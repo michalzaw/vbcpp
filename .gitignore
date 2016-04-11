@@ -1,0 +1,9 @@
+# EXECUTABLES
+bin/vbcpp*
+
+# FILES
+*.layout
+*.depend
+
+# DIRECTORIES
+obj
