@@ -1,7 +1,7 @@
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED
 
-#include <GL/glew.h>
+#include <GLEW/glew.h>
 #include <glm/glm.hpp>
 
 

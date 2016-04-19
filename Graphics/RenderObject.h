@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <cstdio>
 
 #include "Model.h"
 #include "Transform.h"

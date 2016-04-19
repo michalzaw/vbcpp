@@ -79,6 +79,49 @@
 					<Add directory="lib/linux_amd64" />
 				</Linker>
 			</Target>
+			<Target title="Win Debug">
+				<Option platforms="Windows;" />
+				<Option output="bin/vbcpp_debug" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="obj/Debug" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add directory="include" />
+					<Add directory="include/bullet" />
+				</Compiler>
+				<Linker>
+					<Add library="glfw3" />
+					<Add library="glew32" />
+					<Add library="3ds" />
+					<Add library="SOIL" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="gdi32" />
+					<Add library="lib/win32/libBulletCollision.a" />
+					<Add library="lib/win32/libBulletDynamics.a" />
+					<Add library="lib/win32/libLinearMath.a" />
+					<Add library="BulletCollision" />
+					<Add library="BulletDynamics" />
+					<Add library="LinearMath" />
+					<Add directory="lib/win32" />
+				</Linker>
+			</Target>
+			<Target title="Win Release">
+				<Option platforms="Windows;" />
+				<Option output="vbcpp" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="bin" />
+				<Option object_output="obj/Release" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Option use_console_runner="0" />
+				<Compiler>
+					<Add option="-std=c++11" />
+				</Compiler>
+			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
@@ -140,6 +183,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

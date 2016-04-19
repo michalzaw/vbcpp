@@ -2,7 +2,7 @@
 #define VBO_H_INCLUDED
 
 
-#include <GL/glew.h>
+#include <GLEW/glew.h>
 
 #include "Vertex.h"
 

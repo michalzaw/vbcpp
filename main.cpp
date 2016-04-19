@@ -56,7 +56,7 @@ void QuaternionToEuler(const btQuaternion &TQuat, btVector3 &TEuler)
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
     camFPS->setRotation(xpos, ypos);
-    glfwSetCursorPos(window, W_WIDTH/2, W_HEIGHT/2);
+    //glfwSetCursorPos(window, W_WIDTH/2, W_HEIGHT/2);
 }
 
 
@@ -129,7 +129,7 @@ int main()
     glfwSetCursorPosCallback(win->getWindow(), cursor_pos_callback);
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetCursorEnterCallback(win->getWindow(), cursor_enter_callback);
-    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    //glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
     OGLDriver* driver = new OGLDriver;
     driver->Initialize();
@@ -183,6 +183,7 @@ int main()
     {
         // Pobieramy aktualna pozycje kursora myszy
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
+        glfwSetCursorPos(win->getWindow(), W_WIDTH/2, W_HEIGHT/2);
         camFPS->setCursorPos(xpos, ypos);
 
         double NewTime = glfwGetTime();
