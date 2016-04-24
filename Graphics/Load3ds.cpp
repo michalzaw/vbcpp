@@ -118,7 +118,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         me[i] = meshes[i];
     }
 
-	Model* model = new Model(vert, vertices.size(), ind, indices.size(), me, meshes.size());
+	Model* model = new Model(_OGLDriver, vert, vertices.size(), ind, indices.size(), me, meshes.size());
 
 	lib3ds_file_free(_file3ds);
     _file3ds = NULL;

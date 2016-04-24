@@ -14,14 +14,14 @@ class IBO
         unsigned int _indicesCount;
 
     public:
-        IBO();
+        IBO(unsigned int size);
         ~IBO();
 
         unsigned int GetBufferSize();
         unsigned int GetIndicesCount();
 
-        bool Create(unsigned int size);
-        bool Create(unsigned int* indices, unsigned int indicesCount);
+        //bool Create(unsigned int size);
+        //bool Create(unsigned int* indices, unsigned int indicesCount);
 
         unsigned int AddIndices(unsigned int* indices, unsigned int indicesCount);
 

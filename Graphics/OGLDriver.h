@@ -9,6 +9,8 @@
 #include "Shader.h"
 #include "LoadShader.h"
 #include "VAO.h"
+#include "VBO.h"
+#include "IBO.h"
 
 
 class OGLDriver
@@ -16,9 +18,13 @@ class OGLDriver
     private:
         std::vector<Shader*> _shaderList;
 
-        VAO* _defaultVAO;
+        std::vector<VAO*> _vaoList;
+        std::vector<VBO*> _vboList;
+        std::vector<IBO*> _iboList;
 
-        GLuint VertexArrayID;
+        //VAO* _defaultVAO;
+
+        //GLuint VertexArrayID;
 
     public:
         OGLDriver();
@@ -27,6 +33,14 @@ class OGLDriver
         bool Initialize();
 
         Shader* GetShader(ShaderType type);
+
+        VAO* CreateVAO();
+        VBO* CreateVBO(unsigned int size);
+        IBO* CreateIBO(unsigned int size);
+
+        void DeleteVAO(VAO* vao);
+        void DeleteVBO(VBO* vbo);
+        void DeleteIBO(IBO* ibo);
 
 };
 

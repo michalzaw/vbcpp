@@ -1,10 +1,12 @@
 #include "IBO.h"
 
 
-IBO::IBO()
-    : _iboId(0), _bufferSize(0), _indicesCount(0)
+IBO::IBO(unsigned int size)
+    : _iboId(0), _bufferSize(size), _indicesCount(0)
 {
-
+    glGenBuffers(1, &_iboId);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
 }
 
 
@@ -27,7 +29,7 @@ unsigned int IBO::GetIndicesCount()
 }
 
 
-bool IBO::Create(unsigned int size)
+/*bool IBO::Create(unsigned int size)
 {
     if (_iboId == 0)
     {
@@ -41,10 +43,10 @@ bool IBO::Create(unsigned int size)
     }
 
     return false;
-}
+}*/
 
 
-bool IBO::Create(unsigned int* indices, unsigned int indicesCount)
+/*bool IBO::Create(unsigned int* indices, unsigned int indicesCount)
 {
     if (_iboId == 0)
     {
@@ -59,7 +61,7 @@ bool IBO::Create(unsigned int* indices, unsigned int indicesCount)
     }
 
     return false;
-}
+}*/
 
 
 unsigned int IBO::AddIndices(unsigned int* indices, unsigned int indicesCount)
