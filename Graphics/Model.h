@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <GL/glew.h>
+#include <GLEW/glew.h>
 #include <glm/glm.hpp>
 
 #include "Shader.h"
@@ -13,6 +13,7 @@
 #include "IBO.h"
 #include "Vertex.h"
 #include "Material.h"
+#include "OGLDriver.h"
 
 
 struct Mesh
@@ -29,6 +30,8 @@ struct Mesh
 class Model
 {
     private:
+        OGLDriver* _oglDriver;
+
         Vertex* _vertices;
         unsigned int _quantumOfVertices;
 
@@ -44,8 +47,8 @@ class Model
         GLenum _primitiveType;
 
     public:
-        Model(Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
-        Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
+        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
+        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
         ~Model();
 
         VBO* GetVBO();

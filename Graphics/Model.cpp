@@ -3,7 +3,8 @@
 #include "Model.h"
 
 
-Model::Model(Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+    : _oglDriver(driver)
 {
     std::cout << "aaaaaaaa\n\n\n\n\naaaaaaaaaaaaa";
     _vertices = vertices;
@@ -20,18 +21,19 @@ Model::Model(Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, uns
     _meshes = meshes;
     _quantumOfMeshes = quantumOfMeshes;
 
-    _vbo = new VBO;
-    _vbo->Create(vertices, quantumOfVertices);
+    _vbo = _oglDriver->CreateVBO(quantumOfVertices * sizeof(Vertex));
+    _vbo->AddVertexData(vertices, quantumOfVertices);
 
-    _ibo = new IBO;
-    _ibo->Create(_indices, _indicesSize);
+    _ibo = _oglDriver->CreateIBO(_indicesSize * sizeof(unsigned int));
+    _ibo->AddIndices(_indices, _indicesSize);
 
     _primitiveType = primitiveType;
 
 }
 
 
-Model::Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+    : _oglDriver(driver)
 {
     std::cout << "*** Model: Konstruktor" << std::endl;
 
@@ -44,11 +46,11 @@ Model::Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* ind
     _meshes = meshes;
     _quantumOfMeshes = quantumOfMeshes;
 
-    _vbo = new VBO;
-    _vbo->Create(_vertices, _quantumOfVertices);
+    _vbo = _oglDriver->CreateVBO(quantumOfVertices * sizeof(Vertex));
+    _vbo->AddVertexData(vertices, quantumOfVertices);
 
-    _ibo = new IBO;
-    _ibo->Create(_indices, _indicesSize);
+    _ibo = _oglDriver->CreateIBO(_indicesSize * sizeof(unsigned int));
+    _ibo->AddIndices(_indices, _indicesSize);
 
     _primitiveType = primitiveType;
 
@@ -62,14 +64,14 @@ Model::~Model()
     std::cout << "*** Model: Usuwanie _vbo" << std::endl;
     if (_vbo)
     {
-        delete _vbo;
+        _oglDriver->DeleteVBO(_vbo);
         _vbo = 0;
     }
 
     std::cout << "*** Model: Usuwanie _ibo" << std::endl;
     if (_ibo)
     {
-        delete _ibo;
+        _oglDriver->DeleteIBO(_ibo);
         _ibo = 0;
     }
 

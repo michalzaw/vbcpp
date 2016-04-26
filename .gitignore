@@ -4,6 +4,7 @@ bin/vbcpp*
 # FILES
 *.layout
 *.depend
+*.dll
 
 # DIRECTORIES
 obj

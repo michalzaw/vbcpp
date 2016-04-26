@@ -2,7 +2,7 @@
 #define VBO_H_INCLUDED
 
 
-#include <GL/glew.h>
+#include <GLEW/glew.h>
 
 #include "Vertex.h"
 
@@ -17,15 +17,15 @@ class VBO
         unsigned int _quantumOfVertices;
 
     public:
-        VBO();
+        VBO(unsigned int size);
         ~VBO();
 
         unsigned int GetBufferSize();
         unsigned int GetQuantumOfVertices();
 
-        bool Create(unsigned int size);
+        //bool Create(unsigned int size);
 
-        template <typename VertexType>
+        /*template <typename VertexType>
         bool Create(VertexType* vertexData, unsigned int quantumOfVertices)
         {
             if (_vboId == 0)
@@ -42,7 +42,7 @@ class VBO
             }
 
             return false;
-        }
+        }*/
 
         template <typename VertexType>
         // Return new data offset in buffer or -1
