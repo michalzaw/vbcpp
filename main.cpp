@@ -30,10 +30,6 @@ PhysicsManager* physMgr;
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
     camFPS->setRotation(xpos, ypos);
-<<<<<<< HEAD
-=======
-    //glfwSetCursorPos(window, W_WIDTH/2, W_HEIGHT/2);
->>>>>>> 473f8febfd64c51e895f93fb0f1d8575ede36455
 }
 
 
