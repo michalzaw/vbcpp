@@ -11,7 +11,7 @@ _radius(r)
 
 PhysicalBodySphere::~PhysicalBodySphere()
 {
-
+    printf("PhysicalBodyBox - Destruktor\n");
 }
 
 

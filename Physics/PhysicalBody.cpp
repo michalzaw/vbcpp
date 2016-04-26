@@ -14,6 +14,7 @@ _mass(m), _position(pos)
 
 PhysicalBody::~PhysicalBody()
 {
+    printf("Physical body - Destruktor\n");
     safe_delete<btRigidBody>(_rigidBody);
     safe_delete<btCollisionShape>(_collShape);
     safe_delete<btDefaultMotionState>(_motionState);

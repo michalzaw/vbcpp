@@ -11,7 +11,7 @@ _offset(offset)
 
 PhysicalBodyStaticPlane::~PhysicalBodyStaticPlane()
 {
-
+    printf("PhysicalBodyBox - Destruktor\n");
 }
 
 

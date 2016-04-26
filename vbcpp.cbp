@@ -121,6 +121,12 @@
 		<Unit filename="Graphics/VBO.h" />
 		<Unit filename="Graphics/Vector3.h" />
 		<Unit filename="Graphics/Vertex.h" />
+		<Unit filename="Physics/Constraint.cpp" />
+		<Unit filename="Physics/Constraint.hpp" />
+		<Unit filename="Physics/ConstraintHinge.cpp" />
+		<Unit filename="Physics/ConstraintHinge.hpp" />
+		<Unit filename="Physics/ConstraintHinge2.cpp" />
+		<Unit filename="Physics/ConstraintHinge2.hpp" />
 		<Unit filename="Physics/PhysicalBody.cpp" />
 		<Unit filename="Physics/PhysicalBody.hpp" />
 		<Unit filename="Physics/PhysicalBodyBox.cpp" />

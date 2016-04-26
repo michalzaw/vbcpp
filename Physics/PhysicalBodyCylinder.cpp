@@ -12,7 +12,7 @@ _dimensions(dim), _align(align)
 
 PhysicalBodyCylinder::~PhysicalBodyCylinder()
 {
-
+    printf("PhysicalBodyBox - Destruktor\n");
 }
 
 

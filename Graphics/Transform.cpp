@@ -1,5 +1,6 @@
 #include "Transform.h"
 
+#include <cstdio>
 
 void Transform::UpdateTransformMatrix()
 {
@@ -77,6 +78,20 @@ glm::vec3 Transform::GetPosition()
 glm::vec3 Transform::GetRotation()
 {
     return _rotation;
+}
+
+void Transform::SetRotation(float x, float y, float z, float w)
+{
+    glm::quat q;
+    q.x = x;
+    q.y = y;
+    q.z = z;
+    q.w = w;
+    glm::mat4 rot = glm::mat4_cast(q);
+
+    _transformMatrix = glm::translate(_position) * rot * glm::scale(_scale);
+
+    _transformMatrixIs = true;
 }
 
 

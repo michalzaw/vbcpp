@@ -1,5 +1,11 @@
 #include "PhysicsManager.hpp"
 #include "PhysicalBody.hpp"
+#include "PhysicalBodyBox.hpp"
+#include "PhysicalBodyCylinder.hpp"
+#include "PhysicalBodySphere.hpp"
+#include "PhysicalBodyStaticPlane.hpp"
+
+#include "ConstraintHinge.hpp"
 
 #include <cstdio>
 
@@ -15,6 +21,35 @@ PhysicsManager::PhysicsManager()
 
 PhysicsManager::~PhysicsManager()
 {
+  	printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+
+	//delete collision shapes
+	for (int j = 0; j < _physicalBodies.size(); j++)
+	{
+        PhysicalBody* body = _physicalBodies[j];
+
+        //removePhysicalBody(body);
+        _dynamicsWorld->removeRigidBody(body->getRigidBody());
+
+        delete body;
+	}
+	_physicalBodies.clear();
+
+
+	//delete collision shapes
+	for (int j = 0; j < _constraints.size(); j++)
+	{
+        Constraint* c = _constraints[j];
+
+        //removePhysicalBody(body);
+        _dynamicsWorld->removeConstraint(c->getBulletConstraint());
+
+        delete c;
+	}
+	_constraints.clear();
+
+	printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+
     destroyPhysicsWorld();
 }
 
@@ -60,13 +95,91 @@ void PhysicsManager::simulate()
     _dynamicsWorld->stepSimulation(1 / 60.f, 10);
 }
 
-void PhysicsManager::addPhysicalBody(PhysicalBody* body)
+
+PhysicalBodyBox* PhysicsManager::createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos)
 {
-    _dynamicsWorld->addRigidBody(body->getRigidBody());
+    PhysicalBodyBox* b = new PhysicalBodyBox(halfExtents, mass, pos);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
 }
 
 
-void PhysicsManager::removePhysicalBody(PhysicalBody* body)
+PhysicalBodyCylinder* PhysicsManager::createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align)
 {
-    _dynamicsWorld->removeRigidBody(body->getRigidBody());
+    PhysicalBodyCylinder* b = new PhysicalBodyCylinder(dim, mass, pos, align);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
 }
+
+
+PhysicalBodySphere* PhysicsManager::createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos)
+{
+    PhysicalBodySphere* b = new PhysicalBodySphere(r, mass, pos);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
+PhysicalBodyStaticPlane* PhysicsManager::createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset)
+{
+    PhysicalBodyStaticPlane* b = new PhysicalBodyStaticPlane(planeNormal, offset);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
+ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB)
+{
+    ConstraintHinge* c = new ConstraintHinge(bodyA, bodyB, pivotA, pivotB, axisA, axisB);
+
+    _dynamicsWorld->addConstraint(c->getBulletConstraint());
+
+    _constraints.push_back(c);
+
+    return c;
+}
+
+
+ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB)
+{
+    ConstraintHinge2* c = new ConstraintHinge2(bodyA, bodyB, pivot, axisA, axisB);
+
+    _dynamicsWorld->addConstraint(c->getBulletConstraint());
+
+    _constraints.push_back(c);
+
+    return c;
+}
+
+
+void PhysicsManager::addConstraint(Constraint* c)
+{
+    _dynamicsWorld->addConstraint(c->getBulletConstraint());
+
+    _constraints.push_back(c);
+}
+
+
+void PhysicsManager::removeConstraint(Constraint* c)
+{
+    _dynamicsWorld->removeConstraint(c->getBulletConstraint());
+
+    _constraints.remove(c);
+}
+

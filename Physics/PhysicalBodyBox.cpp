@@ -11,7 +11,7 @@ _halfExtents(halfExtents)
 
 PhysicalBodyBox::~PhysicalBodyBox()
 {
-
+    printf("PhysicalBodyBox - Destruktor\n");
 }
 
 void PhysicalBodyBox::updateBody()

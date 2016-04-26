@@ -3,7 +3,14 @@
 
 #include <bullet/btBulletDynamicsCommon.h>
 
-class PhysicalBody;
+#include "PhysicalBodyBox.hpp"
+#include "PhysicalBodyCylinder.hpp"
+#include "PhysicalBodySphere.hpp"
+#include "PhysicalBodyStaticPlane.hpp"
+
+#include "ConstraintHinge.hpp"
+#include "ConstraintHinge2.hpp"
+
 
 // PHYSICS MANAGER
 
@@ -24,8 +31,16 @@ class PhysicsManager
         btDefaultCollisionConfiguration*        getDefaultCollisionConfig() { return _collisionConfiguration; }
         btBroadphaseInterface*                  getBrodaphaseInterface() { return _broadphase; }
 
-        void addPhysicalBody(PhysicalBody* body);
-        void removePhysicalBody(PhysicalBody* body);
+        PhysicalBodyBox*            createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos);
+        PhysicalBodyCylinder*       createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align);
+        PhysicalBodySphere*         createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
+        PhysicalBodyStaticPlane*    createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
+
+        ConstraintHinge*            createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB);
+        ConstraintHinge2*           createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB);
+
+        void addConstraint(Constraint* c);
+        void removeConstraint(Constraint* c);
 
     private:
         btDiscreteDynamicsWorld*                _dynamicsWorld;
@@ -33,6 +48,9 @@ class PhysicsManager
         btCollisionDispatcher*                  _collisionDispatcher;
         btDefaultCollisionConfiguration*        _collisionConfiguration;
         btBroadphaseInterface*                  _broadphase;
+
+        btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
+        btAlignedObjectArray<Constraint*>       _constraints;
 };
 
 #endif // PHYSICSMANAGER_HPP_INCLUDED

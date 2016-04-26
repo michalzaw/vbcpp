@@ -5,6 +5,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 
 class Transform
@@ -30,6 +32,8 @@ class Transform
 
         void SetPosition(glm::vec3 position);
         void SetRotation(glm::vec3 rotation);
+        void SetRotation(float x, float y, float z, float w);
+
         void SetScale(glm::vec3 scale);
         glm::vec3 GetPosition();
         glm::vec3 GetRotation();

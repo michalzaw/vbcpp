@@ -1,13 +1,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <GLEW/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/transform.hpp>
-
 #include "Window/Window.h"
 
 #include "Graphics/Model.h"
@@ -20,6 +13,8 @@
 
 #include "Physics/PhysicsManager.hpp"
 #include "Physics/PhysicalBodyBox.hpp"
+#include "Physics/ConstraintHinge.hpp"
+#include "Physics/ConstraintHinge2.hpp"
 
 
 int W_WIDTH = 1366;
@@ -31,32 +26,10 @@ Window* win;
 PhysicsManager* physMgr;
 
 
-const btScalar RADTODEG = 180.0f / PI;
-
-// Converts a quaternion to an euler angle
-void QuaternionToEuler(const btQuaternion &TQuat, btVector3 &TEuler)
-{
-	btScalar W = TQuat.getW();
-	btScalar X = TQuat.getX();
-	btScalar Y = TQuat.getY();
-	btScalar Z = TQuat.getZ();
-	float WSquared = W * W;
-	float XSquared = X * X;
-	float YSquared = Y * Y;
-	float ZSquared = Z * Z;
-
-	TEuler.setX(atan2f(2.0f * (Y * Z + X * W), -XSquared - YSquared + ZSquared + WSquared));
-	TEuler.setY(asinf(-2.0f * (X * Z - Y * W)));
-	TEuler.setZ(atan2f(2.0f * (X * Y + Z * W), XSquared - YSquared - ZSquared + WSquared));
-	TEuler *= RADTODEG;
-}
-
-
 // Ta funkcja jest wymagana w GLFW > 3.0 aby odpowiednio przetworzyc dane o pozycji kursora myszy na Linuksie
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
     camFPS->setRotation(xpos, ypos);
-    glfwSetCursorPos(window, W_WIDTH/2, W_HEIGHT/2);
 }
 
 
@@ -64,27 +37,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 {
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
-}
-
-
-// Funkcja definiujaca akcje jakie nalezy podjac
-// po wejsciu kursora w obreb okna lub po jego opuszczeniu
-void cursor_enter_callback(GLFWwindow* window, int entered)
-{
-    if (entered)
-    {
-
-
-        // Resetowanie kamery po wejsciu kursora w obreb okna - aby uniknac niechcianych
-        // rotacji kamery wywolanych przez ruchy mysza przed zainicjowaniem renderingu sceny
-        //glfwPollEvents();
-        camFPS->reset();
-        //glfwSetCursorPos(window, W_WIDTH/2, W_HEIGHT/2);
-    }
-    else
-    {
-        // The cursor left the client area of the window
-    }
 }
 
 
@@ -128,8 +80,7 @@ int main()
     // Callbacki do obslugi zdarzen
     glfwSetCursorPosCallback(win->getWindow(), cursor_pos_callback);
     glfwSetKeyCallback(win->getWindow(), key_callback);
-    glfwSetCursorEnterCallback(win->getWindow(), cursor_enter_callback);
-    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     OGLDriver* driver = new OGLDriver;
     driver->Initialize();
@@ -144,25 +95,35 @@ int main()
 
     Model* model = l->loadModel("crate.3ds", "./");
 
-    RenderObject* object = scene->AddRenderObject(model);
-    object->GetTransform()->SetPosition(glm::vec3(0,10,0));
-    object->GetTransform()->SetRotation(glm::vec3(0, 0, 0));
+    RenderObject* object1 = scene->AddRenderObject(model);
+    object1->GetTransform()->SetPosition(glm::vec3(-3.0f,10,0));
+
+    RenderObject* object2 = scene->AddRenderObject(model);
+    object2->GetTransform()->SetPosition(glm::vec3(1.0f,10,0));
 
     RenderObject* staticBox = scene->AddRenderObject(model);
     staticBox->GetTransform()->SetPosition(glm::vec3(0,0,0));
-    staticBox->GetTransform()->SetScale(glm::vec3(4.0f,1,4.0f));
+    staticBox->GetTransform()->SetScale(glm::vec3(10.0f,1,10.0f));
 
-    PhysicalBodyBox* boxBody = new PhysicalBodyBox(btVector3(1,1,1), 8.0f, btVector3(0,10,0));
-    physMgr->addPhysicalBody(boxBody);
-    boxBody->setRestitution(0.9f);
+    PhysicalBodyBox* boxBody1 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(-3.0f,10,0));
+    boxBody1->setRestitution(0.9f);
 
-    PhysicalBodyBox* staticBoxBody = new PhysicalBodyBox(btVector3(4,1,4), 0, btVector3(0,0,0));
-    physMgr->addPhysicalBody(staticBoxBody);
-    staticBoxBody->setRestitution(0.3f);
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 0.0f, btVector3(1.0f,10,0));
+    boxBody2->setRestitution(0.7f);
+
+    btTransform trans1, trans2;
+    boxBody1->getTransform(trans1);
+    boxBody2->getTransform(trans2);
+
+    ConstraintHinge2* hinge = physMgr->createConstraintHinge2(boxBody1, boxBody2, btVector3(1,10,0), btVector3(0,1,0), btVector3(1,0,0));
+
+    PhysicalBodyBox* staticBoxBody = physMgr->createPhysicalBodyBox(btVector3(10,1,10), 0, btVector3(0,0,0));
+    staticBoxBody->setRestitution(0.85f);
 
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,-15);
     camFPS->setRotationSpeed(0.001f);
+    camFPS->lookAt(glm::vec3(0,0,0));
 
     scene->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f));
 
@@ -173,16 +134,12 @@ int main()
 
     double xpos, ypos;
 
-    // Zrzucamy wszystkie zdarzenia przed wejsciem do glownej petli
-    // Inaczej zbierane sa ruchy myszy od momentu uruchomienia aplikacji do momentu uruchomienia renderingu
-    // i po uruchomieniu renderowania przetwarzane sa na raz - wywolujac niepotrzebne rotacje kamery FPS
-    //win->updateEvents();
-
 
     while (win->isOpened())
     {
         // Pobieramy aktualna pozycje kursora myszy
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
+        glfwSetCursorPos(win->getWindow(), W_WIDTH/2, W_HEIGHT/2);
         camFPS->setCursorPos(xpos, ypos);
 
         double NewTime = glfwGetTime();
@@ -203,17 +160,18 @@ int main()
 
         physMgr->simulate();
         btTransform trans;
-        boxBody->getTransform(trans);
-        object->GetTransform()->SetPosition(glm::vec3(trans.getOrigin().getX(),trans.getOrigin().getY(),trans.getOrigin().getZ()));
+        boxBody1->getTransform(trans);
+        object1->GetTransform()->SetPosition(glm::vec3(trans.getOrigin().getX(),trans.getOrigin().getY(),trans.getOrigin().getZ()));
+        object1->GetTransform()->SetRotation(trans.getRotation().getX(),trans.getRotation().getY(),trans.getRotation().getZ(),trans.getRotation().getW());
 
-        btVector3 EulerRot;
-        QuaternionToEuler(boxBody->getRigidBody()->getOrientation(), EulerRot);
-        object->GetTransform()->SetRotation(glm::vec3(EulerRot[0], EulerRot[1], EulerRot[2]));
+        boxBody2->getTransform(trans);
+        object2->GetTransform()->SetPosition(glm::vec3(trans.getOrigin().getX(),trans.getOrigin().getY(),trans.getOrigin().getZ()));
+        object2->GetTransform()->SetRotation(trans.getRotation().getX(),trans.getRotation().getY(),trans.getRotation().getZ(),trans.getRotation().getW());
+
 
         staticBoxBody->getTransform(trans);
         staticBox->GetTransform()->SetPosition(glm::vec3(trans.getOrigin().getX(),trans.getOrigin().getY(),trans.getOrigin().getZ()));
-
-
+        staticBox->GetTransform()->SetRotation(trans.getRotation().getX(),trans.getRotation().getY(),trans.getRotation().getZ(),trans.getRotation().getW());
 
         renderer->Render(scene->GetRenderData());
 
@@ -222,25 +180,11 @@ int main()
         win->updateEvents();
     }
 
+    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    glfwSetInputMode(win->getWindow(), GLFW_CURSOR_NORMAL, 1);
-
-    // DESTROY PHYSICS
-    physMgr->removePhysicalBody(staticBoxBody);
-    physMgr->removePhysicalBody(boxBody);
-    //physMgr->destroyPhysicsWorld();
-
-    delete staticBoxBody;
-    delete boxBody;
     delete physMgr;
     // -----------------------------------
 
-
-    //delete staticBox;
-    //delete object;
-
-    // Musiałem usunąć niszczenie modelu z klasy RenderObject
-    // - inaczej nie mozna wspoldzielic jednego modelu w wielu RenderObjectach
     delete model;
     delete l;
 
