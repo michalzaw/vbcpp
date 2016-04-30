@@ -13,6 +13,7 @@ class PhysicalBody
         btDefaultMotionState* getMotionState() { return _motionState; }
         btCollisionShape*   getCollisionShape() { return _collShape; }
 
+        btScalar getMass() { return _mass; }
         void getTransform(btTransform& t);
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }

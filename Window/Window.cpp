@@ -80,6 +80,7 @@ void Window::swapBuffers()
 void Window::updateEvents()
 {
     glfwPollEvents();
+    //glfwWaitEvents();
 }
 
 

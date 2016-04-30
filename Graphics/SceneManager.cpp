@@ -94,6 +94,15 @@ Light* SceneManager::AddLight(glm::vec3 color, float ambientIntensity, float dif
 }
 
 
+void SceneManager::updatePhysics()
+{
+    for (int i = 0; i < _renderObjects.size(); ++i)
+    {
+        _renderObjects[i]->Update();
+    }
+}
+
+
 RenderData* SceneManager::GetRenderData()
 {
     RenderData* renderData = new RenderData;

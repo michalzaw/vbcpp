@@ -23,7 +23,7 @@ class PhysicsManager
         int createPhysicsWorld();
         int destroyPhysicsWorld();
 
-        void simulate();
+        void simulate(btScalar timeStep);
 
         btDiscreteDynamicsWorld*                getDynamicsWorld() { return _dynamicsWorld; }
         btSequentialImpulseConstraintSolver*    getConstraintSolver() { return _constraintSolver; }

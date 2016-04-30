@@ -3,13 +3,13 @@
 
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 : CameraStatic(width, height, viewAngle, nearValue, farValue),
-	m_HorizontalAngle(0.0f), m_VerticalAngle(0.0f),
+	m_HorizontalAngle(PI), m_VerticalAngle(0.0f),
 	m_MoveSpeed(3.0f), m_RotateSpeed(0.0005f), m_Direction(vec3(0,0,0)), m_RightVector( vec3(0,0,0)), _oldXpos(0), _oldYpos(0)
 {
     update();
 
 	updateProjection();
-	updateView();
+	//updateView();
 }
 
 
@@ -125,7 +125,7 @@ void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)
 
 void CameraFPS::reset()
 {
-    m_HorizontalAngle = 0.0f;
+    m_HorizontalAngle = 3.14f;
     m_VerticalAngle = 0.0f;
     m_Direction = glm::vec3(0,0,0);
 

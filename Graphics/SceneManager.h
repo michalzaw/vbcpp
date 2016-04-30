@@ -39,6 +39,8 @@ class SceneManager
 
         Light* AddLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, glm::vec3 direction);
 
+        void updatePhysics();
+
         RenderData* GetRenderData();
 };
 

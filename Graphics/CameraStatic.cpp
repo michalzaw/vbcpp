@@ -2,9 +2,9 @@
 
 
 CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
-	: m_WindowWidth(width), m_WindowHeight(height), m_ViewAngle(viewAngle), m_NearValue(nearValue), m_FarValue(farValue),
+	: m_ProjectionMatrix(1.0), m_ViewMatrix(1.0),
 	m_Position(vec3(0,0,-10)), m_LookAt(vec3(0,0,0)), m_UpVector(vec3(0,1,0)),
-	m_ProjectionMatrix(1.0), m_ViewMatrix(1.0)
+    m_FarValue(farValue), m_NearValue(nearValue), m_ViewAngle(viewAngle), m_WindowWidth(width), m_WindowHeight(height)
 {
 	updateProjection();
 	updateView();

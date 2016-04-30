@@ -321,13 +321,13 @@ CCamera::CCamera()
 CCamera::CCamera(glm::vec3 Position, float zNear, float zFar, float FieldOfView, float Aspect,
 				 float CameraDistance, float AngleX, float AngleY)
 	: m_Position(Position),
-	m_zNear(zNear),
-	m_zFar(zFar),
 	m_FieldOfView(FieldOfView),
 	m_Aspect(Aspect),
-	m_CameraDistance(CameraDistance),
+	m_zNear(zNear),
+	m_zFar(zFar),
 	m_AngleX(AngleX),
-	m_AngleY(AngleY)
+	m_AngleY(AngleY),
+	m_CameraDistance(CameraDistance)
 {
 	Changed();
 }

@@ -90,9 +90,10 @@ int PhysicsManager::destroyPhysicsWorld()
 }
 
 
-void PhysicsManager::simulate()
+void PhysicsManager::simulate(btScalar timeStep)
 {
-    _dynamicsWorld->stepSimulation(1 / 60.f, 10);
+    //_dynamicsWorld->stepSimulation(timeStep, 2);
+    _dynamicsWorld->stepSimulation(1/60.0f, 5);
 }
 
 
