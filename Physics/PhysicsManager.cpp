@@ -4,6 +4,7 @@
 #include "PhysicalBodyCylinder.hpp"
 #include "PhysicalBodySphere.hpp"
 #include "PhysicalBodyStaticPlane.hpp"
+#include "PhysicalBodyConvexHull.hpp"
 
 #include "ConstraintHinge.hpp"
 
@@ -136,6 +137,17 @@ PhysicalBodySphere* PhysicsManager::createPhysicalBodySphere(btScalar r, btScala
 PhysicalBodyStaticPlane* PhysicsManager::createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset)
 {
     PhysicalBodyStaticPlane* b = new PhysicalBodyStaticPlane(planeNormal, offset);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos)
+{
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass, pos);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody());
 

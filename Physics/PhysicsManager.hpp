@@ -7,6 +7,8 @@
 #include "PhysicalBodyCylinder.hpp"
 #include "PhysicalBodySphere.hpp"
 #include "PhysicalBodyStaticPlane.hpp"
+#include "PhysicalBodyConvexHull.hpp"
+
 
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
@@ -35,6 +37,7 @@ class PhysicsManager
         PhysicalBodyCylinder*       createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align);
         PhysicalBodySphere*         createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
         PhysicalBodyStaticPlane*    createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
+        PhysicalBodyConvexHull*     createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
 
         ConstraintHinge*            createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB);
         ConstraintHinge2*           createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB);

@@ -37,8 +37,6 @@ class CameraFPS : virtual public CameraStatic
 
 		void strafeRight(double deltaTime);
 
-		void setDirection();
-
 		void setMoveSpeed(float speed);
 
 		void setRotationSpeed(float speed);

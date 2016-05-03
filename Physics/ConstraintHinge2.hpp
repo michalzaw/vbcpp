@@ -12,6 +12,7 @@ class ConstraintHinge2 : public Constraint
         ConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB);
         virtual ~ConstraintHinge2();
 
+        btHinge2Constraint* getBulletConstraint() { return dynamic_cast<btHinge2Constraint*>(_constraint); }
 
     private:
         btVector3       _pivot;

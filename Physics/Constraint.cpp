@@ -5,7 +5,7 @@
 Constraint::Constraint(PhysicalBody* bodyA, PhysicalBody* bodyB)
 : _bodyA(bodyA), _bodyB(bodyB), _constraint(0)
 {
-    printf("Hinge - Konstruktor");
+    printf("Hinge - Konstruktor\n");
 
 }
 
