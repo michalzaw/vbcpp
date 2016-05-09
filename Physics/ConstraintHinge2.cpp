@@ -17,6 +17,18 @@ ConstraintHinge2::~ConstraintHinge2()
 }
 
 
+void ConstraintHinge2::setStiffness(int index, btScalar stiffness)
+{
+    dynamic_cast<btHinge2Constraint*>(_constraint)->setStiffness(index, stiffness);
+}
+
+
+void ConstraintHinge2::setDamping(int index, btScalar damping)
+{
+    dynamic_cast<btHinge2Constraint*>(_constraint)->setStiffness(index, damping);
+}
+
+
 void ConstraintHinge2::UpdateConstraint()
 {
     safe_delete<btTypedConstraint>(_constraint);

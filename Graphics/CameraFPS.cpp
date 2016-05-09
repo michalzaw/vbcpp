@@ -125,6 +125,8 @@ void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)
 {
     _oldXpos = xpos;
     _oldYpos = ypos;
+
+    update();
 }
 
 void CameraFPS::reset()

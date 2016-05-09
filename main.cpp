@@ -165,15 +165,13 @@ int main()
     PhysicalBodyConvexHull* leg4Body = physMgr->createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,-3));
     leg4Body->setRestitution(0.9f);
 
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 10.0f, btVector3(0,7,0));
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
 
     ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(leg1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge2 = physMgr->createConstraintHinge2(leg2Body, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge3 = physMgr->createConstraintHinge2(leg3Body, boxBody2, btVector3(1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge4 = physMgr->createConstraintHinge2(leg4Body, boxBody2, btVector3(-1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
-
-
 
 
     PhysicalBodyBox* staticBoxBody = physMgr->createPhysicalBodyBox(btVector3(10,1,10), 0, btVector3(0,0,0));
@@ -193,7 +191,7 @@ int main()
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,15);
-    camFPS->setRotationSpeed(0.0005f);
+    camFPS->setRotationSpeed(0.0003f);
     camFPS->setMoveSpeed(1.0f);
 
     // Światło
@@ -208,9 +206,6 @@ int main()
     const float MAX_ACCU_TIME = 1.0f;
 
     double xpos, ypos;
-
-    std::cout << "Vec3 size: " << sizeof(glm::vec3) << std::endl;
-    std::cout << "Vec2 size: " << sizeof(glm::vec2) << std::endl;
 
 
     while (win->isOpened())
