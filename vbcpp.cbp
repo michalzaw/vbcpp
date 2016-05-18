@@ -94,18 +94,15 @@
 					<Add directory="include/bullet" />
 				</Compiler>
 				<Linker>
-					<Add library="glfw3" />
+					<Add library="lib/win32/glfw3dll.a" />
 					<Add library="glew32" />
 					<Add library="3ds" />
 					<Add library="SOIL" />
 					<Add library="opengl32" />
 					<Add library="glu32" />
 					<Add library="gdi32" />
-					<Add library="lib/win32/libBulletCollision.a" />
-					<Add library="lib/win32/libBulletDynamics.a" />
-					<Add library="lib/win32/libLinearMath.a" />
-					<Add library="BulletCollision" />
 					<Add library="BulletDynamics" />
+					<Add library="BulletCollision" />
 					<Add library="LinearMath" />
 					<Add directory="lib/win32" />
 				</Linker>

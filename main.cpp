@@ -35,11 +35,11 @@ PhysicsManager* physMgr;
 // Ta funkcja jest wymagana w GLFW > 3.0 aby odpowiednio przetworzyc dane o pozycji kursora myszy na Linuksie
 static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (MOUSE_RIGHT_BUTTON_PRESSED)
-    {
+    //if (MOUSE_RIGHT_BUTTON_PRESSED)
+    //{
         camFPS->setRotation(xpos, ypos);
         glfwSetCursorPos(window, oldMouseX, oldMouseY);
-    }
+    //}
 }
 
 
@@ -52,6 +52,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    /*
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
         MOUSE_RIGHT_BUTTON_PRESSED = true;
@@ -66,6 +67,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         MOUSE_RIGHT_BUTTON_PRESSED = false;
     }
+    */
 }
 
 
@@ -110,6 +112,8 @@ int main()
     glfwSetCursorPosCallback(win->getWindow(), cursor_pos_callback);
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetMouseButtonCallback(win->getWindow(), mouse_button_callback);
+
+    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Tworzenie głównych modułów
     OGLDriver* driver = new OGLDriver;
