@@ -20,6 +20,9 @@ class Window
         bool createWindow(int w, int h, int posx, int posy);
         GLFWwindow* getWindow() { return _win; }
 
+        int getHeight() { return _height; }
+        int getWidth() { return _width; }
+
         void setWindowTitle(string title);
         void setWindowSize(int w, int h);
 

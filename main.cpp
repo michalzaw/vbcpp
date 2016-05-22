@@ -38,7 +38,7 @@ static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
     //if (MOUSE_RIGHT_BUTTON_PRESSED)
     //{
         camFPS->setRotation(xpos, ypos);
-        glfwSetCursorPos(window, oldMouseX, oldMouseY);
+        glfwSetCursorPos(window, 0, 0);
     //}
 }
 
@@ -195,36 +195,41 @@ int main()
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,15);
-    camFPS->setRotationSpeed(0.0003f);
-    camFPS->setMoveSpeed(1.0f);
+    camFPS->setRotationSpeed(0.001f);
+    camFPS->setMoveSpeed(8.0f);
 
     // Światło
     scene->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f));
 
 
     // Zmienne dla obliczania czasu
-    float dt = 0.0f;
-    float lastUpdateTime = glfwGetTime();
-    float accu = 0.0f;
-    const float TIME_STEP = 0.5;
-    const float MAX_ACCU_TIME = 1.0f;
+    double t;
+    double dt = 1/60.0f;
 
-    double xpos, ypos;
+    double currentTime = glfwGetTime();
 
+    //double xpos, ypos;
+
+    std::cout << oldMouseX << " " << oldMouseY << std::endl;
+
+    // ========== MAIN LOOP START ==========
 
     while (win->isOpened())
     {
-        dt = glfwGetTime() - lastUpdateTime;
-        dt = std::max(float(0.0),dt);
-        accu += dt;
-        accu = clamp<float>(accu, 0, MAX_ACCU_TIME);
+        double newTime = glfwGetTime();
+        double frameTime = newTime - currentTime;
+        currentTime = newTime;
 
-        // Integracja modelu fizyki
-        while ( accu > TIME_STEP )
+        while ( frameTime > 0.0f )
         {
-        readInput(win->getWindow(), TIME_STEP);
-            physMgr->simulate(TIME_STEP);
-            accu -= TIME_STEP;
+            float deltaTime = std::min(frameTime, dt);
+
+            readInput(win->getWindow(), deltaTime);
+            physMgr->simulate(deltaTime);
+
+            frameTime -= deltaTime;
+
+            t += deltaTime;
         }
 
         // Synchronizacja obiektów sceny z fizyką
@@ -237,6 +242,7 @@ int main()
         win->swapBuffers();
         win->updateEvents();
     }
+    // ========== MAIN LOOP END ==========
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
