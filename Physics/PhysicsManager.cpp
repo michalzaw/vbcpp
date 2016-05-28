@@ -22,7 +22,7 @@ PhysicsManager::PhysicsManager()
 
 PhysicsManager::~PhysicsManager()
 {
-  	printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+  	//printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
 	//delete collision shapes
 	for (int j = 0; j < _physicalBodies.size(); j++)
@@ -49,7 +49,7 @@ PhysicsManager::~PhysicsManager()
 	}
 	_constraints.clear();
 
-	printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+	//printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
     destroyPhysicsWorld();
 }

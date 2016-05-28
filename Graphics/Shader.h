@@ -7,7 +7,8 @@
 
 enum ShaderType
 {
-    SOLID_MATERIAL
+    SOLID_MATERIAL,
+    NOTEXTURE_MATERIAL
 };
 
 

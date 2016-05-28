@@ -43,11 +43,11 @@ void CameraFPS::update()
 void CameraFPS::setRotation(int mousePosX, int mousePosY)
 {
 	// Compute new orientation
-	//m_HorizontalAngle += m_RotateSpeed * GLdouble( m_WindowWidth/2 - mousePosX);
-	//m_VerticalAngle += m_RotateSpeed * GLdouble( m_WindowHeight/2 - mousePosY);
+	m_HorizontalAngle += m_RotateSpeed * GLdouble( m_WindowWidth/2 - mousePosX);
+	m_VerticalAngle += m_RotateSpeed * GLdouble( m_WindowHeight/2 - mousePosY);
 
-    m_HorizontalAngle += m_RotateSpeed * GLdouble( _oldXpos - mousePosX);
-	m_VerticalAngle += m_RotateSpeed * GLdouble( _oldYpos - mousePosY);
+    //m_HorizontalAngle += m_RotateSpeed * GLdouble( _oldXpos - mousePosX);
+	//m_VerticalAngle += m_RotateSpeed * GLdouble( _oldYpos - mousePosY);
 
 
 	if (m_HorizontalAngle > 2 * PI || m_HorizontalAngle < -2 * PI) m_HorizontalAngle = 0.0f;

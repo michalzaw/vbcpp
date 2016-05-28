@@ -61,7 +61,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
             if (i < mesh->texels)
             {
                 vertex.s = mesh->texelL[i][0];
-                vertex.t = mesh->texelL[i][1];
+                vertex.t = -mesh->texelL[i][1];
             }
 
             vertex.normal = Vector3(1.0f, 1.0f, 1.0f);
@@ -150,10 +150,10 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	sMaterial.shininess = material->shininess;
 
-	//sMaterial.offset[0] = material->texture1_map.offset[0];
-	//sMaterial.offset[1] = material->texture1_map.offset[1];
-	//sMaterial.scale[0] = material->texture1_map.scale[0];
-	//sMaterial.scale[1] = material->texture1_map.scale[1];
+	sMaterial.offset[0] = material->texture1_map.offset[0];
+	sMaterial.offset[1] = material->texture1_map.offset[1];
+	sMaterial.scale[0] = material->texture1_map.scale[0];
+	sMaterial.scale[1] = material->texture1_map.scale[1];
 
 	// make Texture Name lowercase
 	std::string texStr = std::string(material->texture1_map.name);
@@ -175,6 +175,10 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
         // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
 		int width, height;
         unsigned char* image = SOIL_load_image(texturePath.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+
+        std::cout << "Loading texture: " << texturePath << std::endl;
+        std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
         glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -189,7 +193,10 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	}
 	sMaterial.diffuseTexture = texId;
 
-	sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
+	if (texId > 0)
+        sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
+    else
+        sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
 }
@@ -212,6 +219,7 @@ void Load3ds::loadGeometryByMatrial(Material& material, std::vector<unsigned int
 			{
 			    for(int currentVertex = 0; currentVertex < 3; currentVertex++)
 				{
+				    //std::cout << "d: " << mesh->user.d << std::endl;
 				    indices.push_back(face->points[currentVertex] + mesh->user.d);
 				}
 			}

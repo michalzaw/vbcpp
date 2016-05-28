@@ -39,7 +39,7 @@ void RenderObject::Update()
 
     if (IsActive())
     {
-        if (_physicalBody->getMass() > 0)
+        if ( _physicalBody && _physicalBody->getMass() > 0)
         {
             btTransform transf;
             _physicalBody->getTransform(transf);

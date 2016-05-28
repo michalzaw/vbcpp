@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <sstream>
 
 #include "Utils/Helpers.hpp"
 
@@ -31,16 +32,7 @@ double oldMouseX, oldMouseY;
 Window* win;
 PhysicsManager* physMgr;
 
-
-// Ta funkcja jest wymagana w GLFW > 3.0 aby odpowiednio przetworzyc dane o pozycji kursora myszy na Linuksie
-static void cursor_pos_callback(GLFWwindow* window, double xpos, double ypos)
-{
-    //if (MOUSE_RIGHT_BUTTON_PRESSED)
-    //{
-        camFPS->setRotation(xpos, ypos);
-        glfwSetCursorPos(window, 0, 0);
-    //}
-}
+std::string winTitle = "Virtual Bus Core++";
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -106,10 +98,9 @@ int main()
     win = new Window;
 
     win->createWindow(1366, 768, 100, 100);
-    win->setWindowTitle("Virtual Bus Test");
+    win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
-    glfwSetCursorPosCallback(win->getWindow(), cursor_pos_callback);
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetMouseButtonCallback(win->getWindow(), mouse_button_callback);
 
@@ -129,16 +120,17 @@ int main()
     // Wczytywanie zasobów
     Load3ds* l = new Load3ds(driver);
 
-    Model* model = l->loadModel("crate.3ds", "./");
-    Model* crate2 = l->loadModel("crate2.3ds", "./");
+    //Model* model = l->loadModel("alfa/alfa.3ds", "alfa/");
+    //Model* model = l->loadModel("H9.3ds", "ZKM/");
+    //Model* model = l->loadModel("crate.3ds", "./");
+    //Model* crate2 = l->loadModel("crate2.3ds", "./");
+    Model* model = l->loadModel("playground/playground2.3ds", "playground/");
 
     // Obiekty sceny
-
     RenderObject* object2 = scene->AddRenderObject(model);
-    object2->GetTransform()->SetPosition(glm::vec3(0,7,0));
+    object2->GetTransform()->SetPosition(glm::vec3(0,0,0));
 
-
-
+    /*
     RenderObject* leg1 = scene->AddRenderObject(crate2);
     leg1->GetTransform()->SetPosition(glm::vec3(3.0f,3,3));
 
@@ -191,10 +183,10 @@ int main()
 
     object2->SetPhysicalBody(boxBody2);
     staticBox->SetPhysicalBody(staticBoxBody);
-
+    */
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
-    camFPS->setPosition(0,4,15);
+    camFPS->setPosition(0,4,5);
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
@@ -208,17 +200,48 @@ int main()
 
     double currentTime = glfwGetTime();
 
-    //double xpos, ypos;
+    //dzieki temu sprawdzamy jak dawno temu byl update licznika klatek
+    double lastFPSupdate = currentTime;
 
-    std::cout << oldMouseX << " " << oldMouseY << std::endl;
+    double xpos, ypos;
+
+    int nbFrames = 0;
 
     // ========== MAIN LOOP START ==========
 
     while (win->isOpened())
     {
+        nbFrames++;
+
         double newTime = glfwGetTime();
         double frameTime = newTime - currentTime;
+
+        // wyswietlamy liczbe klatek/s
+        if ( currentTime - lastFPSupdate >= 1.0f )
+        {
+            float timing = double(nbFrames);
+
+            nbFrames = 0;
+            lastFPSupdate += 1.0f;
+
+            // Convert the fps value into a string using an output stringstream
+			std::ostringstream stream;
+			stream << timing;
+			std::string sTiming = stream.str();
+
+			// Append the FPS value to the window title details
+			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
+			win->setWindowTitle(newWindowTitle);
+        }
+
         currentTime = newTime;
+
+        glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
+        glfwSetCursorPos(win->getWindow(), win->getWidth()/2, win->getHeight()/2);
+
+        camFPS->setRotation(xpos, ypos);
+
+
 
         while ( frameTime > 0.0f )
         {

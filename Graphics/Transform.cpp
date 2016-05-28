@@ -4,11 +4,23 @@
 
 void Transform::UpdateTransformMatrix()
 {
+    glm::mat4 pos = glm::translate(_position);
+
+    /*
     _transformMatrix = glm::translate(_position) *
                        glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f)) *
                        glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) *
                        glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f)) *
                        glm::scale(_scale);
+    */
+
+    glm::mat4 rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+             rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+             rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 s = glm::scale(_scale);
+
+    _transformMatrix = pos * rot * s;
 
     _transformMatrixIs = true;
 }
@@ -17,6 +29,8 @@ void Transform::Changed()
 {
     _transformMatrixIs = false;
     _normalMatrixIs = false;
+
+    UpdateTransformMatrix();
 }
 
 

@@ -37,6 +37,7 @@ Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices
 {
     std::cout << "*** Model: Konstruktor" << std::endl;
 
+
     _vertices = vertices;
     _quantumOfVertices = quantumOfVertices;
 

@@ -21,8 +21,8 @@ struct Material
     float shininess;
     float transparency;
 
-    //glm::vec2 offset;
-    //glm::vec2 scale;
+    glm::vec2 offset;
+    glm::vec2 scale;
 
     Shader* shader;
 
