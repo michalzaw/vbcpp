@@ -19,6 +19,7 @@
 #include "Physics/PhysicalBodyBox.hpp"
 #include "Physics/ConstraintHinge.hpp"
 #include "Physics/ConstraintHinge2.hpp"
+#include "Physics/PhysicalBodyBvtTriangleMesh.hpp"
 
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
@@ -120,15 +121,25 @@ int main()
     // Wczytywanie zasobów
     Load3ds* l = new Load3ds(driver);
 
-    //Model* model = l->loadModel("alfa/alfa.3ds", "alfa/");
+    //Model* alfa = l->loadModel("alfa/alfa.3ds", "alfa/");
     //Model* model = l->loadModel("H9.3ds", "ZKM/");
     //Model* model = l->loadModel("crate.3ds", "./");
-    //Model* crate2 = l->loadModel("crate2.3ds", "./");
-    Model* model = l->loadModel("playground/playground2.3ds", "playground/");
+    Model* crate2 = l->loadModel("crate2.3ds", "./");
+    Model* model = l->loadModel("testarea/test_area.3ds", "testarea/");
 
     // Obiekty sceny
     RenderObject* object2 = scene->AddRenderObject(model);
     object2->GetTransform()->SetPosition(glm::vec3(0,0,0));
+
+    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(model, btVector3(0,0,0));
+    terrainMesh->setRestitution(0.9f);
+
+    RenderObject* objCrate2 = scene->AddRenderObject(crate2);
+
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(10,17,0));
+    boxBody2->setRestitution(0.9f);
+
+    objCrate2->SetPhysicalBody(boxBody2);
 
     /*
     RenderObject* leg1 = scene->AddRenderObject(crate2);
@@ -183,7 +194,7 @@ int main()
 
     object2->SetPhysicalBody(boxBody2);
     staticBox->SetPhysicalBody(staticBoxBody);
-    */
+    //*/
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,5);
@@ -198,10 +209,12 @@ int main()
     double t;
     double dt = 1/60.0f;
 
-    double currentTime = glfwGetTime();
+    double timePhysicsPrev, timePhysicsCurr;
+
+    timePhysicsPrev = timePhysicsCurr = glfwGetTime();
 
     //dzieki temu sprawdzamy jak dawno temu byl update licznika klatek
-    double lastFPSupdate = currentTime;
+    double lastFPSupdate = timePhysicsCurr;
 
     double xpos, ypos;
 
@@ -213,11 +226,11 @@ int main()
     {
         nbFrames++;
 
-        double newTime = glfwGetTime();
-        double frameTime = newTime - currentTime;
+        timePhysicsCurr = glfwGetTime();
+        double frameTime = timePhysicsCurr - timePhysicsPrev;
 
         // wyswietlamy liczbe klatek/s
-        if ( currentTime - lastFPSupdate >= 1.0f )
+        if ( timePhysicsCurr - lastFPSupdate >= 1.0f )
         {
             float timing = double(nbFrames);
 
@@ -234,13 +247,12 @@ int main()
 			win->setWindowTitle(newWindowTitle);
         }
 
-        currentTime = newTime;
+        timePhysicsPrev = timePhysicsCurr;
 
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
         glfwSetCursorPos(win->getWindow(), win->getWidth()/2, win->getHeight()/2);
 
         camFPS->setRotation(xpos, ypos);
-
 
 
         while ( frameTime > 0.0f )

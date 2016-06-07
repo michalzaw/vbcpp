@@ -169,6 +169,8 @@
 		<Unit filename="Physics/PhysicalBody.hpp" />
 		<Unit filename="Physics/PhysicalBodyBox.cpp" />
 		<Unit filename="Physics/PhysicalBodyBox.hpp" />
+		<Unit filename="Physics/PhysicalBodyBvtTriangleMesh.cpp" />
+		<Unit filename="Physics/PhysicalBodyBvtTriangleMesh.hpp" />
 		<Unit filename="Physics/PhysicalBodyConvexHull.cpp" />
 		<Unit filename="Physics/PhysicalBodyConvexHull.hpp" />
 		<Unit filename="Physics/PhysicalBodyCylinder.cpp" />

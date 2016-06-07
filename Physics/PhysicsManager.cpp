@@ -156,6 +156,18 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* ver
     return b;
 }
 
+PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos)
+{
+    PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model, pos);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody());
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+// CONSTRAINTS
 
 ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB)
 {
