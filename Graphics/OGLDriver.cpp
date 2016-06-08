@@ -56,6 +56,9 @@ bool OGLDriver::Initialize()
 
     shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
     _shaderList.push_back(shader);
+
+    shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
+    _shaderList.push_back(shader);
 }
 
 

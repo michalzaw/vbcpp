@@ -21,7 +21,7 @@ void PhysicalBodyConvexHull::updateBody()
     safe_delete<btDefaultMotionState>(_motionState);
 
 
-    _collShape = new btConvexHullShape((btScalar*)_vertices, _vertexCount, 32);
+    _collShape = new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex));//32);
 
     /*
     _collShape = new btConvexHullShape;

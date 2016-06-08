@@ -17,6 +17,7 @@ struct Material
     glm::vec4 specularColor;
 
     GLuint diffuseTexture;
+    GLuint normalmapTexture;
 
     float shininess;
     float transparency;

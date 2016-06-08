@@ -123,9 +123,9 @@ int main()
 
     //Model* alfa = l->loadModel("alfa/alfa.3ds", "alfa/");
     //Model* model = l->loadModel("H9.3ds", "ZKM/");
-    //Model* model = l->loadModel("crate.3ds", "./");
+    Model* model = l->loadModel("crate.3ds", "./");
     Model* crate2 = l->loadModel("crate2.3ds", "./");
-    Model* model = l->loadModel("testarea/test_area.3ds", "testarea/");
+    //Model* model = l->loadModel("testarea/test_area.3ds", "testarea/");
 
     // Obiekty sceny
     RenderObject* object2 = scene->AddRenderObject(model);
@@ -136,12 +136,12 @@ int main()
 
     RenderObject* objCrate2 = scene->AddRenderObject(crate2);
 
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(10,17,0));
-    boxBody2->setRestitution(0.9f);
+    //PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(10,17,0));
+    //boxBody2->setRestitution(0.9f);
 
-    objCrate2->SetPhysicalBody(boxBody2);
+    //objCrate2->SetPhysicalBody(boxBody2);
 
-    /*
+
     RenderObject* leg1 = scene->AddRenderObject(crate2);
     leg1->GetTransform()->SetPosition(glm::vec3(3.0f,3,3));
 
@@ -194,7 +194,7 @@ int main()
 
     object2->SetPhysicalBody(boxBody2);
     staticBox->SetPhysicalBody(staticBoxBody);
-    //*/
+    //
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,5);

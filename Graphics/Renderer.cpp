@@ -145,6 +145,17 @@ void Renderer::Render(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
+        if (mesh->material.normalmapTexture != 0)
+        {
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
+
+            shader->BindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
+        }
+
         shader->SetUniform("Light.Color", renderData->light->GetColor());
         shader->SetUniform("Light.AmbientIntensity", renderData->light->GetAmbientIntensity());
         shader->SetUniform("Light.DiffuseIntensity", renderData->light->GetDiffiseIntenisty());
@@ -174,6 +185,11 @@ void Renderer::Render(RenderData* renderData)
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
+        if (mesh->material.normalmapTexture != 0)
+        {
+            glDisableVertexAttribArray(3);
+            glDisableVertexAttribArray(4);
+        }
     }
 
 

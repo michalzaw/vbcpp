@@ -104,6 +104,8 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         vert[i].Position = vertices[i].pos;
         vert[i].TexCoord = glm::vec2(vertices[i].s, vertices[i].t);
         vert[i].Normal = vertices[i].normal;
+        vert[i].Tangent = vertices[i].tangent;
+        vert[i].Bitangent = vertices[i].binormal;
     }
 
     unsigned int* ind = new unsigned int[indices.size()];
@@ -193,10 +195,53 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	}
 	sMaterial.diffuseTexture = texId;
 
-	if (texId > 0)
+
+	// Normal mapa
+	texStr = std::string(material->bump_map.name);
+
+	for( int i = 0; i < texStr.size(); i++ )
+		texStr[i] = tolower(texStr[i]);
+
+	texturePath = texPath + texStr;
+
+	texId = 0;
+
+	if(texStr != "")
+	{
+
+        glGenTextures(1, &texId);
+        glBindTexture(GL_TEXTURE_2D, texId);
+
+        // Użycie SOIL jedynie do wczytania pliku graficznego
+        // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
+		int width, height;
+        unsigned char* image = SOIL_load_image(texturePath.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+
+        std::cout << "Loading texture: " << texturePath << std::endl;
+        std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // mipmapping
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+
+        SOIL_free_image_data(image);
+	}
+	sMaterial.normalmapTexture = texId;
+
+
+	if (sMaterial.diffuseTexture > 0)
         sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
     else
         sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+
+    if (sMaterial.normalmapTexture > 0)
+        sMaterial.shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
 
 	return sMaterial;
 }
