@@ -125,13 +125,13 @@ int main()
     //Model* model = l->loadModel("H9.3ds", "ZKM/");
     Model* model = l->loadModel("crate.3ds", "./");
     Model* crate2 = l->loadModel("crate2.3ds", "./");
-    //Model* model = l->loadModel("testarea/test_area.3ds", "testarea/");
+    Model* terrain = l->loadModel("testarea/test_area_n.3ds", "testarea/");
 
     // Obiekty sceny
     RenderObject* object2 = scene->AddRenderObject(model);
     object2->GetTransform()->SetPosition(glm::vec3(0,0,0));
 
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(model, btVector3(0,0,0));
+    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
     terrainMesh->setRestitution(0.9f);
 
     RenderObject* objCrate2 = scene->AddRenderObject(crate2);
@@ -155,10 +155,12 @@ int main()
     leg4->GetTransform()->SetPosition(glm::vec3(-3.0f,3,-3));
 
 
+    RenderObject* terrainObj = scene->AddRenderObject(terrain);
+    terrainObj->SetPhysicalBody(terrainMesh);
 
-    RenderObject* staticBox = scene->AddRenderObject(model);
-    staticBox->GetTransform()->SetPosition(glm::vec3(0,0,0));
-    staticBox->GetTransform()->SetScale(glm::vec3(10.0f,1,10.0f));
+    //RenderObject* staticBox = scene->AddRenderObject(model);
+    //staticBox->GetTransform()->SetPosition(glm::vec3(0,0,0));
+    //staticBox->GetTransform()->SetScale(glm::vec3(10.0f,1,10.0f));
 
     PhysicalBodyConvexHull* leg1Body = physMgr->createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
     leg1Body->setRestitution(0.9f);
@@ -181,8 +183,8 @@ int main()
     ConstraintHinge2* hinge4 = physMgr->createConstraintHinge2(leg4Body, boxBody2, btVector3(-1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
 
 
-    PhysicalBodyBox* staticBoxBody = physMgr->createPhysicalBodyBox(btVector3(10,1,10), 0, btVector3(0,0,0));
-    staticBoxBody->setRestitution(0.85f);
+    //PhysicalBodyBox* staticBoxBody = physMgr->createPhysicalBodyBox(btVector3(10,1,10), 0, btVector3(0,0,0));
+    //staticBoxBody->setRestitution(0.85f);
 
 
     // Podłączenie obiektów fizycznych do obiektów sceny
@@ -193,7 +195,7 @@ int main()
 
 
     object2->SetPhysicalBody(boxBody2);
-    staticBox->SetPhysicalBody(staticBoxBody);
+    //staticBox->SetPhysicalBody(staticBoxBody);
     //
     // Kamera FPS
     camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);

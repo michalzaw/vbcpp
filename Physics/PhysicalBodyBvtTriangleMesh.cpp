@@ -4,7 +4,7 @@ PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(Model* model, btVector3
 : PhysicalBody(0, pos),
 _model(model)
 {
-    printf("BvtTrisngleMeshShape - Konstruktor\n");
+    printf("BvtTriangleMeshShape - Konstruktor\n");
     updateBody();
 }
 
