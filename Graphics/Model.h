@@ -41,14 +41,17 @@ class Model
         Mesh* _meshes;
         unsigned int _quantumOfMeshes;
 
+        glm::vec3* _collisionMesh;
+        unsigned int _collisionMeshSize;
+
         VBO* _vbo;
         IBO* _ibo;
 
         GLenum _primitiveType;
 
     public:
-        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
-        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
+        //Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
+        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
         ~Model();
 
         VBO* GetVBO();
@@ -59,6 +62,8 @@ class Model
         unsigned int* GetIndices();
         unsigned int GetQuantumOfMeshes();
         Mesh* GetMesh(unsigned int i);
+        unsigned int GetCollisionMeshSize();
+        glm::vec3* GetCollisionMesh();
         GLenum GetPrimitiveType();
 
 };

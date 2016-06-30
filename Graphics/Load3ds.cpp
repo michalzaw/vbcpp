@@ -64,10 +64,6 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
                 vertex.t = -mesh->texelL[i][1];
             }
 
-            vertex.normal = Vector3(1.0f, 1.0f, 1.0f);
-            vertex.tangent = Vector3(1.0f, 1.0f, 1.0f);
-            vertex.binormal = Vector3(1.0f, 1.0f, 1.0f);
-
             vertices.push_back(vertex);
         }
 	}
@@ -76,19 +72,21 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 
 	for (material = _file3ds->materials; material != NULL; material = material->next)
 	{
-	    Mesh m;
+	    if (strcmp(material->name, "CollisionMes") != 0)
+        {
+            Mesh m;
 
-        m.material = loadMaterialData(material, texturesPath);
+            m.material = loadMaterialData(material, texturesPath);
 
-        m.firstVertex = indices.size();
+            m.firstVertex = indices.size();
 
-        loadGeometryByMatrial(m.material, indices);
+            loadGeometryByMaterial(m.material, indices);
 
-        m.quantumOfVertice = indices.size() - m.firstVertex;
+            m.quantumOfVertice = indices.size() - m.firstVertex;
 
-        if (m.quantumOfVertice > 0)
-            meshes.push_back(m);
-
+            if (m.quantumOfVertice > 0)
+                meshes.push_back(m);
+        }
 	}
 
 
@@ -120,10 +118,21 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         me[i] = meshes[i];
     }
 
-	Model* model = new Model(_OGLDriver, vert, vertices.size(), ind, indices.size(), me, meshes.size());
+    std::vector<glm::vec3> collisionMesh;
+    loadCollisionMesh(&collisionMesh);
+	glm::vec3* collisionMeshVertices = new glm::vec3[collisionMesh.size()];
+	for (int i = 0; i < collisionMesh.size(); ++i)
+    {
+        collisionMeshVertices[i] = collisionMesh[i];
+    }
+
+
+	Model* model = new Model(_OGLDriver, vert, vertices.size(), ind, indices.size(), me, meshes.size(), collisionMeshVertices, collisionMesh.size());
+
 
 	lib3ds_file_free(_file3ds);
     _file3ds = NULL;
+
 
 	return model;
 }
@@ -169,29 +178,7 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	if(texStr != "")
 	{
-
-        glGenTextures(1, &texId);
-        glBindTexture(GL_TEXTURE_2D, texId);
-
-        // Użycie SOIL jedynie do wczytania pliku graficznego
-        // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
-		int width, height;
-        unsigned char* image = SOIL_load_image(texturePath.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-
-        std::cout << "Loading texture: " << texturePath << std::endl;
-        std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // mipmapping
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-        SOIL_free_image_data(image);
+        texId = LoadTexture(texturePath.c_str());
 	}
 	sMaterial.diffuseTexture = texId;
 
@@ -208,29 +195,7 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	if(texStr != "")
 	{
-
-        glGenTextures(1, &texId);
-        glBindTexture(GL_TEXTURE_2D, texId);
-
-        // Użycie SOIL jedynie do wczytania pliku graficznego
-        // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
-		int width, height;
-        unsigned char* image = SOIL_load_image(texturePath.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-
-        std::cout << "Loading texture: " << texturePath << std::endl;
-        std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST); // mipmapping
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-        SOIL_free_image_data(image);
+        texId = LoadTexture(texturePath.c_str());
 	}
 	sMaterial.normalmapTexture = texId;
 
@@ -247,7 +212,7 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 }
 
 
-void Load3ds::loadGeometryByMatrial(Material& material, std::vector<unsigned int>& indices)
+void Load3ds::loadGeometryByMaterial(Material& material, std::vector<unsigned int>& indices)
 {
     Lib3dsMesh* mesh;
 	Lib3dsFace* face;
@@ -266,6 +231,37 @@ void Load3ds::loadGeometryByMatrial(Material& material, std::vector<unsigned int
 				{
 				    //std::cout << "d: " << mesh->user.d << std::endl;
 				    indices.push_back(face->points[currentVertex] + mesh->user.d);
+				}
+			}
+		}
+	}
+}
+
+
+void Load3ds::loadCollisionMesh(std::vector<glm::vec3>* vertices)
+{
+    Lib3dsMesh* mesh;
+	Lib3dsFace* face;
+
+    for(mesh = _file3ds->meshes; mesh != NULL; mesh = mesh->next)
+	{
+	    for(unsigned int currentFace = 0; currentFace < mesh->faces; currentFace++)
+		{
+			face = &mesh->faceL[currentFace];
+
+			std::string faceMaterial = std::string(face->material);
+
+			if(faceMaterial == "CollisionMes")
+			{
+			    std::cout << "\n\n\n\n\n\nCollisionMesh\n\n\n\n\n\n\n";
+			    for(int currentVertex = 0; currentVertex < 3; currentVertex++)
+				{
+				    glm::vec3 vertex;
+				    vertex.x = mesh->pointL[face->points[currentVertex]].pos[0];
+				    vertex.y = mesh->pointL[face->points[currentVertex]].pos[1];
+				    vertex.z = mesh->pointL[face->points[currentVertex]].pos[2];
+
+				    vertices->push_back(vertex);
 				}
 			}
 		}

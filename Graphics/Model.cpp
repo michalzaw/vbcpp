@@ -3,7 +3,7 @@
 #include "Model.h"
 
 
-Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+/*Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
     : _oglDriver(driver)
 {
     std::cout << "aaaaaaaa\n\n\n\n\naaaaaaaaaaaaa";
@@ -29,10 +29,10 @@ Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices
 
     _primitiveType = primitiveType;
 
-}
+}*/
 
 
-Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType)
+Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh, unsigned int collisionMeshSize, GLenum primitiveType)
     : _oglDriver(driver)
 {
     std::cout << "*** Model: Konstruktor" << std::endl;
@@ -52,6 +52,9 @@ Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices
 
     _ibo = _oglDriver->CreateIBO(_indicesSize * sizeof(unsigned int));
     _ibo->AddIndices(_indices, _indicesSize);
+
+    _collisionMesh = collisionMesh;
+    _collisionMeshSize = collisionMeshSize;
 
     _primitiveType = primitiveType;
 
@@ -97,6 +100,13 @@ Model::~Model()
     {
         delete[] _meshes;
         _meshes = 0;
+    }
+
+    std::cout << "*** Model: Usuwanie _collisionMesh" << std::endl;
+    if (_collisionMesh)
+    {
+        delete[] _collisionMesh;
+        _collisionMesh = 0;
     }
 }
 
@@ -148,6 +158,18 @@ Mesh* Model::GetMesh(unsigned int i)
     if (i < _quantumOfMeshes)
         return &_meshes[i];
 
+}
+
+
+unsigned int Model::GetCollisionMeshSize()
+{
+    return _collisionMeshSize;
+}
+
+
+glm::vec3* Model::GetCollisionMesh()
+{
+    return _collisionMesh;
 }
 
 

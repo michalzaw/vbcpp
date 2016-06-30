@@ -10,11 +10,10 @@
 #include <lib3ds/material.h>
 #include <lib3ds/mesh.h>
 
-#include <SOIL/SOIL.h>
-
 #include "Model.h"
 #include "OGLDriver.h"
 #include "NVMeshMender/NVMeshMender.h"
+#include "LoadTexture.h"
 
 
 class Load3ds
@@ -26,7 +25,8 @@ class Load3ds
         float _minCreaseCosAngle;
 
         Material loadMaterialData(Lib3dsMaterial* material, std::string texPath);
-        void loadGeometryByMatrial(Material& material, std::vector<unsigned int>& indices);
+        void loadGeometryByMaterial(Material& material, std::vector<unsigned int>& indices);
+        void loadCollisionMesh(std::vector<glm::vec3>* vertices);
 
     public:
         Load3ds(OGLDriver* driver);
