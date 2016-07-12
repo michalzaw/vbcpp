@@ -95,6 +95,11 @@ void PhysicsManager::simulate(btScalar timeStep)
 {
     _dynamicsWorld->stepSimulation(timeStep, 1);
     //_dynamicsWorld->stepSimulation(1/60.0f, 5);
+
+    for (int i = 0; i < _physicalBodies.size(); i++)
+	{
+        _physicalBodies[i]->update();
+	}
 }
 
 
@@ -165,6 +170,15 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(M
     _physicalBodies.push_back(b);
 
     return b;
+}
+
+void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
+{
+    _dynamicsWorld->removeRigidBody(physicalBody->getRigidBody());
+
+    _physicalBodies.remove(physicalBody);
+
+    delete physicalBody;
 }
 
 // CONSTRAINTS

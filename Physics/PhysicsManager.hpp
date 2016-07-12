@@ -41,6 +41,9 @@ class PhysicsManager
         PhysicalBodyConvexHull*     createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos);
 
+        // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
+        void removePhysicalBody(PhysicalBody* physicalBody);
+
         ConstraintHinge*            createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB);
         ConstraintHinge2*           createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB);
 

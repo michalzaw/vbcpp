@@ -8,7 +8,7 @@
 #include "Window/Window.h"
 
 #include "Graphics/Model.h"
-#include "Graphics/SceneManager.h"
+#include "Graphics/GraphicsManager.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Renderer.h"
 #include "Graphics/OGLDriver.h"
@@ -20,6 +20,8 @@
 #include "Physics/ConstraintHinge.hpp"
 #include "Physics/ConstraintHinge2.hpp"
 #include "Physics/PhysicalBodyBvtTriangleMesh.hpp"
+
+#include "Scene/SceneManager.h"
 
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
@@ -111,10 +113,15 @@ int main()
     OGLDriver* driver = new OGLDriver;
     driver->Initialize();
 
-    physMgr = new PhysicsManager;
-    physMgr->createPhysicsWorld();
+    //physMgr = new PhysicsManager;
+    //physMgr->createPhysicsWorld();
 
-	SceneManager* scene = new SceneManager(driver);
+	//GraphicsManager* scene = new GraphicsManager(/*driver*/);
+	SceneManager* scene = new SceneManager;
+
+	physMgr = scene->getPhysicsManager();
+	GraphicsManager* graphMgr = scene->getGraphicsManager();
+
 	Renderer* renderer = new Renderer(driver);
 
 
@@ -128,39 +135,44 @@ int main()
     Model* terrain = l->loadModel("testarea/test_area_n.3ds", "testarea/");
 
     // Obiekty sceny
-    RenderObject* object2 = scene->AddRenderObject(model);
-    object2->GetTransform()->SetPosition(glm::vec3(0,0,0));
+
+
+    /* terrain */
+    SceneObject* terrainObject = scene->addSceneObject();
 
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
     terrainMesh->setRestitution(0.9f);
 
-    RenderObject* objCrate2 = scene->AddRenderObject(crate2);
+    RenderObject* terrainObj = graphMgr->AddRenderObject(terrain);
 
-    //PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(10,17,0));
-    //boxBody2->setRestitution(0.9f);
-
-    //objCrate2->SetPhysicalBody(boxBody2);
+    terrainObject->addComponent(terrainMesh);
+    terrainObject->addComponent(terrainObj);
 
 
-    RenderObject* leg1 = scene->AddRenderObject(crate2);
-    leg1->GetTransform()->SetPosition(glm::vec3(3.0f,3,3));
+    /* crate */
+    SceneObject* crate = scene->addSceneObject();
 
-    RenderObject* leg2 = scene->AddRenderObject(crate2);
-    leg2->GetTransform()->SetPosition(glm::vec3(-3.0f,3,3));
+    RenderObject* object2 = graphMgr->AddRenderObject(model);
 
-    RenderObject* leg3 = scene->AddRenderObject(crate2);
-    leg3->GetTransform()->SetPosition(glm::vec3(3.0f,3,-3));
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
+    boxBody2->setRestitution(0.1f);
 
-    RenderObject* leg4 = scene->AddRenderObject(crate2);
-    leg4->GetTransform()->SetPosition(glm::vec3(-3.0f,3,-3));
+    crate->addComponent(object2);
+    crate->addComponent(boxBody2);
 
 
-    RenderObject* terrainObj = scene->AddRenderObject(terrain);
-    terrainObj->SetPhysicalBody(terrainMesh);
+    /* legs */
+    SceneObject* l1 = scene->addSceneObject();
+    SceneObject* l2 = scene->addSceneObject();
+    SceneObject* l3 = scene->addSceneObject();
+    SceneObject* l4 = scene->addSceneObject();
 
-    //RenderObject* staticBox = scene->AddRenderObject(model);
-    //staticBox->GetTransform()->SetPosition(glm::vec3(0,0,0));
-    //staticBox->GetTransform()->SetScale(glm::vec3(10.0f,1,10.0f));
+
+    RenderObject* leg1 = graphMgr->AddRenderObject(crate2);
+    RenderObject* leg2 = graphMgr->AddRenderObject(crate2);
+    RenderObject* leg3 = graphMgr->AddRenderObject(crate2);
+    RenderObject* leg4 = graphMgr->AddRenderObject(crate2);
+
 
     PhysicalBodyConvexHull* leg1Body = physMgr->createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
     leg1Body->setRestitution(0.9f);
@@ -174,8 +186,18 @@ int main()
     PhysicalBodyConvexHull* leg4Body = physMgr->createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,-3));
     leg4Body->setRestitution(0.9f);
 
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
-    boxBody2->setRestitution(0.1f);
+
+    l1->addComponent(leg1);
+    l1->addComponent(leg1Body);
+    l2->addComponent(leg2);
+    l2->addComponent(leg2Body);
+    l3->addComponent(leg3);
+    l3->addComponent(leg3Body);
+    l4->addComponent(leg4);
+    l4->addComponent(leg4Body);
+
+
+
 
     ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(leg1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge2 = physMgr->createConstraintHinge2(leg2Body, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
@@ -188,23 +210,25 @@ int main()
 
 
     // Podłączenie obiektów fizycznych do obiektów sceny
-    leg1->SetPhysicalBody(leg1Body);
-    leg2->SetPhysicalBody(leg2Body);
-    leg3->SetPhysicalBody(leg3Body);
-    leg4->SetPhysicalBody(leg4Body);
+//    leg1->SetPhysicalBody(leg1Body);
+ //   leg2->SetPhysicalBody(leg2Body);
+ //   leg3->SetPhysicalBody(leg3Body);
+ //   leg4->SetPhysicalBody(leg4Body);
 
 
-    object2->SetPhysicalBody(boxBody2);
+//    object2->SetPhysicalBody(boxBody2);
     //staticBox->SetPhysicalBody(staticBoxBody);
     //
     // Kamera FPS
-    camFPS = scene->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
+    camFPS = graphMgr->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     camFPS->setPosition(0,4,5);
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
     // Światło
-    scene->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f));
+    SceneObject* dirLight = scene->addSceneObject();
+    dirLight->addComponent(graphMgr->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f)));
+    dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * 3.1416));
 
 
     // Zmienne dla obliczania czasu
@@ -270,10 +294,10 @@ int main()
         }
 
         // Synchronizacja obiektów sceny z fizyką
-        scene->updatePhysics();
+//        scene->updatePhysics();
 
         // Renderowanie sceny
-        renderer->Render(scene->GetRenderData());
+        renderer->Render(graphMgr->GetRenderData());
 
         // Swap buffers and poll events
         win->swapBuffers();
@@ -283,7 +307,7 @@ int main()
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
-    delete physMgr;
+    //delete physMgr;
     // -----------------------------------
 
     delete model;

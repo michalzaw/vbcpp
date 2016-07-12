@@ -6,34 +6,22 @@
 #include <cstdio>
 
 #include "Model.h"
-#include "Transform.h"
 
-#include "../Physics/PhysicalBody.hpp"
+#include "../Scene/Component.h"
 
 
-class RenderObject
+class RenderObject : public Component
 {
     private:
         Model* _model;
-        Transform _transform;
-        PhysicalBody* _physicalBody;
-
-        std::string _name;
-        bool _isActive;
 
     public:
-        RenderObject(Model* model = NULL, std::string name = "RenderObject");
+        RenderObject(Model* model = NULL);
         ~RenderObject();
 
-        void SetPhysicalBody(PhysicalBody* body);
-        void Update();
         void SetModel(Model* model);
-        void SetTransform(Transform& transform);
-        void SetIsActive(bool isActive);
+
         Model* GetModel();
-        Transform* GetTransform();
-        std::string GetName();
-        bool IsActive();
 
 };
 

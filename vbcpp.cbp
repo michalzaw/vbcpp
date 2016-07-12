@@ -127,6 +127,8 @@
 		<Unit filename="Graphics/CameraFPS.hpp" />
 		<Unit filename="Graphics/CameraStatic.cpp" />
 		<Unit filename="Graphics/CameraStatic.hpp" />
+		<Unit filename="Graphics/GraphicsManager.cpp" />
+		<Unit filename="Graphics/GraphicsManager.h" />
 		<Unit filename="Graphics/IBO.cpp" />
 		<Unit filename="Graphics/IBO.h" />
 		<Unit filename="Graphics/Light.cpp" />
@@ -150,8 +152,6 @@
 		<Unit filename="Graphics/RenderObject.h" />
 		<Unit filename="Graphics/Renderer.cpp" />
 		<Unit filename="Graphics/Renderer.h" />
-		<Unit filename="Graphics/SceneManager.cpp" />
-		<Unit filename="Graphics/SceneManager.h" />
 		<Unit filename="Graphics/Shader.cpp" />
 		<Unit filename="Graphics/Shader.h" />
 		<Unit filename="Graphics/Transform.cpp" />
@@ -183,6 +183,12 @@
 		<Unit filename="Physics/PhysicalBodyStaticPlane.hpp" />
 		<Unit filename="Physics/PhysicsManager.cpp" />
 		<Unit filename="Physics/PhysicsManager.hpp" />
+		<Unit filename="Scene/Component.cpp" />
+		<Unit filename="Scene/Component.h" />
+		<Unit filename="Scene/SceneManager.cpp" />
+		<Unit filename="Scene/SceneManager.h" />
+		<Unit filename="Scene/SceneObject.h" />
+		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Window/Window.cpp" />
 		<Unit filename="Window/Window.h" />

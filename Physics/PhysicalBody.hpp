@@ -3,7 +3,10 @@
 
 #include <bullet/btBulletDynamicsCommon.h>
 
-class PhysicalBody
+#include "../Scene/Component.h"
+#include "../Scene/SceneObject.h"
+
+class PhysicalBody : public Component
 {
     public:
         PhysicalBody(btScalar m, btVector3 pos);
@@ -14,9 +17,11 @@ class PhysicalBody
         btCollisionShape*   getCollisionShape() { return _collShape; }
 
         btScalar getMass() { return _mass; }
-        void getTransform(btTransform& t);
+        //void getTransform(btTransform& t);
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
+
+        void update();
 
     protected:
         btRigidBody*            _rigidBody;
