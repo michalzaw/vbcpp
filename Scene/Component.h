@@ -40,6 +40,8 @@ class Component
         SceneObject*    getSceneObject();
         Transform*      getTransform();
 
+        virtual void changedTransform() {}
+
 };
 
 

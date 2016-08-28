@@ -2,12 +2,16 @@
 
 
 CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
-	: m_ProjectionMatrix(1.0), m_ViewMatrix(1.0),
-	m_Position(vec3(0,0,-10)), m_LookAt(vec3(0,0,0)), m_UpVector(vec3(0,1,0)),
-    m_FarValue(farValue), m_NearValue(nearValue), m_ViewAngle(viewAngle), m_WindowWidth(width), m_WindowHeight(height)
+	: Component(CT_CAMERA),
+	_projectionMatrix(1.0), _viewMatrix(1.0),
+	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
+    _farValue(farValue), _nearValue(nearValue), _viewAngle(viewAngle), _windowWidth(width), _windowHeight(height)
 {
-	updateProjection();
-	updateView();
+    changedTransform();
+
+    _projectionMatrixIs = false;
+	//updateProjection();
+	//updateView();
 }
 
 
@@ -19,111 +23,153 @@ CameraStatic::~CameraStatic()
 
 vec3 CameraStatic::getPosition()
 {
-	return m_Position;
+	return _objectTransform->GetPosition();
 }
 
 
 GLfloat CameraStatic::getNearValue()
 {
-	return m_NearValue;
+	return _nearValue;
 }
 
 
 GLfloat	CameraStatic::getFarValue()
 {
-	return m_FarValue;
+	return _farValue;
+}
+
+
+GLfloat	CameraStatic::getViewAngle()
+{
+	return _viewAngle;
 }
 
 
 glm::vec3 CameraStatic::getLookAtVector()
 {
-	return m_LookAt;
+    if (!_lookAtIs)
+    {
+        _lookAt = getPosition() + getDirection();
+
+        _lookAtIs = true;
+    }
+
+	return _lookAt;
 }
 
 glm::vec3 CameraStatic::getUpVector()
 {
-	return m_UpVector;
+    if (!_upVectorIs)
+    {
+        _upVector = glm::cross(getRightVector(), getDirection());
+
+        _upVectorIs = true;
+    }
+
+	return _upVector;
+}
+
+glm::vec3 CameraStatic::getDirection()
+{
+    if (!_directionIs)
+    {
+        float verticalAngle = _objectTransform->GetRotation().x;
+        float horizontalAngle = _objectTransform->GetRotation().y;
+
+        _direction = vec3(
+                    cos(verticalAngle) * sin(horizontalAngle),
+                    sin(verticalAngle),
+                    cos(verticalAngle) * cos(horizontalAngle)
+        );
+
+        _directionIs = true;
+    }
+
+	return _direction;
+}
+
+glm::vec3 CameraStatic::getRightVector()
+{
+    if (!_rightVectorIs)
+    {
+        float horizontalAngle = _objectTransform->GetRotation().y;
+
+        _rightVector = vec3(
+				sin(horizontalAngle - PI/2.0f),
+				0,
+				cos(horizontalAngle - PI/2.0f)
+        );
+
+        _rightVectorIs = true;
+    }
+
+    return _rightVector;
 }
 
 
 glm::mat4 CameraStatic::getProjectionMatrix()
 {
-	return m_ProjectionMatrix;
+    if (!_projectionMatrixIs)
+    {
+        _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+
+        _projectionMatrixIs = true;
+    }
+
+	return _projectionMatrix;
 }
 
 
 glm::mat4 CameraStatic::getViewMatrix()
 {
-	return m_ViewMatrix;
-}
+    if (!_viewMatrixIs)
+    {
+        _viewMatrix = glm::lookAt(
+						getPosition(),
+						getLookAtVector(),
+						getUpVector() );
 
+        _viewMatrixIs = true;
+    }
 
-void CameraStatic::setPosition(vec3 position)
-{
-	m_Position = position;
-
-	updateView();
-}
-
-
-void CameraStatic::setPosition(GLfloat x, GLfloat y, GLfloat z)
-{
-	vec3 pos(x, y, z);
-
-	setPosition(pos);
-}
-
-
-void CameraStatic::lookAt(vec3 lookAt)
-{
-	m_LookAt = lookAt;
-
-	updateView();
-}
-
-
-void CameraStatic::setUpVector(vec3 upVector)
-{
-	m_UpVector = upVector;
-
-	updateView();
+	return _viewMatrix;
 }
 
 
 void CameraStatic::setFarValue(GLfloat value)
 {
-	m_FarValue = value;
+	_farValue = value;
 
-	updateProjection();
+	_projectionMatrixIs = false;//updateProjection();
 }
 
 
 void CameraStatic::setNearValue(GLfloat value)
 {
-	m_NearValue = value;
+	_nearValue = value;
 
-	updateProjection();
+	_projectionMatrixIs = false;//updateProjection();
 }
 
 
 void CameraStatic::setViewAngle(GLfloat angle)
 {
-	m_ViewAngle = angle;
+	_viewAngle = angle;
 
-	updateProjection();
+	_projectionMatrixIs = false;//updateProjection();
 }
 
 
 void CameraStatic::setWindowDimensions(GLint width, GLint height)
 {
-	m_WindowWidth = width;
-	m_WindowHeight = height;
+	_windowWidth = width;
+	_windowHeight = height;
 
-	updateProjection();
+	_projectionMatrixIs = false;//updateProjection();
 }
 
 
-void CameraStatic::updateProjection()
+/*void CameraStatic::updateProjection()
 {
 	m_ProjectionMatrix = glm::perspective(m_ViewAngle, float(m_WindowWidth) / float(m_WindowHeight), m_NearValue, m_FarValue);
 }
@@ -135,4 +181,4 @@ void CameraStatic::updateView()
 						m_Position,
 						m_LookAt,
 						m_UpVector );
-}
+}*/

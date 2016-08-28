@@ -9,6 +9,9 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 
+class SceneObject;
+
+
 class Transform
 {
     private:
@@ -22,11 +25,13 @@ class Transform
         bool _transformMatrixIs;
         bool _normalMatrixIs;
 
-        void  UpdateTransformMatrix();
+        SceneObject* _object;
+
+        void UpdateTransformMatrix();
         void Changed();
 
     public:
-        Transform();
+        Transform(SceneObject* object);
         Transform(const Transform& t);
         ~Transform();
 

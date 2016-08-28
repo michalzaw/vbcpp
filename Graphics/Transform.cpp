@@ -1,6 +1,9 @@
 #include "Transform.h"
 
+#include "../Scene/SceneObject.h"
+
 #include <cstdio>
+
 
 void Transform::UpdateTransformMatrix()
 {
@@ -30,14 +33,15 @@ void Transform::Changed()
     _transformMatrixIs = false;
     _normalMatrixIs = false;
 
-    UpdateTransformMatrix();
+    _object->changedTransform();
 }
 
 
-Transform::Transform()
+Transform::Transform(SceneObject* object)
     : _position(0.0f, 0.0f, 0.0f),
     _rotation(0.0f, 0.0f, 0.0f),
-    _scale(1.0f, 1.0f, 1.0f)
+    _scale(1.0f, 1.0f, 1.0f),
+    _object(object)
 {
     Changed();
 }
@@ -48,6 +52,8 @@ Transform::Transform(const Transform& t)
     _position = t._position;
     _rotation = t._rotation;
     _scale = t._scale;
+
+    _object = t._object;
 
     Changed();
 }
@@ -144,6 +150,8 @@ Transform& Transform::operator=(const Transform& t)
     _position = t._position;
     _rotation = t._rotation;
     _scale = t._scale;
+
+    _object = t._object;
 
     Changed();
 

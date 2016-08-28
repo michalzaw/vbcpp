@@ -4,7 +4,8 @@
 
 SceneObject::SceneObject(unsigned int id, SceneManager* sceneManager)
     : _id(id), _isActive(true),
-    _sceneManager(sceneManager)
+    _sceneManager(sceneManager),
+    _transform(this)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneObject\n";
@@ -25,6 +26,14 @@ SceneObject::~SceneObject()
         {
             case CT_RENDER_OBJECT:
                 _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                break;
+
+            case CT_CAMERA:
+                //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
+                break;
+
+            case CT_LIGHT:
+                _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
                 break;
 
             case CT_PHYSICAL_BODY:
@@ -62,6 +71,14 @@ void SceneObject::removeComponent(Component* component)
             {
                 case CT_RENDER_OBJECT:
                     _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                    break;
+
+                case CT_CAMERA:
+                    //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
+                    break;
+
+                case CT_LIGHT:
+                    _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
                     break;
 
                 case CT_PHYSICAL_BODY:
@@ -120,4 +137,13 @@ unsigned int SceneObject::getComponentsCount()
 SceneManager* SceneObject::getSceneManager()
 {
     return _sceneManager;
+}
+
+
+void SceneObject::changedTransform()
+{
+    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
+    {
+        (*i)->changedTransform();
+    }
 }

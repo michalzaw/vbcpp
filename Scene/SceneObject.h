@@ -13,11 +13,11 @@ class SceneManager;
 class SceneObject
 {
     private:
+        std::vector<Component*> _components;
+
         unsigned int _id;
         Transform _transform;
         bool _isActive;
-
-        std::vector<Component*> _components;
 
         SceneManager* _sceneManager;
 
@@ -38,6 +38,8 @@ class SceneObject
         unsigned int    getComponentsCount();
 
         SceneManager* getSceneManager();
+
+        void changedTransform();
 
 };
 

@@ -4,18 +4,10 @@
 #include "CameraStatic.hpp"
 
 
-const GLfloat PI = 3.14159265359f;
+
 
 /*
-inline GLfloat DegToRad(GLfloat deg)
-{
-    return GLfloat((deg * PI) / 180);
-}
 
-inline GLfloat RadToDeg(GLfloat rad)
-{
-    return GLfloat((rad * 180 ) / PI);
-}
 */
 
 class CameraFPS : virtual public CameraStatic
@@ -25,7 +17,7 @@ class CameraFPS : virtual public CameraStatic
 
 		virtual ~CameraFPS();
 
-		void update();
+		//void update();
 
 		void setRotation(int mousePosX, int mousePosY);
 
@@ -41,25 +33,21 @@ class CameraFPS : virtual public CameraStatic
 
 		void setRotationSpeed(float speed);
 
-		void setCursorPos(GLdouble xpos, GLdouble ypos);
+		//void setCursorPos(GLdouble xpos, GLdouble ypos);
 
 		void reset();
 
-		GLdouble getHorizontalAngle() { return m_HorizontalAngle; }
-		GLdouble getVerticalAngle() { return m_VerticalAngle; }
+		//GLdouble getHorizontalAngle() { return m_HorizontalAngle; }
+		//GLdouble getVerticalAngle() { return m_VerticalAngle; }
 
 	protected:
-		GLdouble m_HorizontalAngle;
-		GLdouble m_VerticalAngle;
 		GLfloat m_MoveSpeed;
 		GLfloat m_RotateSpeed;
-		glm::vec3 m_Direction;
-		glm::vec3 m_RightVector;
 
-		GLdouble    _oldXpos;
-		GLdouble    _oldYpos;
+		//GLdouble    _oldXpos;
+		//GLdouble    _oldYpos;
 
-		void updateDirection();
+		//void updateDirection();
 };
 
 

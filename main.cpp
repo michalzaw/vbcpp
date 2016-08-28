@@ -220,8 +220,10 @@ int main()
     //staticBox->SetPhysicalBody(staticBoxBody);
     //
     // Kamera FPS
+    SceneObject* Camera = scene->addSceneObject();
     camFPS = graphMgr->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
-    camFPS->setPosition(0,4,5);
+    Camera->addComponent(camFPS);
+    Camera->getTransform()->SetPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
