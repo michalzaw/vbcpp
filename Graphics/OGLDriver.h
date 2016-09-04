@@ -12,11 +12,14 @@
 #include "VBO.h"
 #include "IBO.h"
 
+#include <memory>
 
 class OGLDriver
 {
     private:
-        std::vector<Shader*> _shaderList;
+        //std::vector<Shader*> _shaderList;
+        //std::vector<std::shared_ptr<Shader>> _shaderPtrList;
+        std::vector<std::unique_ptr<Shader>> _shaderPtrList;
 
         std::vector<VAO*> _vaoList;
         std::vector<VBO*> _vboList;
@@ -33,6 +36,8 @@ class OGLDriver
         bool Initialize();
 
         Shader* GetShader(ShaderType type);
+
+        //std::shared_ptr<Shader>& GetShader(ShaderType type);
 
         VAO* CreateVAO();
         VBO* CreateVBO(unsigned int size);

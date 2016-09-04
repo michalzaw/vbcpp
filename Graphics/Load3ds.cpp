@@ -1,5 +1,6 @@
 #include "Load3ds.h"
 
+#include "LoadShader.h"
 
 Load3ds::Load3ds(OGLDriver* driver)
     : _OGLDriver(driver), _minCreaseCosAngle(0.7f)
@@ -200,13 +201,17 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	sMaterial.normalmapTexture = texId;
 
 
-	if (sMaterial.diffuseTexture > 0)
-        sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
-    else
-        sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
+        sMaterial._shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+        //sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
+    else if (sMaterial.diffuseTexture > 0)
+        sMaterial._shader = _OGLDriver->GetShader(SOLID_MATERIAL);
+        //sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+        //sMaterial.setShader(_OGLDriver->GetShader(NOTEXTURE_MATERIAL));
 
-    if (sMaterial.normalmapTexture > 0)
-        sMaterial.shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+    else
+        //sMaterial.shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+        sMaterial._shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
 }

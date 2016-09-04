@@ -16,14 +16,15 @@
 #include "OGLDriver.h"
 
 
-struct Mesh
+class Mesh
 {
-    Material material;
-    unsigned int firstVertex;
-    unsigned int quantumOfVertice;
+    public:
+        Material material;
+        unsigned int firstVertex;
+        unsigned int quantumOfVertice;
 
-    Mesh() : firstVertex(0), quantumOfVertice(0) {}
-
+    Mesh() : firstVertex(0), quantumOfVertice(0) { std::cout << "Mesh: Konstruktor\n"; }
+    virtual ~Mesh() { std::cout << "Mesh: Destruktor\n"; }
 };
 
 

@@ -17,7 +17,7 @@ class RenderObject : public Component
 
     public:
         RenderObject(Model* model = NULL);
-        ~RenderObject();
+        virtual ~RenderObject();
 
         void SetModel(Model* model);
 

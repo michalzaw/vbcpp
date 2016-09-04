@@ -125,7 +125,7 @@ void Renderer::Render(RenderData* renderData)
         Model* model = i->GetModel();
         Mesh* mesh = i->GetMesh();
 
-        Shader* shader = mesh->material.shader;
+        Shader* shader = mesh->material._shader;
         shader->Enable();
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();

@@ -23,6 +23,8 @@
 
 #include "Scene/SceneManager.h"
 
+#include "Utils/ResourceManager.h"
+
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
 
@@ -44,7 +46,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, true);
 }
 
-// Callback dla pojedynczych zdarzeÅ„ - przyciski myszy
+// Callback dla pojedynczych zdarzeñ - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
     /*
@@ -66,7 +68,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 }
 
 
-// Bufforowane przetwarzanie zdarzeÅ„
+// Bufforowane przetwarzanie zdarzeñ
 void readInput(GLFWwindow* window, double deltaTime)
 {
 	if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS)
@@ -109,7 +111,7 @@ int main()
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // Tworzenie gÅ‚Ã³wnych moduÅ‚Ã³w
+    // Tworzenie g³ównych modu³ów
     OGLDriver* driver = new OGLDriver;
     driver->Initialize();
 
@@ -119,13 +121,18 @@ int main()
 	//GraphicsManager* scene = new GraphicsManager(/*driver*/);
 	SceneManager* scene = new SceneManager;
 
+	//ResourceManager::getInstance().getString();
+    RTexture* tex =  ResourceManager::getInstance().loadTexture("iron.jpg");
+
+    std::cout << "Tex id: " << tex->getID() << std::endl;
+
 	physMgr = scene->getPhysicsManager();
 	GraphicsManager* graphMgr = scene->getGraphicsManager();
 
 	Renderer* renderer = new Renderer(driver);
 
 
-    // Wczytywanie zasobÃ³w
+    // Wczytywanie zasobów
     Load3ds* l = new Load3ds(driver);
 
     //Model* alfa = l->loadModel("alfa/alfa.3ds", "alfa/");
@@ -160,6 +167,10 @@ int main()
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
 
+    tex = ResourceManager::getInstance().loadTexture("iron.jpg");
+    std::cout << "Tex id: " << tex->getID() << std::endl;
+
+    ResourceManager::getInstance().loadTexture("crate.jpg");
 
     /* legs */
     SceneObject* l1 = scene->addSceneObject();
@@ -209,7 +220,7 @@ int main()
     //staticBoxBody->setRestitution(0.85f);
 
 
-    // PodÅ‚Ä…czenie obiektÃ³w fizycznych do obiektÃ³w sceny
+    // Pod³¹czenie obiektów fizycznych do obiektów sceny
 //    leg1->SetPhysicalBody(leg1Body);
  //   leg2->SetPhysicalBody(leg2Body);
  //   leg3->SetPhysicalBody(leg3Body);
@@ -227,7 +238,7 @@ int main()
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
-    // ÅšwiatÅ‚o
+    // Œwiat³o
     SceneObject* dirLight = scene->addSceneObject();
     dirLight->addComponent(graphMgr->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f)));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * 3.1416));
@@ -295,7 +306,7 @@ int main()
             t += deltaTime;
         }
 
-        // Synchronizacja obiektÃ³w sceny z fizykÄ…
+        // Synchronizacja obiektów sceny z fizyk¹
 //        scene->updatePhysics();
 
         // Renderowanie sceny

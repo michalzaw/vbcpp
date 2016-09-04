@@ -9,15 +9,23 @@ OGLDriver::OGLDriver()
 
 OGLDriver::~OGLDriver()
 {
-    for (int i = 0; i < _shaderList.size(); ++i)
-    {
-        delete _shaderList[i];
-    }
+    //for (int i = 0; i < _shaderList.size(); ++i)
+    //{
+        //delete _shaderList[i];
+    //}
 
     for (int i = 0; i < _vaoList.size(); ++i)
     {
         delete _vaoList[i];
     }
+
+    for (int i = 0; i < _shaderPtrList.size(); ++i)
+    {
+        //delete _shaderList[i];
+        //std::cout << "Ref count: " << _shaderPtrList[i].use_count() << std::endl;
+    }
+
+    //_shaderPtrList.clear();
 
     //glDeleteVertexArrays(1, &VertexArrayID);
 
@@ -51,20 +59,43 @@ bool OGLDriver::Initialize()
 
 
     //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
-    Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
-    _shaderList.push_back(shader);
+    //std::shared_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
+    std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
+    _shaderPtrList.push_back(std::move(shdr1));
+    //_shaderList.push_back(shader);
 
-    shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
-    _shaderList.push_back(shader);
+    //shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
+    //_shaderList.push_back(shader);
 
-    shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    _shaderList.push_back(shader);
+    //std::shared_ptr<Shader> shdr2( new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag")) );
+    std::unique_ptr<Shader> shdr2( new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag")) );
+    _shaderPtrList.push_back(std::move(shdr2));
+
+
+    //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
+    //std::shared_ptr<Shader> shdr3( new Shader(LoadShader("normalmapping.vert", "normalmapping.frag")) );
+    std::unique_ptr<Shader> shdr3( new Shader(LoadShader("normalmapping.vert", "normalmapping.frag")) );
+    _shaderPtrList.push_back(std::move(shdr3));
+    //_shaderList.push_back(shader);
 }
 
-
+/*
 Shader* OGLDriver::GetShader(ShaderType type)
 {
     return _shaderList[type];
+}
+*/
+
+/*
+std::shared_ptr<Shader>& OGLDriver::GetShader(ShaderType type)
+{
+    return _shaderPtrList[type];
+}
+*/
+
+Shader* OGLDriver::GetShader(ShaderType type)
+{
+    return _shaderPtrList[type].get();
 }
 
 

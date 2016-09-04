@@ -4,6 +4,8 @@
 #include <GLEW/glew.h>
 #include <glm/glm.hpp>
 
+#include <iostream>
+
 
 enum ShaderType
 {
@@ -21,8 +23,12 @@ class Shader
         int _textureLocation;
 
     public:
-        Shader(GLuint ID) : _shaderID(ID), _textureLocation(0) {}
-        ~Shader() {glDeleteProgram(_shaderID);}
+        Shader(GLuint ID) : _shaderID(ID), _textureLocation(0) {  std::cout << "Shader: Konstruktor: " << _shaderID <<  "\n"; }
+        virtual ~Shader()
+        {
+            std::cout << "Shader: Destruktor: " << _shaderID << "\n";
+            glDeleteProgram(_shaderID);
+        }
 
         void Enable()
         {

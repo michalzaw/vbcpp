@@ -22,7 +22,7 @@ class Light : public Component
     public:
         Light();
         Light(glm::vec3 color, float ambientIntensity, float diffuseIntensity/*, glm::vec3 direction*/);
-        ~Light();
+        virtual ~Light();
 
         void SetColor(glm::vec3 color);
         void SetAmbientIntensity(float intensity);
