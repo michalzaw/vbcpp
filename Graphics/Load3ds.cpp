@@ -2,6 +2,8 @@
 
 #include "LoadShader.h"
 
+#include "../Utils/ResourceManager.h"
+
 Load3ds::Load3ds(OGLDriver* driver)
     : _OGLDriver(driver), _minCreaseCosAngle(0.7f)
 {
@@ -179,9 +181,14 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	if(texStr != "")
 	{
-        texId = LoadTexture(texturePath.c_str());
+	    RTexture* t = ResourceManager::getInstance().loadTexture(texturePath);
+
+	    std::cout << "TEX: " << t << std::endl;
+
+        sMaterial.setDiffuseText( t );
 	}
-	sMaterial.diffuseTexture = texId;
+
+	//std::cout << "Tex ref count: " << sMaterial._diffTex.use_count() << std::endl;
 
 
 	// Normal mapa
@@ -201,10 +208,10 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	sMaterial.normalmapTexture = texId;
 
 
-	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
+	if (sMaterial._diffTex->getID() > 0 && sMaterial.normalmapTexture > 0)
         sMaterial._shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
         //sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
-    else if (sMaterial.diffuseTexture > 0)
+    else if (sMaterial._diffTex->getID() > 0 && sMaterial.normalmapTexture == 0)
         sMaterial._shader = _OGLDriver->GetShader(SOLID_MATERIAL);
         //sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
         //sMaterial.setShader(_OGLDriver->GetShader(NOTEXTURE_MATERIAL));

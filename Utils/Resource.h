@@ -4,7 +4,9 @@
 #include <string>
 using std::string;
 
-class Resource
+#include "RefCounter.h"
+
+class Resource : public RefCounter
 {
     public:
         Resource(string path)

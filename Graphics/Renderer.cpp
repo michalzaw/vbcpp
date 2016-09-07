@@ -161,7 +161,8 @@ void Renderer::Render(RenderData* renderData)
         shader->SetUniform("Light.DiffuseIntensity", renderData->light->GetDiffiseIntenisty());
         shader->SetUniform("Light.Direction", renderData->light->GetDirection());
 
-        shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
+        //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
+        shader->BindTexture2D("Texture", mesh->material.getDiffTex()->getID());
         shader->SetUniform("matAmbient", mesh->material.ambientColor);
         shader->SetUniform("matDiffuse", mesh->material.diffuseColor);
         shader->SetUniform("matSpecular", mesh->material.specularColor);

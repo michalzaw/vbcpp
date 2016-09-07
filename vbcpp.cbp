@@ -193,6 +193,7 @@
 		<Unit filename="Utils/Math.h" />
 		<Unit filename="Utils/RTexture.cpp" />
 		<Unit filename="Utils/RTexture.h" />
+		<Unit filename="Utils/RefCounter.h" />
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />
 		<Unit filename="Utils/ResourceManager.h" />

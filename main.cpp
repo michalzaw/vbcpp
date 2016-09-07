@@ -121,10 +121,6 @@ int main()
 	//GraphicsManager* scene = new GraphicsManager(/*driver*/);
 	SceneManager* scene = new SceneManager;
 
-	//ResourceManager::getInstance().getString();
-    RTexture* tex =  ResourceManager::getInstance().loadTexture("iron.jpg");
-
-    std::cout << "Tex id: " << tex->getID() << std::endl;
 
 	physMgr = scene->getPhysicsManager();
 	GraphicsManager* graphMgr = scene->getGraphicsManager();
@@ -166,11 +162,6 @@ int main()
 
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
-
-    tex = ResourceManager::getInstance().loadTexture("iron.jpg");
-    std::cout << "Tex id: " << tex->getID() << std::endl;
-
-    ResourceManager::getInstance().loadTexture("crate.jpg");
 
     /* legs */
     SceneObject* l1 = scene->addSceneObject();

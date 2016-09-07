@@ -6,7 +6,9 @@
 #include <iostream>
 #include <list>
 #include <memory>
-typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
+
+typedef std::list<Resource*> resourceList;
+
 
 class ResourceManager
 {
@@ -20,7 +22,7 @@ class ResourceManager
         void getString();
 
     protected:
-        resourcePtrList _resources;
+        resourceList _resources;
 
     private:
         ResourceManager();
