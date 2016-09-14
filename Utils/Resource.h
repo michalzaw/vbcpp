@@ -6,7 +6,7 @@ using std::string;
 
 #include "RefCounter.h"
 
-class Resource : public RefCounter
+class Resource
 {
     public:
         Resource(string path)

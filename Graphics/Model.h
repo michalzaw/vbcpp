@@ -8,13 +8,14 @@
 #include <GLEW/glew.h>
 #include <glm/glm.hpp>
 
-#include "Shader.h"
+#include "RShader.h"
 #include "VBO.h"
 #include "IBO.h"
 #include "Vertex.h"
 #include "Material.h"
 #include "OGLDriver.h"
 
+#include "../Utils/Resource.h"
 
 class Mesh
 {
@@ -28,7 +29,7 @@ class Mesh
 };
 
 
-class Model
+class Model //: virtual public Resource
 {
     private:
         OGLDriver* _oglDriver;

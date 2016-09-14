@@ -42,7 +42,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 
 
 	Lib3dsMesh* mesh;
-	Lib3dsFace* face;
+	//Lib3dsFace* face;
 
 	for(mesh = _file3ds->meshes; mesh != NULL; mesh = mesh->next)
 	{
@@ -177,18 +177,9 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	std::string texturePath = texPath + texStr;
 
-	GLuint texId = 0;
 
 	if(texStr != "")
-	{
-	    RTexture* t = ResourceManager::getInstance().loadTexture(texturePath);
-
-	    std::cout << "TEX: " << t << std::endl;
-
-        sMaterial.setDiffuseText( t );
-	}
-
-	//std::cout << "Tex ref count: " << sMaterial._diffTex.use_count() << std::endl;
+	    sMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
 	// Normal mapa
@@ -199,25 +190,16 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 	texturePath = texPath + texStr;
 
-	texId = 0;
 
 	if(texStr != "")
-	{
-        texId = LoadTexture(texturePath.c_str());
-	}
-	sMaterial.normalmapTexture = texId;
+        sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
-	if (sMaterial._diffTex->getID() > 0 && sMaterial.normalmapTexture > 0)
+	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
         sMaterial._shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
-        //sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
-    else if (sMaterial._diffTex->getID() > 0 && sMaterial.normalmapTexture == 0)
+    else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
         sMaterial._shader = _OGLDriver->GetShader(SOLID_MATERIAL);
-        //sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
-        //sMaterial.setShader(_OGLDriver->GetShader(NOTEXTURE_MATERIAL));
-
     else
-        //sMaterial.shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
         sMaterial._shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;

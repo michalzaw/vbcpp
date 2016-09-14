@@ -9,7 +9,7 @@
 
 #include "Graphics/Model.h"
 #include "Graphics/GraphicsManager.h"
-#include "Graphics/Shader.h"
+#include "Graphics/RShader.h"
 #include "Graphics/Renderer.h"
 #include "Graphics/OGLDriver.h"
 #include "Graphics/Load3ds.h"

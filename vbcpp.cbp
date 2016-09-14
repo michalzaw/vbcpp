@@ -146,14 +146,13 @@
 		<Unit filename="Graphics/NVMeshMender/NVMeshMender.h" />
 		<Unit filename="Graphics/OGLDriver.cpp" />
 		<Unit filename="Graphics/OGLDriver.h" />
+		<Unit filename="Graphics/RShader.h" />
 		<Unit filename="Graphics/RenderData.cpp" />
 		<Unit filename="Graphics/RenderData.h" />
 		<Unit filename="Graphics/RenderObject.cpp" />
 		<Unit filename="Graphics/RenderObject.h" />
 		<Unit filename="Graphics/Renderer.cpp" />
 		<Unit filename="Graphics/Renderer.h" />
-		<Unit filename="Graphics/Shader.cpp" />
-		<Unit filename="Graphics/Shader.h" />
 		<Unit filename="Graphics/Transform.cpp" />
 		<Unit filename="Graphics/Transform.h" />
 		<Unit filename="Graphics/VAO.h" />

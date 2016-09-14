@@ -1,5 +1,6 @@
 #include "OGLDriver.h"
 
+#include "../Utils/ResourceManager.h"
 
 OGLDriver::OGLDriver()
 {
@@ -9,20 +10,9 @@ OGLDriver::OGLDriver()
 
 OGLDriver::~OGLDriver()
 {
-    //for (int i = 0; i < _shaderList.size(); ++i)
-    //{
-        //delete _shaderList[i];
-    //}
-
     for (int i = 0; i < _vaoList.size(); ++i)
     {
         delete _vaoList[i];
-    }
-
-    for (int i = 0; i < _shaderPtrList.size(); ++i)
-    {
-        //delete _shaderList[i];
-        //std::cout << "Ref count: " << _shaderPtrList[i].use_count() << std::endl;
     }
 
     //_shaderPtrList.clear();
@@ -58,44 +48,20 @@ bool OGLDriver::Initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
 
-    //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
-    //std::shared_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
-    std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
-    _shaderPtrList.push_back(std::move(shdr1));
-    //_shaderList.push_back(shader);
+    RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
+    _shaderList.push_back(shdr1);
 
-    //shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
-    //_shaderList.push_back(shader);
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight_notexture.frag");
+    _shaderList.push_back(shdr2);
 
-    //std::shared_ptr<Shader> shdr2( new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag")) );
-    std::unique_ptr<Shader> shdr2( new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag")) );
-    _shaderPtrList.push_back(std::move(shdr2));
-
-
-    //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    //std::shared_ptr<Shader> shdr3( new Shader(LoadShader("normalmapping.vert", "normalmapping.frag")) );
-    std::unique_ptr<Shader> shdr3( new Shader(LoadShader("normalmapping.vert", "normalmapping.frag")) );
-    _shaderPtrList.push_back(std::move(shdr3));
-    //_shaderList.push_back(shader);
+    RShader* shdr3 = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
+    _shaderList.push_back(shdr3);
 }
 
-/*
-Shader* OGLDriver::GetShader(ShaderType type)
+
+RShader* OGLDriver::GetShader(ShaderType type)
 {
     return _shaderList[type];
-}
-*/
-
-/*
-std::shared_ptr<Shader>& OGLDriver::GetShader(ShaderType type)
-{
-    return _shaderPtrList[type];
-}
-*/
-
-Shader* OGLDriver::GetShader(ShaderType type)
-{
-    return _shaderPtrList[type].get();
 }
 
 

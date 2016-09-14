@@ -2,12 +2,14 @@
 #define RESOURCEMANAGER_H_INCLUDED
 
 #include "RTexture.h"
+#include "../Graphics/RShader.h"
+#include "../Graphics/Model.h"
 
 #include <iostream>
 #include <list>
 #include <memory>
 
-typedef std::list<Resource*> resourceList;
+typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
 
 class ResourceManager
@@ -17,12 +19,14 @@ class ResourceManager
 
         static ResourceManager& getInstance();
 
-        RTexture* loadTexture(std::string path);
+        GLuint loadTexture(std::string path);
 
-        void getString();
+        RShader* loadShader(std::string vertexPath, std::string fragmPath);
+
+        Model* loadModel(std::string path, std::string texturePath, OGLDriver* driver);
 
     protected:
-        resourceList _resources;
+        resourcePtrList _resources;
 
     private:
         ResourceManager();
