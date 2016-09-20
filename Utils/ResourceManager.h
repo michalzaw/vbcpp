@@ -4,6 +4,7 @@
 #include "RTexture.h"
 #include "../Graphics/RShader.h"
 #include "../Graphics/Model.h"
+#include "RModel.h"
 
 #include <iostream>
 #include <list>
@@ -23,7 +24,7 @@ class ResourceManager
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath);
 
-        Model* loadModel(std::string path, std::string texturePath, OGLDriver* driver);
+        RModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
 
     protected:
         resourcePtrList _resources;

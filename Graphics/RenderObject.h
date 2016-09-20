@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "Model.h"
+#include "../Utils/RModel.h"
 
 #include "../Scene/Component.h"
 
@@ -13,15 +14,20 @@
 class RenderObject : public Component
 {
     private:
-        Model* _model;
+        //Model* _model;
+        RModel* _model;
 
     public:
-        RenderObject(Model* model = NULL);
+        RenderObject(RModel* model = NULL);
         virtual ~RenderObject();
 
-        void SetModel(Model* model);
+        //void SetModel(Model* model);
 
-        Model* GetModel();
+        //Model* GetModel();
+
+        void SetModel(RModel* model);
+
+        RModel* GetModel();
 
 };
 

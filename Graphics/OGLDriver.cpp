@@ -2,6 +2,9 @@
 
 #include "../Utils/ResourceManager.h"
 
+
+static std::unique_ptr<OGLDriver> drvInstance;
+
 OGLDriver::OGLDriver()
 {
     //_defaultVAO = NULL;
@@ -20,6 +23,15 @@ OGLDriver::~OGLDriver()
     //glDeleteVertexArrays(1, &VertexArrayID);
 
     //delete _defaultVAO;
+}
+
+
+OGLDriver& OGLDriver::getInstance()
+{
+    if( !drvInstance )
+        drvInstance = std::unique_ptr<OGLDriver>(new OGLDriver);
+
+    return* drvInstance;
 }
 
 
@@ -56,6 +68,8 @@ bool OGLDriver::Initialize()
 
     RShader* shdr3 = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
     _shaderList.push_back(shdr3);
+
+    return true;
 }
 
 

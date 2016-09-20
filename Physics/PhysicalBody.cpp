@@ -7,7 +7,7 @@
 
 PhysicalBody::PhysicalBody(btScalar m, btVector3 pos)
 : Component(CT_PHYSICAL_BODY),
-_rigidBody(0), _collShape(0), _motionState(0),
+_rigidBody(nullptr), _collShape(nullptr), _motionState(nullptr),
 _mass(m), _position(pos)
 {
 
@@ -16,9 +16,7 @@ _mass(m), _position(pos)
 PhysicalBody::~PhysicalBody()
 {
     printf("Physical body - Destruktor\n");
-    safe_delete<btRigidBody>(_rigidBody);
-    safe_delete<btCollisionShape>(_collShape);
-    safe_delete<btDefaultMotionState>(_motionState);
+
 }
 
 // =========================================

@@ -14,6 +14,7 @@
 
 #include <memory>
 
+
 class OGLDriver
 {
     private:
@@ -23,13 +24,17 @@ class OGLDriver
         std::vector<VBO*> _vboList;
         std::vector<IBO*> _iboList;
 
+        OGLDriver();
+
         //VAO* _defaultVAO;
 
         //GLuint VertexArrayID;
 
     public:
-        OGLDriver();
+
         ~OGLDriver();
+
+        static OGLDriver& getInstance();
 
         bool Initialize();
 

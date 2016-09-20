@@ -32,8 +32,15 @@
 }*/
 
 
-Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh, unsigned int collisionMeshSize, GLenum primitiveType)
-    : _oglDriver(driver)
+Model::Model(Vertex* vertices,
+             unsigned int quantumOfVertices,
+             unsigned int* indices,
+             unsigned int indicesSize,
+             Mesh* meshes,
+             unsigned int quantumOfMeshes,
+             glm::vec3* collisionMesh,
+             unsigned int collisionMeshSize,
+             GLenum primitiveType)
 {
     std::cout << "*** Model: Konstruktor" << std::endl;
 
@@ -47,10 +54,10 @@ Model::Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices
     _meshes = meshes;
     _quantumOfMeshes = quantumOfMeshes;
 
-    _vbo = _oglDriver->CreateVBO(quantumOfVertices * sizeof(Vertex));
+    _vbo = OGLDriver::getInstance().CreateVBO(quantumOfVertices * sizeof(Vertex));
     _vbo->AddVertexData(vertices, quantumOfVertices);
 
-    _ibo = _oglDriver->CreateIBO(_indicesSize * sizeof(unsigned int));
+    _ibo = OGLDriver::getInstance().CreateIBO(_indicesSize * sizeof(unsigned int));
     _ibo->AddIndices(_indices, _indicesSize);
 
     _collisionMesh = collisionMesh;
@@ -68,14 +75,14 @@ Model::~Model()
     std::cout << "*** Model: Usuwanie _vbo" << std::endl;
     if (_vbo)
     {
-        _oglDriver->DeleteVBO(_vbo);
+        OGLDriver::getInstance().DeleteVBO(_vbo);
         _vbo = 0;
     }
 
     std::cout << "*** Model: Usuwanie _ibo" << std::endl;
     if (_ibo)
     {
-        _oglDriver->DeleteIBO(_ibo);
+        OGLDriver::getInstance().DeleteIBO(_ibo);
         _ibo = 0;
     }
 
@@ -109,7 +116,6 @@ Model::~Model()
         _collisionMesh = 0;
     }
 }
-
 
 VBO* Model::GetVBO()
 {
@@ -157,7 +163,8 @@ Mesh* Model::GetMesh(unsigned int i)
 {
     if (i < _quantumOfMeshes)
         return &_meshes[i];
-
+    else
+        return 0;
 }
 
 
@@ -176,4 +183,10 @@ glm::vec3* Model::GetCollisionMesh()
 GLenum Model::GetPrimitiveType()
 {
     return _primitiveType;
+}
+
+
+Mesh* Model::getMeshes()
+{
+    return _meshes;
 }

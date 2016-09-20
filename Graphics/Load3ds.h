@@ -19,7 +19,7 @@
 class Load3ds
 {
     private:
-        OGLDriver* _OGLDriver;
+        //OGLDriver* _OGLDriver;
         Lib3dsFile* _file3ds;
 
         float _minCreaseCosAngle;
@@ -29,7 +29,7 @@ class Load3ds
         void loadCollisionMesh(std::vector<glm::vec3>* vertices);
 
     public:
-        Load3ds(OGLDriver* driver);
+        Load3ds();
         ~Load3ds();
 
         void setMinCreaseCosAngle(float CosAngle);

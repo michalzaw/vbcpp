@@ -16,12 +16,8 @@ PhysicalBodyConvexHull::~PhysicalBodyConvexHull()
 
 void PhysicalBodyConvexHull::updateBody()
 {
-    safe_delete<btRigidBody>(_rigidBody);
-    safe_delete<btCollisionShape>(_collShape);
-    safe_delete<btDefaultMotionState>(_motionState);
 
-
-    _collShape = new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex));//32);
+    _collShape.reset( new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex)) );//32);
 
     /*
     _collShape = new btConvexHullShape;
@@ -37,8 +33,8 @@ void PhysicalBodyConvexHull::updateBody()
     btVector3 inertia(0, 0, 0);
     _collShape->calculateLocalInertia(_mass, inertia);
 
-    _motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), _position));
+    _motionState.reset( new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), _position)) );
 
-    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(_mass, _motionState, _collShape, inertia);
-    _rigidBody = new btRigidBody(rigidBodyCI);
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(_mass, _motionState.get(), _collShape.get(), inertia);
+    _rigidBody.reset( new btRigidBody(rigidBodyCI) );
 }

@@ -13,7 +13,7 @@ class Renderer
         OGLDriver* _OGLDriver;
 
     public:
-        Renderer(OGLDriver* driver);
+        Renderer(/* OGLDriver* driver */);
         ~Renderer();
 
         void Render(RenderData* renderData);

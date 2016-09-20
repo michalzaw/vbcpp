@@ -1,8 +1,8 @@
 #include "Renderer.h"
 
 
-Renderer::Renderer(OGLDriver* driver)
-    : _OGLDriver(driver)
+Renderer::Renderer(/* OGLDriver* driver */)
+//    : _OGLDriver(driver)
 {
     //_shader = LoadShader("shader.vert", "shader.frag");
     //glUseProgram(_shader);
@@ -122,7 +122,7 @@ void Renderer::Render(RenderData* renderData)
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        Model* model = i->GetModel();
+        RModel* model = i->GetModel();
         Mesh* mesh = i->GetMesh();
 
         RShader* shader = mesh->material._shader;

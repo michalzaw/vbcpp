@@ -32,8 +32,6 @@ class Mesh
 class Model //: virtual public Resource
 {
     private:
-        OGLDriver* _oglDriver;
-
         Vertex* _vertices;
         unsigned int _quantumOfVertices;
 
@@ -53,7 +51,7 @@ class Model //: virtual public Resource
 
     public:
         //Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
-        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
+        Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
         ~Model();
 
         VBO* GetVBO();
@@ -67,6 +65,7 @@ class Model //: virtual public Resource
         unsigned int GetCollisionMeshSize();
         glm::vec3* GetCollisionMesh();
         GLenum GetPrimitiveType();
+        Mesh* getMeshes();
 
 };
 

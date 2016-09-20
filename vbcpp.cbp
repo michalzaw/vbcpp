@@ -190,6 +190,8 @@
 		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
+		<Unit filename="Utils/RModel.cpp" />
+		<Unit filename="Utils/RModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />
 		<Unit filename="Utils/RTexture.h" />
 		<Unit filename="Utils/RefCounter.h" />

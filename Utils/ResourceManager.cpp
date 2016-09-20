@@ -29,6 +29,7 @@ ResourceManager& ResourceManager::getInstance()
 }
 
 
+// Ładowanie tektur
 GLuint ResourceManager::loadTexture(std::string path)
 {
     // Sprawdzamy czy zasob juz istnieje
@@ -54,7 +55,7 @@ GLuint ResourceManager::loadTexture(std::string path)
     if ( tID )
     {
         std::unique_ptr<RTexture> tex (new RTexture(path, tID));
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;;
+        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
 
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
@@ -79,6 +80,7 @@ GLuint ResourceManager::loadTexture(std::string path)
 }
 
 
+// Ładowanie shaderów
 RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath)
 {
     std::string path = vertexPath + ";" + fragmPath;
@@ -114,8 +116,42 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 }
 
 
-Model* ResourceManager::loadModel(std::string path, std::string texturePath, OGLDriver* driver)
+RModel* ResourceManager::loadModel(std::string path, std::string texturePath)
 {
+    //std::string path = vertexPath + ";" + fragmPath;
+
+    // Sprawdzamy czy zasob juz istnieje
+    std::list<std::unique_ptr<Resource>>::iterator it;
+    for ( it = _resources.begin(); it != _resources.end(); ++it)
+    {
+        if ( (*it)->getPath() == path )
+        {
+            std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
+            std::unique_ptr<Resource>& res = *it;
+
+            return dynamic_cast<RModel*>( res.get() );
+        }
+    }
+
+    Load3ds l3ds;
+
+    Model* mTemp = l3ds.loadModel(path, texturePath);
+
+    if (mTemp)
+    {
+        std::unique_ptr<RModel> model( new RModel(path, mTemp) );
+        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+        RModel* m = dynamic_cast<RModel*>( model.get() );
+
+        if ( m )
+        {
+            _resources.push_back(std::move(model));
+            return m;
+        }
+        else
+            return 0;
+    }
 
     return 0;
 }

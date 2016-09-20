@@ -9,9 +9,9 @@ SceneManager::SceneManager()
 
 
     _graphicsManager = new GraphicsManager;
-    _physicsManager = new PhysicsManager;
+    //_physicsManager = new PhysicsManager;
 
-    _physicsManager->createPhysicsWorld();
+    //_physicsManager->createPhysicsWorld();
 }
 
 
@@ -29,7 +29,7 @@ SceneManager::~SceneManager()
 
 
     delete _graphicsManager;
-    delete _physicsManager;
+    //delete _physicsManager;
 }
 
 
@@ -38,12 +38,12 @@ GraphicsManager* SceneManager::getGraphicsManager()
     return _graphicsManager;
 }
 
-
+/*
 PhysicsManager* SceneManager::getPhysicsManager()
 {
     return _physicsManager;
 }
-
+*/
 
 SceneObject* SceneManager::addSceneObject()
 {

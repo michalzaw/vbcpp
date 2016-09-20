@@ -8,23 +8,25 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Transform.h"
+#include "../Utils/RModel.h"
 
 #include "CameraStatic.hpp"
 
 class RenderListElement
 {
     private:
-        Model* _model;
+        //Model* _model;
+        RModel* _model;
         Mesh* _mesh;
         Transform* _transform;
 
         float _distanceFromCamera;
 
     public:
-        RenderListElement(Model* model, Mesh* mesh, Transform* transform, float distance);
+        RenderListElement(RModel* model, Mesh* mesh, Transform* transform, float distance);
         ~RenderListElement();
 
-        inline Model* GetModel()
+        inline RModel* GetModel()
         { return _model; }
 
         inline Mesh* GetMesh()
