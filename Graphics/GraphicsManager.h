@@ -12,6 +12,7 @@
 #include "Camera.h"
 //#include "OGLDriver.h"
 #include "Light.h"
+#include "../Utils/RModel.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -24,14 +25,16 @@ class GraphicsManager
         std::vector<CameraStatic*>  _cameras;
         std::list<Light*>           _lights;
 
-        //OGLDriver* _OGLDriver;
-
     public:
-        GraphicsManager(/*OGLDriver* driver*/);
+        GraphicsManager();
         ~GraphicsManager();
 
-        RenderObject*   AddRenderObject(Model* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+
+        RenderObject*   AddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
                                         glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
+
+        //RenderObject*   AddRenderObject(Model* model = NULL);
+
         CameraStatic*   AddCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         CameraFPS*      AddCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         Light*          AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);

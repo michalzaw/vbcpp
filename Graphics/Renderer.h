@@ -4,8 +4,9 @@
 
 #include "OGLDriver.h"
 #include "RenderData.h"
-#include "Shader.h"
+
 #include "../Utils/Strings.h"
+#include "RShader.h"
 
 
 class Renderer
@@ -14,7 +15,7 @@ class Renderer
         OGLDriver* _OGLDriver;
 
     public:
-        Renderer(OGLDriver* driver);
+        Renderer(/* OGLDriver* driver */);
         ~Renderer();
 
         void Render(RenderData* renderData);

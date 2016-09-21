@@ -1,8 +1,8 @@
 #include "Renderer.h"
 
 
-Renderer::Renderer(OGLDriver* driver)
-    : _OGLDriver(driver)
+Renderer::Renderer(/* OGLDriver* driver */)
+//    : _OGLDriver(driver)
 {
     //_shader = LoadShader("shader.vert", "shader.frag");
     //glUseProgram(_shader);
@@ -54,7 +54,7 @@ Renderer::~Renderer()
 }*/
 
 
-// z oœwietleniem
+// z oÅ“wietleniem
 /*void Renderer::Render(RenderData* renderData)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -113,7 +113,7 @@ Renderer::~Renderer()
 }*/
 
 
-// nowe ³adowanie modeli, indeksy
+// nowe Â³adowanie modeli, indeksy
 void Renderer::Render(RenderData* renderData)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -122,10 +122,10 @@ void Renderer::Render(RenderData* renderData)
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        Model* model = i->GetModel();
+        RModel* model = i->GetModel();
         Mesh* mesh = i->GetMesh();
 
-        Shader* shader = mesh->material.shader;
+        RShader* shader = mesh->material._shader;
         shader->Enable();
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
@@ -197,6 +197,7 @@ void Renderer::Render(RenderData* renderData)
         shader->SetUniform("PointCount", p);
         shader->SetUniform("SpotCount", s);
 
+        //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         shader->SetUniform("matAmbient", mesh->material.ambientColor);
         shader->SetUniform("matDiffuse", mesh->material.diffuseColor);

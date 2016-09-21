@@ -1,8 +1,7 @@
 #include "GraphicsManager.h"
 
 
-GraphicsManager::GraphicsManager(/*OGLDriver* driver*/)
-    /*: _OGLDriver(driver), _camera(0), _light(0)*/
+GraphicsManager::GraphicsManager()
 {
 
 }
@@ -27,7 +26,7 @@ GraphicsManager::~GraphicsManager()
 }
 
 
-RenderObject* GraphicsManager::AddRenderObject(Model* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
+RenderObject* GraphicsManager::AddRenderObject(RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
 {
     RenderObject* object = new RenderObject(model);
 

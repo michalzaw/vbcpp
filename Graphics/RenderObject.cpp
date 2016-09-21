@@ -1,7 +1,7 @@
 #include "RenderObject.h"
 
 
-RenderObject::RenderObject(Model* model)
+RenderObject::RenderObject(RModel* model)
     : Component(CT_RENDER_OBJECT),
     _model(model)
 {
@@ -18,13 +18,13 @@ RenderObject::~RenderObject()
 }
 
 
-void RenderObject::SetModel(Model* model)
+void RenderObject::SetModel(RModel* model)
 {
     _model = model;
 }
 
 
-Model* RenderObject::GetModel()
+RModel* RenderObject::GetModel()
 {
     return _model;
 

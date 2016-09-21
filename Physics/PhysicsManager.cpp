@@ -10,6 +10,17 @@
 
 #include <cstdio>
 
+static std::unique_ptr<PhysicsManager> pmInstance;
+
+PhysicsManager& PhysicsManager::getInstance()
+{
+    if( !pmInstance )
+        pmInstance = std::unique_ptr<PhysicsManager>(new PhysicsManager);
+
+    return* pmInstance;
+}
+
+
 PhysicsManager::PhysicsManager()
 : _dynamicsWorld(0),
   _constraintSolver(0),
@@ -161,7 +172,7 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* ver
     return b;
 }
 
-PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos)
+PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos)
 {
     PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model, pos);
 

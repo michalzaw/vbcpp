@@ -1,5 +1,9 @@
 #include "OGLDriver.h"
 
+#include "../Utils/ResourceManager.h"
+
+
+static std::unique_ptr<OGLDriver> drvInstance;
 
 OGLDriver::OGLDriver()
 {
@@ -9,19 +13,25 @@ OGLDriver::OGLDriver()
 
 OGLDriver::~OGLDriver()
 {
-    for (int i = 0; i < _shaderList.size(); ++i)
-    {
-        delete _shaderList[i];
-    }
-
     for (int i = 0; i < _vaoList.size(); ++i)
     {
         delete _vaoList[i];
     }
 
+    //_shaderPtrList.clear();
+
     //glDeleteVertexArrays(1, &VertexArrayID);
 
     //delete _defaultVAO;
+}
+
+
+OGLDriver& OGLDriver::getInstance()
+{
+    if( !drvInstance )
+        drvInstance = std::unique_ptr<OGLDriver>(new OGLDriver);
+
+    return* drvInstance;
 }
 
 
@@ -50,20 +60,32 @@ bool OGLDriver::Initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
 
-    Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
+    //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
+	RShader* shdr1 = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
     //Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
-    _shaderList.push_back(shader);
+    _shaderList.push_back(shdr1);
 
-    shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
-    _shaderList.push_back(shader);
+    //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
+    //_shaderList.push_back(shdr1);
+
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight_notexture.frag");
+    _shaderList.push_back(shdr2);
+
+
+    //RShader* shdr3 = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
+    //_shaderList.push_back(shdr3);
+
 
     //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    shader = new Shader(LoadShader("shader.vert", "shader.frag"));
+    shader = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
     _shaderList.push_back(shader);
+
+    return true;
+
 }
 
 
-Shader* OGLDriver::GetShader(ShaderType type)
+RShader* OGLDriver::GetShader(ShaderType type)
 {
     return _shaderList[type];
 }

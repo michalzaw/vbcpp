@@ -4,11 +4,20 @@
 
 #include <glm/glm.hpp>
 
-#include "Shader.h"
+#include "RShader.h"
+#include <memory>
+using namespace std;
 
+#include "../Utils/RTexture.h"
 
-struct Material
+class Material
 {
+    public:
+        Material()
+        : diffuseTexture(0), normalmapTexture(0), shininess(0), transparency(0), _shader(0) {}
+        virtual ~Material()
+        { }
+
     // ! Jakie parametry !
     std::string name;
 
@@ -25,8 +34,7 @@ struct Material
     glm::vec2 offset;
     glm::vec2 scale;
 
-    Shader* shader;
-
+    RShader* _shader;
 };
 
 

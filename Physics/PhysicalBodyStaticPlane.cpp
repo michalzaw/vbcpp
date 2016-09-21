@@ -27,14 +27,10 @@ void PhysicalBodyStaticPlane::updateBody()
     physicsMgr->getDynamicsWorld()->addRigidBody(groundRigidBody);
     */
 
-    safe_delete<btRigidBody>(_rigidBody);
-    safe_delete<btDefaultMotionState>(_motionState);
-    safe_delete<btCollisionShape>(_collShape);
+    _collShape.reset( new btStaticPlaneShape(_position, _offset) );
 
-    _collShape = new btStaticPlaneShape(_position, _offset);
+    _motionState.reset( new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0))) );
 
-    _motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
-
-    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0, _motionState, _collShape, btVector3(0, 0, 0));
-    _rigidBody = new btRigidBody(rigidBodyCI);
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(0, _motionState.get(), _collShape.get(), btVector3(0, 0, 0));
+    _rigidBody.reset( new btRigidBody(rigidBodyCI) );
 }

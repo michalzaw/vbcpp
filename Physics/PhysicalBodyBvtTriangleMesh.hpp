@@ -4,15 +4,16 @@
 #include "../Utils/Helpers.hpp"
 #include "PhysicalBody.hpp"
 #include "../Graphics/Model.h"
+#include "../Utils/RModel.h"
 
 class PhysicalBodyBvtTriangleMesh : public PhysicalBody
 {
     public:
-        PhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos);
+        PhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos);
         virtual ~PhysicalBodyBvtTriangleMesh();
 
     private:
-        Model*  _model;
+        RModel*  _model;
 
         btTriangleMesh* buildTriangleMesh();
         void updateBody();

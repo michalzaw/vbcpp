@@ -1,6 +1,6 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
-PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos)
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos)
 : PhysicalBody(0, pos),
 _model(model)
 {
@@ -51,19 +51,15 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 
 void PhysicalBodyBvtTriangleMesh::updateBody()
 {
-    safe_delete<btRigidBody>(_rigidBody);
-    safe_delete<btCollisionShape>(_collShape);
-    safe_delete<btDefaultMotionState>(_motionState);
-
-    _collShape = new btBvhTriangleMeshShape( buildTriangleMesh(), true, true);
+    _collShape.reset( new btBvhTriangleMeshShape( buildTriangleMesh(), true, true) );
 
     btVector3 inertia(0, 0, 0);
 
     // BVT Triangle Mesh is for big static meshes, so we set mass to zero
     _collShape->calculateLocalInertia(0, inertia);
 
-    _motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), _position));
+    _motionState.reset( new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), _position)) );
 
-    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(_mass, _motionState, _collShape, inertia);
-    _rigidBody = new btRigidBody(rigidBodyCI);
+    btRigidBody::btRigidBodyConstructionInfo rigidBodyCI(_mass, _motionState.get(), _collShape.get(), inertia);
+    _rigidBody.reset( new btRigidBody(rigidBodyCI) );
 }

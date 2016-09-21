@@ -1,8 +1,11 @@
 #include "Load3ds.h"
 
+#include "LoadShader.h"
 
-Load3ds::Load3ds(OGLDriver* driver)
-    : _OGLDriver(driver), _minCreaseCosAngle(0.7f)
+#include "../Utils/ResourceManager.h"
+
+Load3ds::Load3ds()
+    : _minCreaseCosAngle(0.7f)
 {
 
 }
@@ -29,8 +32,6 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 {
 	_file3ds = lib3ds_file_load(fileName.c_str());
 
-	printf("3ds mesh: %x\n", _file3ds);
-
 	assert(_file3ds != NULL);
 
 	std::vector<MeshMender::Vertex> vertices;
@@ -39,7 +40,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 
 
 	Lib3dsMesh* mesh;
-	Lib3dsFace* face;
+	//Lib3dsFace* face;
 
 	for(mesh = _file3ds->meshes; mesh != NULL; mesh = mesh->next)
 	{
@@ -47,7 +48,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 	    user.d = vertices.size();
 	    mesh->user = user;
 
-	    for (int i = 0; i < mesh->points; ++i)
+	    for (unsigned int i = 0; i < mesh->points; ++i)
         {
             MeshMender::Vertex vertex;
             //memcpy(&vertex.Position, mesh->pointL[i].pos, sizeof(float) * 3);
@@ -97,7 +98,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 
 
 	Vertex* vert = new Vertex[vertices.size()];
-	for (int i = 0; i < vertices.size(); ++i)
+	for (unsigned int i = 0; i < vertices.size(); ++i)
     {
         vert[i].Position = vertices[i].pos;
         vert[i].TexCoord = glm::vec2(vertices[i].s, vertices[i].t);
@@ -107,13 +108,13 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
     }
 
     unsigned int* ind = new unsigned int[indices.size()];
-	for (int i = 0; i < indices.size(); ++i)
+	for (unsigned int i = 0; i < indices.size(); ++i)
     {
         ind[i] = indices[i];
     }
 
     Mesh* me = new Mesh[meshes.size()];
-	for (int i = 0; i < meshes.size(); ++i)
+	for (unsigned int i = 0; i < meshes.size(); ++i)
     {
         me[i] = meshes[i];
     }
@@ -121,13 +122,13 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
     std::vector<glm::vec3> collisionMesh;
     loadCollisionMesh(&collisionMesh);
 	glm::vec3* collisionMeshVertices = new glm::vec3[collisionMesh.size()];
-	for (int i = 0; i < collisionMesh.size(); ++i)
+	for (unsigned int i = 0; i < collisionMesh.size(); ++i)
     {
         collisionMeshVertices[i] = collisionMesh[i];
     }
 
 
-	Model* model = new Model(_OGLDriver, vert, vertices.size(), ind, indices.size(), me, meshes.size(), collisionMeshVertices, collisionMesh.size());
+	Model* model = new Model(vert, vertices.size(), ind, indices.size(), me, meshes.size(), collisionMeshVertices, collisionMesh.size());
 
 
 	lib3ds_file_free(_file3ds);
@@ -169,44 +170,35 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	// make Texture Name lowercase
 	std::string texStr = std::string(material->texture1_map.name);
 
-	for( int i = 0; i < texStr.size(); i++ )
+	for(unsigned int i = 0; i < texStr.size(); i++ )
 		texStr[i] = tolower(texStr[i]);
 
 	std::string texturePath = texPath + texStr;
 
-	GLuint texId = 0;
 
 	if(texStr != "")
-	{
-        texId = LoadTexture(texturePath.c_str());
-	}
-	sMaterial.diffuseTexture = texId;
+	    sMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
 	// Normal mapa
 	texStr = std::string(material->bump_map.name);
 
-	for( int i = 0; i < texStr.size(); i++ )
+	for(unsigned int i = 0; i < texStr.size(); i++ )
 		texStr[i] = tolower(texStr[i]);
 
 	texturePath = texPath + texStr;
 
-	texId = 0;
 
 	if(texStr != "")
-	{
-        texId = LoadTexture(texturePath.c_str());
-	}
-	sMaterial.normalmapTexture = texId;
+        sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
-	if (sMaterial.diffuseTexture > 0)
-        sMaterial.shader = _OGLDriver->GetShader(SOLID_MATERIAL);
+	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
+        sMaterial._shader = OGLDriver::getInstance().GetShader(NORMALMAPPING_MATERIAL); //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+    else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
+        sMaterial._shader = OGLDriver::getInstance().GetShader(SOLID_MATERIAL); //_OGLDriver->GetShader(SOLID_MATERIAL);
     else
-        sMaterial.shader = _OGLDriver->GetShader(NOTEXTURE_MATERIAL);
-
-    if (sMaterial.normalmapTexture > 0)
-        sMaterial.shader = _OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+        sMaterial._shader = OGLDriver::getInstance().GetShader(NOTEXTURE_MATERIAL); //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
 }

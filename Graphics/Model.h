@@ -8,30 +8,30 @@
 #include <GLEW/glew.h>
 #include <glm/glm.hpp>
 
-#include "Shader.h"
+#include "RShader.h"
 #include "VBO.h"
 #include "IBO.h"
 #include "Vertex.h"
 #include "Material.h"
 #include "OGLDriver.h"
 
+#include "../Utils/Resource.h"
 
-struct Mesh
+class Mesh
 {
-    Material material;
-    unsigned int firstVertex;
-    unsigned int quantumOfVertice;
+    public:
+        Material material;
+        unsigned int firstVertex;
+        unsigned int quantumOfVertice;
 
-    Mesh() : firstVertex(0), quantumOfVertice(0) {}
-
+    Mesh() : firstVertex(0), quantumOfVertice(0) { std::cout << "Mesh: Konstruktor\n"; }
+    virtual ~Mesh() { std::cout << "Mesh: Destruktor\n"; }
 };
 
 
-class Model
+class Model //: virtual public Resource
 {
     private:
-        OGLDriver* _oglDriver;
-
         Vertex* _vertices;
         unsigned int _quantumOfVertices;
 
@@ -51,7 +51,7 @@ class Model
 
     public:
         //Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, Mesh* meshes, unsigned int quantumOfMeshes, GLenum primitiveType = GL_TRIANGLES);
-        Model(OGLDriver* driver, Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
+        Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
         ~Model();
 
         VBO* GetVBO();
@@ -65,6 +65,7 @@ class Model
         unsigned int GetCollisionMeshSize();
         glm::vec3* GetCollisionMesh();
         GLenum GetPrimitiveType();
+        Mesh* getMeshes();
 
 };
 

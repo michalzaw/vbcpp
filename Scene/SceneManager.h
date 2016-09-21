@@ -13,7 +13,7 @@ class SceneManager
 {
     private:
         GraphicsManager*    _graphicsManager;
-        PhysicsManager*     _physicsManager;
+        //PhysicsManager*     _physicsManager;
 
         std::list<SceneObject*> _sceneObjects;
 
@@ -22,7 +22,7 @@ class SceneManager
         ~SceneManager();
 
         GraphicsManager*    getGraphicsManager();
-        PhysicsManager*     getPhysicsManager();
+        //PhysicsManager*     getPhysicsManager();
 
         SceneObject*    addSceneObject();
         void            removeSceneObject(SceneObject* object);

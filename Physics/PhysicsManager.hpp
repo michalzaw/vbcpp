@@ -20,8 +20,10 @@
 class PhysicsManager
 {
     public:
-        PhysicsManager();
-        ~PhysicsManager();
+
+        virtual ~PhysicsManager();
+
+        static PhysicsManager& getInstance();
 
         int createPhysicsWorld();
         int destroyPhysicsWorld();
@@ -39,7 +41,7 @@ class PhysicsManager
         PhysicalBodySphere*         createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
         PhysicalBodyStaticPlane*    createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
         PhysicalBodyConvexHull*     createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
-        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(Model* model, btVector3 pos);
+        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos);
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);
@@ -59,6 +61,8 @@ class PhysicsManager
 
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
+
+        PhysicsManager();
 };
 
 #endif // PHYSICSMANAGER_HPP_INCLUDED

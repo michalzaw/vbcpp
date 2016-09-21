@@ -6,33 +6,39 @@
 
 #include <GLEW/glew.h>
 
-#include "Shader.h"
+#include "RShader.h"
 #include "LoadShader.h"
 #include "VAO.h"
 #include "VBO.h"
 #include "IBO.h"
 
+#include <memory>
+
 
 class OGLDriver
 {
     private:
-        std::vector<Shader*> _shaderList;
+        std::vector<RShader*> _shaderList;
 
         std::vector<VAO*> _vaoList;
         std::vector<VBO*> _vboList;
         std::vector<IBO*> _iboList;
+
+        OGLDriver();
 
         //VAO* _defaultVAO;
 
         //GLuint VertexArrayID;
 
     public:
-        OGLDriver();
+
         ~OGLDriver();
+
+        static OGLDriver& getInstance();
 
         bool Initialize();
 
-        Shader* GetShader(ShaderType type);
+        RShader* GetShader(ShaderType type);
 
         VAO* CreateVAO();
         VBO* CreateVBO(unsigned int size);
