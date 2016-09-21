@@ -6,6 +6,8 @@
 
 #include "../Utils/Resource.h"
 
+#include <iostream>
+
 enum ShaderType
 {
     SOLID_MATERIAL,
@@ -22,13 +24,13 @@ class RShader : virtual public Resource
         int _textureLocation;
 
     public:
-         RShader(std::string path, GLuint ID) : Resource(path),  _shaderID(ID), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
+        RShader(std::string path, GLuint ID) : Resource(path),  _shaderID(ID), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
         virtual ~RShader()
         {
             std::cout << "RShader: Destruktor: " << _shaderID << "\n";
             glDeleteProgram(_shaderID);
         }
-		
+
         void Enable()
         {
             glUseProgram(_shaderID);
@@ -79,8 +81,9 @@ class RShader : virtual public Resource
 
 };
 
-/*
+
 #endif // SHADER_H_INCLUDED
+/*
 =======
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED

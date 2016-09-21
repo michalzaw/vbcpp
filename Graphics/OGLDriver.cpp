@@ -77,7 +77,8 @@ bool OGLDriver::Initialize()
 
 
     //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    shader = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
+    RShader* shader = ResourceManager::getInstance().loadShader("shader_n.vert", "shader_n.frag");
+    //RShader* shader = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
     _shaderList.push_back(shader);
 
     return true;

@@ -248,7 +248,7 @@ int main()
     }
 
 
-    Model* busModel = l->loadModel("H9.3ds", "ZKM/");
+    RModel* busModel = ResourceManager::getInstance().loadModel("H9.3ds", "ZKM/");
     SceneObject* bus = scene->addSceneObject();
     bus->addComponent(graphMgr->AddRenderObject(busModel));
     bus->getTransform()->SetRotation(glm::vec3(-0.5 * 3.14, 0.0f, 0.0f));
