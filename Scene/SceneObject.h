@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <string>
 
 #include "Component.h"
 
@@ -15,6 +16,7 @@ class SceneObject
     private:
         std::vector<Component*> _components;
 
+        std::string _name;
         unsigned int _id;
         Transform _transform;
         bool _isActive;
@@ -22,7 +24,7 @@ class SceneObject
         SceneManager* _sceneManager;
 
     public:
-        SceneObject(unsigned int id, SceneManager* sceneManager);
+        SceneObject(std::string name, SceneManager* sceneManager);
         ~SceneObject();
 
         void addComponent(Component* component);
@@ -30,6 +32,7 @@ class SceneObject
 
         void            setIsActive(bool is);
 
+        std::string     getName();
         unsigned int    getId();
         Transform*      getTransform();
         bool            isActive();

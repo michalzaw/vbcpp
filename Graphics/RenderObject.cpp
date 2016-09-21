@@ -1,5 +1,6 @@
 #include "RenderObject.h"
 
+#include "GraphicsManager.h"
 
 RenderObject::RenderObject(RModel* model)
     : Component(CT_RENDER_OBJECT),

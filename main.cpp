@@ -111,66 +111,52 @@ int main()
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    // Inicjalizujemy potrzebne rzeczy
     OGLDriver::getInstance().Initialize();
-
     PhysicsManager::getInstance().createPhysicsWorld();
 
 	SceneManager* scene = new SceneManager;
-
-	GraphicsManager* graphMgr = scene->getGraphicsManager();
-
 	Renderer* renderer = new Renderer;
 
-
-    // Wczytywanie zasobów
-    //Load3ds* l = new Load3ds;
-
-
-    RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
-    RModel* crate2 = ResourceManager::getInstance().loadModel("crate2.3ds", "./");
-
     /* terrain */
-    SceneObject* terrainObject = scene->addSceneObject();
-
+    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
+    RenderObject* terrainObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(terrain));
+    SceneObject* terrainObject = scene->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = PhysicsManager::getInstance().createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
     terrainMesh->setRestitution(0.9f);
-
-    RenderObject* terrainObj = graphMgr->AddRenderObject(terrain);
-
-    terrainObject->addComponent(terrainMesh);
     terrainObject->addComponent(terrainObj);
-
+    terrainObject->addComponent(terrainMesh);
 
     /* crate */
-    SceneObject* crate = scene->addSceneObject();
-
-    RenderObject* object2 = graphMgr->AddRenderObject(model);
-
+    RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
+    RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
+    SceneObject* crate = scene->addSceneObject("crate");
     PhysicalBodyBox* boxBody2 = PhysicsManager::getInstance().createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
-
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
 
+    /* legs objects */
+    RModel* crate2 = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
+
     /* legs */
-    SceneObject* l1 = scene->addSceneObject();
-    SceneObject* l2 = scene->addSceneObject();
-    SceneObject* l3 = scene->addSceneObject();
-    SceneObject* l4 = scene->addSceneObject();
+    SceneObject* l1 = scene->addSceneObject("leg1");
+    SceneObject* l2 = scene->addSceneObject("leg2");
+    SceneObject* l3 = scene->addSceneObject("leg3");
+    SceneObject* l4 = scene->addSceneObject("leg4");
 
+    RenderObject* leg1 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(crate2));
+    RenderObject* leg2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(crate2));
+    RenderObject* leg3 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(crate2));
+    RenderObject* leg4 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(crate2));
 
-    RenderObject* leg1 = graphMgr->AddRenderObject(crate2);
-    RenderObject* leg2 = graphMgr->AddRenderObject(crate2);
-    RenderObject* leg3 = graphMgr->AddRenderObject(crate2);
-    RenderObject* leg4 = graphMgr->AddRenderObject(crate2);
+    //PhysicalBodyConvexHull* leg1Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
+    PhysicalBodyCylinder* wheel1 = PhysicsManager::getInstance().createPhysicalBodyCylinder(btVector3(0.5f,1,1), 1.0f, btVector3(3,3,3), X_AXIS);
+    wheel1->setRestitution(0.9f);
 
-
-    PhysicalBodyConvexHull* leg1Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
-    leg1Body->setRestitution(0.9f);
-
-    PhysicalBodyConvexHull* leg2Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,3));
-    leg2Body->setRestitution(0.9f);
+    //PhysicalBodyConvexHull* leg2Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,3));
+    PhysicalBodyCylinder* wheel2 = PhysicsManager::getInstance().createPhysicalBodyCylinder(btVector3(0.5f,1,1), 1.0f, btVector3(-3,3,3), X_AXIS);
+    wheel2->setRestitution(0.9f);
 
     PhysicalBodyConvexHull* leg3Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
     leg3Body->setRestitution(0.9f);
@@ -178,33 +164,32 @@ int main()
     PhysicalBodyConvexHull* leg4Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,-3));
     leg4Body->setRestitution(0.9f);
 
-
     l1->addComponent(leg1);
-    l1->addComponent(leg1Body);
+    l1->addComponent(wheel1);
     l2->addComponent(leg2);
-    l2->addComponent(leg2Body);
+    l2->addComponent(wheel2);
     l3->addComponent(leg3);
     l3->addComponent(leg3Body);
     l4->addComponent(leg4);
     l4->addComponent(leg4Body);
 
 
-    ConstraintHinge2* hinge1 = PhysicsManager::getInstance().createConstraintHinge2(leg1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
-    ConstraintHinge2* hinge2 = PhysicsManager::getInstance().createConstraintHinge2(leg2Body, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
+    ConstraintHinge2* hinge1 = PhysicsManager::getInstance().createConstraintHinge2(wheel1, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
+    ConstraintHinge2* hinge2 = PhysicsManager::getInstance().createConstraintHinge2(wheel2, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge3 = PhysicsManager::getInstance().createConstraintHinge2(leg3Body, boxBody2, btVector3(1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge4 = PhysicsManager::getInstance().createConstraintHinge2(leg4Body, boxBody2, btVector3(-1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
 
     // Kamera FPS
-    SceneObject* Camera = scene->addSceneObject();
-    camFPS = graphMgr->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
+    SceneObject* Camera = scene->addSceneObject("cam1");
+    camFPS = GraphicsManager::getInstance().AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500); //graphMgr->AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     Camera->addComponent(camFPS);
     Camera->getTransform()->SetPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
     // Światło
-    SceneObject* dirLight = scene->addSceneObject();
-    dirLight->addComponent(graphMgr->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f)));
+    SceneObject* dirLight = scene->addSceneObject("light");
+    dirLight->addComponent( GraphicsManager::getInstance().AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f))); //graphMgr->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f)));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * 3.1416));
 
 
@@ -273,7 +258,7 @@ int main()
         }
 
         // Renderowanie sceny
-        renderer->Render(graphMgr->GetRenderData());
+        renderer->Render( GraphicsManager::getInstance().GetRenderData() ); //graphMgr->GetRenderData());
 
         // Swap buffers and poll events
         win->swapBuffers();
