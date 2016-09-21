@@ -191,6 +191,7 @@
 		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
+		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Window/Window.cpp" />
 		<Unit filename="Window/Window.h" />
 		<Unit filename="main.cpp" />

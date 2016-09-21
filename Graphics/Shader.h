@@ -35,33 +35,33 @@ class Shader
             glUseProgram(0);
         }
 
-        inline void SetUniform(char* Name, int* Values, int Count = 1)
+        inline void SetUniform(const char* Name, int* Values, int Count = 1)
 		{ glUniform1iv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(char* Name, float* Values, int Count = 1)
+		inline void SetUniform(const char* Name, float* Values, int Count = 1)
 		{ glUniform1fv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(char* Name, int Value)
+		inline void SetUniform(const char* Name, int Value)
 		{ glUniform1i(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(char* Name, float Value)
+		inline void SetUniform(const char* Name, float Value)
 		{ glUniform1f(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(char* Name, glm::vec2* Vectors, int Count = 1)
+		inline void SetUniform(const char* Name, glm::vec2* Vectors, int Count = 1)
 		{ glUniform2fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec3* Vectors, int Count = 1)
+		inline void SetUniform(const char* Name, glm::vec3* Vectors, int Count = 1)
 		{ glUniform3fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec4* Vectors, int Count = 1)
+		inline void SetUniform(const char* Name, glm::vec4* Vectors, int Count = 1)
 		{ glUniform4fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec2 Vector)
+		inline void SetUniform(const char* Name, glm::vec2 Vector)
 		{ glUniform2f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y); }
-		inline void SetUniform(char* Name, glm::vec3 Vector)
+		inline void SetUniform(const char* Name, glm::vec3 Vector)
 		{ glUniform3f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z); }
-		inline void SetUniform(char* Name, glm::vec4 Vector)
+		inline void SetUniform(const char* Name, glm::vec4 Vector)
 		{ glUniform4f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z, Vector.w); }
-		inline void SetUniform(char* Name, glm::mat3* Matrices, int Count = 1)
+		inline void SetUniform(const char* Name, glm::mat3* Matrices, int Count = 1)
 		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(char* Name, glm::mat4* Matrices, int Count = 1)
+		inline void SetUniform(const char* Name, glm::mat4* Matrices, int Count = 1)
 		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(char* Name, glm::mat3 Matrix)
+		inline void SetUniform(const char* Name, glm::mat3 Matrix)
 		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
-		inline void SetUniform(char* Name, glm::mat4 Matrix)
+		inline void SetUniform(const char* Name, glm::mat4 Matrix)
 		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
 
 

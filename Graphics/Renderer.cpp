@@ -156,10 +156,46 @@ void Renderer::Render(RenderData* renderData)
             shader->BindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
         }
 
-        shader->SetUniform("Light.Color", renderData->light->GetColor());
-        shader->SetUniform("Light.AmbientIntensity", renderData->light->GetAmbientIntensity());
-        shader->SetUniform("Light.DiffuseIntensity", renderData->light->GetDiffiseIntenisty());
-        shader->SetUniform("Light.Direction", renderData->light->GetDirection());
+        int d = 0;
+        int p = 0;
+        int s = 0;
+        for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
+        {
+            switch ((*i)->GetLightType())
+            {
+                case LT_DIRECTIONAL:
+                {
+                    std::string lname = "DirLights[";
+                    lname = lname + toString(d++) + "]";
+
+                    shader->SetUniform((lname + ".Base.Color").c_str(), (*i)->GetColor());
+                    shader->SetUniform((lname + ".Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
+                    shader->SetUniform((lname + ".Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
+                    shader->SetUniform((lname + ".Direction").c_str(), (*i)->GetDirection());
+
+                    break;
+                }
+                case LT_POINT:
+                {
+                    std::string lname = "PointLights[";
+                    lname = lname + toString(p++) + "]";
+
+                    shader->SetUniform((lname + ".Base.Color").c_str(), (*i)->GetColor());
+                    shader->SetUniform((lname + ".Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
+                    shader->SetUniform((lname + ".Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
+                    shader->SetUniform((lname + ".Position").c_str(), (*i)->GetPosition());
+                    shader->SetUniform((lname + ".Attenuation.constant").c_str(), (*i)->GetAttenuation().constant);
+                    shader->SetUniform((lname + ".Attenuation.linear").c_str(), (*i)->GetAttenuation().linear);
+                    shader->SetUniform((lname + ".Attenuation.exp").c_str(), (*i)->GetAttenuation().exp);
+
+                    break;
+                }
+            }
+
+        }
+        shader->SetUniform("DirCount", d);
+        shader->SetUniform("PointCount", p);
+        shader->SetUniform("SpotCount", s);
 
         shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         shader->SetUniform("matAmbient", mesh->material.ambientColor);

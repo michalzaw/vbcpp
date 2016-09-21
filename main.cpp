@@ -36,12 +36,41 @@ Window* win;
 PhysicsManager* physMgr;
 
 std::string winTitle = "Virtual Bus Core++";
+SceneObject* point, *point2, *point3, *dirLight;
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+	if (glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS)
+	{
+		point3->setIsActive(!point3->isActive());
+
+	}if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
+	{
+		point2->setIsActive(!point2->isActive());
+
+	}if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
+	{
+		point->setIsActive(!point->isActive());
+
+	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
+	{
+	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
+	    if (l->GetAmbientIntensity() > 0.05)
+        {
+            l->SetAmbientIntensity(0.05);
+            l->SetDiffuseIntensity(0.0);
+        }
+        else
+        {
+            l->SetAmbientIntensity(0.5);
+            l->SetDiffuseIntensity(0.5);
+        }
+
+	}
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -228,9 +257,42 @@ int main()
     camFPS->setMoveSpeed(8.0f);
 
     // Światło
-    SceneObject* dirLight = scene->addSceneObject();
-    dirLight->addComponent(graphMgr->AddLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f, glm::vec3(0.5f, -0.6f, 1.0f)));
+    dirLight = scene->addSceneObject();
+    dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * 3.1416));
+
+    for (int i = 0; i < 2; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            SceneObject* pointLight = scene->addSceneObject();
+            pointLight->addComponent(graphMgr->AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.2f, LightAttenuation(0.5f, 0.05f, 0.001f)));
+            pointLight->getTransform()->SetPosition(glm::vec3(10 + j * 30, 5, i * 30));
+            pointLight->setIsActive(false);
+        }
+    }
+
+
+    Model* busModel = l->loadModel("D:\\vbcpp\\vbcpp\\MAN Lion's City v3\\lion.3ds", "D:\\vbcpp\\vbcpp\\MAN Lion's City v3\\Konin\\");
+    SceneObject* bus = scene->addSceneObject();
+    bus->addComponent(graphMgr->AddRenderObject(busModel));
+    bus->getTransform()->SetRotation(glm::vec3(-0.5 * 3.14, 0.0f, 0.0f));
+    bus->getTransform()->SetPosition(glm::vec3(-10, 2, 20));
+
+    point = scene->addSceneObject();
+    point->addComponent(graphMgr->AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point->getTransform()->SetPosition(glm::vec3(-10, 4.5, 20));
+    point->setIsActive(true);
+
+    point2 = scene->addSceneObject();
+    point2->addComponent(graphMgr->AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point2->getTransform()->SetPosition(glm::vec3(-10, 4.5, 17));
+    point2->setIsActive(true);
+
+    point3 = scene->addSceneObject();
+    point3->addComponent(graphMgr->AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point3->getTransform()->SetPosition(glm::vec3(-10, 4.5, 12));
+    point3->setIsActive(true);
 
 
     // Zmienne dla obliczania czasu

@@ -30,15 +30,19 @@ class Component
         SceneObject* _object;
         Transform* _objectTransform;
 
+        bool _isActive;
+
     public:
         Component(ComponentType type);
         ~Component();
 
         void setSceneObject(SceneObject* object);
+        void setIsActive(bool is);
 
         ComponentType   getType();
         SceneObject*    getSceneObject();
         Transform*      getTransform();
+        bool            isActive();
 
         virtual void changedTransform() {}
 

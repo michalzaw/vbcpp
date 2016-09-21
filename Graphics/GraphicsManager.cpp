@@ -54,9 +54,20 @@ CameraFPS* GraphicsManager::AddCameraFPS(int width, int height, GLfloat viewAngl
     return camera;
 }
 
-Light* GraphicsManager::AddLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, glm::vec3 direction)
+Light* GraphicsManager::AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity)
 {
-    Light* light = new Light(color, ambientIntensity, diffuseIntensity/*, direction*/);
+    Light* light = new Light(LT_DIRECTIONAL, color, ambientIntensity, diffuseIntensity);
+
+    _lights.push_back(light);
+
+    return light;
+}
+
+
+Light* GraphicsManager::AddPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation)
+{
+    Light* light = new Light(LT_POINT, color, ambientIntensity, diffuseIntensity);
+    light->SetAttenuation(attenuation);
 
     _lights.push_back(light);
 
@@ -114,7 +125,13 @@ RenderData* GraphicsManager::GetRenderData()
 {
     RenderData* renderData = new RenderData;
     renderData->camera = _cameras[0];
-    renderData->light = *(_lights.begin());
+    //renderData->light = *(_lights.begin());
+
+    for (std::list<Light*>::iterator i = _lights.begin(); i != _lights.end(); ++i)
+    {
+        if ((*i)->isActive())
+            renderData->lights.push_back(*i);
+    }
 
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
     {

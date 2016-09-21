@@ -5,6 +5,7 @@
 #include "OGLDriver.h"
 #include "RenderData.h"
 #include "Shader.h"
+#include "../Utils/Strings.h"
 
 
 class Renderer

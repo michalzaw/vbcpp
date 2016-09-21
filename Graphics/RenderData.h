@@ -43,7 +43,7 @@ struct RenderData
 {
     std::list<RenderListElement> renderList;
     CameraStatic* camera;
-    Light* light;
+    std::list<Light*> lights;
 
 };
 

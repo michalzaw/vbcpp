@@ -50,14 +50,15 @@ bool OGLDriver::Initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
 
-    //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
-    Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
+    Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
+    //Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
     _shaderList.push_back(shader);
 
     shader = new Shader(LoadShader("DirLight.vert", "DirLight_notexture.frag"));
     _shaderList.push_back(shader);
 
-    shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
+    //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
+    shader = new Shader(LoadShader("shader.vert", "shader.frag"));
     _shaderList.push_back(shader);
 }
 

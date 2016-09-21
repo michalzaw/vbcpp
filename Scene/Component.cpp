@@ -5,7 +5,8 @@
 
 Component::Component(ComponentType type)
     : _type(type),
-    _object(NULL), _objectTransform(NULL)
+    _object(NULL), _objectTransform(NULL),
+    _isActive(true)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create Component\n";
@@ -32,6 +33,12 @@ void Component::setSceneObject(SceneObject* object)
 }
 
 
+void Component::setIsActive(bool is)
+{
+    _isActive = is;
+}
+
+
 ComponentType Component::getType()
 {
     return _type;
@@ -47,4 +54,10 @@ SceneObject* Component::getSceneObject()
 Transform* Component::getTransform()
 {
     return _objectTransform;
+}
+
+
+bool Component::isActive()
+{
+    return _isActive && _object->isActive();
 }

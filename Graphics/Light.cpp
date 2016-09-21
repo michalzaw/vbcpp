@@ -1,20 +1,22 @@
 #include "Light.h"
 
 
-Light::Light()
+Light::Light(LightType type)
     : Component(CT_LIGHT),
+    _lightType(type),
     _color(1.0f, 1.0f, 1.0f), _ambientIntensity(0.5f), _diffuseIntensity(1.0f),
-    /*_direction(0.0f, 0.0f, 1.0f),*/ _isActive(true)
+    _cutoff(0.0f)
 {
 
 
 }
 
 
-Light::Light(glm::vec3 color, float ambientIntensity, float diffuseIntensity/*, glm::vec3 direction*/)
+Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diffuseIntensity)
     : Component(CT_LIGHT),
+    _lightType(type),
     _color(color), _ambientIntensity(ambientIntensity), _diffuseIntensity(diffuseIntensity),
-    /*_direction(0.0f, 0.0f, 1.0f),*/ _isActive(true)
+    _cutoff(0.0f)
 {
 
 
@@ -44,16 +46,30 @@ void Light::SetDiffuseIntensity(float intensity)
     _diffuseIntensity = intensity;
 }
 
-/*
-void Light::SetDirection(glm::vec3 direction)
-{
-    _direction = glm::normalize(direction);
-}
-*/
 
-void Light::SetIsActive(bool isActive)
+void Light::SetAttenuation(float constant, float linear, float exp)
 {
-    _isActive = isActive;
+    _attenuation.constant = constant;
+    _attenuation.linear = linear;
+    _attenuation.exp = exp;
+}
+
+
+void Light::SetAttenuation(LightAttenuation attenuation)
+{
+    _attenuation = attenuation;
+}
+
+
+void Light::SetCutoff(float cutoff)
+{
+    _cutoff = cutoff;
+}
+
+
+LightType Light::GetLightType()
+{
+    return _lightType;
 }
 
 
@@ -79,13 +95,25 @@ glm::vec3 Light::GetDirection()
 {
     glm::vec4 dir(1.0f, 0.0f, 0.0f, 0.0f);
 
-    dir = _objectTransform->GetNormalMatrix() * dir;
+    dir = glm::normalize(_objectTransform->GetNormalMatrix() * dir);
 
     return glm::vec3(dir);
 }
 
 
-bool Light::IsActive()
+glm::vec3 Light::GetPosition()
 {
-    return _isActive;
+    return _objectTransform->GetPosition();
+}
+
+
+LightAttenuation& Light::GetAttenuation()
+{
+    return _attenuation;
+}
+
+
+float Light::GetCutoff()
+{
+    return _cutoff;
 }

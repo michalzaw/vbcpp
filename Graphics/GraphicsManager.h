@@ -34,7 +34,9 @@ class GraphicsManager
                                         glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
         CameraStatic*   AddCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         CameraFPS*      AddCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
-        Light*          AddLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, glm::vec3 direction);
+        Light*          AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
+        Light*          AddPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
+
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
         void removeRenderObject(RenderObject* object);
