@@ -21,12 +21,16 @@ class SceneManager
         SceneManager();
         ~SceneManager();
 
-        GraphicsManager*    getGraphicsManager();
+        //GraphicsManager*    getGraphicsManager();
         //PhysicsManager*     getPhysicsManager();
 
-        SceneObject*    addSceneObject();
+
+        SceneObject*    addSceneObject(std::string name);
         void            removeSceneObject(SceneObject* object);
 
+        void            removeSceneObject(std::string name);
+
+        SceneObject*    getSceneObject(std::string name);
 };
 
 

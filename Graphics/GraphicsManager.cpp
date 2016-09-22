@@ -1,6 +1,8 @@
 #include "GraphicsManager.h"
 
 
+static std::unique_ptr<GraphicsManager> gmInstance;
+
 GraphicsManager::GraphicsManager()
 {
 
@@ -25,10 +27,18 @@ GraphicsManager::~GraphicsManager()
     }
 }
 
-
-RenderObject* GraphicsManager::AddRenderObject(RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
+GraphicsManager& GraphicsManager::getInstance()
 {
-    RenderObject* object = new RenderObject(model);
+    if ( !gmInstance )
+        gmInstance = std::unique_ptr<GraphicsManager>(new GraphicsManager);
+
+    return *gmInstance;
+}
+
+
+RenderObject* GraphicsManager::AddRenderObject(RenderObject* object )//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
+{
+    //RenderObject* object = new RenderObject(model);
 
     _renderObjects.push_back(object);
 

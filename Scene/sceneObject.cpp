@@ -2,22 +2,22 @@
 #include "SceneManager.h"
 
 
-SceneObject::SceneObject(unsigned int id, SceneManager* sceneManager)
-    : _id(id), _isActive(true),
+SceneObject::SceneObject(std::string name, SceneManager* sceneManager)
+    : _id(0), _name(name), _isActive(true),
     _sceneManager(sceneManager),
     _transform(this)
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Create SceneObject\n";
-    #endif // _DEBUG_MODE
+    //#ifdef _DEBUG_MODE
+        std::cout << "Create SceneObject: " << _name << std::endl ;
+    //#endif // _DEBUG_MODE
 }
 
 
 SceneObject::~SceneObject()
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Destroy SceneObject\n";
-    #endif // _DEBUG_MODE
+    //#ifdef _DEBUG_MODE
+        std::cout << "Destroy SceneObject: " << _name << std::endl;
+    //#endif // _DEBUG_MODE
 
     for (std::vector<Component*>:: iterator i = _components.begin(); i != _components.end(); ++i)
     {
@@ -25,7 +25,8 @@ SceneObject::~SceneObject()
         switch ((*i)->getType())
         {
             case CT_RENDER_OBJECT:
-                _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                //_sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(*i));
                 break;
 
             case CT_CAMERA:
@@ -33,7 +34,8 @@ SceneObject::~SceneObject()
                 break;
 
             case CT_LIGHT:
-                _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
+                //_sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
+                GraphicsManager::getInstance().removeLight(static_cast<Light*>(*i));
                 break;
 
             case CT_PHYSICAL_BODY:
@@ -71,7 +73,8 @@ void SceneObject::removeComponent(Component* component)
             switch ((*i)->getType())
             {
                 case CT_RENDER_OBJECT:
-                    _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                    //_sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
+                    GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(*i));
                     break;
 
                 case CT_CAMERA:
@@ -79,7 +82,8 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_LIGHT:
-                    _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
+                    //_sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
+                    GraphicsManager::getInstance().removeLight(static_cast<Light*>(*i));
                     break;
 
                 case CT_PHYSICAL_BODY:
@@ -102,6 +106,11 @@ void SceneObject::setIsActive(bool is)
     _isActive = is;
 }
 
+
+std::string SceneObject::getName()
+{
+    return _name;
+}
 
 unsigned int SceneObject::getId()
 {

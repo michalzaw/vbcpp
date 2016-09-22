@@ -8,7 +8,7 @@ SceneManager::SceneManager()
     #endif // _DEBUG_MODE
 
 
-    _graphicsManager = new GraphicsManager;
+    //_graphicsManager = new GraphicsManager;
     //_physicsManager = new PhysicsManager;
 
     //_physicsManager->createPhysicsWorld();
@@ -28,16 +28,16 @@ SceneManager::~SceneManager()
     }
 
 
-    delete _graphicsManager;
+    //delete _graphicsManager;
     //delete _physicsManager;
 }
 
-
+/*
 GraphicsManager* SceneManager::getGraphicsManager()
 {
     return _graphicsManager;
 }
-
+*/
 /*
 PhysicsManager* SceneManager::getPhysicsManager()
 {
@@ -45,9 +45,9 @@ PhysicsManager* SceneManager::getPhysicsManager()
 }
 */
 
-SceneObject* SceneManager::addSceneObject()
+SceneObject* SceneManager::addSceneObject(std::string name)
 {
-    SceneObject* obj = new SceneObject(0, this);
+    SceneObject* obj = new SceneObject(name, this);
 
     _sceneObjects.push_back(obj);
 
@@ -67,5 +67,29 @@ void SceneManager::removeSceneObject(SceneObject* object)
 
             return;
         }
+    }
+}
+
+void SceneManager::removeSceneObject(std::string name)
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        if ((*i)->getName() == name)
+        {
+            delete *i;
+
+            i = _sceneObjects.erase(i);
+
+
+        }
+    }
+}
+
+SceneObject* SceneManager::getSceneObject(std::string name)
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        if ((*i)->getName() == name)
+            delete *i;
     }
 }

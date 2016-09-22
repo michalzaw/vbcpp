@@ -243,7 +243,7 @@ void Load3ds::loadCollisionMesh(std::vector<glm::vec3>* vertices)
 
 			std::string faceMaterial = std::string(face->material);
 
-			if(faceMaterial == "CollisionMes")
+			if(faceMaterial == "Collision")
 			{
 			    std::cout << "\n\n\n\n\n\nCollisionMesh\n\n\n\n\n\n\n";
 			    for(int currentVertex = 0; currentVertex < 3; currentVertex++)
