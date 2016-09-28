@@ -62,7 +62,7 @@ bool OGLDriver::Initialize()
 
     //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
 	RShader* shdr1 = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
-    //Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
+    //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
     _shaderList.push_back(shdr1);
 
     //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");

@@ -190,6 +190,21 @@ void Renderer::Render(RenderData* renderData)
 
                     break;
                 }
+                case LT_SPOT:
+                {
+                    std::string lname = "SpotLights[";
+                    lname = lname + toString(s++) + "]";
+
+                    shader->SetUniform((lname + ".Base.Base.Color").c_str(), (*i)->GetColor());
+                    shader->SetUniform((lname + ".Base.Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
+                    shader->SetUniform((lname + ".Base.Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
+                    shader->SetUniform((lname + ".Base.Position").c_str(), (*i)->GetPosition());
+                    shader->SetUniform((lname + ".Base.Attenuation.constant").c_str(), (*i)->GetAttenuation().constant);
+                    shader->SetUniform((lname + ".Base.Attenuation.linear").c_str(), (*i)->GetAttenuation().linear);
+                    shader->SetUniform((lname + ".Base.Attenuation.exp").c_str(), (*i)->GetAttenuation().exp);
+                    shader->SetUniform((lname + ".Direction").c_str(), (*i)->GetDirection());
+                    shader->SetUniform((lname + ".CutoffCos").c_str(), (*i)->GetCutoffCos());
+                }
             }
 
         }
