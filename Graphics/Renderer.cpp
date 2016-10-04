@@ -6,11 +6,16 @@ Renderer::Renderer(/* OGLDriver* driver */)
 {
     //_shader = LoadShader("shader.vert", "shader.frag");
     //glUseProgram(_shader);
+    _lightUBO = OGLDriver::getInstance().CreateUBO(4096);
+    _lightUBO->bindBufferBase(0);
+
+    OGLDriver::getInstance().GetShader(SOLID_MATERIAL)->setUniformBlockBinding("LightsBlock", 0);
+    OGLDriver::getInstance().GetShader(NORMALMAPPING_MATERIAL)->setUniformBlockBinding("LightsBlock", 0);
 }
 
 Renderer::~Renderer()
 {
-
+    OGLDriver::getInstance().DeleteUBO(_lightUBO);
 }
 
 /*void Renderer::Render(RenderData* renderData)
@@ -114,7 +119,7 @@ Renderer::~Renderer()
 
 
 // nowe ³adowanie modeli, indeksy
-void Renderer::Render(RenderData* renderData)
+/*void Renderer::Render(RenderData* renderData)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -211,6 +216,199 @@ void Renderer::Render(RenderData* renderData)
         shader->SetUniform("DirCount", d);
         shader->SetUniform("PointCount", p);
         shader->SetUniform("SpotCount", s);
+
+        //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
+        shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
+        shader->SetUniform("matAmbient", mesh->material.ambientColor);
+        shader->SetUniform("matDiffuse", mesh->material.diffuseColor);
+        shader->SetUniform("matSpecular", mesh->material.specularColor);
+
+        shader->SetUniform("Transparency", mesh->material.transparency);
+
+        shader->SetUniform("SpecularPower", mesh->material.shininess);
+        shader->SetUniform("CameraPosition", camera->getPosition());
+        shader->SetUniform("a", 1.0f);
+
+        //glDrawArrays(renderObject->GetModel()->GetPrimitiveType(),
+        //    renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
+        //    renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
+
+        model->GetIBO()->Bind();
+        glDrawElements(model->GetPrimitiveType(),
+                       mesh->quantumOfVertice,
+                       GL_UNSIGNED_INT,
+                       (void*)(mesh->firstVertex * sizeof(unsigned int)));
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
+        if (mesh->material.normalmapTexture != 0)
+        {
+            glDisableVertexAttribArray(3);
+            glDisableVertexAttribArray(4);
+        }
+    }
+
+
+    delete renderData;
+}*/
+
+
+// UBO
+void Renderer::Render(RenderData* renderData)
+{
+    // Aktualizacja UBO światel
+    int d = 0;
+    int p = 0;
+    int s = 0;
+    for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
+    {
+        switch ((*i)->GetLightType())
+        {
+            case LT_DIRECTIONAL:
+            {
+                std::string lname = "LightsBlock.DirLights[";
+                lname = lname + toString(d++) + "]";
+
+                const char* names[4];
+
+                std::string a = lname + ".Base.Color";
+                names[0] = a.c_str();
+                std::string b = lname + ".Base.AmbientIntensity";
+                names[1] = b.c_str();
+                std::string c = (lname + ".Base.DiffuseIntensity");
+                names[2] = c.c_str();
+                std::string d = (lname + ".Direction");
+                names[3] = d.c_str();
+
+                GLint offsets[4];
+
+                OGLDriver::getInstance().GetShader(SOLID_MATERIAL)->getUniformOffset(names, 4, offsets);
+
+                _lightUBO->setUniform(offsets[0],                        (*i)->GetColor().r);
+                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->GetColor().g);
+                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->GetColor().b);
+
+                _lightUBO->setUniform(offsets[1], (*i)->GetAmbientIntensity());
+
+                _lightUBO->setUniform(offsets[2], (*i)->GetDiffiseIntenisty());
+
+                _lightUBO->setUniform(offsets[3],                        (*i)->GetDirection().x);
+                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->GetDirection().y);
+                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->GetDirection().z);
+
+                break;
+            }
+            case LT_POINT:
+            {
+                std::string lname = "LightsBlock.PointLights[";
+                lname = lname + toString(p++) + "]";
+
+                const char* names[7];
+                std::string s1 = lname + ".Base.Color";
+                names[0] = s1.c_str();
+                std::string s2 = lname + ".Base.AmbientIntensity";
+                names[1] = s2.c_str();
+                std::string s3 = lname + ".Base.DiffuseIntensity";
+                names[2] = s3.c_str();
+                std::string s4 = lname + ".Position";
+                names[3] = s4.c_str();
+                std::string s5 = lname + ".Attenuation.constant";
+                names[4] = s5.c_str();
+                std::string s6 = lname + ".Attenuation.linear";
+                names[5] = s6.c_str();
+                std::string s7 = lname + ".Attenuation.exp";
+                names[6] = s7.c_str();
+
+                GLint offsets[7];
+
+                OGLDriver::getInstance().GetShader(SOLID_MATERIAL)->getUniformOffset(names, 7, offsets);
+
+                _lightUBO->setUniform(offsets[0],                        (*i)->GetColor().r);
+                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->GetColor().g);
+                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->GetColor().b);
+
+                _lightUBO->setUniform(offsets[1], (*i)->GetAmbientIntensity());
+
+                _lightUBO->setUniform(offsets[2], (*i)->GetDiffiseIntenisty());
+
+                _lightUBO->setUniform(offsets[3],                        (*i)->GetPosition().x);
+                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->GetPosition().y);
+                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->GetPosition().z);
+
+                _lightUBO->setUniform(offsets[4], (*i)->GetAttenuation().constant);
+                _lightUBO->setUniform(offsets[5], (*i)->GetAttenuation().linear);
+                _lightUBO->setUniform(offsets[6], (*i)->GetAttenuation().exp);
+
+                break;
+            }
+            case LT_SPOT:
+            {
+                /*std::string lname = "SpotLights[";
+                lname = lname + toString(s++) + "]";
+
+                shader->SetUniform((lname + ".Base.Base.Color").c_str(), (*i)->GetColor());
+                shader->SetUniform((lname + ".Base.Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
+                shader->SetUniform((lname + ".Base.Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
+                shader->SetUniform((lname + ".Base.Position").c_str(), (*i)->GetPosition());
+                shader->SetUniform((lname + ".Base.Attenuation.constant").c_str(), (*i)->GetAttenuation().constant);
+                shader->SetUniform((lname + ".Base.Attenuation.linear").c_str(), (*i)->GetAttenuation().linear);
+                shader->SetUniform((lname + ".Base.Attenuation.exp").c_str(), (*i)->GetAttenuation().exp);
+                shader->SetUniform((lname + ".Direction").c_str(), (*i)->GetDirection());
+                shader->SetUniform((lname + ".CutoffCos").c_str(), (*i)->GetCutoffCos());*/
+            }
+        }
+
+    }
+
+    const char* names[3] = { "LightsBlock.DirCount", "LightsBlock.PointCount", "LightsBlock.SpotCount" };
+    GLint offsets[3];
+    OGLDriver::getInstance().GetShader(SOLID_MATERIAL)->getUniformOffset(names, 3, offsets);
+
+    _lightUBO->setUniform(offsets[0], d);
+    _lightUBO->setUniform(offsets[1], p);
+    _lightUBO->setUniform(offsets[2], s);
+
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    CameraStatic* camera = renderData->camera;
+
+    for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
+    {
+        RModel* model = i->GetModel();
+        Mesh* mesh = i->GetMesh();
+
+        RShader* shader = mesh->material._shader;
+        shader->Enable();
+
+        //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->GetTransform()->GetTransformMatrix();
+        shader->SetUniform("MVP", MVP);
+        shader->SetUniform("ModelMatrix", i->GetTransform()->GetTransformMatrix());
+        shader->SetUniform("NormalMatrix", i->GetTransform()->GetNormalMatrix());
+
+        model->GetVBO()->Bind();
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+
+        if (mesh->material.normalmapTexture != 0)
+        {
+            glEnableVertexAttribArray(3);
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+
+            glEnableVertexAttribArray(4);
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
+
+            shader->BindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
+        }
 
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         shader->BindTexture2D("Texture", mesh->material.diffuseTexture);

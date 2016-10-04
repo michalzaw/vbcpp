@@ -11,6 +11,7 @@
 #include "VAO.h"
 #include "VBO.h"
 #include "IBO.h"
+#include "UBO.h"
 
 #include <memory>
 
@@ -23,6 +24,7 @@ class OGLDriver
         std::vector<VAO*> _vaoList;
         std::vector<VBO*> _vboList;
         std::vector<IBO*> _iboList;
+        std::vector<UBO*> _uboList;
 
         OGLDriver();
 
@@ -43,10 +45,12 @@ class OGLDriver
         VAO* CreateVAO();
         VBO* CreateVBO(unsigned int size);
         IBO* CreateIBO(unsigned int size);
+        UBO* CreateUBO(unsigned int size);
 
         void DeleteVAO(VAO* vao);
         void DeleteVBO(VBO* vbo);
         void DeleteIBO(IBO* ibo);
+        void DeleteUBO(UBO* ubo);
 
 };
 

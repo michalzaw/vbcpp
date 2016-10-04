@@ -131,6 +131,19 @@ IBO* OGLDriver::CreateIBO(unsigned int size)
 }
 
 
+UBO* OGLDriver::CreateUBO(unsigned int size)
+{
+    UBO* ubo = new UBO(size);
+
+    if (ubo != NULL)
+    {
+        _uboList.push_back(ubo);
+    }
+
+    return ubo;
+}
+
+
 void OGLDriver::DeleteVAO(VAO* vao)
 {
     for (int i = 0; i < _vaoList.size(); ++i)
@@ -169,6 +182,21 @@ void OGLDriver::DeleteIBO(IBO* ibo)
         {
             delete _iboList[i];
             _iboList.erase(_iboList.begin() + i);
+
+            break;
+        }
+    }
+}
+
+
+void OGLDriver::DeleteUBO(UBO* ubo)
+{
+    for (int i = 0; i < _uboList.size(); ++i)
+    {
+        if (_uboList[i] == ubo)
+        {
+            delete _uboList[i];
+            _uboList.erase(_uboList.begin() + i);
 
             break;
         }

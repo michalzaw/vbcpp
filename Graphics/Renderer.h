@@ -2,6 +2,8 @@
 #define RENDERER_H_INCLUDED
 
 
+#include <string.h>
+
 #include "OGLDriver.h"
 #include "RenderData.h"
 
@@ -13,6 +15,7 @@ class Renderer
 {
     private:
         OGLDriver* _OGLDriver;
+        UBO* _lightUBO;
 
     public:
         Renderer(/* OGLDriver* driver */);

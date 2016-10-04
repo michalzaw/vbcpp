@@ -155,6 +155,7 @@
 		<Unit filename="Graphics/Renderer.h" />
 		<Unit filename="Graphics/Transform.cpp" />
 		<Unit filename="Graphics/Transform.h" />
+		<Unit filename="Graphics/UBO.h" />
 		<Unit filename="Graphics/VAO.h" />
 		<Unit filename="Graphics/VBO.cpp" />
 		<Unit filename="Graphics/VBO.h" />
@@ -190,7 +191,6 @@
 		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
-		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/RModel.cpp" />
 		<Unit filename="Utils/RModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />
@@ -199,6 +199,7 @@
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />
 		<Unit filename="Utils/ResourceManager.h" />
+		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Window/Window.cpp" />
 		<Unit filename="Window/Window.h" />
 		<Unit filename="main.cpp" />
