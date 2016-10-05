@@ -108,14 +108,29 @@
 			</Target>
 			<Target title="Win Release">
 				<Option platforms="Windows;" />
-				<Option output="vbcpp" prefix_auto="1" extension_auto="1" />
+				<Option output="bin/vbcpp_release" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="bin" />
 				<Option object_output="obj/Release" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-std=c++11" />
+					<Add directory="include" />
+					<Add directory="include/bullet" />
 				</Compiler>
+				<Linker>
+					<Add library="lib/win32/glfw3dll.a" />
+					<Add library="glew32" />
+					<Add library="3ds" />
+					<Add library="SOIL" />
+					<Add library="opengl32" />
+					<Add library="glu32" />
+					<Add library="gdi32" />
+					<Add library="BulletDynamics" />
+					<Add library="BulletCollision" />
+					<Add library="LinearMath" />
+					<Add directory="lib/win32" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>

@@ -1,7 +1,5 @@
 #include "OGLDriver.h"
 
-#include "../Utils/ResourceManager.h"
-
 
 static std::unique_ptr<OGLDriver> drvInstance;
 
@@ -18,11 +16,22 @@ OGLDriver::~OGLDriver()
         delete _vaoList[i];
     }
 
+    for (int i = 0; i < _vboList.size(); ++i)
+    {
+        delete _vboList[i];
+    }
+
+    for (int i = 0; i < _iboList.size(); ++i)
+    {
+        delete _iboList[i];
+    }
+
+    for (int i = 0; i < _uboList.size(); ++i)
+    {
+        delete _uboList[i];
+    }
+
     //_shaderPtrList.clear();
-
-    //glDeleteVertexArrays(1, &VertexArrayID);
-
-    //delete _defaultVAO;
 }
 
 
@@ -41,12 +50,6 @@ bool OGLDriver::Initialize()
     if (glewInit() != GLEW_OK)
         return false;
 
-    /*
-   	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-    */
-
     if (CreateVAO() == NULL)
         return false;
 
@@ -59,36 +62,8 @@ bool OGLDriver::Initialize()
 
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
-
-    //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
-	RShader* shdr1 = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
-    //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
-    _shaderList.push_back(shdr1);
-
-    //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
-    //_shaderList.push_back(shdr1);
-
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight_notexture.frag");
-    _shaderList.push_back(shdr2);
-
-
-    //RShader* shdr3 = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
-    //_shaderList.push_back(shdr3);
-
-
-    //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    RShader* shader = ResourceManager::getInstance().loadShader("shader_n.vert", "shader_n.frag");
-    //RShader* shader = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
-    _shaderList.push_back(shader);
-
     return true;
 
-}
-
-
-RShader* OGLDriver::GetShader(ShaderType type)
-{
-    return _shaderList[type];
 }
 
 
@@ -201,4 +176,28 @@ void OGLDriver::DeleteUBO(UBO* ubo)
             break;
         }
     }
+}
+
+
+VAO* OGLDriver::getCurrentVAO()
+{
+    return _currentVAO;
+}
+
+
+VBO* OGLDriver::getCurrentVBO()
+{
+    return _currentVBO;
+}
+
+
+IBO* OGLDriver::getCurrentIBO()
+{
+    return _currentIBO;
+}
+
+
+UBO* OGLDriver::getCurrentUBO()
+{
+    return _currentUBO;
 }
