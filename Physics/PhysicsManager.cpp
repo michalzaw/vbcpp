@@ -10,8 +10,9 @@
 
 #include <cstdio>
 
-static std::unique_ptr<PhysicsManager> pmInstance;
+//static std::unique_ptr<PhysicsManager> pmInstance;
 
+/*
 PhysicsManager& PhysicsManager::getInstance()
 {
     if( !pmInstance )
@@ -19,7 +20,7 @@ PhysicsManager& PhysicsManager::getInstance()
 
     return* pmInstance;
 }
-
+*/
 
 PhysicsManager::PhysicsManager()
 : _dynamicsWorld(0),
@@ -28,7 +29,7 @@ PhysicsManager::PhysicsManager()
   _collisionConfiguration(0),
   _broadphase(0)
 {
-
+    createPhysicsWorld();
 }
 
 PhysicsManager::~PhysicsManager()

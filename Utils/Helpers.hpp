@@ -3,6 +3,11 @@
 
 #include <algorithm>
 
+#include <glm/glm.hpp>
+#include <cstdlib>
+#include <sstream>
+#include <iostream>
+
 template<typename T> void safe_delete(T*& a) {
   delete a;
   a = 0;

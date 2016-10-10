@@ -18,10 +18,8 @@ OGLDriver::~OGLDriver()
         delete _vaoList[i];
     }
 
-    //_shaderPtrList.clear();
-
+    //_shaderList.clear();
     //glDeleteVertexArrays(1, &VertexArrayID);
-
     //delete _defaultVAO;
 }
 
@@ -60,38 +58,16 @@ bool OGLDriver::Initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
 
-    //Shader* shader = new Shader(LoadShader("shader.vert", "shader.frag"));
-	RShader* shdr1 = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
-    //Shader* shader = new Shader(LoadShader("DirLight.vert", "DirLight.frag"));
+	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag");
     _shaderList.push_back(shdr1);
 
-    //RShader* shdr1 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight.frag");
-    //_shaderList.push_back(shdr1);
-
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight_notexture.frag");
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight_notexture.frag");
     _shaderList.push_back(shdr2);
 
-
-    //RShader* shdr3 = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
-    //_shaderList.push_back(shdr3);
-
-
-    //shader = new Shader(LoadShader("normalmapping.vert", "normalmapping.frag"));
-    RShader* shader = ResourceManager::getInstance().loadShader("shader_n.vert", "shader_n.frag");
-    //RShader* shader = ResourceManager::getInstance().loadShader("normalmapping.vert", "normalmapping.frag");
+    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
     _shaderList.push_back(shader);
 
-    //RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight.frag");
-    //_shaderList.push_back(shdr1);
-
-    //RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight_notexture.frag");
-    //_shaderList.push_back(shdr2);
-
-    //RShader* shdr3 = ResourceManager::getInstance().loadShader("Shaders/normalmapping.vert", "Shaders/normalmapping.frag");
-    //_shaderList.push_back(shdr3);
-
     return true;
-
 }
 
 

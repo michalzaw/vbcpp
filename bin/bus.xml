@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<object name="ogorek"> 
+	<transform position="10.4,5.1,10.9" rotation="10,0,0" scale="1,2,1" />
+
+	<component type="render" model="crate.3ds" textures="./" />
+	<component type="physics" body="box" />
+	
+	<constraint type="hinge" parent="" child="" name="blablabla" />
+</object>

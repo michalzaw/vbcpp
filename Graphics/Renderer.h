@@ -7,9 +7,9 @@
 
 #include "../Utils/Strings.h"
 #include "RShader.h"
+#include "../Utils/RefCounter.h"
 
-
-class Renderer
+class Renderer : virtual public RefCounter
 {
     private:
         OGLDriver* _OGLDriver;

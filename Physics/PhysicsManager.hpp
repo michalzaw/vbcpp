@@ -14,16 +14,17 @@
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
 
+#include "../Utils/RefCounter.h"
 
 // PHYSICS MANAGER
 
-class PhysicsManager
+class PhysicsManager : virtual public RefCounter
 {
     public:
-
+        PhysicsManager();
         virtual ~PhysicsManager();
 
-        static PhysicsManager& getInstance();
+        //static PhysicsManager& getInstance();
 
         int createPhysicsWorld();
         int destroyPhysicsWorld();
@@ -36,11 +37,11 @@ class PhysicsManager
         btDefaultCollisionConfiguration*        getDefaultCollisionConfig() { return _collisionConfiguration; }
         btBroadphaseInterface*                  getBrodaphaseInterface() { return _broadphase; }
 
-        PhysicalBodyBox*            createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos);
-        PhysicalBodyCylinder*       createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align);
-        PhysicalBodySphere*         createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
-        PhysicalBodyStaticPlane*    createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
-        PhysicalBodyConvexHull*     createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
+        PhysicalBodyBox*                createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos);
+        PhysicalBodyCylinder*           createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align);
+        PhysicalBodySphere*             createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
+        PhysicalBodyStaticPlane*        createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos);
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
@@ -62,7 +63,7 @@ class PhysicsManager
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
 
-        PhysicsManager();
+
 };
 
 #endif // PHYSICSMANAGER_HPP_INCLUDED

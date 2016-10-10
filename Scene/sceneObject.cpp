@@ -40,7 +40,7 @@ SceneObject::~SceneObject()
 
             case CT_PHYSICAL_BODY:
                 //_sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
-                PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                 break;
 
         }
@@ -88,7 +88,7 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_PHYSICAL_BODY:
                     //_sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
-                    PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                    //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                     break;
 
             }
