@@ -171,6 +171,9 @@ void loadXMLbusData(std::string filename)
 
     std::cout<< sObjName << std::endl;
 
+    RModel* busModel = 0;
+    glm::vec3 busPosition = glm::vec3(0,0,0);
+
     SceneObject* scnObj = sceneMgr->addSceneObject(sObjName);
 
     for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
@@ -184,16 +187,17 @@ void loadXMLbusData(std::string filename)
             std::cout << "XML: Transform" << std::endl;
 
             const char* cPosition = child->Attribute("position");
-            glm::vec3 position(XMLstringToVec3(cPosition));
-            scnObj->getTransform()->SetPosition(position);
+            busPosition = XMLstringToVec3(cPosition);
+            scnObj->getTransform()->SetPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             glm::vec3 rotation(XMLstringToVec3(cRotation));
-            scnObj->getTransform()->SetRotation(rotation);
+
+            scnObj->getTransform()->SetRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
-            scnObj->getTransform()->SetRotation(scale);
+            scnObj->getTransform()->SetScale(scale);
 
         }
         else // RENDER COMPONENT
@@ -209,8 +213,8 @@ void loadXMLbusData(std::string filename)
                 std::string sModel(child->Attribute("model"));
                 std::string sTextures(child->Attribute("textures"));
 
-                RModel* model = ResourceManager::getInstance().loadModel(sModel, sTextures);
-                RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
+                busModel = ResourceManager::getInstance().loadModel(sModel, sTextures);
+                RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
 
                 scnObj->addComponent(renderObj);
             }
@@ -218,6 +222,63 @@ void loadXMLbusData(std::string filename)
             if (strcmp(compType, "physics") == 0)
             {
                 std::cout << "XML: Physics component" << std::endl;
+
+                std::string bodyType(child->Attribute("body"));
+
+                std::cout << "Physical Body: " << bodyType <<  std::endl;
+
+                if (bodyType == "box")
+                {
+                    std::cout << "box" << std::endl;
+                    //PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
+
+                    const char* cHalfExtents = child->Attribute("halfExtents");
+                    glm::vec3 halfExtents(XMLstringToVec3(cHalfExtents));
+                    btVector3 btHalfExtents(halfExtents.x, halfExtents.y, halfExtents.z);
+
+                    const char* cMass = child->Attribute("mass");
+                    float fMass = (float)atof(cMass);
+
+                    const char* cPosition = child->Attribute("position");
+                    glm::vec3 position(XMLstringToVec3(cPosition));
+                    btVector3 btPos(position.x, position.y, position.z);
+
+                    PhysicalBodyBox* box = physMgr->createPhysicalBodyBox(btHalfExtents, fMass, btPos);
+                    scnObj->addComponent(box);
+                } else
+                if (bodyType == "sphere")
+                {
+                    std::cout << "sphere" << std::endl;
+                    //PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
+
+                    const char* cRadius = child->Attribute("radius");
+                    float fRadius = (float)atof(cRadius);
+
+                    const char* cMass = child->Attribute("mass");
+                    float fMass = (float)atof(cMass);
+
+                    const char* cPosition = child->Attribute("position");
+                    glm::vec3 position(XMLstringToVec3(cPosition));
+                    btVector3 btPos(position.x, position.y, position.z);
+
+                    PhysicalBodySphere* sphere = physMgr->createPhysicalBodySphere(fRadius, fMass, btPos);
+                    scnObj->addComponent(sphere);
+                } else
+                if (bodyType == "convex")
+                {
+                    std::cout << "convex hull" << std::endl;
+                    // PhysicalBodyConvexHull* wheel3Body = physMgr->createPhysicalBodyConvexHull(wheel3model->GetVertices(), wheel3model->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
+
+                    const char* cMass = child->Attribute("mass");
+                    float fMass = (float)atof(cMass);
+
+                    btVector3 btPos(busPosition.x, busPosition.y, busPosition.z);
+
+                    PhysicalBodyConvexHull* hull = physMgr->createPhysicalBodyConvexHull(busModel->GetCollisionMesh(), busModel->GetCollisionMeshSize(), fMass, btPos);
+                    scnObj->addComponent(hull);
+
+                }
+
             }
         }
         else // PHYSICS CONSTRAINTS
@@ -262,7 +323,7 @@ int main()
     terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);
 
-    loadXMLbusData("bus.xml");
+    loadXMLbusData("bustest/bus_test.xml");
 
     /* crate */
     SceneObject* crate = sceneMgr->addSceneObject("crate");
@@ -346,13 +407,6 @@ int main()
         }
     }
     */
-
-    RModel* busModel = ResourceManager::getInstance().loadModel("H9.3ds", "ZKM/");
-    SceneObject* bus = sceneMgr->addSceneObject("bus");
-    //RenderObject* busro = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel) );
-    bus->addComponent(GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel) ));
-    bus->getTransform()->SetRotation(glm::vec3(-0.5 * PI, 0.0f, 0.0f));
-    bus->getTransform()->SetPosition(glm::vec3(-10, 2, 20));
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));

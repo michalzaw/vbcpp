@@ -5,6 +5,7 @@
 #include "../Graphics/Model.h"
 #include "../Graphics/OGLDriver.h"
 
+
 class RModel : virtual public Resource
 {
     public:

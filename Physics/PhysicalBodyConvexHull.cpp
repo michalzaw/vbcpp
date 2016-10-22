@@ -2,7 +2,15 @@
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos)
 : PhysicalBody(mass, pos),
-_vertices(vertices), _vertexCount(vertexCount)
+_vertices(vertices), _vertexCount(vertexCount), _verticesvec(0)
+{
+    updateBody();
+}
+
+
+PhysicalBodyConvexHull::PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos)
+: PhysicalBody(mass, pos),
+_verticesvec(vertices), _vertexCount(vertexCount), _vertices(0)
 {
     updateBody();
 }
@@ -17,7 +25,10 @@ PhysicalBodyConvexHull::~PhysicalBodyConvexHull()
 void PhysicalBodyConvexHull::updateBody()
 {
 
-    _collShape.reset( new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex)) );//32);
+    if (_vertices)
+        _collShape.reset( new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex)) );//32);
+    else if (_verticesvec)
+        _collShape.reset( new btConvexHullShape((btScalar*)_verticesvec, _vertexCount, sizeof(glm::vec3)) );//32);
 
     /*
     _collShape = new btConvexHullShape;
