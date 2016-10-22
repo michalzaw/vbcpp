@@ -2,6 +2,7 @@
 #define LIGHT_H_INCLUDED
 
 #include <cstdio>
+#include <cmath>
 
 #include <glm/glm.hpp>
 
@@ -40,7 +41,8 @@ class Light : public Component
 
         LightAttenuation _attenuation;
 
-        float _cutoff;
+        float _cutoff;          // Radians
+        float _cutoffCos;
 
     public:
         Light(LightType type);
@@ -52,7 +54,7 @@ class Light : public Component
         void SetDiffuseIntensity(float intensity);
         void SetAttenuation(float constant, float linear, float exp);
         void SetAttenuation(LightAttenuation attenuation);
-        void SetCutoff(float cutoff);
+        void SetCutoff(float cutoff); // Kat w radianach
 
         LightType           GetLightType();
         glm::vec3           GetColor();
@@ -62,6 +64,7 @@ class Light : public Component
         glm::vec3           GetPosition();
         LightAttenuation&   GetAttenuation();
         float               GetCutoff();
+        float               GetCutoffCos();
 
 };
 

@@ -31,7 +31,10 @@
 #include <cstdlib>
 using namespace tinyxml2;
 
+#include "Utils/Math.h"
+
 // Definicje globalne
+
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
 
@@ -45,8 +48,10 @@ Window* win;
 PhysicsManager* physMgr;
 SceneManager* sceneMgr;
 
+SceneObject* point, *point2, *point3, *dirLight, *spot;
+
 std::string winTitle = "Virtual Bus Core++";
-SceneObject* point, *point2, *point3, *dirLight;
+
 
 // kod
 
@@ -80,6 +85,30 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             l->SetAmbientIntensity(0.5);
             l->SetDiffuseIntensity(0.5);
         }
+
+	}if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
+	{
+		glm::vec3 r = spot->getTransform()->GetRotation();
+		r.z += 0.01;
+		spot->getTransform()->SetRotation(r);
+
+	}if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
+	{
+		glm::vec3 r = spot->getTransform()->GetRotation();
+		r.z -= 0.01;
+		spot->getTransform()->SetRotation(r);
+
+	}if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
+	{
+		glm::vec3 r = spot->getTransform()->GetRotation();
+		r.y += 0.01;
+		spot->getTransform()->SetRotation(r);
+
+	}if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
+	{
+		glm::vec3 r = spot->getTransform()->GetRotation();
+		r.y -= 0.01;
+		spot->getTransform()->SetRotation(r);
 
 	}
 }
@@ -368,6 +397,12 @@ int main()
     point3->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
     point3->getTransform()->SetPosition(glm::vec3(-10, 4.5, 12));
     point3->setIsActive(true);
+
+    spot = scene->addSceneObject();
+    spot->addComponent(graphMgr->AddSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, DegToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
+    spot->getTransform()->SetPosition(glm::vec3(0.0f, 5.0f, -10.0f));
+    spot->getTransform()->SetRotation(glm::vec3(0.0f, 0.0f, DegToRad(-45.0f)));
+    spot->setIsActive(false);
 
 
     // Zmienne dla obliczania czasu

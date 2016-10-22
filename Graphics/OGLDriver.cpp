@@ -1,7 +1,5 @@
 #include "OGLDriver.h"
 
-#include "../Utils/ResourceManager.h"
-
 
 static std::unique_ptr<OGLDriver> drvInstance;
 
@@ -18,9 +16,21 @@ OGLDriver::~OGLDriver()
         delete _vaoList[i];
     }
 
-    //_shaderList.clear();
-    //glDeleteVertexArrays(1, &VertexArrayID);
-    //delete _defaultVAO;
+    for (int i = 0; i < _vboList.size(); ++i)
+    {
+        delete _vboList[i];
+    }
+
+    for (int i = 0; i < _iboList.size(); ++i)
+    {
+        delete _iboList[i];
+    }
+
+    for (int i = 0; i < _uboList.size(); ++i)
+    {
+        delete _uboList[i];
+    }
+
 }
 
 
@@ -39,12 +49,6 @@ bool OGLDriver::Initialize()
     if (glewInit() != GLEW_OK)
         return false;
 
-    /*
-   	GLuint VertexArrayID;
-	glGenVertexArrays(1, &VertexArrayID);
-	glBindVertexArray(VertexArrayID);
-    */
-
     if (CreateVAO() == NULL)
         return false;
 
@@ -57,7 +61,6 @@ bool OGLDriver::Initialize()
 
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
-
 	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag");
     _shaderList.push_back(shdr1);
 
@@ -68,12 +71,6 @@ bool OGLDriver::Initialize()
     _shaderList.push_back(shader);
 
     return true;
-}
-
-
-RShader* OGLDriver::GetShader(ShaderType type)
-{
-    return _shaderList[type];
 }
 
 
@@ -113,6 +110,19 @@ IBO* OGLDriver::CreateIBO(unsigned int size)
     }
 
     return ibo;
+}
+
+
+UBO* OGLDriver::CreateUBO(unsigned int size)
+{
+    UBO* ubo = new UBO(size);
+
+    if (ubo != NULL)
+    {
+        _uboList.push_back(ubo);
+    }
+
+    return ubo;
 }
 
 
@@ -158,4 +168,43 @@ void OGLDriver::DeleteIBO(IBO* ibo)
             break;
         }
     }
+}
+
+
+void OGLDriver::DeleteUBO(UBO* ubo)
+{
+    for (int i = 0; i < _uboList.size(); ++i)
+    {
+        if (_uboList[i] == ubo)
+        {
+            delete _uboList[i];
+            _uboList.erase(_uboList.begin() + i);
+
+            break;
+        }
+    }
+}
+
+
+VAO* OGLDriver::getCurrentVAO()
+{
+    return _currentVAO;
+}
+
+
+VBO* OGLDriver::getCurrentVBO()
+{
+    return _currentVBO;
+}
+
+
+IBO* OGLDriver::getCurrentIBO()
+{
+    return _currentIBO;
+}
+
+
+UBO* OGLDriver::getCurrentUBO()
+{
+    return _currentUBO;
 }

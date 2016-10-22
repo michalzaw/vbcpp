@@ -43,6 +43,7 @@ class GraphicsManager
         CameraFPS*      AddCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         Light*          AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
         Light*          AddPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
+        Light*          AddSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie

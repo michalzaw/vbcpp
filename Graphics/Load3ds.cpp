@@ -194,11 +194,11 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 
 	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
-        sMaterial._shader = OGLDriver::getInstance().GetShader(NORMALMAPPING_MATERIAL); //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+        sMaterial._shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
     else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
-        sMaterial._shader = OGLDriver::getInstance().GetShader(SOLID_MATERIAL); //_OGLDriver->GetShader(SOLID_MATERIAL);
+        sMaterial._shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
     else
-        sMaterial._shader = OGLDriver::getInstance().GetShader(NOTEXTURE_MATERIAL); //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+        sMaterial._shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
 }

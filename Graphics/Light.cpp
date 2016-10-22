@@ -5,7 +5,7 @@ Light::Light(LightType type)
     : Component(CT_LIGHT),
     _lightType(type),
     _color(1.0f, 1.0f, 1.0f), _ambientIntensity(0.5f), _diffuseIntensity(1.0f),
-    _cutoff(0.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f)
 {
 
 
@@ -16,7 +16,7 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
     : Component(CT_LIGHT),
     _lightType(type),
     _color(color), _ambientIntensity(ambientIntensity), _diffuseIntensity(diffuseIntensity),
-    _cutoff(0.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f)
 {
 
 
@@ -64,6 +64,8 @@ void Light::SetAttenuation(LightAttenuation attenuation)
 void Light::SetCutoff(float cutoff)
 {
     _cutoff = cutoff;
+
+    _cutoffCos = cosf(_cutoff);
 }
 
 
@@ -95,9 +97,11 @@ glm::vec3 Light::GetDirection()
 {
     glm::vec4 dir(1.0f, 0.0f, 0.0f, 0.0f);
 
-    dir = glm::normalize(_objectTransform->GetNormalMatrix() * dir);
+    //dir = glm::normalize(_objectTransform->GetNormalMatrix() * dir);
 
-    return glm::vec3(dir);
+    //return glm::vec3(dir);
+
+    return glm::normalize(glm::vec3(_objectTransform->GetNormalMatrix() * dir));;
 }
 
 
@@ -116,4 +120,10 @@ LightAttenuation& Light::GetAttenuation()
 float Light::GetCutoff()
 {
     return _cutoff;
+}
+
+
+float Light::GetCutoffCos()
+{
+    return _cutoffCos;
 }

@@ -84,6 +84,18 @@ Light* GraphicsManager::AddPointLight(glm::vec3 color, float ambientIntensity, f
 }
 
 
+Light* GraphicsManager::AddSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation)
+{
+    Light* light = new Light(LT_SPOT, color, ambientIntensity, diffuseIntensity);
+    light->SetAttenuation(attenuation);
+    light->SetCutoff(cutoff);
+
+    _lights.push_back(light);
+
+    return light;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)

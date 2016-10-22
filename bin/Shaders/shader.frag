@@ -31,7 +31,7 @@ struct SpotLight
 {
 	PointLight Base;
 	vec3 Direction;
-	float Cutoff;
+	float CutoffCos;
 };
 
 const int MAX_DIR_COUNT = 1;
@@ -46,13 +46,15 @@ in vec3 Normal;
 out vec4 FragmentColor;
 
 
-uniform DirectionalLight DirLights[MAX_DIR_COUNT];
-uniform PointLight PointLights[MAX_POINT_COUNT];
-uniform SpotLight SpotLights[MAX_SPOT_COUNT];
-
-uniform int DirCount;
-uniform int PointCount;
-uniform int SpotCount;
+uniform LightsBlock
+{
+	DirectionalLight 	DirLights[MAX_DIR_COUNT];
+	PointLight 			PointLights[MAX_POINT_COUNT];
+	SpotLight 			SpotLights[MAX_SPOT_COUNT];
+	int DirCount;
+	int PointCount;
+	int SpotCount;
+} Lights;
 
 
 uniform vec4 matAmbient;
@@ -83,14 +85,31 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 }
 
 
-vec4 CalculatePointLight(int LightIndex, vec3 normal)
+vec4 CalculatePointLight(PointLight light, vec3 normal)
 {
-	vec3 Direction = Position - PointLights[LightIndex].Position;
+	vec3 Direction = Position - light.Position;
 	float Distance = length(Direction);
-	float Attenuation = PointLights[LightIndex].Attenuation.constant + PointLights[LightIndex].Attenuation.linear * Distance +
-						PointLights[LightIndex].Attenuation.exp * Distance * Distance;
+	float Attenuation = light.Attenuation.constant + light.Attenuation.linear * Distance +
+						light.Attenuation.exp * Distance * Distance;
 						
-	return CalculateLight(PointLights[LightIndex].Base, normal, normalize(Direction)) / Attenuation;
+	return CalculateLight(light.Base, normal, normalize(Direction)) / Attenuation;
+}
+
+
+vec4 CalculateSpotLight(SpotLight light, vec3 normal)
+{
+	vec3 LightToPixel = normalize(Position - light.Base.Position);
+	float SpotFactor = dot(LightToPixel, light.Direction);
+	
+	if (SpotFactor > light.CutoffCos)
+	{
+		vec4 LightColor = CalculatePointLight(light.Base, normal);
+		return LightColor * (1.0f - (1.0f - SpotFactor) * 1.0f / (1.0f - light.CutoffCos));
+	}
+	else
+	{
+		return vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	}
 }
 
 
@@ -100,14 +119,19 @@ void main()
 	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
-	for (int i = 0; i < DirCount; ++i)
+	for (int i = 0; i < Lights.DirCount; ++i)
 	{
-		LightsColor += CalculateLight(DirLights[i].Base, n, DirLights[i].Direction);
+		LightsColor += CalculateLight(Lights.DirLights[i].Base, n, Lights.DirLights[i].Direction);
 	}
 	
-	for (int i = 0; i < PointCount; ++i)
+	for (int i = 0; i < Lights.PointCount; ++i)
 	{
-		LightsColor += CalculatePointLight(i, n);
+		LightsColor += CalculatePointLight(Lights.PointLights[i], n);
+	}
+	
+	for (int i = 0; i < Lights.SpotCount; ++i)
+	{
+		LightsColor += CalculateSpotLight(Lights.SpotLights[i], n);
 	}
 
 	//vec4 amb = AmbientColor * matAmbient;

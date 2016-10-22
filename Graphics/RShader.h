@@ -79,6 +79,36 @@ class RShader : virtual public Resource
             SetUniform(Name, _textureLocation++);
         }
 
+        inline void getUniformOffset(const char** names, unsigned int count, int* offsets)
+        {
+            GLuint uniformIndices[count];
+            glGetUniformIndices(_shaderID, count, names, uniformIndices);
+
+            glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_OFFSET, offsets);
+        }
+
+        inline GLint getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
+        {
+            GLuint uniformIndices[count];
+            glGetUniformIndices(_shaderID, count, names, uniformIndices);
+
+            glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_ARRAY_STRIDE, arrayStrides);
+        }
+
+        inline GLint getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
+        {
+            GLuint uniformIndices[count];
+            glGetUniformIndices(_shaderID, count, names, uniformIndices);
+
+            glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_MATRIX_STRIDE, matrixStrides);
+        }
+
+        inline void setUniformBlockBinding(const char* blocksName, unsigned int location)
+        {
+            GLuint index = glGetUniformBlockIndex(_shaderID, blocksName);
+            glUniformBlockBinding(_shaderID, index, location);
+        }
+
 };
 
 

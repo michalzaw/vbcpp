@@ -14,7 +14,7 @@ class Material
 {
     public:
         Material()
-        : diffuseTexture(0), normalmapTexture(0), shininess(0), transparency(0), _shader(0) {}
+        : diffuseTexture(0), normalmapTexture(0), shininess(0), transparency(0), _shader(SOLID_MATERIAL) {}
         virtual ~Material()
         { }
 
@@ -34,7 +34,9 @@ class Material
     glm::vec2 offset;
     glm::vec2 scale;
 
-    RShader* _shader;
+    //RShader* _shader;
+    ShaderType _shader;
+
 };
 
 
