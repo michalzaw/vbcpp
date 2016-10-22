@@ -6,15 +6,15 @@ Renderer::Renderer(/* OGLDriver* driver */)
 {
     // Load shaders
     // SOLID_MATERIAL
-	RShader* shdr1 = ResourceManager::getInstance().loadShader("shader.vert", "shader.frag");
+	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag");
     _shaderList.push_back(shdr1);
 
     // NOTEXTURE_MATERIAL
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("DirLight.vert", "DirLight_notexture.frag");
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight_notexture.frag");
     _shaderList.push_back(shdr2);
 
     // NORMALMAPPING_MATERIAL
-    RShader* shader = ResourceManager::getInstance().loadShader("shader_n.vert", "shader_n.frag");
+    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
     _shaderList.push_back(shader);
 
 

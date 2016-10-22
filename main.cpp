@@ -376,13 +376,6 @@ int main()
     }
     */
 
-    RModel* busModel = ResourceManager::getInstance().loadModel("H9.3ds", "ZKM/");
-    SceneObject* bus = sceneMgr->addSceneObject("bus");
-    //RenderObject* busro = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel) );
-    bus->addComponent(GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel) ));
-    bus->getTransform()->SetRotation(glm::vec3(-0.5 * PI, 0.0f, 0.0f));
-    bus->getTransform()->SetPosition(glm::vec3(-10, 2, 20));
-
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
     point->getTransform()->SetPosition(glm::vec3(-10, 4.5, 20));
@@ -398,8 +391,8 @@ int main()
     point3->getTransform()->SetPosition(glm::vec3(-10, 4.5, 12));
     point3->setIsActive(true);
 
-    spot = scene->addSceneObject();
-    spot->addComponent(graphMgr->AddSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, DegToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
+    spot = sceneMgr->addSceneObject("spot");
+    spot->addComponent(GraphicsManager::getInstance().AddSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, DegToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
     spot->getTransform()->SetPosition(glm::vec3(0.0f, 5.0f, -10.0f));
     spot->getTransform()->SetRotation(glm::vec3(0.0f, 0.0f, DegToRad(-45.0f)));
     spot->setIsActive(false);
