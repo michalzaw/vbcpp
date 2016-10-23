@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<object name="ogorek"> 
+	<transform position="1,15,0" rotation="0,0,0" scale="1,1,1" />
+
+	<component type="render" model="bustest/bus_test.3ds" textures="bustest/" />
+	<!-- <component type="physics" body="convex" halfExtents="1,1,1" mass="1" position="0,15,0" /> -->
+	<component type="physics" body="convex" mass="1" />
+	
+</object>

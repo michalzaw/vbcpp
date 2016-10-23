@@ -2,10 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <object name="ogorek"> 
-	<transform position="10.4,5.1,10.9" rotation="10,0,0" scale="1,2,1" />
+	<transform position="1,15,0" rotation="0,0,0.1" scale="1,1,1" />
 
 	<component type="render" model="crate.3ds" textures="./" />
-	<component type="physics" body="box" />
+	<!-- <component type="physics" body="convex" halfExtents="1,1,1" mass="1" position="0,15,0" /> -->
+	<component type="physics" body="sphere" radius="1.5" mass="1" position="1,15,0" />
 	
 	<constraint type="hinge" parent="" child="" name="blablabla" />
 </object>

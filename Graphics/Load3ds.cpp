@@ -73,7 +73,9 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 
 	for (material = _file3ds->materials; material != NULL; material = material->next)
 	{
-	    if (strcmp(material->name, "CollisionMes") != 0)
+	    //std::cout << "Material name: " << material->name << std::endl;
+
+	    if (strcmp(material->name, "Collision") != 0)
         {
             Mesh m;
 
@@ -126,6 +128,8 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
     {
         collisionMeshVertices[i] = collisionMesh[i];
     }
+
+    std::cout << "Collision mesh vertices: " << collisionMesh.size() << std::endl;
 
 
 	Model* model = new Model(vert, vertices.size(), ind, indices.size(), me, meshes.size(), collisionMeshVertices, collisionMesh.size());
@@ -245,7 +249,7 @@ void Load3ds::loadCollisionMesh(std::vector<glm::vec3>* vertices)
 
 			if(faceMaterial == "Collision")
 			{
-			    std::cout << "\n\n\n\n\n\nCollisionMesh\n\n\n\n\n\n\n";
+			    //std::cout << "\n\n\n\n\n\nCollisionMesh\n\n\n\n\n\n\n";
 			    for(int currentVertex = 0; currentVertex < 3; currentVertex++)
 				{
 				    glm::vec3 vertex;
