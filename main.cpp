@@ -194,21 +194,22 @@ void loadXMLbusData(std::string filename)
     XMLElement* objElement = doc.FirstChildElement("object");
 
     std::cout << "XML DATA" << std::endl;
-    //std::cout<< objElement->Attribute("name") << std::endl;
 
     std::string sObjName(objElement->Attribute("name"));
 
     std::cout<< sObjName << std::endl;
 
     RModel* busModel = 0;
+    PhysicalBodyConvexHull* chasisBody = 0;
     glm::vec3 busPosition = glm::vec3(0,0,0);
+
+    std::string texturePath;
 
     SceneObject* scnObj = sceneMgr->addSceneObject(sObjName);
 
     for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
     {
         const char* ename = child->Name();
-        //cout << "Element name: " << ename << endl;
 
         // OBJECT TRANSFORM
         if (strcmp(ename,"transform") == 0)
@@ -229,91 +230,77 @@ void loadXMLbusData(std::string filename)
             scnObj->getTransform()->SetScale(scale);
 
         }
-        else // RENDER COMPONENT
-        if (strcmp(ename,"component") == 0)
+        else // BODY DATA
+        if (strcmp(ename,"body") == 0)
         {
-            const char* compType = child->Attribute("type");
+            std::cout << "XML: Body data" << std::endl;
 
-            if (strcmp(compType, "render") == 0)
+            std::string sModel(child->Attribute("model"));
+            texturePath = std::string(child->Attribute("textures"));
+
+            busModel = ResourceManager::getInstance().loadModel(sModel, texturePath);
+            RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
+
+            scnObj->addComponent(renderObj);
+
+
+            // PhysicalBodyConvexHull* wheel3Body = physMgr->createPhysicalBodyConvexHull(wheel3model->GetVertices(), wheel3model->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
+
+            // Tworzenie fizycznego obiektu karoserii
+            const char* cMass = child->Attribute("mass");
+            float fMass = (float)atof(cMass);
+
+            btVector3 btPos(busPosition.x, busPosition.y, busPosition.z);
+
+
+            if (busModel->GetCollisionMeshSize() > 0)
             {
-                std::cout << "XML: Render component" << std::endl;
-                //const char* renderModel = child->Attribute("type");
-
-                std::string sModel(child->Attribute("model"));
-                std::string sTextures(child->Attribute("textures"));
-
-                busModel = ResourceManager::getInstance().loadModel(sModel, sTextures);
-                RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
-
-                scnObj->addComponent(renderObj);
+                chasisBody = physMgr->createPhysicalBodyConvexHull(busModel->GetCollisionMesh(), busModel->GetCollisionMeshSize(), fMass, btPos);
+                scnObj->addComponent(chasisBody);
             }
-            else // PHYSICS COMPONENT
-            if (strcmp(compType, "physics") == 0)
-            {
-                std::cout << "XML: Physics component" << std::endl;
 
-                std::string bodyType(child->Attribute("body"));
-
-                std::cout << "Physical Body: " << bodyType <<  std::endl;
-
-                if (bodyType == "box")
-                {
-                    std::cout << "box" << std::endl;
-                    //PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
-
-                    const char* cHalfExtents = child->Attribute("halfExtents");
-                    glm::vec3 halfExtents(XMLstringToVec3(cHalfExtents));
-                    btVector3 btHalfExtents(halfExtents.x, halfExtents.y, halfExtents.z);
-
-                    const char* cMass = child->Attribute("mass");
-                    float fMass = (float)atof(cMass);
-
-                    const char* cPosition = child->Attribute("position");
-                    glm::vec3 position(XMLstringToVec3(cPosition));
-                    btVector3 btPos(position.x, position.y, position.z);
-
-                    PhysicalBodyBox* box = physMgr->createPhysicalBodyBox(btHalfExtents, fMass, btPos);
-                    scnObj->addComponent(box);
-                } else
-                if (bodyType == "sphere")
-                {
-                    std::cout << "sphere" << std::endl;
-                    //PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
-
-                    const char* cRadius = child->Attribute("radius");
-                    float fRadius = (float)atof(cRadius);
-
-                    const char* cMass = child->Attribute("mass");
-                    float fMass = (float)atof(cMass);
-
-                    const char* cPosition = child->Attribute("position");
-                    glm::vec3 position(XMLstringToVec3(cPosition));
-                    btVector3 btPos(position.x, position.y, position.z);
-
-                    PhysicalBodySphere* sphere = physMgr->createPhysicalBodySphere(fRadius, fMass, btPos);
-                    scnObj->addComponent(sphere);
-                } else
-                if (bodyType == "convex")
-                {
-                    std::cout << "convex hull" << std::endl;
-                    // PhysicalBodyConvexHull* wheel3Body = physMgr->createPhysicalBodyConvexHull(wheel3model->GetVertices(), wheel3model->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
-
-                    const char* cMass = child->Attribute("mass");
-                    float fMass = (float)atof(cMass);
-
-                    btVector3 btPos(busPosition.x, busPosition.y, busPosition.z);
-
-                    PhysicalBodyConvexHull* hull = physMgr->createPhysicalBodyConvexHull(busModel->GetCollisionMesh(), busModel->GetCollisionMeshSize(), fMass, btPos);
-                    scnObj->addComponent(hull);
-
-                }
-
-            }
         }
-        else // PHYSICS CONSTRAINTS
-        if (strcmp(ename,"constraint") == 0)
+        else // WHEEL DATA
+        if (strcmp(ename,"wheel") == 0)
         {
-            std::cout << "XML: Physics constraint" << std::endl;
+            std::cout << "XML: Wheel data" << std::endl;
+            // ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(wheel1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
+
+            std::string wheelName(child->Attribute("name"));
+            std::string wheelModel(child->Attribute("model"));
+            std::string side(child->Attribute("side"));
+            float mass = (float)atof(child->Attribute("mass"));
+            float radius = (float)atof(child->Attribute("radius"));
+            float width = (float)atof(child->Attribute("width"));
+
+            SceneObject* wheel1Obj = sceneMgr->addSceneObject(wheelName);
+
+
+            glm::vec3 wheelPosition = XMLstringToVec3(child->Attribute("position"));
+            glm::vec3 relativePos = busPosition + wheelPosition;
+
+
+            wheel1Obj->getTransform()->SetPosition(relativePos);
+
+            // obracamy model koła jeśli jest po lewej stronie
+            if (side == "left")
+                wheel1Obj->getTransform()->SetRotation(glm::vec3(0,0.5 * PI,0));
+
+
+            btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
+
+            RModel* wheel = ResourceManager::getInstance().loadModel(wheelModel, texturePath);
+            RenderObject* wheelRender = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel));
+
+            wheel1Obj->addComponent(wheelRender);
+
+            PhysicalBodyCylinder* wheel1cyl = physMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btWheelPos, X_AXIS);
+            wheel1Obj->addComponent(wheel1cyl);
+
+            btVector3 suspension(0,1,0);
+            btVector3 hingePos(btWheelPos - suspension);
+            ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(chasisBody, wheel1cyl, hingePos, btVector3(0,1,0), btVector3(1,0,0));
+
         }
 
     }
@@ -354,7 +341,7 @@ int main()
 
     loadXMLbusData("bustest/bus_test.xml");
 
-    /* crate */
+    /*
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
@@ -363,7 +350,6 @@ int main()
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
 
-    /* legs objects */
     RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
     SceneObject* wheel1Obj = sceneMgr->addSceneObject("wheel1");
     RenderObject* wheel1Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel1model));
@@ -371,7 +357,6 @@ int main()
     wheel1Body->setRestitution(0.9f);
     wheel1Obj->addComponent(wheel1Ren);
     wheel1Obj->addComponent(wheel1Body);
-
 
     RModel* wheel2model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
     SceneObject* wheel2Obj = sceneMgr->addSceneObject("wheel2");
@@ -381,7 +366,6 @@ int main()
     wheel2Obj->addComponent(wheel2Ren);
     wheel2Obj->addComponent(wheel2Body);
 
-
     RModel* wheel3model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
     SceneObject* wheel3Obj = sceneMgr->addSceneObject("wheel3");
     RenderObject* wheel3Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel3model));
@@ -389,7 +373,6 @@ int main()
     wheel3Body->setRestitution(0.9f);
     wheel3Obj->addComponent(wheel3Ren);
     wheel3Obj->addComponent(wheel3Body);
-
 
     RModel* wheel4model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
     SceneObject* wheel4Obj = sceneMgr->addSceneObject("wheel4");
@@ -399,15 +382,14 @@ int main()
     wheel4Obj->addComponent(wheel4Ren);
     wheel4Obj->addComponent(wheel4Body);
 
-
     //PhysicalBodyConvexHull* leg1Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
     //PhysicalBodyConvexHull* leg2Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,3));
-
 
     ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(wheel1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge2 = physMgr->createConstraintHinge2(wheel2Body, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge3 = physMgr->createConstraintHinge2(wheel3Body, boxBody2, btVector3(1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
     ConstraintHinge2* hinge4 = physMgr->createConstraintHinge2(wheel4Body, boxBody2, btVector3(-1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
+    */
 
     // Kamera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");

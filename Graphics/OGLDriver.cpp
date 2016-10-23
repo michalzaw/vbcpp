@@ -61,15 +61,6 @@ bool OGLDriver::Initialize()
 
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
-	//RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag");
-    //_shaderList.push_back(shdr1);
-
-    //RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight_notexture.frag");
-    //_shaderList.push_back(shdr2);
-
-    //RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
-    //_shaderList.push_back(shader);
-
     return true;
 }
 

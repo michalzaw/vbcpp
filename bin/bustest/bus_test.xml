@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<object name="ogorek"> 
-	<transform position="1,15,0" rotation="0,0,0" scale="1,1,1" />
+<object name="bus"> 
+	<transform position="1,5,0" rotation="0,0,0" scale="1,1,1" />
 
-	<component type="render" model="bustest/bus_test.3ds" textures="bustest/" />
-	<!-- <component type="physics" body="convex" halfExtents="1,1,1" mass="1" position="0,15,0" /> -->
-	<component type="physics" body="convex" mass="1" />
+	<body model="bustest/bus_test.3ds" textures="bustest/" mass="5" />
+
+	<wheel name="wheel1" side="right" model="bustest/wheel.3ds" mass="2" position="1.2,0.5,2.2" radius="1" width="0.5" />
+	<wheel name="wheel1" side="left" model="bustest/wheel.3ds" mass="2" position="-1.2,0.5,2.2" radius="1" width="0.5" />
+	
+	<wheel name="wheel1" side="right" model="bustest/wheel.3ds" mass="2" position="1.2,0.5,-1.8" radius="1" width="0.5" />
+	<wheel name="wheel1" side="left" model="bustest/wheel.3ds" mass="2" position="-1.2,0.5,-1.8" radius="1" width="0.5" />
 	
 </object>
