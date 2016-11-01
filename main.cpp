@@ -25,6 +25,8 @@
 
 #include "Utils/ResourceManager.h"
 
+#include "Scene/Bus.h"
+
 // XML reader
 #include "Utils/tinyxml2.h"
 #include <sstream>
@@ -50,6 +52,8 @@ SceneManager* sceneMgr;
 
 SceneObject* point, *point2, *point3, *dirLight, *spot;
 
+Bus* bus = 0;
+
 std::string winTitle = "Virtual Bus Core++";
 
 
@@ -74,7 +78,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
-	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
+	    Light* l = static_cast<Light*>(dirLight->getComponent(CT_LIGHT));
 	    if (l->GetAmbientIntensity() > 0.05)
         {
             l->SetAmbientIntensity(0.05);
@@ -161,8 +165,39 @@ void readInput(GLFWwindow* window, double deltaTime)
 		camFPS->strafeLeft(deltaTime);
 
 	}
+
+	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+    {
+        bus->turnLeft();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+    {
+        bus->turnRight();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
+    {
+        bus->accelerate();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_RELEASE)
+    {
+        bus->idle();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
+    {
+        bus->brakeOn();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
+    {
+        bus->brakeOff();
+    }
 }
 
+/*
 glm::vec3 XMLstringToVec3(const char* xmlstring)
 {
     std::stringstream ss(xmlstring);
@@ -185,6 +220,7 @@ glm::vec3 XMLstringToVec3(const char* xmlstring)
     //cout << "Sum: " << n1 + n2 + n3 << endl;
     return outVec;
 }
+*/
 
 void loadXMLbusData(std::string filename)
 {
@@ -331,17 +367,20 @@ int main()
 	Renderer* renderer = new Renderer;
 
     /* terrain */
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
+    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
     RenderObject* terrainObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
     terrainMesh->setRestitution(0.9f);
+    terrainMesh->getRigidBody()->setFriction(1.0f);
     terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);
 
-    loadXMLbusData("bustest/bus_test.xml");
+    //loadXMLbusData("bustest/bus_test.xml");
 
-    /*
+    bus = new Bus(sceneMgr, physMgr, "bustest/bus_test.xml");
+
+
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
@@ -349,7 +388,9 @@ int main()
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
+    crate->getTransform()->SetPosition(glm::vec3(-10,3,-10));
 
+    /*
     RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
     SceneObject* wheel1Obj = sceneMgr->addSceneObject("wheel1");
     RenderObject* wheel1Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel1model));
@@ -405,6 +446,7 @@ int main()
     SceneObject* dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * PI));
+    dirLight->getTransform()->SetPosition(glm::vec3(0,20,0));
 
     /*
     for (int i = 0; i < 2; ++i)
@@ -438,7 +480,7 @@ int main()
     spot->addComponent(GraphicsManager::getInstance().AddSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, DegToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
     spot->getTransform()->SetPosition(glm::vec3(0.0f, 5.0f, -10.0f));
     spot->getTransform()->SetRotation(glm::vec3(0.0f, 0.0f, DegToRad(-45.0f)));
-    spot->setIsActive(false);
+    spot->setIsActive(true);
 
 
     // Zmienne dla obliczania czasu
@@ -499,7 +541,6 @@ int main()
             physMgr->simulate(deltaTime);
             //PhysicsManager::getInstance().simulate(deltaTime);
 
-
             frameTime -= deltaTime;
 
             t += deltaTime;
@@ -516,6 +557,8 @@ int main()
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
+
+    bus->drop();
 
     physMgr->drop();
     renderer->drop();

@@ -19,5 +19,7 @@ T clamp(const T& what, const T& a, const T& b)
        return std::min(b, std::max(what, a));
 }
 
+glm::vec3 XMLstringToVec3(const char* xmlstring);
+
 
 #endif // HELPERS_HPP_INCLUDED

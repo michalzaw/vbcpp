@@ -7,13 +7,14 @@ ConstraintHinge2::ConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btV
 : Constraint(bodyA, bodyB),
 _pivot(btVector3(pivot)), _axisA(btVector3(axisA)), _axisB(btVector3(axisB))
 {
+    std::cout << "Hinge2 Constraint - Konstruktor" << std::endl;
     UpdateConstraint();
 }
 
 
 ConstraintHinge2::~ConstraintHinge2()
 {
-
+    std::cout << "Hinge2 Constraint - Destruktor" << std::endl;
 }
 
 

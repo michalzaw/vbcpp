@@ -47,7 +47,7 @@ class Light : public Component
     public:
         Light(LightType type);
         Light(LightType type, glm::vec3 color, float ambientIntensity, float diffuseIntensity);
-        ~Light();
+        virtual ~Light();
 
         void SetColor(glm::vec3 color);
         void SetAmbientIntensity(float intensity);

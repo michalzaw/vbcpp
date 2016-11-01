@@ -34,7 +34,7 @@ PhysicsManager::PhysicsManager()
 
 PhysicsManager::~PhysicsManager()
 {
-  	//printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+  	printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
 	//delete collision shapes
 	for (int j = 0; j < _physicalBodies.size(); j++)
@@ -48,7 +48,7 @@ PhysicsManager::~PhysicsManager()
 	}
 	_physicalBodies.clear();
 
-
+    std::cout << "Ilosc polaczen na stosie: " << _constraints.size() << std::endl;
 	//delete collision shapes
 	for (int j = 0; j < _constraints.size(); j++)
 	{
@@ -61,7 +61,7 @@ PhysicsManager::~PhysicsManager()
 	}
 	_constraints.clear();
 
-	//printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+	printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
     destroyPhysicsWorld();
 }
@@ -222,7 +222,7 @@ ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, Ph
 {
     ConstraintHinge2* c = new ConstraintHinge2(bodyA, bodyB, pivot, axisA, axisB);
 
-    _dynamicsWorld->addConstraint(c->getBulletConstraint());
+    _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 
     _constraints.push_back(c);
 

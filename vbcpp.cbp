@@ -198,12 +198,15 @@
 		<Unit filename="Physics/PhysicalBodyStaticPlane.hpp" />
 		<Unit filename="Physics/PhysicsManager.cpp" />
 		<Unit filename="Physics/PhysicsManager.hpp" />
+		<Unit filename="Scene/Bus.cpp" />
+		<Unit filename="Scene/Bus.h" />
 		<Unit filename="Scene/Component.cpp" />
 		<Unit filename="Scene/Component.h" />
 		<Unit filename="Scene/SceneManager.cpp" />
 		<Unit filename="Scene/SceneManager.h" />
 		<Unit filename="Scene/SceneObject.h" />
 		<Unit filename="Scene/sceneObject.cpp" />
+		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
 		<Unit filename="Utils/RModel.cpp" />
