@@ -26,6 +26,8 @@
 #include "Utils/ResourceManager.h"
 #include "Utils/Math.h"
 
+#include "GUI/GUIManager.h"
+
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
 
@@ -173,7 +175,7 @@ int main()
 
 	GraphicsManager* graphMgr = scene->getGraphicsManager();
 
-	Renderer* renderer = new Renderer;
+	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
 
 
     // Wczytywanie zasobów
@@ -301,6 +303,12 @@ int main()
     spot->setIsActive(false);
 
 
+    GUIManager* gui = new GUIManager;
+    Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
+    //img->setPosition(100, 768 - 512);
+    //img->setTextureRect(UintRect(256, 0, 256, 256));
+    img->setScale(0.5f, 0.5f);
+
     // Zmienne dla obliczania czasu
     double t;
     double dt = 1/60.0f;
@@ -367,6 +375,7 @@ int main()
 
         // Renderowanie sceny
         renderer->Render(graphMgr->GetRenderData());
+        renderer->RenderGUI(gui->getGUIList());
 
         // Swap buffers and poll events
         win->swapBuffers();

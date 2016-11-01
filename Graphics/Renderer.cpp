@@ -1,8 +1,9 @@
 #include "Renderer.h"
 
 
-Renderer::Renderer(/* OGLDriver* driver */)
+Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */)
 //    : _OGLDriver(driver)
+    : _screenWidth(screenWidth), _screenHeight(screenHeight)
 {
     // Load shaders
     // SOLID_MATERIAL
@@ -16,6 +17,10 @@ Renderer::Renderer(/* OGLDriver* driver */)
     // NORMALMAPPING_MATERIAL
     RShader* shader = ResourceManager::getInstance().loadShader("shader_n.vert", "shader_n.frag");
     _shaderList.push_back(shader);
+
+    // GUI_SHADER
+    RShader* guishader = ResourceManager::getInstance().loadShader("GUIshader.vert", "GUIshader.frag");
+    _shaderList.push_back(guishader);
 
 
     // Create UBO for lights
@@ -450,7 +455,7 @@ void Renderer::Render(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
-        if (mesh->material.normalmapTexture != 0)
+        if (mesh->material.normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
@@ -462,7 +467,8 @@ void Renderer::Render(RenderData* renderData)
         }
 
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
-        shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
+        if (mesh->material.diffuseTexture != NULL)
+            shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         shader->SetUniform("matAmbient", mesh->material.ambientColor);
         shader->SetUniform("matDiffuse", mesh->material.diffuseColor);
         shader->SetUniform("matSpecular", mesh->material.specularColor);
@@ -495,4 +501,38 @@ void Renderer::Render(RenderData* renderData)
 
 
     delete renderData;
+}
+
+
+void Renderer::RenderGUI(std::list<GUIObject*>* GUIObjectsList)
+{
+    glDisable(GL_DEPTH_TEST);
+
+    RShader* shader = _shaderList[GUI_SHADER];
+    shader->Enable();
+
+    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, -(float)_screenHeight, 0.0f, 1.0f, -1.5f);
+
+    for (std::list<GUIObject*>::iterator i = GUIObjectsList->begin(); i != GUIObjectsList->end(); ++i)
+    {
+        GUIObject* object = *i;
+
+        shader->SetUniform("VerticesTransformMatrix", projectionMatrix * object->getVerticesTransformMatrix());
+        shader->SetUniform("TexCoordTransformMatrix", object->getTexCoordTransformMatrix());
+
+        object->getVBO()->Bind();
+
+        RTexture* texture = static_cast<Image*>(object)->getTexture();      // Dodac rozroznianie typow obiektow
+        shader->BindTexture2D("Texture", texture);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        glDisableVertexAttribArray(0);
+    }
+
+    delete GUIObjectsList;
+    glEnable(GL_DEPTH_TEST);
 }
