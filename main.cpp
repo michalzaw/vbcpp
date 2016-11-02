@@ -80,7 +80,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
-	    Light* l = static_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
 	    if (l->GetAmbientIntensity() > 0.05)
         {
             l->SetAmbientIntensity(0.05);
@@ -455,7 +455,7 @@ int main()
     // Światło
     //dirLight = scene->addSceneObject();
     //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
-    SceneObject* dirLight = sceneMgr->addSceneObject("light");
+    dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * PI));
     dirLight->getTransform()->SetPosition(glm::vec3(0,20,0));
