@@ -187,6 +187,8 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	// Normal mapa
 	texStr = std::string(material->bump_map.name);
 
+	std::cout << "NormalMap: " << texStr << std::endl;
+
 	for(unsigned int i = 0; i < texStr.size(); i++ )
 		texStr[i] = tolower(texStr[i]);
 

@@ -62,7 +62,7 @@ class Bus : virtual public RefCounter
         int _wheelCollisionMask;
         int _chasisCollisionMask;
 
-        void loadXMLdata(std::string filename);
+        void loadXMLdata(std::string busname);
         void updatePhysics();
 };
 
