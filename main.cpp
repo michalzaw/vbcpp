@@ -390,13 +390,13 @@ int main()
 
     //loadXMLbusData("bustest/bus_test.xml");
 
-    bus = new Bus(sceneMgr, physMgr, "bustest/bus_test.xml");
+    bus = new Bus(sceneMgr, physMgr, "h9");
 
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
-    RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
+    RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 1.0f, btVector3(0,7,0));
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 45.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);

@@ -36,8 +36,10 @@ Bus::~Bus()
 }
 
 
-void Bus::loadXMLdata(std::string filename)
+void Bus::loadXMLdata(std::string busname)
 {
+    std::string filename = busname + "/config.xml";
+
     XMLDocument doc;
     doc.LoadFile( filename.c_str() );
 
@@ -53,7 +55,7 @@ void Bus::loadXMLdata(std::string filename)
     //PhysicalBodyConvexHull* chasisBody = 0;
     glm::vec3 busPosition = glm::vec3(0,0,0);
 
-    std::string texturePath;
+    std::string texturePath = busname + "/";
 
     _sceneObject = _sMgr->addSceneObject(sObjName);
 
@@ -85,10 +87,11 @@ void Bus::loadXMLdata(std::string filename)
         {
             std::cout << "XML: Body data" << std::endl;
 
-            std::string sModel(child->Attribute("model"));
-            texturePath = std::string(child->Attribute("textures"));
+            std::string modelFile = std::string(child->Attribute("model"));
+            std::string modelPath = busname + "/" + modelFile;
+            texturePath += std::string(child->Attribute("textures")) + "/";
 
-            busModel = ResourceManager::getInstance().loadModel(sModel, texturePath);
+            busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
             RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
 
             _sceneObject->addComponent(renderObj);
@@ -157,7 +160,7 @@ void Bus::loadXMLdata(std::string filename)
             if (side == "right")
             {
                 wheelSide = WS_RIGHT;
-                wheelObj->getTransform()->SetRotation(glm::vec3(DegToRad(45.0f),0,0));
+                wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
             }
             else
                 wheelSide = WS_LEFT;
@@ -182,7 +185,7 @@ void Bus::loadXMLdata(std::string filename)
             ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
             hinge1->setStiffness(2, stiffness);
             hinge1->setDamping(2, damping);
-            hinge1->getBulletConstraint()->setLinearUpperLimit(btVector3(0,0,0.1));
+            hinge1->getBulletConstraint()->setLinearUpperLimit(btVector3(0,0,0.10));
             hinge1->getBulletConstraint()->setLinearLowerLimit(btVector3(0,0,-0.1));
 
 
