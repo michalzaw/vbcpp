@@ -136,6 +136,12 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="GUI/GUIManager.cpp" />
+		<Unit filename="GUI/GUIManager.h" />
+		<Unit filename="GUI/GUIObject.cpp" />
+		<Unit filename="GUI/GUIObject.h" />
+		<Unit filename="GUI/Image.cpp" />
+		<Unit filename="GUI/Image.h" />
 		<Unit filename="Graphics/Camera.cpp" />
 		<Unit filename="Graphics/Camera.h" />
 		<Unit filename="Graphics/CameraFPS.cpp" />

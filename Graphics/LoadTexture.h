@@ -10,7 +10,10 @@
 
 // U¿ycie SOIL jedynie do wczytania pliku graficznego
 // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
-GLuint LoadTexture(const char* FileName, bool Mipmaping = true);
+GLuint LoadTexture(const char* FileName, int* width, int* height, bool Mipmaping = true);
+
+
+GLuint loadTextureRect(const char* fileName);
 
 
 #endif // LOADTEXTURE_H_INCLUDED

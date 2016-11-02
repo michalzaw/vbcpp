@@ -30,7 +30,7 @@ ResourceManager& ResourceManager::getInstance()
 
 
 // Ładowanie tektur
-GLuint ResourceManager::loadTexture(std::string path)
+RTexture* ResourceManager::loadTexture(std::string path)
 {
     // Sprawdzamy czy zasob juz istnieje
     std::list<std::unique_ptr<Resource>>::iterator it;
@@ -45,35 +45,36 @@ GLuint ResourceManager::loadTexture(std::string path)
 
             std::cout << "Texture ID: " << tex->getID() << std::endl;
 
-            return tex->getID();
+            return tex;//tex->getID();
         }
     }
 
     // Zasob nie istnieje
-    GLuint tID = LoadTexture(path.c_str(), true);
+    int width, height;
+    GLuint tID = LoadTexture(path.c_str(), &width, &height, true);
 
     if ( tID )
     {
-        std::unique_ptr<RTexture> tex (new RTexture(path, tID));
+        std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
         std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
 
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
-        GLuint texID = tex->getID();
+        //GLuint texID = tex->getID();
         _resources.push_back(std::move(tex));
 
-        /*
+
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Musialem odwolac sie do utworzonej tekstury poprzez iterator do ostatniego elementu na liscie (nowa tekstura jest zawsze wrzucana na koniec listy)
         std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
         std::unique_ptr<Resource>& res = *(--it);
 
-        RTexture* tex = dynamic_cast<RTexture*>(res.get());
-        */
+        RTexture* t = dynamic_cast<RTexture*>(res.get());
 
-        std::cout << "Texture ID: " << texID << std::endl;
 
-        return texID;
+        std::cout << "Texture ID: " << tID << std::endl;
+
+        return t;
     }
 
     return 0;

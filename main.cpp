@@ -35,8 +35,10 @@ using namespace tinyxml2;
 
 #include "Utils/Math.h"
 
-// Definicje globalne
+#include "GUI/GUIManager.h"
 
+
+// Definicje globalne
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
 
@@ -364,7 +366,17 @@ int main()
 
     physMgr = new PhysicsManager;
 	sceneMgr = new SceneManager;
-	Renderer* renderer = new Renderer;
+	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
+
+
+    // Wczytywanie zasobów
+    //Load3ds* l = new Load3ds;
+
+
+    //RModel* model = ResourceManager::getInstance().loadModel("crate.3ds", "./");
+    //RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
+    //RModel* crate2 = ResourceManager::getInstance().loadModel("crate2.3ds", "./");
+
 
     /* terrain */
     RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
@@ -483,6 +495,13 @@ int main()
     spot->setIsActive(true);
 
 
+    GUIManager* gui = new GUIManager;
+    Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
+    //img->setPosition(100, 768 - 512);
+    //img->setTextureRect(UintRect(256, 0, 256, 256));
+    img->setScale(0.5f, 0.5f);
+
+
     // Zmienne dla obliczania czasu
     double t;
     double dt = 1/60.0f;
@@ -548,6 +567,10 @@ int main()
 
         // Renderowanie sceny
         renderer->Render( GraphicsManager::getInstance().GetRenderData() ); //graphMgr->GetRenderData());
+
+        // Renderowanie GUI
+        renderer->RenderGUI(gui->getGUIList());
+
 
         // Swap buffers and poll events
         win->swapBuffers();

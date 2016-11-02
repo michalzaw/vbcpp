@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "../Utils/Resource.h"
+#include "../Utils/RTexture.h"
 
 #include <iostream>
 
@@ -12,7 +13,8 @@ enum ShaderType
 {
     SOLID_MATERIAL,
     NOTEXTURE_MATERIAL,
-    NORMALMAPPING_MATERIAL
+    NORMALMAPPING_MATERIAL,
+    GUI_SHADER
 };
 
 
@@ -72,10 +74,11 @@ class RShader : virtual public Resource
 		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
 
 
-        inline void BindTexture2D(char* Name, GLuint TextureID)
+        inline void BindTexture2D(char* Name, RTexture* Texture)
         {
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
-            glBindTexture(GL_TEXTURE_2D, TextureID);
+            //glBindTexture(GL_TEXTURE_2D, TextureID);
+            Texture->bind();
             SetUniform(Name, _textureLocation++);
         }
 
@@ -87,7 +90,7 @@ class RShader : virtual public Resource
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_OFFSET, offsets);
         }
 
-        inline GLint getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
+        inline void getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
         {
             GLuint uniformIndices[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
@@ -95,7 +98,7 @@ class RShader : virtual public Resource
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_ARRAY_STRIDE, arrayStrides);
         }
 
-        inline GLint getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
+        inline void getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
         {
             GLuint uniformIndices[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);

@@ -20,7 +20,7 @@ class ResourceManager
 
         static ResourceManager& getInstance();
 
-        GLuint loadTexture(std::string path);
+        RTexture* loadTexture(std::string path);
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath);
 
