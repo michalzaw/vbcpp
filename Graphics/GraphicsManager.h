@@ -34,16 +34,16 @@ class GraphicsManager
         static GraphicsManager& getInstance();
 
 
-        //RenderObject*   AddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
+        //RenderObject*   qddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
-        RenderObject*   AddRenderObject(RenderObject* object); //Model* model = NULL);
+        RenderObject*   addRenderObject(RenderObject* object); //Model* model = NULL);
 
-        CameraStatic*   AddCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
-        CameraFPS*      AddCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
-        Light*          AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
-        Light*          AddPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
-        Light*          AddSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
+        CameraStatic*   addCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
+        CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
+        Light*          addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
+        Light*          addPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
+        Light*          addSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -52,7 +52,7 @@ class GraphicsManager
         void removeLight(Light* light);
 
 
-        RenderData* GetRenderData();
+        RenderData* getRenderData();
 };
 
 

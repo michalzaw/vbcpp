@@ -29,25 +29,25 @@ Light::~Light()
 }
 
 
-void Light::SetColor(glm::vec3 color)
+void Light::setColor(glm::vec3 color)
 {
     _color = color;
 }
 
 
-void Light::SetAmbientIntensity(float intensity)
+void Light::setAmbientIntensity(float intensity)
 {
     _ambientIntensity = intensity;
 }
 
 
-void Light::SetDiffuseIntensity(float intensity)
+void Light::setDiffuseIntensity(float intensity)
 {
     _diffuseIntensity = intensity;
 }
 
 
-void Light::SetAttenuation(float constant, float linear, float exp)
+void Light::setAttenuation(float constant, float linear, float exp)
 {
     _attenuation.constant = constant;
     _attenuation.linear = linear;
@@ -55,13 +55,13 @@ void Light::SetAttenuation(float constant, float linear, float exp)
 }
 
 
-void Light::SetAttenuation(LightAttenuation attenuation)
+void Light::setAttenuation(LightAttenuation attenuation)
 {
     _attenuation = attenuation;
 }
 
 
-void Light::SetCutoff(float cutoff)
+void Light::setCutoff(float cutoff)
 {
     _cutoff = cutoff;
 
@@ -69,31 +69,31 @@ void Light::SetCutoff(float cutoff)
 }
 
 
-LightType Light::GetLightType()
+LightType Light::getLightType()
 {
     return _lightType;
 }
 
 
-glm::vec3 Light::GetColor()
+glm::vec3 Light::getColor()
 {
     return _color;
 }
 
 
-float Light::GetAmbientIntensity()
+float Light::getAmbientIntensity()
 {
     return _ambientIntensity;
 }
 
 
-float Light::GetDiffiseIntenisty()
+float Light::getDiffiseIntenisty()
 {
     return _diffuseIntensity;
 }
 
 
-glm::vec3 Light::GetDirection()
+glm::vec3 Light::getDirection()
 {
     glm::vec4 dir(1.0f, 0.0f, 0.0f, 0.0f);
 
@@ -101,29 +101,29 @@ glm::vec3 Light::GetDirection()
 
     //return glm::vec3(dir);
 
-    return glm::normalize(glm::vec3(_objectTransform->GetNormalMatrix() * dir));;
+    return glm::normalize(glm::vec3(_objectTransform->getNormalMatrix() * dir));;
 }
 
 
-glm::vec3 Light::GetPosition()
+glm::vec3 Light::getPosition()
 {
-    return _objectTransform->GetPosition();
+    return _objectTransform->getPosition();
 }
 
 
-LightAttenuation& Light::GetAttenuation()
+LightAttenuation& Light::getAttenuation()
 {
     return _attenuation;
 }
 
 
-float Light::GetCutoff()
+float Light::getCutoff()
 {
     return _cutoff;
 }
 
 
-float Light::GetCutoffCos()
+float Light::getCutoffCos()
 {
     return _cutoffCos;
 }

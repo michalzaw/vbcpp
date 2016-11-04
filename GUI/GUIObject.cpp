@@ -10,7 +10,7 @@ GUIObject::GUIObject()
     _texCoordTransformMatrixIs = false;
 
 
-    _vbo = OGLDriver::getInstance().CreateVBO(12800);
+    _vbo = OGLDriver::getInstance().createVBO(12800);
 
     GUIVertex vertices[4];
     /*vertices[0].position = glm::vec3(1.0f, 1.0f, 0.0f);
@@ -27,7 +27,7 @@ GUIObject::GUIObject()
     vertices[2].texCoord = glm::vec2(1.0f, 1.0f);
     vertices[3].texCoord = glm::vec2(1.0f, 0.0f);
 
-    _vbo->AddVertexData(vertices, 4);
+    _vbo->addVertexData(vertices, 4);
 }
 
 

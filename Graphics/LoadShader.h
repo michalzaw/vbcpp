@@ -9,7 +9,7 @@
 #include <GLEW/glew.h>
 
 
-GLuint LoadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName);
+GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName);
 
 
 #endif // LOADSHADER_H_INCLUDED

@@ -5,12 +5,12 @@
 const GLfloat PI = 3.14159265359f;
 
 
-inline float DegToRad(float deg)
+inline float degToRad(float deg)
 {
     return float((deg * PI) / 180);
 }
 
-inline float RadToDeg(float rad)
+inline float radToDeg(float rad)
 {
     return float((rad * 180 ) / PI);
 }

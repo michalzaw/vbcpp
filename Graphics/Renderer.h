@@ -31,8 +31,8 @@ class Renderer : virtual public RefCounter
         Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */);
         ~Renderer();
 
-        void Render(RenderData* renderData);
-        void RenderGUI(std::list<GUIObject*>* GUIObjectsList);
+        void render(RenderData* renderData);
+        void renderGUI(std::list<GUIObject*>* GUIObjectsList);
 
 };
 

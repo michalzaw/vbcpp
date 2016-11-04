@@ -25,9 +25,9 @@ class RenderObject : public Component
 
         //Model* GetModel();
 
-        void SetModel(RModel* model);
+        void setModel(RModel* model);
 
-        RModel* GetModel();
+        RModel* getModel();
 
 };
 

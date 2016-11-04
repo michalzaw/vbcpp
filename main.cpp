@@ -81,40 +81,40 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
 	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
-	    if (l->GetAmbientIntensity() > 0.05)
+	    if (l->getAmbientIntensity() > 0.05)
         {
-            l->SetAmbientIntensity(0.05);
-            l->SetDiffuseIntensity(0.0);
+            l->setAmbientIntensity(0.05);
+            l->setDiffuseIntensity(0.0);
         }
         else
         {
-            l->SetAmbientIntensity(0.5);
-            l->SetDiffuseIntensity(0.5);
+            l->setAmbientIntensity(0.5);
+            l->setDiffuseIntensity(0.5);
         }
 
 	}if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
 	{
-		glm::vec3 r = spot->getTransform()->GetRotation();
+		glm::vec3 r = spot->getTransform()->getRotation();
 		r.z += 0.01;
-		spot->getTransform()->SetRotation(r);
+		spot->getTransform()->setRotation(r);
 
 	}if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
 	{
-		glm::vec3 r = spot->getTransform()->GetRotation();
+		glm::vec3 r = spot->getTransform()->getRotation();
 		r.z -= 0.01;
-		spot->getTransform()->SetRotation(r);
+		spot->getTransform()->setRotation(r);
 
 	}if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
 	{
-		glm::vec3 r = spot->getTransform()->GetRotation();
+		glm::vec3 r = spot->getTransform()->getRotation();
 		r.y += 0.01;
-		spot->getTransform()->SetRotation(r);
+		spot->getTransform()->setRotation(r);
 
 	}if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
 	{
-		glm::vec3 r = spot->getTransform()->GetRotation();
+		glm::vec3 r = spot->getTransform()->getRotation();
 		r.y -= 0.01;
-		spot->getTransform()->SetRotation(r);
+		spot->getTransform()->setRotation(r);
 
 	}
 }
@@ -256,16 +256,16 @@ void loadXMLbusData(std::string filename)
 
             const char* cPosition = child->Attribute("position");
             busPosition = XMLstringToVec3(cPosition);
-            scnObj->getTransform()->SetPosition(busPosition);
+            scnObj->getTransform()->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             glm::vec3 rotation(XMLstringToVec3(cRotation));
 
-            scnObj->getTransform()->SetRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+            scnObj->getTransform()->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
-            scnObj->getTransform()->SetScale(scale);
+            scnObj->getTransform()->setScale(scale);
 
         }
         else // BODY DATA
@@ -277,7 +277,7 @@ void loadXMLbusData(std::string filename)
             texturePath = std::string(child->Attribute("textures"));
 
             busModel = ResourceManager::getInstance().loadModel(sModel, texturePath);
-            RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
+            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel));
 
             scnObj->addComponent(renderObj);
 
@@ -291,9 +291,9 @@ void loadXMLbusData(std::string filename)
             btVector3 btPos(busPosition.x, busPosition.y, busPosition.z);
 
 
-            if (busModel->GetCollisionMeshSize() > 0)
+            if (busModel->getCollisionMeshSize() > 0)
             {
-                chasisBody = physMgr->createPhysicalBodyConvexHull(busModel->GetCollisionMesh(), busModel->GetCollisionMeshSize(), fMass, btPos);
+                chasisBody = physMgr->createPhysicalBodyConvexHull(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), fMass, btPos);
                 scnObj->addComponent(chasisBody);
             }
 
@@ -318,17 +318,17 @@ void loadXMLbusData(std::string filename)
             glm::vec3 relativePos = busPosition + wheelPosition;
 
 
-            wheel1Obj->getTransform()->SetPosition(relativePos);
+            wheel1Obj->getTransform()->setPosition(relativePos);
 
             // obracamy model koła jeśli jest po lewej stronie
             if (side == "left")
-                wheel1Obj->getTransform()->SetRotation(glm::vec3(0,0.5 * PI,0));
+                wheel1Obj->getTransform()->setRotation(glm::vec3(0,0.5 * PI,0));
 
 
             btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
 
             RModel* wheel = ResourceManager::getInstance().loadModel(wheelModel, texturePath);
-            RenderObject* wheelRender = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel));
+            RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel));
 
             wheel1Obj->addComponent(wheelRender);
 
@@ -361,7 +361,7 @@ int main()
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Inicjalizujemy potrzebne rzeczy
-    OGLDriver::getInstance().Initialize();
+    OGLDriver::getInstance().initialize();
     //PhysicsManager::getInstance().createPhysicsWorld();
 
     physMgr = new PhysicsManager;
@@ -380,7 +380,7 @@ int main()
 
     /* terrain */
     RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
-    RenderObject* terrainObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(terrain));
+    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
     terrainMesh->setRestitution(0.9f);
@@ -395,12 +395,12 @@ int main()
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
-    RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
+    RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
     PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 45.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
-    crate->getTransform()->SetPosition(glm::vec3(-10,3,-10));
+    crate->getTransform()->setPosition(glm::vec3(-10,3,-10));
 
     /*
     RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
@@ -446,9 +446,9 @@ int main()
 
     // Kamera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
-    camFPS = GraphicsManager::getInstance().AddCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
+    camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     Camera->addComponent(camFPS);
-    Camera->getTransform()->SetPosition(glm::vec3(0,4,5));
+    Camera->getTransform()->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
@@ -456,9 +456,9 @@ int main()
     //dirLight = scene->addSceneObject();
     //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight = sceneMgr->addSceneObject("light");
-    dirLight->addComponent( GraphicsManager::getInstance().AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
-    dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * PI));
-    dirLight->getTransform()->SetPosition(glm::vec3(0,20,0));
+    dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
+    dirLight->getTransform()->setRotation(glm::vec3(0, 0, -0.2f * PI));
+    dirLight->getTransform()->setPosition(glm::vec3(0,20,0));
 
     /*
     for (int i = 0; i < 2; ++i)
@@ -474,24 +474,24 @@ int main()
     */
 
     point = sceneMgr->addSceneObject("point1");
-    point->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point->getTransform()->SetPosition(glm::vec3(-10, 4.5, 20));
+    point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
     point->setIsActive(true);
 
     point2 = sceneMgr->addSceneObject("point2");
-    point2->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point2->getTransform()->SetPosition(glm::vec3(-10, 4.5, 17));
+    point2->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
     point2->setIsActive(true);
 
     point3 = sceneMgr->addSceneObject("point3");
-    point3->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point3->getTransform()->SetPosition(glm::vec3(-10, 4.5, 12));
+    point3->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
+    point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
     point3->setIsActive(true);
 
     spot = sceneMgr->addSceneObject("spot");
-    spot->addComponent(GraphicsManager::getInstance().AddSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, DegToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
-    spot->getTransform()->SetPosition(glm::vec3(0.0f, 5.0f, -10.0f));
-    spot->getTransform()->SetRotation(glm::vec3(0.0f, 0.0f, DegToRad(-45.0f)));
+    spot->addComponent(GraphicsManager::getInstance().addSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, degToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
+    spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, -10.0f));
+    spot->getTransform()->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
     spot->setIsActive(true);
 
 
@@ -566,10 +566,10 @@ int main()
         }
 
         // Renderowanie sceny
-        renderer->Render( GraphicsManager::getInstance().GetRenderData() ); //graphMgr->GetRenderData());
+        renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());
 
         // Renderowanie GUI
-        renderer->RenderGUI(gui->getGUIList());
+        renderer->renderGUI(gui->getGUIList());
 
 
         // Swap buffers and poll events

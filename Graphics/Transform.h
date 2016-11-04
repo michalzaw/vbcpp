@@ -27,25 +27,25 @@ class Transform
 
         SceneObject* _object;
 
-        void UpdateTransformMatrix();
-        void Changed();
+        void updateTransformMatrix();
+        void changed();
 
     public:
         Transform(SceneObject* object);
         Transform(const Transform& t);
         ~Transform();
 
-        void SetPosition(glm::vec3 position);
-        void SetRotation(glm::vec3 rotation);
-        void SetRotation(float x, float y, float z, float w);
+        void setPosition(glm::vec3 position);
+        void setRotation(glm::vec3 rotation);
+        void setRotation(float x, float y, float z, float w);
+        void setScale(glm::vec3 scale);
 
-        void SetScale(glm::vec3 scale);
-        glm::vec3 GetPosition();
-        glm::vec3 GetRotation();
-        glm::vec3 GetScale();
+        glm::vec3 getPosition();
+        glm::vec3 getRotation();
+        glm::vec3 getScale();
 
-        glm::mat4& GetTransformMatrix();
-        glm::mat4& GetNormalMatrix();
+        glm::mat4& getTransformMatrix();
+        glm::mat4& getNormalMatrix();
 
         Transform& operator=(const Transform& t);
 

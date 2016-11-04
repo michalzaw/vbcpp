@@ -1,7 +1,7 @@
 #include "LoadTexture.h"
 
 
-GLuint LoadTexture(const char* fileName, int* width, int* height, bool mipmaping)
+GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping)
 {
     GLuint texId = 0;
     glGenTextures(1, &texId);

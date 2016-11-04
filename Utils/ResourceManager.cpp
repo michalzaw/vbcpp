@@ -51,7 +51,7 @@ RTexture* ResourceManager::loadTexture(std::string path)
 
     // Zasob nie istnieje
     int width, height;
-    GLuint tID = LoadTexture(path.c_str(), &width, &height, true);
+    GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
 
     if ( tID )
     {
@@ -101,7 +101,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
-    std::unique_ptr<Resource> shader ( new RShader(path, LoadShader(vertexPath.c_str(), fragmPath.c_str())) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ::loadShader(vertexPath.c_str(), fragmPath.c_str())) );
 
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
 

@@ -23,7 +23,7 @@ CameraStatic::~CameraStatic()
 
 vec3 CameraStatic::getPosition()
 {
-	return _objectTransform->GetPosition();
+	return _objectTransform->getPosition();
 }
 
 
@@ -73,8 +73,8 @@ glm::vec3 CameraStatic::getDirection()
 {
     if (!_directionIs)
     {
-        float verticalAngle = _objectTransform->GetRotation().x;
-        float horizontalAngle = _objectTransform->GetRotation().y;
+        float verticalAngle = _objectTransform->getRotation().x;
+        float horizontalAngle = _objectTransform->getRotation().y;
 
         _direction = vec3(
                     cos(verticalAngle) * sin(horizontalAngle),
@@ -92,7 +92,7 @@ glm::vec3 CameraStatic::getRightVector()
 {
     if (!_rightVectorIs)
     {
-        float horizontalAngle = _objectTransform->GetRotation().y;
+        float horizontalAngle = _objectTransform->getRotation().y;
 
         _rightVector = vec3(
 				sin(horizontalAngle - PI/2.0f),

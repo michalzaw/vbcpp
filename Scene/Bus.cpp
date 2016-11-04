@@ -70,16 +70,16 @@ void Bus::loadXMLdata(std::string busname)
 
             const char* cPosition = child->Attribute("position");
             busPosition = XMLstringToVec3(cPosition);
-            _sceneObject->getTransform()->SetPosition(busPosition);
+            _sceneObject->getTransform()->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             glm::vec3 rotation(XMLstringToVec3(cRotation));
 
-            _sceneObject->getTransform()->SetRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+            _sceneObject->getTransform()->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
-            _sceneObject->getTransform()->SetScale(scale);
+            _sceneObject->getTransform()->setScale(scale);
 
         }
         else // BODY DATA
@@ -92,7 +92,7 @@ void Bus::loadXMLdata(std::string busname)
             texturePath += std::string(child->Attribute("textures")) + "/";
 
             busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            RenderObject* renderObj = GraphicsManager::getInstance().AddRenderObject(new RenderObject(busModel));
+            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel));
 
             _sceneObject->addComponent(renderObj);
 
@@ -106,9 +106,9 @@ void Bus::loadXMLdata(std::string busname)
             btVector3 btPos(busPosition.x, busPosition.y, busPosition.z);
 
 
-            if (busModel->GetCollisionMeshSize() > 0)
+            if (busModel->getCollisionMeshSize() > 0)
             {
-                _chasisBody = _pMgr->createPhysicalBodyConvexHull(busModel->GetCollisionMesh(), busModel->GetCollisionMeshSize(), fMass, btPos);
+                _chasisBody = _pMgr->createPhysicalBodyConvexHull(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), fMass, btPos);
                 _chasisBody->getRigidBody()->setActivationState( DISABLE_DEACTIVATION );
                 _sceneObject->addComponent(_chasisBody);
 
@@ -154,13 +154,13 @@ void Bus::loadXMLdata(std::string busname)
             glm::vec3 relativePos = glm::vec3(busPosition.x + wheelPosition.x, busPosition.y + wheelPosition.y, busPosition.z + wheelPosition.z);
 
 
-            wheelObj->getTransform()->SetPosition(relativePos);
+            wheelObj->getTransform()->setPosition(relativePos);
 
             // obracamy model kola jeżli jest po lewej stronie
             if (side == "right")
             {
                 wheelSide = WS_RIGHT;
-                wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
+                wheelObj->getTransform()->setRotation(glm::vec3(0,degToRad(45.0f),0));
             }
             else
                 wheelSide = WS_LEFT;
@@ -170,7 +170,7 @@ void Bus::loadXMLdata(std::string busname)
             btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
 
             RModel* wheel = ResourceManager::getInstance().loadModel(wheelModel, texturePath);
-            RenderObject* wheelRender = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel));
+            RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel));
 
             wheelObj->addComponent(wheelRender);
 

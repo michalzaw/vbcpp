@@ -5,7 +5,7 @@
 #include <cstdio>
 
 
-void Transform::UpdateTransformMatrix()
+void Transform::updateTransformMatrix()
 {
     glm::mat4 pos = glm::translate(_position);
 
@@ -28,7 +28,7 @@ void Transform::UpdateTransformMatrix()
     _transformMatrixIs = true;
 }
 
-void Transform::Changed()
+void Transform::changed()
 {
     _transformMatrixIs = false;
     _normalMatrixIs = false;
@@ -43,7 +43,7 @@ Transform::Transform(SceneObject* object)
     _scale(1.0f, 1.0f, 1.0f),
     _object(object)
 {
-    Changed();
+    changed();
 }
 
 
@@ -55,7 +55,7 @@ Transform::Transform(const Transform& t)
 
     _object = t._object;
 
-    Changed();
+    changed();
 }
 
 
@@ -65,42 +65,23 @@ Transform::~Transform()
 }
 
 
-void Transform::SetPosition(glm::vec3 position)
+void Transform::setPosition(glm::vec3 position)
 {
     _position = position;
 
-    Changed();
+    changed();
 }
 
 
-void Transform::SetRotation(glm::vec3 rotation)
+void Transform::setRotation(glm::vec3 rotation)
 {
     _rotation = rotation;
 
-    Changed();
+    changed();
 }
 
 
-void Transform::SetScale(glm::vec3 scale)
-{
-    _scale = scale;
-
-    Changed();
-}
-
-
-glm::vec3 Transform::GetPosition()
-{
-    return _position;
-}
-
-
-glm::vec3 Transform::GetRotation()
-{
-    return _rotation;
-}
-
-void Transform::SetRotation(float x, float y, float z, float w)
+void Transform::setRotation(float x, float y, float z, float w)
 {
     glm::quat q;
     q.x = x;
@@ -115,28 +96,48 @@ void Transform::SetRotation(float x, float y, float z, float w)
 }
 
 
-glm::vec3 Transform::GetScale()
+void Transform::setScale(glm::vec3 scale)
+{
+    _scale = scale;
+
+    changed();
+}
+
+
+glm::vec3 Transform::getPosition()
+{
+    return _position;
+}
+
+
+glm::vec3 Transform::getRotation()
+{
+    return _rotation;
+}
+
+
+glm::vec3 Transform::getScale()
 {
     return _scale;
 }
 
 
-glm::mat4& Transform::GetTransformMatrix()
+glm::mat4& Transform::getTransformMatrix()
 {
     if (!_transformMatrixIs)
     {
-        UpdateTransformMatrix();
+        updateTransformMatrix();
     }
 
     return _transformMatrix;
 }
 
 
-glm::mat4& Transform::GetNormalMatrix()
+glm::mat4& Transform::getNormalMatrix()
 {
     if (!_normalMatrixIs)
     {
-        _normalMatrix = glm::transpose(glm::inverse(GetTransformMatrix()));
+        _normalMatrix = glm::transpose(glm::inverse(getTransformMatrix()));
 
         _normalMatrixIs = true;
     }
@@ -153,7 +154,7 @@ Transform& Transform::operator=(const Transform& t)
 
     _object = t._object;
 
-    Changed();
+    changed();
 
     return *this;
 }

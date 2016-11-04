@@ -43,13 +43,13 @@ OGLDriver& OGLDriver::getInstance()
 }
 
 
-bool OGLDriver::Initialize()
+bool OGLDriver::initialize()
 {
     glewExperimental = true;
     if (glewInit() != GLEW_OK)
         return false;
 
-    if (CreateVAO() == NULL)
+    if (createVAO() == NULL)
         return false;
 
     glEnable(GL_CULL_FACE);
@@ -65,7 +65,7 @@ bool OGLDriver::Initialize()
 }
 
 
-VAO* OGLDriver::CreateVAO()
+VAO* OGLDriver::createVAO()
 {
     VAO* vao = new VAO;
 
@@ -78,7 +78,7 @@ VAO* OGLDriver::CreateVAO()
 }
 
 
-VBO* OGLDriver::CreateVBO(unsigned int size)
+VBO* OGLDriver::createVBO(unsigned int size)
 {
     VBO* vbo = new VBO(size);
 
@@ -91,7 +91,7 @@ VBO* OGLDriver::CreateVBO(unsigned int size)
 }
 
 
-IBO* OGLDriver::CreateIBO(unsigned int size)
+IBO* OGLDriver::createIBO(unsigned int size)
 {
     IBO* ibo = new IBO(size);
 
@@ -104,7 +104,7 @@ IBO* OGLDriver::CreateIBO(unsigned int size)
 }
 
 
-UBO* OGLDriver::CreateUBO(unsigned int size)
+UBO* OGLDriver::createUBO(unsigned int size)
 {
     UBO* ubo = new UBO(size);
 
@@ -117,7 +117,7 @@ UBO* OGLDriver::CreateUBO(unsigned int size)
 }
 
 
-void OGLDriver::DeleteVAO(VAO* vao)
+void OGLDriver::deleteVAO(VAO* vao)
 {
     for (int i = 0; i < _vaoList.size(); ++i)
     {
@@ -132,7 +132,7 @@ void OGLDriver::DeleteVAO(VAO* vao)
 }
 
 
-void OGLDriver::DeleteVBO(VBO* vbo)
+void OGLDriver::deleteVBO(VBO* vbo)
 {
     for (int i = 0; i < _vboList.size(); ++i)
     {
@@ -147,7 +147,7 @@ void OGLDriver::DeleteVBO(VBO* vbo)
 }
 
 
-void OGLDriver::DeleteIBO(IBO* ibo)
+void OGLDriver::deleteIBO(IBO* ibo)
 {
     for (int i = 0; i < _iboList.size(); ++i)
     {
@@ -162,7 +162,7 @@ void OGLDriver::DeleteIBO(IBO* ibo)
 }
 
 
-void OGLDriver::DeleteUBO(UBO* ubo)
+void OGLDriver::deleteUBO(UBO* ubo)
 {
     for (int i = 0; i < _uboList.size(); ++i)
     {

@@ -7,11 +7,11 @@
 
 struct Vertex
 {
-    glm::vec3 Position;
-    glm::vec2 TexCoord;
-    glm::vec3 Normal;
-    glm::vec3 Tangent;
-    glm::vec3 Bitangent;
+    glm::vec3 position;
+    glm::vec2 texCoord;
+    glm::vec3 normal;
+    glm::vec3 tangent;
+    glm::vec3 bitangent;
 
 };
 

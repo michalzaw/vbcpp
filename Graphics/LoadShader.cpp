@@ -1,7 +1,7 @@
 #include "LoadShader.h"
 
 
-GLuint LoadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName)
+GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName)
 {
 	GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
 	GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);

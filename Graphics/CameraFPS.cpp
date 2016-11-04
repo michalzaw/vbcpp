@@ -3,7 +3,7 @@
 
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
     : CameraStatic(width, height, viewAngle, nearValue, farValue),
-	m_MoveSpeed(3.0f), m_RotateSpeed(0.0005f)//, _oldXpos(0), _oldYpos(0)
+	_moveSpeed(3.0f), _rotateSpeed(0.0005f)//, _oldXpos(0), _oldYpos(0)
 {
     //update();
 
@@ -42,13 +42,13 @@ CameraFPS::~CameraFPS()
 void CameraFPS::setRotation(int mousePosX, int mousePosY)
 {
 	// Compute new orientation
-	float horizontalAngle = _objectTransform->GetRotation().y + m_RotateSpeed * GLdouble( _windowWidth/2 - mousePosX);
-	float verticalAngle = _objectTransform->GetRotation().x + m_RotateSpeed * GLdouble( _windowHeight/2 - mousePosY);
-	//m_HorizontalAngle += m_RotateSpeed * GLdouble( m_WindowWidth/2 - mousePosX);
-	//m_VerticalAngle += m_RotateSpeed * GLdouble( m_WindowHeight/2 - mousePosY);
+	float horizontalAngle = _objectTransform->getRotation().y + _rotateSpeed * GLdouble( _windowWidth/2 - mousePosX);
+	float verticalAngle = _objectTransform->getRotation().x + _rotateSpeed * GLdouble( _windowHeight/2 - mousePosY);
+	//m_HorizontalAngle += _rotateSpeed * GLdouble( m_WindowWidth/2 - mousePosX);
+	//m_VerticalAngle += _rotateSpeed * GLdouble( m_WindowHeight/2 - mousePosY);
 
-    //m_HorizontalAngle += m_RotateSpeed * GLdouble( _oldXpos - mousePosX);
-	//m_VerticalAngle += m_RotateSpeed * GLdouble( _oldYpos - mousePosY);
+    //m_HorizontalAngle += _rotateSpeed * GLdouble( _oldXpos - mousePosX);
+	//m_VerticalAngle += _rotateSpeed * GLdouble( _oldYpos - mousePosY);
 
 
 	if (horizontalAngle > 2 * PI || horizontalAngle < -2 * PI) horizontalAngle = 0.0f;
@@ -56,7 +56,7 @@ void CameraFPS::setRotation(int mousePosX, int mousePosY)
 	if (verticalAngle > 0.4f * PI) verticalAngle = 0.4f * PI;
 	if (verticalAngle < -0.4f * PI) verticalAngle = -0.4f * PI;
 
-	_objectTransform->SetRotation(glm::vec3(verticalAngle, horizontalAngle, 0.0f));
+	_objectTransform->setRotation(glm::vec3(verticalAngle, horizontalAngle, 0.0f));
 
 	//update();
 }
@@ -75,7 +75,7 @@ void CameraFPS::setRotation(int mousePosX, int mousePosY)
 
 void CameraFPS::moveForward(double deltaTime)
 {
-	//m_Direction *= deltaTime * m_MoveSpeed;
+	//m_Direction *= deltaTime * _moveSpeed;
 
 	//m_Position += m_Direction;
 
@@ -83,15 +83,15 @@ void CameraFPS::moveForward(double deltaTime)
 
 	glm::vec3 dir = getDirection();
 
-	dir *= deltaTime * m_MoveSpeed;
+	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->SetPosition(_objectTransform->GetPosition() + dir);
+	_objectTransform->setPosition(_objectTransform->getPosition() + dir);
 }
 
 
 void CameraFPS::moveBackward(double deltaTime)
 {
-	//m_Direction *= deltaTime * m_MoveSpeed;
+	//m_Direction *= deltaTime * _moveSpeed;
 
 	//m_Position -= m_Direction;
 
@@ -99,15 +99,15 @@ void CameraFPS::moveBackward(double deltaTime)
 
 	glm::vec3 dir = getDirection();
 
-	dir *= deltaTime * m_MoveSpeed;
+	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->SetPosition(_objectTransform->GetPosition() - dir);
+	_objectTransform->setPosition(_objectTransform->getPosition() - dir);
 }
 
 
 void CameraFPS::strafeLeft(double deltaTime)
 {
-	//m_RightVector *= deltaTime * m_MoveSpeed;
+	//m_RightVector *= deltaTime * _moveSpeed;
 
 	//m_Position -= m_RightVector;
 
@@ -115,15 +115,15 @@ void CameraFPS::strafeLeft(double deltaTime)
 
 	glm::vec3 dir = getRightVector();
 
-	dir *= deltaTime * m_MoveSpeed;
+	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->SetPosition(_objectTransform->GetPosition() - dir);
+	_objectTransform->setPosition(_objectTransform->getPosition() - dir);
 }
 
 
 void CameraFPS::strafeRight(double deltaTime)
 {
-	//m_RightVector *= deltaTime * m_MoveSpeed;
+	//m_RightVector *= deltaTime * _moveSpeed;
 
 	//m_Position += m_RightVector;
 
@@ -131,21 +131,21 @@ void CameraFPS::strafeRight(double deltaTime)
 
 	glm::vec3 dir = getRightVector();
 
-	dir *= deltaTime * m_MoveSpeed;
+	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->SetPosition(_objectTransform->GetPosition() + dir);
+	_objectTransform->setPosition(_objectTransform->getPosition() + dir);
 }
 
 
 void CameraFPS::setMoveSpeed(float speed)
 {
-	m_MoveSpeed = speed;
+	_moveSpeed = speed;
 }
 
 
 void CameraFPS::setRotationSpeed(float speed)
 {
-	m_RotateSpeed = speed;
+	_rotateSpeed = speed;
 }
 
 /*void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)

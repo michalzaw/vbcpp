@@ -102,11 +102,11 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 	Vertex* vert = new Vertex[vertices.size()];
 	for (unsigned int i = 0; i < vertices.size(); ++i)
     {
-        vert[i].Position = vertices[i].pos;
-        vert[i].TexCoord = glm::vec2(vertices[i].s, vertices[i].t);
-        vert[i].Normal = vertices[i].normal;
-        vert[i].Tangent = vertices[i].tangent;
-        vert[i].Bitangent = vertices[i].binormal;
+        vert[i].position = vertices[i].pos;
+        vert[i].texCoord = glm::vec2(vertices[i].s, vertices[i].t);
+        vert[i].normal = vertices[i].normal;
+        vert[i].tangent = vertices[i].tangent;
+        vert[i].bitangent = vertices[i].binormal;
     }
 
     unsigned int* ind = new unsigned int[indices.size()];
@@ -200,11 +200,11 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 
 	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
-        sMaterial._shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+        sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
     else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
-        sMaterial._shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
+        sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
     else
-        sMaterial._shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+        sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
 }
