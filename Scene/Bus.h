@@ -41,6 +41,8 @@ class Bus : virtual public RefCounter
         void brakeOn();
         void brakeOff();
 
+
+
     private:
         SceneObject*    _sceneObject;
         PhysicalBodyConvexHull* _chasisBody;

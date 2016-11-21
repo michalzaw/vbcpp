@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.8f), _steerStep(0.0005f),
+_maxSteerAngle(0.75f), _steerStep(0.0005f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f)
 {
@@ -160,7 +160,7 @@ void Bus::loadXMLdata(std::string busname)
             if (side == "right")
             {
                 wheelSide = WS_RIGHT;
-                wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
+                //wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
             }
             else
                 wheelSide = WS_LEFT;
@@ -175,7 +175,7 @@ void Bus::loadXMLdata(std::string busname)
             wheelObj->addComponent(wheelRender);
 
             PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btWheelPos, X_AXIS);
-            wheelCyl->getRigidBody()->setFriction(1.0f);
+            wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
             wheelObj->addComponent(wheelCyl);
             //wheelCyl->getRigidBody()->setActivationState( DISABLE_DEACTIVATION );
@@ -185,8 +185,8 @@ void Bus::loadXMLdata(std::string busname)
             ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
             hinge1->setStiffness(2, stiffness);
             hinge1->setDamping(2, damping);
-            hinge1->getBulletConstraint()->setLinearUpperLimit(btVector3(0,0,0.10));
-            hinge1->getBulletConstraint()->setLinearLowerLimit(btVector3(0,0,-0.1));
+            hinge1->getBulletConstraint()->setLinearUpperLimit(btVector3(0,0,0.25));
+            hinge1->getBulletConstraint()->setLinearLowerLimit(btVector3(0,0,-0.14));
 
 
             hinge1->getBulletConstraint()->setUpperLimit(0.0f);
@@ -211,6 +211,25 @@ void Bus::loadXMLdata(std::string busname)
             w->wheelSide = wheelSide;
 
             _wheels.push_back(w);
+        }
+        else // DOOR DATA
+        if (strcmp(ename,"door") == 0)
+        {
+            std::cout << "XML: Door data" << std::endl;
+
+            std::string wheelName(child->Attribute("name"));
+            std::string wheelModel(child->Attribute("model"));
+            float mass = (float)atof(child->Attribute("mass"));
+
+            glm::vec3 doorPosition = XMLstringToVec3(child->Attribute("position"));
+            glm::vec3 relativePos = glm::vec3(busPosition.x + doorPosition.x, busPosition.y + doorPosition.y, busPosition.z + doorPosition.z);
+
+            btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
+
+            glm::vec3 busPivot = XMLstringToVec3(child->Attribute("pivotA"));
+            glm::vec3 doorPivot = XMLstringToVec3(child->Attribute("pivotB"));
+
+
         }
     }
 

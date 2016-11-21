@@ -26,6 +26,7 @@
 #include "Utils/ResourceManager.h"
 
 #include "Scene/Bus.h"
+//#include "Scene/RaycastBus.h"
 
 // XML reader
 #include "Utils/tinyxml2.h"
@@ -50,9 +51,10 @@ Window* win;
 PhysicsManager* physMgr;
 SceneManager* sceneMgr;
 
-SceneObject* point, *point2, *point3, *dirLight, *spot;
+SceneObject* point, *point2, *point3, *dirLight, *spot = 0;
 
 Bus* bus = 0;
+//RaycastBus* bus = 0;
 
 std::string winTitle = "Virtual Bus Core++";
 
@@ -78,7 +80,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
-	    Light* l = static_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
 	    if (l->GetAmbientIntensity() > 0.05)
         {
             l->SetAmbientIntensity(0.05);
@@ -379,58 +381,16 @@ int main()
     //loadXMLbusData("bustest/bus_test.xml");
 
     bus = new Bus(sceneMgr, physMgr, "h9");
-
+    //bus = new RaycastBus(sceneMgr, physMgr, "h9");
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 45.0f, btVector3(0,7,0));
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
     crate->getTransform()->SetPosition(glm::vec3(-10,3,-10));
-
-    /*
-    RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
-    SceneObject* wheel1Obj = sceneMgr->addSceneObject("wheel1");
-    RenderObject* wheel1Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel1model));
-    PhysicalBodyCylinder* wheel1Body = physMgr->createPhysicalBodyCylinder(btVector3(0.5f,1,1), 1.0f, btVector3(3,3,3), X_AXIS);
-    wheel1Body->setRestitution(0.9f);
-    wheel1Obj->addComponent(wheel1Ren);
-    wheel1Obj->addComponent(wheel1Body);
-
-    RModel* wheel2model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
-    SceneObject* wheel2Obj = sceneMgr->addSceneObject("wheel2");
-    RenderObject* wheel2Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel2model));
-    PhysicalBodyCylinder* wheel2Body = physMgr->createPhysicalBodyCylinder(btVector3(0.5f,1,1), 1.0f, btVector3(-3,3,3), X_AXIS);
-    wheel2Body->setRestitution(0.9f);
-    wheel2Obj->addComponent(wheel2Ren);
-    wheel2Obj->addComponent(wheel2Body);
-
-    RModel* wheel3model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
-    SceneObject* wheel3Obj = sceneMgr->addSceneObject("wheel3");
-    RenderObject* wheel3Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel3model));
-    PhysicalBodyConvexHull* wheel3Body = physMgr->createPhysicalBodyConvexHull(wheel3model->GetVertices(), wheel3model->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
-    wheel3Body->setRestitution(0.9f);
-    wheel3Obj->addComponent(wheel3Ren);
-    wheel3Obj->addComponent(wheel3Body);
-
-    RModel* wheel4model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
-    SceneObject* wheel4Obj = sceneMgr->addSceneObject("wheel4");
-    RenderObject* wheel4Ren = GraphicsManager::getInstance().AddRenderObject(new RenderObject(wheel4model));
-    PhysicalBodyConvexHull* wheel4Body = physMgr->createPhysicalBodyConvexHull(wheel4model->GetVertices(), wheel4model->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,-3));
-    wheel4Body->setRestitution(0.9f);
-    wheel4Obj->addComponent(wheel4Ren);
-    wheel4Obj->addComponent(wheel4Body);
-
-    //PhysicalBodyConvexHull* leg1Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,3));
-    //PhysicalBodyConvexHull* leg2Body = PhysicsManager::getInstance().createPhysicalBodyConvexHull(crate2->GetVertices(), crate2->GetQuantumOfVertices(), 1.0f, btVector3(-3.0f,3,3));
-
-    ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(wheel1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
-    ConstraintHinge2* hinge2 = physMgr->createConstraintHinge2(wheel2Body, boxBody2, btVector3(-1,3,1), btVector3(0,1,0), btVector3(1,0,0));
-    ConstraintHinge2* hinge3 = physMgr->createConstraintHinge2(wheel3Body, boxBody2, btVector3(1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
-    ConstraintHinge2* hinge4 = physMgr->createConstraintHinge2(wheel4Body, boxBody2, btVector3(-1,3,-1), btVector3(0,1,0), btVector3(1,0,0));
-    */
 
     // Kamera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
@@ -447,19 +407,6 @@ int main()
     dirLight->addComponent( GraphicsManager::getInstance().AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->SetRotation(glm::vec3(0, 0, -0.2f * PI));
     dirLight->getTransform()->SetPosition(glm::vec3(0,20,0));
-
-    /*
-    for (int i = 0; i < 2; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            SceneObject* pointLight = scene->addSceneObject();
-            pointLight->addComponent(graphMgr->AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.2f, LightAttenuation(0.5f, 0.05f, 0.001f)));
-            pointLight->getTransform()->SetPosition(glm::vec3(10 + j * 30, 5, i * 30));
-            pointLight->setIsActive(false);
-        }
-    }
-    */
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().AddPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
@@ -546,8 +493,10 @@ int main()
             t += deltaTime;
         }
 
+        //bus->updatePhysics();
         // Renderowanie sceny
         renderer->Render( GraphicsManager::getInstance().GetRenderData() ); //graphMgr->GetRenderData());
+
 
         // Swap buffers and poll events
         win->swapBuffers();

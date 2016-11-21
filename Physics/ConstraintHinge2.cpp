@@ -26,7 +26,7 @@ void ConstraintHinge2::setStiffness(int index, btScalar stiffness)
 
 void ConstraintHinge2::setDamping(int index, btScalar damping)
 {
-    dynamic_cast<btHinge2Constraint*>(_constraint)->setStiffness(index, damping);
+    dynamic_cast<btHinge2Constraint*>(_constraint)->setDamping(index, damping);
 }
 
 

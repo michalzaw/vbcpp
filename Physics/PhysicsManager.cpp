@@ -105,7 +105,7 @@ int PhysicsManager::destroyPhysicsWorld()
 
 void PhysicsManager::simulate(btScalar timeStep)
 {
-    _dynamicsWorld->stepSimulation(timeStep, 1);
+    _dynamicsWorld->stepSimulation(timeStep, 2);
     //_dynamicsWorld->stepSimulation(1/60.0f, 5);
 
     for (int i = 0; i < _physicalBodies.size(); i++)
@@ -194,6 +194,13 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(R
 
     return b;
 }
+
+
+btCompoundShape* PhysicsManager::createCompoundShape()
+{
+    btCompoundShape* c = new btCompoundShape();
+}
+
 
 void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
 {

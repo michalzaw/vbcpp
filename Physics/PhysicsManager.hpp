@@ -44,6 +44,7 @@ class PhysicsManager : virtual public RefCounter
         PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
         PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos);
+        btCompoundShape*                createCompoundShape();
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);
