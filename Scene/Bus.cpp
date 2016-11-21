@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.75f), _steerStep(0.0005f),
+_maxSteerAngle(0.65f), _steerStep(0.0005f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f)
 {
@@ -326,7 +326,7 @@ void Bus::updatePhysics()
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * 5.0f);
+                w->body->getRigidBody()->applyTorque(forwardDir * 4.0f);
             }
         }
     }

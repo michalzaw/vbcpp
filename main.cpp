@@ -83,7 +83,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
 	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
-	    if (l->GetAmbientIntensity() > 0.05)
+	    if (l->getAmbientIntensity() > 0.05)
         {
             l->setAmbientIntensity(0.05);
             l->setDiffuseIntensity(0.0);
@@ -397,12 +397,12 @@ int main()
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
-    RenderObject* object2 = GraphicsManager::getInstance().AddRenderObject(new RenderObject(model));
+    RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
     PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0));
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
-    crate->getTransform()->SetPosition(glm::vec3(-10,3,-10));
+    crate->getTransform()->setPosition(glm::vec3(-10,3,-10));
 
     /*
     RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");
