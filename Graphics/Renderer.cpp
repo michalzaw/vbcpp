@@ -1,8 +1,9 @@
 #include "Renderer.h"
 
 
-Renderer::Renderer(/* OGLDriver* driver */)
+Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */)
 //    : _OGLDriver(driver)
+    : _screenWidth(screenWidth), _screenHeight(screenHeight)
 {
     // Load shaders
     // SOLID_MATERIAL
@@ -17,9 +18,13 @@ Renderer::Renderer(/* OGLDriver* driver */)
     RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
     _shaderList.push_back(shader);
 
+    // GUI_SHADER
+    RShader* guishader = ResourceManager::getInstance().loadShader("GUIshader.vert", "GUIshader.frag");
+    _shaderList.push_back(guishader);
+
 
     // Create UBO for lights
-    _lightUBO = OGLDriver::getInstance().CreateUBO(4096);
+    _lightUBO = OGLDriver::getInstance().createUBO(4096);
     _lightUBO->bindBufferBase(0);
 
     _shaderList[SOLID_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
@@ -28,7 +33,7 @@ Renderer::Renderer(/* OGLDriver* driver */)
 
 Renderer::~Renderer()
 {
-    OGLDriver::getInstance().DeleteUBO(_lightUBO);
+    OGLDriver::getInstance().deleteUBO(_lightUBO);
 }
 
 /*void Renderer::Render(RenderData* renderData)
@@ -268,7 +273,7 @@ Renderer::~Renderer()
 
 
 // UBO
-void Renderer::Render(RenderData* renderData)
+void Renderer::render(RenderData* renderData)
 {
     // Aktualizacja UBO swiatel
     int d = 0;
@@ -276,7 +281,7 @@ void Renderer::Render(RenderData* renderData)
     int s = 0;
     for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
     {
-        switch ((*i)->GetLightType())
+        switch ((*i)->getLightType())
         {
             case LT_DIRECTIONAL:
             {
@@ -298,17 +303,17 @@ void Renderer::Render(RenderData* renderData)
 
                 _shaderList[SOLID_MATERIAL]->getUniformOffset(names, 4, offsets);
 
-                _lightUBO->setUniform(offsets[0],                        (*i)->GetColor().r);
-                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->GetColor().g);
-                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->GetColor().b);
+                _lightUBO->setUniform(offsets[0],                        (*i)->getColor().r);
+                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->getColor().g);
+                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->getColor().b);
 
-                _lightUBO->setUniform(offsets[1], (*i)->GetAmbientIntensity());
+                _lightUBO->setUniform(offsets[1], (*i)->getAmbientIntensity());
 
-                _lightUBO->setUniform(offsets[2], (*i)->GetDiffiseIntenisty());
+                _lightUBO->setUniform(offsets[2], (*i)->getDiffiseIntenisty());
 
-                _lightUBO->setUniform(offsets[3],                        (*i)->GetDirection().x);
-                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->GetDirection().y);
-                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->GetDirection().z);
+                _lightUBO->setUniform(offsets[3],                        (*i)->getDirection().x);
+                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->getDirection().y);
+                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->getDirection().z);
 
                 break;
             }
@@ -337,21 +342,21 @@ void Renderer::Render(RenderData* renderData)
 
                 _shaderList[SOLID_MATERIAL]->getUniformOffset(names, 7, offsets);
 
-                _lightUBO->setUniform(offsets[0],                        (*i)->GetColor().r);
-                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->GetColor().g);
-                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->GetColor().b);
+                _lightUBO->setUniform(offsets[0],                        (*i)->getColor().r);
+                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->getColor().g);
+                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->getColor().b);
 
-                _lightUBO->setUniform(offsets[1], (*i)->GetAmbientIntensity());
+                _lightUBO->setUniform(offsets[1], (*i)->getAmbientIntensity());
 
-                _lightUBO->setUniform(offsets[2], (*i)->GetDiffiseIntenisty());
+                _lightUBO->setUniform(offsets[2], (*i)->getDiffiseIntenisty());
 
-                _lightUBO->setUniform(offsets[3],                        (*i)->GetPosition().x);
-                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->GetPosition().y);
-                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->GetPosition().z);
+                _lightUBO->setUniform(offsets[3],                        (*i)->getPosition().x);
+                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->getPosition().y);
+                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->getPosition().z);
 
-                _lightUBO->setUniform(offsets[4], (*i)->GetAttenuation().constant);
-                _lightUBO->setUniform(offsets[5], (*i)->GetAttenuation().linear);
-                _lightUBO->setUniform(offsets[6], (*i)->GetAttenuation().exp);
+                _lightUBO->setUniform(offsets[4], (*i)->getAttenuation().constant);
+                _lightUBO->setUniform(offsets[5], (*i)->getAttenuation().linear);
+                _lightUBO->setUniform(offsets[6], (*i)->getAttenuation().exp);
 
                 break;
             }
@@ -384,27 +389,27 @@ void Renderer::Render(RenderData* renderData)
 
                 _shaderList[SOLID_MATERIAL]->getUniformOffset(names, 9, offsets);
 
-                _lightUBO->setUniform(offsets[0],                        (*i)->GetColor().r);
-                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->GetColor().g);
-                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->GetColor().b);
+                _lightUBO->setUniform(offsets[0],                        (*i)->getColor().r);
+                _lightUBO->setUniform(offsets[0] + sizeof(float),        (*i)->getColor().g);
+                _lightUBO->setUniform(offsets[0] + 2 * sizeof(float),    (*i)->getColor().b);
 
-                _lightUBO->setUniform(offsets[1], (*i)->GetAmbientIntensity());
+                _lightUBO->setUniform(offsets[1], (*i)->getAmbientIntensity());
 
-                _lightUBO->setUniform(offsets[2], (*i)->GetDiffiseIntenisty());
+                _lightUBO->setUniform(offsets[2], (*i)->getDiffiseIntenisty());
 
-                _lightUBO->setUniform(offsets[3],                        (*i)->GetPosition().x);
-                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->GetPosition().y);
-                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->GetPosition().z);
+                _lightUBO->setUniform(offsets[3],                        (*i)->getPosition().x);
+                _lightUBO->setUniform(offsets[3] + sizeof(float),        (*i)->getPosition().y);
+                _lightUBO->setUniform(offsets[3] + 2 * sizeof(float),    (*i)->getPosition().z);
 
-                _lightUBO->setUniform(offsets[4], (*i)->GetAttenuation().constant);
-                _lightUBO->setUniform(offsets[5], (*i)->GetAttenuation().linear);
-                _lightUBO->setUniform(offsets[6], (*i)->GetAttenuation().exp);
+                _lightUBO->setUniform(offsets[4], (*i)->getAttenuation().constant);
+                _lightUBO->setUniform(offsets[5], (*i)->getAttenuation().linear);
+                _lightUBO->setUniform(offsets[6], (*i)->getAttenuation().exp);
 
-                _lightUBO->setUniform(offsets[7],                        (*i)->GetDirection().x);
-                _lightUBO->setUniform(offsets[7] + sizeof(float),        (*i)->GetDirection().y);
-                _lightUBO->setUniform(offsets[7] + 2 * sizeof(float),    (*i)->GetDirection().z);
+                _lightUBO->setUniform(offsets[7],                        (*i)->getDirection().x);
+                _lightUBO->setUniform(offsets[7] + sizeof(float),        (*i)->getDirection().y);
+                _lightUBO->setUniform(offsets[7] + 2 * sizeof(float),    (*i)->getDirection().z);
 
-                _lightUBO->setUniform(offsets[8], (*i)->GetCutoffCos());
+                _lightUBO->setUniform(offsets[8], (*i)->getCutoffCos());
 
                 break;
             }
@@ -427,19 +432,19 @@ void Renderer::Render(RenderData* renderData)
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        RModel* model = i->GetModel();
-        Mesh* mesh = i->GetMesh();
+        RModel* model = i->getModel();
+        Mesh* mesh = i->getMesh();
 
-        RShader* shader = _shaderList[mesh->material._shader];
-        shader->Enable();
+        RShader* shader = _shaderList[mesh->material.shader];
+        shader->enable();
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
-        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->GetTransform()->GetTransformMatrix();
-        shader->SetUniform("MVP", MVP);
-        shader->SetUniform("ModelMatrix", i->GetTransform()->GetTransformMatrix());
-        shader->SetUniform("NormalMatrix", i->GetTransform()->GetNormalMatrix());
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransform()->getTransformMatrix();
+        shader->setUniform("MVP", MVP);
+        shader->setUniform("ModelMatrix", i->getTransform()->getTransformMatrix());
+        shader->setUniform("NormalMatrix", i->getTransform()->getNormalMatrix());
 
-        model->GetVBO()->Bind();
+        model->getVBO()->bind();
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -450,7 +455,7 @@ void Renderer::Render(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
-        if (mesh->material.normalmapTexture != 0)
+        if (mesh->material.normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
@@ -458,27 +463,28 @@ void Renderer::Render(RenderData* renderData)
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
 
-            shader->BindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
+            shader->bindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
         }
 
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
-        shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
-        shader->SetUniform("matAmbient", mesh->material.ambientColor);
-        shader->SetUniform("matDiffuse", mesh->material.diffuseColor);
-        shader->SetUniform("matSpecular", mesh->material.specularColor);
+        if (mesh->material.diffuseTexture != NULL)
+            shader->bindTexture2D("Texture", mesh->material.diffuseTexture);
+        shader->setUniform("matAmbient", mesh->material.ambientColor);
+        shader->setUniform("matDiffuse", mesh->material.diffuseColor);
+        shader->setUniform("matSpecular", mesh->material.specularColor);
 
-        shader->SetUniform("Transparency", mesh->material.transparency);
+        shader->setUniform("Transparency", mesh->material.transparency);
 
-        shader->SetUniform("SpecularPower", mesh->material.shininess);
-        shader->SetUniform("CameraPosition", camera->getPosition());
-        shader->SetUniform("a", 1.0f);
+        shader->setUniform("SpecularPower", mesh->material.shininess);
+        shader->setUniform("CameraPosition", camera->getPosition());
+        shader->setUniform("a", 1.0f);
 
         //glDrawArrays(renderObject->GetModel()->GetPrimitiveType(),
         //    renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
         //    renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
 
-        model->GetIBO()->Bind();
-        glDrawElements(model->GetPrimitiveType(),
+        model->getIBO()->bind();
+        glDrawElements(model->getPrimitiveType(),
                        mesh->quantumOfVertice,
                        GL_UNSIGNED_INT,
                        (void*)(mesh->firstVertex * sizeof(unsigned int)));
@@ -495,4 +501,38 @@ void Renderer::Render(RenderData* renderData)
 
 
     delete renderData;
+}
+
+
+void Renderer::renderGUI(std::list<GUIObject*>* GUIObjectsList)
+{
+    glDisable(GL_DEPTH_TEST);
+
+    RShader* shader = _shaderList[GUI_SHADER];
+    shader->enable();
+
+    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, -(float)_screenHeight, 0.0f, 1.0f, -1.5f);
+
+    for (std::list<GUIObject*>::iterator i = GUIObjectsList->begin(); i != GUIObjectsList->end(); ++i)
+    {
+        GUIObject* object = *i;
+
+        shader->setUniform("VerticesTransformMatrix", projectionMatrix * object->getVerticesTransformMatrix());
+        shader->setUniform("TexCoordTransformMatrix", object->getTexCoordTransformMatrix());
+
+        object->getVBO()->bind();
+
+        RTexture* texture = static_cast<Image*>(object)->getTexture();      // Dodac rozroznianie typow obiektow
+        shader->bindTexture2D("Texture", texture);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+        glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+
+        glDisableVertexAttribArray(0);
+    }
+
+    delete GUIObjectsList;
+    glEnable(GL_DEPTH_TEST);
 }

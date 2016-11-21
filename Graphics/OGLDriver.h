@@ -44,17 +44,17 @@ class OGLDriver
 
         static OGLDriver& getInstance();
 
-        bool Initialize();
+        bool initialize();
 
-        VAO* CreateVAO();
-        VBO* CreateVBO(unsigned int size);
-        IBO* CreateIBO(unsigned int size);
-        UBO* CreateUBO(unsigned int size);
+        VAO* createVAO();
+        VBO* createVBO(unsigned int size);
+        IBO* createIBO(unsigned int size);
+        UBO* createUBO(unsigned int size);
 
-        void DeleteVAO(VAO* vao);
-        void DeleteVBO(VBO* vbo);
-        void DeleteIBO(IBO* ibo);
-        void DeleteUBO(UBO* ubo);
+        void deleteVAO(VAO* vao);
+        void deleteVBO(VBO* vbo);
+        void deleteIBO(IBO* ibo);
+        void deleteUBO(UBO* ubo);
 
         VAO* getCurrentVAO();
         VBO* getCurrentVBO();

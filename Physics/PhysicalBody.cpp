@@ -35,8 +35,8 @@ void PhysicalBody::update()
             btTransform transf;
             _motionState->getWorldTransform(transf);
 
-            _objectTransform->SetPosition(glm::vec3(transf.getOrigin().getX(),transf.getOrigin().getY(),transf.getOrigin().getZ()));
-            _objectTransform->SetRotation(transf.getRotation().getX(),transf.getRotation().getY(),transf.getRotation().getZ(),transf.getRotation().getW());
+            _objectTransform->setPosition(glm::vec3(transf.getOrigin().getX(),transf.getOrigin().getY(),transf.getOrigin().getZ()));
+            _objectTransform->setRotation(transf.getRotation().getX(),transf.getRotation().getY(),transf.getRotation().getZ(),transf.getRotation().getW());
         }
     }
 }

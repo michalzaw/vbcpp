@@ -17,15 +17,15 @@ class IBO
         IBO(unsigned int size);
         ~IBO();
 
-        unsigned int GetBufferSize();
-        unsigned int GetIndicesCount();
+        unsigned int getBufferSize();
+        unsigned int getIndicesCount();
 
-        //bool Create(unsigned int size);
-        //bool Create(unsigned int* indices, unsigned int indicesCount);
+        //bool create(unsigned int size);
+        //bool create(unsigned int* indices, unsigned int indicesCount);
 
-        unsigned int AddIndices(unsigned int* indices, unsigned int indicesCount);
+        unsigned int addIndices(unsigned int* indices, unsigned int indicesCount);
 
-        inline void Bind()
+        inline void bind()
         {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
         }

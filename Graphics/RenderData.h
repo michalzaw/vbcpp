@@ -16,26 +16,26 @@ class RenderListElement
 {
     private:
         //Model* _model;
-        RModel* _model;
-        Mesh* _mesh;
-        Transform* _transform;
+        RModel*     _model;
+        Mesh*       _mesh;
+        Transform*  _transform;
 
-        float _distanceFromCamera;
+        float       _distanceFromCamera;
 
     public:
         RenderListElement(RModel* model, Mesh* mesh, Transform* transform, float distance);
         ~RenderListElement();
 
-        inline RModel* GetModel()
+        inline RModel* getModel()
         { return _model; }
 
-        inline Mesh* GetMesh()
+        inline Mesh* getMesh()
         { return _mesh; }
 
-        inline Transform* GetTransform()
+        inline Transform* getTransform()
         { return _transform; }
 
-        inline float GetDistanceFromCamera()
+        inline float getDistanceFromCamera()
         { return _distanceFromCamera; }
 
 };

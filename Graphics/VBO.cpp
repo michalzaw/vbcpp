@@ -17,19 +17,19 @@ VBO::~VBO()
 }
 
 
-unsigned int VBO::GetBufferSize()
+unsigned int VBO::getBufferSize()
 {
     return _bufferSize;
 }
 
 
-unsigned int VBO::GetQuantumOfVertices()
+unsigned int VBO::getQuantumOfVertices()
 {
     return _quantumOfVertices;
 }
 
 
-/*bool VBO::Create(unsigned int size)
+/*bool VBO::create(unsigned int size)
 {
     if (_vboId == 0)
     {

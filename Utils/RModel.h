@@ -12,17 +12,17 @@ class RModel : virtual public Resource
         RModel(std::string path, Model* m);
         virtual ~RModel();
 
-        VBO* GetVBO();
-        IBO* GetIBO();
-        unsigned int GetQuantumOfVertices();
-        Vertex* GetVertices();
-        unsigned int GetIndicesSize();
-        unsigned int* GetIndices();
-        unsigned int GetQuantumOfMeshes();
-        Mesh* GetMesh(unsigned int i);
-        unsigned int GetCollisionMeshSize();
-        glm::vec3* GetCollisionMesh();
-        GLenum GetPrimitiveType();
+        VBO* getVBO();
+        IBO* getIBO();
+        unsigned int getQuantumOfVertices();
+        Vertex* getVertices();
+        unsigned int getIndicesSize();
+        unsigned int* getIndices();
+        unsigned int getQuantumOfMeshes();
+        Mesh* getMesh(unsigned int i);
+        unsigned int getCollisionMeshSize();
+        glm::vec3* getCollisionMesh();
+        GLenum getPrimitiveType();
         Mesh* getMeshes();
 
     private:

@@ -7,23 +7,23 @@ RModel::RModel(std::string path, Model* m)
 
     //_oglDriver = m->getDriver();
 
-    _vertices = m->GetVertices();
-    _quantumOfVertices = m->GetQuantumOfVertices();
+    _vertices = m->getVertices();
+    _quantumOfVertices = m->getQuantumOfVertices();
 
-    _indices = m->GetIndices();
-    _indicesSize = m->GetIndicesSize();
+    _indices = m->getIndices();
+    _indicesSize = m->getIndicesSize();
 
     _meshes = m->getMeshes();
-    _quantumOfMeshes = m->GetQuantumOfMeshes();
+    _quantumOfMeshes = m->getQuantumOfMeshes();
 
-    _vbo = m->GetVBO();
+    _vbo = m->getVBO();
 
-    _ibo = m->GetIBO();
+    _ibo = m->getIBO();
 
-    _collisionMesh = m->GetCollisionMesh();
-    _collisionMeshSize = m->GetCollisionMeshSize();
+    _collisionMesh = m->getCollisionMesh();
+    _collisionMeshSize = m->getCollisionMeshSize();
 
-    _primitiveType = m->GetPrimitiveType();
+    _primitiveType = m->getPrimitiveType();
 }
 
 RModel::~RModel()
@@ -33,14 +33,14 @@ RModel::~RModel()
     std::cout << "*** RModel: Usuwanie _vbo" << std::endl;
     if (_vbo)
     {
-        OGLDriver::getInstance().DeleteVBO(_vbo);
+        OGLDriver::getInstance().deleteVBO(_vbo);
         _vbo = 0;
     }
 
     std::cout << "*** RModel: Usuwanie _ibo" << std::endl;
     if (_ibo)
     {
-        OGLDriver::getInstance().DeleteIBO(_ibo);
+        OGLDriver::getInstance().deleteIBO(_ibo);
         _ibo = 0;
     }
 
@@ -75,49 +75,49 @@ RModel::~RModel()
     }
 }
 
-VBO* RModel::GetVBO()
+VBO* RModel::getVBO()
 {
     return _vbo;
 }
 
 
-IBO* RModel::GetIBO()
+IBO* RModel::getIBO()
 {
     return _ibo;
 }
 
 
-unsigned int RModel::GetQuantumOfVertices()
+unsigned int RModel::getQuantumOfVertices()
 {
     return _quantumOfVertices;
 }
 
 
-Vertex* RModel::GetVertices()
+Vertex* RModel::getVertices()
 {
     return _vertices;
 }
 
 
-unsigned int RModel::GetIndicesSize()
+unsigned int RModel::getIndicesSize()
 {
     return _indicesSize;
 }
 
 
-unsigned int* RModel::GetIndices()
+unsigned int* RModel::getIndices()
 {
     return _indices;
 }
 
 
-unsigned int RModel::GetQuantumOfMeshes()
+unsigned int RModel::getQuantumOfMeshes()
 {
     return _quantumOfMeshes;
 }
 
 
-Mesh* RModel::GetMesh(unsigned int i)
+Mesh* RModel::getMesh(unsigned int i)
 {
     if (i < _quantumOfMeshes)
         return &_meshes[i];
@@ -126,19 +126,19 @@ Mesh* RModel::GetMesh(unsigned int i)
 }
 
 
-unsigned int RModel::GetCollisionMeshSize()
+unsigned int RModel::getCollisionMeshSize()
 {
     return _collisionMeshSize;
 }
 
 
-glm::vec3* RModel::GetCollisionMesh()
+glm::vec3* RModel::getCollisionMesh()
 {
     return _collisionMesh;
 }
 
 
-GLenum RModel::GetPrimitiveType()
+GLenum RModel::getPrimitiveType()
 {
     return _primitiveType;
 }

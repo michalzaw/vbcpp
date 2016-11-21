@@ -23,12 +23,12 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 
     if (_model)
     {
-        unsigned int* indices = _model->GetIndices();
-        Vertex* vertices = _model->GetVertices();
+        unsigned int* indices = _model->getIndices();
+        Vertex* vertices = _model->getVertices();
 
-        vertexCount = _model->GetQuantumOfVertices();
+        vertexCount = _model->getQuantumOfVertices();
 
-        for (unsigned int j = 0; j < _model->GetIndicesSize(); j += 3)
+        for (unsigned int j = 0; j < _model->getIndicesSize(); j += 3)
         {
             for (unsigned int k = 0; k < 3; k++)
             {
@@ -36,7 +36,7 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 
                 if (index > vertexCount) continue;
 
-                tmp_vertices[k] = btVector3(vertices[index].Position[0], vertices[index].Position[1], vertices[index].Position[2]);
+                tmp_vertices[k] = btVector3(vertices[index].position[0], vertices[index].position[1], vertices[index].position[2]);
             }
 
             triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[3]);

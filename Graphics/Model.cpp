@@ -54,11 +54,11 @@ Model::Model(Vertex* vertices,
     _meshes = meshes;
     _quantumOfMeshes = quantumOfMeshes;
 
-    _vbo = OGLDriver::getInstance().CreateVBO(quantumOfVertices * sizeof(Vertex));
-    _vbo->AddVertexData(vertices, quantumOfVertices);
+    _vbo = OGLDriver::getInstance().createVBO(quantumOfVertices * sizeof(Vertex));
+    _vbo->addVertexData(vertices, quantumOfVertices);
 
-    _ibo = OGLDriver::getInstance().CreateIBO(_indicesSize * sizeof(unsigned int));
-    _ibo->AddIndices(_indices, _indicesSize);
+    _ibo = OGLDriver::getInstance().createIBO(_indicesSize * sizeof(unsigned int));
+    _ibo->addIndices(_indices, _indicesSize);
 
     _collisionMesh = collisionMesh;
     _collisionMeshSize = collisionMeshSize;
@@ -75,14 +75,14 @@ Model::~Model()
     std::cout << "*** Model: Usuwanie _vbo" << std::endl;
     if (_vbo)
     {
-        OGLDriver::getInstance().DeleteVBO(_vbo);
+        OGLDriver::getInstance().deleteVBO(_vbo);
         _vbo = 0;
     }
 
     std::cout << "*** Model: Usuwanie _ibo" << std::endl;
     if (_ibo)
     {
-        OGLDriver::getInstance().DeleteIBO(_ibo);
+        OGLDriver::getInstance().deleteIBO(_ibo);
         _ibo = 0;
     }
 
@@ -117,49 +117,49 @@ Model::~Model()
     }
 }
 
-VBO* Model::GetVBO()
+VBO* Model::getVBO()
 {
     return _vbo;
 }
 
 
-IBO* Model::GetIBO()
+IBO* Model::getIBO()
 {
     return _ibo;
 }
 
 
-unsigned int Model::GetQuantumOfVertices()
+unsigned int Model::getQuantumOfVertices()
 {
     return _quantumOfVertices;
 }
 
 
-Vertex* Model::GetVertices()
+Vertex* Model::getVertices()
 {
     return _vertices;
 }
 
 
-unsigned int Model::GetIndicesSize()
+unsigned int Model::getIndicesSize()
 {
     return _indicesSize;
 }
 
 
-unsigned int* Model::GetIndices()
+unsigned int* Model::getIndices()
 {
     return _indices;
 }
 
 
-unsigned int Model::GetQuantumOfMeshes()
+unsigned int Model::getQuantumOfMeshes()
 {
     return _quantumOfMeshes;
 }
 
 
-Mesh* Model::GetMesh(unsigned int i)
+Mesh* Model::getMesh(unsigned int i)
 {
     if (i < _quantumOfMeshes)
         return &_meshes[i];
@@ -168,19 +168,19 @@ Mesh* Model::GetMesh(unsigned int i)
 }
 
 
-unsigned int Model::GetCollisionMeshSize()
+unsigned int Model::getCollisionMeshSize()
 {
     return _collisionMeshSize;
 }
 
 
-glm::vec3* Model::GetCollisionMesh()
+glm::vec3* Model::getCollisionMesh()
 {
     return _collisionMesh;
 }
 
 
-GLenum Model::GetPrimitiveType()
+GLenum Model::getPrimitiveType()
 {
     return _primitiveType;
 }

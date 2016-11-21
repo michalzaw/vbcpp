@@ -33,11 +33,11 @@ struct LightAttenuation
 class Light : public Component
 {
     private:
-        LightType _lightType;
+        LightType   _lightType;
 
-        glm::vec3 _color;
-        float _ambientIntensity;
-        float _diffuseIntensity;
+        glm::vec3   _color;
+        float       _ambientIntensity;
+        float       _diffuseIntensity;
 
         LightAttenuation _attenuation;
 
@@ -49,22 +49,22 @@ class Light : public Component
         Light(LightType type, glm::vec3 color, float ambientIntensity, float diffuseIntensity);
         virtual ~Light();
 
-        void SetColor(glm::vec3 color);
-        void SetAmbientIntensity(float intensity);
-        void SetDiffuseIntensity(float intensity);
-        void SetAttenuation(float constant, float linear, float exp);
-        void SetAttenuation(LightAttenuation attenuation);
-        void SetCutoff(float cutoff); // Kat w radianach
+        void setColor(glm::vec3 color);
+        void setAmbientIntensity(float intensity);
+        void setDiffuseIntensity(float intensity);
+        void setAttenuation(float constant, float linear, float exp);
+        void setAttenuation(LightAttenuation attenuation);
+        void setCutoff(float cutoff); // Kat w radianach
 
-        LightType           GetLightType();
-        glm::vec3           GetColor();
-        float               GetAmbientIntensity();
-        float               GetDiffiseIntenisty();
-        glm::vec3           GetDirection();
-        glm::vec3           GetPosition();
-        LightAttenuation&   GetAttenuation();
-        float               GetCutoff();
-        float               GetCutoffCos();
+        LightType           getLightType();
+        glm::vec3           getColor();
+        float               getAmbientIntensity();
+        float               getDiffiseIntenisty();
+        glm::vec3           getDirection();
+        glm::vec3           getPosition();
+        LightAttenuation&   getAttenuation();
+        float               getCutoff();
+        float               getCutoffCos();
 
 };
 

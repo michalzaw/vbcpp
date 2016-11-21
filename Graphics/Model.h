@@ -32,17 +32,17 @@ class Mesh
 class Model //: virtual public Resource
 {
     private:
-        Vertex* _vertices;
-        unsigned int _quantumOfVertices;
+        Vertex*         _vertices;
+        unsigned int    _quantumOfVertices;
 
-        unsigned int* _indices;
-        unsigned int _indicesSize;
+        unsigned int*   _indices;
+        unsigned int    _indicesSize;
 
-        Mesh* _meshes;
-        unsigned int _quantumOfMeshes;
+        Mesh*           _meshes;
+        unsigned int    _quantumOfMeshes;
 
-        glm::vec3* _collisionMesh;
-        unsigned int _collisionMeshSize;
+        glm::vec3*      _collisionMesh;
+        unsigned int    _collisionMeshSize;
 
         VBO* _vbo;
         IBO* _ibo;
@@ -54,18 +54,18 @@ class Model //: virtual public Resource
         Model(Vertex* vertices, unsigned int quantumOfVertices, unsigned int* indices, unsigned int indicesSize, Mesh* meshes, unsigned int quantumOfMeshes, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, GLenum primitiveType = GL_TRIANGLES);
         ~Model();
 
-        VBO* GetVBO();
-        IBO* GetIBO();
-        unsigned int GetQuantumOfVertices();
-        Vertex* GetVertices();
-        unsigned int GetIndicesSize();
-        unsigned int* GetIndices();
-        unsigned int GetQuantumOfMeshes();
-        Mesh* GetMesh(unsigned int i);
-        unsigned int GetCollisionMeshSize();
-        glm::vec3* GetCollisionMesh();
-        GLenum GetPrimitiveType();
-        Mesh* getMeshes();
+        VBO*            getVBO();
+        IBO*            getIBO();
+        unsigned int    getQuantumOfVertices();
+        Vertex*         getVertices();
+        unsigned int    getIndicesSize();
+        unsigned int*   getIndices();
+        unsigned int    getQuantumOfMeshes();
+        Mesh*           getMesh(unsigned int i);
+        unsigned int    getCollisionMeshSize();
+        glm::vec3*      getCollisionMesh();
+        GLenum          getPrimitiveType();
+        Mesh*           getMeshes();
 
 };
 

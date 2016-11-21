@@ -20,10 +20,10 @@ class VBO
         VBO(unsigned int size);
         ~VBO();
 
-        unsigned int GetBufferSize();
-        unsigned int GetQuantumOfVertices();
+        unsigned int getBufferSize();
+        unsigned int getQuantumOfVertices();
 
-        //bool Create(unsigned int size);
+        //bool create(unsigned int size);
 
         /*template <typename VertexType>
         bool Create(VertexType* vertexData, unsigned int quantumOfVertices)
@@ -46,7 +46,7 @@ class VBO
 
         template <typename VertexType>
         // Return new data offset in buffer or -1
-        unsigned int AddVertexData(VertexType* vertices, unsigned int quantumOfVertices)
+        unsigned int addVertexData(VertexType* vertices, unsigned int quantumOfVertices)
         {
             if (_vertexSize == 0)
                 _vertexSize = sizeof(VertexType);
@@ -56,7 +56,7 @@ class VBO
 
             if (_vboId != 0 && ((_quantumOfVertices + quantumOfVertices) * _vertexSize) <= _bufferSize)
             {
-                Bind();
+                bind();
                 unsigned int offset = _quantumOfVertices * _vertexSize;
                 glBufferSubData(GL_ARRAY_BUFFER, offset, quantumOfVertices* _vertexSize, vertices);
 
@@ -68,7 +68,7 @@ class VBO
             return -1;
         }
 
-        inline void Bind()
+        inline void bind()
         {
             glBindBuffer(GL_ARRAY_BUFFER, _vboId);
         }

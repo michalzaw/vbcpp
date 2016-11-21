@@ -19,13 +19,13 @@ RenderObject::~RenderObject()
 }
 
 
-void RenderObject::SetModel(RModel* model)
+void RenderObject::setModel(RModel* model)
 {
     _model = model;
 }
 
 
-RModel* RenderObject::GetModel()
+RModel* RenderObject::getModel()
 {
     return _model;
 

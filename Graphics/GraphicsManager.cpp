@@ -36,7 +36,7 @@ GraphicsManager& GraphicsManager::getInstance()
 }
 
 
-RenderObject* GraphicsManager::AddRenderObject(RenderObject* object )//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
+RenderObject* GraphicsManager::addRenderObject(RenderObject* object )//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
 {
     //RenderObject* object = new RenderObject(model);
 
@@ -45,7 +45,7 @@ RenderObject* GraphicsManager::AddRenderObject(RenderObject* object )//RModel* m
     return object;
 }
 
-CameraStatic* GraphicsManager::AddCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
+CameraStatic* GraphicsManager::addCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 {
     CameraStatic* camera = new CameraStatic(width, height, viewAngle, nearValue, farValue);
 
@@ -54,7 +54,7 @@ CameraStatic* GraphicsManager::AddCameraStatic(int width, int height, GLfloat vi
     return camera;
 }
 
-CameraFPS* GraphicsManager::AddCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
+CameraFPS* GraphicsManager::addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 {
     CameraFPS* camera = new CameraFPS(width, height, viewAngle, nearValue, farValue);
 
@@ -63,7 +63,7 @@ CameraFPS* GraphicsManager::AddCameraFPS(int width, int height, GLfloat viewAngl
     return camera;
 }
 
-Light* GraphicsManager::AddDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity)
+Light* GraphicsManager::addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity)
 {
     Light* light = new Light(LT_DIRECTIONAL, color, ambientIntensity, diffuseIntensity);
 
@@ -73,10 +73,10 @@ Light* GraphicsManager::AddDirectionalLight(glm::vec3 color, float ambientIntens
 }
 
 
-Light* GraphicsManager::AddPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation)
+Light* GraphicsManager::addPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation)
 {
     Light* light = new Light(LT_POINT, color, ambientIntensity, diffuseIntensity);
-    light->SetAttenuation(attenuation);
+    light->setAttenuation(attenuation);
 
     _lights.push_back(light);
 
@@ -84,11 +84,11 @@ Light* GraphicsManager::AddPointLight(glm::vec3 color, float ambientIntensity, f
 }
 
 
-Light* GraphicsManager::AddSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation)
+Light* GraphicsManager::addSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation)
 {
     Light* light = new Light(LT_SPOT, color, ambientIntensity, diffuseIntensity);
-    light->SetAttenuation(attenuation);
-    light->SetCutoff(cutoff);
+    light->setAttenuation(attenuation);
+    light->setCutoff(cutoff);
 
     _lights.push_back(light);
 
@@ -142,7 +142,7 @@ void GraphicsManager::removeLight(Light* light)
 }
 
 
-RenderData* GraphicsManager::GetRenderData()
+RenderData* GraphicsManager::getRenderData()
 {
     RenderData* renderData = new RenderData;
     renderData->camera = _cameras[0];
@@ -158,11 +158,11 @@ RenderData* GraphicsManager::GetRenderData()
     {
         RenderObject* object = *i;
 
-        for (int j = 0; j < object->GetModel()->GetQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            RenderListElement renderElement(object->GetModel(), object->GetModel()->GetMesh(j), object->getTransform(),
-                                            glm::length(renderData->camera->getPosition() - object->getTransform()->GetPosition()));
-            if (object->GetModel()->GetMesh(j)->material.transparency == 0.0f)
+            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), object->getTransform(),
+                                            glm::length(renderData->camera->getPosition() - object->getTransform()->getPosition()));
+            if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else
                 renderData->renderList.push_back(renderElement);

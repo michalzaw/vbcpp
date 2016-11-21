@@ -41,8 +41,8 @@ class CameraFPS : virtual public CameraStatic
 		//GLdouble getVerticalAngle() { return m_VerticalAngle; }
 
 	protected:
-		GLfloat m_MoveSpeed;
-		GLfloat m_RotateSpeed;
+		GLfloat _moveSpeed;
+		GLfloat _rotateSpeed;
 
 		//GLdouble    _oldXpos;
 		//GLdouble    _oldYpos;

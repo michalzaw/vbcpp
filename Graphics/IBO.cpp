@@ -17,19 +17,19 @@ IBO::~IBO()
 }
 
 
-unsigned int IBO::GetBufferSize()
+unsigned int IBO::getBufferSize()
 {
     return _bufferSize;
 }
 
 
-unsigned int IBO::GetIndicesCount()
+unsigned int IBO::getIndicesCount()
 {
     return _indicesCount;
 }
 
 
-/*bool IBO::Create(unsigned int size)
+/*bool IBO::create(unsigned int size)
 {
     if (_iboId == 0)
     {
@@ -46,7 +46,7 @@ unsigned int IBO::GetIndicesCount()
 }*/
 
 
-/*bool IBO::Create(unsigned int* indices, unsigned int indicesCount)
+/*bool IBO::create(unsigned int* indices, unsigned int indicesCount)
 {
     if (_iboId == 0)
     {
@@ -64,11 +64,11 @@ unsigned int IBO::GetIndicesCount()
 }*/
 
 
-unsigned int IBO::AddIndices(unsigned int* indices, unsigned int indicesCount)
+unsigned int IBO::addIndices(unsigned int* indices, unsigned int indicesCount)
 {
     if (_iboId != 0 && ((_indicesCount + indicesCount) * sizeof(unsigned int)) <= _bufferSize)
     {
-        Bind();
+        bind();
         unsigned int offset = _indicesCount * sizeof(unsigned int);
         glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, indicesCount* sizeof(unsigned int), indices);
 

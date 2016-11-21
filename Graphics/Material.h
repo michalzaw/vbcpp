@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "RShader.h"
+#include "../Utils/RTexture.h"
 #include <memory>
 using namespace std;
 
@@ -14,7 +15,7 @@ class Material
 {
     public:
         Material()
-        : diffuseTexture(0), normalmapTexture(0), shininess(0), transparency(0), _shader(SOLID_MATERIAL) {}
+        : diffuseTexture(NULL), normalmapTexture(NULL), shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
         virtual ~Material()
         { }
 
@@ -25,8 +26,8 @@ class Material
     glm::vec4 diffuseColor;
     glm::vec4 specularColor;
 
-    GLuint diffuseTexture;
-    GLuint normalmapTexture;
+    RTexture* diffuseTexture;
+    RTexture* normalmapTexture;
 
     float shininess;
     float transparency;
@@ -35,7 +36,7 @@ class Material
     glm::vec2 scale;
 
     //RShader* _shader;
-    ShaderType _shader;
+    ShaderType shader;
 
 };
 

@@ -11,7 +11,7 @@ class VAO
         VAO()
         {
             glGenVertexArrays(1, &_Id);
-            Bind();
+            bind();
         }
 
         ~VAO()
@@ -19,7 +19,7 @@ class VAO
             glDeleteVertexArrays(1, &_Id);
         }
 
-        void Bind()
+        void bind()
         {
             glBindVertexArray(_Id);
         }

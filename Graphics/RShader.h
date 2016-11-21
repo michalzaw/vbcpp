@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 
 #include "../Utils/Resource.h"
+#include "../Utils/RTexture.h"
 
 #include <iostream>
 
@@ -12,7 +13,8 @@ enum ShaderType
 {
     SOLID_MATERIAL,
     NOTEXTURE_MATERIAL,
-    NORMALMAPPING_MATERIAL
+    NORMALMAPPING_MATERIAL,
+    GUI_SHADER
 };
 
 
@@ -24,59 +26,60 @@ class RShader : virtual public Resource
         int _textureLocation;
 
     public:
-        RShader(std::string path, GLuint ID) : Resource(path),  _shaderID(ID), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
+        RShader(std::string path, GLuint id) : Resource(path),  _shaderID(id), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
         virtual ~RShader()
         {
             std::cout << "RShader: Destruktor: " << _shaderID << "\n";
             glDeleteProgram(_shaderID);
         }
 
-        void Enable()
+        void enable()
         {
             glUseProgram(_shaderID);
 
             _textureLocation = 0;
         }
-        void Disable()
+        void disable()
         {
             glUseProgram(0);
         }
 
-        inline void SetUniform(const char* Name, int* Values, int Count = 1)
-		{ glUniform1iv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(const char* Name, float* Values, int Count = 1)
-		{ glUniform1fv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(const char* Name, int Value)
-		{ glUniform1i(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(const char* Name, float Value)
-		{ glUniform1f(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(const char* Name, glm::vec2* Vectors, int Count = 1)
-		{ glUniform2fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(const char* Name, glm::vec3* Vectors, int Count = 1)
-		{ glUniform3fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(const char* Name, glm::vec4* Vectors, int Count = 1)
-		{ glUniform4fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(const char* Name, glm::vec2 Vector)
-		{ glUniform2f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y); }
-		inline void SetUniform(const char* Name, glm::vec3 Vector)
-		{ glUniform3f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z); }
-		inline void SetUniform(const char* Name, glm::vec4 Vector)
-		{ glUniform4f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z, Vector.w); }
-		inline void SetUniform(const char* Name, glm::mat3* Matrices, int Count = 1)
-		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(const char* Name, glm::mat4* Matrices, int Count = 1)
-		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(const char* Name, glm::mat3 Matrix)
-		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
-		inline void SetUniform(const char* Name, glm::mat4 Matrix)
-		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
+        inline void setUniform(const char* name, int* values, int count = 1)
+		{ glUniform1iv(glGetUniformLocation(_shaderID, name), count, values); }
+		inline void setUniform(const char* name, float* values, int count = 1)
+		{ glUniform1fv(glGetUniformLocation(_shaderID, name), count, values); }
+		inline void setUniform(const char* name, int value)
+		{ glUniform1i(glGetUniformLocation(_shaderID, name), value); }
+		inline void setUniform(const char* name, float value)
+		{ glUniform1f(glGetUniformLocation(_shaderID, name), value); }
+		inline void setUniform(const char* name, glm::vec2* vectors, int count = 1)
+		{ glUniform2fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(const char* name, glm::vec3* vectors, int count = 1)
+		{ glUniform3fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(const char* name, glm::vec4* vectors, int count = 1)
+		{ glUniform4fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(const char* name, glm::vec2 vector)
+		{ glUniform2f(glGetUniformLocation(_shaderID, name), vector.x, vector.y); }
+		inline void setUniform(const char* name, glm::vec3 vector)
+		{ glUniform3f(glGetUniformLocation(_shaderID, name), vector.x, vector.y, vector.z); }
+		inline void setUniform(const char* name, glm::vec4 vector)
+		{ glUniform4f(glGetUniformLocation(_shaderID, name), vector.x, vector.y, vector.z, vector.w); }
+		inline void setUniform(const char* name, glm::mat3* matrices, int count = 1)
+		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, name), count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(const char* name, glm::mat4* matrices, int count = 1)
+		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, name), count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(const char* name, glm::mat3 matrix)
+		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, name), 1, GL_FALSE, &matrix[0][0]); }
+		inline void setUniform(const char* name, glm::mat4 matrix)
+		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, name), 1, GL_FALSE, &matrix[0][0]); }
 
 
-        inline void BindTexture2D(char* Name, GLuint TextureID)
+        inline void bindTexture2D(char* name, RTexture* texture)
         {
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
-            glBindTexture(GL_TEXTURE_2D, TextureID);
-            SetUniform(Name, _textureLocation++);
+            //glBindTexture(GL_TEXTURE_2D, TextureID);
+            texture->bind();
+            setUniform(name, _textureLocation++);
         }
 
         inline void getUniformOffset(const char** names, unsigned int count, int* offsets)
@@ -87,7 +90,7 @@ class RShader : virtual public Resource
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_OFFSET, offsets);
         }
 
-        inline GLint getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
+        inline void getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
         {
             GLuint uniformIndices[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
@@ -95,7 +98,7 @@ class RShader : virtual public Resource
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_ARRAY_STRIDE, arrayStrides);
         }
 
-        inline GLint getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
+        inline void getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
         {
             GLuint uniformIndices[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
@@ -103,9 +106,9 @@ class RShader : virtual public Resource
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_MATRIX_STRIDE, matrixStrides);
         }
 
-        inline void setUniformBlockBinding(const char* blocksName, unsigned int location)
+        inline void setUniformBlockBinding(const char* blocksname, unsigned int location)
         {
-            GLuint index = glGetUniformBlockIndex(_shaderID, blocksName);
+            GLuint index = glGetUniformBlockIndex(_shaderID, blocksname);
             glUniformBlockBinding(_shaderID, index, location);
         }
 
@@ -160,41 +163,41 @@ class RShader : virtual public Resource
             glUseProgram(0);
         }
 
-        inline void SetUniform(char* Name, int* Values, int Count = 1)
-		{ glUniform1iv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(char* Name, float* Values, int Count = 1)
-		{ glUniform1fv(glGetUniformLocation(_shaderID, Name), Count, Values); }
-		inline void SetUniform(char* Name, int Value)
-		{ glUniform1i(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(char* Name, float Value)
-		{ glUniform1f(glGetUniformLocation(_shaderID, Name), Value); }
-		inline void SetUniform(char* Name, glm::vec2* Vectors, int Count = 1)
-		{ glUniform2fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec3* Vectors, int Count = 1)
-		{ glUniform3fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec4* Vectors, int Count = 1)
-		{ glUniform4fv(glGetUniformLocation(_shaderID, Name), Count, (GLfloat*)Vectors); }
-		inline void SetUniform(char* Name, glm::vec2 Vector)
-		{ glUniform2f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y); }
-		inline void SetUniform(char* Name, glm::vec3 Vector)
-		{ glUniform3f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z); }
-		inline void SetUniform(char* Name, glm::vec4 Vector)
-		{ glUniform4f(glGetUniformLocation(_shaderID, Name), Vector.x, Vector.y, Vector.z, Vector.w); }
-		inline void SetUniform(char* Name, glm::mat3* Matrices, int Count = 1)
-		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(char* Name, glm::mat4* Matrices, int Count = 1)
-		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), Count, GL_FALSE, (GLfloat*)Matrices); }
-		inline void SetUniform(char* Name, glm::mat3 Matrix)
-		{ glUniformMatrix3fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
-		inline void SetUniform(char* Name, glm::mat4 Matrix)
-		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, Name), 1, GL_FALSE, &Matrix[0][0]); }
+        inline void setUniform(char* name, int* values, int count = 1)
+		{ glUniform1iv(glGetUniformLocation(_shaderID, name), count, values); }
+		inline void setUniform(char* name, float* values, int count = 1)
+		{ glUniform1fv(glGetUniformLocation(_shaderID, name), count, values); }
+		inline void setUniform(char* name, int value)
+		{ glUniform1i(glGetUniformLocation(_shaderID, name), value); }
+		inline void setUniform(char* name, float value)
+		{ glUniform1f(glGetUniformLocation(_shaderID, name), value); }
+		inline void setUniform(char* name, glm::vec2* vectors, int count = 1)
+		{ glUniform2fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(char* name, glm::vec3* vectors, int count = 1)
+		{ glUniform3fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(char* name, glm::vec4* vectors, int count = 1)
+		{ glUniform4fv(glGetUniformLocation(_shaderID, name), count, (GLfloat*)vectors); }
+		inline void setUniform(char* name, glm::vec2 vector)
+		{ glUniform2f(glGetUniformLocation(_shaderID, name), vector.x, vector.y); }
+		inline void setUniform(char* name, glm::vec3 vector)
+		{ glUniform3f(glGetUniformLocation(_shaderID, name), vector.x, vector.y, vector.z); }
+		inline void setUniform(char* name, glm::vec4 vector)
+		{ glUniform4f(glGetUniformLocation(_shaderID, name), vector.x, vector.y, vector.z, vector.w); }
+		inline void setUniform(char* name, glm::mat3* matrices, int count = 1)
+		{ glUniformmatrix4fv(glGetUniformLocation(_shaderID, name), count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(char* name, glm::mat4* matrices, int count = 1)
+		{ glUniformmatrix3fv(glGetUniformLocation(_shaderID, name), count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(char* name, glm::mat3 matrix)
+		{ glUniformmatrix3fv(glGetUniformLocation(_shaderID, name), 1, GL_FALSE, &matrix[0][0]); }
+		inline void setUniform(char* name, glm::mat4 matrix)
+		{ glUniformmatrix4fv(glGetUniformLocation(_shaderID, name), 1, GL_FALSE, &matrix[0][0]); }
 
 
-        inline void BindTexture2D(char* Name, GLuint TextureID)
+        inline void BindTexture2D(char* name, GLuint TextureID)
         {
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
             glBindTexture(GL_TEXTURE_2D, TextureID);
-            SetUniform(Name, _textureLocation++);
+            setUniform(name, _textureLocation++);
         }
 
 };

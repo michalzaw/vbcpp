@@ -128,7 +128,7 @@ void main()
 	{
 		LightsColor += CalculatePointLight(Lights.PointLights[i], n);
 	}
-	
+
 	for (int i = 0; i < Lights.SpotCount; ++i)
 	{
 		LightsColor += CalculateSpotLight(Lights.SpotLights[i], n);
