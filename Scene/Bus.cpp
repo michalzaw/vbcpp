@@ -217,18 +217,33 @@ void Bus::loadXMLdata(std::string busname)
         {
             std::cout << "XML: Door data" << std::endl;
 
-            std::string wheelName(child->Attribute("name"));
-            std::string wheelModel(child->Attribute("model"));
+            std::string doorName(child->Attribute("name"));
+            std::string doorModel(child->Attribute("model"));
             float mass = (float)atof(child->Attribute("mass"));
 
             glm::vec3 doorPosition = XMLstringToVec3(child->Attribute("position"));
             glm::vec3 relativePos = glm::vec3(busPosition.x + doorPosition.x, busPosition.y + doorPosition.y, busPosition.z + doorPosition.z);
 
+            btVector3 busPivot = XMLstringToBtVec3(child->Attribute("pivotA"));
+            btVector3 doorPivot = XMLstringToBtVec3(child->Attribute("pivotB"));
+
+            SceneObject* doorObj = _sMgr->addSceneObject(doorName);
+
+            doorObj->getTransform()->setPosition(relativePos);
+
+            RModel* dr1 = ResourceManager::getInstance().loadModel(doorModel, texturePath);
+            RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr1));
+
+            doorObj->addComponent(doorRender);
+
             btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
-            glm::vec3 busPivot = XMLstringToVec3(child->Attribute("pivotA"));
-            glm::vec3 doorPivot = XMLstringToVec3(child->Attribute("pivotB"));
+            PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr1->getCollisionMesh(), dr1->getCollisionMeshSize(), mass, btDoorPos);
+            doorObj->addComponent(doorBody);
 
+            ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
+
+            doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
         }
     }

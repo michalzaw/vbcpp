@@ -8,6 +8,8 @@
 #include <sstream>
 #include <iostream>
 
+#include <bullet/btBulletDynamicsCommon.h>
+
 template<typename T> void safe_delete(T*& a) {
   delete a;
   a = 0;
@@ -21,5 +23,6 @@ T clamp(const T& what, const T& a, const T& b)
 
 glm::vec3 XMLstringToVec3(const char* xmlstring);
 
+btVector3 XMLstringToBtVec3(const char* xmlstring);
 
 #endif // HELPERS_HPP_INCLUDED

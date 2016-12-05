@@ -2,16 +2,17 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <object name="bus"> 
-	<transform position="1,4,12" rotation="0,0,0" scale="1,1,1" />
+	<transform position="1,3,12" rotation="0,1.0,0" scale="1,1,1" />
 
-	<body model="h9n.3ds" textures="PKS" mass="9.6" /> <!-- mass in tons -->
+	<body model="h9.3ds" textures="PKS" mass="9.6" /> <!-- mass in tons -->
 
-	<wheel name="wheel1" side="right" steering="1" powered="0" model="h9/fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00025" brakeForce="2.0"/>
-	<wheel name="wheel2" side="left" steering="1" powered="0" model="h9/fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00025" brakeForce="2.0"/>
+	<wheel name="wheel1" side="right" steering="1" powered="0" model="h9/fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
+	<wheel name="wheel2" side="left" steering="1" powered="0" model="h9/fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
 	
-	<wheel name="wheel3" side="right" steering="0" powered="1" model="h9/rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00027" brakeForce="0.85" />
-	<wheel name="wheel4" side="left" steering="0" powered="1" model="h9/rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00027" brakeForce="0.85" />
+	<wheel name="wheel3" side="right" steering="0" powered="1" model="h9/rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.85" />
+	<wheel name="wheel4" side="left" steering="0" powered="1" model="h9/rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.85" />
 	
-	<door name="df1" model="h9/df1.3ds" mass="0.5" position="1.2,0.0,2.7" pivotA="1.2,0.0,2.8" pivotB="0,0,1" />
+	<door name="df1" model="h9/df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" />
+	<door name="dr1" model="h9/dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" />
 	
 </object>

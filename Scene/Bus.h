@@ -13,6 +13,14 @@ enum WheelSide
     WS_LEFT
 };
 
+
+struct Door
+{
+    PhysicalBodyConvexHull*  body;
+    RModel*                  model;
+    ConstraintHinge*         hinge;
+};
+
 struct Wheel
 {
     PhysicalBodyCylinder* body;

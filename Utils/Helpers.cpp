@@ -28,3 +28,23 @@ glm::vec3 XMLstringToVec3(const char* xmlstring)
     return outVec;
 }
 
+
+btVector3 XMLstringToBtVec3(const char* xmlstring)
+{
+    std::stringstream ss(xmlstring);
+    //vec3 outVec = {0,0,0};
+
+    std::string s1, s2, s3;
+    getline(ss, s1, ',');
+    float n1 = (float)atof(s1.c_str());
+
+    getline(ss, s2, ',');
+    float n2 = (float)atof(s2.c_str());
+
+    getline(ss, s3, ',');
+    float n3 = (float)atof(s3.c_str());
+
+    btVector3 outVec(n1, n2, n3);
+
+    return outVec;
+}

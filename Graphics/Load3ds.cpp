@@ -149,6 +149,9 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 	sMaterial.name = material->name;
 	sMaterial.transparency = material->transparency;
 
+	std::cout << "Material name: " << material->name << std::endl;
+    std::cout << "Material transparency: " << (float)material->transparency << std::endl;
+
 	sMaterial.ambientColor[0] = material->ambient[0];
 	sMaterial.ambientColor[1] = material->ambient[1];
 	sMaterial.ambientColor[2] = material->ambient[2];

@@ -217,7 +217,7 @@ ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, Phys
 {
     ConstraintHinge* c = new ConstraintHinge(bodyA, bodyB, pivotA, pivotB, axisA, axisB);
 
-    _dynamicsWorld->addConstraint(c->getBulletConstraint());
+    _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 
     _constraints.push_back(c);
 
