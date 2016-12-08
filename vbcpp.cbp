@@ -140,6 +140,8 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="GUI/FontLoader.cpp" />
+		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />
 		<Unit filename="GUI/GUIManager.h" />
 		<Unit filename="GUI/GUIObject.cpp" />
@@ -150,7 +152,6 @@
 		<Unit filename="GUI/Image.h" />
 		<Unit filename="GUI/Label.cpp" />
 		<Unit filename="GUI/Label.h" />
-		<Unit filename="GUI/loadFont.h" />
 		<Unit filename="Graphics/Camera.cpp" />
 		<Unit filename="Graphics/Camera.h" />
 		<Unit filename="Graphics/CameraFPS.cpp" />
@@ -224,6 +225,7 @@
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
+		<Unit filename="Utils/RFont.cpp" />
 		<Unit filename="Utils/RFont.h" />
 		<Unit filename="Utils/RModel.cpp" />
 		<Unit filename="Utils/RModel.h" />
