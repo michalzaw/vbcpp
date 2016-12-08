@@ -18,9 +18,13 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
     _shaderList.push_back(shader);
 
-    // GUI_SHADER
-    RShader* guishader = ResourceManager::getInstance().loadShader("GUIshader.vert", "GUIshader.frag");
+    // GUI_IMAGE_SHADER
+    RShader* guishader = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
     _shaderList.push_back(guishader);
+
+    // GUI_LABEL_SHADER
+    RShader* guishader2 = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/LabelShader.frag");
+    _shaderList.push_back(guishader2);
 
 
     // Create UBO for lights
@@ -504,16 +508,16 @@ void Renderer::render(RenderData* renderData)
 }
 
 
-void Renderer::renderGUI(std::list<GUIObject*>* GUIObjectsList)
+/*void Renderer::renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList)
 {
     glDisable(GL_DEPTH_TEST);
 
     RShader* shader = _shaderList[GUI_SHADER];
     shader->enable();
 
-    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, -(float)_screenHeight, 0.0f, 1.0f, -1.5f);
-
-    for (std::list<GUIObject*>::iterator i = GUIObjectsList->begin(); i != GUIObjectsList->end(); ++i)
+    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, 0.0f, (float)_screenHeight, 1.0f, -1.5f);
+*/
+    /*for (std::list<GUIObject*>::iterator i = GUIObjectsList->begin(); i != GUIObjectsList->end(); ++i)
     {
         GUIObject* object = *i;
 
@@ -521,6 +525,7 @@ void Renderer::renderGUI(std::list<GUIObject*>* GUIObjectsList)
         shader->setUniform("TexCoordTransformMatrix", object->getTexCoordTransformMatrix());
 
         object->getVBO()->bind();
+
 
         RTexture* texture = static_cast<Image*>(object)->getTexture();      // Dodac rozroznianie typow obiektow
         shader->bindTexture2D("Texture", texture);
@@ -531,8 +536,151 @@ void Renderer::renderGUI(std::list<GUIObject*>* GUIObjectsList)
         glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
 
         glDisableVertexAttribArray(0);
+    }*/
+
+
+    /*shader->setUniform("VerticesTransformMatrix", projectionMatrix);
+    shader->setUniform("TexCoordTransformMatrix", glm::mat4(1.0f));
+
+    _font->_vbo->bind();
+
+    //RTexture* texture = ResourceManager::getInstance().loadTexture("crate.jpg");
+    RTexture* texture = _font->_characterTextures[static_cast<int>('g')];      // Dodac rozroznianie typow obiektow
+    shader->bindTexture2D("Texture", texture);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)(sizeof(float) * 3));
+
+    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<int>('g') * 4, 4);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);*/
+
+
+    /*Label* label = new Label(_font);
+    label->setText("Hello world");
+    label->setPosition(100, 600);
+    //label->setRotation(0.25 * 3.14);
+    label->setScale(1, 1);
+
+    for (int i = 0; i < label->getQuantumOfVBO(); ++i)
+    {
+
+        shader->setUniform("VerticesTransformMatrix", projectionMatrix * label->getVerticesTransformMatrix(i));
+        shader->setUniform("TexCoordTransformMatrix", glm::mat4(1.0f));
+
+        label->getVBO(i)->bind();
+
+        //RTexture* texture = ResourceManager::getInstance().loadTexture("crate.jpg");
+        RTexture* texture = _font->_characterTextures[static_cast<int>(label->getText()[i])];      // Dodac rozroznianie typow obiektow
+        shader->bindTexture2D("Texture", texture);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)(sizeof(float) * 3));
+
+        glDrawArrays(GL_TRIANGLE_STRIP, static_cast<int>(label->getText()[i]) * 4, 4);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
     }
 
+
     delete GUIObjectsList;
+    glEnable(GL_DEPTH_TEST);
+}*/
+
+
+void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIObjectsList)
+{
+    glDisable(GL_DEPTH_TEST);
+
+    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, 0.0f, (float)_screenHeight, 1.0f, -1.5f);
+
+    for (GUIRenderList::iterator i = renderList->begin(); i != renderList->end(); ++i)
+    {
+        RShader* shader = _shaderList[i->getShaderType()];
+        shader->enable();
+
+        shader->setUniform("VerticesTransformMatrix", projectionMatrix * i->getVerticesTransformMatrix());
+        shader->setUniform("TexCoordTransformMatrix", i->getTexCoordTransformMatrix());
+        shader->setUniform("color", i->getColor());
+
+        i->getVBO()->bind();
+
+
+        shader->bindTexture2D("Texture", i->getTexture());
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)(sizeof(float) * 3));
+
+        glDrawArrays(GL_TRIANGLE_STRIP, i->getFirstVertex(), 4);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+    }
+
+
+    /*shader->setUniform("VerticesTransformMatrix", projectionMatrix);
+    shader->setUniform("TexCoordTransformMatrix", glm::mat4(1.0f));
+
+    _font->_vbo->bind();
+
+    //RTexture* texture = ResourceManager::getInstance().loadTexture("crate.jpg");
+    RTexture* texture = _font->_characterTextures[static_cast<int>('g')];      // Dodac rozroznianie typow obiektow
+    shader->bindTexture2D("Texture", texture);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)(sizeof(float) * 3));
+
+    glDrawArrays(GL_TRIANGLE_STRIP, static_cast<int>('g') * 4, 4);
+
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);*/
+
+
+    /*Label* label = new Label(_font);
+    label->setText("Hello world");
+    label->setPosition(100, 600);
+    //label->setRotation(0.25 * 3.14);
+    label->setScale(1, 1);
+
+    for (int i = 0; i < label->getQuantumOfVBO(); ++i)
+    {
+
+        shader->setUniform("VerticesTransformMatrix", projectionMatrix * label->getVerticesTransformMatrix(i));
+        shader->setUniform("TexCoordTransformMatrix", glm::mat4(1.0f));
+
+        label->getVBO(i)->bind();
+
+        //RTexture* texture = ResourceManager::getInstance().loadTexture("crate.jpg");
+        RTexture* texture = _font->_characterTextures[static_cast<int>(label->getText()[i])];      // Dodac rozroznianie typow obiektow
+        shader->bindTexture2D("Texture", texture);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)(sizeof(float) * 3));
+
+        glDrawArrays(GL_TRIANGLE_STRIP, static_cast<int>(label->getText()[i]) * 4, 4);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+    }*/
+
+
+    delete renderList;
     glEnable(GL_DEPTH_TEST);
 }

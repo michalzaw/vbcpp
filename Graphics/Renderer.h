@@ -1,7 +1,8 @@
 #ifndef RENDERER_H_INCLUDED
 #define RENDERER_H_INCLUDED
 
-
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <string.h>
 #include <list>
 
@@ -15,6 +16,8 @@
 
 #include "../GUI/GUIObject.h"
 #include "../GUI/Image.h"
+#include "../GUI/Label.h"
+#include "../GUI/GUIRenderListElement.h"
 
 
 class Renderer : virtual public RefCounter
@@ -32,7 +35,7 @@ class Renderer : virtual public RefCounter
         ~Renderer();
 
         void render(RenderData* renderData);
-        void renderGUI(std::list<GUIObject*>* GUIObjectsList);
+        void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 
 };
 

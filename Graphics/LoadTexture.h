@@ -6,11 +6,13 @@
 
 #include <GLEW/glew.h>
 #include <SOIL/SOIL.h>
+#include "../Utils/RTexture.h"
 
 
 // U¿ycie SOIL jedynie do wczytania pliku graficznego
 // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
-GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping = true);
+//GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping = true);
+RTexture* loadTexture(const char* fileName, bool mipmaping = true);
 
 
 GLuint loadTextureRect(const char* fileName);

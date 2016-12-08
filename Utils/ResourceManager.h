@@ -5,6 +5,7 @@
 #include "../Graphics/RShader.h"
 #include "../Graphics/Model.h"
 #include "RModel.h"
+#include "RFont.h"
 
 #include <iostream>
 #include <list>
@@ -25,6 +26,8 @@ class ResourceManager
         RShader* loadShader(std::string vertexPath, std::string fragmPath);
 
         RModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
+
+        RFont* loadFont(std::string path, int pixelSize = 32);
 
     protected:
         resourcePtrList _resources;

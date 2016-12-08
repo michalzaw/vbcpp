@@ -351,7 +351,7 @@ int main()
 {
     win = new Window;
 
-    win->createWindow(1366, 768, 100, 100);
+    win->createWindow(1366, 768, 00, 100);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
@@ -379,7 +379,7 @@ int main()
 
 
     /* terrain */
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
+    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
@@ -497,9 +497,16 @@ int main()
 
     GUIManager* gui = new GUIManager;
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    //img->setPosition(100, 768 - 512);
+    img->setPosition(0, W_HEIGHT - img->getTexture()->getSize().y / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
     img->setScale(0.5f, 0.5f);
+    //img->setPosition(100, 100);
+
+
+    RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
+    Label* label = gui->addLabel(font, "Virtual Bus Core++");
+    label->setPosition(img->getTexture()->getSize().x / 2.0f + 100, W_HEIGHT - 40);
+    label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
     // Zmienne dla obliczania czasu
@@ -542,6 +549,7 @@ int main()
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
 			win->setWindowTitle(newWindowTitle);
+			label->setText(newWindowTitle);
         }
 
         timePhysicsPrev = timePhysicsCurr;
@@ -569,7 +577,7 @@ int main()
         renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());
 
         // Renderowanie GUI
-        renderer->renderGUI(gui->getGUIList());
+        renderer->renderGUI(gui->getGUIRenderList());
 
 
         // Swap buffers and poll events
