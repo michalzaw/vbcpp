@@ -1,7 +1,7 @@
 #include "LoadTexture.h"
 
 
-GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping)
+/*GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping)
 {
     GLuint texId = 0;
     glGenTextures(1, &texId);
@@ -34,6 +34,35 @@ GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping
 
 
     return texId;
+}*/
+
+
+RTexture* loadTexture(const char* fileName, bool mipmaping)
+{
+    int width, height;
+    unsigned char* image = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGBA);
+
+    RTexture* texture = new RTexture(fileName, image, TT_2D, TF_RGBA, glm::uvec2(width, height));
+
+    std::cout << "Loading texture: " << fileName << std::endl;
+    std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+
+    if (mipmaping)
+    {
+        texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+    }
+    else
+    {
+        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+    }
+
+    texture->setClampMode(TCM_REPEAT);
+
+
+    SOIL_free_image_data(image);
+
+
+    return texture;
 }
 
 
