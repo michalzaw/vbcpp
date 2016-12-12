@@ -203,7 +203,9 @@ Material Load3ds::loadMaterialData(Lib3dsMaterial* material, std::string texPath
 
 
 	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
+    {
         sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+    }
     else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
         sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
     else

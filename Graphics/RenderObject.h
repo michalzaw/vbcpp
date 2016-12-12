@@ -29,6 +29,7 @@ class RenderObject : public Component
 
         RModel* getModel();
 
+        virtual void updateTransform() {}
 };
 
 

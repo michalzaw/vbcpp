@@ -25,10 +25,12 @@ class Transform
         bool _transformMatrixIs;
         bool _normalMatrixIs;
 
+
+
         SceneObject* _object;
 
         void updateTransformMatrix();
-        void changed();
+        void update();
 
     public:
         Transform(SceneObject* object);
@@ -39,6 +41,9 @@ class Transform
         void setRotation(glm::vec3 rotation);
         void setRotation(float x, float y, float z, float w);
         void setScale(glm::vec3 scale);
+
+        //* Shows whether transform has changed
+        bool changed;
 
         glm::vec3 getPosition();
         glm::vec3 getRotation();

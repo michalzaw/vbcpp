@@ -7,32 +7,56 @@
 #include "SceneManager.h"
 #include "../Physics/PhysicsManager.hpp"
 
+
 enum WheelSide
 {
     WS_RIGHT = 0,
     WS_LEFT
 };
 
+enum DoorState
+{
+    EDS_OPENING = 0,
+    EDS_CLOSING = 1
+};
 
 struct Door
 {
+
+
     PhysicalBodyConvexHull*  body;
     RModel*                  model;
     ConstraintHinge*         hinge;
+    DoorState                state;
+
+    void open()
+    {
+        hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
+        state = EDS_OPENING;
+    }
+
+    void close()
+    {
+        hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
+        state = EDS_CLOSING;
+    }
 };
 
 struct Wheel
 {
+
+
     PhysicalBodyCylinder* body;
     ConstraintHinge2*     suspension;
     bool                  steering;
     bool                  powered;
     float                 currentAngle;
     float                 brakeForce;
-    WheelSide             wheelSide;
+    //WheelSide             wheelSide;
 };
 
 typedef std::vector<Wheel*> WheelList;
+typedef std::vector<Door*> DoorList;
 
 class Bus : virtual public RefCounter
 {
@@ -49,7 +73,9 @@ class Bus : virtual public RefCounter
         void brakeOn();
         void brakeOff();
 
-
+        void openDoor(unsigned char doorIndex);
+        void closeDoor(unsigned char doorIndex);
+        Door* getDoor(unsigned char doorIndex) { return _doors[doorIndex]; };
 
     private:
         SceneObject*    _sceneObject;
@@ -58,6 +84,7 @@ class Bus : virtual public RefCounter
         PhysicsManager* _pMgr;
 
         WheelList       _wheels;
+        DoorList        _doors;
 
         bool    _accelerate;
         bool    _brake;

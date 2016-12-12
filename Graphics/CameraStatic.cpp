@@ -7,7 +7,7 @@ CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nea
 	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
     _farValue(farValue), _nearValue(nearValue), _viewAngle(viewAngle), _windowWidth(width), _windowHeight(height)
 {
-    changedTransform();
+    updateTransform();
 
     _projectionMatrixIs = false;
 	//updateProjection();

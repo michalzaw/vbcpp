@@ -2,6 +2,8 @@
 
 #include "../Utils/Helpers.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+
 // =========================================
 // CONSTRUCTOR & DESTRUCTOR
 
@@ -25,6 +27,18 @@ PhysicalBody::~PhysicalBody()
 {
     _motionState->getWorldTransform(t);
 }*/
+
+/*
+void PhysicalBody::updateTransform(Transform& t)
+{
+    btTransform transf;
+    transf.setIdentity();
+    //transf.setOrigin(btVector3(t.));
+    transf.setFromOpenGLMatrix(glm::value_ptr(t.getTransformMatrix()));
+
+    update();
+}
+*/
 
 void PhysicalBody::update()
 {

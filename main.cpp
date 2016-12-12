@@ -120,6 +120,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		spot->getTransform()->setRotation(r);
 
 	}
+
+	if (glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS)
+    {
+        if (bus->getDoor(0)->state == EDS_CLOSING)
+            bus->openDoor(0);
+        else
+        if (bus->getDoor(0)->state == EDS_OPENING)
+            bus->closeDoor(0);
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS)
+    {
+        if (bus->getDoor(1)->state == EDS_CLOSING)
+            bus->openDoor(1);
+        else
+        if (bus->getDoor(1)->state == EDS_OPENING)
+            bus->closeDoor(1);
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -228,7 +246,7 @@ int main()
 
 
     /* terrain */
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
+    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
@@ -238,6 +256,7 @@ int main()
     terrainObject->addComponent(terrainMesh);
 
     bus = new Bus(sceneMgr, physMgr, "h9");
+    bus->getSceneObject()->getTransform()->setScale(glm::vec3(1,1,1));
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
@@ -252,13 +271,11 @@ int main()
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
     camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     Camera->addComponent(camFPS);
-    Camera->getTransform()->setPosition(glm::vec3(0,4,5));
+    Camera->getTransform()->setPosition(glm::vec3(0,4,-15));
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
     // Światło
-    //dirLight = scene->addSceneObject();
-    //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->setRotation(glm::vec3(0, 0, -0.2f * PI));

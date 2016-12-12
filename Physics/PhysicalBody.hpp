@@ -25,6 +25,8 @@ class PhysicalBody : public Component
 
         void update();
 
+        //virtual void updateTransform(Transform& t);
+
     protected:
         std::unique_ptr<btRigidBody>            _rigidBody;
         std::unique_ptr<btCollisionShape>       _collShape;
@@ -32,7 +34,7 @@ class PhysicalBody : public Component
         btScalar                _mass;
         btVector3               _position;
 
-        virtual void updateBody() { }
+        //virtual void updateTransform(Transform& t);
 };
 
 #endif // PHYSICALBODY_HPP_INCLUDED

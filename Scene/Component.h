@@ -44,7 +44,7 @@ class Component
         Transform*      getTransform();
         bool            isActive();
 
-        virtual void changedTransform() {}
+        virtual void updateTransform() {}
 
 };
 

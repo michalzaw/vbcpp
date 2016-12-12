@@ -42,7 +42,7 @@ class SceneObject
 
         SceneManager* getSceneManager();
 
-        void changedTransform();
+        void updateComponents();
 
 };
 

@@ -40,7 +40,7 @@ class CameraStatic : public Component
 		void setViewAngle(GLfloat angle);
 		void setWindowDimensions(GLint width, GLint height);
 
-		virtual void changedTransform()
+		virtual void updateTransform()
 		{
 		    _viewMatrixIs = false;
 		    _lookAtIs = false;

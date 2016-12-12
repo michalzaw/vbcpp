@@ -466,6 +466,11 @@ void Renderer::render(RenderData* renderData)
             shader->bindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
         }
 
+         //if (mesh->material.normalmapTexture != NULL)
+         //   shader->bindTexture2D("Texture", mesh->material.diffuseTexture);
+         //else if (mesh->material.diffuseTexture != NULL)
+         //   shader->bindTexture2D("Texture", mesh->material.diffuseTexture);
+
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         if (mesh->material.diffuseTexture != NULL)
             shader->bindTexture2D("Texture", mesh->material.diffuseTexture);

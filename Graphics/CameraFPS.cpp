@@ -1,5 +1,6 @@
 #include "CameraFPS.hpp"
 
+#include <iostream>
 
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
     : CameraStatic(width, height, viewAngle, nearValue, farValue),
@@ -86,6 +87,7 @@ void CameraFPS::moveForward(double deltaTime)
 	dir *= deltaTime * _moveSpeed;
 
 	_objectTransform->setPosition(_objectTransform->getPosition() + dir);
+	//std::cout << "Camera FPS move forward" << std::endl;
 }
 
 

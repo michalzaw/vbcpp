@@ -28,10 +28,18 @@ Bus::~Bus()
 {
     std::cout << "Bus Destruktor" << std::endl;
 
-    WheelList::iterator it = _wheels.begin();
+    // cleaning up wheel objects
+    WheelList::iterator wit = _wheels.begin();
 
-    for (; it != _wheels.end(); ++it)
-        delete (*it);
+    for (; wit != _wheels.end(); ++wit)
+        delete (*wit);
+
+
+    // cleaning up door objects
+    DoorList::iterator dit = _doors.begin();
+
+    for (; dit != _doors.end(); ++dit)
+        delete (*dit);
 
 }
 
@@ -138,7 +146,7 @@ void Bus::loadXMLdata(std::string busname)
             float radius = (float)atof(child->Attribute("radius"));
             float width = (float)atof(child->Attribute("width"));
 
-            WheelSide wheelSide;
+            //WheelSide wheelSide;
 
             int steering = (int)atoi(child->Attribute("steering"));
             int powered = (int)atoi(child->Attribute("powered"));
@@ -157,13 +165,13 @@ void Bus::loadXMLdata(std::string busname)
             wheelObj->getTransform()->setPosition(relativePos);
 
             // obracamy model kola jeżli jest po lewej stronie
-            if (side == "right")
-            {
-                wheelSide = WS_RIGHT;
+            //if (side == "right")
+            //{
+                //wheelSide = WS_RIGHT;
                 //wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
-            }
-            else
-                wheelSide = WS_LEFT;
+            //}
+            //else
+                //wheelSide = WS_LEFT;
 
 
 
@@ -208,7 +216,7 @@ void Bus::loadXMLdata(std::string busname)
             w->brakeForce = brakeForce;
             w->steering = steering;
             w->powered = powered;
-            w->wheelSide = wheelSide;
+            //w->wheelSide = wheelSide;
 
             _wheels.push_back(w);
         }
@@ -244,7 +252,15 @@ void Bus::loadXMLdata(std::string busname)
             ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
 
             doorHinge->getBulletConstraint()->setLimit(-1.5,0);
+            //doorHinge->getBulletConstraint()->enableAngularMotor(true, -0.1f, 1.15f);
 
+            Door* d = new Door;
+            d->body = doorBody;
+            d->model = dr1;
+            d->hinge = doorHinge;
+
+            d->close();
+            _doors.push_back(d);
         }
     }
 
@@ -321,6 +337,20 @@ void Bus::idle()
     _brake = false;
 
     updatePhysics();
+}
+
+
+void Bus::openDoor(unsigned char doorIndex)
+{
+    if (doorIndex <= _doors.size())
+        _doors[doorIndex]->open();
+}
+
+
+void Bus::closeDoor(unsigned char doorIndex)
+{
+    if (doorIndex <= _doors.size())
+        _doors[doorIndex]->close();
 }
 
 

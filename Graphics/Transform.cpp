@@ -3,7 +3,7 @@
 #include "../Scene/SceneObject.h"
 
 #include <cstdio>
-
+#include <iostream>
 
 void Transform::updateTransformMatrix()
 {
@@ -28,12 +28,15 @@ void Transform::updateTransformMatrix()
     _transformMatrixIs = true;
 }
 
-void Transform::changed()
+void Transform::update()
 {
+    // Wyglada na to, ze i tak po wywolaniu 'setPosition' albo 'setRotation' obie matryce sa ustawiana na 'false' wiec i tak obie musza byc przeliczone
+    // Do tego NormalMatrix to transponowana matryca Tranformacji, wiec praktycznie za kazdym razem trzeba przeliczac obie
     _transformMatrixIs = false;
     _normalMatrixIs = false;
 
-    _object->changedTransform();
+    _object->updateComponents();
+    //changed = true;
 }
 
 
@@ -41,9 +44,10 @@ Transform::Transform(SceneObject* object)
     : _position(0.0f, 0.0f, 0.0f),
     _rotation(0.0f, 0.0f, 0.0f),
     _scale(1.0f, 1.0f, 1.0f),
-    _object(object)
+    _object(object),
+    changed(true)
 {
-    changed();
+    update();
 }
 
 
@@ -55,7 +59,7 @@ Transform::Transform(const Transform& t)
 
     _object = t._object;
 
-    changed();
+    update();
 }
 
 
@@ -69,7 +73,7 @@ void Transform::setPosition(glm::vec3 position)
 {
     _position = position;
 
-    changed();
+    update();
 }
 
 
@@ -77,7 +81,7 @@ void Transform::setRotation(glm::vec3 rotation)
 {
     _rotation = rotation;
 
-    changed();
+    update();
 }
 
 
@@ -100,7 +104,7 @@ void Transform::setScale(glm::vec3 scale)
 {
     _scale = scale;
 
-    changed();
+    update();
 }
 
 
@@ -124,6 +128,7 @@ glm::vec3 Transform::getScale()
 
 glm::mat4& Transform::getTransformMatrix()
 {
+
     if (!_transformMatrixIs)
     {
         updateTransformMatrix();
@@ -135,6 +140,7 @@ glm::mat4& Transform::getTransformMatrix()
 
 glm::mat4& Transform::getNormalMatrix()
 {
+
     if (!_normalMatrixIs)
     {
         _normalMatrix = glm::transpose(glm::inverse(getTransformMatrix()));
@@ -154,7 +160,7 @@ Transform& Transform::operator=(const Transform& t)
 
     _object = t._object;
 
-    changed();
+    update();
 
     return *this;
 }

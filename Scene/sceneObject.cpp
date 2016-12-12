@@ -121,6 +121,12 @@ unsigned int SceneObject::getId()
 Transform* SceneObject::getTransform()
 {
     return &_transform;
+
+    //if (_transform.changed)
+        //updateComponents();
+
+    //if (_transform.isDirty())
+    //    changedTransform();
 }
 
 
@@ -151,10 +157,12 @@ SceneManager* SceneObject::getSceneManager()
 }
 
 
-void SceneObject::changedTransform()
+void SceneObject::updateComponents()
 {
     for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
     {
-        (*i)->changedTransform();
+        (*i)->updateTransform();
     }
+
+    //_transform.changed = false;
 }
