@@ -57,6 +57,12 @@ Transform* Component::getTransform()
 }
 
 
+Transform* Component::getGlobalTransform()
+{
+    return _object->getGlobalTransform();
+}
+
+
 bool Component::isActive()
 {
     return _isActive && _object->isActive();

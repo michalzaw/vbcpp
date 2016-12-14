@@ -33,6 +33,7 @@ class Bus : virtual public RefCounter
         virtual ~Bus();
 
         SceneObject* getSceneObject() { return _sceneObject; }
+        SceneObject* getSteeringWheelObject() { return _steeringWheelObject; }
 
         void turnLeft();
         void turnRight();
@@ -48,6 +49,8 @@ class Bus : virtual public RefCounter
         PhysicalBodyConvexHull* _chasisBody;
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
+
+        SceneObject*    _steeringWheelObject;
 
         WheelList       _wheels;
 

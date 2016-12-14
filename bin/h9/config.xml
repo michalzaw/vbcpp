@@ -14,4 +14,6 @@
 	
 	<door name="df1" model="h9/df1.3ds" mass="0.5" position="1.2,0.0,2.7" pivotA="1.2,0.0,2.8" pivotB="0,0,1" />
 	
+	<steering_wheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.6,0.6,0.6"/>
+	
 </object>

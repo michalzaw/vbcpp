@@ -5,7 +5,7 @@
 #include <cstdio>
 
 
-void Transform::updateTransformMatrix()
+void Transform::updateTransformMatrix() const
 {
     glm::mat4 pos = glm::translate(_position);
 
@@ -17,9 +17,18 @@ void Transform::updateTransformMatrix()
                        glm::scale(_scale);
     */
 
-    glm::mat4 rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-             rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-             rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    glm::mat4 rot;
+
+    if (_rotationMode == RM_EULER_ANGLES)
+    {
+        rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+        rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+        rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    }
+    else
+    {
+        rot = glm::mat4_cast(_rotationQuaternion);
+    }
 
     glm::mat4 s = glm::scale(_scale);
 
@@ -38,7 +47,8 @@ void Transform::changed()
 
 
 Transform::Transform(SceneObject* object)
-    : _position(0.0f, 0.0f, 0.0f),
+    : _rotationMode(RM_QUATERNION),
+    _position(0.0f, 0.0f, 0.0f),
     _rotation(0.0f, 0.0f, 0.0f),
     _scale(1.0f, 1.0f, 1.0f),
     _object(object)
@@ -49,8 +59,11 @@ Transform::Transform(SceneObject* object)
 
 Transform::Transform(const Transform& t)
 {
+    _rotationMode = t._rotationMode;
+
     _position = t._position;
     _rotation = t._rotation;
+    _rotationQuaternion = t._rotationQuaternion;
     _scale = t._scale;
 
     _object = t._object;
@@ -78,12 +91,23 @@ void Transform::setRotation(glm::vec3 rotation)
     _rotation = rotation;
 
     changed();
+
+    _rotationMode = RM_EULER_ANGLES;
 }
 
 
 void Transform::setRotation(float x, float y, float z, float w)
 {
-    glm::quat q;
+    _rotationQuaternion.x = x;
+    _rotationQuaternion.y = y;
+    _rotationQuaternion.z = z;
+    _rotationQuaternion.w = w;
+
+    changed();
+
+    _rotationMode = RM_QUATERNION;
+
+    /*glm::quat q;
     q.x = x;
     q.y = y;
     q.z = z;
@@ -92,7 +116,7 @@ void Transform::setRotation(float x, float y, float z, float w)
 
     _transformMatrix = glm::translate(_position) * rot * glm::scale(_scale);
 
-    _transformMatrixIs = true;
+    changed();*/
 }
 
 
@@ -104,25 +128,25 @@ void Transform::setScale(glm::vec3 scale)
 }
 
 
-glm::vec3 Transform::getPosition()
+glm::vec3 Transform::getPosition() const
 {
     return _position;
 }
 
 
-glm::vec3 Transform::getRotation()
+glm::vec3 Transform::getRotation() const
 {
     return _rotation;
 }
 
 
-glm::vec3 Transform::getScale()
+glm::vec3 Transform::getScale() const
 {
     return _scale;
 }
 
 
-glm::mat4& Transform::getTransformMatrix()
+glm::mat4& Transform::getTransformMatrix() const
 {
     if (!_transformMatrixIs)
     {
@@ -133,7 +157,7 @@ glm::mat4& Transform::getTransformMatrix()
 }
 
 
-glm::mat4& Transform::getNormalMatrix()
+glm::mat4& Transform::getNormalMatrix() const
 {
     if (!_normalMatrixIs)
     {
@@ -148,13 +172,31 @@ glm::mat4& Transform::getNormalMatrix()
 
 Transform& Transform::operator=(const Transform& t)
 {
+    _rotationMode = t._rotationMode;
+
     _position = t._position;
     _rotation = t._rotation;
+    _rotationQuaternion = t._rotationQuaternion;
     _scale = t._scale;
 
     _object = t._object;
 
     changed();
+    //_transformMatrix = t._transformMatrix;
+    //_normalMatrix = t._normalMatrix;
+
+    return *this;
+}
+
+
+Transform& Transform::operator*=(const Transform& t)
+{
+    glm::mat4 transformMatrix = getTransformMatrix();
+    glm::mat4 transformMatrix2 = t.getTransformMatrix();
+    _transformMatrix = transformMatrix2 * transformMatrix;      // Zmienic sposob mnozenia macierzy
+
+    _transformMatrixIs = true;
+    _normalMatrixIs = false;
 
     return *this;
 }

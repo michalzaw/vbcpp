@@ -119,6 +119,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		spot->getTransform()->setRotation(r);
 
 	}
+
+	if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS)
+	{
+		if (camFPS->getSceneObject()->hasParent())
+        {
+            camFPS->getSceneObject()->removeParent();
+        }
+        else
+        {
+            std::cout << "\n\n\n\n\ntak to tu\n\n\n\n\n";
+            camFPS->getTransform()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+            bus->getSceneObject()->addChild(camFPS->getSceneObject());
+        }
+
+	}
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -403,6 +418,17 @@ int main()
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
     crate->getTransform()->setPosition(glm::vec3(-10,3,-10));
+
+    //bus->getSceneObject()->addChild(crate);
+    /*SceneObject* test = sceneMgr->addSceneObject("kierownica");
+    RModel* kier = ResourceManager::getInstance().loadModel("h9/steeringwheel3.3ds", "h9/");
+    RenderObject* kierObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(kier));
+    test->addComponent(kierObj);
+    test->getTransform()->setRotationMode(RM_EULER_ANGLES);
+    //test->getTransform()->setRotation(glm::vec3(-0.5f * 3.14, 0.0f, 0.0f));
+    test->getTransform()->setPosition(glm::vec3(0.75f, 0.09f, 4.3f));
+    test->getTransform()->setScale(glm::vec3(0.6f, 0.6f, 0.6f));
+    bus->getSceneObject()->addChild(test);*/
 
     /*
     RModel* wheel1model = ResourceManager::getInstance().loadModel("wheel.3ds", "./");

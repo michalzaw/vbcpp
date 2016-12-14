@@ -231,6 +231,36 @@ void Bus::loadXMLdata(std::string busname)
 
 
         }
+        else // STERING WHEEL
+        if (strcmp(ename,"steering_wheel") == 0)
+        {
+            std::cout << "XML: Steering wheel" << std::endl;
+
+            std::string modelFile = std::string(child->Attribute("model"));
+            std::string modelPath = busname + "/" + modelFile;
+
+            _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
+
+            RModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
+            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel));
+
+            _steeringWheelObject->addComponent(renderObj);
+
+
+            const char* cPosition = child->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+            _steeringWheelObject->getTransform()->setPosition(position);
+
+            const char* cRotation = child->Attribute("rotation");
+            glm::vec3 rotation(XMLstringToVec3(cRotation));
+            _steeringWheelObject->getTransform()->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+
+            const char* cScale = child->Attribute("scale");
+            glm::vec3 scale(XMLstringToVec3(cScale));
+            _steeringWheelObject->getTransform()->setScale(scale);
+
+            _sceneObject->addChild(_steeringWheelObject);
+        }
     }
 
 }
@@ -246,7 +276,13 @@ void Bus::turnLeft()
         if ( w->steering )
         {
             if (w->currentAngle > -_maxSteerAngle)
+            {
                 w->currentAngle -= _steerStep;
+
+                glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                rotation.y += 0.005f;
+                _steeringWheelObject->getTransform()->setRotation(rotation);
+            }
 
             w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
             w->suspension->getBulletConstraint()->setUpperLimit(w->currentAngle);
@@ -265,7 +301,14 @@ void Bus::turnRight()
         if ( w->steering )
         {
             if (w->currentAngle < _maxSteerAngle)
+            {
                 w->currentAngle += _steerStep;
+
+
+                glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                rotation.y -= 0.005f;
+                _steeringWheelObject->getTransform()->setRotation(rotation);
+            }
 
             w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
             w->suspension->getBulletConstraint()->setUpperLimit(w->currentAngle);

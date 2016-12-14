@@ -101,13 +101,13 @@ glm::vec3 Light::getDirection()
 
     //return glm::vec3(dir);
 
-    return glm::normalize(glm::vec3(_objectTransform->getNormalMatrix() * dir));;
+    return glm::normalize(glm::vec3(getGlobalTransform()->getNormalMatrix() * dir));;
 }
 
 
 glm::vec3 Light::getPosition()
 {
-    return _objectTransform->getPosition();
+    return getGlobalTransform()->getPosition();
 }
 
 

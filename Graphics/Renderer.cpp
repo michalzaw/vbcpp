@@ -11,7 +11,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     _shaderList.push_back(shdr1);
 
     // NOTEXTURE_MATERIAL
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/DirLight.vert", "Shaders/DirLight_notexture.frag");
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag");
     _shaderList.push_back(shdr2);
 
     // NORMALMAPPING_MATERIAL
