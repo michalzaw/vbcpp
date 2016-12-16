@@ -128,7 +128,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
         else
         {
-            std::cout << "\n\n\n\n\ntak to tu\n\n\n\n\n";
             camFPS->getTransform()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             bus->getSceneObject()->addChild(camFPS->getSceneObject());
         }
@@ -490,25 +489,31 @@ int main()
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
+    //point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
+    point->getTransform()->setPosition(glm::vec3(0, 4.0, 5));
     point->setIsActive(true);
 
     point2 = sceneMgr->addSceneObject("point2");
     point2->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
+    //point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
+    point2->getTransform()->setPosition(glm::vec3(0, 4.5, 0));
     point2->setIsActive(true);
 
     point3 = sceneMgr->addSceneObject("point3");
     point3->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
+    //point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
+    point3->getTransform()->setPosition(glm::vec3(0, 4.0, -5));
     point3->setIsActive(true);
 
     spot = sceneMgr->addSceneObject("spot");
     spot->addComponent(GraphicsManager::getInstance().addSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, degToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
-    spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, -10.0f));
+    spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 5.0f));//-10.0f));
     spot->getTransform()->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
     spot->setIsActive(true);
-
+    bus->getSceneObject()->addChild(spot);
+    bus->getSceneObject()->addChild(point);
+    bus->getSceneObject()->addChild(point2);
+    bus->getSceneObject()->addChild(point3);
 
     GUIManager* gui = new GUIManager;
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));

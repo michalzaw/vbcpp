@@ -27,6 +27,9 @@ class CameraStatic : public Component
 		vec3 getUpVector();
 		vec3 getDirection();
 		vec3 getRightVector();
+		vec3 getLocalUpVector();
+		vec3 getLocalDirection();
+		vec3 getLocalRightVector();
 
 		GLfloat getNearValue();
 		GLfloat	getFarValue();
@@ -47,6 +50,9 @@ class CameraStatic : public Component
 		    _upVectorIs = false;
 		    _directionIs = false;
 		    _rightVectorIs = false;
+		    _localUpVectorIs = false;
+		    _localDirectionIs = false;
+		    _localRightVectorIs = false;
 		}
 
 	protected:
@@ -57,12 +63,17 @@ class CameraStatic : public Component
 		vec3	_upVector;                 bool _upVectorIs;
 		vec3    _direction;                bool _directionIs;
 		vec3    _rightVector;              bool _rightVectorIs;
+		vec3    _localUpVector;            bool _localUpVectorIs;
+		vec3    _localDirection;           bool _localDirectionIs;
+		vec3    _localRightVector;         bool _localRightVectorIs;
 
 		GLfloat		_farValue;
 		GLfloat		_nearValue;
 		GLfloat		_viewAngle;
 		GLint		_windowWidth;
 		GLint		_windowHeight;
+
+		vec3 transformToGlobal(glm::vec3 vector);
 
 		//void updateProjection();
 		//void updateView();

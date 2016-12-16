@@ -107,7 +107,9 @@ glm::vec3 Light::getDirection()
 
 glm::vec3 Light::getPosition()
 {
-    return getGlobalTransform()->getPosition();
+    glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    return glm::vec3(pos.x, pos.y, pos.z);
+    //return getGlobalTransform()->getPosition();
 }
 
 

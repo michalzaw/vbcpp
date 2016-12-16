@@ -1,5 +1,7 @@
 #include "CameraStatic.hpp"
 
+#include "../Scene/SceneObject.h"
+
 
 CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 	: Component(CT_CAMERA),
@@ -21,9 +23,21 @@ CameraStatic::~CameraStatic()
 }
 
 
+vec3 CameraStatic::transformToGlobal(glm::vec3 vector)
+{
+    glm::vec4 vec(vector, 0.0f);
+    if (_object->hasParent())
+        vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
+
+    return glm::normalize(glm::vec3(vec.x, vec.y, vec.z));
+}
+
+
 vec3 CameraStatic::getPosition()
 {
-	return getGlobalTransform()->getPosition();
+    glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    return glm::vec3(pos.x, pos.y, pos.z);
+    //return getGlobalTransform()->getPosition();
 }
 
 
@@ -61,7 +75,7 @@ glm::vec3 CameraStatic::getUpVector()
 {
     if (!_upVectorIs)
     {
-        _upVector = glm::cross(getRightVector(), getDirection());
+        _upVector = transformToGlobal(getLocalUpVector());
 
         _upVectorIs = true;
     }
@@ -73,14 +87,7 @@ glm::vec3 CameraStatic::getDirection()
 {
     if (!_directionIs)
     {
-        float verticalAngle = getGlobalTransform()->getRotation().x;
-        float horizontalAngle = getGlobalTransform()->getRotation().y;
-
-        _direction = vec3(
-                    cos(verticalAngle) * sin(horizontalAngle),
-                    sin(verticalAngle),
-                    cos(verticalAngle) * cos(horizontalAngle)
-        );
+        _direction = transformToGlobal(getLocalDirection());
 
         _directionIs = true;
     }
@@ -92,18 +99,64 @@ glm::vec3 CameraStatic::getRightVector()
 {
     if (!_rightVectorIs)
     {
-        float horizontalAngle = getGlobalTransform()->getRotation().y;
-
-        _rightVector = vec3(
-				sin(horizontalAngle - PI/2.0f),
-				0,
-				cos(horizontalAngle - PI/2.0f)
-        );
+        _rightVector = transformToGlobal(getLocalRightVector());
 
         _rightVectorIs = true;
     }
 
     return _rightVector;
+}
+
+
+vec3 CameraStatic::getLocalUpVector()
+{
+    if (!_localDirectionIs)
+    {
+        _localUpVector = glm::cross(getLocalRightVector(), getLocalDirection());
+
+        _localUpVectorIs = true;
+    }
+
+	return _localUpVector;
+}
+
+
+vec3 CameraStatic::getLocalDirection()
+{
+    if (!_localDirectionIs)
+    {
+        float verticalAngle = getGlobalTransform()->getRotation().x;
+        float horizontalAngle = getGlobalTransform()->getRotation().y;
+
+        _localDirection = glm::vec3(
+                    cos(verticalAngle) * sin(horizontalAngle),
+                    sin(verticalAngle),
+                    cos(verticalAngle) * cos(horizontalAngle)
+        );
+
+        _localDirectionIs = true;
+    }
+
+	return _localDirection;
+}
+
+
+vec3 CameraStatic::getLocalRightVector()
+{
+    if (!_localRightVectorIs)
+    {
+        float horizontalAngle = getGlobalTransform()->getRotation().y;
+
+        _localRightVector = glm::vec3(
+				sin(horizontalAngle - PI/2.0f),
+				0,
+				cos(horizontalAngle - PI/2.0f)
+        );
+
+        _localRightVectorIs = true;
+    }
+
+	return _localRightVector;
 }
 
 

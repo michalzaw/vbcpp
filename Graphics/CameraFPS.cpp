@@ -81,7 +81,7 @@ void CameraFPS::moveForward(double deltaTime)
 
 	//update();
 
-	glm::vec3 dir = getDirection();
+	glm::vec3 dir = getLocalDirection();
 
 	dir *= deltaTime * _moveSpeed;
 
@@ -97,7 +97,7 @@ void CameraFPS::moveBackward(double deltaTime)
 
 	//update();
 
-	glm::vec3 dir = getDirection();
+	glm::vec3 dir = getLocalDirection();
 
 	dir *= deltaTime * _moveSpeed;
 
@@ -113,7 +113,7 @@ void CameraFPS::strafeLeft(double deltaTime)
 
 	//update();
 
-	glm::vec3 dir = getRightVector();
+	glm::vec3 dir = getLocalRightVector();
 
 	dir *= deltaTime * _moveSpeed;
 
@@ -129,7 +129,7 @@ void CameraFPS::strafeRight(double deltaTime)
 
 	//update();
 
-	glm::vec3 dir = getRightVector();
+	glm::vec3 dir = getLocalRightVector();
 
 	dir *= deltaTime * _moveSpeed;
 
