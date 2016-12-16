@@ -70,20 +70,22 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS)
 	{
-		point3->setIsActive(!point3->isActive());
+		//point3->setIsActive(!point3->isActive());
+		bus->setIsEnableHeadlights(!bus->isEnableHeadlights());
 
 	}if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
 	{
-		point2->setIsActive(!point2->isActive());
+		//point2->setIsActive(!point2->isActive());
+		bus->setIsEnableLights(!bus->isEnableLights());
 
 	}if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
 	{
-		point->setIsActive(!point->isActive());
+		//point->setIsActive(!point->isActive());
 
 	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
 	    Light* l = static_cast<Light*>(dirLight->getComponent(0));
-	    if (l->getAmbientIntensity() > 0.05)
+	    if (l->getDiffiseIntenisty() > 0.05)
         {
             l->setAmbientIntensity(0.05);
             l->setDiffuseIntensity(0.0);
@@ -124,12 +126,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		if (camFPS->getSceneObject()->hasParent())
         {
+            camFPS->getTransform()->setPosition(camFPS->getPosition());
             camFPS->getSceneObject()->removeParent();
         }
         else
         {
-            camFPS->getTransform()->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
             bus->getSceneObject()->addChild(camFPS->getSceneObject());
+            camFPS->getTransform()->setPosition(bus->getDriverPosition());
         }
 
 	}
@@ -484,36 +487,33 @@ int main()
     //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
-    dirLight->getTransform()->setRotation(glm::vec3(0, 0, -0.2f * PI));
+    dirLight->getTransform()->setRotation(glm::vec3(-0.2f * PI, 0.5f * PI, 0));
     dirLight->getTransform()->setPosition(glm::vec3(0,20,0));
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
     //point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
     point->getTransform()->setPosition(glm::vec3(0, 4.0, 5));
-    point->setIsActive(true);
+    point->setIsActive(false);
 
     point2 = sceneMgr->addSceneObject("point2");
     point2->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
     //point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
     point2->getTransform()->setPosition(glm::vec3(0, 4.5, 0));
-    point2->setIsActive(true);
+    point2->setIsActive(false);
 
     point3 = sceneMgr->addSceneObject("point3");
     point3->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
     //point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
     point3->getTransform()->setPosition(glm::vec3(0, 4.0, -5));
-    point3->setIsActive(true);
+    point3->setIsActive(false);
 
     spot = sceneMgr->addSceneObject("spot");
     spot->addComponent(GraphicsManager::getInstance().addSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, degToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
     spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 5.0f));//-10.0f));
     spot->getTransform()->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
-    spot->setIsActive(true);
-    bus->getSceneObject()->addChild(spot);
-    bus->getSceneObject()->addChild(point);
-    bus->getSceneObject()->addChild(point2);
-    bus->getSceneObject()->addChild(point3);
+    spot->setIsActive(false);
+
 
     GUIManager* gui = new GUIManager;
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));

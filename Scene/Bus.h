@@ -2,6 +2,7 @@
 #define BUS_H_INCLUDED
 
 #include "../Utils/RefCounter.h"
+#include "../Utils/Strings.h"
 
 #include "SceneObject.h"
 #include "SceneManager.h"
@@ -25,6 +26,7 @@ struct Wheel
 };
 
 typedef std::vector<Wheel*> WheelList;
+typedef std::vector<Light*> LightsList;
 
 class Bus : virtual public RefCounter
 {
@@ -34,6 +36,12 @@ class Bus : virtual public RefCounter
 
         SceneObject* getSceneObject() { return _sceneObject; }
         SceneObject* getSteeringWheelObject() { return _steeringWheelObject; }
+
+        glm::vec3 getDriverPosition();
+        void setIsEnableLights(bool is);
+        bool isEnableLights();
+        void setIsEnableHeadlights(bool is);
+        bool isEnableHeadlights();
 
         void turnLeft();
         void turnRight();
@@ -51,6 +59,11 @@ class Bus : virtual public RefCounter
         PhysicsManager* _pMgr;
 
         SceneObject*    _steeringWheelObject;
+        glm::vec3       _driverPosition;
+        LightsList      _lights;
+        bool            _isEnableLights;
+        Light*          _headlights[2];
+        bool            _isEnableHeadlights;
 
         WheelList       _wheels;
 

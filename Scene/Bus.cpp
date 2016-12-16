@@ -17,7 +17,8 @@ Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
 _maxSteerAngle(0.65f), _steerStep(0.0005f),
 _brake(false), _accelerate(false),
-_brakeForce(0.0f), _brakeForceStep(0.5f)
+_brakeForce(0.0f), _brakeForceStep(0.5f),
+_steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f), _isEnableLights(false), _isEnableHeadlights(false)
 {
     std::cout << "Bus Konstruktor" << std::endl;
 
@@ -261,8 +262,128 @@ void Bus::loadXMLdata(std::string busname)
 
             _sceneObject->addChild(_steeringWheelObject);
         }
+        else // DRIVER
+        if (strcmp(ename,"driver") == 0)
+        {
+            std::cout << "XML: Driver" << std::endl;
+
+            const char* cPosition = child->Attribute("position");
+            _driverPosition = XMLstringToVec3(cPosition);
+        }
+        else // LIGHT
+        if (strcmp(ename,"light") == 0)
+        {
+            std::cout << "XML: Light" << std::endl;
+
+            const char* cPosition = child->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+
+            const char* cColor = child->Attribute("color");
+            glm::vec3 color = XMLstringToVec3(cColor);
+
+            const char* cAttenuation = child->Attribute("attenuation");
+            glm::vec3 attenuation = XMLstringToVec3(cAttenuation);
+
+            float ambientIntensity = (float)atof(child->Attribute("ambientIntensity"));
+            float diffuseIntensity = (float)atof(child->Attribute("diffuseIntensity"));
+
+
+            SceneObject* light = _sMgr->addSceneObject("busLight" + toString(_lights.size()));
+            Light* lightComponent = GraphicsManager::getInstance().addPointLight(color, ambientIntensity,
+                                                                                 diffuseIntensity,
+                                                                                 LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+            light->addComponent(lightComponent);
+            light->getTransform()->setPosition(position);
+            _sceneObject->addChild(light);
+
+            lightComponent->setIsActive(_isEnableLights);
+
+            _lights.push_back(lightComponent);
+        }
+        else // HEADLIGHTS
+        if (strcmp(ename,"headlights") == 0)
+        {
+            std::cout << "XML: Headlights" << std::endl;
+
+            const char* cPosition = child->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+
+            const char* cRotation = child->Attribute("rotation");
+            glm::vec3 rotation = XMLstringToVec3(cRotation);
+
+            const char* cColor = child->Attribute("color");
+            glm::vec3 color = XMLstringToVec3(cColor);
+
+            const char* cAttenuation = child->Attribute("attenuation");
+            glm::vec3 attenuation = XMLstringToVec3(cAttenuation);
+
+            float ambientIntensity = (float)atof(child->Attribute("ambientIntensity"));
+            float diffuseIntensity = (float)atof(child->Attribute("diffuseIntensity"));
+            float cutoff = (float)atof(child->Attribute("cutoff"));
+
+
+            SceneObject* light = _sMgr->addSceneObject("busHeadlights0");
+            Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
+                                                                                diffuseIntensity, cutoff,
+                                                                                LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+            light->addComponent(lightComponent);
+            light->getTransform()->setPosition(position);
+            light->getTransform()->setRotation(rotation);
+            _sceneObject->addChild(light);
+
+            lightComponent->setIsActive(_isEnableHeadlights);
+
+            _headlights[0] = lightComponent;
+
+
+            light = _sMgr->addSceneObject("busHeadlights0");
+            lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
+                                                                                diffuseIntensity, cutoff,
+                                                                                LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+            light->addComponent(lightComponent);
+            position.x = -position.x;
+            light->getTransform()->setPosition(position);
+            light->getTransform()->setRotation(rotation);
+            _sceneObject->addChild(light);
+
+            lightComponent->setIsActive(_isEnableHeadlights);
+
+            _headlights[1] = lightComponent;
+        }
     }
 
+}
+
+glm::vec3 Bus::getDriverPosition()
+{
+    return _driverPosition;
+}
+
+void Bus::setIsEnableLights(bool is)
+{
+    for (LightsList::iterator i = _lights.begin(); i != _lights.end(); ++i)
+    {
+        (*i)->setIsActive(is);
+    }
+    _isEnableLights = is;
+}
+
+bool Bus::isEnableLights()
+{
+    return _isEnableLights;
+}
+
+void Bus::setIsEnableHeadlights(bool is)
+{
+    _headlights[0]->setIsActive(is);
+    _headlights[1]->setIsActive(is);
+
+    _isEnableHeadlights = is;
+}
+
+bool Bus::isEnableHeadlights()
+{
+    return _isEnableHeadlights;
 }
 
 void Bus::turnLeft()
