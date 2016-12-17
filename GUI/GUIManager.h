@@ -4,9 +4,12 @@
 
 #include <vector>
 #include <list>
+#include <string>
 
 #include "GUIObject.h"
 #include "Image.h"
+#include "Label.h"
+#include "GUIRenderListElement.h"
 
 
 class GUIManager
@@ -19,13 +22,15 @@ class GUIManager
         ~GUIManager();
 
         Image* addImage(RTexture* texture);
+        Label* addLabel(RFont* font, std::string text = "");
 
         unsigned int getObjectsCount();
 
         GUIObject* getObject(unsigned int index);
 
         //void renderAllObjects();
-        std::list<GUIObject*>* getGUIList();
+        //std::list<GUIObject*>* getGUIList();
+        GUIRenderList* getGUIRenderList();
 
 };
 

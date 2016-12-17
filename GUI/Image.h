@@ -38,8 +38,27 @@ class Image : public GUIObject
 
         UintRect _textureRect;
 
+        glm::vec2   _size;                      // Wykorzystywane wewnetrznie, zalezy np od rozmiaru tekstury
 
-        virtual void calculateTexCoordTransformMatrix();
+        glm::mat4 _verticesTransformMatrix;
+        glm::mat4 _texCoordTransformMatrix;
+
+        bool _verticesTransformMatrixIs;
+        bool _texCoordTransformMatrixIs;
+
+
+        bool _isInitialized;
+
+
+        void createVBO();
+
+        void setSize(glm::vec2 size);
+
+        void calculateVerticesTransformMatrix();
+        void calculateTexCoordTransformMatrix();
+
+        inline virtual void changedVerticesTransformMatrixParameters() { _verticesTransformMatrixIs = false; }
+        inline virtual void changedTexCoordTransformMatrixParameters() { _texCoordTransformMatrixIs = false; }
 
     public:
         Image(RTexture* texture);
@@ -51,6 +70,13 @@ class Image : public GUIObject
 
         RTexture* getTexture();
         UintRect& getTextureRect();
+
+        glm::vec2 getSize();
+
+        virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
+        virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0);
+
+        virtual void addDataToRenderList(GUIRenderList* renderList);
 
 };
 

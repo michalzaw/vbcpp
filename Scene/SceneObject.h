@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <list>
 #include <string>
 
 #include "Component.h"
@@ -14,18 +15,37 @@ class SceneManager;
 class SceneObject
 {
     private:
+        SceneObject*            _parent;
+        std::list<SceneObject*> _childrens;
+
         std::vector<Component*> _components;
 
-        std::string _name;
-        unsigned int _id;
-        Transform _transform;
-        bool _isActive;
+        std::string     _name;
+        unsigned int    _id;
+        Transform       _transform;
+        Transform       _globalTransform;
+        bool            _isActive;
 
-        SceneManager* _sceneManager;
+        bool            _transformIsChanged;
+
+        SceneManager*   _sceneManager;
+
+
+        void calculateGlobalTransform();
 
     public:
-        SceneObject(std::string name, SceneManager* sceneManager);
+        SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent = NULL);
         ~SceneObject();
+
+
+        void removeParent();
+        bool hasParent();
+        SceneObject* getParent();
+
+        void addChild(SceneObject* child);
+        bool removeChild(SceneObject* child);
+        void removeAllChildren();
+
 
         void addComponent(Component* component);
         void removeComponent(Component* component);
@@ -35,12 +55,14 @@ class SceneObject
         std::string     getName();
         unsigned int    getId();
         Transform*      getTransform();
+        Transform*      getGlobalTransform();
         bool            isActive();
 
         Component*      getComponent(unsigned int index);
         unsigned int    getComponentsCount();
 
         SceneManager* getSceneManager();
+
 
         void changedTransform();
 

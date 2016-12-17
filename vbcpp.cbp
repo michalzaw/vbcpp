@@ -91,6 +91,7 @@
 					<Add option="-g" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
+					<Add directory="include/freetype" />
 				</Compiler>
 				<Linker>
 					<Add library="lib/win32/glfw3dll.a" />
@@ -103,6 +104,7 @@
 					<Add library="BulletDynamics" />
 					<Add library="BulletCollision" />
 					<Add library="LinearMath" />
+					<Add library="freetype" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -117,6 +119,7 @@
 					<Add option="-std=c++11" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
+					<Add directory="include/freetype" />
 				</Compiler>
 				<Linker>
 					<Add library="lib/win32/glfw3dll.a" />
@@ -129,6 +132,7 @@
 					<Add library="BulletDynamics" />
 					<Add library="BulletCollision" />
 					<Add library="LinearMath" />
+					<Add library="freetype" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -136,12 +140,18 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="GUI/FontLoader.cpp" />
+		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />
 		<Unit filename="GUI/GUIManager.h" />
 		<Unit filename="GUI/GUIObject.cpp" />
 		<Unit filename="GUI/GUIObject.h" />
+		<Unit filename="GUI/GUIRenderListElement.cpp" />
+		<Unit filename="GUI/GUIRenderListElement.h" />
 		<Unit filename="GUI/Image.cpp" />
 		<Unit filename="GUI/Image.h" />
+		<Unit filename="GUI/Label.cpp" />
+		<Unit filename="GUI/Label.h" />
 		<Unit filename="Graphics/Camera.cpp" />
 		<Unit filename="Graphics/Camera.h" />
 		<Unit filename="Graphics/CameraFPS.cpp" />
@@ -215,6 +225,8 @@
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />
+		<Unit filename="Utils/RFont.cpp" />
+		<Unit filename="Utils/RFont.h" />
 		<Unit filename="Utils/RModel.cpp" />
 		<Unit filename="Utils/RModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />

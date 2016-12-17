@@ -1,5 +1,7 @@
 #include "Light.h"
 
+#include "../Scene/SceneObject.h"
+
 
 Light::Light(LightType type)
     : Component(CT_LIGHT),
@@ -101,13 +103,29 @@ glm::vec3 Light::getDirection()
 
     //return glm::vec3(dir);
 
-    return glm::normalize(glm::vec3(_objectTransform->getNormalMatrix() * dir));;
+    //return glm::normalize(glm::vec3(getGlobalTransform()->getNormalMatrix() * dir));;
+    float verticalAngle = getGlobalTransform()->getRotation().x;
+    float horizontalAngle = getGlobalTransform()->getRotation().y;
+
+    glm::vec4 vec(
+                    cos(verticalAngle) * sin(horizontalAngle),
+                    sin(verticalAngle),
+                    cos(verticalAngle) * cos(horizontalAngle),
+                    0.0f
+                     );
+
+    if (_object->hasParent())
+        vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
+
+    return glm::normalize(glm::vec3(vec.x, vec.y, vec.z));
 }
 
 
 glm::vec3 Light::getPosition()
 {
-    return _objectTransform->getPosition();
+    glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    return glm::vec3(pos.x, pos.y, pos.z);
+    //return getGlobalTransform()->getPosition();
 }
 
 

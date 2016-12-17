@@ -2,12 +2,16 @@
 #define GUIOBJECT_H_INCLUDED
 
 
+#include <vector>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../Graphics/OGLDriver.h"
 #include "../Graphics/VBO.h"
+
+#include "GUIRenderListElement.h"
 
 
 struct GUIVertex
@@ -20,29 +24,23 @@ struct GUIVertex
 
 class GUIObject
 {
+    private:
+        glm::mat4 _identityTransformMatrix;
+
     protected:
         glm::vec3   _position;
         glm::vec2   _scale;
         float       _rotation;
 
-        glm::vec2   _size;                      // Wykorzystywane wewnetrznie, zalezy np od rozmiaru tekstury
-
-        glm::mat4 _verticesTransformMatrix;
-        glm::mat4 _texCoordTransformMatrix;
-
-        bool _verticesTransformMatrixIs;
-        bool _texCoordTransformMatrixIs;
+        glm::vec4   _color;
 
         bool _isActive;
 
-        VBO* _vbo;
+        std::vector<VBO*> _vbos;
 
 
-        void setSize(glm::vec2 _size);
-
-
-        virtual void calculateVerticesTransformMatrix();
-        virtual void calculateTexCoordTransformMatrix();
+        inline virtual void changedVerticesTransformMatrixParameters() {}
+        inline virtual void changedTexCoordTransformMatrixParameters() {}
 
     public:
         GUIObject();
@@ -67,17 +65,21 @@ class GUIObject
         float       getRotation();
 
 
-        glm::vec2   getSize();
-
-
         void setIsActive(bool isActive);
         bool isActive();
 
 
-        VBO* getVBO();
+        void            setColor(glm::vec4 color);
+        glm::vec4       getColor();
 
-        glm::mat4& getVerticesTransformMatrix();
-        glm::mat4& getTexCoordTransformMatrix();
+
+        VBO*            getVBO(unsigned int index = 0);
+        unsigned int    getQuantumOfVBO();
+
+        virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0) { return _identityTransformMatrix; }
+        virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0) { return _identityTransformMatrix; }
+
+        virtual void addDataToRenderList(GUIRenderList* renderList) = 0;
 
 };
 

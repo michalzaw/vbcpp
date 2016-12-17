@@ -42,6 +42,7 @@ class Component
         ComponentType   getType();
         SceneObject*    getSceneObject();
         Transform*      getTransform();
+        Transform*      getGlobalTransform();
         bool            isActive();
 
         virtual void changedTransform() {}

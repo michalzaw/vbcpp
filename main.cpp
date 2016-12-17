@@ -70,19 +70,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS)
 	{
-		point3->setIsActive(!point3->isActive());
+		//point3->setIsActive(!point3->isActive());
+		bus->setIsEnableHeadlights(!bus->isEnableHeadlights());
 
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
 	{
-		point2->setIsActive(!point2->isActive());
+		//point2->setIsActive(!point2->isActive());
+		bus->setIsEnableLights(!bus->isEnableLights());
 
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
 	{
-		point->setIsActive(!point->isActive());
+		//point->setIsActive(!point->isActive());
 
 	}
 
@@ -90,7 +92,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 	    Light* l = dynamic_cast<Light*>(dirLight->getComponent(0));
 
-	    if (l->getAmbientIntensity() > 0.05)
+	    if (l->getDiffiseIntenisty() > 0.05)
         {
             l->setAmbientIntensity(0.05);
             l->setDiffuseIntensity(0.0);
@@ -153,6 +155,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (bus->getDoor(1)->state == EDS_OPENING)
             bus->closeDoor(1);
     }
+
+	if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS)
+	{
+		if (camFPS->getSceneObject()->hasParent())
+        {
+            camFPS->getTransform()->setPosition(camFPS->getPosition());
+            camFPS->getSceneObject()->removeParent();
+        }
+        else
+        {
+            bus->getSceneObject()->addChild(camFPS->getSceneObject());
+            camFPS->getTransform()->setPosition(bus->getDriverPosition());
+        }
+
+	}
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -242,7 +259,7 @@ int main()
 {
     win = new Window;
 
-    win->createWindow(1366, 768, 100, 100);
+    win->createWindow(1366, 768, 00, 100);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
@@ -294,36 +311,46 @@ int main()
     //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
-    dirLight->getTransform()->setRotation(glm::vec3(0, 0, -0.2f * PI));
+    dirLight->getTransform()->setRotation(glm::vec3(-0.2f * PI, 0.5f * PI, 0));
     dirLight->getTransform()->setPosition(glm::vec3(0,20,0));
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
-    point->setIsActive(true);
+    //point->getTransform()->setPosition(glm::vec3(-10, 4.5, 20));
+    point->getTransform()->setPosition(glm::vec3(0, 4.0, 5));
+    point->setIsActive(false);
 
     point2 = sceneMgr->addSceneObject("point2");
     point2->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
-    point2->setIsActive(true);
+    //point2->getTransform()->setPosition(glm::vec3(-10, 4.5, 17));
+    point2->getTransform()->setPosition(glm::vec3(0, 4.5, 0));
+    point2->setIsActive(false);
 
     point3 = sceneMgr->addSceneObject("point3");
     point3->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
-    point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
-    point3->setIsActive(true);
+    //point3->getTransform()->setPosition(glm::vec3(-10, 4.5, 12));
+    point3->getTransform()->setPosition(glm::vec3(0, 4.0, -5));
+    point3->setIsActive(false);
 
     spot = sceneMgr->addSceneObject("spot");
     spot->addComponent(GraphicsManager::getInstance().addSpotLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.1f, 0.4f, degToRad(20.0f), LightAttenuation(1.0f, 0.0014f, 0.000007f)));
-    spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, -10.0f));
+    spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 5.0f));//-10.0f));
     spot->getTransform()->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
-    spot->setIsActive(true);
+    spot->setIsActive(false);
 
 
     GUIManager* gui = new GUIManager;
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    //img->setPosition(100, 768 - 512);
+    img->setPosition(0, W_HEIGHT - img->getTexture()->getSize().y / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
     img->setScale(0.5f, 0.5f);
+    //img->setPosition(100, 100);
+
+
+    RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
+    Label* label = gui->addLabel(font, "Virtual Bus Core++");
+    label->setPosition(img->getTexture()->getSize().x / 2.0f + 100, W_HEIGHT - 40);
+    label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
     // Zmienne dla obliczania czasu
@@ -366,6 +393,7 @@ int main()
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
 			win->setWindowTitle(newWindowTitle);
+			label->setText(newWindowTitle);
         }
 
         timePhysicsPrev = timePhysicsCurr;
@@ -394,7 +422,7 @@ int main()
         renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());
 
         // Renderowanie GUI
-        renderer->renderGUI(gui->getGUIList());
+        renderer->renderGUI(gui->getGUIRenderList());
 
 
 

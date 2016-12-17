@@ -19,11 +19,20 @@ enum TextureType
 };
 
 
+enum TextureFormat
+{
+    TF_RGB              = GL_RGB,
+    TF_RGBA             = GL_RGBA,
+    TF_DEPTH_COMPONENT  = GL_DEPTH_COMPONENT
+
+};
+
+
 enum TextureFilterMode
 {
-    TFM_NEAREST = GL_NEAREST,
-    TFM_LINEAR  = GL_LINEAR,
-    TFM_MIPMAP  = GL_LINEAR_MIPMAP_LINEAR,
+    TFM_NEAREST     = GL_NEAREST,
+    TFM_LINEAR      = GL_LINEAR,
+    TFM_TRILINEAR   = GL_LINEAR_MIPMAP_LINEAR,
 
 };
 
@@ -41,15 +50,19 @@ enum TextureClampMode
 class RTexture : virtual public Resource
 {
     public:
-        RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
+        //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
+        RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
+        RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
         virtual ~RTexture();
 
-        GLuint getID() { return _texID; }
+        //GLuint getID() { return _texID; }
 
         void setFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void setClampMode(TextureClampMode mode);
 
         void setAnisotropyFiltering(bool isEnable, float anisotropy = 1.0f);
+
+        void setTexSubImage(unsigned char* data, int offsetX, int offsetY, int width, int height);
 
         glm::uvec2 getSize();
 
@@ -61,7 +74,12 @@ class RTexture : virtual public Resource
     protected:
         GLuint      _texID;
         TextureType _type;
+        TextureFormat _format;
         glm::uvec2  _size;
+
+        bool        _isGenerateMipmap;
+
+        void generateMipmap();
 
 };
 

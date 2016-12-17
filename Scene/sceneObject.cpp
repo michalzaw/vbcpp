@@ -2,11 +2,17 @@
 #include "SceneManager.h"
 
 
-SceneObject::SceneObject(std::string name, SceneManager* sceneManager)
-    : _id(0), _name(name), _isActive(true),
+SceneObject::SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent)
+    : _parent(parent),
+    _id(0), _name(name), _isActive(true),
     _sceneManager(sceneManager),
-    _transform(this)
+    _transform(this), _globalTransform(this), _transformIsChanged(true)
 {
+    if (_parent != NULL)
+    {
+        _parent->addChild(this);
+    }
+
     //#ifdef _DEBUG_MODE
         std::cout << "Create SceneObject: " << _name << std::endl ;
     //#endif // _DEBUG_MODE
@@ -31,6 +37,7 @@ SceneObject::~SceneObject()
 
             case CT_CAMERA:
                 //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
+                GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
                 break;
 
             case CT_LIGHT:
@@ -47,6 +54,90 @@ SceneObject::~SceneObject()
 
         /* ------------------------------------- */
     }
+}
+
+
+void SceneObject::calculateGlobalTransform()
+{
+    _globalTransform = _transform;
+
+    if (_parent != NULL)
+    {
+        _globalTransform *= *(_parent->getGlobalTransform());
+        //_globalTransform = *(_parent->getGlobalTransform()) * _globalTransform;
+        //_globalTransform.setObject(this);
+    }
+}
+
+
+void SceneObject::removeParent()
+{
+    if (_parent != NULL)
+    {
+        _parent->removeChild(this);
+        _parent = NULL;
+    }
+}
+
+
+bool SceneObject::hasParent()
+{
+    return static_cast<bool>(_parent);
+}
+
+
+SceneObject* SceneObject::getParent()
+{
+    return _parent;
+}
+
+
+void SceneObject::addChild(SceneObject* child)
+{
+    if (child == NULL)
+    {
+        return;
+    }
+
+    _childrens.push_back(child);
+
+    child->removeParent();
+    child->_parent = this;
+
+    child->setIsActive(_isActive);
+}
+
+
+bool SceneObject::removeChild(SceneObject* child)
+{
+    if (child == NULL)
+    {
+        return false;
+    }
+
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        if ((*i) == child)
+        {
+            child->_parent = NULL;
+            _childrens.erase(i);
+
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+void SceneObject::removeAllChildren()
+{
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        (*i)->_parent = NULL;
+    }
+
+    _childrens.clear();
 }
 
 
@@ -79,6 +170,7 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_CAMERA:
                     //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
+                    GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
                     break;
 
                 case CT_LIGHT:
@@ -104,6 +196,11 @@ void SceneObject::removeComponent(Component* component)
 void SceneObject::setIsActive(bool is)
 {
     _isActive = is;
+
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        (*i)->setIsActive(_isActive);
+    }
 }
 
 
@@ -121,6 +218,19 @@ unsigned int SceneObject::getId()
 Transform* SceneObject::getTransform()
 {
     return &_transform;
+}
+
+
+Transform* SceneObject::getGlobalTransform()
+{
+    if (_transformIsChanged)
+    {
+        calculateGlobalTransform();
+
+        _transformIsChanged = false;
+    }
+
+    return &_globalTransform;
 }
 
 
@@ -153,8 +263,15 @@ SceneManager* SceneObject::getSceneManager()
 
 void SceneObject::changedTransform()
 {
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        (*i)->changedTransform();
+    }
+
     for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
     {
         (*i)->changedTransform();
     }
+
+    _transformIsChanged = true;
 }
