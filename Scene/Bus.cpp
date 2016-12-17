@@ -28,10 +28,15 @@ Bus::~Bus()
 {
     std::cout << "Bus Destruktor" << std::endl;
 
-    WheelList::iterator it = _wheels.begin();
+    WheelList::iterator wit = _wheels.begin();
 
-    for (; it != _wheels.end(); ++it)
-        delete (*it);
+    for (; wit != _wheels.end(); ++wit)
+        delete (*wit);
+
+    DoorList::iterator dit = _doors.begin();
+
+    for (; dit != _doors.end(); ++dit)
+        delete (*dit);
 
 }
 
@@ -245,6 +250,13 @@ void Bus::loadXMLdata(std::string busname)
 
             doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
+            Door* d = new Door;
+            d->body = doorBody;
+            d->model = dr1;
+            d->hinge = doorHinge;
+
+            d->close();
+            _doors.push_back(d);
         }
     }
 
@@ -321,6 +333,20 @@ void Bus::idle()
     _brake = false;
 
     updatePhysics();
+}
+
+
+void Bus::openDoor(unsigned char doorIndex)
+{
+    if (doorIndex <= _doors.size())
+        _doors[doorIndex]->open();
+}
+
+
+void Bus::closeDoor(unsigned char doorIndex)
+{
+    if (doorIndex <= _doors.size())
+        _doors[doorIndex]->close();
 }
 
 

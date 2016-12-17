@@ -72,15 +72,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		point3->setIsActive(!point3->isActive());
 
-	}if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
 	{
 		point2->setIsActive(!point2->isActive());
 
-	}if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
 	{
 		point->setIsActive(!point->isActive());
 
-	}if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
 	{
 	    Light* l = dynamic_cast<Light*>(dirLight->getComponent(0));
 
@@ -95,31 +101,58 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             l->setDiffuseIntensity(0.5);
         }
 
-	}if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
 	{
 		glm::vec3 r = spot->getTransform()->getRotation();
 		r.z += 0.01;
 		spot->getTransform()->setRotation(r);
 
-	}if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
 	{
 		glm::vec3 r = spot->getTransform()->getRotation();
 		r.z -= 0.01;
 		spot->getTransform()->setRotation(r);
 
-	}if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
 	{
 		glm::vec3 r = spot->getTransform()->getRotation();
 		r.y += 0.01;
 		spot->getTransform()->setRotation(r);
 
-	}if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
+	}
+
+	if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
 	{
 		glm::vec3 r = spot->getTransform()->getRotation();
 		r.y -= 0.01;
 		spot->getTransform()->setRotation(r);
-
 	}
+
+
+	if (glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS)
+    {
+        if (bus->getDoor(0)->state == EDS_CLOSING)
+            bus->openDoor(0);
+        else
+        if (bus->getDoor(0)->state == EDS_OPENING)
+            bus->closeDoor(0);
+    }
+
+
+    if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS)
+    {
+        if (bus->getDoor(1)->state == EDS_CLOSING)
+            bus->openDoor(1);
+        else
+        if (bus->getDoor(1)->state == EDS_OPENING)
+            bus->closeDoor(1);
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -228,7 +261,7 @@ int main()
 
 
     /* terrain */
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area.3ds", "testarea/");
+    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
