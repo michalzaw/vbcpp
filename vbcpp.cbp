@@ -177,6 +177,7 @@
 		<Unit filename="Graphics/NVMeshMender/NVMeshMender.h" />
 		<Unit filename="Graphics/OGLDriver.cpp" />
 		<Unit filename="Graphics/OGLDriver.h" />
+		<Unit filename="Graphics/Prefab.h" />
 		<Unit filename="Graphics/RShader.h" />
 		<Unit filename="Graphics/RenderData.cpp" />
 		<Unit filename="Graphics/RenderData.h" />
@@ -221,6 +222,8 @@
 		<Unit filename="Scene/SceneManager.cpp" />
 		<Unit filename="Scene/SceneManager.h" />
 		<Unit filename="Scene/SceneObject.h" />
+		<Unit filename="Scene/Skybox.cpp" />
+		<Unit filename="Scene/Skybox.h" />
 		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
@@ -231,6 +234,10 @@
 		<Unit filename="Utils/RModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />
 		<Unit filename="Utils/RTexture.h" />
+		<Unit filename="Utils/RTexture2D.cpp" />
+		<Unit filename="Utils/RTexture2D.h" />
+		<Unit filename="Utils/RTextureCubeMap.cpp" />
+		<Unit filename="Utils/RTextureCubeMap.h" />
 		<Unit filename="Utils/RefCounter.h" />
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />

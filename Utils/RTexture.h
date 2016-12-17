@@ -47,12 +47,13 @@ enum TextureClampMode
 };
 
 
-class RTexture : virtual public Resource
+class RTexture : public Resource
 {
     public:
         //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
-        RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
-        RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
+        //RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
+        //RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
+        RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size);
         virtual ~RTexture();
 
         //GLuint getID() { return _texID; }
@@ -61,8 +62,6 @@ class RTexture : virtual public Resource
         void setClampMode(TextureClampMode mode);
 
         void setAnisotropyFiltering(bool isEnable, float anisotropy = 1.0f);
-
-        void setTexSubImage(unsigned char* data, int offsetX, int offsetY, int width, int height);
 
         glm::uvec2 getSize();
 

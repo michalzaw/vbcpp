@@ -2,6 +2,7 @@
 
 
 SceneManager::SceneManager()
+    : _sky(NULL)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";
@@ -92,4 +93,14 @@ SceneObject* SceneManager::getSceneObject(std::string name)
         if ((*i)->getName() == name)
             delete *i;
     }
+}
+
+
+void SceneManager::addSky(RTextureCubeMap* texture)
+{
+    if (_sky != NULL)
+        removeSceneObject(_sky->getName());
+
+    _sky = new Skybox(texture, this);
+    _sceneObjects.push_back(_sky);
 }

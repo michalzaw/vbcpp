@@ -7,6 +7,7 @@
 #include "../Graphics/GraphicsManager.h"
 #include "../Physics/PhysicsManager.hpp"
 #include "SceneObject.h"
+#include "Skybox.h"
 
 
 class SceneManager
@@ -16,6 +17,8 @@ class SceneManager
         //PhysicsManager*     _physicsManager;
 
         std::list<SceneObject*> _sceneObjects;
+
+        Skybox* _sky;
 
     public:
         SceneManager();
@@ -31,6 +34,9 @@ class SceneManager
         void            removeSceneObject(std::string name);
 
         SceneObject*    getSceneObject(std::string name);
+
+        void addSky(RTextureCubeMap* texture);
+
 };
 
 

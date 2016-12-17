@@ -9,7 +9,7 @@
 #include "../Graphics/VBO.h"
 
 #include "Resource.h"
-#include "RTexture.h"
+#include "RTexture2D.h"
 
 
 struct CharacterInfo
@@ -30,7 +30,7 @@ class RFont : virtual public Resource
 
     private:
         CharacterInfo _characterInfos[256];
-        RTexture* _characterTexture;
+        RTexture2D* _characterTexture;
 
         VBO* _vbo;
 
@@ -39,7 +39,7 @@ class RFont : virtual public Resource
         virtual ~RFont();
 
         const CharacterInfo& getCharacterInfo(char character);
-        RTexture* getTexture();
+        RTexture2D* getTexture();
         VBO* getVBO();
 
 };

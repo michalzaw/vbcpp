@@ -21,7 +21,7 @@ class ResourceManager
 
         static ResourceManager& getInstance();
 
-        RTexture* loadTexture(std::string path);
+        RTexture2D* loadTexture(std::string path);
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath);
 

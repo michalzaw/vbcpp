@@ -25,7 +25,7 @@ class RModel : virtual public Resource
         GLenum getPrimitiveType();
         Mesh* getMeshes();
 
-    private:
+    protected:
         Vertex* _vertices;
         unsigned int _quantumOfVertices;
 

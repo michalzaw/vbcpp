@@ -91,7 +91,7 @@ RFont* FontLoader::loadFont(const char* fontName, int pixelSize)
 
     _textureWidth = next_p2(_textureWidth);
     _textureHeight = next_p2(_textureHeight);
-    font->_characterTexture = new RTexture(TT_2D, TF_DEPTH_COMPONENT, glm::uvec2(_textureWidth, _textureHeight));
+    font->_characterTexture = new RTexture2D(TF_DEPTH_COMPONENT, glm::uvec2(_textureWidth, _textureHeight));
     font->_characterTexture->setFiltering(TFM_LINEAR, TFM_LINEAR);
     font->_characterTexture->setClampMode(TCM_CLAMP_TO_EDGE);
     //glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
