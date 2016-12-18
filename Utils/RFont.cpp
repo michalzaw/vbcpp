@@ -25,7 +25,7 @@ const CharacterInfo& RFont::getCharacterInfo(char character)
 }
 
 
-RTexture* RFont::getTexture()
+RTexture2D* RFont::getTexture()
 {
     return _characterTexture;
 }

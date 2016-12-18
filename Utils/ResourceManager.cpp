@@ -31,7 +31,7 @@ ResourceManager& ResourceManager::getInstance()
 
 
 // Ładowanie tektur
-RTexture* ResourceManager::loadTexture(std::string path)
+RTexture2D* ResourceManager::loadTexture(std::string path)
 {
     // Sprawdzamy czy zasob juz istnieje
     std::list<std::unique_ptr<Resource>>::iterator it;
@@ -42,7 +42,7 @@ RTexture* ResourceManager::loadTexture(std::string path)
             std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
             std::unique_ptr<Resource>& res = *it;
 
-            RTexture* tex =  dynamic_cast<RTexture*>( res.get());
+            RTexture2D* tex =  dynamic_cast<RTexture2D*>( res.get());
 
 //            std::cout << "Texture ID: " << tex->getID() << std::endl;
 
@@ -53,7 +53,7 @@ RTexture* ResourceManager::loadTexture(std::string path)
     // Zasob nie istnieje
     int width, height;
     //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
-    RTexture* texture = ::loadTexture(path.c_str(), true);
+    RTexture2D* texture = ::loadTexture(path.c_str(), true);
 
     if ( texture )
     {
@@ -72,7 +72,7 @@ RTexture* ResourceManager::loadTexture(std::string path)
         std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
         std::unique_ptr<Resource>& res = *(--it);
 
-        RTexture* t = dynamic_cast<RTexture*>(res.get());
+        RTexture2D* t = dynamic_cast<RTexture2D*>(res.get());
 
 
         //std::cout << "Texture ID: " << tID << std::endl;

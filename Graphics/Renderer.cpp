@@ -26,6 +26,10 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* guishader2 = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/LabelShader.frag");
     _shaderList.push_back(guishader2);
 
+    // SKY_MATERIAL
+    RShader* skyshader = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
+    _shaderList.push_back(skyshader);
+
 
     // Create UBO for lights
     _lightUBO = OGLDriver::getInstance().createUBO(4096);
@@ -441,6 +445,11 @@ void Renderer::render(RenderData* renderData)
 
         RShader* shader = _shaderList[mesh->material.shader];
         shader->enable();
+        if (mesh->material.shader == SKY_MATERIAL)
+        {
+            glDisable(GL_CULL_FACE);
+            i->getTransform()->setPosition(camera->getPosition());
+        }
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
         glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransform()->getTransformMatrix();
@@ -467,12 +476,12 @@ void Renderer::render(RenderData* renderData)
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
 
-            shader->bindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
+            shader->bindTexture("NormalmapTexture", mesh->material.normalmapTexture);
         }
 
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         if (mesh->material.diffuseTexture != NULL)
-            shader->bindTexture2D("Texture", mesh->material.diffuseTexture);
+            shader->bindTexture("Texture", mesh->material.diffuseTexture);
         shader->setUniform("matAmbient", mesh->material.ambientColor);
         shader->setUniform("matDiffuse", mesh->material.diffuseColor);
         shader->setUniform("matSpecular", mesh->material.specularColor);
@@ -501,6 +510,8 @@ void Renderer::render(RenderData* renderData)
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
         }
+        if (mesh->material.shader == SKY_MATERIAL)
+            glEnable(GL_CULL_FACE);
     }
 
 
@@ -614,7 +625,7 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
         i->getVBO()->bind();
 
 
-        shader->bindTexture2D("Texture", i->getTexture());
+        shader->bindTexture("Texture", i->getTexture());
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);

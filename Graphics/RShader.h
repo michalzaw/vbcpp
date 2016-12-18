@@ -15,7 +15,8 @@ enum ShaderType
     NOTEXTURE_MATERIAL,
     NORMALMAPPING_MATERIAL,
     GUI_IMAGE_SHADER,
-    GUI_LABEL_SHADER
+    GUI_LABEL_SHADER,
+    SKY_MATERIAL
 
 };
 
@@ -76,7 +77,7 @@ class RShader : virtual public Resource
 		{ glUniformMatrix4fv(glGetUniformLocation(_shaderID, name), 1, GL_FALSE, &matrix[0][0]); }
 
 
-        inline void bindTexture2D(char* name, RTexture* texture)
+        inline void bindTexture(char* name, RTexture* texture)
         {
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
             //glBindTexture(GL_TEXTURE_2D, TextureID);

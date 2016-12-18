@@ -36,7 +36,7 @@ using namespace tinyxml2;
 #include "Utils/Math.h"
 
 #include "GUI/GUIManager.h"
-
+#include "Graphics/Prefab.h"
 
 // Definicje globalne
 
@@ -291,7 +291,7 @@ int main()
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
-    camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
+    camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 1000);
     Camera->addComponent(camFPS);
     Camera->getTransform()->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
@@ -326,6 +326,10 @@ int main()
     spot->getTransform()->setPosition(glm::vec3(0.0f, 5.0f, 5.0f));//-10.0f));
     spot->getTransform()->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
     spot->setIsActive(false);
+
+
+    const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
+    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;

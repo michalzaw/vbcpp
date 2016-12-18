@@ -13,7 +13,7 @@
 
 class RenderObject : public Component
 {
-    private:
+    protected:
         //Model* _model;
         RModel* _model;
 

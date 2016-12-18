@@ -37,12 +37,12 @@
 }*/
 
 
-RTexture* loadTexture(const char* fileName, bool mipmaping)
+RTexture2D* loadTexture(const char* fileName, bool mipmaping)
 {
     int width, height;
     unsigned char* image = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGBA);
 
-    RTexture* texture = new RTexture(fileName, image, TT_2D, TF_RGBA, glm::uvec2(width, height));
+    RTexture2D* texture = new RTexture2D(fileName, image, TF_RGBA, glm::uvec2(width, height));
 
     std::cout << "Loading texture: " << fileName << std::endl;
     std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
@@ -65,6 +65,47 @@ RTexture* loadTexture(const char* fileName, bool mipmaping)
     return texture;
 }
 
+
+RTextureCubeMap* loadTextureCubeMap(const char** filesNames, bool mipmaping)
+{
+    std::cout << "Loading cube map" << std::endl;
+
+    unsigned char* cubeMapFaces[6];
+    int width, height;
+
+    for (int i = 0; i < 6; ++i)
+    {
+        cubeMapFaces[i] = SOIL_load_image(filesNames[i], &width, &height, 0, SOIL_LOAD_RGBA);
+
+        std::cout << "Loading texture: " << filesNames[i] << std::endl;
+        std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+    }
+
+    if (width != height)
+        return NULL;
+
+    RTextureCubeMap* texture = new RTextureCubeMap("", cubeMapFaces, TF_RGBA, width);
+
+    if (mipmaping)
+    {
+        texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+    }
+    else
+    {
+        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+    }
+
+    texture->setClampMode(TCM_CLAMP_TO_EDGE);
+
+
+    for (int i = 0; i < 6; ++i)
+    {
+        SOIL_free_image_data(cubeMapFaces[i]);
+    }
+
+
+    return texture;
+}
 
 GLuint loadTextureRect(const char* fileName)
 {
