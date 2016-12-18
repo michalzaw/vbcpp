@@ -8,13 +8,15 @@
 #include "SceneManager.h"
 #include "../Physics/PhysicsManager.hpp"
 
+#include "Door.h"
+
 enum WheelSide
 {
     WS_RIGHT = 0,
     WS_LEFT
 };
 
-
+/*
 enum DoorState
 {
     EDS_OPENING = 0,
@@ -42,6 +44,8 @@ struct Door
     }
 };
 
+*/
+
 struct Wheel
 {
     PhysicalBodyCylinder* body;
@@ -57,6 +61,8 @@ typedef std::vector<Wheel*> WheelList;
 typedef std::vector<Door*> DoorList;
 typedef std::vector<Light*> LightsList;
 
+
+//! Bus vehicle class
 class Bus : virtual public RefCounter
 {
     public:
@@ -64,14 +70,18 @@ class Bus : virtual public RefCounter
         virtual ~Bus();
 
         SceneObject* getSceneObject() { return _sceneObject; }
+
+        // Steering wheel methods
+        glm::vec3 getDriverPosition();
         SceneObject* getSteeringWheelObject() { return _steeringWheelObject; }
 
-        glm::vec3 getDriverPosition();
+        // Lights methods
         void setIsEnableLights(bool is);
         bool isEnableLights();
         void setIsEnableHeadlights(bool is);
         bool isEnableHeadlights();
 
+        // Driving methods
         void turnLeft();
         void turnRight();
         void accelerate();
@@ -79,6 +89,7 @@ class Bus : virtual public RefCounter
         void brakeOn();
         void brakeOff();
 
+        // Door methods
         void openDoor(unsigned char doorIndex);
         void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex) { return _doors[doorIndex]; };
@@ -110,10 +121,10 @@ class Bus : virtual public RefCounter
         float   _maxSteerAngle;
         float   _steerStep;
 
-        int _wheelCollisionMask;
-        int _chasisCollisionMask;
-
+        // Load config file
         void loadXMLdata(std::string busname);
+
+        // Update internal physics - doors, wheels etc
         void updatePhysics();
 };
 

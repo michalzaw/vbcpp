@@ -15,7 +15,7 @@
 	<door name="df1" model="h9/df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" />
 	<door name="dr1" model="h9/dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" />
 	
-	<steering_wheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.6,0.6,0.6"/>
+	<steering_wheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
 	<driver position="0.75,0.44,3.51"/>
 	<light position="0.0,1.12,-2.13" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
 	<light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>

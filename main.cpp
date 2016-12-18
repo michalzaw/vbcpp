@@ -26,7 +26,6 @@
 #include "Utils/ResourceManager.h"
 
 #include "Scene/Bus.h"
-//#include "Scene/RaycastBus.h"
 
 // XML reader
 #include "Utils/tinyxml2.h"
@@ -56,7 +55,6 @@ SceneManager* sceneMgr;
 SceneObject* point, *point2, *point3, *dirLight, *spot = 0;
 
 Bus* bus = 0;
-//RaycastBus* bus = 0;
 
 std::string winTitle = "Virtual Bus Core++";
 
@@ -77,14 +75,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
 	{
-		//point2->setIsActive(!point2->isActive());
 		bus->setIsEnableLights(!bus->isEnableLights());
-
-	}
-
-	if (glfwGetKey( window, GLFW_KEY_J ) == GLFW_PRESS)
-	{
-		//point->setIsActive(!point->isActive());
 
 	}
 
@@ -298,7 +289,7 @@ int main()
     crate->addComponent(boxBody2);
     crate->getTransform()->setPosition(glm::vec3(-10,3,-10));
 
-    // Kamera FPS
+    // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
     camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 500);
     Camera->addComponent(camFPS);
@@ -306,9 +297,7 @@ int main()
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
 
-    // Światło
-    //dirLight = scene->addSceneObject();
-    //dirLight->addComponent(graphMgr->AddDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
+    // Light
     dirLight = sceneMgr->addSceneObject("light");
     dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
     dirLight->getTransform()->setRotation(glm::vec3(-0.2f * PI, 0.5f * PI, 0));
@@ -353,7 +342,7 @@ int main()
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
-    // Zmienne dla obliczania czasu
+    // Time calculation variables
     double t;
     double dt = 1/60.0f;
 
@@ -361,7 +350,7 @@ int main()
 
     timePhysicsPrev = timePhysicsCurr = glfwGetTime();
 
-    //dzieki temu sprawdzamy jak dawno temu byl update licznika klatek
+    //how long ago FPS counter was updated
     double lastFPSupdate = timePhysicsCurr;
 
     double xpos, ypos;
@@ -377,7 +366,7 @@ int main()
         timePhysicsCurr = glfwGetTime();
         double frameTime = timePhysicsCurr - timePhysicsPrev;
 
-        // wyswietlamy liczbe klatek/s
+        //create string from frame/sec and display it in window title
         if ( timePhysicsCurr - lastFPSupdate >= 1.0f )
         {
             float timing = double(nbFrames);
@@ -410,21 +399,17 @@ int main()
 
             readInput(win->getWindow(), deltaTime);
             physMgr->simulate(deltaTime);
-            //PhysicsManager::getInstance().simulate(deltaTime);
 
             frameTime -= deltaTime;
 
             t += deltaTime;
         }
 
-        //bus->updatePhysics();
-        // Renderowanie sceny
+        // Render the scene
         renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());
 
-        // Renderowanie GUI
+        // Render GUI
         renderer->renderGUI(gui->getGUIRenderList());
-
-
 
         // Swap buffers and poll events
         win->swapBuffers();
@@ -439,7 +424,6 @@ int main()
 
     physMgr->drop();
     renderer->drop();
-    //delete renderer;
     delete sceneMgr;
 
     delete win;
