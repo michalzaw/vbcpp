@@ -42,7 +42,7 @@ using namespace tinyxml2;
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
 
-int W_WIDTH = 1366;
+int W_WIDTH = 1024;
 int W_HEIGHT = 768;
 
 CameraFPS* camFPS;
@@ -57,6 +57,22 @@ SceneObject* point, *point2, *point3, *dirLight, *spot = 0;
 Bus* bus = 0;
 
 std::string winTitle = "Virtual Bus Core++";
+
+
+struct GameConfig
+{
+    GameConfig()
+    : windowWidth(1024), windowHeight(768)
+    {
+
+    }
+
+    int windowWidth;
+    int windowHeight;
+    std::string mapFile;
+    std::string mapTexPath;
+    std::string busModel;
+} gameCfg;
 
 
 // kod
@@ -236,13 +252,51 @@ void readInput(GLFWwindow* window, double deltaTime)
 }
 
 
+void loadScene()
+{
+    std::string filename("game.xml");
+
+    XMLDocument doc;
+    doc.LoadFile( filename.c_str() );
+
+    XMLElement* objElement = doc.FirstChildElement("game");
+
+    for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
+    {
+        const char* ename = child->Name();
+
+        // OBJECT TRANSFORM
+        if (strcmp(ename,"resolution") == 0)
+        {
+            const char* cWidth = child->Attribute("x");
+            const char* cHeight = child->Attribute("y");
+
+            gameCfg.windowWidth = (int)atoi(cWidth);
+            gameCfg.windowHeight = (int)atoi(cHeight);
+        }
+        else
+        if (strcmp(ename,"map") == 0)
+        {
+            gameCfg.mapFile = std::string(child->Attribute("model"));;
+            gameCfg.mapTexPath = std::string(child->Attribute("texturePath"));
+        }
+        else
+        if (strcmp(ename,"bus") == 0)
+        {
+            gameCfg.busModel = std::string(child->Attribute("model"));
+        }
+    }
+}
+
 
 // ### MAIN ###
 int main()
 {
+    loadScene();
+
     win = new Window;
 
-    win->createWindow(1366, 768, 00, 100);
+    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 100);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
@@ -257,11 +311,15 @@ int main()
 
     physMgr = new PhysicsManager;
 	sceneMgr = new SceneManager;
+
+
+
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
 
 
     /* terrain */
-    RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
+    //RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
+    RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
@@ -271,7 +329,7 @@ int main()
     terrainObject->addComponent(terrainMesh);
 
     //bus = new Bus(sceneMgr, physMgr, "h9");
-    bus = new Bus(sceneMgr, physMgr, "i211");
+    bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
@@ -284,7 +342,7 @@ int main()
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
-    camFPS = GraphicsManager::getInstance().addCameraFPS(W_WIDTH, W_HEIGHT, 45.0f, 0.1f, 1000);
+    camFPS = GraphicsManager::getInstance().addCameraFPS(gameCfg.windowWidth, gameCfg.windowHeight, 45.0f, 0.1f, 1000);
     Camera->addComponent(camFPS);
     Camera->getTransform()->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
@@ -327,7 +385,7 @@ int main()
 
     GUIManager* gui = new GUIManager;
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    img->setPosition(0, W_HEIGHT - img->getTexture()->getSize().y / 2.0f);
+    img->setPosition(0, gameCfg.windowHeight - img->getTexture()->getSize().y / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
     img->setScale(0.5f, 0.5f);
     //img->setPosition(100, 100);
@@ -335,7 +393,7 @@ int main()
 
     RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
     Label* label = gui->addLabel(font, "Virtual Bus Core++");
-    label->setPosition(img->getTexture()->getSize().x / 2.0f + 100, W_HEIGHT - 40);
+    label->setPosition(img->getTexture()->getSize().x / 2.0f + 100, gameCfg.windowHeight - 40);
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 
