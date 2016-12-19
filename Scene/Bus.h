@@ -58,8 +58,9 @@ struct Wheel
 };
 
 typedef std::vector<Wheel*> WheelList;
-typedef std::vector<Door*> DoorList;
+typedef std::vector<Door*>  DoorList;
 typedef std::vector<Light*> LightsList;
+typedef std::vector<Light*> HeadlightsList;
 
 
 //! Bus vehicle class
@@ -90,10 +91,9 @@ class Bus : virtual public RefCounter
         void brakeOff();
 
         // Door methods
-        void openDoor(unsigned char doorIndex);
-        void closeDoor(unsigned char doorIndex);
-        Door* getDoor(unsigned char doorIndex) { return _doors[doorIndex]; };
-
+        void doorOpenClose(unsigned char doorIndex);
+        //void closeDoor(unsigned char doorIndex);
+        Door* getDoor(unsigned char doorIndex);
 
     private:
         SceneObject*    _sceneObject;
@@ -105,7 +105,7 @@ class Bus : virtual public RefCounter
         glm::vec3       _driverPosition;
         LightsList      _lights;
         bool            _isEnableLights;
-        Light*          _headlights[2];
+        HeadlightsList  _headlights;
         bool            _isEnableHeadlights;
 
         WheelList       _wheels;

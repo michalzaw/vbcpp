@@ -11,24 +11,45 @@ enum DoorState
 };
 
 
-struct Door
+class Door
 {
-    PhysicalBodyConvexHull*  body;
-    RModel*                  model;
-    ConstraintHinge*         hinge;
-    DoorState                state;
+    public:
+        Door(RModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge)
+        : _hinge(hinge), _body(body), _model(model)
+        {
 
-    void open()
-    {
-        hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
-        state = EDS_OPENING;
-    }
+        }
 
-    void close()
-    {
-        hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
-        state = EDS_CLOSING;
-    }
+        virtual ~Door()
+        {
+
+        }
+
+        void open()
+        {
+            _hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
+            _state = EDS_OPENING;
+        }
+
+        void close()
+        {
+            _hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
+            _state = EDS_CLOSING;
+        }
+
+        PhysicalBodyConvexHull* getPhysicalBody() { return _body; }
+
+        RModel* getModel() { return _model; }
+
+        ConstraintHinge* getConstraint() { return _hinge; }
+
+        DoorState getState() { return _state; }
+
+        protected:
+            PhysicalBodyConvexHull*  _body;
+            RModel*                  _model;
+            ConstraintHinge*         _hinge;
+            DoorState                _state;
 };
 
 

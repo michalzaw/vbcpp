@@ -219,6 +219,7 @@
 		<Unit filename="Scene/Bus.h" />
 		<Unit filename="Scene/Component.cpp" />
 		<Unit filename="Scene/Component.h" />
+		<Unit filename="Scene/Door.h" />
 		<Unit filename="Scene/SceneManager.cpp" />
 		<Unit filename="Scene/SceneManager.h" />
 		<Unit filename="Scene/SceneObject.h" />

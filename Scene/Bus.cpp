@@ -15,10 +15,11 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.65f), _steerStep(0.0005f),
+_maxSteerAngle(0.55f), _steerStep(0.0005f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f),
-_steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f), _isEnableLights(false), _isEnableHeadlights(false)
+_steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
+_isEnableLights(false), _isEnableHeadlights(false)
 {
     std::cout << "Bus Konstruktor" << std::endl;
 
@@ -39,6 +40,7 @@ Bus::~Bus()
     for (; dit != _doors.end(); ++dit)
         delete (*dit);
 
+    _headlights.clear();
 }
 
 
@@ -58,7 +60,7 @@ void Bus::loadXMLdata(std::string busname)
     std::cout<< sObjName << std::endl;
 
     RModel* busModel = 0;
-    //PhysicalBodyConvexHull* chasisBody = 0;
+
     glm::vec3 busPosition = glm::vec3(0,0,0);
 
     std::string texturePath = busname + "/";
@@ -102,9 +104,6 @@ void Bus::loadXMLdata(std::string busname)
 
             _sceneObject->addComponent(renderObj);
 
-
-            // PhysicalBodyConvexHull* wheel3Body = physMgr->createPhysicalBodyConvexHull(wheel3model->GetVertices(), wheel3model->GetQuantumOfVertices(), 1.0f, btVector3(3.0f,3,-3));
-
             // Tworzenie fizycznego obiektu karoserii
             const char* cMass = child->Attribute("mass");
             float fMass = (float)atof(cMass);
@@ -135,7 +134,6 @@ void Bus::loadXMLdata(std::string busname)
         if (strcmp(ename,"wheel") == 0)
         {
             std::cout << "XML: Wheel data" << std::endl;
-            // ConstraintHinge2* hinge1 = physMgr->createConstraintHinge2(wheel1Body, boxBody2, btVector3(1,3,1), btVector3(0,1,0), btVector3(1,0,0));
 
             std::string wheelName(child->Attribute("name"));
             std::string wheelModel(child->Attribute("model"));
@@ -166,16 +164,14 @@ void Bus::loadXMLdata(std::string busname)
             if (side == "right")
             {
                 wheelSide = WS_RIGHT;
-                //wheelObj->getTransform()->SetRotation(glm::vec3(0,DegToRad(45.0f),0));
             }
             else
                 wheelSide = WS_LEFT;
 
-
-
             btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
 
-            RModel* wheel = ResourceManager::getInstance().loadModel(wheelModel, texturePath);
+            std::string modelPath = busname + "/" + wheelModel;
+            RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
             RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel));
 
             wheelObj->addComponent(wheelRender);
@@ -184,10 +180,7 @@ void Bus::loadXMLdata(std::string busname)
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
             wheelObj->addComponent(wheelCyl);
-            //wheelCyl->getRigidBody()->setActivationState( DISABLE_DEACTIVATION );
 
-            //btVector3 suspension(0,0.5,0);
-            //btVector3 hingePos(btWheelPos + suspension);
             ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
             hinge1->setStiffness(2, stiffness);
             hinge1->setDamping(2, damping);
@@ -224,12 +217,14 @@ void Bus::loadXMLdata(std::string busname)
             std::cout << "XML: Door data" << std::endl;
 
             std::string doorName(child->Attribute("name"));
+            std::string doorType(child->Attribute("type"));
             std::string doorModel(child->Attribute("model"));
             float mass = (float)atof(child->Attribute("mass"));
 
             glm::vec3 doorPosition = XMLstringToVec3(child->Attribute("position"));
             glm::vec3 relativePos = glm::vec3(busPosition.x + doorPosition.x, busPosition.y + doorPosition.y, busPosition.z + doorPosition.z);
 
+            // poczatek IF
             btVector3 busPivot = XMLstringToBtVec3(child->Attribute("pivotA"));
             btVector3 doorPivot = XMLstringToBtVec3(child->Attribute("pivotB"));
 
@@ -237,27 +232,37 @@ void Bus::loadXMLdata(std::string busname)
 
             doorObj->getTransform()->setPosition(relativePos);
 
-            RModel* dr1 = ResourceManager::getInstance().loadModel(doorModel, texturePath);
-            RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr1));
+            std::string modelPath = busname + "/" + doorModel;
+
+            RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+            RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr));
 
             doorObj->addComponent(doorRender);
 
             btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
-            PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr1->getCollisionMesh(), dr1->getCollisionMeshSize(), mass, btDoorPos);
+            PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, btDoorPos);
             doorObj->addComponent(doorBody);
 
             ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
 
             doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
-            Door* d = new Door;
-            d->body = doorBody;
-            d->model = dr1;
-            d->hinge = doorHinge;
+            Door* d = 0;
+            if (doorType == "s")
+            {
+                d = new Door(dr, doorBody, doorHinge);
 
-            d->close();
-            _doors.push_back(d);
+                d->close();
+                _doors.push_back(d);
+            }
+
+
+            //d->body = doorBody;
+            //d->model = dr;
+            //d->hinge = doorHinge;
+
+            // koniec IF
         }
         else // STERING WHEEL
         if (strcmp(ename,"steering_wheel") == 0)
@@ -332,6 +337,7 @@ void Bus::loadXMLdata(std::string busname)
         {
             std::cout << "XML: Headlights" << std::endl;
 
+            std::string headlightName(child->Attribute("name"));
             const char* cPosition = child->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
 
@@ -349,7 +355,7 @@ void Bus::loadXMLdata(std::string busname)
             float cutoff = (float)atof(child->Attribute("cutoff"));
 
 
-            SceneObject* light = _sMgr->addSceneObject("busHeadlights0");
+            SceneObject* light = _sMgr->addSceneObject(headlightName);
             Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
                                                                                 diffuseIntensity, cutoff,
                                                                                 LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
@@ -360,22 +366,7 @@ void Bus::loadXMLdata(std::string busname)
 
             lightComponent->setIsActive(_isEnableHeadlights);
 
-            _headlights[0] = lightComponent;
-
-
-            light = _sMgr->addSceneObject("busHeadlights0");
-            lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
-                                                                                diffuseIntensity, cutoff,
-                                                                                LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
-            light->addComponent(lightComponent);
-            position.x = -position.x;
-            light->getTransform()->setPosition(position);
-            light->getTransform()->setRotation(rotation);
-            _sceneObject->addChild(light);
-
-            lightComponent->setIsActive(_isEnableHeadlights);
-
-            _headlights[1] = lightComponent;
+            _headlights.push_back(lightComponent);
         }
     }
 
@@ -386,32 +377,44 @@ glm::vec3 Bus::getDriverPosition()
     return _driverPosition;
 }
 
+
 void Bus::setIsEnableLights(bool is)
 {
-    for (LightsList::iterator i = _lights.begin(); i != _lights.end(); ++i)
+    if (_lights.size() > 0)
     {
-        (*i)->setIsActive(is);
+        for (LightsList::iterator i = _lights.begin(); i != _lights.end(); ++i)
+        {
+            (*i)->setIsActive(is);
+        }
+        _isEnableLights = is;
     }
-    _isEnableLights = is;
 }
+
 
 bool Bus::isEnableLights()
 {
     return _isEnableLights;
 }
 
+
 void Bus::setIsEnableHeadlights(bool is)
 {
-    _headlights[0]->setIsActive(is);
-    _headlights[1]->setIsActive(is);
+    if (_headlights.size() > 0)
+    {
+        for (HeadlightsList::iterator i = _headlights.begin(); i != _headlights.end(); ++i)
+        {
+            (*i)->setIsActive(is);
+        }
 
-    _isEnableHeadlights = is;
+        _isEnableHeadlights = is;
+    }
 }
 
 bool Bus::isEnableHeadlights()
 {
     return _isEnableHeadlights;
 }
+
 
 void Bus::turnLeft()
 {
@@ -427,9 +430,12 @@ void Bus::turnLeft()
             {
                 w->currentAngle -= _steerStep;
 
-                glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
-                rotation.y += 0.005f;
-                _steeringWheelObject->getTransform()->setRotation(rotation);
+                if (_steeringWheelObject)
+                {
+                    glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                    rotation.y += 0.005f;
+                    _steeringWheelObject->getTransform()->setRotation(rotation);
+                }
             }
 
             w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
@@ -437,6 +443,7 @@ void Bus::turnLeft()
         }
     }
 }
+
 
 void Bus::turnRight()
 {
@@ -452,10 +459,12 @@ void Bus::turnRight()
             {
                 w->currentAngle += _steerStep;
 
-
-                glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
-                rotation.y -= 0.005f;
-                _steeringWheelObject->getTransform()->setRotation(rotation);
+                if (_steeringWheelObject)
+                {
+                    glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                    rotation.y -= 0.005f;
+                    _steeringWheelObject->getTransform()->setRotation(rotation);
+                }
             }
 
             w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
@@ -500,19 +509,34 @@ void Bus::idle()
 }
 
 
-void Bus::openDoor(unsigned char doorIndex)
+Door* Bus::getDoor(unsigned char doorIndex)
 {
-    if (doorIndex <= _doors.size())
-        _doors[doorIndex]->open();
+    if (doorIndex <= _doors.size()-1)
+        return _doors[doorIndex];
+    else
+        return 0;
 }
 
+void Bus::doorOpenClose(unsigned char doorIndex)
+{
+    if (doorIndex <= _doors.size()-1)
+    {
+        if (_doors[doorIndex]->getState() == EDS_CLOSING)
+            _doors[doorIndex]->open();
+        else
+        if (_doors[doorIndex]->getState() == EDS_OPENING)
+             _doors[doorIndex]->close();
+    }
 
+}
+
+/*
 void Bus::closeDoor(unsigned char doorIndex)
 {
-    if (doorIndex <= _doors.size())
+    if (doorIndex <= _doors.size()-1)
         _doors[doorIndex]->close();
 }
-
+*/
 
 void Bus::updatePhysics()
 {

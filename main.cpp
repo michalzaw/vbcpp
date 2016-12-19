@@ -130,21 +130,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS)
     {
-        if (bus->getDoor(0)->state == EDS_CLOSING)
-            bus->openDoor(0);
-        else
-        if (bus->getDoor(0)->state == EDS_OPENING)
-            bus->closeDoor(0);
+        bus->doorOpenClose(0);
     }
 
 
     if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS)
     {
-        if (bus->getDoor(1)->state == EDS_CLOSING)
-            bus->openDoor(1);
-        else
-        if (bus->getDoor(1)->state == EDS_OPENING)
-            bus->closeDoor(1);
+        bus->doorOpenClose(1);
     }
 
 	if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS)
@@ -278,7 +270,8 @@ int main()
     terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);
 
-    bus = new Bus(sceneMgr, physMgr, "h9");
+    //bus = new Bus(sceneMgr, physMgr, "h9");
+    bus = new Bus(sceneMgr, physMgr, "i211");
 
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
