@@ -18,6 +18,7 @@
 					<Add option="-g" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
+					<Add directory="include/freetype" />
 				</Compiler>
 				<Linker>
 					<Add library="GL" />
@@ -35,10 +36,12 @@
 					<Add library="Xcursor" />
 					<Add library="Xinerama" />
 					<Add library="X11" />
+					<Add library="freetype" />
 					<Add library="BulletDynamics" />
 					<Add library="BulletCollision" />
 					<Add library="BulletSoftBody" />
 					<Add library="LinearMath" />
+					<Add library="libz" />
 					<Add directory="lib/linux_amd64" />
 				</Linker>
 			</Target>
