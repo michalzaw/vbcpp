@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.55f), _steerStep(0.0005f),
+_maxSteerAngle(0.55f), _steerStep(0.6f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
@@ -416,7 +416,7 @@ bool Bus::isEnableHeadlights()
 }
 
 
-void Bus::turnLeft()
+void Bus::turnLeft(float dt)
 {
     WheelList::iterator it = _wheels.begin();
 
@@ -428,7 +428,7 @@ void Bus::turnLeft()
         {
             if (w->currentAngle > -_maxSteerAngle)
             {
-                w->currentAngle -= _steerStep;
+                w->currentAngle -= dt * _steerStep;
 
                 if (_steeringWheelObject)
                 {
@@ -445,7 +445,7 @@ void Bus::turnLeft()
 }
 
 
-void Bus::turnRight()
+void Bus::turnRight(float dt)
 {
     WheelList::iterator it = _wheels.begin();
 
@@ -457,7 +457,7 @@ void Bus::turnRight()
         {
             if (w->currentAngle < _maxSteerAngle)
             {
-                w->currentAngle += _steerStep;
+                w->currentAngle += dt * _steerStep;
 
                 if (_steeringWheelObject)
                 {

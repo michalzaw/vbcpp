@@ -83,8 +83,8 @@ class Bus : virtual public RefCounter
         bool isEnableHeadlights();
 
         // Driving methods
-        void turnLeft();
-        void turnRight();
+        void turnLeft(float dt);
+        void turnRight(float dt);
         void accelerate();
         void idle();
         void brakeOn();

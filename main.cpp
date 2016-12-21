@@ -222,12 +222,12 @@ void readInput(GLFWwindow* window, double deltaTime)
 
 	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
     {
-        bus->turnLeft();
+        bus->turnLeft(deltaTime);
     }
 
     if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
     {
-        bus->turnRight();
+        bus->turnRight(deltaTime);
     }
 
     if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
@@ -296,7 +296,7 @@ int main()
 
     win = new Window;
 
-    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 100);
+    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 10);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
