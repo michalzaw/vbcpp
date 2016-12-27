@@ -21,7 +21,9 @@ T clamp(const T& what, const T& a, const T& b)
        return std::min(b, std::max(what, a));
 }
 
+glm::vec2 XMLstringToVec2(const char* xmlstring);
 glm::vec3 XMLstringToVec3(const char* xmlstring);
+glm::vec4 XMLstringToVec4(const char* xmlstring);
 
 btVector3 XMLstringToBtVec3(const char* xmlstring);
 

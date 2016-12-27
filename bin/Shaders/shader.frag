@@ -67,6 +67,9 @@ uniform float SpecularPower;
 uniform vec3 CameraPosition;
 
 
+vec4 textureColor;
+
+
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 {
 	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
@@ -77,11 +80,11 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
 	float SpecularFactor = max(dot(FragmentToEye, LightReflect), 0.0f);
-//	SpecularFactor = pow(SpecularFactor, SpecularPower);
-	SpecularFactor = pow(SpecularFactor, 96);
+	SpecularFactor = pow(SpecularFactor, SpecularPower);
+//	SpecularFactor = pow(SpecularFactor, 96);
 	vec4 SpecularColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * SpecularFactor;
 	
-	return (AmbientColor + DiffuseColor + SpecularColor);
+	return (AmbientColor + DiffuseColor) * textureColor + SpecularColor * matSpecular;
 }
 
 
@@ -117,6 +120,8 @@ void main()
 {
 	vec3 n = normalize(Normal);
 	
+	textureColor = texture2D(Texture, TexCoord);
+	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	for (int i = 0; i < Lights.DirCount; ++i)
@@ -140,7 +145,7 @@ void main()
 	
 	//FragmentColor = (AmbientColor + DiffuseColor + SpecularColor);
 	//FragmentColor = texture2D(Texture, TexCoord) * (amb + diff + spec);
-	FragmentColor = texture2D(Texture, TexCoord) * LightsColor;
+	FragmentColor = LightsColor;
 	
 	FragmentColor.a = 1 - Transparency;
 }
