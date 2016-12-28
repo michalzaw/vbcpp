@@ -6,12 +6,18 @@ SceneObject::SceneObject(std::string name, SceneManager* sceneManager, SceneObje
     : _parent(parent),
     _id(0), _name(name), _isActive(true),
     _sceneManager(sceneManager),
-    _transform(this), _globalTransform(this), _transformIsChanged(true)
+    _rotationMode(RM_QUATERNION),
+    _position(0.0f, 0.0f, 0.0f),
+    _rotation(0.0f, 0.0f, 0.0f),
+    _scale(1.0f, 1.0f, 1.0f)
+    //_transform(this), _globalTransform(this), _transformIsChanged(true)
 {
     if (_parent != NULL)
     {
         _parent->addChild(this);
     }
+
+    changedTransform();
 
     //#ifdef _DEBUG_MODE
         std::cout << "Create SceneObject: " << _name << std::endl ;
@@ -57,15 +63,55 @@ SceneObject::~SceneObject()
 }
 
 
-void SceneObject::calculateGlobalTransform()
+void SceneObject::changedTransform()
 {
-    _globalTransform = _transform;
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        (*i)->changedTransform();
+    }
+
+    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
+    {
+        (*i)->changedTransform();
+    }
+
+    _localTransformMatrixIsCalculated = false;
+    _localNormalMatrixIsCalculated = false;
+    _globalTransformMatrixIsCalculated = false;
+    _globalNormalMatrixIsCalculated = false;
+}
+
+
+void SceneObject::calculateLocalTransformMatrix() const
+{
+    glm::mat4 pos = glm::translate(_position);
+
+    glm::mat4 rot;
+
+    if (_rotationMode == RM_EULER_ANGLES)
+    {
+        rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+        rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+        rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    }
+    else
+    {
+        rot = glm::mat4_cast(_rotationQuaternion);
+    }
+
+    glm::mat4 s = glm::scale(_scale);
+
+    _localTransformMatrix = pos * rot * s;
+}
+
+
+void SceneObject::calculateGlobalTransformMatrix() const
+{
+    _globalTransformMatrix = getLocalTransformMatrix();
 
     if (_parent != NULL)
     {
-        _globalTransform *= *(_parent->getGlobalTransform());
-        //_globalTransform = *(_parent->getGlobalTransform()) * _globalTransform;
-        //_globalTransform.setObject(this);
+        _globalTransformMatrix = _parent->getGlobalTransformMatrix() * _globalTransformMatrix;
     }
 }
 
@@ -104,7 +150,7 @@ void SceneObject::addChild(SceneObject* child)
     child->removeParent();
     child->_parent = this;
 
-    child->setIsActive(_isActive);
+    //child->setIsActive(_isActive);
 }
 
 
@@ -197,10 +243,10 @@ void SceneObject::setIsActive(bool is)
 {
     _isActive = is;
 
-    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    /*for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
     {
         (*i)->setIsActive(_isActive);
-    }
+    }*/
 }
 
 
@@ -215,25 +261,6 @@ unsigned int SceneObject::getId()
 }
 
 
-Transform* SceneObject::getTransform()
-{
-    return &_transform;
-}
-
-
-Transform* SceneObject::getGlobalTransform()
-{
-    if (_transformIsChanged)
-    {
-        calculateGlobalTransform();
-
-        _transformIsChanged = false;
-    }
-
-    return &_globalTransform;
-}
-
-
 Component* SceneObject::getComponent(unsigned int index)
 {
     if (index < _components.size())
@@ -245,6 +272,9 @@ Component* SceneObject::getComponent(unsigned int index)
 
 bool SceneObject::isActive()
 {
+    if (_parent != NULL)
+        return _parent->isActive() && _isActive;
+
     return _isActive;
 }
 
@@ -261,17 +291,192 @@ SceneManager* SceneObject::getSceneManager()
 }
 
 
-void SceneObject::changedTransform()
+void SceneObject::setPosition(glm::vec3 position)
 {
-    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    _position = position;
+
+    changedTransform();
+}
+
+
+void SceneObject::setPosition(float x, float y, float z)
+{
+    setPosition(glm::vec3(x, y, z));
+}
+
+
+void SceneObject::setRotation(glm::vec3 rotation)
+{
+    _rotation = rotation;
+
+    _rotationMode = RM_EULER_ANGLES;
+
+    changedTransform();
+}
+
+
+void SceneObject::setRotation(float x, float y, float z)
+{
+    setRotation(glm::vec3(x, y, z));
+}
+
+
+void SceneObject::setRotationQuaternion(glm::quat rotation)
+{
+    _rotationQuaternion = rotation;
+
+    _rotationMode = RM_QUATERNION;
+
+    changedTransform();
+}
+
+
+void SceneObject::setRotationQuaternion(float x, float y, float z, float w)
+{
+    _rotationQuaternion.x = x;
+    _rotationQuaternion.y = y;
+    _rotationQuaternion.z = z;
+    _rotationQuaternion.w = w;
+
+    _rotationMode = RM_QUATERNION;
+
+    changedTransform();
+}
+
+
+void SceneObject::setScale(glm::vec3 scale)
+{
+    _scale = scale;
+
+    changedTransform();
+}
+
+
+void SceneObject::setScale(float x, float y, float z)
+{
+    setScale(glm::vec3(x, y, z));
+}
+
+
+void SceneObject::setScale(float scale)
+{
+    setScale(glm::vec3(scale, scale, scale));
+}
+
+
+void SceneObject::move(glm::vec3 deltaPosition)
+{
+    _position += deltaPosition;
+
+    changedTransform();
+}
+
+
+void SceneObject::move(float dx, float dy, float dz)
+{
+    move(glm::vec3(dx, dy, dz));
+}
+
+
+void SceneObject::rotate(glm::vec3 deltaRotation)
+{
+    _rotation += deltaRotation;
+
+    changedTransform();
+}
+
+
+void SceneObject::rotate(float dx, float dy, float dz)
+{
+    rotate(glm::vec3(dx, dy, dz));
+}
+
+
+void SceneObject::scale(glm::vec3 scale)
+{
+    _scale *= scale;
+
+    changedTransform();
+}
+
+
+void SceneObject::scale(float x, float y, float z)
+{
+    scale(glm::vec3(x, y, z));
+}
+
+
+glm::vec3 SceneObject::getPosition() const
+{
+    return _position;
+}
+
+
+glm::vec3 SceneObject::getRotation() const
+{
+    return _rotation;
+}
+
+
+glm::quat SceneObject::getRotationQuaternion() const
+{
+    return _rotationQuaternion;
+}
+
+
+glm::vec3 SceneObject::getScale() const
+{
+    return _scale;
+}
+
+
+glm::mat4& SceneObject::getLocalTransformMatrix() const
+{
+    if (!_localTransformMatrixIsCalculated)
     {
-        (*i)->changedTransform();
+        calculateLocalTransformMatrix();
+
+        _localTransformMatrixIsCalculated = true;
     }
 
-    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
+    return _localTransformMatrix;
+}
+
+
+glm::mat4& SceneObject::getLocalNormalMatrix() const
+{
+    if (!_localNormalMatrixIsCalculated)
     {
-        (*i)->changedTransform();
+        _localNormalMatrix = glm::transpose(glm::inverse(getLocalTransformMatrix()));
+
+        _localNormalMatrixIsCalculated = true;
     }
 
-    _transformIsChanged = true;
+    return _localNormalMatrix;
+}
+
+
+glm::mat4& SceneObject::getGlobalTransformMatrix() const
+{
+    if (!_globalTransformMatrixIsCalculated)
+    {
+        calculateGlobalTransformMatrix();
+
+        _globalTransformMatrixIsCalculated = true;
+    }
+
+    return _globalTransformMatrix;
+}
+
+
+glm::mat4& SceneObject::getGlobalNormalMatrix() const
+{
+    if (!_globalNormalMatrixIsCalculated)
+    {
+        _globalNormalMatrix = glm::transpose(glm::inverse(getGlobalTransformMatrix()));
+
+        _globalNormalMatrixIsCalculated = true;
+    }
+
+    return _globalNormalMatrix;
 }

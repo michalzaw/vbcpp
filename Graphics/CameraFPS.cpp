@@ -1,5 +1,7 @@
 #include "CameraFPS.hpp"
 
+#include "../Scene/SceneObject.h"
+
 
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
     : CameraStatic(width, height, viewAngle, nearValue, farValue),
@@ -42,8 +44,10 @@ CameraFPS::~CameraFPS()
 void CameraFPS::setRotation(int mousePosX, int mousePosY)
 {
 	// Compute new orientation
-	float horizontalAngle = _objectTransform->getRotation().y + _rotateSpeed * GLdouble( _windowWidth/2 - mousePosX);
-	float verticalAngle = _objectTransform->getRotation().x + _rotateSpeed * GLdouble( _windowHeight/2 - mousePosY);
+	float horizontalAngle = _object->getRotation().y + _rotateSpeed * GLdouble(_windowWidth / 2 - mousePosX);
+	float verticalAngle = _object->getRotation().x + _rotateSpeed * GLdouble( _windowHeight/2 - mousePosY);
+	//float horizontalAngle = _objectTransform->getRotation().y + _rotateSpeed * GLdouble( _windowWidth/2 - mousePosX);
+	//float verticalAngle = _objectTransform->getRotation().x + _rotateSpeed * GLdouble( _windowHeight/2 - mousePosY);
 	//m_HorizontalAngle += _rotateSpeed * GLdouble( m_WindowWidth/2 - mousePosX);
 	//m_VerticalAngle += _rotateSpeed * GLdouble( m_WindowHeight/2 - mousePosY);
 
@@ -56,7 +60,8 @@ void CameraFPS::setRotation(int mousePosX, int mousePosY)
 	if (verticalAngle > 0.4f * PI) verticalAngle = 0.4f * PI;
 	if (verticalAngle < -0.4f * PI) verticalAngle = -0.4f * PI;
 
-	_objectTransform->setRotation(glm::vec3(verticalAngle, horizontalAngle, 0.0f));
+	//_objectTransform->setRotation(glm::vec3(verticalAngle, horizontalAngle, 0.0f));
+	_object->setRotation(verticalAngle, horizontalAngle, 0.0f);
 
 	//update();
 }
@@ -85,7 +90,8 @@ void CameraFPS::moveForward(double deltaTime)
 
 	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->setPosition(_objectTransform->getPosition() + dir);
+	//_objectTransform->setPosition(_objectTransform->getPosition() + dir);
+	_object->move(dir);
 }
 
 
@@ -101,7 +107,8 @@ void CameraFPS::moveBackward(double deltaTime)
 
 	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->setPosition(_objectTransform->getPosition() - dir);
+	//_objectTransform->setPosition(_objectTransform->getPosition() - dir);
+	_object->move(-dir);
 }
 
 
@@ -117,7 +124,8 @@ void CameraFPS::strafeLeft(double deltaTime)
 
 	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->setPosition(_objectTransform->getPosition() - dir);
+	//_objectTransform->setPosition(_objectTransform->getPosition() - dir);
+	_object->move(-dir);
 }
 
 
@@ -133,7 +141,8 @@ void CameraFPS::strafeRight(double deltaTime)
 
 	dir *= deltaTime * _moveSpeed;
 
-	_objectTransform->setPosition(_objectTransform->getPosition() + dir);
+	//_objectTransform->setPosition(_objectTransform->getPosition() + dir);
+	_object->move(dir);
 }
 
 

@@ -5,7 +5,7 @@
 #include <cstdio>
 
 
-void Transform::updateTransformMatrix() const
+/*void Transform::updateTransformMatrix() const
 {
     glm::mat4 pos = glm::translate(_position);
 
@@ -15,7 +15,7 @@ void Transform::updateTransformMatrix() const
                        glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f)) *
                        glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f)) *
                        glm::scale(_scale);
-    */
+   //
 
     glm::mat4 rot;
 
@@ -116,7 +116,7 @@ void Transform::setRotation(float x, float y, float z, float w)
 
     _transformMatrix = glm::translate(_position) * rot * glm::scale(_scale);
 
-    changed();*/
+    changed();//
 }
 
 
@@ -199,4 +199,4 @@ Transform& Transform::operator*=(const Transform& t)
     _normalMatrixIs = false;
 
     return *this;
-}
+}*/

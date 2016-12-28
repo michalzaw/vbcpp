@@ -1,5 +1,7 @@
 #include "GraphicsManager.h"
 
+#include "../Scene/SceneObject.h"
+
 
 static std::unique_ptr<GraphicsManager> gmInstance;
 
@@ -160,13 +162,8 @@ RenderData* GraphicsManager::getRenderData()
 
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            if (object->getGlobalTransform()->getTransformMatrix() != object->getTransform()->getTransformMatrix())
-            {
-
-            }
-
-            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), object->getGlobalTransform(),
-                                            glm::length(renderData->camera->getPosition() - object->getTransform()->getPosition()));
+            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()));
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else

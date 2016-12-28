@@ -188,8 +188,6 @@
 		<Unit filename="Graphics/RenderObject.h" />
 		<Unit filename="Graphics/Renderer.cpp" />
 		<Unit filename="Graphics/Renderer.h" />
-		<Unit filename="Graphics/Transform.cpp" />
-		<Unit filename="Graphics/Transform.h" />
 		<Unit filename="Graphics/UBO.h" />
 		<Unit filename="Graphics/VAO.h" />
 		<Unit filename="Graphics/VBO.cpp" />
@@ -225,10 +223,10 @@
 		<Unit filename="Scene/Door.h" />
 		<Unit filename="Scene/SceneManager.cpp" />
 		<Unit filename="Scene/SceneManager.h" />
+		<Unit filename="Scene/SceneObject.cpp" />
 		<Unit filename="Scene/SceneObject.h" />
 		<Unit filename="Scene/Skybox.cpp" />
 		<Unit filename="Scene/Skybox.h" />
-		<Unit filename="Scene/sceneObject.cpp" />
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />

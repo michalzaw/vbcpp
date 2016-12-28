@@ -448,14 +448,14 @@ void Renderer::render(RenderData* renderData)
         if (mesh->material.shader == SKY_MATERIAL)
         {
             glDisable(GL_CULL_FACE);
-            i->getTransform()->setPosition(camera->getPosition());
+            i->getTransformMatrices().transformMatrix = glm::translate(camera->getPosition());
         }
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
-        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransform()->getTransformMatrix();
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
         shader->setUniform("MVP", MVP);
-        shader->setUniform("ModelMatrix", i->getTransform()->getTransformMatrix());
-        shader->setUniform("NormalMatrix", i->getTransform()->getNormalMatrix());
+        shader->setUniform("ModelMatrix", i->getTransformMatrices().transformMatrix);
+        shader->setUniform("NormalMatrix", i->getTransformMatrices().normalMatrix);
 
         model->getVBO()->bind();
 

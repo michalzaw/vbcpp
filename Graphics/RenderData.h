@@ -5,25 +5,37 @@
 #include <list>
 
 #include "Model.h"
-#include "Camera.h"
+#include "CameraStatic.hpp"
 #include "Light.h"
 #include "Transform.h"
 #include "../Utils/RModel.h"
 
-#include "CameraStatic.hpp"
+
+struct TransformMatrices
+{
+    glm::mat4& transformMatrix;
+    glm::mat4& normalMatrix;
+
+    TransformMatrices(glm::mat4& transform, glm::mat4& normal)
+        : transformMatrix(transform), normalMatrix(normal)
+    {
+
+    }
+
+};
+
 
 class RenderListElement
 {
     private:
-        //Model* _model;
         RModel*     _model;
         Mesh*       _mesh;
-        Transform*  _transform;
+        TransformMatrices _matrices;
 
         float       _distanceFromCamera;
 
     public:
-        RenderListElement(RModel* model, Mesh* mesh, Transform* transform, float distance);
+        RenderListElement(RModel* model, Mesh* mesh, TransformMatrices matrices, float distance);
         ~RenderListElement();
 
         inline RModel* getModel()
@@ -32,8 +44,8 @@ class RenderListElement
         inline Mesh* getMesh()
         { return _mesh; }
 
-        inline Transform* getTransform()
-        { return _transform; }
+        inline TransformMatrices& getTransformMatrices()
+        { return _matrices; }
 
         inline float getDistanceFromCamera()
         { return _distanceFromCamera; }

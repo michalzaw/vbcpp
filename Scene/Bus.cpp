@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.55f), _steerStep(0.6f),
+_maxSteerAngle(0.55f), _steerStep(0.2f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
@@ -78,16 +78,16 @@ void Bus::loadXMLdata(std::string busname)
 
             const char* cPosition = child->Attribute("position");
             busPosition = XMLstringToVec3(cPosition);
-            _sceneObject->getTransform()->setPosition(busPosition);
+            _sceneObject->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             glm::vec3 rotation(XMLstringToVec3(cRotation));
 
-            _sceneObject->getTransform()->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+            _sceneObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
-            _sceneObject->getTransform()->setScale(scale);
+            _sceneObject->setScale(scale);
 
         }
         else // BODY DATA
@@ -158,7 +158,7 @@ void Bus::loadXMLdata(std::string busname)
             glm::vec3 relativePos = glm::vec3(busPosition.x + wheelPosition.x, busPosition.y + wheelPosition.y, busPosition.z + wheelPosition.z);
 
 
-            wheelObj->getTransform()->setPosition(relativePos);
+            wheelObj->setPosition(relativePos);
 
             // obracamy model kola jeżli jest po lewej stronie
             if (side == "right")
@@ -230,7 +230,7 @@ void Bus::loadXMLdata(std::string busname)
 
             SceneObject* doorObj = _sMgr->addSceneObject(doorName);
 
-            doorObj->getTransform()->setPosition(relativePos);
+            doorObj->setPosition(relativePos);
 
             std::string modelPath = busname + "/" + doorModel;
 
@@ -282,15 +282,15 @@ void Bus::loadXMLdata(std::string busname)
 
             const char* cPosition = child->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
-            _steeringWheelObject->getTransform()->setPosition(position);
+            _steeringWheelObject->setPosition(position);
 
             const char* cRotation = child->Attribute("rotation");
             glm::vec3 rotation(XMLstringToVec3(cRotation));
-            _steeringWheelObject->getTransform()->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+            _steeringWheelObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
-            _steeringWheelObject->getTransform()->setScale(scale);
+            _steeringWheelObject->setScale(scale);
 
             _sceneObject->addChild(_steeringWheelObject);
         }
@@ -325,7 +325,7 @@ void Bus::loadXMLdata(std::string busname)
                                                                                  diffuseIntensity,
                                                                                  LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
             light->addComponent(lightComponent);
-            light->getTransform()->setPosition(position);
+            light->setPosition(position);
             _sceneObject->addChild(light);
 
             lightComponent->setIsActive(_isEnableLights);
@@ -360,8 +360,8 @@ void Bus::loadXMLdata(std::string busname)
                                                                                 diffuseIntensity, cutoff,
                                                                                 LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
             light->addComponent(lightComponent);
-            light->getTransform()->setPosition(position);
-            light->getTransform()->setRotation(rotation);
+            light->setPosition(position);
+            light->setRotation(rotation);
             _sceneObject->addChild(light);
 
             lightComponent->setIsActive(_isEnableHeadlights);
@@ -432,9 +432,11 @@ void Bus::turnLeft(float dt)
 
                 if (_steeringWheelObject)
                 {
-                    glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                    /*glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
                     rotation.y += 0.005f;
-                    _steeringWheelObject->getTransform()->setRotation(rotation);
+                    _steeringWheelObject->getTransform()->setRotation(rotation);*/
+
+                    _steeringWheelObject->rotate(0.0f, dt * _steerStep * 2 * PI / _maxSteerAngle, 0.0f);
                 }
             }
 
@@ -461,9 +463,11 @@ void Bus::turnRight(float dt)
 
                 if (_steeringWheelObject)
                 {
-                    glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
+                    /*glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
                     rotation.y -= 0.005f;
-                    _steeringWheelObject->getTransform()->setRotation(rotation);
+                    _steeringWheelObject->getTransform()->setRotation(rotation);*/
+
+                    _steeringWheelObject->rotate(0.0f, -dt * _steerStep * 2 * PI / _maxSteerAngle, 0.0f);
                 }
             }
 

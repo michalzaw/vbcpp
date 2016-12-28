@@ -5,7 +5,7 @@
 
 Component::Component(ComponentType type)
     : _type(type),
-    _object(NULL), _objectTransform(NULL),
+    _object(NULL),// _objectTransform(NULL),
     _isActive(true)
 {
     #ifdef _DEBUG_MODE
@@ -28,7 +28,7 @@ void Component::setSceneObject(SceneObject* object)
     {
         _object = object;
 
-        _objectTransform = _object->getTransform();
+        //_objectTransform = _object->getTransform();
     }
 }
 
@@ -48,18 +48,6 @@ ComponentType Component::getType()
 SceneObject* Component::getSceneObject()
 {
     return _object;
-}
-
-
-Transform* Component::getTransform()
-{
-    return _objectTransform;
-}
-
-
-Transform* Component::getGlobalTransform()
-{
-    return _object->getGlobalTransform();
 }
 
 
