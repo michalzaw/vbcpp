@@ -104,8 +104,10 @@ glm::vec3 Light::getDirection()
     //return glm::vec3(dir);
 
     //return glm::normalize(glm::vec3(getGlobalTransform()->getNormalMatrix() * dir));;
-    float verticalAngle = getGlobalTransform()->getRotation().x;
-    float horizontalAngle = getGlobalTransform()->getRotation().y;
+    //float verticalAngle = getGlobalTransform()->getRotation().x;
+    //float horizontalAngle = getGlobalTransform()->getRotation().y;
+    float verticalAngle = _object->getRotation().x;
+    float horizontalAngle = _object->getRotation().y;
 
     glm::vec4 vec(
                     cos(verticalAngle) * sin(horizontalAngle),
@@ -115,7 +117,8 @@ glm::vec3 Light::getDirection()
                      );
 
     if (_object->hasParent())
-        vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
+        vec = _object->getParent()->getGlobalTransformMatrix() * vec;
+        //vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
 
     return glm::normalize(glm::vec3(vec.x, vec.y, vec.z));
 }
@@ -123,7 +126,8 @@ glm::vec3 Light::getDirection()
 
 glm::vec3 Light::getPosition()
 {
-    glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    glm::vec4 pos = _object->getGlobalTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    //glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     return glm::vec3(pos.x, pos.y, pos.z);
     //return getGlobalTransform()->getPosition();
 }

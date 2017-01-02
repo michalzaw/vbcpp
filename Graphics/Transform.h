@@ -9,7 +9,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 
 
-class SceneObject;
+/*class SceneObject;
 
 
 enum RotationMode
@@ -66,7 +66,7 @@ class Transform
             _object = object;
         }
 
-};
+};*/
 
 
 #endif // TRANSFORM_H_INCLUDED

@@ -28,7 +28,7 @@ class Component
         ComponentType _type;
 
         SceneObject* _object;
-        Transform* _objectTransform;
+//        Transform* _objectTransform;
 
         bool _isActive;
 
@@ -41,8 +41,6 @@ class Component
 
         ComponentType   getType();
         SceneObject*    getSceneObject();
-        Transform*      getTransform();
-        Transform*      getGlobalTransform();
         bool            isActive();
 
         virtual void changedTransform() {}
