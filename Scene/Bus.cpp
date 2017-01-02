@@ -273,7 +273,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 armPivotB = XMLstringToBtVec3(child->Attribute("armPivotB"));
 
                 SceneObject* armObj = _sMgr->addSceneObject(armName);
-                armObj->getTransform()->setPosition(armRelPos);
+                armObj->setPosition(armRelPos);
 
                 std::string armPath = busname + "/" + armModel;
 
@@ -304,7 +304,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 arm2PivotB = XMLstringToBtVec3(child->Attribute("arm2PivotB"));
 
                 SceneObject* arm2Obj = _sMgr->addSceneObject(arm2Name);
-                arm2Obj->getTransform()->setPosition(arm2RelPos);
+                arm2Obj->setPosition(arm2RelPos);
 
                 std::string arm2Path = busname + "/" + arm2Model;
 
@@ -335,7 +335,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 doorPivotB = XMLstringToBtVec3(child->Attribute("pivotB"));
 
                 SceneObject* doorObj = _sMgr->addSceneObject(doorName);
-                doorObj->getTransform()->setPosition(relativePos);
+                doorObj->setPosition(relativePos);
 
                 std::string doorPath = busname + "/" + doorModel;
 
