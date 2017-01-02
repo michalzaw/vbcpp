@@ -288,7 +288,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(_chasisBody, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-                busArmHinge->getBulletConstraint()->setLimit(-0.2,1.9);
+                busArmHinge->getBulletConstraint()->setLimit(-0.3,1.9);
 
                 // arm 2
 
@@ -319,8 +319,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 ConstraintHinge* busArm2Hinge = _pMgr->createConstraintHinge(_chasisBody, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-                busArm2Hinge->getBulletConstraint()->setLimit(-0.4,1.2);
-
+                busArm2Hinge->getBulletConstraint()->setLimit(-0.3,1.9);
                 // door model
 
                 std::string doorName(child->Attribute("name"));
@@ -351,13 +350,6 @@ void Bus::loadXMLdata(std::string busname)
                 ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
                 armDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
-
-
-                btVector3 pivotC = XMLstringToBtVec3(child->Attribute("pivotC"));
-                btVector3 pivotD = XMLstringToBtVec3(child->Attribute("pivotD"));
-
-                ConstraintHinge* arm2doorHinge = _pMgr->createConstraintHinge(arm2Body, doorBody, pivotC, pivotD, btVector3(0,1,0), btVector3(0,1,0));
-
 
                 Door* d = 0;
                 d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0);

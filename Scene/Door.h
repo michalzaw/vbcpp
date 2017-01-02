@@ -1,8 +1,8 @@
 #ifndef DOOR_H_INCLUDED
 #define DOOR_H_INCLUDED
 
-#include "SceneManager.h"
-#include "../Physics/PhysicsManager.hpp"
+#include "../Utils/RModel.h"
+#include "../Physics/PhysicalBodyConvexHull.hpp"
 
 enum DoorState
 {
@@ -14,8 +14,8 @@ enum DoorState
 class Door
 {
     public:
-        Door(RModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge)
-        : _hinge(hinge), _body(body), _model(model)
+        Door(RModel* model, PhysicalBodyConvexHull* body)
+        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING)
         {
 
         }
@@ -25,31 +25,22 @@ class Door
 
         }
 
-        void open()
-        {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
-            _state = EDS_OPENING;
-        }
+        virtual void open() = 0;
+        virtual void close() = 0;
 
-        void close()
-        {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
-            _state = EDS_CLOSING;
-        }
+        PhysicalBodyConvexHull* getDoorBody() { return _doorBody; }
 
-        PhysicalBodyConvexHull* getPhysicalBody() { return _body; }
+        RModel* getDoorModel() { return _doorModel; }
 
-        RModel* getModel() { return _model; }
 
-        ConstraintHinge* getConstraint() { return _hinge; }
 
         DoorState getState() { return _state; }
 
         protected:
-            PhysicalBodyConvexHull*  _body;
-            RModel*                  _model;
-            ConstraintHinge*         _hinge;
+            RModel*                  _doorModel;
+            PhysicalBodyConvexHull*  _doorBody;
             DoorState                _state;
+            int                      _collidesWith;
 };
 
 

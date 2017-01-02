@@ -8,7 +8,8 @@
 #include "SceneManager.h"
 #include "../Physics/PhysicsManager.hpp"
 
-#include "Door.h"
+#include "DoorSimple.h"
+#include "DoorSE.h"
 
 enum WheelSide
 {
@@ -107,6 +108,7 @@ class Bus : virtual public RefCounter
         bool            _isEnableLights;
         HeadlightsList  _headlights;
         bool            _isEnableHeadlights;
+        int             _collidesWith;
 
         WheelList       _wheels;
         DoorList        _doors;

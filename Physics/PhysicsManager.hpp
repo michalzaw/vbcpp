@@ -37,13 +37,13 @@ class PhysicsManager : virtual public RefCounter
         btDefaultCollisionConfiguration*        getDefaultCollisionConfig() { return _collisionConfiguration; }
         btBroadphaseInterface*                  getBrodaphaseInterface() { return _broadphase; }
 
-        PhysicalBodyBox*                createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos);
-        PhysicalBodyCylinder*           createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align);
-        PhysicalBodySphere*             createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);
-        PhysicalBodyStaticPlane*        createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
-        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
-        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos);
-        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos);
+        PhysicalBodyBox*                createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyCylinder*           createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align, short collisionGroup, short collisionFilter);
+        PhysicalBodySphere*             createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyStaticPlane*        createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset, short collisionGroup, short collisionFilter);
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie

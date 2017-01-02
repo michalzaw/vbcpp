@@ -8,6 +8,16 @@
 
 #include <memory>
 
+#define BIT(x) (1<<(x))
+enum collisiontypes {
+    COL_NOTHING = 0, //<Collide with nothing
+    COL_TERRAIN = BIT(0), //<Collide with terrain
+    COL_BUS = BIT(1), //<Collide with bus chassis
+    COL_DOOR = BIT(2), //<Collide with bus door
+    COL_WHEEL = BIT(3), // Collide with bus wheel
+    COL_ENV = BIT(4)
+};
+
 class PhysicalBody : public Component
 {
     public:

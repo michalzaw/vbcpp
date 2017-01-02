@@ -322,7 +322,8 @@ int main()
     RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0));
+    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV;
+    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
     terrainObject->addComponent(terrainObj);
@@ -330,11 +331,12 @@ int main()
 
     //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
-
+    collidesWith = COL_TERRAIN | COL_BUS;
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0));
+
+    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0), COL_ENV, collidesWith);
     boxBody2->setRestitution(0.1f);
     crate->addComponent(object2);
     crate->addComponent(boxBody2);
