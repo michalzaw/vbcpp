@@ -14,8 +14,8 @@ enum DoorState
 class Door
 {
     public:
-        Door(RModel* model, PhysicalBodyConvexHull* body)
-        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING)
+        Door(RModel* model, PhysicalBodyConvexHull* body, char group = 1)
+        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING), _group(group)
         {
 
         }
@@ -32,11 +32,12 @@ class Door
 
         RModel* getDoorModel() { return _doorModel; }
 
-
+        char getGroup() { return _group; }
 
         DoorState getState() { return _state; }
 
         protected:
+            char                     _group;
             RModel*                  _doorModel;
             PhysicalBodyConvexHull*  _doorBody;
             DoorState                _state;

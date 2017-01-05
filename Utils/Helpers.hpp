@@ -22,6 +22,7 @@ T clamp(const T& what, const T& a, const T& b)
 }
 
 glm::vec3 XMLstringToVec3(const char* xmlstring);
+glm::vec2 XMLstringToVec2(const char* xmlstring);
 
 btVector3 XMLstringToBtVec3(const char* xmlstring);
 

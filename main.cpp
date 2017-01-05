@@ -154,14 +154,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS)
     {
-        bus->doorOpenClose(0);
+        bus->doorOpenClose(1);
     }
 
 
     if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS)
     {
-        bus->doorOpenClose(1);
+        bus->doorOpenClose(2);
     }
+
 
 	if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS)
 	{

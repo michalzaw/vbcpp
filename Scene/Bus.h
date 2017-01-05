@@ -92,7 +92,7 @@ class Bus : virtual public RefCounter
         void brakeOff();
 
         // Door methods
-        void doorOpenClose(unsigned char doorIndex);
+        void doorOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex);
 

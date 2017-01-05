@@ -3,13 +3,19 @@
 
 #include "Door.h"
 
+enum RotationDir
+{
+    ERD_CCW = 0,
+    ERD_CW
+};
+
 class DoorSE : virtual public Door
 {
     public:
         DoorSE(RModel* model, PhysicalBodyConvexHull* body,
-               RModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2)
-        : Door(model, body),
-        _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2)
+               RModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2, RotationDir dir = ERD_CCW, char group = 1)
+        : Door(model, body, group),
+        _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2), _rotationDir(dir)
         {
             //close();
         }
@@ -21,13 +27,21 @@ class DoorSE : virtual public Door
 
         void open()
         {
-            _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.9f, 2.15f);
+            if (_rotationDir == ERD_CCW)
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.9f, 2.15f);
+            else
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.9f, 2.15f);
+
             _state = EDS_OPENING;
         }
 
         void close()
         {
-            _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.9f, 2.15f);
+            if (_rotationDir == ERD_CCW)
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.9f, 2.15f);
+            else
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.9f, 2.15f);
+
             _state = EDS_CLOSING;
         }
 
@@ -41,6 +55,7 @@ class DoorSE : virtual public Door
         PhysicalBodyConvexHull* _armBody;
         ConstraintHinge*        _constraint1;   // bus - arm
         ConstraintHinge*        _constraint2;   // arm - door
+        RotationDir             _rotationDir;
 };
 
 #endif // DOORSE_H_INCLUDED

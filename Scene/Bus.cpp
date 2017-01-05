@@ -222,6 +222,7 @@ void Bus::loadXMLdata(std::string busname)
             std::string doorType(child->Attribute("type"));
             std::string doorModel(child->Attribute("model"));
             float mass = (float)atof(child->Attribute("mass"));
+            char group = (char)atoi(child->Attribute("group"));
 
             if (doorType == "s")
             {
@@ -256,7 +257,7 @@ void Bus::loadXMLdata(std::string busname)
                 doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
                 Door* d = 0;
-                d = new DoorSimple(dr, doorBody, doorHinge);
+                d = new DoorSimple(dr, doorBody, doorHinge, group);
                 _doors.push_back(d);
             } // IF "S"
             else
@@ -265,6 +266,20 @@ void Bus::loadXMLdata(std::string busname)
                 std::string armName(child->Attribute("armName"));
                 std::string armModel(child->Attribute("arm"));
                 float armMass = (float)atof(child->Attribute("armMass"));
+                char group = (char)atoi(child->Attribute("group"));
+
+                float arm1lowLimit = (float)atof(child->Attribute("arm1lowLimit"));
+                float arm1highLimit = (float)atof(child->Attribute("arm1highLimit"));
+                glm::vec2 arm1limits = XMLstringToVec2(child->Attribute("arm1limits"));
+
+                std::string rotDir(child->Attribute("rotationDir"));
+
+                RotationDir rdir;
+
+                if (rotDir == "CCW")
+                    rdir = ERD_CCW;
+                else
+                    rdir = ERD_CW;
 
                 glm::vec3 armPosition = XMLstringToVec3(child->Attribute("armPosition"));
                 glm::vec3 armRelPos = glm::vec3(busPosition.x + armPosition.x, busPosition.y + armPosition.y, busPosition.z + armPosition.z);
@@ -289,13 +304,16 @@ void Bus::loadXMLdata(std::string busname)
 
                 ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(_chasisBody, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-                busArmHinge->getBulletConstraint()->setLimit(-0.2,1.9);
+                busArmHinge->getBulletConstraint()->setLimit(arm1limits.x,arm1limits.y);
 
                 // arm 2
 
                 std::string arm2Name(child->Attribute("arm2Name"));
                 std::string arm2Model(child->Attribute("arm2"));
                 float arm2Mass = (float)atof(child->Attribute("arm2Mass"));
+
+                float arm2lowLimit = (float)atof(child->Attribute("arm2lowLimit"));
+                float arm2highLimit = (float)atof(child->Attribute("arm2highLimit"));
 
                 glm::vec3 arm2Position = XMLstringToVec3(child->Attribute("arm2Position"));
                 glm::vec3 arm2RelPos = glm::vec3(busPosition.x + arm2Position.x, busPosition.y + arm2Position.y, busPosition.z + arm2Position.z);
@@ -320,7 +338,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 ConstraintHinge* busArm2Hinge = _pMgr->createConstraintHinge(_chasisBody, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-                busArm2Hinge->getBulletConstraint()->setLimit(-0.4,1.2);
+                //busArm2Hinge->getBulletConstraint()->setLimit(arm2lowLimit,arm2highLimit);
 
                 // door model
 
@@ -351,8 +369,10 @@ void Bus::loadXMLdata(std::string busname)
 
                 ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-                armDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
-
+                if (rotDir == "CCW")
+                    armDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
+                else
+                    armDoorHinge->getBulletConstraint()->setLimit(0.0,1.9);
 
                 btVector3 pivotC = XMLstringToBtVec3(child->Attribute("pivotC"));
                 btVector3 pivotD = XMLstringToBtVec3(child->Attribute("pivotD"));
@@ -361,7 +381,7 @@ void Bus::loadXMLdata(std::string busname)
 
 
                 Door* d = 0;
-                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0);
+                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, rdir, group);
                 d->open();
                 _doors.push_back(d);
             }
@@ -625,15 +645,20 @@ Door* Bus::getDoor(unsigned char doorIndex)
         return 0;
 }
 
-void Bus::doorOpenClose(unsigned char doorIndex)
+void Bus::doorOpenClose(char doorGroup)
 {
-    if (doorIndex <= _doors.size()-1)
+    for (char i = 0; i < _doors.size(); i++)
+    //if (doorIndex <= _doors.size()-1)
     {
-        if (_doors[doorIndex]->getState() == EDS_CLOSING)
-            _doors[doorIndex]->open();
-        else
-        if (_doors[doorIndex]->getState() == EDS_OPENING)
-             _doors[doorIndex]->close();
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+                _doors[i]->open();
+            else
+            if (_doors[i]->getState() == EDS_OPENING)
+                _doors[i]->close();
+        }
+
     }
 
 }
