@@ -248,7 +248,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
-                int collidesWith = COL_ENV;
+                int collidesWith = COL_ENV | COL_TERRAIN;
                 PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, btDoorPos, COL_DOOR, collidesWith);
                 doorObj->addComponent(doorBody);
 
@@ -298,7 +298,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
-                int collidesWith = COL_NOTHING;
+                int collidesWith = COL_ENV | COL_TERRAIN;
                 PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, btArmPos, COL_DOOR, collidesWith);
                 armObj->addComponent(armBody);
 

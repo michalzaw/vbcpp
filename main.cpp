@@ -332,7 +332,7 @@ int main()
     RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV;
+    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
     PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);

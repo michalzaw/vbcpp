@@ -6,6 +6,6 @@
 
 	<map model="testarea/test_area_n.3ds" texturePath="testarea/" />
 	
-	<bus model="i211" />
+	<bus model="h9" />
 
 </game>

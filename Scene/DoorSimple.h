@@ -22,13 +22,13 @@ class DoorSimple : virtual public Door
 
         void open()
         {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
+            _hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 0.15f);
             _state = EDS_OPENING;
         }
 
         void close()
         {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
+            _hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 0.15f);
             _state = EDS_CLOSING;
         }
 
