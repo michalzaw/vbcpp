@@ -6,6 +6,12 @@
 
 using namespace tinyxml2;
 
+// XML MATERIAL FILE DEFINITIONS
+const char* XML_MATERIAL_ROOT = "Materials";
+const char* XML_MATERIAL_ELEMENT = "Material";
+std::string matFilenamePostfix("_mat.xml");
+// XML END
+
 
 Load3ds::Load3ds()
     : _minCreaseCosAngle(0.7f)
@@ -33,19 +39,21 @@ void Load3ds::setMinCreaseCosAngle(float cosAngle)
 
 Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 {
-    _fileName = fileName;
 	_file3ds = lib3ds_file_load(fileName.c_str());
 
 	assert(_file3ds != NULL);
 
+    // Check for XML material file, create new one if it's not present
+    std::string xmlFileName = fileName;
+    xmlFileName.erase(xmlFileName.size() - 4, 4);
+    xmlFileName += matFilenamePostfix;
 
-	if (!isMaterialXmlFileExists())
+
+	if (!isMaterialXmlFileExists(xmlFileName))
     {
-        std::string xmlFileName = fileName;
-        xmlFileName.erase(xmlFileName.size() - 3, 3);
-        xmlFileName += "xml";
         saveMaterialsDataToXml(xmlFileName);
     }
+    // --------------
 
 
 	std::vector<MeshMender::Vertex> vertices;
@@ -82,10 +90,6 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
             vertices.push_back(vertex);
         }
 	}
-
-    std::string xmlFileName = fileName;
-	xmlFileName.erase(xmlFileName.size() - 3, 3);
-	xmlFileName += "xml";
 
 	XMLDocument materialDoc;
 	materialDoc.LoadFile(xmlFileName.c_str());
@@ -292,19 +296,16 @@ void Load3ds::loadCollisionMesh(std::vector<glm::vec3>* vertices)
 }
 
 
-bool Load3ds::isMaterialXmlFileExists()
+bool Load3ds::isMaterialXmlFileExists(std::string fileName)
 {
-    std::string xmlFileName = _fileName;
-	xmlFileName.erase(xmlFileName.size() - 3, 3);
-	xmlFileName += "xml";
-
 	FILE* file;
-    file = fopen(xmlFileName.c_str(), "r");
+    file = fopen(fileName.c_str(), "r");
     if (file)
     {
         fclose(file);
         return 1;
     }
+
     fclose(file);
     return 0;
 }
@@ -317,12 +318,13 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
     XMLDeclaration* dec = doc.NewDeclaration();
     doc.InsertFirstChild(dec);
 
+    XMLNode* root = doc.NewElement(XML_MATERIAL_ROOT);
 
     Lib3dsMaterial* material;
 
 	for (material = _file3ds->materials; material != NULL; material = material->next)
     {
-        XMLElement* matElement = doc.NewElement("material");
+        XMLElement* matElement = doc.NewElement(XML_MATERIAL_ELEMENT);
         matElement->SetAttribute("name", material->name);
 
         std::string ambientStr = toString(material->ambient[0]) + "," + toString(material->ambient[1]) + "," + toString(material->ambient[2]) + "," + toString(material->ambient[3]);
@@ -350,8 +352,10 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
         std::string scaleStr = toString(material->texture1_map.scale[0]) + "," + toString(material->texture1_map.scale[1]);
         matElement->SetAttribute("scale", scaleStr.c_str());
 
-        doc.InsertEndChild(matElement);
+        root->InsertEndChild(matElement);
     }
+
+    doc.InsertEndChild(root);
 
     doc.SaveFile(fileName.c_str());
 }
@@ -360,9 +364,12 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
 Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath)
 {
     XMLElement* materialElement = NULL;
+    XMLElement* root = xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
 
-    for (XMLElement* child = xmlFile->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
+    for (XMLElement* child = root->FirstChildElement(XML_MATERIAL_ELEMENT); child != NULL; child = child->NextSiblingElement())
     {
+        std::string elementName(child->Name());
+
         const char* name = child->Attribute("name");
         if (strcmp(name, materialName.c_str()) == 0)
         {
@@ -370,7 +377,6 @@ Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string mate
             break;
         }
     }
-
 
     Material sMaterial;
 	sMaterial.name = materialName;

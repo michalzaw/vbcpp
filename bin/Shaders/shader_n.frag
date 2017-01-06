@@ -90,7 +90,8 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
-	float SpecularFactor = max(dot(FragmentToEye, LightReflect), 0.0f);
+	//float SpecularFactor = max(dot(FragmentToEye, LightReflect), 0.0f);
+	float SpecularFactor = max(0.0, dot(FragmentToEye, LightReflect));
 	SpecularFactor = pow(SpecularFactor, SpecularPower);
 //	SpecularFactor = pow(SpecularFactor, 96);
 	vec4 SpecularColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * SpecularFactor;
