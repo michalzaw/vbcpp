@@ -179,6 +179,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
 
 	}
+
+	if (glfwGetKey( window, GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS)
+        bus->getGearbox()->shiftUp();
+
+  	if (glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+        bus->getGearbox()->shiftDown();
+
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -306,7 +313,7 @@ int main()
 
     win = new Window;
 
-    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 10);
+    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 40);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
@@ -342,6 +349,7 @@ int main()
     //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
     collidesWith = COL_TERRAIN | COL_BUS;
+
     SceneObject* crate = sceneMgr->addSceneObject("crate");
     RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
     RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
@@ -399,15 +407,20 @@ int main()
     Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
     img->setPosition(0, gameCfg.windowHeight - img->getTexture()->getSize().y / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
-    img->setScale(0.5f, 0.5f);
+    img->setScale(0.3f, 0.3f);
     //img->setPosition(100, 100);
 
 
     RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
     Label* label = gui->addLabel(font, "Virtual Bus Core++");
-    label->setPosition(img->getTexture()->getSize().x / 2.0f + 100, gameCfg.windowHeight - 40);
+    label->setPosition(10, gameCfg.windowHeight - 20);
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    label->scale(0.6f, 0.6f);
 
+    Label* gearRatio = gui->addLabel(font, "0");
+    gearRatio->setPosition(10, 50);
+    gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    gearRatio->scale(0.6f, 0.6f);
 
     // Time calculation variables
     double t;
@@ -471,6 +484,12 @@ int main()
 
             t += deltaTime;
         }
+
+        std::stringstream stream;
+        stream << bus->getGearbox()->currentRatio();
+        std::string gearRatioString("Gear ratio: ");
+        gearRatioString += stream.str();
+        gearRatio->setText(gearRatioString);
 
         // Render the scene
         renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());

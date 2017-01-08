@@ -4,6 +4,8 @@
 #include "../Utils/RefCounter.h"
 #include "../Utils/Strings.h"
 
+#include "../Utils/Gearbox.h"
+
 #include "SceneObject.h"
 #include "SceneManager.h"
 #include "../Physics/PhysicsManager.hpp"
@@ -91,6 +93,8 @@ class Bus : virtual public RefCounter
         void brakeOn();
         void brakeOff();
 
+        Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
+
         // Door methods
         void doorOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
@@ -101,6 +105,8 @@ class Bus : virtual public RefCounter
         PhysicalBodyConvexHull* _chasisBody;
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
+
+        Gearbox*        _gearbox;
 
         SceneObject*    _steeringWheelObject;
         glm::vec3       _driverPosition;

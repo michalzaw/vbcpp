@@ -229,6 +229,8 @@
 		<Unit filename="Scene/SceneObject.h" />
 		<Unit filename="Scene/Skybox.cpp" />
 		<Unit filename="Scene/Skybox.h" />
+		<Unit filename="Utils/Gearbox.cpp" />
+		<Unit filename="Utils/Gearbox.h" />
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
 		<Unit filename="Utils/Math.h" />

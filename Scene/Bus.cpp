@@ -31,6 +31,12 @@ Bus::~Bus()
 {
     std::cout << "Bus Destruktor" << std::endl;
 
+    if (_gearbox)
+    {
+        delete _gearbox;
+        _gearbox = 0;
+    }
+
     WheelList::iterator wit = _wheels.begin();
 
     for (; wit != _wheels.end(); ++wit)
@@ -52,7 +58,13 @@ void Bus::loadXMLdata(std::string busname)
     XMLDocument doc;
     doc.LoadFile( filename.c_str() );
 
-    XMLElement* objElement = doc.FirstChildElement("object");
+    XMLElement* objElement = doc.FirstChildElement("Gearbox");
+
+    std::string gearboxFile(objElement->Attribute("model"));
+    _gearbox = new Gearbox(gearboxFile);
+
+
+    objElement = doc.FirstChildElement("Object");
 
     std::cout << "XML DATA" << std::endl;
 
@@ -688,7 +700,7 @@ void Bus::updatePhysics()
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * 4.0f);
+                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio());
             }
         }
     }

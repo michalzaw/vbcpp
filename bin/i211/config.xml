@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<object name="bus"> 
+<Gearbox model="gbx_ikarus260" />
+
+<Object name="bus"> 
 	<transform position="1,4,12" rotation="0,1.0,0" scale="1,1,1" />
 
 	<body model="i211.3ds" textures="211" mass="9.6" /> <!-- mass in tons -->
@@ -35,4 +37,4 @@
 	<headlights name="headlight0" position="0.96,-0.52,3.39" rotation="-0.45,0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.43"/>
 	<headlights name="headlight1" position="-0.96,-0.52,3.39" rotation="-0.45,-0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.45"/>
 
-</object>
+</Object>
