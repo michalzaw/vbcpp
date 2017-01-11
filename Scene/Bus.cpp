@@ -37,6 +37,12 @@ Bus::~Bus()
         _gearbox = 0;
     }
 
+    if (_engine)
+    {
+        delete _engine;
+        _engine = 0;
+    }
+
     WheelList::iterator wit = _wheels.begin();
 
     for (; wit != _wheels.end(); ++wit)
@@ -63,6 +69,9 @@ void Bus::loadXMLdata(std::string busname)
     std::string gearboxFile(objElement->Attribute("model"));
     _gearbox = new Gearbox(gearboxFile);
 
+    objElement = doc.FirstChildElement("Engine");
+    std::string engineFile(objElement->Attribute("model"));
+    _engine = new Engine(engineFile);
 
     objElement = doc.FirstChildElement("Object");
 
@@ -619,7 +628,12 @@ void Bus::accelerate()
     _accelerate = true;
     _brake = false;
 
-    updatePhysics();
+   if (_engine->getThrottle() < 1.0f)
+            _engine->setThrottle(_engine->getThrottle() + 0.001f );
+    else
+        _engine->setThrottle(1.0f);
+
+    //updatePhysics();
 }
 
 
@@ -628,7 +642,7 @@ void Bus::brakeOn()
     _accelerate = false;
     _brake = true;
 
-    updatePhysics();
+    //updatePhysics();
 }
 
 
@@ -636,7 +650,7 @@ void Bus::brakeOff()
 {
     _brake = false;
 
-    updatePhysics();
+    //updatePhysics();
 }
 
 
@@ -645,7 +659,11 @@ void Bus::idle()
     _accelerate = false;
     _brake = false;
 
-    updatePhysics();
+        if (_engine->getThrottle() > 0.0f)
+            _engine->setThrottle(_engine->getThrottle() - 0.001f);
+        else
+            _engine->setThrottle(0.0f);
+    //updatePhysics();
 }
 
 
@@ -683,8 +701,9 @@ void Bus::closeDoor(unsigned char doorIndex)
 }
 */
 
-void Bus::updatePhysics()
+void Bus::updatePhysics(float dt)
 {
+    _engine->update();
 
     // przyspieszanie
     if (_accelerate)
@@ -700,7 +719,7 @@ void Bus::updatePhysics()
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio());
+                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.001f);
             }
         }
     }
@@ -719,6 +738,8 @@ void Bus::updatePhysics()
     }
     else
     {
+
+
         WheelList::iterator it = _wheels.begin();
 
         for (; it != _wheels.end(); ++it)

@@ -2,6 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Gearbox model="gbx_ikarus260" />
+<Engine model="eng_wskmielec" />
 
 <Object name="bus"> 
 	<transform position="1,4,12" rotation="0,1.0,0" scale="1,1,1" />

@@ -56,6 +56,8 @@ SceneObject* point, *point2, *point3, *dirLight, *spot = 0;
 
 Bus* bus = 0;
 
+Label* engineIsRunning = 0;
+
 std::string winTitle = "Virtual Bus Core++";
 
 
@@ -185,6 +187,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
   	if (glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
         bus->getGearbox()->shiftDown();
+
+  	if (glfwGetKey( window, GLFW_KEY_0 ) == GLFW_PRESS)
+    {
+        if (!bus->getEngine()->isRunning())
+        {
+            bus->getEngine()->turnOn();
+            engineIsRunning->setText("Engine on");
+        }
+        else
+        {
+            bus->getEngine()->turnOff();
+            engineIsRunning->setText("Engine off");
+        }
+    }
 
 }
 
@@ -417,10 +433,34 @@ int main()
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
+
+    engineIsRunning = gui->addLabel(font, "Engine off");
+    engineIsRunning->setPosition(10, 70);
+    engineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    engineIsRunning->scale(0.6f, 0.6f);
+
     Label* gearRatio = gui->addLabel(font, "0");
-    gearRatio->setPosition(10, 50);
+    gearRatio->setPosition(10, 55);
     gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     gearRatio->scale(0.6f, 0.6f);
+
+    Label* labelRPM = gui->addLabel(font, "0");
+    labelRPM->setPosition(10, 40);
+    labelRPM->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelRPM->scale(0.6f, 0.6f);
+
+    Label* labelThrottle = gui->addLabel(font, "0");
+    labelThrottle->setPosition(10, 25);
+    labelThrottle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelThrottle->scale(0.6f, 0.6f);
+
+    Label* labelTorque = gui->addLabel(font, "0");
+    labelTorque->setPosition(10, 10);
+    labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelTorque->scale(0.6f, 0.6f);
+
+
+    std::stringstream stream;
 
     // Time calculation variables
     double t;
@@ -479,17 +519,36 @@ int main()
 
             readInput(win->getWindow(), deltaTime);
             physMgr->simulate(deltaTime);
+            bus->updatePhysics(deltaTime);
 
             frameTime -= deltaTime;
 
             t += deltaTime;
         }
 
-        std::stringstream stream;
+        stream.str(std::string());
         stream << bus->getGearbox()->currentRatio();
         std::string gearRatioString("Gear ratio: ");
         gearRatioString += stream.str();
         gearRatio->setText(gearRatioString);
+
+        stream.str(std::string());
+        stream << bus->getEngine()->getCurrentRPM();
+        std::string stringRPM("RPM: ");
+        stringRPM += stream.str();
+        labelRPM->setText(stringRPM);
+
+        stream.str(std::string());
+        stream << bus->getEngine()->getThrottle();
+        std::string stringThrottle("Throttle: ");
+        stringThrottle += stream.str();
+        labelThrottle->setText(stringThrottle);
+
+        stream.str(std::string());
+        stream << bus->getEngine()->getCurrentTorque();
+        std::string stringTorque("Torque: ");
+        stringTorque += stream.str();
+        labelTorque->setText(stringTorque);
 
         // Render the scene
         renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());

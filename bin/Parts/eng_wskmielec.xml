@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Engine>
+	<Description Author="Unknown" Model="WSK Mielec" Comment="WSK Mielec engine" />
+	
+	<Points count="4">
+		<Point rpm="900" torque="650" />
+		<Point rpm="1500" torque="670" />
+		<Point rpm="2000" torque="650" />
+		<Point rpm="3000" torque="600" />
+	</Points>
+</Engine>

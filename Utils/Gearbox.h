@@ -17,7 +17,7 @@ enum Mode
 class Gearbox
 {
     public:
-        Gearbox(std::string filename);
+        Gearbox(const std::string filename);
         virtual ~Gearbox();
 
         const int currentGear() { return _currentGear; }
@@ -32,7 +32,7 @@ class Gearbox
         int                _gearCount;
         int                _currentGear;
 
-        void loadData(std::string filename);
+        void loadData(const std::string filename);
 };
 
 #endif // GEARBOX_H_INCLUDED

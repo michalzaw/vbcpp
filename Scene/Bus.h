@@ -5,6 +5,7 @@
 #include "../Utils/Strings.h"
 
 #include "../Utils/Gearbox.h"
+#include "../Utils/Engine.h"
 
 #include "SceneObject.h"
 #include "SceneManager.h"
@@ -94,11 +95,15 @@ class Bus : virtual public RefCounter
         void brakeOff();
 
         Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
+        Engine* getEngine() { if (_engine) return _engine; }
 
         // Door methods
         void doorOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex);
+
+        // Update internal physics - doors, wheels etc
+        void updatePhysics(float dt);
 
     private:
         SceneObject*    _sceneObject;
@@ -107,6 +112,7 @@ class Bus : virtual public RefCounter
         PhysicsManager* _pMgr;
 
         Gearbox*        _gearbox;
+        Engine*         _engine;
 
         SceneObject*    _steeringWheelObject;
         glm::vec3       _driverPosition;
@@ -132,8 +138,7 @@ class Bus : virtual public RefCounter
         // Load config file
         void loadXMLdata(std::string busname);
 
-        // Update internal physics - doors, wheels etc
-        void updatePhysics();
+
 };
 
 
