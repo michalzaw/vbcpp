@@ -96,7 +96,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 //	SpecularFactor = pow(SpecularFactor, 96);
 	vec4 SpecularColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * SpecularFactor;
 	
-	return (AmbientColor + DiffuseColor) * textureColor + SpecularColor * matSpecular;
+	return (AmbientColor + DiffuseColor + SpecularColor * matSpecular) * textureColor;
 }
 
 

@@ -324,7 +324,19 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
 
 	for (material = _file3ds->materials; material != NULL; material = material->next)
     {
+        std::string type;
+        if (strcmp(material->texture1_map.name, "") != 0 && strcmp(material->bump_map.name, "") != 0)
+            type = "normalmapping";
+        else if (strcmp(material->texture1_map.name, "") != 0 && strcmp(material->bump_map.name, "") == 0)
+            type = "solid";
+        else
+            type = "no_texture";
+
+
         XMLElement* matElement = doc.NewElement(XML_MATERIAL_ELEMENT);
+
+        matElement->SetAttribute("type", type.c_str());
+
         matElement->SetAttribute("name", material->name);
 
         std::string ambientStr = toString(material->ambient[0]) + "," + toString(material->ambient[1]) + "," + toString(material->ambient[2]) + "," + toString(material->ambient[3]);
@@ -428,11 +440,13 @@ Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string mate
         sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
-	if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture > 0)
+    const char* type = materialElement->Attribute("type");
+
+	if (strcmp(type, "normalmapping") == 0)
         sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
-    else if (sMaterial.diffuseTexture > 0 && sMaterial.normalmapTexture == 0)
+    else if (strcmp(type, "solid") == 0)
         sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
-    else
+    else if (strcmp(type, "no_texture") == 0)
         sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
 
 	return sMaterial;
