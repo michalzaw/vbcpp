@@ -15,11 +15,18 @@
 #include "NVMeshMender/NVMeshMender.h"
 #include "LoadTexture.h"
 
+#include "../Utils/tinyxml2.h"
+#include "../Utils/Strings.h"
+#include "../Utils/Helpers.hpp"
+
+using namespace tinyxml2;
+
 
 class Load3ds
 {
     private:
         //OGLDriver* _OGLDriver;
+        //std::string _matFileName;
         Lib3dsFile* _file3ds;
 
         float _minCreaseCosAngle;
@@ -27,6 +34,10 @@ class Load3ds
         Material loadMaterialData(Lib3dsMaterial* material, std::string texPath);
         void loadGeometryByMaterial(Material& material, std::vector<unsigned int>& indices);
         void loadCollisionMesh(std::vector<glm::vec3>* vertices);
+
+        bool isMaterialXmlFileExists(std::string fileName);
+        void saveMaterialsDataToXml(std::string fileName);
+        Material loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath);
 
     public:
         Load3ds();

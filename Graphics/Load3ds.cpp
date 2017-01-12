@@ -4,6 +4,15 @@
 
 #include "../Utils/ResourceManager.h"
 
+using namespace tinyxml2;
+
+// XML MATERIAL FILE DEFINITIONS
+const char* XML_MATERIAL_ROOT = "Materials";
+const char* XML_MATERIAL_ELEMENT = "Material";
+std::string matFilenamePostfix("_mat.xml");
+// XML END
+
+
 Load3ds::Load3ds()
     : _minCreaseCosAngle(0.7f)
 {
@@ -33,6 +42,19 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 	_file3ds = lib3ds_file_load(fileName.c_str());
 
 	assert(_file3ds != NULL);
+
+    // Check for XML material file, create new one if it's not present
+    std::string xmlFileName = fileName;
+    xmlFileName.erase(xmlFileName.size() - 4, 4);
+    xmlFileName += matFilenamePostfix;
+
+
+	if (!isMaterialXmlFileExists(xmlFileName))
+    {
+        saveMaterialsDataToXml(xmlFileName);
+    }
+    // --------------
+
 
 	std::vector<MeshMender::Vertex> vertices;
 	std::vector<unsigned int> indices;
@@ -69,6 +91,9 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         }
 	}
 
+	XMLDocument materialDoc;
+	materialDoc.LoadFile(xmlFileName.c_str());
+
 	Lib3dsMaterial* material;
 
 	for (material = _file3ds->materials; material != NULL; material = material->next)
@@ -79,7 +104,8 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         {
             Mesh m;
 
-            m.material = loadMaterialData(material, texturesPath);
+            m.material = loadMaterialDataFromXml(&materialDoc, material->name, texturesPath);
+            //m.material = loadMaterialData(material, texturesPath);
 
             m.firstVertex = indices.size();
 
@@ -267,4 +293,161 @@ void Load3ds::loadCollisionMesh(std::vector<glm::vec3>* vertices)
 			}
 		}
 	}
+}
+
+
+bool Load3ds::isMaterialXmlFileExists(std::string fileName)
+{
+	FILE* file;
+    file = fopen(fileName.c_str(), "r");
+    if (file)
+    {
+        fclose(file);
+        return 1;
+    }
+
+    fclose(file);
+    return 0;
+}
+
+
+void Load3ds::saveMaterialsDataToXml(std::string fileName)
+{
+    XMLDocument doc;
+
+    XMLDeclaration* dec = doc.NewDeclaration();
+    doc.InsertFirstChild(dec);
+
+    XMLNode* root = doc.NewElement(XML_MATERIAL_ROOT);
+
+    Lib3dsMaterial* material;
+
+	for (material = _file3ds->materials; material != NULL; material = material->next)
+    {
+        std::string type;
+        if (strcmp(material->texture1_map.name, "") != 0 && strcmp(material->bump_map.name, "") != 0)
+            type = "normalmapping";
+        else if (strcmp(material->texture1_map.name, "") != 0 && strcmp(material->bump_map.name, "") == 0)
+            type = "solid";
+        else
+            type = "no_texture";
+
+
+        XMLElement* matElement = doc.NewElement(XML_MATERIAL_ELEMENT);
+
+        matElement->SetAttribute("type", type.c_str());
+
+        matElement->SetAttribute("name", material->name);
+
+        std::string ambientStr = toString(material->ambient[0]) + "," + toString(material->ambient[1]) + "," + toString(material->ambient[2]) + "," + toString(material->ambient[3]);
+        matElement->SetAttribute("ambient", ambientStr.c_str());
+
+        std::string diffuseStr = toString(material->diffuse[0]) + "," + toString(material->diffuse[1]) + "," + toString(material->diffuse[2]) + "," + toString(material->diffuse[3]);
+        matElement->SetAttribute("diffuse", diffuseStr.c_str());
+
+        std::string specularStr = toString(material->specular[0]) + "," + toString(material->specular[1]) + "," + toString(material->specular[2]) + "," + toString(material->specular[3]);
+        matElement->SetAttribute("specular", specularStr.c_str());
+
+        matElement->SetAttribute("diffuse_texture", material->texture1_map.name);
+
+        matElement->SetAttribute("normalmap_texture", material->bump_map.name);
+
+        std::string shininessStr = toString(material->shininess);
+        matElement->SetAttribute("shininess", shininessStr.c_str());
+
+        std::string transparencyStr = toString(material->transparency);
+        matElement->SetAttribute("transparency", transparencyStr.c_str());
+
+        std::string offsetStr = toString(material->texture1_map.offset[0]) + "," + toString(material->texture1_map.offset[1]);
+        matElement->SetAttribute("offset", offsetStr.c_str());
+
+        std::string scaleStr = toString(material->texture1_map.scale[0]) + "," + toString(material->texture1_map.scale[1]);
+        matElement->SetAttribute("scale", scaleStr.c_str());
+
+        root->InsertEndChild(matElement);
+    }
+
+    doc.InsertEndChild(root);
+
+    doc.SaveFile(fileName.c_str());
+}
+
+
+Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath)
+{
+    XMLElement* materialElement = NULL;
+    XMLElement* root = xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
+
+    for (XMLElement* child = root->FirstChildElement(XML_MATERIAL_ELEMENT); child != NULL; child = child->NextSiblingElement())
+    {
+        std::string elementName(child->Name());
+
+        const char* name = child->Attribute("name");
+        if (strcmp(name, materialName.c_str()) == 0)
+        {
+            materialElement = child;
+            break;
+        }
+    }
+
+    Material sMaterial;
+	sMaterial.name = materialName;
+
+
+    if (materialElement == NULL)
+        return sMaterial;
+
+
+	sMaterial.transparency = (float)atof(materialElement->Attribute("transparency"));
+
+	std::cout << "Material name: " << sMaterial.name << std::endl;
+    std::cout << "Material transparency: " << (float)sMaterial.transparency << std::endl;
+
+	sMaterial.ambientColor = XMLstringToVec4(materialElement->Attribute("ambient"));
+	sMaterial.diffuseColor = XMLstringToVec4(materialElement->Attribute("diffuse"));
+	sMaterial.specularColor = XMLstringToVec4(materialElement->Attribute("specular"));
+
+	sMaterial.shininess = (float)atof(materialElement->Attribute("shininess"));
+
+	sMaterial.offset = XMLstringToVec2(materialElement->Attribute("offset"));
+	sMaterial.scale = XMLstringToVec2(materialElement->Attribute("scale"));
+
+	// make Texture Name lowercase
+	std::string texStr = std::string(materialElement->Attribute("diffuse_texture"));
+
+	for(unsigned int i = 0; i < texStr.size(); i++ )
+		texStr[i] = tolower(texStr[i]);
+
+	std::string texturePath = texPath + texStr;
+
+
+	if(texStr != "")
+	    sMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(texturePath);
+
+
+	// Normal mapa
+	texStr = std::string(materialElement->Attribute("normalmap_texture"));
+
+	std::cout << "NormalMap: " << texStr << std::endl;
+
+	for(unsigned int i = 0; i < texStr.size(); i++ )
+		texStr[i] = tolower(texStr[i]);
+
+	texturePath = texPath + texStr;
+
+
+	if(texStr != "")
+        sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
+
+
+    const char* type = materialElement->Attribute("type");
+
+	if (strcmp(type, "normalmapping") == 0)
+        sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+    else if (strcmp(type, "solid") == 0)
+        sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
+    else if (strcmp(type, "no_texture") == 0)
+        sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+
+	return sMaterial;
 }
