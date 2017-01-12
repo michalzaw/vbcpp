@@ -160,6 +160,9 @@ RenderData* GraphicsManager::getRenderData()
     {
         RenderObject* object = *i;
 
+        if (!(*i)->isActive())
+            continue;
+
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
             RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),

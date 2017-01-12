@@ -37,6 +37,8 @@ using namespace tinyxml2;
 
 #include "GUI/GUIManager.h"
 #include "Graphics/Prefab.h"
+#include "Graphics/LoadTerrainModel.h"
+#include "Graphics/Roads.h"
 
 // Definicje globalne
 
@@ -299,6 +301,68 @@ void loadScene()
 }
 
 
+void loadTerrain()
+{
+    Material terrainMaterial;
+    terrainMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture("testarea/snow.jpg");
+    terrainMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture("testarea/snown.jpg");
+    terrainMaterial.shader = NORMALMAPPING_MATERIAL;
+    terrainMaterial.scale = glm::vec2(100, 100);
+    Model* terrModel = loadTerrainModel("heightmap.bmp", terrainMaterial, 2);
+    RModel* terrain = new RModel("", terrModel);
+    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
+    SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
+    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
+    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+    terrainMesh->setRestitution(0.9f);
+    terrainMesh->getRigidBody()->setFriction(1.0f);
+    terrainObject->addComponent(terrainObj);
+    terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
+
+    // Road
+    RoadLane* lanes = new RoadLane[3];
+    lanes[0].material.diffuseTexture = ResourceManager::getInstance().loadTexture("polbruk.bmp");
+    lanes[0].material.normalmapTexture = ResourceManager::getInstance().loadTexture("testarea/asphalt_n.jpg");
+    lanes[0].material.shader = NORMALMAPPING_MATERIAL;
+    lanes[0].material.scale = glm::vec2(5, 5);
+    lanes[0].r1 = -3.0f;
+    lanes[0].r2 = 3.0f;
+    lanes[0].height1 = 0.05f;
+    lanes[0].height2 = 0.05f;
+    lanes[1].material.diffuseTexture = ResourceManager::getInstance().loadTexture("testarea/snown.jpg");
+    lanes[1].material.scale = glm::vec2(1, 0.1);
+    lanes[1].r1 = 3.0f;
+    lanes[1].r2 = 3.0f;
+    lanes[1].height1 = 0.05f;
+    lanes[1].height2 = 0.15f;
+    lanes[2].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
+    lanes[2].material.normalmapTexture = ResourceManager::getInstance().loadTexture("testarea/snown.jpg");
+    lanes[2].material.shader = NORMALMAPPING_MATERIAL;
+    lanes[2].material.scale = glm::vec2(1, 1);
+    lanes[2].r1 = 3.0f;
+    lanes[2].r2 = 5.0f;
+    lanes[2].height1 = 0.15f;
+    lanes[2].height2 = 0.15;
+
+    RoadSegment segment;
+    segment.center = glm::vec2(0.0f, 0.0f);
+    segment.r = 20.0f;
+    segment.angle1 = 3.0f;
+    segment.angle2 = 6.14f;
+
+    Model* roadModel = createRoadModel(lanes, 3, segment);
+    RModel* roadModel2 = new RModel("", roadModel);
+    RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
+    SceneObject* roadSceneObject = sceneMgr->addSceneObject("road1");
+    roadSceneObject->addComponent(roadRenderObject);
+    collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
+    PhysicalBodyBvtTriangleMesh* roadMesh = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+    roadMesh->setRestitution(0.9f);
+    roadMesh->getRigidBody()->setFriction(1.0f);
+    terrainObject->addComponent(roadMesh);
+}
+
+
 // ### MAIN ###
 int main()
 {
@@ -392,7 +456,7 @@ int main()
 
 
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
+    //sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;
