@@ -18,6 +18,10 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
     _shaderList.push_back(shader);
 
+    // TREE_MATERIAL
+    RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/tree.frag");
+    _shaderList.push_back(treeShader);
+
     // GUI_IMAGE_SHADER
     RShader* guishader = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
     _shaderList.push_back(guishader);
@@ -450,6 +454,12 @@ void Renderer::render(RenderData* renderData)
             glDisable(GL_CULL_FACE);
             i->getTransformMatrices().transformMatrix = glm::translate(camera->getPosition());
         }
+        if (mesh->material.shader == TREE_MATERIAL)
+        {
+            glDisable(GL_BLEND);
+            shader->setUniform("n", -camera->getDirection());
+            shader->setUniform("CameraPositionWorldspace", camera->getPosition());
+        }
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
         glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
@@ -512,6 +522,11 @@ void Renderer::render(RenderData* renderData)
         }
         if (mesh->material.shader == SKY_MATERIAL)
             glEnable(GL_CULL_FACE);
+
+        if (mesh->material.shader == TREE_MATERIAL)
+        {
+            glEnable(GL_BLEND);
+        }
     }
 
 

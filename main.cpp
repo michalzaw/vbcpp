@@ -426,6 +426,13 @@ int main()
     terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);
 
+    RModel* treeModel = ResourceManager::getInstance().loadModel("testarea/iglak.3ds", "testarea/");
+    treeModel->getMesh(0)->material.diffuseTexture->setAnisotropyFiltering(true, 4.0f);
+    SceneObject* treeObj = sceneMgr->addSceneObject("tree");
+    RenderObject* treeRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(treeModel));
+    treeObj->addComponent(treeRender);
+    treeObj->setPosition(-10.0f, 4.371f, -5.0f);
+
     //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
     collidesWith = COL_TERRAIN | COL_BUS;
@@ -480,7 +487,7 @@ int main()
 
 
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
+    //sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;

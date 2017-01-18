@@ -448,6 +448,8 @@ Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string mate
         sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
     else if (strcmp(type, "no_texture") == 0)
         sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+    else if (strcmp(type, "tree") == 0)
+        sMaterial.shader = TREE_MATERIAL;
 
 	return sMaterial;
 }
