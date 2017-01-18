@@ -19,6 +19,7 @@ struct RoadLane
     Material material;
     float r1;
     float r2;
+    float width;
     float height1;
     float height2;
 

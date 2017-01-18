@@ -35,6 +35,21 @@ class PhysicalBody : public Component
 
         void update();
 
+        /*
+        void changedTransform(glm::vec3 position, glm::vec3 rotation)
+        {
+            btVector3 btPos(position.x, position.y, position.z);
+
+            btTransform transf;
+            transf.setOrigin(btPos);
+
+
+            btQuaternion quat(rotation.x, rotation.y, rotation.z, 1);
+            transf.setRotation(quat);
+
+
+        }*/
+
     protected:
         std::unique_ptr<btRigidBody>            _rigidBody;
         std::unique_ptr<btCollisionShape>       _collShape;

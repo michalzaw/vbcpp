@@ -213,6 +213,7 @@
 		<Unit filename="Physics/PhysicalBodyConvexHull.hpp" />
 		<Unit filename="Physics/PhysicalBodyCylinder.cpp" />
 		<Unit filename="Physics/PhysicalBodyCylinder.hpp" />
+		<Unit filename="Physics/PhysicalBodyHeightmap.h" />
 		<Unit filename="Physics/PhysicalBodySphere.cpp" />
 		<Unit filename="Physics/PhysicalBodySphere.hpp" />
 		<Unit filename="Physics/PhysicalBodyStaticPlane.cpp" />

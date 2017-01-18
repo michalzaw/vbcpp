@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Scene>
+	<Description author="" />
+	
+	<Terrain heightmap="test_terrain.bmp" texture="grass_2048.jpg" normalmap="grass_2048.jpg" textureScale="100,100" />
+	
+	<Objects>
+		<Object name="crate" position="-10,3,-10" rotation="0,0,0" />
+		<Object name="crate" position="10,3,-10" rotation="0,0,0" />
+		<Object name="domek" position="20,0,20" rotation="0,0,0" />
+		<Object name="domek" position="20,0,40" rotation="0,0,0" />
+		<Object name="domek" position="20,0,60" rotation="0,0,0" />
+	</Objects>
+	
+</Scene>

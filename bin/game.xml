@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<game>
-	<resolution x="1024" y="768" />
+<Game>
+	<Resolution x="1024" y="768" />
 
-	<map model="testarea/test_area_n.3ds" texturePath="testarea/" />
+
+	<Map name="Test" />
 	
-	<bus model="h9" />
+	<Bus model="h9" />
 
-</game>
+</Game>

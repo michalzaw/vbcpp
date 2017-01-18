@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.55f), _steerStep(0.2f),
+_maxSteerAngle(0.55f), _steerStep(0.5f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
@@ -59,7 +59,7 @@ Bus::~Bus()
 
 void Bus::loadXMLdata(std::string busname)
 {
-    std::string filename = busname + "/config.xml";
+    std::string filename = "Buses/" + busname + "/config.xml";
 
     XMLDocument doc;
     doc.LoadFile( filename.c_str() );
@@ -85,7 +85,7 @@ void Bus::loadXMLdata(std::string busname)
 
     glm::vec3 busPosition = glm::vec3(0,0,0);
 
-    std::string texturePath = busname + "/";
+    std::string texturePath = "Buses/" + busname + "/";
 
     _sceneObject = _sMgr->addSceneObject(sObjName);
 
@@ -118,7 +118,7 @@ void Bus::loadXMLdata(std::string busname)
             std::cout << "XML: Body data" << std::endl;
 
             std::string modelFile = std::string(child->Attribute("model"));
-            std::string modelPath = busname + "/" + modelFile;
+            std::string modelPath = "Buses/" + busname + "/" + modelFile;
             texturePath += std::string(child->Attribute("textures")) + "/";
 
             busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
@@ -192,7 +192,7 @@ void Bus::loadXMLdata(std::string busname)
 
             btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
 
-            std::string modelPath = busname + "/" + wheelModel;
+            std::string modelPath = "Buses/" + busname + "/" + wheelModel;
             RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
             RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel));
 
@@ -260,7 +260,7 @@ void Bus::loadXMLdata(std::string busname)
 
                 //doorObj->getTransform()->setPosition(relativePos);
 
-                std::string modelPath = busname + "/" + doorModel;
+                std::string modelPath = "Buses/" + busname + "/" + doorModel;
 
                 RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
                 RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr));
@@ -311,7 +311,7 @@ void Bus::loadXMLdata(std::string busname)
                 SceneObject* armObj = _sMgr->addSceneObject(armName);
                 armObj->setPosition(armRelPos);
 
-                std::string armPath = busname + "/" + armModel;
+                std::string armPath = "Buses/" + busname + "/" + armModel;
 
                 RModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
                 RenderObject* armRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm));
@@ -345,7 +345,7 @@ void Bus::loadXMLdata(std::string busname)
                 SceneObject* arm2Obj = _sMgr->addSceneObject(arm2Name);
                 arm2Obj->setPosition(arm2RelPos);
 
-                std::string arm2Path = busname + "/" + arm2Model;
+                std::string arm2Path = "Buses/" + busname + "/" + arm2Model;
 
                 RModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
                 RenderObject* arm2Render = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2));
@@ -376,7 +376,7 @@ void Bus::loadXMLdata(std::string busname)
                 SceneObject* doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(relativePos);
 
-                std::string doorPath = busname + "/" + doorModel;
+                std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
                 RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
                 RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(door));
@@ -415,7 +415,7 @@ void Bus::loadXMLdata(std::string busname)
             std::cout << "XML: Steering wheel" << std::endl;
 
             std::string modelFile = std::string(child->Attribute("model"));
-            std::string modelPath = busname + "/" + modelFile;
+            std::string modelPath = "Buses/" + busname + "/" + modelFile;
 
             _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
 
@@ -719,7 +719,7 @@ void Bus::updatePhysics(float dt)
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.001f);
+                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.005f);
             }
         }
     }

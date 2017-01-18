@@ -37,14 +37,14 @@ Model* createRoadModel(RoadLane* roadLanes, int lanesCount, RoadSegment& segment
 
             MeshMender::Vertex vertex1;
             vertex1.pos = glm::vec3(p1.x, roadLanes[i].height1, p1.y);
-            vertex1.s = p1.x;//1.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;//
-            vertex1.t = p1.y;//j / 2.0f * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;//
+            vertex1.s = p1.x; //p1.x; //0.0f * roadLanes[i].material.scale.x; //p1.x * roadLanes[i].material.scale.x; // + roadLanes[i].material.offset.x;//
+            vertex1.t = p1.y; //p1.y; //0.0f * roadLanes[i].material.scale.y; //p1.y * roadLanes[i].material.scale.y; //j / 2.0f * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;//
             vertex1.normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
             MeshMender::Vertex vertex2;
             vertex2.pos = glm::vec3(p2.x, roadLanes[i].height2, p2.y);
-            vertex2.s = p2.x;//0.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;//
-            vertex2.t = p2.y;//j / 2.0f * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;//
+            vertex2.s = p2.x; //1.0f * roadLanes[i].material.scale.x; //p2.x * roadLanes[i].material.scale.x;// + roadLanes[i].material.offset.x;//
+            vertex2.t = p2.y; //1.0f * roadLanes[i].material.scale.y; //p2.y * roadLanes[i].material.scale.y;// + roadLanes[i].material.offset.y;//
             vertex2.normal = glm::vec3(0.0f, 0.0f, 0.0f);
 
             lanesVerticesArray[i].push_back(vertex1);   //lanesVerticesArray[i][j];

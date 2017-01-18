@@ -56,9 +56,9 @@ void Engine::loadData(std::string filename)
     if (engDesc == nullptr) std::cout << "Description element not found" << std::endl;
 
     // Load file description
-    std::string author(engDesc->Attribute("Author"));
-    std::string model(engDesc->Attribute("Model"));
-    std::string comment(engDesc->Attribute("Comment"));
+    std::string author(engDesc->Attribute("author"));
+    std::string model(engDesc->Attribute("name"));
+    std::string comment(engDesc->Attribute("comment"));
 
     XMLElement* pointList = engElement->FirstChildElement("Points");
 

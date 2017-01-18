@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Gearbox>
-	<Description Author="Unknown" Model="Ikarus 260" Comment="Ikarus 260 gearbox" />
+	<Description author="Unknown" name="Ikarus 260" comment="Ikarus 260 gearbox" />
 
 	<Gears count="6">
 		<Gear>-4.84</Gear>

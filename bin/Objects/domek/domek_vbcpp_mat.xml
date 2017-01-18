@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="solid" name="Material #10" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BKCIK.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #12" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="DSK2.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #13" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="DSK2.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #14" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FCT.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #16" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="DSK2.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #25" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BKFRO.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #37" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BKFRO.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #50" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BKCIK.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #88" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FRNTDK.JPG" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

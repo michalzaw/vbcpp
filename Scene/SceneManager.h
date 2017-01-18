@@ -14,14 +14,14 @@ class SceneManager
 {
     private:
         GraphicsManager*    _graphicsManager;
-        //PhysicsManager*     _physicsManager;
+        PhysicsManager*     _physicsManager;
 
         std::list<SceneObject*> _sceneObjects;
 
         Skybox* _sky;
 
     public:
-        SceneManager();
+        SceneManager(PhysicsManager* pMgr);
         ~SceneManager();
 
         //GraphicsManager*    getGraphicsManager();
@@ -37,6 +37,11 @@ class SceneManager
 
         void addSky(RTextureCubeMap* texture);
 
+
+
+        void loadScene(std::string filename);
+
+        void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0));
 };
 
 

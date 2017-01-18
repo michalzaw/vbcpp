@@ -56,9 +56,9 @@ void Gearbox::loadData(std::string filename)
     if (gbxDesc == nullptr) std::cout << "Description element not found" << std::endl;
 
     // Load file description
-    std::string author(gbxDesc->Attribute("Author"));
-    std::string model(gbxDesc->Attribute("Model"));
-    std::string comment(gbxDesc->Attribute("Comment"));
+    std::string author(gbxDesc->Attribute("author"));
+    std::string model(gbxDesc->Attribute("name"));
+    std::string comment(gbxDesc->Attribute("comment"));
 
     // Search for gear list element
     XMLElement* gearList = gbxElement->FirstChildElement("Gears");

@@ -3,7 +3,7 @@
 
 #include "PhysicalBody.hpp"
 
-class PhysicalBodySphere : public PhysicalBody
+class PhysicalBodySphere : virtual public PhysicalBody
 {
     public:
         PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos);

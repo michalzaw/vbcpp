@@ -10,7 +10,7 @@ enum ShapeAlign
     Z_AXIS
 };
 
-class PhysicalBodyCylinder : public PhysicalBody
+class PhysicalBodyCylinder : virtual public PhysicalBody
 {
     public:
         PhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align = Y_AXIS);
