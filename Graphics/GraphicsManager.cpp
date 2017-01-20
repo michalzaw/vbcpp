@@ -6,6 +6,7 @@
 static std::unique_ptr<GraphicsManager> gmInstance;
 
 GraphicsManager::GraphicsManager()
+    : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f)
 {
 
 }
@@ -141,6 +142,43 @@ void GraphicsManager::removeLight(Light* light)
             return;
         }
     }
+}
+
+
+void GraphicsManager::setWindDirection(glm::vec3 direction)
+{
+    _windDirection = direction;
+}
+
+
+void GraphicsManager::setWindVelocity(float velocity)
+{
+    _windVelocity = velocity;
+}
+
+
+glm::vec3 GraphicsManager::getWindDirection()
+{
+    return _windDirection;
+}
+
+
+float GraphicsManager::getWindVelocity()
+{
+    return _windVelocity;
+}
+
+
+glm::vec3 GraphicsManager::getWindVector()
+{
+    return _windVector;
+}
+
+
+void GraphicsManager::update(float deltaTime)
+{
+    _windValue += _windVelocity * deltaTime;
+    _windVector = _windDirection * sinf(_windValue);
 }
 
 

@@ -26,6 +26,11 @@ class GraphicsManager
         std::vector<CameraStatic*>  _cameras;
         std::list<Light*>           _lights;
 
+        glm::vec3   _windDirection;
+        float       _windVelocity;
+        float       _windValue;
+        glm::vec3   _windVector;
+
         GraphicsManager();
 
     public:
@@ -50,6 +55,17 @@ class GraphicsManager
         void removeRenderObject(RenderObject* object);
         void removeCamera(CameraStatic* camera);
         void removeLight(Light* light);
+
+
+        void setWindDirection(glm::vec3 direction);
+        void setWindVelocity(float velocity);
+
+        glm::vec3   getWindDirection();
+        float       getWindVelocity();
+        glm::vec3   getWindVector();
+
+
+        void update(float deltaTime);
 
 
         RenderData* getRenderData();
