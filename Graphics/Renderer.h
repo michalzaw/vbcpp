@@ -9,6 +9,7 @@
 #include "OGLDriver.h"
 #include "RenderData.h"
 #include "RShader.h"
+#include "GraphicsManager.h"
 
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"

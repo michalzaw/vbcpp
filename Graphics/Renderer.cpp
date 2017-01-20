@@ -457,8 +457,12 @@ void Renderer::render(RenderData* renderData)
         if (mesh->material.shader == TREE_MATERIAL)
         {
             glDisable(GL_BLEND);
-            shader->setUniform("n", -camera->getDirection());
+            //shader->setUniform("n",);
             shader->setUniform("CameraPositionWorldspace", camera->getPosition());
+
+            static float d = 0;
+            d += 0.01;
+            shader->setUniform("d", GraphicsManager::getInstance().getWindVector());//glm::vec3(0.5f * sinf(d), 0.0f, 0.0f));
         }
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();

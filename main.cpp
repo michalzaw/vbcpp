@@ -414,6 +414,10 @@ int main()
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
 
 
+	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
+	GraphicsManager::getInstance().setWindVelocity(0.4f);
+
+
     /* terrain */
     //RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
     RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
@@ -487,7 +491,7 @@ int main()
 
 
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    //sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
+    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;
@@ -591,6 +595,7 @@ int main()
             readInput(win->getWindow(), deltaTime);
             physMgr->simulate(deltaTime);
             bus->updatePhysics(deltaTime);
+            GraphicsManager::getInstance().update(deltaTime);
 
             frameTime -= deltaTime;
 
