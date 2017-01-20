@@ -442,6 +442,13 @@ int main()
     treeObj->addComponent(treeRender);
     treeObj->setPosition(-10.0f, 4.371f, -5.0f);
 
+    RModel* treeModel = ResourceManager::getInstance().loadModel("testarea/iglak.3ds", "testarea/");
+    treeModel->getMesh(0)->material.diffuseTexture->setAnisotropyFiltering(true, 4.0f);
+    SceneObject* treeObj = sceneMgr->addSceneObject("tree");
+    RenderObject* treeRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(treeModel));
+    treeObj->addComponent(treeRender);
+    treeObj->setPosition(-10.0f, 4.371f, -5.0f);
+
     //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
 
