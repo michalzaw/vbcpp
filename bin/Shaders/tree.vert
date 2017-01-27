@@ -17,10 +17,11 @@ out vec3 Normal;
 
 void main()
 {
-	if (VertexPosition.y > 0.0f)
-		VertexPosition += d;
+	vec3 pos = VertexPosition;
+	if (pos.y > 0.0f)
+		pos += d;
 	
-	gl_Position = MVP * vec4(VertexPosition, 1.0f);
+	gl_Position = MVP * vec4(pos, 1.0f);
 
 	Position = (ModelMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;//(ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
 	TexCoord = VertexUV;

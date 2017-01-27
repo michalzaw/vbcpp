@@ -345,11 +345,14 @@ void loadTerrain()
     */
 
     // Road
-    RoadLane* lanes = new RoadLane[3];
-    lanes[0].material.diffuseTexture = ResourceManager::getInstance().loadTexture("polbruk.bmp");
-    lanes[0].material.normalmapTexture = ResourceManager::getInstance().loadTexture("polbruk_n.bmp");
+    /*RoadLane* lanes = new RoadLane[5];
+    lanes[0].material.diffuseTexture = ResourceManager::getInstance().loadTexture("road.jpg");
+    lanes[0].material.normalmapTexture = ResourceManager::getInstance().loadTexture("road_n.jpg");
     lanes[0].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[0].material.scale = glm::vec2(6, 6);
+    lanes[0].material.scale = glm::vec2(1, 0.25);
+    //lanes[0].material.scale = glm::vec2(3, 1.5);
+    lanes[0].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    lanes[0].material.shininess = 96.0f;
     lanes[0].r1 = -3.0f;
     lanes[0].r2 = 3.0f;
     lanes[0].height1 = 0.05f;
@@ -357,6 +360,8 @@ void loadTerrain()
     lanes[1].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
     lanes[1].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
     lanes[1].material.scale = glm::vec2(1, 1);
+    lanes[1].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    lanes[1].material.shininess = 96.0f;
     lanes[1].r1 = 3.0f;
     lanes[1].r2 = 3.0f;
     lanes[1].height1 = 0.05f;
@@ -365,27 +370,83 @@ void loadTerrain()
     lanes[2].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
     lanes[2].material.shader = NORMALMAPPING_MATERIAL;
     lanes[2].material.scale = glm::vec2(1, 1);
+    lanes[2].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    lanes[2].material.shininess = 96.0f;
     lanes[2].r1 = 3.0f;
     lanes[2].r2 = 5.0f;
     lanes[2].height1 = 0.15f;
     lanes[2].height2 = 0.15;
+    lanes[3].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
+    lanes[3].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
+    lanes[3].material.scale = glm::vec2(1, 1);
+    lanes[3].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    lanes[3].material.shininess = 96.0f;
+    lanes[3].r1 = -3.0f;
+    lanes[3].r2 = -3.0f;
+    lanes[3].height1 = 0.15f;
+    lanes[3].height2 = 0.05f;
+    lanes[4].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
+    lanes[4].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
+    lanes[4].material.shader = NORMALMAPPING_MATERIAL;
+    lanes[4].material.scale = glm::vec2(1, 1);
+    lanes[4].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+    lanes[4].material.shininess = 96.0f;
+    lanes[4].r1 = -5.0f;
+    lanes[4].r2 = -3.0f;
+    lanes[4].height1 = 0.15f;
+    lanes[4].height2 = 0.15;
 
     RoadSegment segment;
     segment.center = glm::vec2(10.0f, 10.0f);
-    segment.r = 10.0f;
+    segment.r = 50.0f;
     segment.angle1 = 3.0f;
     segment.angle2 = 6.14f;
+    RoadSegment segment;
+    segment.r = 50.0f;
+    segment.begin = glm::vec3(-50.0f, -3.0f, 5.0f);
+    segment.end = glm::vec3(10.0f, 4.0f, 5.0f);
+    segment.pointsCount = 60;
+    segment.interpolation = RI_COS;
+    segment.type = RST_ARC;
 
-    Model* roadModel = createRoadModel(lanes, 3, segment);
+    RoadSegment segment2;
+    segment2.r = 20.0f;
+    segment2.begin = glm::vec3(10.0f, 4.0f, 5.0f);
+    segment2.end = glm::vec3(16.0f, 4.0f, 33.0f);
+    segment2.pointsCount = 30;
+    segment2.interpolation = RI_LIN;
+    segment2.type = RST_ARC;
+
+    std::vector<RoadSegment> s;
+    s.push_back(segment);
+    s.push_back(segment2);*/
+
+    /*Model* roadModel = createRoadModel(lanes, 5, s);
     RModel* roadModel2 = new RModel("", roadModel);
     RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
     SceneObject* roadSceneObject = sceneMgr->addSceneObject("road1");
     roadSceneObject->addComponent(roadRenderObject);
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* roadMesh = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(10,0,10), COL_TERRAIN, collidesWith);
+    PhysicalBodyBvtTriangleMesh* roadMesh = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
     roadMesh->setRestitution(0.9f);
     roadMesh->getRigidBody()->setFriction(1.0f);
-    //terrainObject->addComponent(roadMesh);
+    roadSceneObject->addComponent(roadMesh);*/
+
+    /*RoadSegment segment2;
+    segment2.r = 20.0f;
+    segment2.begin = glm::vec3(10.0f, 0.0f, 10.0f);
+    segment2.end = glm::vec3(14.0f, 0.0f, 38.0f);
+
+    Model* roadModel23 = createRoadModel(lanes, 3, segment2);
+    RModel* roadModel22 = new RModel("", roadModel23);
+    RenderObject* roadRenderObject2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel22));
+    SceneObject* roadSceneObject2 = sceneMgr->addSceneObject("road1");
+    roadSceneObject2->addComponent(roadRenderObject2);
+//    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
+    PhysicalBodyBvtTriangleMesh* roadMesh2 = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel22, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+    roadMesh2->setRestitution(0.9f);
+    roadMesh2->getRigidBody()->setFriction(1.0f);
+    roadSceneObject2->addComponent(roadMesh2);*/
 }
 
 

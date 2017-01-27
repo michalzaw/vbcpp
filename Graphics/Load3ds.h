@@ -14,6 +14,7 @@
 #include "OGLDriver.h"
 #include "NVMeshMender/NVMeshMender.h"
 #include "LoadTexture.h"
+#include "LoadMaterial.h"
 
 #include "../Utils/tinyxml2.h"
 #include "../Utils/Strings.h"
@@ -37,7 +38,7 @@ class Load3ds
 
         bool isMaterialXmlFileExists(std::string fileName);
         void saveMaterialsDataToXml(std::string fileName);
-        Material loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath);
+        //Material loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath);
 
     public:
         Load3ds();

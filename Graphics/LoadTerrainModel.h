@@ -9,9 +9,10 @@
 #include "Model.h"
 #include "Material.h"
 #include "NVMeshMender/NVMeshMender.h"
+#include "LoadMaterial.h"
 
 
-Model* loadTerrainModel(const char* heightmapFilename, Material& material, float maxHeight)
+/*Model* loadTerrainModel(const char* heightmapFilename, Material& material, float maxHeight)
 {
     const float cellSize = 1.0f;
 
@@ -132,12 +133,18 @@ Model* loadTerrainModel(const char* heightmapFilename, Material& material, float
 
 
     return model;
-}
+}*/
 
 
 // Mesh mender
-/*Model* loadTerrainModel(const char* heightmapFilename, Material& material, float maxHeight)
+//Model* loadTerrainModel(const char* heightmapFilename, Material& material, float maxHeight)
+Model* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight)
 {
+    MaterialLoader matLoader;
+    matLoader.openFile(materialFileName.c_str());
+    Material material = matLoader.loadMaterial(materialName, texturePath);
+
+
     const float cellSize = 1.0f;
 
     int width, height, chanels;
@@ -302,7 +309,7 @@ Model* loadTerrainModel(const char* heightmapFilename, Material& material, float
 
 
     return model;
-}*/
+}
 
 
 #endif // LOADTERRAINMODEL_H_INCLUDED

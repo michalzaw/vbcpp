@@ -6,12 +6,6 @@
 
 using namespace tinyxml2;
 
-// XML MATERIAL FILE DEFINITIONS
-const char* XML_MATERIAL_ROOT = "Materials";
-const char* XML_MATERIAL_ELEMENT = "Material";
-std::string matFilenamePostfix("_mat.xml");
-// XML END
-
 
 Load3ds::Load3ds()
     : _minCreaseCosAngle(0.7f)
@@ -44,9 +38,10 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
 	assert(_file3ds != NULL);
 
     // Check for XML material file, create new one if it's not present
-    std::string xmlFileName = fileName;
+    /*std::string xmlFileName = fileName;
     xmlFileName.erase(xmlFileName.size() - 4, 4);
-    xmlFileName += matFilenamePostfix;
+    xmlFileName += matFilenamePostfix;*/
+    std::string xmlFileName = MaterialLoader::createMaterialFileName(fileName);
 
 
 	if (!isMaterialXmlFileExists(xmlFileName))
@@ -91,8 +86,10 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         }
 	}
 
-	XMLDocument materialDoc;
-	materialDoc.LoadFile(xmlFileName.c_str());
+	/*XMLDocument materialDoc;
+	materialDoc.LoadFile(xmlFileName.c_str());*/
+	MaterialLoader matLoader;
+	matLoader.openFile(xmlFileName.c_str());
 
 	Lib3dsMaterial* material;
 
@@ -104,7 +101,7 @@ Model* Load3ds::loadModel(std::string fileName, std::string texturesPath)
         {
             Mesh m;
 
-            m.material = loadMaterialDataFromXml(&materialDoc, material->name, texturesPath);
+            m.material = matLoader.loadMaterial(material->name, texturesPath);//loadMaterialDataFromXml(&materialDoc, material->name, texturesPath);
             //m.material = loadMaterialData(material, texturesPath);
 
             m.firstVertex = indices.size();
@@ -373,7 +370,7 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
 }
 
 
-Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath)
+/*Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string materialName, std::string texPath)
 {
     XMLElement* materialElement = NULL;
     XMLElement* root = xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
@@ -452,4 +449,4 @@ Material Load3ds::loadMaterialDataFromXml(XMLDocument* xmlFile, std::string mate
         sMaterial.shader = TREE_MATERIAL;
 
 	return sMaterial;
-}
+}*/

@@ -4,7 +4,7 @@
 <Scene>
 	<Description author="" />
 	
-	<Terrain heightmap="test_terrain.bmp" texture="grass_2048.jpg" normalmap="grass_2048.jpg" textureScale="100,100" />
+	<Terrain heightmap="test_terrain.bmp" material="terrain" />
 	
 	<Objects>
 		<Object name="crate" position="-10,3,-10" rotation="0,0,0" />
@@ -12,7 +12,27 @@
 		<Object name="domek" position="20,0,20" rotation="0,0,0" />
 		<Object name="domek" position="20,0,40" rotation="0,0,0" />
 		<Object name="domek" position="20,0,60" rotation="0,0,0" />
-		<Object name="iglak" position="-10,4,-5" rotation="0,0,0" />
+		<Object name="iglak" position="-10,3.5,-5" rotation="0,0,0" />
 	</Objects>
+	
+	<Roads>
+		<Profile name="profile1">
+			<Lane material="asfalt" r1="-3" r2="3" height1="0.05" height2="0.05" />
+			<Lane material="kostka" r1="3" r2="3" height1="0.05" height2="0.15" />
+			<Lane material="kostka" r1="3" r2="5" height1="0.15" height2="0.15" />
+			<Lane material="kostka" r1="-3" r2="-3" height1="0.15" height2="0.05" />
+			<Lane material="kostka" r1="-5" r2="-3" height1="0.15" height2="0.15" />
+		</Profile>
+		
+		<Road name="road1" profile="profile1">
+			<Segment type="line" radius="0" beginPoint="0,0,100" endPoint="0,0,-10" points="60" interpolation="lin" />
+			<Segment type="arc" radius="55" beginPoint="0,0,-10" endPoint="60,5,-65" points="60" interpolation="cos" />
+		</Road>
+		
+		<Road name="road2" profile="profile1">
+			<Segment type="line" radius="0" beginPoint="-80,0,5.0" endPoint="-100,5,30" points="60" interpolation="cos" />
+			<Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80.0" points="60" interpolation="lin" />
+		</Road>
+	</Roads>
 	
 </Scene>

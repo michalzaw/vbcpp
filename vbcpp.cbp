@@ -169,6 +169,8 @@
 		<Unit filename="Graphics/Light.h" />
 		<Unit filename="Graphics/Load3ds.cpp" />
 		<Unit filename="Graphics/Load3ds.h" />
+		<Unit filename="Graphics/LoadMaterial.cpp" />
+		<Unit filename="Graphics/LoadMaterial.h" />
 		<Unit filename="Graphics/LoadShader.cpp" />
 		<Unit filename="Graphics/LoadShader.h" />
 		<Unit filename="Graphics/LoadTerrainModel.h" />

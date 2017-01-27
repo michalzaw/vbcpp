@@ -13,8 +13,10 @@
 #include "Model.h"
 #include "NVMeshMender/NVMeshMender.h"
 
+#include "../Utils/Math.h"
 
-struct RoadLane
+
+/*struct RoadLane
 {
     Material material;
     float r1;
@@ -33,10 +35,52 @@ struct RoadSegment
     float angle1;
     float angle2;
 
+};*/
+
+
+struct RoadLane
+{
+    Material material;
+    float r1;
+    float r2;
+    float height1;
+    float height2;
+
 };
 
 
-Model* createRoadModel(RoadLane* roadLanes, int lanesCount, RoadSegment& segment);
+enum RoadInterpolation
+{
+    RI_LIN,
+    RI_COS
+
+};
+
+enum RoadSegmetType
+{
+    RST_ARC,
+    RST_LINE
+
+};
+
+
+struct RoadSegment
+{
+    RoadSegmetType type;
+    float r;
+    glm::vec3 begin;
+    glm::vec3 end;
+    int pointsCount;
+    RoadInterpolation interpolation;
+
+    RoadSegment()
+        : type(RST_LINE), r(0), begin(0.0f, 0.0f, 0.0f), end(0.0f, 0.0f, 0.0f), pointsCount(10), interpolation(RI_LIN)
+    {}
+
+};
+
+
+Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vector<RoadSegment> segments);
 
 
 #endif // ROADS_H_INCLUDED

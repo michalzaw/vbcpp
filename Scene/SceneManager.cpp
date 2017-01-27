@@ -140,24 +140,28 @@ void SceneManager::loadScene(std::string filename)
     }
 
     std::string terrainHeightmap(terrElement->Attribute("heightmap"));
-    std::string terrainTexture(terrElement->Attribute("texture"));
-    std::string terrainNormalmap(terrElement->Attribute("normalmap"));
+    //std::string terrainTexture(terrElement->Attribute("texture"));
+    //std::string terrainNormalmap(terrElement->Attribute("normalmap"));
+    std::string materialName(terrElement->Attribute("material"));
 
     std::cout << "*** TERRAIN DATA ***" << std::endl;
     std::cout << "Heightmap: " << terrainHeightmap << std::endl;
-    std::cout << "Texture: " << terrainTexture << std::endl;
-    std::cout << "Normalmap: " << terrainNormalmap << std::endl;
+    //std::cout << "Texture: " << terrainTexture << std::endl;
+    //std::cout << "Normalmap: " << terrainNormalmap << std::endl;
+    std::cout << "Material: " << materialName << std::endl;
 
     // load terrain here
 
-    Material terrainMaterial;
+    /*Material terrainMaterial;
     terrainMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(dirPath + terrainTexture);
     terrainMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(dirPath + terrainNormalmap);
     terrainMaterial.shader = NORMALMAPPING_MATERIAL;
     terrainMaterial.scale = glm::vec2(100, 100);
+    terrainMaterial.shininess = 96.0f;*/
 
     std::string heightmapFullPath = dirPath + terrainHeightmap;
-    Model* terrModel = loadTerrainModel(heightmapFullPath.c_str(), terrainMaterial, 20);
+    std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
+    Model* terrModel = loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
     RModel* terrain = new RModel("", terrModel);
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = addSceneObject("terrain");
@@ -190,6 +194,98 @@ void SceneManager::loadScene(std::string filename)
         loadObject(name, position);
 
         objectElement = objectElement->NextSiblingElement("Object");
+    }
+
+
+    // Roads
+    MaterialLoader matLoader;
+    matLoader.openFile(materialFullPath.c_str());
+
+    XMLElement* roads = scnElement->FirstChildElement("Roads");
+std::cout << "1111\n\n\n";
+    // Profiles
+    std::map<std::string, std::vector<RoadLane>> profiles;
+std::cout << "22222\n\n\n\n";
+    XMLElement* profileElement = roads->FirstChildElement("Profile");
+    std::cout << "3333\n\n\n\n";
+    while (profileElement != nullptr)
+    {
+        std::string name(profileElement->Attribute("name"));
+
+        std::cout << "==> ROAD PROFILE" << std::endl;
+        std::cout << "Name: " << name << std::endl;
+
+        profiles.insert(std::make_pair(name, std::vector<RoadLane>()));
+        //std::map<int, std::vector<RoadLane>>::iterator profile = profiles.find(id);
+
+        XMLElement* laneElement = profileElement->FirstChildElement("Lane");
+        while (laneElement != nullptr)
+        {
+            RoadLane lane;
+            lane.material = matLoader.loadMaterial(laneElement->Attribute("material"), dirPath);
+            lane.r1 = toFloat(laneElement->Attribute("r1"));
+            lane.r2 = toFloat(laneElement->Attribute("r2"));
+            lane.height1 = toFloat(laneElement->Attribute("height1"));
+            lane.height2 = toFloat(laneElement->Attribute("height2"));
+
+            profiles[name].push_back(lane);
+
+            laneElement = laneElement->NextSiblingElement("Lane");
+        }
+
+        profileElement = profileElement->NextSiblingElement("Profile");
+    }
+
+    // Road
+    XMLElement* roadElement = roads->FirstChildElement("Road");
+    while (roadElement != nullptr)
+    {
+        std::string name = roadElement->Attribute("name");
+        std::string profileName = roadElement->Attribute("profile");
+
+        std::cout << "==> ROAD" << std::endl;
+        std::cout << "profile name: " << profileName << std::endl;
+
+        std::vector<RoadSegment> segments;
+
+        XMLElement* segmentElement = roadElement->FirstChildElement("Segment");
+        while (segmentElement != nullptr)
+        {
+            RoadSegment segment;
+
+            const char* type = segmentElement->Attribute("type");
+            if (strcmp(type, "arc") == 0)
+                segment.type = RST_ARC;
+            else if (strcmp(type, "line"))
+                segment.type = RST_LINE;
+            segment.r = toFloat(segmentElement->Attribute("radius"));
+            segment.begin = XMLstringToVec3(segmentElement->Attribute("beginPoint"));
+            segment.end = XMLstringToVec3(segmentElement->Attribute("endPoint"));
+            segment.pointsCount = toInt(segmentElement->Attribute("points"));
+            const char* interpolation = segmentElement->Attribute("interpolation");
+            if (strcmp(interpolation, "lin") == 0)
+                segment.interpolation = RI_LIN;
+            else if (strcmp(interpolation, "cos") == 0)
+                segment.interpolation = RI_COS;
+
+            segments.push_back(segment);
+
+            segmentElement = segmentElement->NextSiblingElement("Segment");
+        }
+
+        // create road
+        Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
+        RModel* roadModel2 = new RModel("", roadModel);
+        RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
+        SceneObject* roadSceneObject = addSceneObject(name);
+        roadSceneObject->addComponent(roadRenderObject);
+        int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
+        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+        roadMesh->setRestitution(0.9f);
+        roadMesh->getRigidBody()->setFriction(1.0f);
+        roadSceneObject->addComponent(roadMesh);
+
+        roadElement = roadElement->NextSiblingElement("Road");
     }
 }
 
