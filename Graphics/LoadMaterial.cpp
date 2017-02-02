@@ -114,6 +114,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
     else if (strcmp(type, "tree") == 0)
         sMaterial.shader = TREE_MATERIAL;
+    else if (strcmp(type, "alpha_test") == 0)
+        sMaterial.shader = ALPHA_TEST_MATERIAL;
 
     return sMaterial;
 }

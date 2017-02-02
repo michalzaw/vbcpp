@@ -85,9 +85,13 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
 
 
 // Ładowanie shaderów
-RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath)
+RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines)
 {
     std::string path = vertexPath + ";" + fragmPath;
+    for (int i = 0; i < defines.size(); ++i)
+    {
+        path += ";" + defines[i];
+    }
 
     // Sprawdzamy czy zasob juz istnieje
     std::list<std::unique_ptr<Resource>>::iterator it;
@@ -104,7 +108,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
-    std::unique_ptr<Resource> shader ( new RShader(path, ::loadShader(vertexPath.c_str(), fragmPath.c_str())) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines)) );
 
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
 

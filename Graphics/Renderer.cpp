@@ -5,9 +5,11 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
 //    : _OGLDriver(driver)
     : _screenWidth(screenWidth), _screenHeight(screenHeight)
 {
+    std::vector<std::string> defines;
     // Load shaders
     // SOLID_MATERIAL
-	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag");
+    defines.push_back("SOLID");
+	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(shdr1);
 
     // NOTEXTURE_MATERIAL
@@ -15,11 +17,23 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     _shaderList.push_back(shdr2);
 
     // NORMALMAPPING_MATERIAL
-    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader_n.vert", "Shaders/shader_n.frag");
+    defines.clear();
+    defines.push_back("NORMALMAPPING");
+    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(shader);
 
+    // ALPHA_TEST_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    RShader* alphaTestShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+    _shaderList.push_back(alphaTestShader);
+
     // TREE_MATERIAL
-    RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/tree.frag");
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(treeShader);
 
     // GUI_IMAGE_SHADER
@@ -464,6 +478,10 @@ void Renderer::render(RenderData* renderData)
             d += 0.01;
             shader->setUniform("d", GraphicsManager::getInstance().getWindVector());//glm::vec3(0.5f * sinf(d), 0.0f, 0.0f));
         }
+        if (mesh->material.shader == ALPHA_TEST_MATERIAL)
+        {
+            glDisable(GL_BLEND);
+        }
 
         //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
         glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
@@ -527,7 +545,7 @@ void Renderer::render(RenderData* renderData)
         if (mesh->material.shader == SKY_MATERIAL)
             glEnable(GL_CULL_FACE);
 
-        if (mesh->material.shader == TREE_MATERIAL)
+        if (mesh->material.shader == TREE_MATERIAL || mesh->material.shader == ALPHA_TEST_MATERIAL)
         {
             glEnable(GL_BLEND);
         }
