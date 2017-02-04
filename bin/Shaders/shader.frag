@@ -42,6 +42,10 @@ const int MAX_SPOT_COUNT = 8;
 in vec3 Position;
 in vec2 TexCoord;
 in vec3 Normal;
+#ifdef NORMALMAPPING
+in vec3 TangentWorldspace;
+in vec3 BitangentWorldspace;
+#endif
 
 out vec4 FragmentColor;
 
@@ -63,6 +67,9 @@ uniform vec4 matSpecular;
 uniform float Transparency;
 uniform sampler2D Texture;
 uniform float SpecularPower;
+#ifdef NORMALMAPPING
+uniform sampler2D NormalmapTexture;
+#endif
 
 uniform vec3 CameraPosition;
 
@@ -118,25 +125,42 @@ vec4 CalculateSpotLight(SpotLight light, vec3 normal)
 
 void main()
 {
-	vec3 n = normalize(Normal);
+#ifdef SOLID
+	vec3 normal = normalize(Normal);
+#endif
+	
+#ifdef NORMALMAPPING
+	vec3 n = normalize(texture2D(NormalmapTexture, TexCoord).rgb * 2.0f - 1.0f);
+	
+	mat3 TBN = mat3(normalize(TangentWorldspace),
+					normalize(BitangentWorldspace),
+					normalize(Normal));
+	
+	vec3 normal = normalize(TBN * n);
+#endif
 	
 	textureColor = texture2D(Texture, TexCoord);
+	
+#ifdef ALPHA_TEST
+	if (textureColor.a < 0.1f)
+		discard;
+#endif
 	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
 	for (int i = 0; i < Lights.DirCount; ++i)
 	{
-		LightsColor += CalculateLight(Lights.DirLights[i].Base, n, Lights.DirLights[i].Direction);
+		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction);
 	}
 	
 	for (int i = 0; i < Lights.PointCount; ++i)
 	{
-		LightsColor += CalculatePointLight(Lights.PointLights[i], n);
+		LightsColor += CalculatePointLight(Lights.PointLights[i], normal);
 	}
 
 	for (int i = 0; i < Lights.SpotCount; ++i)
 	{
-		LightsColor += CalculateSpotLight(Lights.SpotLights[i], n);
+		LightsColor += CalculateSpotLight(Lights.SpotLights[i], normal);
 	}
 
 	//vec4 amb = AmbientColor * matAmbient;

@@ -23,7 +23,7 @@ class ResourceManager
 
         RTexture2D* loadTexture(std::string path);
 
-        RShader* loadShader(std::string vertexPath, std::string fragmPath);
+        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>());
 
         RModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
 
