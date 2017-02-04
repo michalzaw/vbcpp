@@ -32,7 +32,7 @@
 		
 		<Road name="road2" profile="profile1">
 			<Segment type="line" radius="0" beginPoint="-80,0,5.0" endPoint="-100,5,30" points="60" interpolation="cos" />
-			<Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80.0" points="60" interpolation="lin" />
+			<Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80.0" points="60" interpolation="cos" />
 		</Road>
 	</Roads>
 	

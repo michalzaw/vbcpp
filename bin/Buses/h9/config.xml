@@ -9,11 +9,11 @@
 
 	<body model="h9.3ds" textures="PKS" mass="9.6" /> <!-- mass in tons -->
 
-	<wheel name="wheel1" side="right" steering="1" powered="0" model="fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
-	<wheel name="wheel2" side="left" steering="1" powered="0" model="fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
+	<wheel name="wheel1" side="right" steering="1" powered="0" model="fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00051" brakeForce="2.0"/>
+	<wheel name="wheel2" side="left" steering="1" powered="0" model="fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="198.0" damping="0.00051" brakeForce="2.0"/>
 	
-	<wheel name="wheel3" side="right" steering="0" powered="1" model="rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.85" />
-	<wheel name="wheel4" side="left" steering="0" powered="1" model="rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.85" />
+	<wheel name="wheel3" side="right" steering="0" powered="1" model="rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00055" brakeForce="0.85" />
+	<wheel name="wheel4" side="left" steering="0" powered="1" model="rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00055" brakeForce="0.85" />
 	
 	<door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" />
 	<door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" />
