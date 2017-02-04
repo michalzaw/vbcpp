@@ -100,8 +100,10 @@ SceneObject* SceneManager::getSceneObject(std::string name)
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
         if ((*i)->getName() == name)
-            delete *i;
+            return *i;
     }
+
+    return 0;
 }
 
 
@@ -166,7 +168,7 @@ void SceneManager::loadScene(std::string filename)
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = addSceneObject("terrain");
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), btVector3(0,0,0), COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
     terrainObject->addComponent(terrainObj);
@@ -191,7 +193,7 @@ void SceneManager::loadScene(std::string filename)
         std::cout << "Position: " << cPosition << std::endl;
         std::cout << "Rotation: " << cRotation << std::endl;
 
-        loadObject(name, position);
+        loadObject(name, position, rotation);
 
         objectElement = objectElement->NextSiblingElement("Object");
     }
@@ -280,7 +282,7 @@ std::cout << "22222\n\n\n\n";
         SceneObject* roadSceneObject = addSceneObject(name);
         roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
+        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), btVector3(0,0,0), COL_TERRAIN, collidesWith);
         roadMesh->setRestitution(0.9f);
         roadMesh->getRigidBody()->setFriction(1.0f);
         roadSceneObject->addComponent(roadMesh);
@@ -290,7 +292,7 @@ std::cout << "22222\n\n\n\n";
 }
 
 
-void SceneManager::loadObject(std::string name, glm::vec3 position)
+void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 rotation)
 {
     /*
     SceneObject* crate = sceneMgr->addSceneObject("crate");
@@ -360,21 +362,18 @@ void SceneManager::loadObject(std::string name, glm::vec3 position)
 
             std::string modelPath = dirPath + modelFile;
 
-            sceneObject = addSceneObject(modelName);
+            sceneObject = addSceneObject(name);
             model = ResourceManager::getInstance().loadModel(modelPath, dirPath);
             RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
             sceneObject->addComponent(renderObject);
             //sceneObject->setPosition(glm::vec3(-10,3,-10));
             //sceneObject->setPosition(pos);
-            sceneObject->setPosition(position);
+            //sceneObject->setPosition(position);
             //sceneObject->setPosition(glm::vec3(0,0,0));
         }
         else
         if (componentType == "physics")
         {
-
-
-
             std::string bodyType(componentElement->Attribute("body"));
 
             PhysicalBody* physicalBody;
@@ -384,15 +383,25 @@ void SceneManager::loadObject(std::string name, glm::vec3 position)
                 float halfExtents = atof(componentElement->Attribute("halfExtents"));
                 float mass = atof(componentElement->Attribute("mass"));
 
-                physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, btVector3(position.x,position.y,position.z), COL_ENV, collidesWith);
+                physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, btVector3(0,0,0),
+                                                                      btVector3(0, 0, 0), COL_ENV, collidesWith);
                 //physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, btVector3(0,0,0), COL_ENV, collidesWith);
                 //physicalBody->setRestitution(0.1f);
                 sceneObject->addComponent(physicalBody);
             }
             else
-            if (bodyType == "convex")
+            if (bodyType == "dynamic")
             {
+                std::cout << "<><><><><><>>####  Model: " << model << std::endl;
+                float mass = atoi(componentElement->Attribute("mass"));
 
+                int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR;
+
+                PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass,
+                                                                                                     btVector3(0, 0, 0), btVector3(0, 0, 0),
+                                                                                                     COL_ENV, collidesWith);
+
+                sceneObject->addComponent(physicalBody);
             }
             else
             if (bodyType == "static")
@@ -400,30 +409,20 @@ void SceneManager::loadObject(std::string name, glm::vec3 position)
                 std::cout << "<><><><><><>>####  Model: " << model << std::endl;
                 float mass = atoi(componentElement->Attribute("mass"));
 
-                /*
-                RModel* domekModel = ResourceManager::getInstance().loadModel("Objects/domek/domek_vbcpp.3ds", "Objects/domek/");
-                RenderObject* domekRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(domekModel));
-                SceneObject* domekObject = sceneMgr->addSceneObject("domek");
-                int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR;
-                PhysicalBodyBvtTriangleMesh* domekBody = physMgr->createPhysicalBodyBvtTriangleMesh(domekModel, btVector3(0,0,0), COL_ENV, collidesWith);
-                domekObject->addComponent(domekRender);
-                domekObject->addComponent(domekBody);
-                */
 
                 int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR;
 
-                //PhysicalBodyBvtTriangleMesh* physicalBody = _physicsManager->createPhysicalBodyBvtTriangleMesh(model, btVector3(position.x,position.y,position.z), COL_ENV, collidesWith);
-                PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass, btVector3(position.x, position.y, position.z), COL_ENV, collidesWith);
-                //PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass, btVector3(0, 0, 0), COL_ENV, collidesWith);
+                PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), 0,
+                                                                                                     btVector3(0, 0, 0), btVector3(0, 0, 0),
+                                                                                                     COL_ENV, collidesWith);
                 //terrainMesh->setRestitution(0.9f);
                 //terrainMesh->getRigidBody()->setFriction(1.0f);
-                //terrainObject->addComponent(terrainObj);
-                //terrainObject->addComponent(terrainMesh);
                 sceneObject->addComponent(physicalBody);
             }
         }
 
-        //sceneObject->setPosition(position);
+        sceneObject->setPosition(position);
+        sceneObject->setRotation(rotation);
 
         componentElement = componentElement->NextSiblingElement("Component");
     }

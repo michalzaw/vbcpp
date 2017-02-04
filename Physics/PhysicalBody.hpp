@@ -8,6 +8,8 @@
 
 #include <memory>
 
+class PhysicsManager;
+
 #define BIT(x) (1<<(x))
 enum collisiontypes {
     COL_NOTHING = 0, //<Collide with nothing
@@ -21,7 +23,7 @@ enum collisiontypes {
 class PhysicalBody : public Component
 {
     public:
-        PhysicalBody(btScalar m, btVector3 pos);
+        PhysicalBody(btScalar m, btVector3 pos = btVector3(0,0,0), btVector3 rot = btVector3(0,0,0));
         virtual ~PhysicalBody();
 
         btRigidBody* getRigidBody() { return _rigidBody.get(); }
@@ -31,24 +33,30 @@ class PhysicalBody : public Component
         btScalar getMass() { return _mass; }
         //void getTransform(btTransform& t);
 
+        void setRotation(btVector3 rot);
+
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
 
         void update();
 
-        /*
-        void changedTransform(glm::vec3 position, glm::vec3 rotation)
+
+        virtual void changedTransform(glm::vec3 position, glm::vec3 rotation)
         {
-            btVector3 btPos(position.x, position.y, position.z);
-
             btTransform transf;
-            transf.setOrigin(btPos);
+            transf.setIdentity();
 
+            btQuaternion quat;
+            quat.setEulerZYX(rotation.x, rotation.y, rotation.z);
 
-            btQuaternion quat(rotation.x, rotation.y, rotation.z, 1);
+            btVector3 pos(position.x, position.y, position.z);
+            transf.setOrigin(pos);
+
             transf.setRotation(quat);
+            _rigidBody->setCenterOfMassTransform(transf);
+            _motionState->setWorldTransform(transf);
 
-
-        }*/
+            _rigidBody->activate();
+        }
 
     protected:
         std::unique_ptr<btRigidBody>            _rigidBody;
@@ -56,6 +64,7 @@ class PhysicalBody : public Component
         std::unique_ptr<btDefaultMotionState>   _motionState;
         btScalar                _mass;
         btVector3               _position;
+        btVector3               _rotation;
 
         virtual void updateBody() { }
 };

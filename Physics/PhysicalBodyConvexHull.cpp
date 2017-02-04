@@ -1,15 +1,15 @@
 #include "PhysicalBodyConvexHull.hpp"
 
-PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos)
-: PhysicalBody(mass, pos),
+PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot)
+: PhysicalBody(mass, pos, rot),
 _vertices(vertices), _vertexCount(vertexCount), _verticesvec(0)
 {
     updateBody();
 }
 
 
-PhysicalBodyConvexHull::PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos)
-: PhysicalBody(mass, pos),
+PhysicalBodyConvexHull::PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot)
+: PhysicalBody(mass, pos, rot),
 _verticesvec(vertices), _vertexCount(vertexCount), _vertices(0)
 {
     updateBody();

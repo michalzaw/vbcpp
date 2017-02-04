@@ -13,7 +13,7 @@ enum ShapeAlign
 class PhysicalBodyCylinder : virtual public PhysicalBody
 {
     public:
-        PhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align = Y_AXIS);
+        PhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, btVector3 rot, ShapeAlign align = Y_AXIS);
         virtual ~PhysicalBodyCylinder();
 
     private:

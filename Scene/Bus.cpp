@@ -84,6 +84,7 @@ void Bus::loadXMLdata(std::string busname)
     RModel* busModel = 0;
 
     glm::vec3 busPosition = glm::vec3(0,0,0);
+    glm::vec3 busRotation = glm::vec3(0,0,0);
 
     std::string texturePath = "Buses/" + busname + "/";
 
@@ -103,9 +104,9 @@ void Bus::loadXMLdata(std::string busname)
             _sceneObject->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
-            glm::vec3 rotation(XMLstringToVec3(cRotation));
+            busRotation = XMLstringToVec3(cRotation);
 
-            _sceneObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+            _sceneObject->setRotation(glm::vec3(busRotation.x * PI, busRotation.y * PI, busRotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
@@ -135,7 +136,8 @@ void Bus::loadXMLdata(std::string busname)
 
             if (busModel->getCollisionMeshSize() > 0)
             {
-                _chasisBody = _pMgr->createPhysicalBodyConvexHull(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), fMass, btPos, COL_BUS, _collidesWith);
+                _chasisBody = _pMgr->createPhysicalBodyConvexHull(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), fMass, btPos,
+                                                                  btVector3(busRotation.x, busRotation.y, busRotation.z), COL_BUS, _collidesWith);
                 _chasisBody->getRigidBody()->setActivationState( DISABLE_DEACTIVATION );
                 _sceneObject->addComponent(_chasisBody);
 
@@ -199,7 +201,7 @@ void Bus::loadXMLdata(std::string busname)
             wheelObj->addComponent(wheelRender);
 
             int collidesWith = COL_TERRAIN | COL_ENV;
-            PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btWheelPos, X_AXIS, COL_WHEEL, collidesWith);
+            PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btWheelPos, btVector3(0,0,0), X_AXIS, COL_WHEEL, collidesWith);
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
             wheelObj->addComponent(wheelCyl);
@@ -270,7 +272,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
                 int collidesWith = COL_ENV | COL_TERRAIN;
-                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, btDoorPos, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, btDoorPos, btVector3(0,0,0), COL_DOOR, collidesWith);
                 doorObj->addComponent(doorBody);
 
                 ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
@@ -320,7 +322,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
                 int collidesWith = COL_ENV | COL_TERRAIN;
-                PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, btArmPos, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, btArmPos, btVector3(0,0,0), COL_DOOR, collidesWith);
                 armObj->addComponent(armBody);
 
                 ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(_chasisBody, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
@@ -354,7 +356,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
 
                 collidesWith = COL_NOTHING;
-                PhysicalBodyConvexHull* arm2Body = _pMgr->createPhysicalBodyConvexHull(arm2->getCollisionMesh(), arm2->getCollisionMeshSize(), arm2Mass, btArm2Pos, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* arm2Body = _pMgr->createPhysicalBodyConvexHull(arm2->getCollisionMesh(), arm2->getCollisionMeshSize(), arm2Mass, btArm2Pos, btVector3(0,0,0), COL_DOOR, collidesWith);
                 arm2Obj->addComponent(arm2Body);
 
                 ConstraintHinge* busArm2Hinge = _pMgr->createConstraintHinge(_chasisBody, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
@@ -385,7 +387,7 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
                 collidesWith = COL_ENV;
-                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(door->getCollisionMesh(), door->getCollisionMeshSize(), doorMass, btDoorPos, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(door->getCollisionMesh(), door->getCollisionMeshSize(), doorMass, btDoorPos, btVector3(0,0,0), COL_DOOR, collidesWith);
                 doorObj->addComponent(doorBody);
 
                 ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));

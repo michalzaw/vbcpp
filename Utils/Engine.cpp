@@ -86,7 +86,7 @@ void Engine::loadData(std::string filename)
 
     std::cout << "Point count: " << _torqueCurve.size() << std::endl;
 
-    for (int i = 0; i < _torqueCurve.size(); i++)
+    for (unsigned char i = 0; i < _torqueCurve.size(); i++)
         std::cout << "Point " << i << ": " << _torqueCurve[i].rpm << " - " << _torqueCurve[i].torque << std::endl;
 }
 
@@ -140,7 +140,7 @@ float Engine::getMaxTorque()
         maxTorque = 0.0f;
 	else
 	{
-		for ( char i = 0; i < _torqueCurve.size() - 1; i++ )
+		for ( unsigned char i = 0; i < _torqueCurve.size() - 1; i++ )
 		{
 			if ( (_currentRPM >= _torqueCurve[i].rpm) && (_currentRPM <= _torqueCurve[i+1].rpm) )
 				maxTorque = (_curveParams[i].a * _currentRPM + _curveParams[i].b);

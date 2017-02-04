@@ -2,8 +2,8 @@
 
 #include "../Utils/Helpers.hpp"
 
-PhysicalBodyCylinder::PhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align)
-: PhysicalBody(mass, pos),
+PhysicalBodyCylinder::PhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, btVector3 rot, ShapeAlign align)
+: PhysicalBody(mass, pos, rot),
 _dimensions(dim), _align(align)
 {
     updateBody();

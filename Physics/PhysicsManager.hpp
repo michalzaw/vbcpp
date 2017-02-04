@@ -29,6 +29,11 @@ class PhysicsManager : virtual public RefCounter
         int createPhysicsWorld();
         int destroyPhysicsWorld();
 
+        void play();
+        void stop();
+
+        bool isRunning();
+
         void simulate(btScalar timeStep);
 
         btDiscreteDynamicsWorld*                getDynamicsWorld() { return _dynamicsWorld; }
@@ -37,13 +42,13 @@ class PhysicsManager : virtual public RefCounter
         btDefaultCollisionConfiguration*        getDefaultCollisionConfig() { return _collisionConfiguration; }
         btBroadphaseInterface*                  getBrodaphaseInterface() { return _broadphase; }
 
-        PhysicalBodyBox*                createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
-        PhysicalBodyCylinder*           createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, ShapeAlign align, short collisionGroup, short collisionFilter);
-        PhysicalBodySphere*             createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyBox*                createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter);
+        PhysicalBodyCylinder*           createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, btVector3 rot, ShapeAlign align, short collisionGroup, short collisionFilter);
+        PhysicalBodySphere*             createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter);
         PhysicalBodyStaticPlane*        createPhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset, short collisionGroup, short collisionFilter);
-        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
-        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, short collisionGroup, short collisionFilter);
-        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, short collisionGroup, short collisionFilter);
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter);
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter);
+        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
@@ -55,6 +60,8 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
+        friend class PhysicalBody;
+
     private:
         btDiscreteDynamicsWorld*                _dynamicsWorld;
         btSequentialImpulseConstraintSolver*    _constraintSolver;
@@ -65,7 +72,7 @@ class PhysicsManager : virtual public RefCounter
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
 
-
+        bool _running;
 };
 
 #endif // PHYSICSMANAGER_HPP_INCLUDED

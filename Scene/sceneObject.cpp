@@ -72,8 +72,22 @@ void SceneObject::changedTransform()
 
     for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
     {
-        (*i)->changedTransform();
+        if ((*i)->getType() == CT_PHYSICAL_BODY)
+        {
+            if (!_sceneManager->getPhysicsManager()->isRunning()) // set object transform only if physics is NOT running; otherwise - let the physics update objects' transform
+                (*i)->changedTransform(_position, _rotation);
+        }
+        else
+            (*i)->changedTransform(_position, _rotation);
     }
+
+    /*
+    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
+    {
+        //if ((*i)->getType() == CT_PHYSICAL_BODY)
+            //(*i)->setTransform(_position, _rotation);
+    }
+    */
 
     _localTransformMatrixIsCalculated = false;
     _localNormalMatrixIsCalculated = false;

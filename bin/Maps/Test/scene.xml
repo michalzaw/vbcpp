@@ -7,12 +7,13 @@
 	<Terrain heightmap="test_terrain.bmp" material="terrain" />
 	
 	<Objects>
-		<Object name="crate" position="-10,3,-10" rotation="0,0,0" />
+		<Object name="crate" position="-10,3,-10" rotation="0,45,0" />
 		<Object name="crate" position="10,3,-10" rotation="0,0,0" />
 		<Object name="domek" position="20,0,20" rotation="0,0,0" />
 		<Object name="domek" position="20,0,40" rotation="0,0,0" />
 		<Object name="domek" position="20,0,60" rotation="0,0,0" />
 		<Object name="iglak" position="-10,3.5,-5" rotation="0,0,0" />
+		<Object name="zapora" position="15,1,10" rotation="0,-10,0" />
 	</Objects>
 	
 	<Roads>

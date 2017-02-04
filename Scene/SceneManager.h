@@ -27,7 +27,7 @@ class SceneManager
         ~SceneManager();
 
         //GraphicsManager*    getGraphicsManager();
-        //PhysicsManager*     getPhysicsManager();
+        PhysicsManager*     getPhysicsManager() { return _physicsManager; };
 
 
         SceneObject*    addSceneObject(std::string name);
@@ -43,7 +43,7 @@ class SceneManager
 
         void loadScene(std::string filename);
 
-        void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0));
+        void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0));
 };
 
 

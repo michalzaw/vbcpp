@@ -2,8 +2,8 @@
 
 #include "../Utils/Helpers.hpp"
 
-PhysicalBodySphere::PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos)
-: PhysicalBody(mass, pos),
+PhysicalBodySphere::PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, btVector3 rot)
+: PhysicalBody(mass, pos, rot),
 _radius(r)
 {
     updateBody();

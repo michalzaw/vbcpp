@@ -204,6 +204,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     }
 
+    if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
+    {
+        if (!physMgr->isRunning())
+            physMgr->play();
+        else
+            physMgr->stop();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS)
+    {
+        SceneObject* zapora = sceneMgr->getSceneObject("zapora");
+
+        if (zapora)
+        {
+            zapora->setPosition(glm::vec3(0,3,0));
+            zapora->setRotation(glm::vec3(0,10,0));
+        }
+
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_T ) == GLFW_PRESS)
+    {
+        if (bus)
+            bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -639,6 +664,8 @@ int main()
 
     int nbFrames = 0;
 
+    physMgr->play();
+
     // ========== MAIN LOOP START ==========
 
     while (win->isOpened())
@@ -724,6 +751,8 @@ int main()
         win->updateEvents();
     }
     // ========== MAIN LOOP END ==========
+
+    physMgr->stop();
 
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 

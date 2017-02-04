@@ -2,7 +2,7 @@
 
 #include "../Utils/Helpers.hpp"
 
-PhysicalBodyBox::PhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos)
+PhysicalBodyBox::PhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, btVector3 rot)
 : PhysicalBody(mass, pos),
 _halfExtents(halfExtents)
 {

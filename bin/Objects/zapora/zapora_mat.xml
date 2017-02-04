@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="no_texture" name="Collision" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="" normalmap_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #27" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BET2.JPG" normalmap_texture="bet2_normal.jpg" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #28" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BET.JPG" normalmap_texture="bet2_normal.jpg" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #29" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BET.JPG" normalmap_texture="bet2_normal.jpg" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #30" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BET.JPG" normalmap_texture="bet2_normal.jpg" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #31" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BET.JPG" normalmap_texture="bet2_normal.jpg" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="MMiki" name="Zapora" comment="Test object" />
+
+	<Components>
+	
+		<Component type="render" model="zapora.3ds" />
+	
+		<Component type="physics" mass="25" body="dynamic" />
+	</Components>
+	
+</Object>
