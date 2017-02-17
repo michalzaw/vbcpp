@@ -13,7 +13,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     _shaderList.push_back(shdr1);
 
     // NOTEXTURE_MATERIAL
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag");
+    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
     _shaderList.push_back(shdr2);
 
     // NORMALMAPPING_MATERIAL
@@ -474,9 +474,11 @@ void Renderer::render(RenderData* renderData)
             //shader->setUniform("n",);
             shader->setUniform("CameraPositionWorldspace", camera->getPosition());
 
-            static float d = 0;
-            d += 0.01;
-            shader->setUniform("d", GraphicsManager::getInstance().getWindVector());//glm::vec3(0.5f * sinf(d), 0.0f, 0.0f));
+            glm::vec3 d = GraphicsManager::getInstance().getWindVector();
+            /*d.x += rand() % 101 / 1000;
+            d.y += rand() % 101 / 1000;
+            d.z += rand() % 101 / 1000;*/
+            shader->setUniform("d", d);
         }
         if (mesh->material.shader == ALPHA_TEST_MATERIAL)
         {

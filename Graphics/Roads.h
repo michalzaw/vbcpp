@@ -41,10 +41,10 @@ struct RoadSegment
 struct RoadLane
 {
     Material material;
-    float r1;
-    float r2;
-    float height1;
-    float height2;
+    float r1;           // x1
+    float r2;           // x2
+    float height1;      // y1
+    float height2;      // y2
 
 };
 

@@ -44,6 +44,8 @@ class SceneManager
         void loadScene(std::string filename);
 
         void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0));
+        void loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles);
+
 };
 
 

@@ -200,45 +200,10 @@ void SceneManager::loadScene(std::string filename)
 
 
     // Roads
-    MaterialLoader matLoader;
-    matLoader.openFile(materialFullPath.c_str());
-
     XMLElement* roads = scnElement->FirstChildElement("Roads");
-std::cout << "1111\n\n\n";
-    // Profiles
+
     std::map<std::string, std::vector<RoadLane>> profiles;
-std::cout << "22222\n\n\n\n";
-    XMLElement* profileElement = roads->FirstChildElement("Profile");
-    std::cout << "3333\n\n\n\n";
-    while (profileElement != nullptr)
-    {
-        std::string name(profileElement->Attribute("name"));
 
-        std::cout << "==> ROAD PROFILE" << std::endl;
-        std::cout << "Name: " << name << std::endl;
-
-        profiles.insert(std::make_pair(name, std::vector<RoadLane>()));
-        //std::map<int, std::vector<RoadLane>>::iterator profile = profiles.find(id);
-
-        XMLElement* laneElement = profileElement->FirstChildElement("Lane");
-        while (laneElement != nullptr)
-        {
-            RoadLane lane;
-            lane.material = matLoader.loadMaterial(laneElement->Attribute("material"), dirPath);
-            lane.r1 = toFloat(laneElement->Attribute("r1"));
-            lane.r2 = toFloat(laneElement->Attribute("r2"));
-            lane.height1 = toFloat(laneElement->Attribute("height1"));
-            lane.height2 = toFloat(laneElement->Attribute("height2"));
-
-            profiles[name].push_back(lane);
-
-            laneElement = laneElement->NextSiblingElement("Lane");
-        }
-
-        profileElement = profileElement->NextSiblingElement("Profile");
-    }
-
-    // Road
     XMLElement* roadElement = roads->FirstChildElement("Road");
     while (roadElement != nullptr)
     {
@@ -247,6 +212,13 @@ std::cout << "22222\n\n\n\n";
 
         std::cout << "==> ROAD" << std::endl;
         std::cout << "profile name: " << profileName << std::endl;
+
+
+        if (profiles.find(profileName) == profiles.end())
+        {
+            loadRoadProfile(profileName, &profiles);
+        }
+
 
         std::vector<RoadSegment> segments;
 
@@ -274,7 +246,8 @@ std::cout << "22222\n\n\n\n";
 
             segmentElement = segmentElement->NextSiblingElement("Segment");
         }
-
+std::cout << profiles[profileName].size() << std::endl;
+std::cout << segments.size() << std::endl;
         // create road
         Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
         RModel* roadModel2 = new RModel("", roadModel);
@@ -425,5 +398,74 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
         sceneObject->setRotation(rotation);
 
         componentElement = componentElement->NextSiblingElement("Component");
+    }
+}
+
+
+void SceneManager::loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles)
+{
+    std::string dirPath = "RoadProfiles/" + name + "/";
+    std::string fullPath = dirPath + "profile.xml";
+    std::string materialFullPath = MaterialLoader::createMaterialFileName(fullPath);
+
+    std::cout << "Profile path: " << fullPath << std::endl;
+
+    XMLDocument doc;
+    XMLError result = doc.LoadFile( fullPath.c_str() );
+    std::cout << result << std::endl;
+
+    // Search for main element - Object
+    XMLElement* profileElement = doc.FirstChildElement("Profile");
+    if (profileElement == nullptr)
+    {
+        std::cout << "Profile element not found!" << std::endl;
+        return;
+    }
+
+    XMLElement* profileDesc = profileElement->FirstChildElement("Description");
+    if (profileDesc == nullptr)
+    {
+        std::cout << "Description element not found" << std::endl;
+        return;
+    }
+
+    // Load file description
+    std::string author(profileDesc->Attribute("author"));
+    std::string profName(profileDesc->Attribute("name"));
+    std::string comment(profileDesc->Attribute("comment"));
+
+    std::cout << "*** PROFILE DATA ***" << std::endl;
+    std::cout << "Author: " << author << std::endl;
+    std::cout << "Name: " << profName << std::endl;
+    std::cout << "Comment: " << comment << std::endl;
+
+    MaterialLoader matLoader;
+    matLoader.openFile(materialFullPath.c_str());
+
+    XMLElement* lanesElement = profileElement->FirstChildElement("Lanes");
+
+    if (lanesElement == nullptr)
+    {
+        std::cout << "Lanes element not found" << std::endl;
+        return;
+    }
+    else
+    {
+        profiles->insert(std::make_pair(name, std::vector<RoadLane>()));
+
+        XMLElement* laneElement = lanesElement->FirstChildElement("Lane");
+        while (laneElement != nullptr)
+        {
+            RoadLane lane;
+            lane.material = matLoader.loadMaterial(laneElement->Attribute("material"), dirPath);
+            lane.r1 = toFloat(laneElement->Attribute("x1"));
+            lane.r2 = toFloat(laneElement->Attribute("x2"));
+            lane.height1 = toFloat(laneElement->Attribute("y1"));
+            lane.height2 = toFloat(laneElement->Attribute("y2"));
+
+            (*profiles)[name].push_back(lane);
+
+            laneElement = laneElement->NextSiblingElement("Lane");
+        }
     }
 }
