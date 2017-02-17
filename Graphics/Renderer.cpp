@@ -29,6 +29,13 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* alphaTestShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(alphaTestShader);
 
+    // TRANSPARENCY_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("TRANSPARENCY");
+    RShader* transparencyShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+    _shaderList.push_back(transparencyShader);
+
     // TREE_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -516,6 +523,8 @@ void Renderer::render(RenderData* renderData)
         //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
         if (mesh->material.diffuseTexture != NULL)
             shader->bindTexture("Texture", mesh->material.diffuseTexture);
+        if (mesh->material.alphaTexture != NULL)
+            shader->bindTexture("AlphaTexture", mesh->material.alphaTexture);
         shader->setUniform("matAmbient", mesh->material.ambientColor);
         shader->setUniform("matDiffuse", mesh->material.diffuseColor);
         shader->setUniform("matSpecular", mesh->material.specularColor);

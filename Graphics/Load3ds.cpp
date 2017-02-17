@@ -349,6 +349,8 @@ void Load3ds::saveMaterialsDataToXml(std::string fileName)
 
         matElement->SetAttribute("normalmap_texture", material->bump_map.name);
 
+        matElement->SetAttribute("alpha_texture", material->opacity_map.name);
+
         std::string shininessStr = toString(material->shininess);
         matElement->SetAttribute("shininess", shininessStr.c_str());
 

@@ -70,6 +70,9 @@ uniform float SpecularPower;
 #ifdef NORMALMAPPING
 uniform sampler2D NormalmapTexture;
 #endif
+#ifdef TRANSPARENCY
+uniform sampler2D AlphaTexture;
+#endif
 
 uniform vec3 CameraPosition;
 
@@ -172,4 +175,7 @@ void main()
 	FragmentColor = LightsColor;
 	
 	FragmentColor.a = 1 - Transparency;
+#ifdef TRANSPARENCY
+	FragmentColor.a = texture2D(AlphaTexture, TexCoord).a;
+#endif
 }
