@@ -117,7 +117,7 @@ void SceneManager::addSky(RTextureCubeMap* texture)
 }
 
 
-void SceneManager::loadScene(std::string filename)
+void SceneManager::loadScene(std::string filename, glm::vec3& startPosition, glm::vec3& startRotation)
 {
     std::string dirPath = "Maps/" + filename + "/";
     std::string fullPath = dirPath + "/scene.xml";
@@ -174,6 +174,19 @@ void SceneManager::loadScene(std::string filename)
     terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
 
+
+    XMLElement* routeElement = scnElement->FirstChildElement("Route");
+    if (routeElement == nullptr)
+    {
+        std::cout << "Route element not found!" << std::endl;
+        return;
+    }
+
+    const char* cStartPosition = routeElement->Attribute("startPosition");
+    startPosition = XMLstringToVec3(cStartPosition);
+
+    const char* cStartRotation = routeElement->Attribute("startRotation");
+    startRotation = XMLstringToVec3(cStartRotation);
 
     XMLElement* objects = scnElement->FirstChildElement("Objects");
 
@@ -354,7 +367,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
         std::string componentType = componentElement->Attribute("type");
         std::cout << "Component: " << componentType << std::endl;
 
-        SceneObject* sceneObject;
+        SceneObject* sceneObject = addSceneObject(name);
 
         if (componentType == "render")
         {
@@ -362,7 +375,6 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
             std::string modelPath = dirPath + modelFile;
 
-            sceneObject = addSceneObject(name);
             model = ResourceManager::getInstance().loadModel(modelPath, dirPath);
             RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
             sceneObject->addComponent(renderObject);

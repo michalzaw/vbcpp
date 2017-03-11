@@ -52,6 +52,8 @@ struct Door
 
 struct Wheel
 {
+    glm::vec3             position;
+    SceneObject*          object;
     PhysicalBodyCylinder* body;
     ConstraintHinge2*     suspension;
     bool                  steering;
@@ -104,6 +106,8 @@ class Bus : virtual public RefCounter
 
         // Update internal physics - doors, wheels etc
         void updatePhysics(float dt);
+
+        void setTransformation(glm::vec3 position, glm::vec3 rotation);
 
     private:
         SceneObject*    _sceneObject;

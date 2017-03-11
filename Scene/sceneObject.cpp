@@ -1,6 +1,8 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
 
+#include <glm/gtx/matrix_decompose.hpp>
+
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent)
     : _parent(parent),
@@ -67,6 +69,7 @@ void SceneObject::changedTransform()
 {
     for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
     {
+        calculateLocalTransformMatrix();
         (*i)->changedTransform();
     }
 
@@ -75,19 +78,19 @@ void SceneObject::changedTransform()
         if ((*i)->getType() == CT_PHYSICAL_BODY)
         {
             if (!_sceneManager->getPhysicsManager()->isRunning()) // set object transform only if physics is NOT running; otherwise - let the physics update objects' transform
-                (*i)->changedTransform(_position, _rotation);
+            {
+                calculateGlobalTransformMatrix();
+
+                //if (_parent != NULL)
+                    //(*i)->changedTransform(_parent->getLocalTransformMatrix() * _localTransformMatrix);
+                //else
+                    (*i)->changedTransform(_globalTransformMatrix);
+            }
+
         }
         else
-            (*i)->changedTransform(_position, _rotation);
+            (*i)->changedTransform(_localTransformMatrix);
     }
-
-    /*
-    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
-    {
-        //if ((*i)->getType() == CT_PHYSICAL_BODY)
-            //(*i)->setTransform(_position, _rotation);
-    }
-    */
 
     _localTransformMatrixIsCalculated = false;
     _localNormalMatrixIsCalculated = false;
@@ -239,7 +242,7 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_PHYSICAL_BODY:
-                    //_sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                    _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
                     //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                     break;
 
@@ -444,6 +447,44 @@ glm::vec3 SceneObject::getScale() const
 }
 
 
+void SceneObject::updateTransformFromPhysics(btTransform& t)
+{
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        calculateLocalTransformMatrix();
+        (*i)->changedTransform();
+    }
+
+    glm::vec3 vPos(t.getOrigin().getX(), t.getOrigin().getY(), t.getOrigin().getZ());
+
+    glm::mat4 pos = glm::translate(vPos);
+
+    btQuaternion btQuat = t.getRotation();
+
+    glm::quat qRot;
+
+    qRot.x = btQuat.x();
+    qRot.y = btQuat.y();
+    qRot.z = btQuat.z();
+    qRot.w = btQuat.w();
+
+
+
+    glm::mat4 rot;
+
+    rot = glm::mat4_cast(qRot);
+
+    glm::mat4 s = glm::scale(_scale);
+
+    _globalTransformMatrix = pos * rot * s;
+
+    //_globalTransformMatrix = _localTransformMatrix;
+
+    _localTransformMatrixIsCalculated = true;
+    _globalTransformMatrixIsCalculated = true;
+}
+
+
 glm::mat4& SceneObject::getLocalTransformMatrix() const
 {
     if (!_localTransformMatrixIsCalculated)
@@ -493,4 +534,24 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     }
 
     return _globalNormalMatrix;
+}
+
+
+void SceneObject::setGlobalTransformMatrix(glm::mat4 mat)
+{
+    _globalTransformMatrix = mat;
+
+    _globalTransformMatrixIsCalculated = true;
+
+    changedTransform();
+}
+
+
+void SceneObject::setLocalTransformMatrix(glm::mat4 mat)
+{
+    _localTransformMatrix = mat;
+
+    _localTransformMatrixIsCalculated = true;
+
+    changedTransform();
 }

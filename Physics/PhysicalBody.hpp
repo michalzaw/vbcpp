@@ -6,6 +6,9 @@
 #include "../Scene/Component.h"
 #include "../Scene/SceneObject.h"
 
+#include <glm/gtx/matrix_decompose.hpp>
+
+
 #include <memory>
 
 class PhysicsManager;
@@ -40,15 +43,25 @@ class PhysicalBody : public Component
         void update();
 
 
-        virtual void changedTransform(glm::vec3 position, glm::vec3 rotation)
+        virtual void changedTransform(glm::mat4 localMatrix)
         {
+                //glm::mat4 transformation; // your transformation matrix.
+                glm::vec3 scale;
+                glm::quat rotation;
+                glm::vec3 translation;
+                glm::vec3 skew;
+                glm::vec4 perspective;
+                glm::decompose(localMatrix, scale, rotation, translation, skew, perspective);
+
+            glm::vec3 glmRot = glm::eulerAngles(rotation);
+
             btTransform transf;
             transf.setIdentity();
 
             btQuaternion quat;
-            quat.setEulerZYX(rotation.x, rotation.y, rotation.z);
+            quat.setEuler(glmRot.y, glmRot.x, glmRot.z);
 
-            btVector3 pos(position.x, position.y, position.z);
+            btVector3 pos(translation.x, translation.y, translation.z);
             transf.setOrigin(pos);
 
             transf.setRotation(quat);

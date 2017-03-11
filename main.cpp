@@ -74,7 +74,6 @@ struct GameConfig
     int windowWidth;
     int windowHeight;
     std::string mapFile;
-    std::string mapTexPath;
     std::string busModel;
 } gameCfg;
 
@@ -226,8 +225,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
     if (glfwGetKey( window, GLFW_KEY_T ) == GLFW_PRESS)
     {
-        if (bus)
-            bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
+        bus->setTransformation(glm::vec3(0,3,0), glm::vec3(0,-10,0));
+        //bus->getSceneObject()->setPosition(glm::vec3(0,3,5));
     }
 }
 
@@ -312,7 +311,7 @@ void readInput(GLFWwindow* window, double deltaTime)
 }
 
 
-void loadScene()
+void loadGameCfg()
 {
     std::string filename("game.xml");
 
@@ -349,136 +348,11 @@ void loadScene()
 }
 
 
-void loadTerrain()
-{
-    /*
-    Material terrainMaterial;
-    terrainMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture("Maps/Test/grass_2048.jpg");
-    terrainMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture("Maps/Test/grass_2048_n.jpg");
-    terrainMaterial.shader = NORMALMAPPING_MATERIAL;
-    terrainMaterial.scale = glm::vec2(100, 100);
-    Model* terrModel = loadTerrainModel("test_terrain.bmp", terrainMaterial, 20);
-    RModel* terrain = new RModel("", terrModel);
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
-    SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    terrainMesh->setRestitution(0.9f);
-    terrainMesh->getRigidBody()->setFriction(1.0f);
-    terrainObject->addComponent(terrainObj);
-    terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
-    */
-
-    // Road
-    /*RoadLane* lanes = new RoadLane[5];
-    lanes[0].material.diffuseTexture = ResourceManager::getInstance().loadTexture("road.jpg");
-    lanes[0].material.normalmapTexture = ResourceManager::getInstance().loadTexture("road_n.jpg");
-    lanes[0].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[0].material.scale = glm::vec2(1, 0.25);
-    //lanes[0].material.scale = glm::vec2(3, 1.5);
-    lanes[0].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[0].material.shininess = 96.0f;
-    lanes[0].r1 = -3.0f;
-    lanes[0].r2 = 3.0f;
-    lanes[0].height1 = 0.05f;
-    lanes[0].height2 = 0.05f;
-    lanes[1].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[1].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[1].material.scale = glm::vec2(1, 1);
-    lanes[1].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[1].material.shininess = 96.0f;
-    lanes[1].r1 = 3.0f;
-    lanes[1].r2 = 3.0f;
-    lanes[1].height1 = 0.05f;
-    lanes[1].height2 = 0.15f;
-    lanes[2].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[2].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[2].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[2].material.scale = glm::vec2(1, 1);
-    lanes[2].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[2].material.shininess = 96.0f;
-    lanes[2].r1 = 3.0f;
-    lanes[2].r2 = 5.0f;
-    lanes[2].height1 = 0.15f;
-    lanes[2].height2 = 0.15;
-    lanes[3].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[3].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[3].material.scale = glm::vec2(1, 1);
-    lanes[3].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[3].material.shininess = 96.0f;
-    lanes[3].r1 = -3.0f;
-    lanes[3].r2 = -3.0f;
-    lanes[3].height1 = 0.15f;
-    lanes[3].height2 = 0.05f;
-    lanes[4].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[4].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[4].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[4].material.scale = glm::vec2(1, 1);
-    lanes[4].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[4].material.shininess = 96.0f;
-    lanes[4].r1 = -5.0f;
-    lanes[4].r2 = -3.0f;
-    lanes[4].height1 = 0.15f;
-    lanes[4].height2 = 0.15;
-
-    RoadSegment segment;
-    segment.center = glm::vec2(10.0f, 10.0f);
-    segment.r = 50.0f;
-    segment.angle1 = 3.0f;
-    segment.angle2 = 6.14f;
-    RoadSegment segment;
-    segment.r = 50.0f;
-    segment.begin = glm::vec3(-50.0f, -3.0f, 5.0f);
-    segment.end = glm::vec3(10.0f, 4.0f, 5.0f);
-    segment.pointsCount = 60;
-    segment.interpolation = RI_COS;
-    segment.type = RST_ARC;
-
-    RoadSegment segment2;
-    segment2.r = 20.0f;
-    segment2.begin = glm::vec3(10.0f, 4.0f, 5.0f);
-    segment2.end = glm::vec3(16.0f, 4.0f, 33.0f);
-    segment2.pointsCount = 30;
-    segment2.interpolation = RI_LIN;
-    segment2.type = RST_ARC;
-
-    std::vector<RoadSegment> s;
-    s.push_back(segment);
-    s.push_back(segment2);*/
-
-    /*Model* roadModel = createRoadModel(lanes, 5, s);
-    RModel* roadModel2 = new RModel("", roadModel);
-    RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
-    SceneObject* roadSceneObject = sceneMgr->addSceneObject("road1");
-    roadSceneObject->addComponent(roadRenderObject);
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* roadMesh = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    roadMesh->setRestitution(0.9f);
-    roadMesh->getRigidBody()->setFriction(1.0f);
-    roadSceneObject->addComponent(roadMesh);*/
-
-    /*RoadSegment segment2;
-    segment2.r = 20.0f;
-    segment2.begin = glm::vec3(10.0f, 0.0f, 10.0f);
-    segment2.end = glm::vec3(14.0f, 0.0f, 38.0f);
-
-    Model* roadModel23 = createRoadModel(lanes, 3, segment2);
-    RModel* roadModel22 = new RModel("", roadModel23);
-    RenderObject* roadRenderObject2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel22));
-    SceneObject* roadSceneObject2 = sceneMgr->addSceneObject("road1");
-    roadSceneObject2->addComponent(roadRenderObject2);
-//    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* roadMesh2 = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel22, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    roadMesh2->setRestitution(0.9f);
-    roadMesh2->getRigidBody()->setFriction(1.0f);
-    roadSceneObject2->addComponent(roadMesh2);*/
-}
-
 
 // ### MAIN ###
 int main()
 {
-    loadScene();
+    loadGameCfg();
 
     win = new Window;
 
@@ -493,75 +367,24 @@ int main()
 
     // Inicjalizujemy potrzebne rzeczy
     OGLDriver::getInstance().initialize();
-    //PhysicsManager::getInstance().createPhysicsWorld();
 
     physMgr = new PhysicsManager;
 	sceneMgr = new SceneManager(physMgr);
 
-
-
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
-
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
 	GraphicsManager::getInstance().setWindVelocity(0.4f);
 
 
-    /* terrain */
-/*    //RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
-    RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
-    SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    terrainMesh->setRestitution(0.9f);
-    terrainMesh->getRigidBody()->setFriction(1.0f);
-    terrainObject->addComponent(terrainObj);
-    terrainObject->addComponent(terrainMesh);
-*/
-        //loadTerrain();
+	glm::vec3 startPosition;
+	glm::vec3 startRotation;
+    sceneMgr->loadScene(gameCfg.mapFile, startPosition, startRotation);
 
-    /*RModel* treeModel = ResourceManager::getInstance().loadModel("testarea/iglak.3ds", "testarea/");
-    treeModel->getMesh(0)->material.diffuseTexture->setAnisotropyFiltering(true, 4.0f);
-    SceneObject* treeObj = sceneMgr->addSceneObject("tree");
-    RenderObject* treeRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(treeModel));
-    treeObj->addComponent(treeRender);
-    treeObj->setPosition(-10.0f, 4.371f, -5.0f);*/
-
-    //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
+    bus->setTransformation(startPosition, startRotation);
+    //bus->getSceneObject()->setPosition(startPosition);
 
-
-    /*
-    SceneObject* crate = sceneMgr->addSceneObject("crate");
-    RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
-    RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
-
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0), COL_ENV, collidesWith);
-    boxBody2->setRestitution(0.1f);
-    crate->addComponent(object2);
-    crate->addComponent(boxBody2);
-    crate->setPosition(glm::vec3(-10,3,-10));
-
-    */
-    /*
-    SceneObject* domekObject = sceneMgr->addSceneObject("Domek");
-    RModel* domekModel = ResourceManager::getInstance().loadModel("Objects/domek/domek_vbcpp.3ds", "Objects/domek/");
-    RenderObject* domekRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(domekModel));
-
-    domekObject->addComponent(domekRender);
-
-    int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* domekBody = physMgr->createPhysicalBodyBvtTriangleMesh(domekModel, btVector3(-10,2,40), COL_ENV, collidesWith);
-    //terrainMesh->setRestitution(0.9f);
-    //terrainMesh->getRigidBody()->setFriction(1.0f);
-    domekObject->addComponent(domekBody);
-    domekObject->setPosition(glm::vec3(-10,2,40));
-
-    //int collidesWith = COL_TERRAIN | COL_BUS;
-    */
-
-    sceneMgr->loadScene("Test");
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
@@ -664,7 +487,7 @@ int main()
 
     int nbFrames = 0;
 
-    physMgr->play();
+    //physMgr->play();
 
     // ========== MAIN LOOP START ==========
 
@@ -708,7 +531,9 @@ int main()
 
             readInput(win->getWindow(), deltaTime);
             physMgr->simulate(deltaTime);
-            bus->updatePhysics(deltaTime);
+
+            if (bus)
+                bus->updatePhysics(deltaTime);
             GraphicsManager::getInstance().update(deltaTime);
 
             frameTime -= deltaTime;

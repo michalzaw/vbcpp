@@ -6,6 +6,8 @@
 #include <list>
 #include <string>
 
+#include <bullet/btBulletDynamicsCommon.h>
+
 #include "Component.h"
 
 
@@ -93,6 +95,8 @@ class SceneObject
         void setScale(float x, float y, float z);
         void setScale(float scale);
 
+        void updateTransformFromPhysics(btTransform& t);
+
         void move(glm::vec3 deltaPosition);
         void move(float dx, float dy, float dz);
         void rotate(glm::vec3 deltaRotation);
@@ -110,6 +114,8 @@ class SceneObject
         glm::mat4& getGlobalTransformMatrix() const;
         glm::mat4& getGlobalNormalMatrix() const;
 
+        void setGlobalTransformMatrix(glm::mat4 mat);
+        void setLocalTransformMatrix(glm::mat4 mat);
 };
 
 

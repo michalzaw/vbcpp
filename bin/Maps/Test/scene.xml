@@ -6,6 +6,8 @@
 	
 	<Terrain heightmap="test_terrain.bmp" material="terrain" />
 	
+	<Route startPosition="0,3,20" startRotation="0,20,0" />
+	
 	<Objects>
 		<Object name="crate" position="-10,3,-10" rotation="0,45,0" />
 		<Object name="crate" position="10,3,-10" rotation="0,0,0" />

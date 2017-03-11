@@ -41,7 +41,7 @@ class SceneManager
 
 
 
-        void loadScene(std::string filename);
+        void loadScene(std::string filename, glm::vec3& startPosition, glm::vec3& rotation);
 
         void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0));
 };

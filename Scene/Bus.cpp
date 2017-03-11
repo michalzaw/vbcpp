@@ -31,6 +31,8 @@ Bus::~Bus()
 {
     std::cout << "Bus Destruktor" << std::endl;
 
+
+
     if (_gearbox)
     {
         delete _gearbox;
@@ -43,17 +45,46 @@ Bus::~Bus()
         _engine = 0;
     }
 
+
     WheelList::iterator wit = _wheels.begin();
 
     for (; wit != _wheels.end(); ++wit)
+    {
+        if ((*wit)->object)
+            _sMgr->removeSceneObject((*wit)->object);
+
+        if ((*wit)->body)
+            _pMgr->removePhysicalBody((*wit)->body);
+
+        if ((*wit)->suspension)
+            _pMgr->removeConstraint((*wit)->suspension);
+
         delete (*wit);
+    }
+
+
+    printf("BUS: USUWANIE DRZWI\n");
 
     DoorList::iterator dit = _doors.begin();
 
     for (; dit != _doors.end(); ++dit)
+    {
+        //_pMgr->removePhysicalBody((*dit)->getDoorBody());
+
         delete (*dit);
+    }
+
 
     _headlights.clear();
+
+    printf("BUS: USUWANIE SCENE OBJECT\n");
+    _sMgr->removeSceneObject(_sceneObject);
+
+    printf("BUS: USUWANIE PHYSICAL BODY\n");
+    _pMgr->removePhysicalBody(_chasisBody);
+
+    _sMgr->removeSceneObject(_steeringWheelObject);
+
 }
 
 
@@ -100,13 +131,15 @@ void Bus::loadXMLdata(std::string busname)
             std::cout << "XML: Transform" << std::endl;
 
             const char* cPosition = child->Attribute("position");
-            busPosition = XMLstringToVec3(cPosition);
+            //busPosition = XMLstringToVec3(cPosition);
+
+            busPosition = glm::vec3(0,4,12);
             _sceneObject->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             busRotation = XMLstringToVec3(cRotation);
 
-            _sceneObject->setRotation(glm::vec3(busRotation.x * PI, busRotation.y * PI, busRotation.z * PI) );
+            //_sceneObject->setRotation(glm::vec3(busRotation.x * PI, busRotation.y * PI, busRotation.z * PI) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
@@ -145,7 +178,7 @@ void Bus::loadXMLdata(std::string busname)
                 btTransform tmpTransf = _chasisBody->getRigidBody()->getWorldTransform();
                 btVector3 dir = tmpTransf.getBasis() * dirVec;
 
-                std::cout << dir.x() << " " << dir.y() << " " << dir.z() << std::endl;
+                //std::cout << dir.x() << " " << dir.y() << " " << dir.z() << std::endl;
             }
             else
             {
@@ -177,12 +210,8 @@ void Bus::loadXMLdata(std::string busname)
 
             SceneObject* wheelObj = _sMgr->addSceneObject(wheelName);
 
-
             glm::vec3 wheelPosition = XMLstringToVec3(child->Attribute("position"));
             glm::vec3 relativePos = glm::vec3(busPosition.x + wheelPosition.x, busPosition.y + wheelPosition.y, busPosition.z + wheelPosition.z);
-
-
-            wheelObj->setPosition(relativePos);
 
             // obracamy model kola je¿li jest po lewej stronie
             if (side == "right")
@@ -192,7 +221,8 @@ void Bus::loadXMLdata(std::string busname)
             else
                 wheelSide = WS_LEFT;
 
-            btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
+            //btVector3 btWheelPos(relativePos.x, relativePos.y, relativePos.z);
+            btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
 
             std::string modelPath = "Buses/" + busname + "/" + wheelModel;
             RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
@@ -201,12 +231,15 @@ void Bus::loadXMLdata(std::string busname)
             wheelObj->addComponent(wheelRender);
 
             int collidesWith = COL_TERRAIN | COL_ENV;
-            PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btWheelPos, btVector3(0,0,0), X_AXIS, COL_WHEEL, collidesWith);
+            PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, btVector3(0, 0, 0), btVector3(0,0,0), X_AXIS, COL_WHEEL, collidesWith);
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
             wheelObj->addComponent(wheelCyl);
+            wheelObj->setPosition(relativePos);
+            //wheelObj->setPosition(wheelPosition);
 
-            ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
+
+            ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btVector3(relativePos.x, relativePos.y, relativePos.z), btVector3(0,1,0), btVector3(1,0,0));
             hinge1->setStiffness(2, stiffness);
             hinge1->setDamping(2, damping);
             hinge1->getBulletConstraint()->setLinearUpperLimit(btVector3(0,0,0.25));
@@ -225,7 +258,13 @@ void Bus::loadXMLdata(std::string busname)
             hinge1->getBulletConstraint()->getLinearUpperLimit(upperlimit);
             std::cout << upperlimit.x() << " " << upperlimit.y() << " " << upperlimit.z() << std::endl;
 
+            wheelObj->setPosition(wheelPosition);
+            _sceneObject->addChild(wheelObj);
+
+
             Wheel* w = new Wheel;
+            w->position = wheelPosition;
+            w->object = wheelObj;
             w->body = wheelCyl;
             w->suspension = hinge1;
             w->currentAngle = 0.0f;
@@ -241,51 +280,21 @@ void Bus::loadXMLdata(std::string busname)
         {
             std::cout << "XML: Door data" << std::endl;
 
-            std::string doorName(child->Attribute("name"));
             std::string doorType(child->Attribute("type"));
-            std::string doorModel(child->Attribute("model"));
-            float mass = (float)atof(child->Attribute("mass"));
-            char group = (char)atoi(child->Attribute("group"));
 
             if (doorType == "s")
             {
 
-                glm::vec3 doorPosition = XMLstringToVec3(child->Attribute("position"));
-                glm::vec3 relativePos = glm::vec3(busPosition.x + doorPosition.x, busPosition.y + doorPosition.y, busPosition.z + doorPosition.z);
+                Door* d = new DoorSimple(_sMgr, _pMgr, _chasisBody, busPosition, busname, texturePath, child);
 
-                // poczatek IF
-                btVector3 busPivot = XMLstringToBtVec3(child->Attribute("pivotA"));
-                btVector3 doorPivot = XMLstringToBtVec3(child->Attribute("pivotB"));
+                _sceneObject->addChild(d->getSceneObject());
 
-                SceneObject* doorObj = _sMgr->addSceneObject(doorName);
-				doorObj->setPosition(relativePos);
-
-                //doorObj->getTransform()->setPosition(relativePos);
-
-                std::string modelPath = "Buses/" + busname + "/" + doorModel;
-
-                RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-                RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr));
-
-                doorObj->addComponent(doorRender);
-
-                btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
-
-                int collidesWith = COL_ENV | COL_TERRAIN;
-                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, btDoorPos, btVector3(0,0,0), COL_DOOR, collidesWith);
-                doorObj->addComponent(doorBody);
-
-                ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
-
-                doorHinge->getBulletConstraint()->setLimit(-1.5,0);
-
-                Door* d = 0;
-                d = new DoorSimple(dr, doorBody, doorHinge, group);
                 _doors.push_back(d);
-            } // IF "S"
+            }
             else
             if (doorType == "se")
             {
+                /*
                 std::string armName(child->Attribute("armName"));
                 std::string armModel(child->Attribute("arm"));
                 float armMass = (float)atof(child->Attribute("armMass"));
@@ -401,11 +410,13 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 pivotD = XMLstringToBtVec3(child->Attribute("pivotD"));
 
                 ConstraintHinge* arm2doorHinge = _pMgr->createConstraintHinge(arm2Body, doorBody, pivotC, pivotD, btVector3(0,1,0), btVector3(0,1,0));
+                */
 
-
-                Door* d = 0;
-                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, rdir, group);
-                d->open();
+                //Door* d = 0;
+                //d = new DoorSE(doorObj, doorPosition, 0, 0, arm, armBody, busArmHinge, 0, rdir, group);
+                Door* d = new DoorSE(_sMgr, _pMgr, _chasisBody, busPosition, busname, texturePath, child);
+                _sceneObject->addChild(d->getSceneObject());
+                //d->open();
                 _doors.push_back(d);
             }
 
@@ -634,8 +645,6 @@ void Bus::accelerate()
             _engine->setThrottle(_engine->getThrottle() + 0.001f );
     else
         _engine->setThrottle(1.0f);
-
-    //updatePhysics();
 }
 
 
@@ -643,16 +652,12 @@ void Bus::brakeOn()
 {
     _accelerate = false;
     _brake = true;
-
-    //updatePhysics();
 }
 
 
 void Bus::brakeOff()
 {
     _brake = false;
-
-    //updatePhysics();
 }
 
 
@@ -665,7 +670,6 @@ void Bus::idle()
             _engine->setThrottle(_engine->getThrottle() - 0.001f);
         else
             _engine->setThrottle(0.0f);
-    //updatePhysics();
 }
 
 
@@ -695,13 +699,6 @@ void Bus::doorOpenClose(char doorGroup)
 
 }
 
-/*
-void Bus::closeDoor(unsigned char doorIndex)
-{
-    if (doorIndex <= _doors.size()-1)
-        _doors[doorIndex]->close();
-}
-*/
 
 void Bus::updatePhysics(float dt)
 {
@@ -751,4 +748,66 @@ void Bus::updatePhysics(float dt)
             w->body->getRigidBody()->setDamping(0, 0.0f);
         }
     }
+}
+
+
+void Bus::setTransformation(glm::vec3 position, glm::vec3 rotation)
+{
+    _sceneObject->setPosition(position);
+    _sceneObject->setRotation(rotation);
+
+
+    /*
+    glm::mat4 mPos = glm::translate(position);
+
+    glm::mat4 mRot;
+
+    mRot = glm::rotate(rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    mRot *= glm::rotate(rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    mRot *= glm::rotate(rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    glm::mat4 newMat = mPos * mRot * glm::mat4(1.0f);
+    */
+
+    //glm::mat4 newMat = _sceneObject->getGlobalTransformMatrix() * localMat;
+
+    for (int i = 0; i<_wheels.size(); i++)
+    {
+
+        //glm::vec3 vPos = _wheels[i]->position;
+        //glm::vec3 vRot = _wheels[i]->object->getRotation();
+        /*
+        glm::mat4 mPos = glm::translate(vPos);
+
+        glm::mat4 mRot;
+
+        mRot = glm::rotate(vRot.x, glm::vec3(1.0f, 0.0f, 0.0f));
+        mRot *= glm::rotate(vRot.y, glm::vec3(0.0f, 1.0f, 0.0f));
+        mRot *= glm::rotate(vRot.z, glm::vec3(0.0f, 0.0f, 1.0f));
+
+        glm::mat4 newMat = mPos * mRot * glm::mat4(1.0f);
+        */
+
+
+
+        //glm::mat4 wheelMat = _wheels[i]->object->getGlobalTransformMatrix();
+
+        //glm::mat4 busGlobalMatrix = _sceneObject->getGlobalTransformMatrix();
+
+        //_wheels[i]->object->setGlobalTransformMatrix(busGlobalMatrix * newMat);
+
+        /*
+            glm::vec3 scale;
+            glm::quat qrotation;
+            glm::vec3 translation;
+            glm::vec3 skew;
+            glm::vec4 perspective;
+            glm::decompose(_sceneObject->getGlobalTransformMatrix(), scale, qrotation, translation, skew, perspective);
+    */
+
+
+        //_wheels[i]->object->setPosition(position + vPos);
+        //_wheels[i]->object->setRotation(rotation * wRot);
+    }
+
 }
