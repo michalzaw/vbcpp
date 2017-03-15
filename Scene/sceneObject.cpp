@@ -56,6 +56,10 @@ SceneObject::~SceneObject()
                 //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                 break;
 
+            case CT_TREE_COMPONENT:
+                delete *i;
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -243,6 +247,10 @@ void SceneObject::removeComponent(Component* component)
                     //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                     break;
 
+                case CT_TREE_COMPONENT:
+                    delete *i;
+                    break;
+
             }
 
             /* ------------------------------------- */
@@ -279,6 +287,18 @@ Component* SceneObject::getComponent(unsigned int index)
 {
     if (index < _components.size())
         return _components[index];
+
+    return NULL;
+}
+
+
+Component* SceneObject::getComponent(ComponentType type)
+{
+    for (int i = 0; i < _components.size(); ++i)
+    {
+        if (_components[i]->getType() == type)
+            return _components[i];
+    }
 
     return NULL;
 }

@@ -482,9 +482,13 @@ void Renderer::render(RenderData* renderData)
             shader->setUniform("CameraPositionWorldspace", camera->getPosition());
 
             glm::vec3 d = GraphicsManager::getInstance().getWindVector();
-            /*d.x += rand() % 101 / 1000;
-            d.y += rand() % 101 / 1000;
-            d.z += rand() % 101 / 1000;*/
+
+            Component* treeComponent = i->getObject()->getComponent(CT_TREE_COMPONENT);
+            if (treeComponent != NULL)
+            {
+                d = static_cast<TreeComponent*>(treeComponent)->getWindVector();
+            }
+
             shader->setUniform("d", d);
         }
         if (mesh->material.shader == ALPHA_TEST_MATERIAL)

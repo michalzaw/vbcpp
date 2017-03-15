@@ -77,6 +77,7 @@ class SceneObject
         bool            isActive();
 
         Component*      getComponent(unsigned int index);
+        Component*      getComponent(ComponentType type);
         unsigned int    getComponentsCount();
 
 

@@ -7,6 +7,7 @@
 
 #include "../Graphics/GraphicsManager.h"
 #include "../Graphics/Roads.h"
+#include "../Graphics/TreeComponent.h"
 #include "../Physics/PhysicsManager.hpp"
 #include "SceneObject.h"
 #include "Skybox.h"

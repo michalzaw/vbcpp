@@ -17,7 +17,8 @@ enum ComponentType
     CT_RENDER_OBJECT,
     CT_CAMERA,
     CT_LIGHT,
-    CT_PHYSICAL_BODY
+    CT_PHYSICAL_BODY,
+    CT_TREE_COMPONENT
 
 };
 

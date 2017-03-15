@@ -7,6 +7,7 @@
 	<Components>
 	
 		<Component type="render" model="iglak.3ds" />
+		<Component type="tree" />
 	</Components>
 	
 </Object>

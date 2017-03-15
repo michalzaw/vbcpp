@@ -63,6 +63,7 @@ class GraphicsManager
         glm::vec3   getWindDirection();
         float       getWindVelocity();
         glm::vec3   getWindVector();
+        float       getWindValue();
 
 
         void update(float deltaTime);

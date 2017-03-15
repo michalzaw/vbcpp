@@ -9,6 +9,7 @@
 #include "Light.h"
 #include "Transform.h"
 #include "../Utils/RModel.h"
+#include "../Scene/SceneObject.h"
 
 
 struct TransformMatrices
@@ -34,8 +35,10 @@ class RenderListElement
 
         float       _distanceFromCamera;
 
+        SceneObject* _object; /* !!!!!!!!!! */
+
     public:
-        RenderListElement(RModel* model, Mesh* mesh, TransformMatrices matrices, float distance);
+        RenderListElement(RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object);
         ~RenderListElement();
 
         inline RModel* getModel()
@@ -49,6 +52,9 @@ class RenderListElement
 
         inline float getDistanceFromCamera()
         { return _distanceFromCamera; }
+
+        inline SceneObject* getObject()
+        { return _object; }
 
 };
 

@@ -2,6 +2,7 @@
 #include <fstream>
 #include <algorithm>
 #include <sstream>
+#include <ctime>
 
 #include "Utils/Helpers.hpp"
 
@@ -478,6 +479,8 @@ void loadTerrain()
 // ### MAIN ###
 int main()
 {
+    srand(static_cast<unsigned int>(time(NULL)));
+
     loadScene();
 
     win = new Window;
@@ -504,7 +507,7 @@ int main()
 
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-	GraphicsManager::getInstance().setWindVelocity(0.4f);
+	GraphicsManager::getInstance().setWindVelocity(0.6f);
 
 
     /* terrain */

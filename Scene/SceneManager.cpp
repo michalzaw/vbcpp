@@ -393,6 +393,12 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
                 sceneObject->addComponent(physicalBody);
             }
         }
+        else
+        if (componentType == "tree")
+        {
+            TreeComponent* component = new TreeComponent;
+            sceneObject->addComponent(component);
+        }
 
         sceneObject->setPosition(position);
         sceneObject->setRotation(rotation);

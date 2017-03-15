@@ -175,6 +175,12 @@ glm::vec3 GraphicsManager::getWindVector()
 }
 
 
+float GraphicsManager::getWindValue()
+{
+    return _windValue;
+}
+
+
 void GraphicsManager::update(float deltaTime)
 {
     _windValue += _windVelocity * deltaTime;
@@ -204,7 +210,7 @@ RenderData* GraphicsManager::getRenderData()
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
             RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()));
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else
