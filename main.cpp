@@ -220,7 +220,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (zapora)
         {
             zapora->setPosition(glm::vec3(0,3,0));
-            zapora->setRotation(glm::vec3(0,10,0));
+            zapora->setRotation(glm::vec3(PI / 2.0,0,0));
         }
 
     }

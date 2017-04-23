@@ -6,7 +6,7 @@
 class PhysicalBodySphere : virtual public PhysicalBody
 {
     public:
-        PhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, btVector3 rot);
+        PhysicalBodySphere(btScalar r, btScalar mass);
         virtual ~PhysicalBodySphere();
 
         btScalar getRadius() { return _radius; }

@@ -6,7 +6,7 @@
 class PhysicalBodyBox : public PhysicalBody
 {
     public:
-        PhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, btVector3 rot);
+        PhysicalBodyBox(btVector3 halfExtents, btScalar mass);
         virtual ~PhysicalBodyBox();
 
         btVector3 getHalfExtents() { return _halfExtents; }

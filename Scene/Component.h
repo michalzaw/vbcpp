@@ -44,7 +44,7 @@ class Component
         SceneObject*    getSceneObject();
         bool            isActive();
 
-        virtual void changedTransform(glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0)) {}
+        virtual void changedTransform() {}
 
 };
 

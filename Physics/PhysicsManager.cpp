@@ -138,9 +138,9 @@ void PhysicsManager::simulate(btScalar timeStep)
 }
 
 
-PhysicalBodyBox* PhysicsManager::createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter)
+PhysicalBodyBox* PhysicsManager::createPhysicalBodyBox(btVector3 halfExtents, btScalar mass, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodyBox* b = new PhysicalBodyBox(halfExtents, mass, pos, rot);
+    PhysicalBodyBox* b = new PhysicalBodyBox(halfExtents, mass);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -150,9 +150,9 @@ PhysicalBodyBox* PhysicsManager::createPhysicalBodyBox(btVector3 halfExtents, bt
 }
 
 
-PhysicalBodyCylinder* PhysicsManager::createPhysicalBodyCylinder(btVector3 dim, btScalar mass, btVector3 pos, btVector3 rot, ShapeAlign align, short collisionGroup, short collisionFilter)
+PhysicalBodyCylinder* PhysicsManager::createPhysicalBodyCylinder(btVector3 dim, btScalar mass, ShapeAlign align, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodyCylinder* b = new PhysicalBodyCylinder(dim, mass, pos, rot, align);
+    PhysicalBodyCylinder* b = new PhysicalBodyCylinder(dim, mass, align);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -162,9 +162,9 @@ PhysicalBodyCylinder* PhysicsManager::createPhysicalBodyCylinder(btVector3 dim, 
 }
 
 
-PhysicalBodySphere* PhysicsManager::createPhysicalBodySphere(btScalar r, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter)
+PhysicalBodySphere* PhysicsManager::createPhysicalBodySphere(btScalar r, btScalar mass, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodySphere* b = new PhysicalBodySphere(r, mass, pos, rot);
+    PhysicalBodySphere* b = new PhysicalBodySphere(r, mass);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -185,9 +185,9 @@ PhysicalBodyStaticPlane* PhysicsManager::createPhysicalBodyStaticPlane(btVector3
     return b;
 }
 
-PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter)
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass, pos, rot);
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -196,9 +196,9 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* ver
     return b;
 }
 
-PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter)
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass, pos, rot);
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -207,9 +207,9 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* 
     return b;
 }
 
-PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, btVector3 rot, short collisionGroup, short collisionFilter)
+PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RModel* model, short collisionGroup, short collisionFilter)
 {
-    PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model, pos, rot);
+    PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 

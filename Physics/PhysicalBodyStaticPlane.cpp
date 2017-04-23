@@ -3,7 +3,7 @@
 #include "../Utils/Helpers.hpp"
 
 PhysicalBodyStaticPlane::PhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset)
-: PhysicalBody(0, planeNormal),
+: PhysicalBody(0),
 _offset(offset)
 {
     updateBody();

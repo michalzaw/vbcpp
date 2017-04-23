@@ -69,6 +69,11 @@ SceneObject::~SceneObject()
 
 void SceneObject::changedTransform()
 {
+    _localTransformMatrixIsCalculated = false;
+    _localNormalMatrixIsCalculated = false;
+    _globalTransformMatrixIsCalculated = false;
+    _globalNormalMatrixIsCalculated = false;
+
     for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
     {
         (*i)->changedTransform();
@@ -76,27 +81,8 @@ void SceneObject::changedTransform()
 
     for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
     {
-        if ((*i)->getType() == CT_PHYSICAL_BODY)
-        {
-            if (!_sceneManager->getPhysicsManager()->isRunning()) // set object transform only if physics is NOT running; otherwise - let the physics update objects' transform
-                (*i)->changedTransform(_position, _rotation);
-        }
-        else
-            (*i)->changedTransform(_position, _rotation);
+        (*i)->changedTransform();
     }
-
-    /*
-    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
-    {
-        //if ((*i)->getType() == CT_PHYSICAL_BODY)
-            //(*i)->setTransform(_position, _rotation);
-    }
-    */
-
-    _localTransformMatrixIsCalculated = false;
-    _localNormalMatrixIsCalculated = false;
-    _globalTransformMatrixIsCalculated = false;
-    _globalNormalMatrixIsCalculated = false;
 }
 
 
@@ -212,6 +198,8 @@ void SceneObject::addComponent(Component* component)
         component->setSceneObject(this);
 
         _components.push_back(component);
+
+        component->changedTransform();
     }
 }
 
@@ -342,6 +330,7 @@ void SceneObject::setPosition(float x, float y, float z)
 void SceneObject::setRotation(glm::vec3 rotation)
 {
     _rotation = rotation;
+    _rotationQuaternion = glm::quat(rotation);
 
     _rotationMode = RM_EULER_ANGLES;
 
@@ -358,6 +347,7 @@ void SceneObject::setRotation(float x, float y, float z)
 void SceneObject::setRotationQuaternion(glm::quat rotation)
 {
     _rotationQuaternion = rotation;
+    _rotation = glm::eulerAngles(rotation);
 
     _rotationMode = RM_QUATERNION;
 

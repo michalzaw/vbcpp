@@ -6,6 +6,8 @@
 #include "../Scene/Component.h"
 #include "../Scene/SceneObject.h"
 
+#include "../Utils/Math.h"
+
 #include <memory>
 
 class PhysicsManager;
@@ -31,32 +33,13 @@ class PhysicalBody : public Component
         btCollisionShape*   getCollisionShape() { return _collShape.get(); }
 
         btScalar getMass() { return _mass; }
-        //void getTransform(btTransform& t);
-
-        void setRotation(btVector3 rot);
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
 
         void update();
 
 
-        virtual void changedTransform(glm::vec3 position, glm::vec3 rotation)
-        {
-            btTransform transf;
-            transf.setIdentity();
-
-            btQuaternion quat;
-            quat.setEulerZYX(rotation.x, rotation.y, rotation.z);
-
-            btVector3 pos(position.x, position.y, position.z);
-            transf.setOrigin(pos);
-
-            transf.setRotation(quat);
-            _rigidBody->setCenterOfMassTransform(transf);
-            _motionState->setWorldTransform(transf);
-
-            _rigidBody->activate();
-        }
+        virtual void changedTransform();
 
     protected:
         std::unique_ptr<btRigidBody>            _rigidBody;
@@ -65,6 +48,8 @@ class PhysicalBody : public Component
         btScalar                _mass;
         btVector3               _position;
         btVector3               _rotation;
+
+        bool _isUpdateTransformFromObject;
 
         virtual void updateBody() { }
 };

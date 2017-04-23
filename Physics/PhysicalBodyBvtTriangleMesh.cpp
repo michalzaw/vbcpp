@@ -1,7 +1,7 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
-PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, btVector3 rot)
-: PhysicalBody(0, pos, rot),
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RModel* model)
+: PhysicalBody(0),
 _model(model)
 {
     printf("BvtTriangleMeshShape - Konstruktor\n");

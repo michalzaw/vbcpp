@@ -168,7 +168,7 @@ void SceneManager::loadScene(std::string filename)
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = addSceneObject("terrain");
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), btVector3(0,0,0), COL_TERRAIN, collidesWith);
+    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
     terrainObject->addComponent(terrainObj);
@@ -255,7 +255,7 @@ std::cout << segments.size() << std::endl;
         SceneObject* roadSceneObject = addSceneObject(name);
         roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), btVector3(0,0,0), COL_TERRAIN, collidesWith);
+        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, COL_TERRAIN, collidesWith);
         roadMesh->setRestitution(0.9f);
         roadMesh->getRigidBody()->setFriction(1.0f);
         roadSceneObject->addComponent(roadMesh);
@@ -352,12 +352,11 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             PhysicalBody* physicalBody;
             if (bodyType == "box")
             {
-                int collidesWith = COL_TERRAIN | COL_BUS;
+                int collidesWith = COL_TERRAIN | COL_BUS |COL_ENV;
                 float halfExtents = atof(componentElement->Attribute("halfExtents"));
                 float mass = atof(componentElement->Attribute("mass"));
 
-                physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, btVector3(0,0,0),
-                                                                      btVector3(0, 0, 0), COL_ENV, collidesWith);
+                physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, COL_ENV, collidesWith);
                 //physicalBody = _physicsManager->createPhysicalBodyBox(btVector3(halfExtents,halfExtents,halfExtents), mass, btVector3(0,0,0), COL_ENV, collidesWith);
                 //physicalBody->setRestitution(0.1f);
                 sceneObject->addComponent(physicalBody);
@@ -368,10 +367,9 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
                 std::cout << "<><><><><><>>####  Model: " << model << std::endl;
                 float mass = atoi(componentElement->Attribute("mass"));
 
-                int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR;
+                int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR |COL_ENV;
 
                 PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass,
-                                                                                                     btVector3(0, 0, 0), btVector3(0, 0, 0),
                                                                                                      COL_ENV, collidesWith);
 
                 sceneObject->addComponent(physicalBody);
@@ -383,10 +381,9 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
                 float mass = atoi(componentElement->Attribute("mass"));
 
 
-                int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR;
+                int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR |COL_ENV;
 
                 PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), 0,
-                                                                                                     btVector3(0, 0, 0), btVector3(0, 0, 0),
                                                                                                      COL_ENV, collidesWith);
                 //terrainMesh->setRestitution(0.9f);
                 //terrainMesh->getRigidBody()->setFriction(1.0f);

@@ -2,7 +2,7 @@
 #define MATH_H_INCLUDED
 
 
-const GLfloat PI = 3.14159265359f;
+const float PI = 3.14159265359f;
 
 
 inline float degToRad(float deg)

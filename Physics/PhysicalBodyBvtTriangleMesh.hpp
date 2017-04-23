@@ -9,7 +9,7 @@
 class PhysicalBodyBvtTriangleMesh : public PhysicalBody
 {
     public:
-        PhysicalBodyBvtTriangleMesh(RModel* model, btVector3 pos, btVector3 rot);
+        PhysicalBodyBvtTriangleMesh(RModel* model);
         virtual ~PhysicalBodyBvtTriangleMesh();
 
     private:

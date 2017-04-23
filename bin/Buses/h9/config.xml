@@ -5,7 +5,7 @@
 <Engine model="eng_wskmielec" />
 
 <Object name="bus"> 
-	<transform position="1,4,12" rotation="0,1.0,0" scale="1,1,1" />
+	<transform position="1,4,12" rotation="0,0.0,0" scale="1,1,1" />
 
 	<body model="h9.3ds" textures="PKS" mass="9.6" /> <!-- mass in tons -->
 
