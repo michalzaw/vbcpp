@@ -13,9 +13,6 @@ class Constraint
 
         btTypedConstraint* getBulletConstraint() { return _constraint; }
 
-        void setBodyA(PhysicalBody* body) { _bodyA = body; }
-        void setBodyB(PhysicalBody* body) { _bodyB = body; }
-
         PhysicalBody* getBodyA() { return _bodyA; }
         PhysicalBody* getBodyB() { return _bodyB; }
 

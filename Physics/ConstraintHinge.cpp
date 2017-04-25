@@ -21,5 +21,5 @@ void ConstraintHinge::updateConstraint()
 {
     safe_delete<btTypedConstraint>(_constraint);
 
-    _constraint = new btHingeConstraint(*(_bodyA->getRigidBody()), *(_bodyB->getRigidBody()), _pivotA , _pivotB, _axisA, _axisB);
+    _constraint = new btHingeConstraint(*(_bodyA->getRigidBody()), *(_bodyB->getRigidBody()), _pivotA, _pivotB, _axisA, _axisB);
 }

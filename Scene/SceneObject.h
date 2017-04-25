@@ -111,6 +111,17 @@ class SceneObject
         glm::mat4& getGlobalTransformMatrix() const;
         glm::mat4& getGlobalNormalMatrix() const;
 
+        glm::vec3 transformLocalPointToGlobal(glm::vec3 point)
+        {
+            glm::vec4 p = getGlobalTransformMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
+            return glm::vec3(p.x, p.y, p.z);
+        }
+        glm::vec3 transformLocalVectorToGlobal(glm::vec3 vec)
+        {
+            glm::vec4 v = getGlobalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
+            return glm::vec3(v.x, v.y, v.z);
+        }
+
 };
 
 

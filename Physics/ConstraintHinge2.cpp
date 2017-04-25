@@ -34,5 +34,12 @@ void ConstraintHinge2::UpdateConstraint()
 {
     safe_delete<btTypedConstraint>(_constraint);
 
-    _constraint = new btHinge2Constraint(*(_bodyA->getRigidBody()), *(_bodyB->getRigidBody()), _pivot, _axisA, _axisB);
+    glm::vec3 newPivot = _bodyA->getSceneObject()->transformLocalPointToGlobal(glm::vec3(_pivot.x(), _pivot.y(), _pivot.z()));
+    glm::vec3 newAxisA = _bodyA->getSceneObject()->transformLocalVectorToGlobal(glm::vec3(_axisA.x(), _axisA.y(), _axisA.z()));
+    glm::vec3 newAxisB = _bodyA->getSceneObject()->transformLocalVectorToGlobal(glm::vec3(_axisB.x(), _axisB.y(), _axisB.z()));
+    btVector3 newBtPivot(newPivot.x, newPivot.y, newPivot.z);
+    btVector3 newBtAxisA(newAxisA.x, newAxisA.y, newAxisA.z);
+    btVector3 newBtAxisB(newAxisB.x, newAxisB.y, newAxisB.z);
+
+    _constraint = new btHinge2Constraint(*(_bodyA->getRigidBody()), *(_bodyB->getRigidBody()), newBtPivot, newBtAxisA, newBtAxisB);
 }

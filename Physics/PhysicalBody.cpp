@@ -2,13 +2,15 @@
 
 #include "../Utils/Helpers.hpp"
 
+#include "Constraint.hpp"
+
 // =========================================
 // CONSTRUCTOR & DESTRUCTOR
 
-PhysicalBody::PhysicalBody(btScalar m, btVector3 pos, btVector3 rot)
+PhysicalBody::PhysicalBody(btScalar m)
 : Component(CT_PHYSICAL_BODY),
 _rigidBody(nullptr), _collShape(nullptr), _motionState(nullptr),
-_mass(m), _position(pos), _rotation(rot),
+_mass(m), _position(btVector3(0,0,0)),
 _isUpdateTransformFromObject(true)
 {
 
@@ -52,6 +54,30 @@ void PhysicalBody::changedTransform()
 
         _rigidBody->setCenterOfMassTransform(transf);
         _motionState->setWorldTransform(transf);
+
+        for (int i = 0; i < _constraints.size(); ++i)
+        {
+            /*PhysicalBody* b;
+            if (_constraints[i]->getBodyA() != this)
+                b = _constraints[i]->getBodyA();
+
+            else if (_constraints[i]->getBodyB() != this)
+                b = _constraints[i]->getBodyB();*/
+            PhysicalBody* a = _constraints[i]->getBodyA();
+            PhysicalBody* b = _constraints[i]->getBodyB();
+
+            if (a == this && b != this)
+                a = b;
+            else
+                continue;
+
+            glm::vec3 relativePos = getSceneObject()->transformLocalPointToGlobal(glm::vec3(a->_position.x(), a->_position.y(), a->_position.z()));
+
+            _isUpdateTransformFromObject = false;
+            a->getSceneObject()->setPosition(relativePos);
+            a->getSceneObject()->setRotation(getSceneObject()->getRotation());
+            _isUpdateTransformFromObject = true;
+        }
 
         _rigidBody->activate();
     }

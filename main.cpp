@@ -228,7 +228,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     if (glfwGetKey( window, GLFW_KEY_T ) == GLFW_PRESS)
     {
         if (bus)
+        {
+            bus->getSceneObject()->setRotation(0, PI/2, 0);
             bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
+        }
     }
 }
 

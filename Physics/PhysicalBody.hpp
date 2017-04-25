@@ -11,6 +11,7 @@
 #include <memory>
 
 class PhysicsManager;
+class Constraint;
 
 #define BIT(x) (1<<(x))
 enum collisiontypes {
@@ -25,7 +26,7 @@ enum collisiontypes {
 class PhysicalBody : public Component
 {
     public:
-        PhysicalBody(btScalar m, btVector3 pos = btVector3(0,0,0), btVector3 rot = btVector3(0,0,0));
+        PhysicalBody(btScalar m);
         virtual ~PhysicalBody();
 
         btRigidBody* getRigidBody() { return _rigidBody.get(); }
@@ -35,6 +36,16 @@ class PhysicalBody : public Component
         btScalar getMass() { return _mass; }
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
+
+        void addConstraint(Constraint* c)
+        {
+            _constraints.push_back(c);
+        }
+
+        void setDefaultPosition(btVector3 pos)
+        {
+            _position = pos;
+        }
 
         void update();
 
@@ -46,8 +57,9 @@ class PhysicalBody : public Component
         std::unique_ptr<btCollisionShape>       _collShape;
         std::unique_ptr<btDefaultMotionState>   _motionState;
         btScalar                _mass;
-        btVector3               _position;
-        btVector3               _rotation;
+        btVector3               _position;      // default position
+
+        std::vector<Constraint*> _constraints;
 
         bool _isUpdateTransformFromObject;
 
