@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="no_texture" name="Collision" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="" normalmap_texture="" alpha_texture="" shininess="96" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="no_texture" name="Material#34" ambient="0,0,0,1" diffuse="0,0,0,1" specular="0.196078,0.196078,0.196078,1" diffuse_texture="" normalmap_texture="" alpha_texture="" shininess="96" transparency="0.7" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material#39d" ambient="0.996078,0.996078,0.996078,1" diffuse="0.996078,0.996078,0.996078,1" specular="0.188235,0.188235,0.188235,1" diffuse_texture="doors.bmp" normalmap_texture="" alpha_texture="" shininess="96" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>
