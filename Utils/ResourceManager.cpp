@@ -30,10 +30,9 @@ ResourceManager& ResourceManager::getInstance()
 }
 
 
-// Ładowanie tektur
-RTexture2D* ResourceManager::loadTexture(std::string path)
+Resource* ResourceManager::findResource(std::string path)
 {
-    // Sprawdzamy czy zasob juz istnieje
+// Sprawdzamy czy zasob juz istnieje
     std::list<std::unique_ptr<Resource>>::iterator it;
     for ( it = _resources.begin(); it != _resources.end(); ++it)
     {
@@ -42,12 +41,22 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
             std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
             std::unique_ptr<Resource>& res = *it;
 
-            RTexture2D* tex =  dynamic_cast<RTexture2D*>( res.get());
-
-//            std::cout << "Texture ID: " << tex->getID() << std::endl;
-
-            return tex;//tex->getID();
+            return res.get();
         }
+    }
+
+    return 0;
+}
+
+
+// Ładowanie tektur
+RTexture2D* ResourceManager::loadTexture(std::string path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RTexture2D* tex = dynamic_cast<RTexture2D*>(res);
+        return tex;
     }
 
     // Zasob nie istnieje
@@ -93,17 +102,12 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
         path += ";" + defines[i];
     }
 
-    // Sprawdzamy czy zasob juz istnieje
-    std::list<std::unique_ptr<Resource>>::iterator it;
-    for ( it = _resources.begin(); it != _resources.end(); ++it)
-    {
-        if ( (*it)->getPath() == path )
-        {
-            std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
-            std::unique_ptr<Resource>& res = *it;
 
-            return dynamic_cast<RShader*>( res.get() );
-        }
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RShader* shdr = dynamic_cast<RShader*>(res);
+        return shdr;
     }
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
@@ -126,20 +130,13 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
 RModel* ResourceManager::loadModel(std::string path, std::string texturePath)
 {
-    //std::string path = vertexPath + ";" + fragmPath;
-
-    // Sprawdzamy czy zasob juz istnieje
-    std::list<std::unique_ptr<Resource>>::iterator it;
-    for ( it = _resources.begin(); it != _resources.end(); ++it)
+    Resource* res = findResource(path);
+    if (res != 0)
     {
-        if ( (*it)->getPath() == path )
-        {
-            std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
-            std::unique_ptr<Resource>& res = *it;
-
-            return dynamic_cast<RModel*>( res.get() );
-        }
+        RModel* model = dynamic_cast<RModel*>(res);
+        return model;
     }
+
 
     Load3ds l3ds;
 
@@ -167,17 +164,11 @@ RModel* ResourceManager::loadModel(std::string path, std::string texturePath)
 
 RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 {
-    // Sprawdzamy czy zasob juz istnieje
-    std::list<std::unique_ptr<Resource>>::iterator it;
-    for ( it = _resources.begin(); it != _resources.end(); ++it)
+    Resource* res = findResource(path);
+    if (res != 0)
     {
-        if ( (*it)->getPath() == path )
-        {
-            std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
-            std::unique_ptr<Resource>& res = *it;
-
-            return dynamic_cast<RFont*>( res.get() );
-        }
+        RFont* font = dynamic_cast<RFont*>(res);
+        return font;
     }
 
     FontLoader loader;
@@ -202,4 +193,3 @@ RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 
     return 0;
 }
-

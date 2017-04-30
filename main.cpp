@@ -22,6 +22,7 @@
 #include "Physics/PhysicalBodyBvtTriangleMesh.hpp"
 
 #include "Scene/SceneManager.h"
+#include "Scene/SoundManager.h"
 
 #include "Utils/ResourceManager.h"
 
@@ -53,6 +54,9 @@ double oldMouseX, oldMouseY;
 Window* win;
 PhysicsManager* physMgr;
 SceneManager* sceneMgr;
+SoundManager* sndMgr = 0;
+
+SoundComponent* soundComp = 0;
 
 SceneObject* point, *point2, *point3, *dirLight, *spot = 0;
 
@@ -194,13 +198,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         if (!bus->getEngine()->isRunning())
         {
-            bus->getEngine()->turnOn();
+            //bus->getEngine()->turnOn();
+            bus->startEngine();
             engineIsRunning->setText("Engine on");
+            //soundComp->play();
         }
         else
         {
-            bus->getEngine()->turnOff();
+            //bus->getEngine()->turnOff();
+            bus->stopEngine();
             engineIsRunning->setText("Engine off");
+            //soundComp->stop();
         }
     }
 
@@ -229,6 +237,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (bus)
             bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
     }
+
+
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -497,7 +507,7 @@ int main()
 
     physMgr = new PhysicsManager;
 	sceneMgr = new SceneManager(physMgr);
-
+    sndMgr = new SoundManager();
 
 
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
@@ -529,8 +539,16 @@ int main()
     treeObj->setPosition(-10.0f, 4.371f, -5.0f);*/
 
     //bus = new Bus(sceneMgr, physMgr, "h9");
-    bus = new Bus(sceneMgr, physMgr, gameCfg.busModel);
+    bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
 
+    //SoundComponent* sC = dynamic_cast<SoundComponent*>(bus->getSceneObject()->getComponentByType(CT_SOUND));
+
+    //if (sC != 0)
+    //    sndMgr->addSoundComponent(sC);
+
+    //soundComp = sndMgr->addSoundComponent( new SoundComponent("engine.wav", true));
+
+    //bus->getSceneObject()->addComponent(soundComp);
 
     /*
     SceneObject* crate = sceneMgr->addSceneObject("crate");
@@ -647,6 +665,8 @@ int main()
     labelTorque->scale(0.6f, 0.6f);
 
 
+    sndMgr->setActiveCamera(camFPS);
+
     std::stringstream stream;
 
     // Time calculation variables
@@ -716,6 +736,8 @@ int main()
             t += deltaTime;
         }
 
+        sndMgr->update();
+
         stream.str(std::string());
         stream << bus->getGearbox()->currentRatio();
         std::string gearRatioString("Gear ratio: ");
@@ -759,6 +781,7 @@ int main()
 
     bus->drop();
 
+    sndMgr->drop();
     physMgr->drop();
     renderer->drop();
     delete sceneMgr;

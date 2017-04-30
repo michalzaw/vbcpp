@@ -9,6 +9,7 @@
 
 #include "SceneObject.h"
 #include "SceneManager.h"
+#include "SoundManager.h"
 #include "../Physics/PhysicsManager.hpp"
 
 #include "DoorSimple.h"
@@ -71,7 +72,7 @@ typedef std::vector<Light*> HeadlightsList;
 class Bus : virtual public RefCounter
 {
     public:
-        Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename);
+        Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
         virtual ~Bus();
 
         SceneObject* getSceneObject() { return _sceneObject; }
@@ -97,6 +98,9 @@ class Bus : virtual public RefCounter
         Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
         Engine* getEngine() { if (_engine) return _engine; }
 
+        void startEngine();
+        void stopEngine();
+
         // Door methods
         void doorOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
@@ -110,6 +114,7 @@ class Bus : virtual public RefCounter
         PhysicalBodyConvexHull* _chasisBody;
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
+        SoundManager*   _sndMgr;
 
         Gearbox*        _gearbox;
         Engine*         _engine;

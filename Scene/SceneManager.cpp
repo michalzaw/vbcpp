@@ -246,8 +246,8 @@ void SceneManager::loadScene(std::string filename)
 
             segmentElement = segmentElement->NextSiblingElement("Segment");
         }
-std::cout << profiles[profileName].size() << std::endl;
-std::cout << segments.size() << std::endl;
+        //std::cout << profiles[profileName].size() << std::endl;
+        //std::cout << segments.size() << std::endl;
         // create road
         Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
         RModel* roadModel2 = new RModel("", roadModel);
@@ -282,7 +282,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
     std::string dirPath = "Objects/" + name + "/";
     std::string fullPath = dirPath + "object.xml";
 
-    std::cout << "Object path: " << fullPath << std::endl;
+    //std::cout << "Object path: " << fullPath << std::endl;
 
     XMLDocument doc;
     XMLError result = doc.LoadFile( fullPath.c_str() );
@@ -408,7 +408,7 @@ void SceneManager::loadRoadProfile(std::string name, std::map<std::string, std::
     std::string fullPath = dirPath + "profile.xml";
     std::string materialFullPath = MaterialLoader::createMaterialFileName(fullPath);
 
-    std::cout << "Profile path: " << fullPath << std::endl;
+    //std::cout << "Profile path: " << fullPath << std::endl;
 
     XMLDocument doc;
     XMLError result = doc.LoadFile( fullPath.c_str() );

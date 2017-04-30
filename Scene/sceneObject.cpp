@@ -284,6 +284,18 @@ Component* SceneObject::getComponent(unsigned int index)
 }
 
 
+Component* SceneObject::getComponentByType(ComponentType type)
+{
+    for (std::vector<Component*>::iterator i = _components.begin(); i != _components.end(); ++i)
+    {
+        if ((*i)->getType() == type)
+            return *i;
+    }
+
+    return 0;
+}
+
+
 bool SceneObject::isActive()
 {
     if (_parent != NULL)

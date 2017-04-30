@@ -40,6 +40,8 @@ class Engine
 
         float getCurrentTorque() { return _currentTorque; }
 
+        std::string getSoundFilename() { return _sound; }
+
         void update();
 
     protected:
@@ -50,6 +52,8 @@ class Engine
         float   _currentRPM;
         float   _currentTorque;
         float   _maxRPM;
+
+        std::string _sound;
 
         std::vector<point>  _torqueCurve;
         std::vector<params> _curveParams;

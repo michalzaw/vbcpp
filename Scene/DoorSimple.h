@@ -7,8 +7,8 @@
 class DoorSimple : virtual public Door
 {
     public:
-        DoorSimple(RModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge, char group = 1)
-        : Door(model, body, group), _hinge(hinge)
+        DoorSimple(RModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
+        : Door(model, body, openDoor, closeDoor, group), _hinge(hinge)
         {
             close();
         }
@@ -22,13 +22,15 @@ class DoorSimple : virtual public Door
 
         void open()
         {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 0.15f);
+            //_doorOpenSound->play();
+            _hinge->getBulletConstraint()->enableAngularMotor(true, -2.1f, 0.15f);
             _state = EDS_OPENING;
         }
 
         void close()
         {
-            _hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 0.15f);
+            //_doorCloseSound->play();
+            _hinge->getBulletConstraint()->enableAngularMotor(true, 2.1f, 0.15f);
             _state = EDS_CLOSING;
         }
 
