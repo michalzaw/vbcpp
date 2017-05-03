@@ -8,6 +8,7 @@
 #include "../Graphics/GraphicsManager.h"
 #include "../Graphics/Roads.h"
 #include "../Physics/PhysicsManager.hpp"
+#include "SoundManager.h"
 #include "SceneObject.h"
 #include "Skybox.h"
 
@@ -17,13 +18,14 @@ class SceneManager
     private:
         GraphicsManager*    _graphicsManager;
         PhysicsManager*     _physicsManager;
+        SoundManager*       _soundManager;
 
         std::list<SceneObject*> _sceneObjects;
 
         Skybox* _sky;
 
     public:
-        SceneManager(PhysicsManager* pMgr);
+        SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
 
         //GraphicsManager*    getGraphicsManager();

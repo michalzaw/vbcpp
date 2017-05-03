@@ -9,8 +9,8 @@ using namespace tinyxml2;
 #include "../Utils/Helpers.hpp"
 #include "../Graphics/LoadTerrainModel.h"
 
-SceneManager::SceneManager(PhysicsManager* pMgr)
-    : _sky(NULL), _physicsManager(pMgr)
+SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
+    : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";
@@ -392,6 +392,34 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
                 //terrainMesh->getRigidBody()->setFriction(1.0f);
                 sceneObject->addComponent(physicalBody);
             }
+        }
+        else
+        if (componentType == "sound")
+        {
+            std::string soundFile = componentElement->Attribute("file");
+
+            std::string soundLooping = componentElement->Attribute("looping");
+
+            std::string soundPath = dirPath + soundFile;
+
+
+            bool looping = (soundLooping == "true" ? true : false);
+
+            std::cout << "LOOPING: " << looping << std::endl;
+
+            /*
+            SoundComponent* openSoundComp = new SoundComponent(openSound);
+            _sndMgr->addSoundComponent(openSoundComp);
+
+            doorObj->addComponent(openSoundComp);
+            doorObj->addComponent(closeSoundComp);
+            */
+
+            SoundComponent* sound = new SoundComponent(soundPath, EST_AMBIENT, looping);
+            _soundManager->addSoundComponent(sound);
+
+            sceneObject->addComponent(sound);
+
         }
 
         sceneObject->setPosition(position);

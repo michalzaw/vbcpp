@@ -10,11 +10,19 @@
 
 #include "Component.h"
 
+
+typedef enum SoundType
+{
+    EST_PLAYER = 0,
+    EST_AMBIENT
+};
+
+
 class SoundComponent : virtual public Component
 {
     public:
-        SoundComponent(std::string file, bool looping = false)
-        : _buffer(0), _source(0), Component(CT_SOUND), _play(false), _looping(looping)
+        SoundComponent(std::string file, SoundType type, bool looping = false)
+        : _buffer(0), _source(0), Component(CT_SOUND), _play(false), _looping(looping), _type(type), _playDistance(10.0f)
         {
         std::cout << "Engine sound: " << file << std::endl;
             alGenSources( 1, &_source );
@@ -78,34 +86,45 @@ class SoundComponent : virtual public Component
                 alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
             }
 
-            if (_play)
-            {
-                ALenum state;
-
-                alGetSourcei(_source, AL_SOURCE_STATE, &state);
-
-
-                //if (state != AL_INITIAL)
-                    //alSourcePlay(_source);
-                    //_play = false;
-                //else if (state == AL_STOPPED)
-                    //_play = false;
-
-            }
-            //else
-                //alSourceStop(_source);
         }
+
+
+        glm::vec3 getPosition()
+        {
+            return _object->getPosition();
+        }
+
+
+        float getPlayDistance()
+        {
+            return _playDistance;
+        }
+
 
         void play()
         {
+            ALenum state;
+
+            alGetSourcei(_source, AL_SOURCE_STATE, &state);
+
+            std::cout << _source << "PLAY" << std::endl;
+
             //_play = true;
-            alSourcePlay(_source);
+
+            if (state != AL_PLAYING)
+                alSourcePlay(_source);
         }
 
         void stop()
         {
             alSourceStop(_source);
             //_play = false;
+        }
+
+
+        SoundType getSoundType()
+        {
+            return _type;
         }
 
         void setGain(ALfloat gain)
@@ -124,6 +143,9 @@ class SoundComponent : virtual public Component
         bool    _looping;
 
         bool    _play;
+
+        SoundType   _type;
+        float       _playDistance;
 };
 
 

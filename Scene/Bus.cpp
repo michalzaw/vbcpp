@@ -96,7 +96,7 @@ void Bus::loadXMLdata(std::string busname)
     // Create Sound Component if sound filename is defined in Engine XML config file
     if (_engine->getSoundFilename() != "")
     {
-        SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), true);
+        SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
         _sceneObject->addComponent(soundComp);
         soundComp->setGain(0.4f);
 
@@ -270,10 +270,10 @@ void Bus::loadXMLdata(std::string busname)
 
 
             // Create sound component
-            SoundComponent* openSoundComp = new SoundComponent(openSound);
+            SoundComponent* openSoundComp = new SoundComponent(openSound, EST_PLAYER);
             _sndMgr->addSoundComponent(openSoundComp);
 
-            SoundComponent* closeSoundComp = new SoundComponent(closeSound);
+            SoundComponent* closeSoundComp = new SoundComponent(closeSound, EST_PLAYER);
             _sndMgr->addSoundComponent(closeSoundComp);
 
             SceneObject* doorObj = 0;

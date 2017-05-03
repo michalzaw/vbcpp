@@ -43,8 +43,6 @@ class SoundManager : virtual public RefCounter
             {
                 delete *i;
             }
-            //alcDestroyContext( _ALcontext );
-            //alcCloseDevice( _ALdevice );
 
             _device = alcGetContextsDevice(_context);
             alcMakeContextCurrent(NULL);
@@ -64,10 +62,12 @@ class SoundManager : virtual public RefCounter
         void update()
         {
 
+
+
             if (_camera)
             {
-                glm::vec3 pos = _camera->getPosition();
-                alListener3f( AL_POSITION, pos.x, pos.y, pos.z );
+                glm::vec3 cameraPos = _camera->getPosition();
+                alListener3f( AL_POSITION, cameraPos.x, cameraPos.y, cameraPos.z );
 
                 glm::vec3 right = _camera->getRightVector();
                 glm::vec3 up = _camera->getUpVector();
@@ -84,6 +84,28 @@ class SoundManager : virtual public RefCounter
             for (std::list<SoundComponent*>::iterator i = _sounds.begin(); i != _sounds.end(); ++i)
             {
                 (*i)->update();
+
+
+
+                if ((*i)->getSoundType() == EST_AMBIENT)
+                {
+                    //std::cout << "AMBIENT SOUND - UPDATE" << std::endl;
+
+                    glm::vec3 cameraPos;
+
+                    if (_camera)
+                        cameraPos = _camera->getPosition();
+
+                    glm::vec3 objPos = (*i)->getPosition();
+                    float playDistance = (*i)->getPlayDistance();
+
+                    float distance = glm::distance(cameraPos, objPos);
+
+                    if (distance <= playDistance)
+                        (*i)->play();
+                    else
+                        (*i)->stop();
+                }
             }
         }
 

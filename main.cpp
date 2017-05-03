@@ -38,7 +38,6 @@ using namespace tinyxml2;
 
 #include "GUI/GUIManager.h"
 #include "Graphics/Prefab.h"
-//#include "Graphics/LoadTerrainModel.h"
 #include "Graphics/Roads.h"
 
 // Definicje globalne
@@ -122,40 +121,21 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
 	{
-		/*glm::vec3 r = spot->getTransform()->getRotation();
-		r.z += 0.01;
-		spot->getTransform()->setRotation(r);*/
-
 		spot->rotate(0, 0, 0.01);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
 	{
-		/*glm::vec3 r = spot->getTransform()->getRotation();
-		r.z -= 0.01;
-		spot->getTransform()->setRotation(r);*/
-
 		spot->rotate(0, 0, -0.01);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
 	{
-		/*glm::vec3 r = spot->getTransform()->getRotation();
-		r.y += 0.01;
-		spot->getTransform()->setRotation(r);*/
-
 		spot->rotate(0, 0.01, 0);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
 	{
-		/*glm::vec3 r = spot->getTransform()->getRotation();
-		r.y -= 0.01;
-		spot->getTransform()->setRotation(r);*/
-
 		spot->rotate(0, -0.01, 0);
 	}
 
@@ -244,22 +224,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    /*
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
-    {
-        MOUSE_RIGHT_BUTTON_PRESSED = true;
 
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        camFPS->setCursorPos(xpos, ypos);
-        oldMouseX = xpos; oldMouseY = ypos;
-    }
-
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
-    {
-        MOUSE_RIGHT_BUTTON_PRESSED = false;
-    }
-    */
 }
 
 
@@ -359,132 +324,6 @@ void loadScene()
 }
 
 
-void loadTerrain()
-{
-    /*
-    Material terrainMaterial;
-    terrainMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture("Maps/Test/grass_2048.jpg");
-    terrainMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture("Maps/Test/grass_2048_n.jpg");
-    terrainMaterial.shader = NORMALMAPPING_MATERIAL;
-    terrainMaterial.scale = glm::vec2(100, 100);
-    Model* terrModel = loadTerrainModel("test_terrain.bmp", terrainMaterial, 20);
-    RModel* terrain = new RModel("", terrModel);
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
-    SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    terrainMesh->setRestitution(0.9f);
-    terrainMesh->getRigidBody()->setFriction(1.0f);
-    terrainObject->addComponent(terrainObj);
-    terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
-    */
-
-    // Road
-    /*RoadLane* lanes = new RoadLane[5];
-    lanes[0].material.diffuseTexture = ResourceManager::getInstance().loadTexture("road.jpg");
-    lanes[0].material.normalmapTexture = ResourceManager::getInstance().loadTexture("road_n.jpg");
-    lanes[0].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[0].material.scale = glm::vec2(1, 0.25);
-    //lanes[0].material.scale = glm::vec2(3, 1.5);
-    lanes[0].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[0].material.shininess = 96.0f;
-    lanes[0].r1 = -3.0f;
-    lanes[0].r2 = 3.0f;
-    lanes[0].height1 = 0.05f;
-    lanes[0].height2 = 0.05f;
-    lanes[1].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[1].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[1].material.scale = glm::vec2(1, 1);
-    lanes[1].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[1].material.shininess = 96.0f;
-    lanes[1].r1 = 3.0f;
-    lanes[1].r2 = 3.0f;
-    lanes[1].height1 = 0.05f;
-    lanes[1].height2 = 0.15f;
-    lanes[2].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[2].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[2].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[2].material.scale = glm::vec2(1, 1);
-    lanes[2].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[2].material.shininess = 96.0f;
-    lanes[2].r1 = 3.0f;
-    lanes[2].r2 = 5.0f;
-    lanes[2].height1 = 0.15f;
-    lanes[2].height2 = 0.15;
-    lanes[3].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[3].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[3].material.scale = glm::vec2(1, 1);
-    lanes[3].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[3].material.shininess = 96.0f;
-    lanes[3].r1 = -3.0f;
-    lanes[3].r2 = -3.0f;
-    lanes[3].height1 = 0.15f;
-    lanes[3].height2 = 0.05f;
-    lanes[4].material.diffuseTexture = ResourceManager::getInstance().loadTexture("kstka.bmp");
-    lanes[4].material.normalmapTexture = ResourceManager::getInstance().loadTexture("kstka_n.bmp");
-    lanes[4].material.shader = NORMALMAPPING_MATERIAL;
-    lanes[4].material.scale = glm::vec2(1, 1);
-    lanes[4].material.specularColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
-    lanes[4].material.shininess = 96.0f;
-    lanes[4].r1 = -5.0f;
-    lanes[4].r2 = -3.0f;
-    lanes[4].height1 = 0.15f;
-    lanes[4].height2 = 0.15;
-
-    RoadSegment segment;
-    segment.center = glm::vec2(10.0f, 10.0f);
-    segment.r = 50.0f;
-    segment.angle1 = 3.0f;
-    segment.angle2 = 6.14f;
-    RoadSegment segment;
-    segment.r = 50.0f;
-    segment.begin = glm::vec3(-50.0f, -3.0f, 5.0f);
-    segment.end = glm::vec3(10.0f, 4.0f, 5.0f);
-    segment.pointsCount = 60;
-    segment.interpolation = RI_COS;
-    segment.type = RST_ARC;
-
-    RoadSegment segment2;
-    segment2.r = 20.0f;
-    segment2.begin = glm::vec3(10.0f, 4.0f, 5.0f);
-    segment2.end = glm::vec3(16.0f, 4.0f, 33.0f);
-    segment2.pointsCount = 30;
-    segment2.interpolation = RI_LIN;
-    segment2.type = RST_ARC;
-
-    std::vector<RoadSegment> s;
-    s.push_back(segment);
-    s.push_back(segment2);*/
-
-    /*Model* roadModel = createRoadModel(lanes, 5, s);
-    RModel* roadModel2 = new RModel("", roadModel);
-    RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
-    SceneObject* roadSceneObject = sceneMgr->addSceneObject("road1");
-    roadSceneObject->addComponent(roadRenderObject);
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* roadMesh = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel2, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    roadMesh->setRestitution(0.9f);
-    roadMesh->getRigidBody()->setFriction(1.0f);
-    roadSceneObject->addComponent(roadMesh);*/
-
-    /*RoadSegment segment2;
-    segment2.r = 20.0f;
-    segment2.begin = glm::vec3(10.0f, 0.0f, 10.0f);
-    segment2.end = glm::vec3(14.0f, 0.0f, 38.0f);
-
-    Model* roadModel23 = createRoadModel(lanes, 3, segment2);
-    RModel* roadModel22 = new RModel("", roadModel23);
-    RenderObject* roadRenderObject2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel22));
-    SceneObject* roadSceneObject2 = sceneMgr->addSceneObject("road1");
-    roadSceneObject2->addComponent(roadRenderObject2);
-//    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* roadMesh2 = physMgr->createPhysicalBodyBvtTriangleMesh(roadModel22, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    roadMesh2->setRestitution(0.9f);
-    roadMesh2->getRigidBody()->setFriction(1.0f);
-    roadSceneObject2->addComponent(roadMesh2);*/
-}
-
-
 // ### MAIN ###
 int main()
 {
@@ -506,8 +345,9 @@ int main()
     //PhysicsManager::getInstance().createPhysicsWorld();
 
     physMgr = new PhysicsManager;
-	sceneMgr = new SceneManager(physMgr);
     sndMgr = new SoundManager();
+	sceneMgr = new SceneManager(physMgr, sndMgr);
+
 
 
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
@@ -517,67 +357,7 @@ int main()
 	GraphicsManager::getInstance().setWindVelocity(0.4f);
 
 
-    /* terrain */
-/*    //RModel* terrain = ResourceManager::getInstance().loadModel("testarea/test_area_n.3ds", "testarea/");
-    RModel* terrain = ResourceManager::getInstance().loadModel(gameCfg.mapFile, gameCfg.mapTexPath);
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
-    SceneObject* terrainObject = sceneMgr->addSceneObject("terrain");
-    int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = physMgr->createPhysicalBodyBvtTriangleMesh(terrain, btVector3(0,0,0), COL_TERRAIN, collidesWith);
-    terrainMesh->setRestitution(0.9f);
-    terrainMesh->getRigidBody()->setFriction(1.0f);
-    terrainObject->addComponent(terrainObj);
-    terrainObject->addComponent(terrainMesh);
-*/
-        //loadTerrain();
-
-    /*RModel* treeModel = ResourceManager::getInstance().loadModel("testarea/iglak.3ds", "testarea/");
-    treeModel->getMesh(0)->material.diffuseTexture->setAnisotropyFiltering(true, 4.0f);
-    SceneObject* treeObj = sceneMgr->addSceneObject("tree");
-    RenderObject* treeRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(treeModel));
-    treeObj->addComponent(treeRender);
-    treeObj->setPosition(-10.0f, 4.371f, -5.0f);*/
-
-    //bus = new Bus(sceneMgr, physMgr, "h9");
     bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
-
-    //SoundComponent* sC = dynamic_cast<SoundComponent*>(bus->getSceneObject()->getComponentByType(CT_SOUND));
-
-    //if (sC != 0)
-    //    sndMgr->addSoundComponent(sC);
-
-    //soundComp = sndMgr->addSoundComponent( new SoundComponent("engine.wav", true));
-
-    //bus->getSceneObject()->addComponent(soundComp);
-
-    /*
-    SceneObject* crate = sceneMgr->addSceneObject("crate");
-    RModel* model = ResourceManager::getInstance().loadModel("craten.3ds", "./");
-    RenderObject* object2 = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
-
-    PhysicalBodyBox* boxBody2 = physMgr->createPhysicalBodyBox(btVector3(1,1,1), 5.0f, btVector3(0,7,0), COL_ENV, collidesWith);
-    boxBody2->setRestitution(0.1f);
-    crate->addComponent(object2);
-    crate->addComponent(boxBody2);
-    crate->setPosition(glm::vec3(-10,3,-10));
-
-    */
-    /*
-    SceneObject* domekObject = sceneMgr->addSceneObject("Domek");
-    RModel* domekModel = ResourceManager::getInstance().loadModel("Objects/domek/domek_vbcpp.3ds", "Objects/domek/");
-    RenderObject* domekRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(domekModel));
-
-    domekObject->addComponent(domekRender);
-
-    int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* domekBody = physMgr->createPhysicalBodyBvtTriangleMesh(domekModel, btVector3(-10,2,40), COL_ENV, collidesWith);
-    //terrainMesh->setRestitution(0.9f);
-    //terrainMesh->getRigidBody()->setFriction(1.0f);
-    domekObject->addComponent(domekBody);
-    domekObject->setPosition(glm::vec3(-10,2,40));
-
-    //int collidesWith = COL_TERRAIN | COL_BUS;
-    */
 
     sceneMgr->loadScene("Test");
 
