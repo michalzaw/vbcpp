@@ -707,7 +707,7 @@ void Bus::startEngine()
     {
         _engine->turnOn();
 
-        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         sndC->play();
     }
 }
@@ -719,7 +719,7 @@ void Bus::stopEngine()
     {
         _engine->turnOff();
 
-        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         sndC->stop();
     }
 }
@@ -775,7 +775,7 @@ void Bus::updatePhysics(float dt)
     _engine->update();
 
 
-    SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+    SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
     sndC->setPitch(_engine->getCurrentRPM() / 1000);
 
     // przyspieszanie

@@ -20,14 +20,14 @@
 	<door type="se" group="1" armName="arm" arm="d1arm.3ds" armMass="0.01" armPosition="-0.98,-0.1,3.85" armPivotA="-0.96,-0.1,3.85" armPivotB="0.0,0,0.0"
 		arm2Name="arm2" arm2="d1arm2.3ds" arm2Mass="0.001" arm2Position="-1.0,-1.1,3.68" arm2PivotA="-0.95,-1.1,3.68" arm2PivotB="0.05,0,0"
 		name="dr1" model="dr1.3ds" mass="0.01" position="-0.11,0.06,0.11" pivotA="-0.11,0.06,0.1" pivotB="0.06,0.0,0.08"  
-		pivotC="-0.12,0,0" pivotD="0.05,-1.0,-0.1" arm1limits="-0.1,1.9" arm2lowLimit="-0.9" arm2highLimit="1.8" rotationDir="CCW" />
+		pivotC="-0.12,0,0" pivotD="0.05,-1.0,-0.1" arm1limits="-0.1,1.9" arm2lowLimit="-0.9" arm2highLimit="1.8" rotationDir="CCW" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 		
 	<door type="se" group="1" armName="d2arm" arm="d2arm.3ds" armMass="0.01" armPosition="-0.97,-0.1,3.0" armPivotA="-0.95,-0.1,3.0" armPivotB="0.0,0,0.0"
 		arm2Name="d2arm2" arm2="d1arm2.3ds" arm2Mass="0.001" arm2Position="-0.99,-1.1,3.18" arm2PivotA="-0.94,-1.1,3.18" arm2PivotB="0.06,0,0"
 		name="dr2" model="dr2.3ds" mass="0.01" position="-0.11,0.08,0.11" pivotA="-0.11,0.08,-0.11" pivotB="0.06,0.0,-0.08"  
-		pivotC="-0.12,0,0" pivotD="0.05,-1.0,0.1" arm1limits="-1.9,0.1" arm2lowLimit="-1.5" arm2highLimit="0.5" rotationDir="CW" />
+		pivotC="-0.12,0,0" pivotD="0.05,-1.0,0.1" arm1limits="-1.9,0.1" arm2lowLimit="-1.5" arm2highLimit="0.5" rotationDir="CW" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 		
-	<door name="dr3" group="2" type="s" model="dr3.3ds" mass="0.1" position="-1.08,0.23,-2.71" pivotA="-1.08,0.23,-2.71" pivotB="-0.02,0.3,0.4" />
+	<door name="dr3" group="2" type="s" model="dr3.3ds" mass="0.1" position="-1.08,0.23,-2.71" pivotA="-1.08,0.23,-2.71" pivotB="-0.02,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 	
 	<driver position="0.75,0.44,3.51"/>
 	
