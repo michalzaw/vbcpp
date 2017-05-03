@@ -15,8 +15,8 @@
 	<wheel name="wheel3" side="right" steering="0" powered="1" model="rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00055" brakeForce="0.85" />
 	<wheel name="wheel4" side="left" steering="0" powered="1" model="rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="245.0" damping="0.00055" brakeForce="0.85" />
 	
-	<door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" />
-	<door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" />
+	<door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
+	<door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 	
 	<steering_wheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
 	<driver position="0.75,0.44,3.51"/>

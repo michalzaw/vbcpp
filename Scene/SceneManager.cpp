@@ -9,8 +9,8 @@ using namespace tinyxml2;
 #include "../Utils/Helpers.hpp"
 #include "../Graphics/LoadTerrainModel.h"
 
-SceneManager::SceneManager(PhysicsManager* pMgr)
-    : _sky(NULL), _physicsManager(pMgr)
+SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
+    : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";
@@ -246,8 +246,8 @@ void SceneManager::loadScene(std::string filename)
 
             segmentElement = segmentElement->NextSiblingElement("Segment");
         }
-std::cout << profiles[profileName].size() << std::endl;
-std::cout << segments.size() << std::endl;
+        //std::cout << profiles[profileName].size() << std::endl;
+        //std::cout << segments.size() << std::endl;
         // create road
         Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
         RModel* roadModel2 = new RModel("", roadModel);
@@ -282,7 +282,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
     std::string dirPath = "Objects/" + name + "/";
     std::string fullPath = dirPath + "object.xml";
 
-    std::cout << "Object path: " << fullPath << std::endl;
+    //std::cout << "Object path: " << fullPath << std::endl;
 
     XMLDocument doc;
     XMLError result = doc.LoadFile( fullPath.c_str() );
@@ -395,6 +395,20 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
         {
             TreeComponent* component = new TreeComponent;
             sceneObject->addComponent(component);
+		}
+		else
+        if (componentType == "sound")
+        {
+            std::string soundFile = componentElement->Attribute("file");
+            std::string soundLooping = componentElement->Attribute("looping");
+            std::string soundPath = dirPath + soundFile;
+
+            bool looping = (soundLooping == "true" ? true : false);
+
+            SoundComponent* sound = new SoundComponent(soundPath, EST_AMBIENT, looping);
+            _soundManager->addSoundComponent(sound);
+
+            sceneObject->addComponent(sound);
         }
 
         sceneObject->setPosition(position);
@@ -411,7 +425,7 @@ void SceneManager::loadRoadProfile(std::string name, std::map<std::string, std::
     std::string fullPath = dirPath + "profile.xml";
     std::string materialFullPath = MaterialLoader::createMaterialFileName(fullPath);
 
-    std::cout << "Profile path: " << fullPath << std::endl;
+    //std::cout << "Profile path: " << fullPath << std::endl;
 
     XMLDocument doc;
     XMLError result = doc.LoadFile( fullPath.c_str() );

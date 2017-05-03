@@ -89,6 +89,6 @@ void Gearbox::loadData(std::string filename)
 
     std::cout << "Gear count: " << _gearCount << std::endl;
 
-    for (int i = 0; i < _gears.size(); i++)
-        std::cout << "Gear " << i << ": " << _gears[i] << std::endl;
+    //for (int i = 0; i < _gears.size(); i++)
+    //    std::cout << "Gear " << i << ": " << _gears[i] << std::endl;
 }

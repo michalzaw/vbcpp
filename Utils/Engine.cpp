@@ -60,6 +60,11 @@ void Engine::loadData(std::string filename)
     std::string model(engDesc->Attribute("name"));
     std::string comment(engDesc->Attribute("comment"));
 
+    XMLElement* engSound = engElement->FirstChildElement("Sound");
+    _sound = "Parts/" + std::string(engSound->Attribute("file"));
+
+    std::cout << "Engine sound: " << _sound << std::endl;
+
     XMLElement* pointList = engElement->FirstChildElement("Points");
 
     int curvePoints = atoi(pointList->Attribute("count"));
@@ -86,8 +91,8 @@ void Engine::loadData(std::string filename)
 
     std::cout << "Point count: " << _torqueCurve.size() << std::endl;
 
-    for (unsigned char i = 0; i < _torqueCurve.size(); i++)
-        std::cout << "Point " << i << ": " << _torqueCurve[i].rpm << " - " << _torqueCurve[i].torque << std::endl;
+    //for (unsigned char i = 0; i < _torqueCurve.size(); i++)
+    //    std::cout << "Point " << i << ": " << _torqueCurve[i].rpm << " - " << _torqueCurve[i].torque << std::endl;
 }
 
 
@@ -99,9 +104,9 @@ void Engine::calculateTorqueLine()
 	for ( char i = 0; i < pointCount; i++ )
 	{
 		_curveParams[i].a = ( static_cast<float>(_torqueCurve[i+1].torque) - static_cast<float>(_torqueCurve[i].torque) ) / ( static_cast<float>(_torqueCurve[i+1].rpm) - static_cast<float>(_torqueCurve[i].rpm) );
-		printf("Torque a parameter: %3.2f\n", _curveParams[i].a );
+		//printf("Torque a parameter: %3.2f\n", _curveParams[i].a );
 		_curveParams[i].b = (float)_torqueCurve[i].torque - ( _curveParams[i].a * (float)_torqueCurve[i].rpm );
-		printf("Torque b parameter: %3.2f\n", _curveParams[i].b );
+		//printf("Torque b parameter: %3.2f\n", _curveParams[i].b );
 	}
 }
 
@@ -123,7 +128,7 @@ void Engine::update()
     else
     {
         if (_currentRPM > _torqueCurve[0].rpm)
-            _currentRPM -= 1;
+            _currentRPM -= 3;
         else
             _currentRPM = _torqueCurve[0].rpm;
     }

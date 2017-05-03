@@ -13,8 +13,9 @@ class DoorSE : virtual public Door
 {
     public:
         DoorSE(RModel* model, PhysicalBodyConvexHull* body,
-               RModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2, RotationDir dir = ERD_CCW, char group = 1)
-        : Door(model, body, group),
+               RModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2,
+               SoundComponent* openDoor, SoundComponent* closeDoor, RotationDir dir = ERD_CCW, char group = 1)
+        : Door(model, body, openDoor, closeDoor, group),
         _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2), _rotationDir(dir)
         {
             //close();

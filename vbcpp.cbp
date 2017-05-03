@@ -108,6 +108,8 @@
 					<Add library="BulletCollision" />
 					<Add library="LinearMath" />
 					<Add library="freetype" />
+					<Add library="OpenAL32.dll" />
+					<Add library="alut" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -136,6 +138,8 @@
 					<Add library="BulletCollision" />
 					<Add library="LinearMath" />
 					<Add library="freetype" />
+					<Add library="OpenAL32.dll" />
+					<Add library="alut" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -235,6 +239,8 @@
 		<Unit filename="Scene/SceneObject.h" />
 		<Unit filename="Scene/Skybox.cpp" />
 		<Unit filename="Scene/Skybox.h" />
+		<Unit filename="Scene/SoundComponent.h" />
+		<Unit filename="Scene/SoundManager.h" />
 		<Unit filename="Utils/Engine.cpp" />
 		<Unit filename="Utils/Engine.h" />
 		<Unit filename="Utils/Gearbox.cpp" />

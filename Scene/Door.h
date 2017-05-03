@@ -3,6 +3,7 @@
 
 #include "../Utils/RModel.h"
 #include "../Physics/PhysicalBodyConvexHull.hpp"
+#include "SoundComponent.h"
 
 enum DoorState
 {
@@ -14,8 +15,8 @@ enum DoorState
 class Door
 {
     public:
-        Door(RModel* model, PhysicalBodyConvexHull* body, char group = 1)
-        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING), _group(group)
+        Door(RModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
+        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING), _group(group), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
         {
 
         }
@@ -27,6 +28,9 @@ class Door
 
         virtual void open() = 0;
         virtual void close() = 0;
+
+        void playOpenSound() { _doorOpenSound->play(); }
+        void playCloseSound() { _doorCloseSound->play(); }
 
         PhysicalBodyConvexHull* getDoorBody() { return _doorBody; }
 
@@ -42,6 +46,8 @@ class Door
             PhysicalBodyConvexHull*  _doorBody;
             DoorState                _state;
             int                      _collidesWith;
+            SoundComponent*          _doorOpenSound;
+            SoundComponent*          _doorCloseSound;
 };
 
 

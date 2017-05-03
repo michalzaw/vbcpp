@@ -11,10 +11,12 @@ using namespace tinyxml2;
 #include "../Graphics/GraphicsManager.h"
 #include "../Utils/ResourceManager.h"
 
+//#include "SoundComponent.h"
+
 #include "../Utils/Helpers.hpp"
 
-Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, std::string filename)
-: _sMgr(smgr), _pMgr(pmgr), _sceneObject(0), _chasisBody(0),
+Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
+: _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr), _sceneObject(0), _chasisBody(0),
 _maxSteerAngle(0.55f), _steerStep(0.5f),
 _brake(false), _accelerate(false),
 _brakeForce(0.0f), _brakeForceStep(0.5f),
@@ -90,6 +92,17 @@ void Bus::loadXMLdata(std::string busname)
 
     _sceneObject = _sMgr->addSceneObject(sObjName);
 
+
+    // Create Sound Component if sound filename is defined in Engine XML config file
+    if (_engine->getSoundFilename() != "")
+    {
+        SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
+        _sceneObject->addComponent(soundComp);
+        soundComp->setGain(0.4f);
+
+        _sndMgr->addSoundComponent(soundComp);
+    }
+
     for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
     {
         const char* ename = child->Name();
@@ -97,7 +110,7 @@ void Bus::loadXMLdata(std::string busname)
         // OBJECT TRANSFORM
         if (strcmp(ename,"transform") == 0)
         {
-            std::cout << "XML: Transform" << std::endl;
+            //std::cout << "XML: Transform" << std::endl;
 
             const char* cPosition = child->Attribute("position");
             busPosition = XMLstringToVec3(cPosition);
@@ -116,7 +129,7 @@ void Bus::loadXMLdata(std::string busname)
         else // BODY DATA
         if (strcmp(ename,"body") == 0)
         {
-            std::cout << "XML: Body data" << std::endl;
+            //std::cout << "XML: Body data" << std::endl;
 
             std::string modelFile = std::string(child->Attribute("model"));
             std::string modelPath = "Buses/" + busname + "/" + modelFile;
@@ -144,7 +157,7 @@ void Bus::loadXMLdata(std::string busname)
                 btTransform tmpTransf = _chasisBody->getRigidBody()->getWorldTransform();
                 btVector3 dir = tmpTransf.getBasis() * dirVec;
 
-                std::cout << dir.x() << " " << dir.y() << " " << dir.z() << std::endl;
+                //std::cout << dir.x() << " " << dir.y() << " " << dir.z() << std::endl;
             }
             else
             {
@@ -222,11 +235,11 @@ void Bus::loadXMLdata(std::string busname)
 
             btVector3 lowerlimit;
             hinge1->getBulletConstraint()->getLinearLowerLimit(lowerlimit);
-            std::cout << lowerlimit.x() << " " << lowerlimit.y() << " " << lowerlimit.z() << std::endl;
+            //std::cout << lowerlimit.x() << " " << lowerlimit.y() << " " << lowerlimit.z() << std::endl;
 
             btVector3 upperlimit;
             hinge1->getBulletConstraint()->getLinearUpperLimit(upperlimit);
-            std::cout << upperlimit.x() << " " << upperlimit.y() << " " << upperlimit.z() << std::endl;
+            //std::cout << upperlimit.x() << " " << upperlimit.y() << " " << upperlimit.z() << std::endl;
 
             Wheel* w = new Wheel;
             w->body = wheelCyl;
@@ -250,6 +263,24 @@ void Bus::loadXMLdata(std::string busname)
             float mass = (float)atof(child->Attribute("mass"));
             char group = (char)atoi(child->Attribute("group"));
 
+            // doorOpenSound="dopen.wav" doorCloseSound
+
+            std::string openSound = "Buses/" + busname + "/" + std::string(child->Attribute("doorOpenSound"));
+            std::string closeSound = "Buses/" + busname + "/" + std::string(child->Attribute("doorCloseSound"));
+
+            std::cout << "Door open sound:" << openSound << std::endl;
+            std::cout << "Door open sound:" << closeSound <<std::endl;
+
+
+            // Create sound component
+            SoundComponent* openSoundComp = new SoundComponent(openSound, EST_PLAYER);
+            _sndMgr->addSoundComponent(openSoundComp);
+
+            SoundComponent* closeSoundComp = new SoundComponent(closeSound, EST_PLAYER);
+            _sndMgr->addSoundComponent(closeSoundComp);
+
+            SceneObject* doorObj = 0;
+
             if (doorType == "s")
             {
 
@@ -261,10 +292,13 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 busPivot = XMLstringToBtVec3(child->Attribute("pivotA"));
                 btVector3 doorPivot = XMLstringToBtVec3(child->Attribute("pivotB"));
 
-                SceneObject* doorObj = _sMgr->addSceneObject(doorName);
+                doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(doorPosition);
 				//doorObj->setPosition(relativePos);
 				//doorObj->setRotation(_chasisBody->getSceneObject()->getRotation());
+
+                //doorObj->addComponent(openSoundComp);
+                //doorObj->addComponent(closeSoundComp);
 
                 //doorObj->getTransform()->setPosition(relativePos);
 
@@ -287,7 +321,7 @@ void Bus::loadXMLdata(std::string busname)
                 doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
                 Door* d = 0;
-                d = new DoorSimple(dr, doorBody, doorHinge, group);
+                d = new DoorSimple(dr, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
                 _doors.push_back(d);
             } // IF "S"
             else
@@ -382,8 +416,11 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 doorPivotA = XMLstringToBtVec3(child->Attribute("pivotA"));
                 btVector3 doorPivotB = XMLstringToBtVec3(child->Attribute("pivotB"));
 
-                SceneObject* doorObj = _sMgr->addSceneObject(doorName);
+                doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(relativePos);
+
+                //doorObj->addComponent(openSoundComp);
+                //doorObj->addComponent(closeSoundComp);
 
                 std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
@@ -411,17 +448,21 @@ void Bus::loadXMLdata(std::string busname)
 
 
                 Door* d = 0;
-                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, rdir, group);
+                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
                 d->open();
                 _doors.push_back(d);
             }
+
+
+            doorObj->addComponent(openSoundComp);
+            doorObj->addComponent(closeSoundComp);
 
             // koniec IF
         }
         else // STERING WHEEL
         if (strcmp(ename,"steering_wheel") == 0)
         {
-            std::cout << "XML: Steering wheel" << std::endl;
+            //std::cout << "XML: Steering wheel" << std::endl;
 
             std::string modelFile = std::string(child->Attribute("model"));
             std::string modelPath = "Buses/" + busname + "/" + modelFile;
@@ -451,7 +492,7 @@ void Bus::loadXMLdata(std::string busname)
         else // DRIVER
         if (strcmp(ename,"driver") == 0)
         {
-            std::cout << "XML: Driver" << std::endl;
+            //std::cout << "XML: Driver" << std::endl;
 
             const char* cPosition = child->Attribute("position");
             _driverPosition = XMLstringToVec3(cPosition);
@@ -459,7 +500,7 @@ void Bus::loadXMLdata(std::string busname)
         else // LIGHT
         if (strcmp(ename,"light") == 0)
         {
-            std::cout << "XML: Light" << std::endl;
+            //std::cout << "XML: Light" << std::endl;
 
             const char* cPosition = child->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
@@ -489,7 +530,7 @@ void Bus::loadXMLdata(std::string busname)
         else // HEADLIGHTS
         if (strcmp(ename,"headlights") == 0)
         {
-            std::cout << "XML: Headlights" << std::endl;
+            //std::cout << "XML: Headlights" << std::endl;
 
             std::string headlightName(child->Attribute("name"));
             const char* cPosition = child->Attribute("position");
@@ -566,6 +607,7 @@ void Bus::setIsEnableHeadlights(bool is)
     }
 }
 
+
 bool Bus::isEnableHeadlights()
 {
     return _isEnableHeadlights;
@@ -640,11 +682,9 @@ void Bus::accelerate()
     _brake = false;
 
    if (_engine->getThrottle() < 1.0f)
-            _engine->setThrottle(_engine->getThrottle() + 0.001f );
+            _engine->setThrottle(_engine->getThrottle() + 0.05f );
     else
         _engine->setThrottle(1.0f);
-
-    //updatePhysics();
 }
 
 
@@ -652,16 +692,36 @@ void Bus::brakeOn()
 {
     _accelerate = false;
     _brake = true;
-
-    //updatePhysics();
 }
 
 
 void Bus::brakeOff()
 {
     _brake = false;
+}
 
-    //updatePhysics();
+
+void Bus::startEngine()
+{
+    if (_engine)
+    {
+        _engine->turnOn();
+
+        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+        sndC->play();
+    }
+}
+
+
+void Bus::stopEngine()
+{
+    if (_engine)
+    {
+        _engine->turnOff();
+
+        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+        sndC->stop();
+    }
 }
 
 
@@ -670,11 +730,7 @@ void Bus::idle()
     _accelerate = false;
     _brake = false;
 
-        if (_engine->getThrottle() > 0.0f)
-            _engine->setThrottle(_engine->getThrottle() - 0.001f);
-        else
-            _engine->setThrottle(0.0f);
-    //updatePhysics();
+    _engine->setThrottle(0.0f);
 }
 
 
@@ -686,6 +742,7 @@ Door* Bus::getDoor(unsigned char doorIndex)
         return 0;
 }
 
+
 void Bus::doorOpenClose(char doorGroup)
 {
     for (char i = 0; i < _doors.size(); i++)
@@ -694,27 +751,32 @@ void Bus::doorOpenClose(char doorGroup)
         if (_doors[i]->getGroup() == doorGroup)
         {
             if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->playOpenSound();
                 _doors[i]->open();
+            }
+
             else
             if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->playCloseSound();
                 _doors[i]->close();
+            }
+
         }
 
     }
 
 }
 
-/*
-void Bus::closeDoor(unsigned char doorIndex)
-{
-    if (doorIndex <= _doors.size()-1)
-        _doors[doorIndex]->close();
-}
-*/
 
 void Bus::updatePhysics(float dt)
 {
     _engine->update();
+
+
+    SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponentByType(CT_SOUND));
+    sndC->setPitch(_engine->getCurrentRPM() / 1000);
 
     // przyspieszanie
     if (_accelerate)
@@ -730,7 +792,7 @@ void Bus::updatePhysics(float dt)
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.005f);
+                w->body->getRigidBody()->applyTorque((forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 5.0f)/3000);
             }
         }
     }
