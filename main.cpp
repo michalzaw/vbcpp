@@ -363,7 +363,7 @@ int main()
 
     bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
 
-    sceneMgr->loadScene("Test");
+    sceneMgr->loadScene(gameCfg.mapFile);
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");

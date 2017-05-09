@@ -18,7 +18,7 @@ class DoorSE : virtual public Door
         : Door(model, body, openDoor, closeDoor, group),
         _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2), _rotationDir(dir)
         {
-            //close();
+            close();
         }
 
         virtual ~DoorSE()
@@ -29,9 +29,9 @@ class DoorSE : virtual public Door
         void open()
         {
             if (_rotationDir == ERD_CCW)
-                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.9f, 2.15f);
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.7f, 2.15f);
             else
-                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.9f, 2.15f);
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.7f, 2.15f);
 
             _state = EDS_OPENING;
         }
@@ -39,9 +39,9 @@ class DoorSE : virtual public Door
         void close()
         {
             if (_rotationDir == ERD_CCW)
-                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.9f, 2.15f);
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, 1.7f, 2.15f);
             else
-                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.9f, 2.15f);
+                _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.7f, 2.15f);
 
             _state = EDS_CLOSING;
         }

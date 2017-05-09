@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="mmiki26" name="Fontanna" comment="Fontanna mała" />
+
+	<Components>
+	
+		<Component type="render" model="fontanna_vb.3ds" />
+	
+		<Component type="physics" mass="0" body="box" halfExtents="1.0" />
+	</Components>
+	
+</Object>

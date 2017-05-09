@@ -107,7 +107,7 @@ class SoundComponent : virtual public Component
 
             alGetSourcei(_source, AL_SOURCE_STATE, &state);
 
-            std::cout << _source << "PLAY" << std::endl;
+            //std::cout << _source << "PLAY" << std::endl;
 
             //_play = true;
 

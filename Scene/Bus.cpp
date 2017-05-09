@@ -98,7 +98,7 @@ void Bus::loadXMLdata(std::string busname)
     {
         SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
         _sceneObject->addComponent(soundComp);
-        soundComp->setGain(0.4f);
+        //soundComp->setGain(0.6f);
 
         _sndMgr->addSoundComponent(soundComp);
     }
@@ -114,12 +114,9 @@ void Bus::loadXMLdata(std::string busname)
 
             const char* cPosition = child->Attribute("position");
             busPosition = XMLstringToVec3(cPosition);
-            //_sceneObject->setPosition(busPosition);
 
             const char* cRotation = child->Attribute("rotation");
             busRotation = XMLstringToVec3(cRotation);
-
-            //_sceneObject->setRotation(glm::vec3(busRotation.x, busRotation.y, busRotation.z) );
 
             const char* cScale = child->Attribute("scale");
             glm::vec3 scale(XMLstringToVec3(cScale));
@@ -156,8 +153,6 @@ void Bus::loadXMLdata(std::string busname)
                 btVector3 dirVec(0,0,1);
                 btTransform tmpTransf = _chasisBody->getRigidBody()->getWorldTransform();
                 btVector3 dir = tmpTransf.getBasis() * dirVec;
-
-                //std::cout << dir.x() << " " << dir.y() << " " << dir.z() << std::endl;
             }
             else
             {
@@ -191,13 +186,11 @@ void Bus::loadXMLdata(std::string busname)
 
 
             glm::vec3 wheelPosition = XMLstringToVec3(child->Attribute("position"));
-            //glm::vec3 relativePos = glm::vec3(busPosition.x + wheelPosition.x, busPosition.y + wheelPosition.y, busPosition.z + wheelPosition.z);
             glm::vec3 relativePos = _chasisBody->getSceneObject()->transformLocalPointToGlobal(wheelPosition);
 
 
             wheelObj->setPosition(wheelPosition);
-            //wheelObj->setPosition(relativePos);
-            //wheelObj->setRotation(_chasisBody->getSceneObject()->getRotation());
+
 
             // obracamy model kola je¿li jest po lewej stronie
             if (side == "right")
@@ -220,7 +213,6 @@ void Bus::loadXMLdata(std::string busname)
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
             wheelObj->addComponent(wheelCyl);
-            //wheelCyl->_position = btVector3(wheelPosition.x, wheelPosition.y, wheelPosition.z);
 
             ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
             hinge1->setStiffness(2, stiffness);
@@ -263,8 +255,6 @@ void Bus::loadXMLdata(std::string busname)
             float mass = (float)atof(child->Attribute("mass"));
             char group = (char)atoi(child->Attribute("group"));
 
-            // doorOpenSound="dopen.wav" doorCloseSound
-
             std::string openSound = "Buses/" + busname + "/" + std::string(child->Attribute("doorOpenSound"));
             std::string closeSound = "Buses/" + busname + "/" + std::string(child->Attribute("doorCloseSound"));
 
@@ -294,13 +284,6 @@ void Bus::loadXMLdata(std::string busname)
 
                 doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(doorPosition);
-				//doorObj->setPosition(relativePos);
-				//doorObj->setRotation(_chasisBody->getSceneObject()->getRotation());
-
-                //doorObj->addComponent(openSoundComp);
-                //doorObj->addComponent(closeSoundComp);
-
-                //doorObj->getTransform()->setPosition(relativePos);
 
                 std::string modelPath = "Buses/" + busname + "/" + doorModel;
 
@@ -419,9 +402,6 @@ void Bus::loadXMLdata(std::string busname)
                 doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(relativePos);
 
-                //doorObj->addComponent(openSoundComp);
-                //doorObj->addComponent(closeSoundComp);
-
                 std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
                 RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
@@ -449,7 +429,6 @@ void Bus::loadXMLdata(std::string busname)
 
                 Door* d = 0;
                 d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
-                d->open();
                 _doors.push_back(d);
             }
 
@@ -792,7 +771,7 @@ void Bus::updatePhysics(float dt)
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque((forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 5.0f)/3000);
+                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.003f );
             }
         }
     }

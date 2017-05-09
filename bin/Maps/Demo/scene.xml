@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Scene>
+	<Description author="" />
+	
+	<Terrain heightmap="terrain_map.bmp" material="terrain" />
+	
+	<Objects>
+
+	</Objects>
+	
+	<Roads>
+		<Road name="road1" profile="profile1">
+			<Segment type="line" radius="0" beginPoint="150,3,-150" endPoint="-150,3,-150" points="60" interpolation="lin" />
+			<Segment type="arc" radius="-35" beginPoint="-150,3,-150" endPoint="-170,3,-130" points="60" interpolation="cos" />
+		</Road>
+		
+		
+	</Roads>
+	
+</Scene>

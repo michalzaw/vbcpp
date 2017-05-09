@@ -5,7 +5,7 @@
 	<Resolution x="1024" y="768" />
 
 
-	<Map name="Test" />
+	<Map name="Demo" />
 	
 	<Bus model="i211" />
 

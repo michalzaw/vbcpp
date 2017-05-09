@@ -100,7 +100,8 @@ Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vec
                     point.y = segments[k].begin.z + (segments[k].end.z - segments[k].begin.z) * (j / static_cast<float>(pointsCount * 2 - 2));
 
                     glm::vec2 d = glm::normalize(glm::vec2(segments[k].end.x - segments[k].begin.x, segments[k].end.z - segments[k].begin.z));
-                    v = glm::vec2(-d.y, d.x);std::cout << v.x << " " << v.y << std::endl;
+                    v = glm::vec2(-d.y, d.x);
+                    //std::cout << v.x << " " << v.y << std::endl;
                 }
 
                 //glm::vec2 a = point2 - point1;

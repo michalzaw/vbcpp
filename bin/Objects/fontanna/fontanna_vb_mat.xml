@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="solid" name="Material #25" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FONT1.JPG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #27" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FONT2.JPG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #39" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FONT1.JPG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #40" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FONT2.JPG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #52" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FON.PNG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #53" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="FON.PNG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #54" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="SIEM.JPG" normalmap_texture="" alpha_texture="" shininess="0.1" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>
