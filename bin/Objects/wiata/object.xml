@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="test" name="wiata" comment="Wiata przystanku" />
+
+	<Components>
+		<Component type="render" model="wiata2.3ds" />
+		<!-- <Component type="physics" mass="0" body="static" /> -->
+	</Components>
+	
+</Object>

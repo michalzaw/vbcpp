@@ -28,7 +28,6 @@ Engine::~Engine()
 void Engine::turnOn()
 {
     _isRunning = true;
-
     _currentRPM = _torqueCurve[0].rpm;
 }
 
@@ -36,8 +35,44 @@ void Engine::turnOn()
 void Engine::turnOff()
 {
     _isRunning = false;
-
     _currentRPM = 0.0f;
+}
+
+
+void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
+{
+    if (_isRunning)
+    {
+        float rpm = (wheelAngularVelocity * abs(gearRatio) * 5.45f * 60.0f) / 3.14f;
+        //if (_currentRPM < _torqueCurve[0].rpm)
+        //    _currentRPM = static_cast<float>(_torqueCurve[0].rpm);
+        if (rpm > _torqueCurve[0].rpm &&  rpm < _maxRPM)
+            _currentRPM = rpm;
+        else if (rpm < _torqueCurve[0].rpm)
+            _currentRPM = _torqueCurve[0].rpm;
+        else if (rpm > _maxRPM)
+            _currentRPM = _maxRPM;
+
+        //printf("RPM: %.4f\n", rpm);
+    }
+}
+
+
+void Engine::throttleUp()
+{
+    if (_throttle < 1.0f)
+        _throttle += 0.05f;
+    else
+        _throttle = 1.0f;
+}
+
+
+void Engine::throttleDown()
+{
+    if (_throttle > 0)
+        _throttle -= 0.05f;
+    else
+        _throttle = 0;
 }
 
 
@@ -111,27 +146,28 @@ void Engine::calculateTorqueLine()
 }
 
 
-void Engine::update()
+void Engine::update(float dt)
 {
-    if (!_isRunning)
-        _currentTorque = 0.0f;
-    else
-    if (_throttle > 0)
+    if (_isRunning)
     {
-        if ( _currentRPM < _maxRPM )
+        if (_throttle > 0)
         {
-            _currentRPM += _throttle;
+            if (_currentRPM < _maxRPM)
+                _currentRPM += 1000 * _throttle * dt;
+            else
+                _currentRPM = _maxRPM;
         }
         else
-            _currentRPM = _maxRPM;
+        {
+            if (_currentRPM > _torqueCurve[0].rpm)
+                _currentRPM -= 1000 * dt;
+            else
+                _currentRPM = _torqueCurve[0].rpm;
+        }
     }
-    else
-    {
-        if (_currentRPM > _torqueCurve[0].rpm)
-            _currentRPM -= 3;
-        else
-            _currentRPM = _torqueCurve[0].rpm;
-    }
+
+
+    //_currentRPM = (wheelAngularVelocity * abs(gearRatio) * 5.45f * 60.0f) / 3.14f;
 
     _currentTorque = getMaxTorque();
 }

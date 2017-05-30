@@ -412,7 +412,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
         }
 
         sceneObject->setPosition(position);
-        sceneObject->setRotation(rotation);
+        sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
 
         componentElement = componentElement->NextSiblingElement("Component");
     }

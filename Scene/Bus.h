@@ -90,12 +90,14 @@ class Bus : virtual public RefCounter
         // Driving methods
         void turnLeft(float dt);
         void turnRight(float dt);
+        void centerSteringWheel(float dt);
         void accelerate();
         void idle();
         void brakeOn();
         void brakeOff();
 
         Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
+
         Engine* getEngine() { if (_engine) return _engine; }
 
         void startEngine();

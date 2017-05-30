@@ -19,7 +19,7 @@ Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::st
 : _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr), _sceneObject(0), _chasisBody(0),
 _maxSteerAngle(0.55f), _steerStep(0.5f),
 _brake(false), _accelerate(false),
-_brakeForce(0.0f), _brakeForceStep(0.5f),
+_brakeForce(0.0f), _brakeForceStep(0.2f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
 _isEnableLights(false), _isEnableHeadlights(false),
 _collidesWith(COL_TERRAIN | COL_ENV)
@@ -640,16 +640,54 @@ void Bus::turnRight(float dt)
 
                 if (_steeringWheelObject)
                 {
-                    /*glm::vec3 rotation = _steeringWheelObject->getTransform()->getRotation();
-                    rotation.y -= 0.005f;
-                    _steeringWheelObject->getTransform()->setRotation(rotation);*/
-
                     _steeringWheelObject->rotate(0.0f, -dt * _steerStep * 2 * PI / _maxSteerAngle, 0.0f);
                 }
             }
 
             w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
             w->suspension->getBulletConstraint()->setUpperLimit(w->currentAngle);
+        }
+    }
+
+
+}
+
+
+void Bus::centerSteringWheel(float dt)
+{
+WheelList::iterator it = _wheels.begin();
+
+    for (; it != _wheels.end(); ++it)
+    {
+        Wheel* w = (*it);
+
+        if ( w->steering )
+        {
+            if (w->currentAngle > 0)
+            {
+                w->currentAngle -= dt * _steerStep;
+
+                w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
+                w->suspension->getBulletConstraint()->setUpperLimit(w->currentAngle);
+
+                if (_steeringWheelObject)
+                {
+                    _steeringWheelObject->rotate(0.0f, dt * _steerStep * 2 * PI / _maxSteerAngle, 0.0f);
+                }
+            }
+            else
+            if (w->currentAngle < 0)
+            {
+                w->currentAngle += dt * _steerStep;
+
+                w->suspension->getBulletConstraint()->setLowerLimit(w->currentAngle);
+                w->suspension->getBulletConstraint()->setUpperLimit(w->currentAngle);
+
+                if (_steeringWheelObject)
+                {
+                    _steeringWheelObject->rotate(0.0f, -dt * _steerStep * 2 * PI / _maxSteerAngle, 0.0f);
+                }
+            }
         }
     }
 }
@@ -660,10 +698,7 @@ void Bus::accelerate()
     _accelerate = true;
     _brake = false;
 
-   if (_engine->getThrottle() < 1.0f)
-            _engine->setThrottle(_engine->getThrottle() + 0.05f );
-    else
-        _engine->setThrottle(1.0f);
+    _engine->throttleUp();
 }
 
 
@@ -671,6 +706,8 @@ void Bus::brakeOn()
 {
     _accelerate = false;
     _brake = true;
+
+    _engine->throttleDown();
 }
 
 
@@ -751,11 +788,13 @@ void Bus::doorOpenClose(char doorGroup)
 
 void Bus::updatePhysics(float dt)
 {
-    _engine->update();
+    _engine->update(dt);
 
 
     SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
     sndC->setPitch(_engine->getCurrentRPM() / 1000);
+
+    btScalar wheelAngularVelocity = 0.0f;
 
     // przyspieszanie
     if (_accelerate)
@@ -771,13 +810,14 @@ void Bus::updatePhysics(float dt)
                 btTransform tmpDirection = w->body->getRigidBody()->getWorldTransform();
                 btVector3 forwardDir = tmpDirection.getBasis().getColumn(0);
 
-                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.003f );
+                w->body->getRigidBody()->applyTorque(forwardDir * _gearbox->currentRatio() * _engine->getCurrentTorque() * 0.0032f );
+
+                //wheelAngularVelocity = w->body->getRigidBody()->getAngularVelocity().length();
             }
         }
     }
-
     // hamowanie
-    if (_brake)
+    else if (_brake)
     {
         WheelList::iterator it = _wheels.begin();
 
@@ -788,17 +828,34 @@ void Bus::updatePhysics(float dt)
             w->body->getRigidBody()->setDamping(0, w->brakeForce);
         }
     }
-    else
+    else if (!_accelerate && !_brake)
     {
-
-
         WheelList::iterator it = _wheels.begin();
 
         for (; it != _wheels.end(); ++it)
         {
             Wheel* w = (*it);
 
-            w->body->getRigidBody()->setDamping(0, 0.0f);
+            w->body->getRigidBody()->setDamping(0, 0.13f * abs(_gearbox->currentRatio()) );
         }
     }
+
+    char poweredWheels = 0;
+
+    // Get wheel linear speed to calculate RPM of the engine
+    WheelList::iterator it = _wheels.begin();
+    for (; it != _wheels.end(); ++it)
+    {
+        Wheel* w = (*it);
+
+        if ( w->powered )
+        {
+            wheelAngularVelocity += w->body->getRigidBody()->getAngularVelocity().length();
+            poweredWheels++;
+            //break;
+        }
+    }
+
+    //if (_gearbox->currentRatio() != 0.0f)
+    _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 }

@@ -236,25 +236,21 @@ void readInput(GLFWwindow* window, double deltaTime)
 	if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS)
 	{
 		camFPS->moveForward(deltaTime);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_S ) == GLFW_PRESS)
 	{
 		camFPS->moveBackward(deltaTime);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_D ) == GLFW_PRESS)
 	{
 		camFPS->strafeRight(deltaTime);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_A ) == GLFW_PRESS)
 	{
 		camFPS->strafeLeft(deltaTime);
-
 	}
 
 	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
@@ -285,6 +281,11 @@ void readInput(GLFWwindow* window, double deltaTime)
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
     {
         bus->brakeOff();
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_RELEASE && glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_RELEASE)
+    {
+        bus->centerSteringWheel(deltaTime);
     }
 }
 
@@ -342,6 +343,7 @@ int main()
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetMouseButtonCallback(win->getWindow(), mouse_button_callback);
 
+    //glfwSetInputMode(win->getWindow(), GLFW_STICKY_KEYS, 1);
     glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Inicjalizujemy potrzebne rzeczy

@@ -34,18 +34,24 @@ class Engine
 
         float getCurrentRPM() { return _currentRPM; }
 
+        void setRPM(float wheelAngularVelocity, float gearRatio);
+
         bool isRunning() { return _isRunning; }
 
         void setThrottle(float throttle) { _throttle = throttle; }
+
+        void throttleUp();
+
+        void throttleDown();
 
         float getCurrentTorque() { return _currentTorque; }
 
         std::string getSoundFilename() { return _sound; }
 
-        void update();
+        void update(float dt);
+
 
     protected:
-        //bool _clutch;
         bool _isRunning;
 
         float   _throttle;

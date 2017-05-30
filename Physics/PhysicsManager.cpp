@@ -53,8 +53,10 @@ PhysicsManager::~PhysicsManager()
 	//delete collision shapes
 	for (int j = 0; j < _constraints.size(); j++)
 	{
+	    std::cout << "Constraint: " << _constraints[j] << std::endl;
         Constraint* c = _constraints[j];
 
+        std::cout << "Bullet Constraint: " << c->getBulletConstraint() << std::endl;
         //removePhysicalBody(body);
         _dynamicsWorld->removeConstraint(c->getBulletConstraint());
 
