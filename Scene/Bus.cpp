@@ -18,7 +18,7 @@ using namespace tinyxml2;
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
 : _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr), _sceneObject(0), _chasisBody(0),
 _maxSteerAngle(0.55f), _steerStep(0.5f),
-_brake(false), _accelerate(false),
+_brake(false), _accelerate(false), _handbrake(true),
 _brakeForce(0.0f), _brakeForceStep(0.2f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
 _isEnableLights(false), _isEnableHeadlights(false),
@@ -48,12 +48,21 @@ Bus::~Bus()
     WheelList::iterator wit = _wheels.begin();
 
     for (; wit != _wheels.end(); ++wit)
+    {
+        _pMgr->removeConstraint((*wit)->suspension);
+
         delete (*wit);
+    }
+    _wheels.clear();
 
     DoorList::iterator dit = _doors.begin();
 
     for (; dit != _doors.end(); ++dit)
+    {
+
         delete (*dit);
+    }
+    _doors.clear();
 
     _headlights.clear();
 }
@@ -717,6 +726,11 @@ void Bus::brakeOff()
 }
 
 
+void Bus::toggleHandbrake()
+{
+    _handbrake = !_handbrake;
+}
+
 void Bus::startEngine()
 {
     if (_engine)
@@ -828,7 +842,7 @@ void Bus::updatePhysics(float dt)
             w->body->getRigidBody()->setDamping(0, w->brakeForce);
         }
     }
-    else if (!_accelerate && !_brake)
+    else if (!_accelerate && !_brake && !_handbrake)
     {
         WheelList::iterator it = _wheels.begin();
 
@@ -837,6 +851,17 @@ void Bus::updatePhysics(float dt)
             Wheel* w = (*it);
 
             w->body->getRigidBody()->setDamping(0, 0.13f * abs(_gearbox->currentRatio()) );
+        }
+    }
+    else if (_handbrake)
+    {
+        WheelList::iterator it = _wheels.begin();
+
+        for (; it != _wheels.end(); ++it)
+        {
+            Wheel* w = (*it);
+
+            w->body->getRigidBody()->setDamping(0, w->brakeForce);
         }
     }
 

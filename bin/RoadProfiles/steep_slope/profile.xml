@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Profile>
+	<Description author="fr0zi" name="steep_slope" comment="Steep slope" />
+
+	<Lanes>
+		<Lane material="asfalt" x1="-3.5" x2="3.5" y1="0.05" y2="0.05" /> <!-- main road -->
+		<Lane material="kostka" x1="3.5" x2="3.5" y1="0.05" y2="0.15" /> <!-- begining of the pavement on the right side -->
+		<Lane material="kostka" x1="3.5" x2="5.5" y1="0.15" y2="0.15" /> <!-- right pavement -->
+		<Lane material="kostka" x1="-3.5" x2="-3.5" y1="0.15" y2="0.05" /> <!-- begining of the pavement on the left side -->
+		<Lane material="kostka" x1="-5.5" x2="-3.5" y1="0.15" y2="0.15" /> <!-- left pavement -->
+		<Lane material="concrete" x1="5.5" y1="0.15" x2="8.5" y2="-7.15" />
+		<Lane material="concrete" x1="-8.5" y1="-7.15" x2="-5.5" y2="0.15" />
+	</Lanes>
+	
+</Profile>

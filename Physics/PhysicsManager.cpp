@@ -35,19 +35,7 @@ PhysicsManager::PhysicsManager()
 
 PhysicsManager::~PhysicsManager()
 {
-  	printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
-
-	//delete collision shapes
-	for (int j = 0; j < _physicalBodies.size(); j++)
-	{
-        PhysicalBody* body = _physicalBodies[j];
-
-        //removePhysicalBody(body);
-        _dynamicsWorld->removeRigidBody(body->getRigidBody());
-
-        delete body;
-	}
-	_physicalBodies.clear();
+  	//printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
     std::cout << "Ilosc polaczen na stosie: " << _constraints.size() << std::endl;
 	//delete collision shapes
@@ -64,7 +52,20 @@ PhysicsManager::~PhysicsManager()
 	}
 	_constraints.clear();
 
-	printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
+	//delete collision shapes
+	for (int j = 0; j < _physicalBodies.size(); j++)
+	{
+        PhysicalBody* body = _physicalBodies[j];
+
+        //removePhysicalBody(body);
+        _dynamicsWorld->removeRigidBody(body->getRigidBody());
+
+        delete body;
+	}
+	_physicalBodies.clear();
+
+
+	//printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
     destroyPhysicsWorld();
 }
@@ -242,6 +243,9 @@ ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, Phys
 {
     ConstraintHinge* c = new ConstraintHinge(bodyA, bodyB, pivotA, pivotB, axisA, axisB);
 
+    std::cout << "Constraint created: " << c << std::endl;
+    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+
     _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 
     _constraints.push_back(c);
@@ -253,6 +257,9 @@ ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, Phys
 ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB)
 {
     ConstraintHinge2* c = new ConstraintHinge2(bodyA, bodyB, pivot, axisA, axisB);
+
+    std::cout << "Constraint created: " << c << std::endl;
+    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
 
     _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 

@@ -221,6 +221,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
         }
     }
+
+    if (glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS)
+    {
+        bus->toggleHandbrake();
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -364,8 +369,16 @@ int main()
 
 
     bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
+    //bus->getSceneObject()->setPosition(150,5,-150);
+    //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
+
 
     sceneMgr->loadScene(gameCfg.mapFile);
+
+    bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
+    bus->getSceneObject()->setRotation(sceneMgr->getBusStart().rotation.x,
+                                       degToRad(sceneMgr->getBusStart().rotation.y),
+                                       sceneMgr->getBusStart().rotation.z );
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");

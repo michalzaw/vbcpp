@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="no_texture" name="Collision" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #96" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="8.JPG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #96.000" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="26.JPG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #96.001" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="8.JPG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #96.002" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="24.JPG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #97" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="BIEDR.PNG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Material #97.000" ambient="0.584314,0.584314,0.584314,1" diffuse="0.584314,0.584314,0.584314,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="8.JPG" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

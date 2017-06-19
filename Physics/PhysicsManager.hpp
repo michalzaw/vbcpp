@@ -60,7 +60,7 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
-        friend class PhysicalBody;
+        //friend class PhysicalBody;
 
     private:
         btDiscreteDynamicsWorld*                _dynamicsWorld;

@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="test" name="Kosciol" comment="Test object" />
+
+	<Components>
+	
+		<Component type="render" model="kosciol.3ds" />
+	
+		<Component type="physics" mass="0" body="static" />
+		
+		<Component type="sound" file="church_bells.wav" looping="true" playDistance="100" volume="1" />
+	</Components>
+	
+</Object>

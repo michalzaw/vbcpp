@@ -95,6 +95,7 @@ class Bus : virtual public RefCounter
         void idle();
         void brakeOn();
         void brakeOff();
+        void toggleHandbrake();
 
         Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
 
@@ -135,6 +136,7 @@ class Bus : virtual public RefCounter
         bool    _accelerate;
         bool    _brake;
         bool    _idle;
+        bool    _handbrake;
 
         float   _brakeForce;
         float   _brakeForceStep;

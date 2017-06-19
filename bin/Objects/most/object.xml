@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="most" comment="Wiata przystanku" />
+	<Description author="test" name="most" comment="Most" />
 
 	<Components>
-		<Component type="render" model="most.3ds" />
-		<Component type="physics" mass="0" body="static" />
+		<Component type="render" model="most.3ds" scale="1.7,1,1" />
+		<Component type="physics" body="bvh" />
 	</Components>
 	
 </Object>

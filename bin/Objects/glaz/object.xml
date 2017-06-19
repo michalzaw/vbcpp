@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="fr0zi" name="Głaz" comment="Wielki głaz" />
+
+	<Components>
+	
+		<Component type="render" model="rock.3ds" />
+	
+		<Component type="physics" body="static" />
+	</Components>
+	
+</Object>

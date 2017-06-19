@@ -17,6 +17,9 @@ SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
     #endif // _DEBUG_MODE
     _physicsManager->grab();
 
+    _busStart.position = glm::vec3(0,3,0);
+    _busStart.rotation = glm::vec3(0,0,0);
+
     //_graphicsManager = new GraphicsManager;
     //_physicsManager = new PhysicsManager;
 
@@ -132,6 +135,20 @@ void SceneManager::loadScene(std::string filename)
     {
         std::cout << "Scene element not found!" << std::endl;
         return;
+    }
+
+    XMLElement* startElement = scnElement->FirstChildElement("Start");
+    if (startElement == nullptr)
+    {
+        std::cout << "Start point not found!" << std::endl;
+    }
+    else
+    {
+        const char* cPosition(startElement->Attribute("position"));
+        _busStart.position = XMLstringToVec3(cPosition);
+
+        const char* cRotation(startElement->Attribute("rotation"));
+        _busStart.rotation = XMLstringToVec3(cRotation);
     }
 
     XMLElement* terrElement = scnElement->FirstChildElement("Terrain");
@@ -313,9 +330,11 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
     std::cout << "Name: " << modelName << std::endl;
     std::cout << "Comment: " << comment << std::endl;
 
-    glm::vec3 pos(-10,3,-10);
+    //glm::vec3 pos(-10,3,-10);
 
     XMLElement* components = objElement->FirstChildElement("Components");
+
+    glm::vec3 scale(1,1,1);
 
     RModel* model = 0;
 
@@ -339,10 +358,14 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             model = ResourceManager::getInstance().loadModel(modelPath, dirPath);
             RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
             sceneObject->addComponent(renderObject);
-            //sceneObject->setPosition(glm::vec3(-10,3,-10));
-            //sceneObject->setPosition(pos);
-            //sceneObject->setPosition(position);
-            //sceneObject->setPosition(glm::vec3(0,0,0));
+
+            const char* cScale = componentElement->Attribute("scale");
+
+            if (cScale != NULL)
+            {
+                std::cout << "Object scale: " << cScale << std::endl;
+                scale = glm::vec3(XMLstringToVec3(cScale));
+            }
         }
         else
         if (componentType == "physics")
@@ -364,7 +387,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             else
             if (bodyType == "dynamic")
             {
-                std::cout << "<><><><><><>>####  Model: " << model << std::endl;
+                std::cout << "- Creating dynamic Convex Hull collision shape" << std::endl;
                 float mass = atoi(componentElement->Attribute("mass"));
 
                 int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR |COL_ENV;
@@ -377,7 +400,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             else
             if (bodyType == "static")
             {
-                std::cout << "<><><><><><>>####  Model: " << model << std::endl;
+                std::cout << "- Creating static Convex Hull collision shape" << std::endl;
                 float mass = atoi(componentElement->Attribute("mass"));
 
 
@@ -385,6 +408,18 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
                 PhysicalBodyConvexHull* physicalBody = _physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), 0,
                                                                                                      COL_ENV, collidesWith);
+                //terrainMesh->setRestitution(0.9f);
+                //terrainMesh->getRigidBody()->setFriction(1.0f);
+                sceneObject->addComponent(physicalBody);
+            }
+            else
+            if (bodyType == "bvh")
+            {
+                std::cout << "- Creating BVH Triangle Mesh collision shape" << std::endl;
+
+                int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
+
+                PhysicalBodyBvtTriangleMesh* physicalBody = _physicsManager->createPhysicalBodyBvtTriangleMesh(model, COL_ENV, collidesWith);
                 //terrainMesh->setRestitution(0.9f);
                 //terrainMesh->getRigidBody()->setFriction(1.0f);
                 sceneObject->addComponent(physicalBody);
@@ -405,14 +440,20 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
             bool looping = (soundLooping == "true" ? true : false);
 
+            float playDistance = atoi(componentElement->Attribute("playDistance"));
+            float volume = atoi(componentElement->Attribute("volume"));
+
             SoundComponent* sound = new SoundComponent(soundPath, EST_AMBIENT, looping);
             _soundManager->addSoundComponent(sound);
+            sound->setPlayDistance(playDistance);
+            sound->setGain(volume);
 
             sceneObject->addComponent(sound);
         }
 
         sceneObject->setPosition(position);
         sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
+        //sceneObject->setScale(scale);
 
         componentElement = componentElement->NextSiblingElement("Component");
     }

@@ -10,7 +10,7 @@
 PhysicalBody::PhysicalBody(btScalar m)
 : Component(CT_PHYSICAL_BODY),
 _rigidBody(nullptr), _collShape(nullptr), _motionState(nullptr),
-_mass(m), _position(btVector3(0,0,0)),
+_mass(m), _position(btVector3(0,0,0)), _oldScale(btVector3(1,1,1)),
 _isUpdateTransformFromObject(true)
 {
 

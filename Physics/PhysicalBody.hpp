@@ -53,11 +53,13 @@ class PhysicalBody : public Component
         virtual void changedTransform();
 
     protected:
+        btDiscreteDynamicsWorld*                _dynamicsWorld;
         std::unique_ptr<btRigidBody>            _rigidBody;
         std::unique_ptr<btCollisionShape>       _collShape;
         std::unique_ptr<btDefaultMotionState>   _motionState;
         btScalar                _mass;
         btVector3               _position;      // default position
+        btVector3               _oldScale;
 
         std::vector<Constraint*> _constraints;
 

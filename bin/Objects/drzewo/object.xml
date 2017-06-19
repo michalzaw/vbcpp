@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="test" name="Drzewo" comment="Test object" />
+
+	<Components>
+	
+		<Component type="render" model="drzewo.3ds" />
+		<Component type="tree" />
+	</Components>
+	
+</Object>

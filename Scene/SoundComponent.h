@@ -100,6 +100,11 @@ class SoundComponent : virtual public Component
             return _playDistance;
         }
 
+        void setPlayDistance(float distance)
+        {
+            _playDistance = distance;
+        }
+
 
         void play()
         {

@@ -121,6 +121,7 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-march=i686" />
 					<Add option="-std=c++11" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
