@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Materials>
-	<Material type="normalmapping" name="Concreteconc" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="snow.jpg" normalmap_texture="snown.jpg" shininess="96" transparency="0" offset="0,0" scale="1,1"/>
-	<Material type="normalmapping" name="WoodFencewoo" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="fence.jpg" normalmap_texture="fencen.jpg" shininess="96" transparency="0" offset="0,0" scale="1,1"/>
-</Materials>

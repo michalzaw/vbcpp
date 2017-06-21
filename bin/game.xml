@@ -7,6 +7,6 @@
 
 	<Map name="Demo" />
 	
-	<Bus model="h9" />
+	<Bus model="i211" />
 
 </Game>

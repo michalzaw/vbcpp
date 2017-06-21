@@ -165,6 +165,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             bus->getSceneObject()->addChild(camFPS->getSceneObject());
             camFPS->getSceneObject()->setPosition(bus->getDriverPosition());
+            camFPS->getSceneObject()->setRotation(0,0,0);
         }
 
 	}
@@ -201,6 +202,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             physMgr->stop();
     }
 
+    /*
     if (glfwGetKey( window, GLFW_KEY_R ) == GLFW_PRESS)
     {
         SceneObject* zapora = sceneMgr->getSceneObject("zapora");
@@ -221,6 +223,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             bus->getSceneObject()->setPosition(glm::vec3(0,3,0));
         }
     }
+    */
 
     if (glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS)
     {
@@ -387,6 +390,8 @@ int main()
     Camera->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
+    Camera->setRotation(0,degToRad(-90), 0);
+    Camera->setPosition(169,7,-151);
 
     // Light
     dirLight = sceneMgr->addSceneObject("light");
