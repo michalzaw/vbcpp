@@ -11,18 +11,28 @@
 #include "Component.h"
 
 
-typedef enum SoundType
+enum SoundType
 {
     EST_PLAYER = 0,
     EST_AMBIENT
 };
+
+/**
+    Sound component - config file attributes:
+
+    @param file - sound filename to be played (example: file="sound.wav")
+    @param looping - tells whether sound should be looped or not. Values are "true" or "false". Default is "false".
+    @param playDistance - set max distance from the sound can be heard. Default value is 10.0f.
+    @param volume - sets volume of the sound. It's in range 0.0 - 1.0.
+    @param position - sets sound's offset relatively to scene object. Default is (0,0,0) which means sound has it's origin in the scene object's origin.
+**/
 
 
 class SoundComponent : virtual public Component
 {
     public:
         SoundComponent(std::string file, SoundType type, bool looping = false)
-        : _buffer(0), _source(0), Component(CT_SOUND), _play(false), _looping(looping), _type(type), _playDistance(10.0f)
+        : Component(CT_SOUND), _source(0), _buffer(0), _looping(looping), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
         {
         std::cout << "Engine sound: " << file << std::endl;
             alGenSources( 1, &_source );
@@ -42,9 +52,11 @@ class SoundComponent : virtual public Component
             {
                 if (_object)
                 {
-                    glm::vec3 pos = _object->getPosition();
+                    update();
 
-                    alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
+                    //glm::vec3 pos = _object->getPosition();
+
+                    //alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
                     alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
                 }
 
@@ -60,6 +72,9 @@ class SoundComponent : virtual public Component
                 alSourcef( _source, AL_PITCH, 1.0f );
                 alSourcef( _source, AL_GAIN, 1. );
                 alSourcei( _source, AL_LOOPING, looping );
+
+                alSourcei( _source, AL_REFERENCE_DISTANCE, 1.0f); // 1.0f
+                alSourcei( _source, AL_MAX_DISTANCE, _playDistance);  // 1000.0f
 
                 alSourcei(_source, AL_BUFFER, _buffer);
             }
@@ -81,17 +96,26 @@ class SoundComponent : virtual public Component
         {
             if (_object)
             {
-                glm::vec3 pos = _object->getPosition();
+                glm::vec3 pos = _object->getPosition() + _soundPosition;
 
                 alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
             }
 
         }
 
+        void setPosition(glm::vec3 newPos)
+        {
+            _soundPosition = newPos;
+
+            update();
+        }
 
         glm::vec3 getPosition()
         {
-            return _object->getPosition();
+            if (_object)
+                return _object->getPosition() + _soundPosition;
+            else
+                return _soundPosition;
         }
 
 
@@ -103,6 +127,7 @@ class SoundComponent : virtual public Component
         void setPlayDistance(float distance)
         {
             _playDistance = distance;
+            alSourcei( _source, AL_MAX_DISTANCE, _playDistance);
         }
 
 
@@ -148,6 +173,8 @@ class SoundComponent : virtual public Component
         bool    _looping;
 
         bool    _play;
+
+        glm::vec3   _soundPosition;
 
         SoundType   _type;
         float       _playDistance;

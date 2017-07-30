@@ -107,7 +107,7 @@ void Bus::loadXMLdata(std::string busname)
     {
         SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
         _sceneObject->addComponent(soundComp);
-        //soundComp->setGain(0.6f);
+        soundComp->setGain(0.6f);
 
         _sndMgr->addSoundComponent(soundComp);
     }

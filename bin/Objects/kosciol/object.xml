@@ -10,7 +10,7 @@
 	
 		<Component type="physics" mass="0" body="static" />
 		
-		<Component type="sound" file="church_bells.wav" looping="true" playDistance="100" volume="1" />
+		<Component type="sound" file="church_bells.wav" looping="true" playDistance="100" volume="0.9f" position="2,8,0" />
 	</Components>
 	
 </Object>

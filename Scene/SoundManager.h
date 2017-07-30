@@ -33,6 +33,10 @@ class SoundManager : virtual public RefCounter
             alListener3f( AL_VELOCITY, 0., 0., 0. );
             float orient[6] = { /*fwd:*/ 0., 0., -1., /*up:*/ 0., 1., 0. };
             alListenerfv( AL_ORIENTATION, orient );
+
+            alListenerf( AL_GAIN, 0.9f);
+
+            alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
         }
 
         virtual ~SoundManager()

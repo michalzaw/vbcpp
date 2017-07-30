@@ -440,13 +440,35 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
             bool looping = (soundLooping == "true" ? true : false);
 
-            float playDistance = atoi(componentElement->Attribute("playDistance"));
-            float volume = atoi(componentElement->Attribute("volume"));
+            //float playDistance = atoi(componentElement->Attribute("playDistance"));
+            //float volume = atoi(componentElement->Attribute("volume"));
 
             SoundComponent* sound = new SoundComponent(soundPath, EST_AMBIENT, looping);
             _soundManager->addSoundComponent(sound);
-            sound->setPlayDistance(playDistance);
-            sound->setGain(volume);
+
+            // if set in config file - we set play distance accordingly (otherwise - play distance is 10.0f by default)
+            const char* cPlayDistance = componentElement->Attribute("playDistance");
+            if (cPlayDistance != nullptr)
+            {
+                sound->setPlayDistance(atof(cPlayDistance));
+                std::cout << "Sound play distance: " << atof(cPlayDistance) << std::endl;
+            }
+
+            // if set in config file - we set volume accordingly (otherwise - volume is 1.0f by default)
+            const char* cVolume = componentElement->Attribute("volume");
+            if (cVolume != nullptr)
+            {
+                sound->setGain(atof(cVolume));
+                std::cout << "Sound volume: " << atof(cVolume) << std::endl;
+            }
+
+            const char* cSoundPosition = componentElement->Attribute("position");
+            if (cSoundPosition != nullptr)
+            {
+                glm::vec3 soundPosition = XMLstringToVec3(cSoundPosition);
+                sound->setPosition(soundPosition);
+                std::cout << "Sound position offset: " << soundPosition.x << ", " << soundPosition.y << ", " << soundPosition.z << std::endl;
+            }
 
             sceneObject->addComponent(sound);
         }
