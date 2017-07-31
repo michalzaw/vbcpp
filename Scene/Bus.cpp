@@ -16,10 +16,10 @@ using namespace tinyxml2;
 #include "../Utils/Helpers.hpp"
 
 Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
-: _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr), _sceneObject(0), _chasisBody(0),
-_maxSteerAngle(0.55f), _steerStep(0.5f),
-_brake(false), _accelerate(false), _handbrake(true),
-_brakeForce(0.0f), _brakeForceStep(0.2f),
+: _sceneObject(0), _chasisBody(0), _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr),
+_maxSteerAngle(0.55f), _steerStep(0.3f),
+_brake(false), _accelerate(false), _handbrake(true), _idle(true),
+_brakeForce(0.0f), _brakeForceStep(0.1f),
 _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
 _isEnableLights(false), _isEnableHeadlights(false),
 _collidesWith(COL_TERRAIN | COL_ENV)
@@ -32,18 +32,6 @@ _collidesWith(COL_TERRAIN | COL_ENV)
 Bus::~Bus()
 {
     std::cout << "Bus Destruktor" << std::endl;
-
-    if (_gearbox)
-    {
-        delete _gearbox;
-        _gearbox = 0;
-    }
-
-    if (_engine)
-    {
-        delete _engine;
-        _engine = 0;
-    }
 
     WheelList::iterator wit = _wheels.begin();
 
@@ -78,11 +66,11 @@ void Bus::loadXMLdata(std::string busname)
     XMLElement* objElement = doc.FirstChildElement("Gearbox");
 
     std::string gearboxFile(objElement->Attribute("model"));
-    _gearbox = new Gearbox(gearboxFile);
+    _gearbox = std::unique_ptr<Gearbox> (new Gearbox(gearboxFile));
 
     objElement = doc.FirstChildElement("Engine");
     std::string engineFile(objElement->Attribute("model"));
-    _engine = new Engine(engineFile);
+    _engine = std::unique_ptr<Engine> (new Engine(engineFile));
 
     objElement = doc.FirstChildElement("Object");
 
@@ -107,7 +95,7 @@ void Bus::loadXMLdata(std::string busname)
     {
         SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
         _sceneObject->addComponent(soundComp);
-        soundComp->setGain(0.6f);
+        soundComp->setGain(_engine->getSoundVolume());
 
         _sndMgr->addSoundComponent(soundComp);
     }
@@ -324,8 +312,8 @@ void Bus::loadXMLdata(std::string busname)
                 float armMass = (float)atof(child->Attribute("armMass"));
                 char group = (char)atoi(child->Attribute("group"));
 
-                float arm1lowLimit = (float)atof(child->Attribute("arm1lowLimit"));
-                float arm1highLimit = (float)atof(child->Attribute("arm1highLimit"));
+                //float arm1lowLimit = (float)atof(child->Attribute("arm1lowLimit"));
+                //float arm1highLimit = (float)atof(child->Attribute("arm1highLimit"));
                 glm::vec2 arm1limits = XMLstringToVec2(child->Attribute("arm1limits"));
 
                 std::string rotDir(child->Attribute("rotationDir"));
@@ -368,8 +356,8 @@ void Bus::loadXMLdata(std::string busname)
                 std::string arm2Model(child->Attribute("arm2"));
                 float arm2Mass = (float)atof(child->Attribute("arm2Mass"));
 
-                float arm2lowLimit = (float)atof(child->Attribute("arm2lowLimit"));
-                float arm2highLimit = (float)atof(child->Attribute("arm2highLimit"));
+                //float arm2lowLimit = (float)atof(child->Attribute("arm2lowLimit"));
+                //float arm2highLimit = (float)atof(child->Attribute("arm2highLimit"));
 
                 glm::vec3 arm2Position = XMLstringToVec3(child->Attribute("arm2Position"));
                 glm::vec3 arm2RelPos = glm::vec3(busPosition.x + arm2Position.x, busPosition.y + arm2Position.y, busPosition.z + arm2Position.z);
@@ -664,7 +652,9 @@ void Bus::turnRight(float dt)
 
 void Bus::centerSteringWheel(float dt)
 {
-WheelList::iterator it = _wheels.begin();
+    float deadZone = 0.0025f;
+
+    WheelList::iterator it = _wheels.begin();
 
     for (; it != _wheels.end(); ++it)
     {
@@ -672,7 +662,7 @@ WheelList::iterator it = _wheels.begin();
 
         if ( w->steering )
         {
-            if (w->currentAngle > 0)
+            if (w->currentAngle > deadZone)
             {
                 w->currentAngle -= dt * _steerStep;
 
@@ -685,7 +675,7 @@ WheelList::iterator it = _wheels.begin();
                 }
             }
             else
-            if (w->currentAngle < 0)
+            if (w->currentAngle < -deadZone)
             {
                 w->currentAngle += dt * _steerStep;
 
@@ -760,7 +750,8 @@ void Bus::idle()
     _accelerate = false;
     _brake = false;
 
-    _engine->setThrottle(0.0f);
+    //_engine->setThrottle(0.0f);
+    _engine->throttleDown();
 }
 
 
@@ -830,7 +821,7 @@ void Bus::updatePhysics(float dt)
             }
         }
     }
-    // hamowanie
+    // bus is braking
     else if (_brake)
     {
         WheelList::iterator it = _wheels.begin();
@@ -841,7 +832,7 @@ void Bus::updatePhysics(float dt)
 
             w->body->getRigidBody()->setDamping(0, w->brakeForce);
         }
-    }
+    } // bus engine is idle
     else if (!_accelerate && !_brake && !_handbrake)
     {
         WheelList::iterator it = _wheels.begin();
@@ -850,9 +841,9 @@ void Bus::updatePhysics(float dt)
         {
             Wheel* w = (*it);
 
-            w->body->getRigidBody()->setDamping(0, 0.13f * abs(_gearbox->currentRatio()) );
+            w->body->getRigidBody()->setDamping(0, 0.13f * abs(_gearbox->currentRatio()) ); // we set a little damping to simulate air and rolling resistance
         }
-    }
+    } // bus is on handbrake
     else if (_handbrake)
     {
         WheelList::iterator it = _wheels.begin();
@@ -867,6 +858,7 @@ void Bus::updatePhysics(float dt)
 
     char poweredWheels = 0;
 
+    // If we do not accelerate at the moment - we have to calculate and simulate engine braking
     // Get wheel linear speed to calculate RPM of the engine
     WheelList::iterator it = _wheels.begin();
     for (; it != _wheels.end(); ++it)
@@ -881,6 +873,5 @@ void Bus::updatePhysics(float dt)
         }
     }
 
-    //if (_gearbox->currentRatio() != 0.0f)
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 }

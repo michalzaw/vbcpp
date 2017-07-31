@@ -61,7 +61,7 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 void Engine::throttleUp()
 {
     if (_throttle < 1.0f)
-        _throttle += 0.05f;
+        _throttle += 0.001f;
     else
         _throttle = 1.0f;
 }
@@ -70,7 +70,7 @@ void Engine::throttleUp()
 void Engine::throttleDown()
 {
     if (_throttle > 0)
-        _throttle -= 0.05f;
+        _throttle -= 0.002f;
     else
         _throttle = 0;
 }
@@ -98,7 +98,15 @@ void Engine::loadData(std::string filename)
     XMLElement* engSound = engElement->FirstChildElement("Sound");
     _sound = "Parts/" + std::string(engSound->Attribute("file"));
 
+    const char* cVolume = engSound->Attribute("volume");
+
+    if (cVolume != nullptr)
+        _volume = atof(cVolume);
+    else
+        _volume = 0.9f;
+
     std::cout << "Engine sound: " << _sound << std::endl;
+    std::cout << "Engine volume: " << _volume << std::endl;
 
     XMLElement* pointList = engElement->FirstChildElement("Points");
 

@@ -16,7 +16,7 @@ class Door
 {
     public:
         Door(RModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
-        : _doorBody(body), _doorModel(model), _state(EDS_CLOSING), _collidesWith(COL_NOTHING), _group(group), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
+        : _group(group), _doorModel(model), _doorBody(body), _state(EDS_CLOSING), _collidesWith(COL_TERRAIN), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
         {
 
         }

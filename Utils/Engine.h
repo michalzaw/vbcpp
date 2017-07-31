@@ -48,6 +48,8 @@ class Engine
 
         std::string getSoundFilename() { return _sound; }
 
+        float getSoundVolume() { return _volume; }
+
         void update(float dt);
 
 
@@ -60,6 +62,7 @@ class Engine
         float   _maxRPM;
 
         std::string _sound;
+        float       _volume;
 
         std::vector<point>  _torqueCurve;
         std::vector<params> _curveParams;

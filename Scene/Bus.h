@@ -15,41 +15,13 @@
 #include "DoorSimple.h"
 #include "DoorSE.h"
 
+#include <memory>
+
 enum WheelSide
 {
     WS_RIGHT = 0,
     WS_LEFT
 };
-
-/*
-enum DoorState
-{
-    EDS_OPENING = 0,
-    EDS_CLOSING = 1
-};
-
-
-struct Door
-{
-    PhysicalBodyConvexHull*  body;
-    RModel*                  model;
-    ConstraintHinge*         hinge;
-    DoorState                state;
-
-    void open()
-    {
-        hinge->getBulletConstraint()->enableAngularMotor(true, -1.9f, 1.15f);
-        state = EDS_OPENING;
-    }
-
-    void close()
-    {
-        hinge->getBulletConstraint()->enableAngularMotor(true, 1.9f, 1.15f);
-        state = EDS_CLOSING;
-    }
-};
-
-*/
 
 struct Wheel
 {
@@ -97,9 +69,9 @@ class Bus : virtual public RefCounter
         void brakeOff();
         void toggleHandbrake();
 
-        Gearbox* getGearbox() { if (_gearbox) return _gearbox; }
+        Gearbox* getGearbox() { if (_gearbox) return _gearbox.get(); else return 0; }
 
-        Engine* getEngine() { if (_engine) return _engine; }
+        Engine* getEngine() { if (_engine) return _engine.get(); else return 0; }
 
         void startEngine();
         void stopEngine();
@@ -119,8 +91,19 @@ class Bus : virtual public RefCounter
         PhysicsManager* _pMgr;
         SoundManager*   _sndMgr;
 
-        Gearbox*        _gearbox;
-        Engine*         _engine;
+        std::unique_ptr<Gearbox>    _gearbox;
+        std::unique_ptr<Engine>     _engine;
+
+        float   _maxSteerAngle;
+        float   _steerStep;
+
+        bool    _brake;
+        bool    _accelerate;
+        bool    _handbrake;
+        bool    _idle;
+
+        float   _brakeForce;
+        float   _brakeForceStep;
 
         SceneObject*    _steeringWheelObject;
         glm::vec3       _driverPosition;
@@ -133,16 +116,10 @@ class Bus : virtual public RefCounter
         WheelList       _wheels;
         DoorList        _doors;
 
-        bool    _accelerate;
-        bool    _brake;
-        bool    _idle;
-        bool    _handbrake;
 
-        float   _brakeForce;
-        float   _brakeForceStep;
 
-        float   _maxSteerAngle;
-        float   _steerStep;
+
+
 
         // Load config file
         void loadXMLdata(std::string busname);
