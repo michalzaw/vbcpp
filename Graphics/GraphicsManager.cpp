@@ -8,7 +8,7 @@ static std::unique_ptr<GraphicsManager> gmInstance;
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f)
 {
-
+    _quadTree = new QuadTree(glm::vec3(512, 512, 512));
 }
 
 
@@ -28,6 +28,8 @@ GraphicsManager::~GraphicsManager()
     {
         delete *i;
     }
+
+    delete _quadTree;
 }
 
 GraphicsManager& GraphicsManager::getInstance()
@@ -39,11 +41,14 @@ GraphicsManager& GraphicsManager::getInstance()
 }
 
 
-RenderObject* GraphicsManager::addRenderObject(RenderObject* object )//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
+RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject* owner)//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
 {
     //RenderObject* object = new RenderObject(model);
 
+    owner->addComponent(object);
+
     _renderObjects.push_back(object);
+    _quadTree->addObject(object);
 
     return object;
 }
@@ -188,6 +193,7 @@ void GraphicsManager::update(float deltaTime)
 }
 
 
+#ifdef ALL_OBJECTS
 RenderData* GraphicsManager::getRenderData()
 {
     RenderData* renderData = new RenderData;
@@ -199,7 +205,7 @@ RenderData* GraphicsManager::getRenderData()
         if ((*i)->isActive())
             renderData->lights.push_back(*i);
     }
-
+//std::cout << _renderObjects.size() << std::endl;
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
     {
         RenderObject* object = *i;
@@ -220,3 +226,83 @@ RenderData* GraphicsManager::getRenderData()
 
     return renderData;
 }
+#endif // ALL_OBJECTS
+
+#ifdef FRUSTUM_CULLING
+RenderData* GraphicsManager::getRenderData()
+{
+    RenderData* renderData = new RenderData;
+    renderData->camera = _cameras[0];
+    //renderData->light = *(_lights.begin());
+
+    Frustum frustum(renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix());
+
+    for (std::list<Light*>::iterator i = _lights.begin(); i != _lights.end(); ++i)
+    {
+        if ((*i)->isActive())
+            renderData->lights.push_back(*i);
+    }
+//int k = 0;
+    for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        if (!(*i)->isActive() || !isAABBIntersectFrustum(frustum, *object->getAABB()))//!isPointInFrustum(frustum, object->getAABB()->getCenterPosition()))
+            continue;
+//k++;
+        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        {
+            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
+                renderData->renderList.insert(renderData->renderList.begin(), renderElement);
+            else
+                renderData->renderList.push_back(renderElement);
+        }
+    }
+
+//std::cout << k << std::endl;
+    return renderData;
+}
+#endif // FRUSTUM_CULLING
+
+#ifdef QUAD_TREE
+RenderData* GraphicsManager::getRenderData()
+{
+    RenderData* renderData = new RenderData;
+    renderData->camera = _cameras[0];
+    //renderData->light = *(_lights.begin());
+
+    Frustum frustum(renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix());
+
+    for (std::list<Light*>::iterator i = _lights.begin(); i != _lights.end(); ++i)
+    {
+        if ((*i)->isActive())
+            renderData->lights.push_back(*i);
+    }
+
+    std::list<RenderObject*> objects;
+    _quadTree->getObjectsInFrustum(&objects, frustum);
+
+//std::cout << objects.size() << std::endl;
+    for (std::list<RenderObject*>::iterator i = objects.begin(); i != objects.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        {
+            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
+                renderData->renderList.insert(renderData->renderList.begin(), renderElement);
+            else
+                renderData->renderList.push_back(renderElement);
+        }
+    }
+
+    return renderData;
+}
+#endif // QUAD_TREE

@@ -142,9 +142,9 @@ void Bus::loadXMLdata(std::string busname)
             texturePath += std::string(child->Attribute("textures")) + "/";
 
             busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel));
+            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
 
-            _sceneObject->addComponent(renderObj);
+            //_sceneObject->addComponent(renderObj);
 
             // Tworzenie fizycznego obiektu karoserii
             const char* cMass = child->Attribute("mass");
@@ -213,9 +213,9 @@ void Bus::loadXMLdata(std::string busname)
 
             std::string modelPath = "Buses/" + busname + "/" + wheelModel;
             RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel));
+            RenderObject* wheelRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelObj);
 
-            wheelObj->addComponent(wheelRender);
+            //wheelObj->addComponent(wheelRender);
 
             int collidesWith = COL_TERRAIN | COL_ENV;
             PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, X_AXIS, COL_WHEEL, collidesWith);
@@ -297,9 +297,9 @@ void Bus::loadXMLdata(std::string busname)
                 std::string modelPath = "Buses/" + busname + "/" + doorModel;
 
                 RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-                RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr));
+                RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(dr), doorObj);
 
-                doorObj->addComponent(doorRender);
+                //doorObj->addComponent(doorRender);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -349,8 +349,8 @@ void Bus::loadXMLdata(std::string busname)
                 std::string armPath = "Buses/" + busname + "/" + armModel;
 
                 RModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
-                RenderObject* armRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm));
-                armObj->addComponent(armRender);
+                RenderObject* armRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+                //armObj->addComponent(armRender);
 
                 btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
@@ -383,8 +383,8 @@ void Bus::loadXMLdata(std::string busname)
                 std::string arm2Path = "Buses/" + busname + "/" + arm2Model;
 
                 RModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
-                RenderObject* arm2Render = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2));
-                arm2Obj->addComponent(arm2Render);
+                RenderObject* arm2Render = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+                //arm2Obj->addComponent(arm2Render);
 
                 btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
 
@@ -414,8 +414,8 @@ void Bus::loadXMLdata(std::string busname)
                 std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
                 RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
-                RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(door));
-                doorObj->addComponent(doorRender);
+                RenderObject* doorRender = GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
+                //doorObj->addComponent(doorRender);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -458,9 +458,9 @@ void Bus::loadXMLdata(std::string busname)
             _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
 
             RModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
-            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel));
+            RenderObject* renderObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
 
-            _steeringWheelObject->addComponent(renderObj);
+            //_steeringWheelObject->addComponent(renderObj);
 
 
             const char* cPosition = child->Attribute("position");

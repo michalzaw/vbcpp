@@ -22,6 +22,9 @@
 #include "../GUI/GUIRenderListElement.h"
 
 
+//#define DRAW_AABB
+
+
 class Renderer : virtual public RefCounter
 {
     private:

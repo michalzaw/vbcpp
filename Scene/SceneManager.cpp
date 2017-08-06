@@ -182,13 +182,13 @@ void SceneManager::loadScene(std::string filename)
     std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
     Model* terrModel = loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
     RModel* terrain = new RModel("", terrModel);
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain));
     SceneObject* terrainObject = addSceneObject("terrain");
+    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain), terrainObject);
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
     PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
-    terrainObject->addComponent(terrainObj);
+    //terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
 
 
@@ -268,9 +268,9 @@ void SceneManager::loadScene(std::string filename)
         // create road
         Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
         RModel* roadModel2 = new RModel("", roadModel);
-        RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2));
         SceneObject* roadSceneObject = addSceneObject(name);
-        roadSceneObject->addComponent(roadRenderObject);
+        RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2), roadSceneObject);
+        //roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
         PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, COL_TERRAIN, collidesWith);
         roadMesh->setRestitution(0.9f);
@@ -355,9 +355,11 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             std::string modelPath = dirPath + modelFile;
 
             sceneObject = addSceneObject(name);
+        sceneObject->setPosition(position);
+        sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
             model = ResourceManager::getInstance().loadModel(modelPath, dirPath);
-            RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model));
-            sceneObject->addComponent(renderObject);
+            RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
+            //sceneObject->addComponent(renderObject);
 
             const char* cScale = componentElement->Attribute("scale");
 
@@ -451,8 +453,8 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
             sceneObject->addComponent(sound);
         }
 
-        sceneObject->setPosition(position);
-        sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
+        //sceneObject->setPosition(position);
+        //sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
         //sceneObject->setScale(scale);
 
         componentElement = componentElement->NextSiblingElement("Component");

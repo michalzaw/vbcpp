@@ -19,7 +19,8 @@ enum ShaderType
     TREE_MATERIAL,
     GUI_IMAGE_SHADER,
     GUI_LABEL_SHADER,
-    SKY_MATERIAL
+    SKY_MATERIAL,
+    DEBUG_SHADER
 
 };
 

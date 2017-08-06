@@ -6,6 +6,8 @@
 #include <cstdio>
 
 #include "Model.h"
+#include "AABB.h"
+
 #include "../Utils/RModel.h"
 
 #include "../Scene/Component.h"
@@ -14,20 +16,23 @@
 class RenderObject : public Component
 {
     protected:
-        //Model* _model;
         RModel* _model;
+
+        AABB _aabb;
+        bool _isCalculatedAABB;
+
+        void calculateNewAABB();
 
     public:
         RenderObject(RModel* model = NULL);
         virtual ~RenderObject();
 
-        //void SetModel(Model* model);
-
-        //Model* GetModel();
-
         void setModel(RModel* model);
-
         RModel* getModel();
+
+        AABB* getAABB();
+
+        virtual void changedTransform();
 
 };
 

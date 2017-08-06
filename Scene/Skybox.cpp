@@ -17,8 +17,8 @@ Skybox::Skybox(RTextureCubeMap* texture, SceneManager* sceneManager)
 
     Prefab* cube = new Cube(900, skyMaterial);
     cube->init();
-    RenderObject* skyRenderObject = GraphicsManager::getInstance().addRenderObject(cube);
-    addComponent(skyRenderObject);
+    RenderObject* skyRenderObject = GraphicsManager::getInstance().addRenderObject(cube, this);
+    //addComponent(skyRenderObject);
 
     //getTransform()->setScale(glm::vec3(20, 20, 20));
 }
