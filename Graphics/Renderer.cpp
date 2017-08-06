@@ -55,6 +55,10 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* skyshader = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
     _shaderList.push_back(skyshader);
 
+    // DEBUG_SHADER
+    RShader* debugshader = ResourceManager::getInstance().loadShader("Shaders/debug.vert", "Shaders/debug.frag");
+    _shaderList.push_back(debugshader);
+
 
     // Create UBO for lights
     _lightUBO = OGLDriver::getInstance().createUBO(4096);
@@ -565,6 +569,35 @@ void Renderer::render(RenderData* renderData)
             glEnable(GL_BLEND);
         }
     }
+
+    // -----------------DEBUG----------------------------------------
+    #ifdef DRAW_AABB
+    for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
+    {
+        RModel* model = i->getModel();
+        Mesh* mesh = i->getMesh();
+        glPointSize(50);
+        glLineWidth(3);
+        RShader* shader = _shaderList[DEBUG_SHADER];
+        shader->enable();
+
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
+        shader->setUniform("MVP", MVP);
+
+        model->getAabbVbo()->bind();
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+        model->getAabbIbo()->bind();
+        glDrawElements(GL_LINES,
+                       24,
+                       GL_UNSIGNED_INT,
+                       (void*)0);
+
+        glDisableVertexAttribArray(0);
+    }
+    #endif
 
 
     delete renderData;

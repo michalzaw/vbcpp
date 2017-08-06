@@ -4,6 +4,7 @@
 #include "Resource.h"
 #include "../Graphics/Model.h"
 #include "../Graphics/OGLDriver.h"
+#include "../Graphics/AABB.h"
 
 
 class RModel : virtual public Resource
@@ -24,6 +25,15 @@ class RModel : virtual public Resource
         glm::vec3* getCollisionMesh();
         GLenum getPrimitiveType();
         Mesh* getMeshes();
+        AABB* getAABB();
+        VBO* getAabbVbo()
+        {
+            return _aabbVbo;
+        }
+        IBO* getAabbIbo()
+        {
+            return _aabbIbo;
+        }
 
     protected:
         Vertex* _vertices;
@@ -42,6 +52,14 @@ class RModel : virtual public Resource
         IBO* _ibo;
 
         GLenum _primitiveType;
+
+        AABB _aabb;
+
+        VBO* _aabbVbo;
+        IBO* _aabbIbo;
+
+        void calculateAABB();
+        void createAabbVbo();
 };
 
 

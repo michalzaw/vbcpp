@@ -160,12 +160,14 @@
 		<Unit filename="GUI/Image.h" />
 		<Unit filename="GUI/Label.cpp" />
 		<Unit filename="GUI/Label.h" />
+		<Unit filename="Graphics/AABB.h" />
 		<Unit filename="Graphics/Camera.cpp" />
 		<Unit filename="Graphics/Camera.h" />
 		<Unit filename="Graphics/CameraFPS.cpp" />
 		<Unit filename="Graphics/CameraFPS.hpp" />
 		<Unit filename="Graphics/CameraStatic.cpp" />
 		<Unit filename="Graphics/CameraStatic.hpp" />
+		<Unit filename="Graphics/Frustum.h" />
 		<Unit filename="Graphics/GraphicsManager.cpp" />
 		<Unit filename="Graphics/GraphicsManager.h" />
 		<Unit filename="Graphics/IBO.cpp" />
@@ -189,6 +191,10 @@
 		<Unit filename="Graphics/OGLDriver.cpp" />
 		<Unit filename="Graphics/OGLDriver.h" />
 		<Unit filename="Graphics/Prefab.h" />
+		<Unit filename="Graphics/QuadTree.cpp" />
+		<Unit filename="Graphics/QuadTree.h" />
+		<Unit filename="Graphics/QuadTreeNode.cpp" />
+		<Unit filename="Graphics/QuadTreeNode.h" />
 		<Unit filename="Graphics/RShader.h" />
 		<Unit filename="Graphics/RenderData.cpp" />
 		<Unit filename="Graphics/RenderData.h" />
@@ -242,6 +248,8 @@
 		<Unit filename="Scene/Skybox.h" />
 		<Unit filename="Scene/SoundComponent.h" />
 		<Unit filename="Scene/SoundManager.h" />
+		<Unit filename="Utils/Collision.cpp" />
+		<Unit filename="Utils/Collision.h" />
 		<Unit filename="Utils/Engine.cpp" />
 		<Unit filename="Utils/Engine.h" />
 		<Unit filename="Utils/Gearbox.cpp" />
@@ -264,6 +272,7 @@
 		<Unit filename="Utils/ResourceManager.cpp" />
 		<Unit filename="Utils/ResourceManager.h" />
 		<Unit filename="Utils/Strings.h" />
+		<Unit filename="Utils/Timer.h" />
 		<Unit filename="Utils/tinyxml2.cpp" />
 		<Unit filename="Utils/tinyxml2.h" />
 		<Unit filename="Window/Window.cpp" />

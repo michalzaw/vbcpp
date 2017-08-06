@@ -26,6 +26,7 @@
 #include "Scene/SoundManager.h"
 
 #include "Utils/ResourceManager.h"
+#include "Utils/Timer.h"
 
 #include "Scene/Bus.h"
 
@@ -40,6 +41,7 @@ using namespace tinyxml2;
 #include "GUI/GUIManager.h"
 #include "Graphics/Prefab.h"
 #include "Graphics/Roads.h"
+#include "Utils/Collision.h"
 
 // Definicje globalne
 
@@ -371,12 +373,14 @@ int main()
 	GraphicsManager::getInstance().setWindVelocity(0.6f);
 
 
+Timer timer;
+timer.start();
     bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
     //bus->getSceneObject()->setPosition(150,5,-150);
     //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
 
-
     sceneMgr->loadScene(gameCfg.mapFile);
+double diff = timer.stop();
 
     bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
     bus->getSceneObject()->setRotation(sceneMgr->getBusStart().rotation.x,
@@ -385,7 +389,7 @@ int main()
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
-    camFPS = GraphicsManager::getInstance().addCameraFPS(gameCfg.windowWidth, gameCfg.windowHeight, 45.0f, 0.1f, 1000);
+    camFPS = GraphicsManager::getInstance().addCameraFPS(gameCfg.windowWidth, gameCfg.windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     Camera->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
@@ -491,7 +495,7 @@ int main()
     physMgr->play();
 
     // ========== MAIN LOOP START ==========
-
+std::cout << "TEST" << diff << std::endl;
     while (win->isOpened())
     {
         nbFrames++;
@@ -514,7 +518,7 @@ int main()
 
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
-			win->setWindowTitle(newWindowTitle);
+//			win->setWindowTitle(newWindowTitle);
 			label->setText(newWindowTitle);
         }
 

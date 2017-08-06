@@ -12,12 +12,19 @@
 #include "Camera.h"
 //#include "OGLDriver.h"
 #include "Light.h"
+#include "QuadTree.h"
 #include "../Utils/RModel.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
 
+#include <../Utils/Collision.h>
+
 #include <memory>
+
+//#define ALL_OBJECTS
+#define FRUSTUM_CULLING
+//#define QUAD_TREE
 
 class GraphicsManager
 {
@@ -25,6 +32,8 @@ class GraphicsManager
         std::list<RenderObject*>    _renderObjects;
         std::vector<CameraStatic*>  _cameras;
         std::list<Light*>           _lights;
+
+        QuadTree* _quadTree;
 
         glm::vec3   _windDirection;
         float       _windVelocity;
@@ -42,7 +51,7 @@ class GraphicsManager
         //RenderObject*   qddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
-        RenderObject*   addRenderObject(RenderObject* object); //Model* model = NULL);
+        RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
 
         CameraStatic*   addCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);

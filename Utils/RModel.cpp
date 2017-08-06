@@ -24,6 +24,9 @@ RModel::RModel(std::string path, Model* m)
     _collisionMeshSize = m->getCollisionMeshSize();
 
     _primitiveType = m->getPrimitiveType();
+
+    calculateAABB();
+    createAabbVbo();
 }
 
 RModel::~RModel()
@@ -147,4 +150,62 @@ GLenum RModel::getPrimitiveType()
 Mesh* RModel::getMeshes()
 {
     return _meshes;
+}
+
+
+AABB* RModel::getAABB()
+{
+    return &_aabb;
+}
+
+
+void RModel::calculateAABB()
+{
+    glm::vec3 min(0.0f, 0.0f, 0.0f);
+    glm::vec3 max(0.0f, 0.0f, 0.0f);
+
+    for (int i = 0; i < _quantumOfVertices; ++i)
+    {
+        if (_vertices[i].position.x < min.x)
+            min.x = _vertices[i].position.x;
+        else if (_vertices[i].position.x > max.x)
+            max.x = _vertices[i].position.x;
+
+        if (_vertices[i].position.y < min.y)
+            min.y = _vertices[i].position.y;
+        else if (_vertices[i].position.y > max.y)
+            max.y = _vertices[i].position.y;
+
+        if (_vertices[i].position.z < min.z)
+            min.z = _vertices[i].position.z;
+        else if (_vertices[i].position.z > max.z)
+            max.z = _vertices[i].position.z;
+    }
+
+    _aabb.setSize(min, max);
+}
+
+
+void RModel::createAabbVbo()
+{
+    glm::vec3 min = _aabb.getMinCoords();
+    glm::vec3 max = _aabb.getMaxCoords();
+
+    Vertex vertices[8];
+    vertices[0].position = glm::vec3(min.x, min.y, min.z);
+    vertices[1].position = glm::vec3(min.x, min.y, max.z);
+    vertices[2].position = glm::vec3(min.x, max.y, min.z);
+    vertices[3].position = glm::vec3(min.x, max.y, max.z);
+    vertices[4].position = glm::vec3(max.x, min.y, min.z);
+    vertices[5].position = glm::vec3(max.x, min.y, max.z);
+    vertices[6].position = glm::vec3(max.x, max.y, min.z);
+    vertices[7].position = glm::vec3(max.x, max.y, max.z);
+
+    _aabbVbo = OGLDriver::getInstance().createVBO(8 * sizeof(Vertex));
+    _aabbVbo->addVertexData(vertices, 8);
+
+    unsigned int indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
+
+    _aabbIbo = OGLDriver::getInstance().createIBO(24 * sizeof(unsigned int));
+    _aabbIbo->addIndices(indices, 24);
 }
