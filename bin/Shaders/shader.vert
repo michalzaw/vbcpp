@@ -8,9 +8,12 @@ layout (location = 3) in vec3 VertexTangent;
 layout (location = 4) in vec3 VertexBitangent;
 #endif
 
+const int CASCADES_COUNT = 3;
+
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
+uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
 
 out vec3 Position;
 out vec2 TexCoord;
@@ -19,6 +22,8 @@ out vec3 Normal;
 	out vec3 TangentWorldspace;
 	out vec3 BitangentWorldspace;
 #endif
+out vec4 PositionLightSpace[CASCADES_COUNT];
+out float ClipSpacePositionZ;
 
 void main()
 {
@@ -36,4 +41,10 @@ void main()
 	TangentWorldspace = NM * VertexTangent;
 	BitangentWorldspace = NM * VertexBitangent;
 #endif
+	for (int i = 0; i < 3; ++i)
+	{
+		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
+	}
+	
+	ClipSpacePositionZ = gl_Position.z;
 }

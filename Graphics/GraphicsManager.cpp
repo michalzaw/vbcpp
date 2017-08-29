@@ -53,9 +53,9 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-CameraStatic* GraphicsManager::addCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
+CameraStatic* GraphicsManager::addCameraStatic(CameraProjectionType projectionType)
 {
-    CameraStatic* camera = new CameraStatic(width, height, viewAngle, nearValue, farValue);
+    CameraStatic* camera = new CameraStatic(projectionType);
 
     _cameras.push_back(camera);
 
@@ -150,6 +150,18 @@ void GraphicsManager::removeLight(Light* light)
 }
 
 
+void GraphicsManager::setCurrentCamera(CameraStatic* camera)
+{
+    _currentCamera = camera;
+}
+
+
+CameraStatic* GraphicsManager::getCurrentCamera()
+{
+    return _currentCamera;
+}
+
+
 void GraphicsManager::setWindDirection(glm::vec3 direction)
 {
     _windDirection = direction;
@@ -197,7 +209,7 @@ void GraphicsManager::update(float deltaTime)
 RenderData* GraphicsManager::getRenderData()
 {
     RenderData* renderData = new RenderData;
-    renderData->camera = _cameras[0];
+    renderData->camera = _currentCamera;
     //renderData->light = *(_lights.begin());
 
     for (std::list<Light*>::iterator i = _lights.begin(); i != _lights.end(); ++i)
@@ -232,7 +244,7 @@ RenderData* GraphicsManager::getRenderData()
 RenderData* GraphicsManager::getRenderData()
 {
     RenderData* renderData = new RenderData;
-    renderData->camera = _cameras[0];
+    renderData->camera = _currentCamera;
     //renderData->light = *(_lights.begin());
 
     Frustum frustum(renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix());
@@ -270,7 +282,7 @@ RenderData* GraphicsManager::getRenderData()
 RenderData* GraphicsManager::getRenderData()
 {
     RenderData* renderData = new RenderData;
-    renderData->camera = _cameras[0];
+    renderData->camera = _currentCamera;
     //renderData->light = *(_lights.begin());
 
     Frustum frustum(renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix());

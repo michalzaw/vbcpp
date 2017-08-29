@@ -167,6 +167,9 @@
 		<Unit filename="Graphics/CameraFPS.hpp" />
 		<Unit filename="Graphics/CameraStatic.cpp" />
 		<Unit filename="Graphics/CameraStatic.hpp" />
+		<Unit filename="Graphics/Framebuffer.cpp" />
+		<Unit filename="Graphics/Framebuffer.h" />
+		<Unit filename="Graphics/Frustum.cpp" />
 		<Unit filename="Graphics/Frustum.h" />
 		<Unit filename="Graphics/GraphicsManager.cpp" />
 		<Unit filename="Graphics/GraphicsManager.h" />
@@ -196,6 +199,7 @@
 		<Unit filename="Graphics/QuadTreeNode.cpp" />
 		<Unit filename="Graphics/QuadTreeNode.h" />
 		<Unit filename="Graphics/RShader.h" />
+		<Unit filename="Graphics/Rect.h" />
 		<Unit filename="Graphics/RenderData.cpp" />
 		<Unit filename="Graphics/RenderData.h" />
 		<Unit filename="Graphics/RenderObject.cpp" />

@@ -4,6 +4,8 @@
 
 #include <glm/glm.hpp>
 
+#include "AABB.h"
+
 
 struct Plane
 {
@@ -39,10 +41,32 @@ enum FrustumPlane
 };
 
 
+enum FrustumPoint
+{
+    FP_NEAR_LEFT_BOTTOM,
+    FP_NEAR_RIGHT_BOTTOM,
+    FP_NEAR_LEFT_TOP,
+    FP_NEAR_RIGHT_TOP,
+    FP_FAR_LEFT_BOTTOM,
+    FP_FAR_RIGHT_BOTTOM,
+    FP_FAR_LEFT_TOP,
+    FP_FAR_RIGHT_TOP
+
+};
+
+
+glm::vec3 intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3);
+
+
 class Frustum
 {
     private:
         Plane _planes[6];
+        glm::vec3 _points[8];
+
+        AABB _aabb;
+
+        bool _isCalculatedPoints;
 
         void normalizePlanes()
         {
@@ -57,19 +81,35 @@ class Frustum
             }
         }
 
+        void calculatePoints()
+        {
+            _points[FP_NEAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
+            _points[FP_NEAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
+            _points[FP_NEAR_LEFT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_TOP]);
+            _points[FP_NEAR_RIGHT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_TOP]);
+            _points[FP_FAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
+            _points[FP_FAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
+            _points[FP_FAR_LEFT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_TOP]);
+            _points[FP_FAR_RIGHT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_TOP]);
+        }
+
     public:
         Frustum()
         {
-
+            _isCalculatedPoints = false;
         }
 
         Frustum(glm::mat4 matrix)
         {
+            _isCalculatedPoints = false;
+
             set(matrix);
         }
 
         void set(glm::mat4 matrix)
         {
+            _isCalculatedPoints = false;
+
             /*_planes[FP_LEFT].set(matrix[3] + matrix[0], matrix[7] + matrix[4], matrix[11] + matrix[8], matrix[15] + matrix[12]);
             _planes[FP_RIGHT].set(matrix[3] - matrix[0], matrix[7] - matrix[4], matrix[11] - matrix[8], matrix[15] - matrix[12]);
             _planes[FP_TOP].set(matrix[3] - matrix[1], matrix[7] - matrix[5], matrix[11] - matrix[9], matrix[15] - matrix[13]);
@@ -97,6 +137,60 @@ class Frustum
         const Plane& getPlane(FrustumPlane plane)
         {
             return _planes[plane];
+        }
+
+        glm::vec3* const getPoints()
+        {
+            if (!_isCalculatedPoints)
+            {
+                calculatePoints();
+
+                _isCalculatedPoints = true;
+            }
+
+            return _points;
+        }
+
+        void applyTransform(glm::mat4 transform)
+        {
+            glm::vec3* points = getPoints();
+
+            for (int i = 0; i < 8; ++i)
+            {
+                glm::vec4 v = transform * glm::vec4(points[i], 1.0f);
+                _points[i] = glm::vec3(v.x, v.y, v.z);
+            }
+        }
+
+
+        AABB* getAABB()
+        {
+            glm::vec3* frustumPoints = _points;
+
+            glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
+            glm::vec3 max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+            for (int i = 0; i < 8; ++i)
+            {
+                if (frustumPoints[i].x < min.x)
+                    min.x = frustumPoints[i].x;
+                if (frustumPoints[i].x > max.x)
+                    max.x = frustumPoints[i].x;
+
+                if (frustumPoints[i].y < min.y)
+                    min.y = frustumPoints[i].y;
+                if (frustumPoints[i].y > max.y)
+                    max.y = frustumPoints[i].y;
+
+                if (frustumPoints[i].z < min.z)
+                    min.z = frustumPoints[i].z;
+                if (frustumPoints[i].z > max.z)
+                    max.z = frustumPoints[i].z;
+            }
+
+            _aabb.setSize(min, max);
+
+            return &_aabb;
         }
 
 };

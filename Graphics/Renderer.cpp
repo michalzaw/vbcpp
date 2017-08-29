@@ -59,6 +59,16 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     RShader* debugshader = ResourceManager::getInstance().loadShader("Shaders/debug.vert", "Shaders/debug.frag");
     _shaderList.push_back(debugshader);
 
+    // SHADOWMAP_SHADER
+    RShader* shadowmapshader = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag");
+    _shaderList.push_back(shadowmapshader);
+
+    // SHADOWMAP_ALPHA_TEST_SHADER
+    defines.clear();
+    defines.push_back("ALPHA_TEST");
+    RShader* shadowmapshader2 = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+    _shaderList.push_back(shadowmapshader2);
+
 
     // Create UBO for lights
     _lightUBO = OGLDriver::getInstance().createUBO(4096);
@@ -66,6 +76,13 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
 
     _shaderList[SOLID_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
     _shaderList[NORMALMAPPING_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
+
+    framebuffer = new Framebuffer();
+    framebuffer->init();
+    framebuffer->addTexture(TF_DEPTH_COMPONENT, 512, 512);
+    framebuffer->setViewport(UintRect(0, 0, 512, 512));
+
+    OGLDriver::getInstance().getDefaultFramebuffer()->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 }
 
 Renderer::~Renderer()
@@ -73,245 +90,121 @@ Renderer::~Renderer()
     OGLDriver::getInstance().deleteUBO(_lightUBO);
 }
 
-/*void Renderer::Render(RenderData* renderData)
+
+void Renderer::renderAll()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    RenderData* renderData = GraphicsManager::getInstance().getRenderData();
 
-    CCamera* camera = renderData->_camera;
+    CameraStatic* currentCamera = renderData->camera;
 
-    for (int i = 0; i < renderData->_renderList.size(); ++i)
+    for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
     {
-        RenderObject* renderObject = renderData->_renderList[i].GetRenderObject();
-        unsigned int meshIndex = renderData->_renderList[i].GetMeshIndex();
+        Light* light = (*i);
+        if (light->isShadowMapping())
+        {
+            float cascadeStarts[3] = {currentCamera->getNearValue(), 25.0f, 100.0f};
+            float cascadeEnds[3] = {25.0f, 100.0f, 500.0f};//currentCamera->getFarValue()};
 
-        Shader* shader = renderObject->GetModel()->GetMesh(meshIndex).material.shader;
-        shader->Enable();
+            for (int i = 0; i < 3; ++i)
+            {
+                Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
+                                                 cascadeStarts[i], cascadeEnds[i]) * currentCamera->getViewMatrix());
 
-        glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * renderObject->GetTransform().GetTransformMatrix();
-        shader->SetUniform("MVP", MVP);
+                frustum.applyTransform(light->getCameraForShadowMap(i)->getViewMatrix());
+                AABB* frustumAabb = frustum.getAABB();
+                glm::vec3 min = frustumAabb->getMinCoords();
+                glm::vec3 max = frustumAabb->getMaxCoords();
 
-        renderObject->GetModel()->GetVBO()->Bind();
+                light->getCameraForShadowMap(i)->setLeft(min.x);
+                light->getCameraForShadowMap(i)->setRight(max.x);
+                light->getCameraForShadowMap(i)->setBottom(min.y);
+                light->getCameraForShadowMap(i)->setTop(max.y);
+                light->getCameraForShadowMap(i)->setNearValue(-256.0f);
+                light->getCameraForShadowMap(i)->setFarValue(256.0f);
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+                renderData->camera = light->getCameraForShadowMap(i);
 
-        shader->BindTexture2D("Texture", renderObject->GetModel()->GetMesh(meshIndex).material.diffuseTexture);
-
-        shader->SetUniform("Transparency", renderObject->GetModel()->GetMesh(meshIndex).material.transparency);
-
-        glDrawArrays(renderObject->GetModel()->GetPrimitiveType(),
-            renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
-            renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
+                light->getShadowMap(i)->bind();
+                renderDepth(renderData);
+            }
+        }
     }
 
-    delete renderData;
-}*/
+    renderData->camera = currentCamera;
 
-
-// z oœwietleniem
-/*void Renderer::Render(RenderData* renderData)
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    CCamera* camera = renderData->_camera;
-
-    for (int i = 0; i < renderData->_renderList.size(); ++i)
-    {
-        RenderObject* renderObject = renderData->_renderList[i].GetRenderObject();
-        unsigned int meshIndex = renderData->_renderList[i].GetMeshIndex();
-
-        Shader* shader = renderObject->GetModel()->GetMesh(meshIndex).material.shader;
-        shader->Enable();
-
-        //if (renderObject->GetModel()->GetMesh(meshIndex).material.name != "Material #305")
-            //std::cout << "\n\n\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n!!!!!!!!!!!!!!!!!!!!!!!!\n\n\n\n";
-
-        glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * renderObject->GetTransform().GetTransformMatrix();
-        shader->SetUniform("MVP", MVP);
-        shader->SetUniform("ModelMatrix", renderObject->GetTransform().GetTransformMatrix());
-        shader->SetUniform("NormalMatrix", renderObject->GetTransform().GetNormalMatrix());
-
-        renderObject->GetModel()->GetVBO()->Bind();
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
-
-        shader->SetUniform("Light.Color", renderData->_light->GetColor());
-        shader->SetUniform("Light.AmbientIntensity", renderData->_light->GetAmbientIntensity());
-        shader->SetUniform("Light.DiffuseIntensity", renderData->_light->GetDiffiseIntenisty());
-        shader->SetUniform("Light.Direction", renderData->_light->GetDirection());
-
-        shader->BindTexture2D("Texture", renderObject->GetModel()->GetMesh(meshIndex).material.diffuseTexture);
-
-        shader->SetUniform("Transparency", renderObject->GetModel()->GetMesh(meshIndex).material.transparency);
-
-        shader->SetUniform("SpecularPower", renderObject->GetModel()->GetMesh(meshIndex).material.shininess);
-        shader->SetUniform("CameraPosition", renderData->_camera->GetPosition());
-
-        glDrawArrays(renderObject->GetModel()->GetPrimitiveType(),
-            renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
-            renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
-    }
+    OGLDriver::getInstance().getDefaultFramebuffer()->bind();
+    renderScene(renderData);
 
     delete renderData;
-}*/
+}
 
 
-// nowe ³adowanie modeli, indeksy
-/*void Renderer::Render(RenderData* renderData)
+void Renderer::renderDepth(RenderData* renderData)
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     CameraStatic* camera = renderData->camera;
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        RModel* model = i->GetModel();
-        Mesh* mesh = i->GetMesh();
+        RModel* model = i->getModel();
+        Mesh* mesh = i->getMesh();
+        RShader* shader;
 
-        RShader* shader = mesh->material._shader;
-        shader->Enable();
+        if (mesh->material.transparency != 0.0f || mesh->material.shader == TRANSPARENCY_MATERIAL)
+            break;
 
-        //glm::mat4 MVP = camera->GetMatrices().GetViewProjectionMatrix() * i->GetTransform()->GetTransformMatrix();
-        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->GetTransform()->GetTransformMatrix();
-        shader->SetUniform("MVP", MVP);
-        shader->SetUniform("ModelMatrix", i->GetTransform()->GetTransformMatrix());
-        shader->SetUniform("NormalMatrix", i->GetTransform()->GetNormalMatrix());
+        bool isAlphaTest = mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == TRANSPARENCY_MATERIAL || mesh->material.shader == TREE_MATERIAL;
+        if (isAlphaTest)
+            shader = _shaderList[SHADOWMAP_ALPHA_TEST_SHADER];
 
-        model->GetVBO()->Bind();
+        else
+            shader = _shaderList[SHADOWMAP_SHADER];
+
+        shader->enable();
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
+        shader->setUniform("MVP", MVP);
+
+        model->getVBO()->bind();
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
 
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
-
-        if (mesh->material.normalmapTexture != 0)
+        if (isAlphaTest)
         {
-            glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
 
-            glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
-
-            shader->BindTexture2D("NormalmapTexture", mesh->material.normalmapTexture);
+            shader->bindTexture("AlphaTexture", mesh->material.diffuseTexture);
         }
 
-        int d = 0;
-        int p = 0;
-        int s = 0;
-        for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
-        {
-            switch ((*i)->GetLightType())
-            {
-                case LT_DIRECTIONAL:
-                {
-                    std::string lname = "DirLights[";
-                    lname = lname + toString(d++) + "]";
-
-                    shader->SetUniform((lname + ".Base.Color").c_str(), (*i)->GetColor());
-                    shader->SetUniform((lname + ".Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
-                    shader->SetUniform((lname + ".Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
-                    shader->SetUniform((lname + ".Direction").c_str(), (*i)->GetDirection());
-
-                    break;
-                }
-                case LT_POINT:
-                {
-                    std::string lname = "PointLights[";
-                    lname = lname + toString(p++) + "]";
-
-                    shader->SetUniform((lname + ".Base.Color").c_str(), (*i)->GetColor());
-                    shader->SetUniform((lname + ".Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
-                    shader->SetUniform((lname + ".Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
-                    shader->SetUniform((lname + ".Position").c_str(), (*i)->GetPosition());
-                    shader->SetUniform((lname + ".Attenuation.constant").c_str(), (*i)->GetAttenuation().constant);
-                    shader->SetUniform((lname + ".Attenuation.linear").c_str(), (*i)->GetAttenuation().linear);
-                    shader->SetUniform((lname + ".Attenuation.exp").c_str(), (*i)->GetAttenuation().exp);
-
-                    break;
-                }
-                case LT_SPOT:
-                {
-                    std::string lname = "SpotLights[";
-                    lname = lname + toString(s++) + "]";
-
-                    shader->SetUniform((lname + ".Base.Base.Color").c_str(), (*i)->GetColor());
-                    shader->SetUniform((lname + ".Base.Base.AmbientIntensity").c_str(), (*i)->GetAmbientIntensity());
-                    shader->SetUniform((lname + ".Base.Base.DiffuseIntensity").c_str(), (*i)->GetDiffiseIntenisty());
-                    shader->SetUniform((lname + ".Base.Position").c_str(), (*i)->GetPosition());
-                    shader->SetUniform((lname + ".Base.Attenuation.constant").c_str(), (*i)->GetAttenuation().constant);
-                    shader->SetUniform((lname + ".Base.Attenuation.linear").c_str(), (*i)->GetAttenuation().linear);
-                    shader->SetUniform((lname + ".Base.Attenuation.exp").c_str(), (*i)->GetAttenuation().exp);
-                    shader->SetUniform((lname + ".Direction").c_str(), (*i)->GetDirection());
-                    shader->SetUniform((lname + ".CutoffCos").c_str(), (*i)->GetCutoffCos());
-                }
-            }
-
-        }
-        shader->SetUniform("DirCount", d);
-        shader->SetUniform("PointCount", p);
-        shader->SetUniform("SpotCount", s);
-
-        //shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
-        shader->BindTexture2D("Texture", mesh->material.diffuseTexture);
-        shader->SetUniform("matAmbient", mesh->material.ambientColor);
-        shader->SetUniform("matDiffuse", mesh->material.diffuseColor);
-        shader->SetUniform("matSpecular", mesh->material.specularColor);
-
-        shader->SetUniform("Transparency", mesh->material.transparency);
-
-        shader->SetUniform("SpecularPower", mesh->material.shininess);
-        shader->SetUniform("CameraPosition", camera->getPosition());
-        shader->SetUniform("a", 1.0f);
-
-        //glDrawArrays(renderObject->GetModel()->GetPrimitiveType(),
-        //    renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
-        //    renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
-
-        model->GetIBO()->Bind();
-        glDrawElements(model->GetPrimitiveType(),
+        model->getIBO()->bind();
+        glDrawElements(model->getPrimitiveType(),
                        mesh->quantumOfVertice,
                        GL_UNSIGNED_INT,
                        (void*)(mesh->firstVertex * sizeof(unsigned int)));
 
         glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
-        if (mesh->material.normalmapTexture != 0)
+        if (isAlphaTest)
         {
-            glDisableVertexAttribArray(3);
-            glDisableVertexAttribArray(4);
+            glDisableVertexAttribArray(1);
         }
     }
 
-
-    delete renderData;
-}*/
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
 
 
 // UBO
-void Renderer::render(RenderData* renderData)
+void Renderer::renderScene(RenderData* renderData)
 {
+    glm::mat4 lightSpaceMatrix[3];
+    RTexture* shadowMap[3];
+
+
     // Aktualizacja UBO swiatel
     int d = 0;
     int p = 0;
@@ -322,6 +215,14 @@ void Renderer::render(RenderData* renderData)
         {
             case LT_DIRECTIONAL:
             {
+                if ((*i)->isShadowMapping())
+                {
+                    for (int j = 0; j < 3; ++j)
+                    {
+                        lightSpaceMatrix[j] = (*i)->getCameraForShadowMap(j)->getProjectionMatrix() * (*i)->getCameraForShadowMap(j)->getViewMatrix();
+                        shadowMap[j] = (*i)->getShadowMap(j)->getTexture(0);
+                    }
+                }
                 std::string lname = "LightsBlock.DirLights[";
                 lname = lname + toString(d++) + "]";
 
@@ -505,6 +406,15 @@ void Renderer::render(RenderData* renderData)
         shader->setUniform("MVP", MVP);
         shader->setUniform("ModelMatrix", i->getTransformMatrices().transformMatrix);
         shader->setUniform("NormalMatrix", i->getTransformMatrices().normalMatrix);
+        //for (int j = 0; j < 3; ++j)
+        //{
+            shader->setUniform("LightSpaceMatrix[0]", lightSpaceMatrix[0]);
+            shader->bindTexture("ShadowMap[0]", shadowMap[0]);
+            shader->setUniform("LightSpaceMatrix[1]", lightSpaceMatrix[1]);
+            shader->bindTexture("ShadowMap[1]", shadowMap[1]);
+            shader->setUniform("LightSpaceMatrix[2]", lightSpaceMatrix[2]);
+            shader->bindTexture("ShadowMap[2]", shadowMap[2]);
+        //}
 
         model->getVBO()->bind();
 
@@ -598,9 +508,6 @@ void Renderer::render(RenderData* renderData)
         glDisableVertexAttribArray(0);
     }
     #endif
-
-
-    delete renderData;
 }
 
 

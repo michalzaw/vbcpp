@@ -3,11 +3,27 @@
 #include "../Scene/SceneObject.h"
 
 
-CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
+/*CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 	: Component(CT_CAMERA),
 	_projectionMatrix(1.0), _viewMatrix(1.0),
 	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
     _farValue(farValue), _nearValue(nearValue), _viewAngle(viewAngle), _windowWidth(width), _windowHeight(height)
+{
+    changedTransform();
+
+    _projectionMatrixIs = false;
+	//updateProjection();
+	//updateView();
+}*/
+
+
+CameraStatic::CameraStatic(CameraProjectionType projectionType)
+	: Component(CT_CAMERA),
+	_projectionType(projectionType),
+	_projectionMatrix(1.0), _viewMatrix(1.0),
+	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
+    _farValue(0.1f), _nearValue(1000.0f), _viewAngle(45.0f), _windowWidth(800), _windowHeight(600),
+    _left(-1.0f), _right(1.0f), _bottom(-1.0f), _top(1.0f)
 {
     changedTransform();
 
@@ -31,6 +47,12 @@ vec3 CameraStatic::transformToGlobal(glm::vec3 vector)
         //vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
 
     return glm::normalize(glm::vec3(vec.x, vec.y, vec.z));
+}
+
+
+CameraProjectionType CameraStatic::getProjctionType()
+{
+    return _projectionType;
 }
 
 
@@ -58,6 +80,42 @@ GLfloat	CameraStatic::getFarValue()
 GLfloat	CameraStatic::getViewAngle()
 {
 	return _viewAngle;
+}
+
+
+GLint CameraStatic::getWindowWidth()
+{
+    return _windowWidth;
+}
+
+
+GLint CameraStatic::getWindowHeight()
+{
+    return _windowHeight;
+}
+
+
+GLfloat CameraStatic::getLeft()
+{
+    return _left;
+}
+
+
+GLfloat CameraStatic::getRight()
+{
+    return _right;
+}
+
+
+GLfloat CameraStatic::getBottom()
+{
+    return _bottom;
+}
+
+
+GLfloat CameraStatic::getTop()
+{
+    return _top;
 }
 
 
@@ -170,7 +228,11 @@ glm::mat4 CameraStatic::getProjectionMatrix()
 {
     if (!_projectionMatrixIs)
     {
-        _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+        if (_projectionType == CPT_PERSPECTIVE)
+            _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+
+        else
+            _projectionMatrix = glm::ortho(_left, _right, _bottom, _top, _nearValue, _farValue);
 
         _projectionMatrixIs = true;
     }
@@ -225,6 +287,38 @@ void CameraStatic::setWindowDimensions(GLint width, GLint height)
 	_windowHeight = height;
 
 	_projectionMatrixIs = false;//updateProjection();
+}
+
+
+void CameraStatic::setLeft(GLfloat left)
+{
+    _left = left;
+
+	_projectionMatrixIs = false;
+}
+
+
+void CameraStatic::setRight(GLfloat right)
+{
+    _right = right;
+
+	_projectionMatrixIs = false;
+}
+
+
+void CameraStatic::setBottom(GLfloat bottom)
+{
+    _bottom = bottom;
+
+	_projectionMatrixIs = false;
+}
+
+
+void CameraStatic::setTop(GLfloat top)
+{
+    _top = top;
+
+	_projectionMatrixIs = false;
 }
 
 

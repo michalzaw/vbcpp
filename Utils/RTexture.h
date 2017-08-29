@@ -49,6 +49,8 @@ enum TextureClampMode
 
 class RTexture : public Resource
 {
+    friend class Framebuffer;
+
     public:
         //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
         //RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);

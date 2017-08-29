@@ -1,5 +1,6 @@
 #include "Light.h"
 
+#include "GraphicsManager.h"
 #include "../Scene/SceneObject.h"
 
 
@@ -7,9 +8,9 @@ Light::Light(LightType type)
     : Component(CT_LIGHT),
     _lightType(type),
     _color(1.0f, 1.0f, 1.0f), _ambientIntensity(0.5f), _diffuseIntensity(1.0f),
-    _cutoff(0.0f), _cutoffCos(1.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f),
+    _isShadowMapping(false), _shadowMap({NULL, NULL, NULL}), _cameraForShadowMap({NULL, NULL, NULL})
 {
-
 
 }
 
@@ -18,16 +19,27 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
     : Component(CT_LIGHT),
     _lightType(type),
     _color(color), _ambientIntensity(ambientIntensity), _diffuseIntensity(diffuseIntensity),
-    _cutoff(0.0f), _cutoffCos(1.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f),
+    _isShadowMapping(false), _shadowMap({NULL, NULL, NULL}), _cameraForShadowMap({NULL, NULL, NULL})
 {
-
 
 }
 
 
 Light::~Light()
 {
+    for (int i = 0; i < 3; ++i)
+    {
+        if (_shadowMap[i] != NULL)
+        {
+            OGLDriver::getInstance().deleteFramebuffer(_shadowMap[i]);
+        }
 
+        if (_cameraForShadowMap[i] != NULL)
+        {
+            _object->removeComponent(_cameraForShadowMap[i]);
+        }
+    }
 }
 
 
@@ -68,6 +80,40 @@ void Light::setCutoff(float cutoff)
     _cutoff = cutoff;
 
     _cutoffCos = cosf(_cutoff);
+}
+
+
+void Light::setShadowMapping(bool isEnable)
+{
+    const int SHADOWMAPS_SIZE[3] = {2048, 1024, 512};
+    _isShadowMapping = isEnable;
+
+    if (_isShadowMapping)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            _shadowMap[i] = OGLDriver::getInstance().createFramebuffer();
+            _shadowMap[i]->addTexture(TF_DEPTH_COMPONENT, SHADOWMAPS_SIZE[i], SHADOWMAPS_SIZE[i]);
+            _shadowMap[i]->setViewport(UintRect(0, 0, SHADOWMAPS_SIZE[i], SHADOWMAPS_SIZE[i]));
+
+            _cameraForShadowMap[i] = GraphicsManager::getInstance().addCameraStatic(CPT_ORTHOGRAPHIC);
+            _cameraForShadowMap[i]->setLeft(-256.0f);
+            _cameraForShadowMap[i]->setRight(256.0f);
+            _cameraForShadowMap[i]->setBottom(-256.0f);
+            _cameraForShadowMap[i]->setTop(256.0f);
+            _cameraForShadowMap[i]->setNearValue(-256.0f);
+            _cameraForShadowMap[i]->setFarValue(256.0f);
+            _object->addComponent(_cameraForShadowMap[i]);
+        }
+    }
+    else if (_shadowMap != NULL)
+    {
+        for (int i = 0; i < 3; ++i)
+        {
+            OGLDriver::getInstance().deleteFramebuffer(_shadowMap[i]);
+            _object->removeComponent(_cameraForShadowMap[i]);
+        }
+    }
 }
 
 
@@ -148,4 +194,22 @@ float Light::getCutoff()
 float Light::getCutoffCos()
 {
     return _cutoffCos;
+}
+
+
+bool Light::isShadowMapping()
+{
+    return _isShadowMapping;
+}
+
+
+Framebuffer* Light::getShadowMap(int index)
+{
+    return _shadowMap[index];
+}
+
+
+CameraStatic* Light::getCameraForShadowMap(int index)
+{
+    return _cameraForShadowMap[index];
 }

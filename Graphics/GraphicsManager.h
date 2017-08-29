@@ -22,8 +22,8 @@
 
 #include <memory>
 
-//#define ALL_OBJECTS
-#define FRUSTUM_CULLING
+#define ALL_OBJECTS
+//#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
 class GraphicsManager
@@ -34,6 +34,8 @@ class GraphicsManager
         std::list<Light*>           _lights;
 
         QuadTree* _quadTree;
+
+        CameraStatic* _currentCamera;
 
         glm::vec3   _windDirection;
         float       _windVelocity;
@@ -53,7 +55,7 @@ class GraphicsManager
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
 
-        CameraStatic*   addCameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
+        CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         Light*          addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
         Light*          addPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
@@ -64,6 +66,10 @@ class GraphicsManager
         void removeRenderObject(RenderObject* object);
         void removeCamera(CameraStatic* camera);
         void removeLight(Light* light);
+
+
+        void setCurrentCamera(CameraStatic* camera);
+        CameraStatic* getCurrentCamera();
 
 
         void setWindDirection(glm::vec3 direction);

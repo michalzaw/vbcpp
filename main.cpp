@@ -396,12 +396,16 @@ double diff = timer.stop();
     camFPS->setMoveSpeed(8.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(169,7,-151);
+    GraphicsManager::getInstance().setCurrentCamera(camFPS);
 
     // Light
     dirLight = sceneMgr->addSceneObject("light");
-    dirLight->addComponent( GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f));
-    dirLight->setRotation(glm::vec3(-0.2f * PI, 0.5f * PI, 0));
-    dirLight->setPosition(glm::vec3(0,20,0));
+    Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
+    dirLight->addComponent(lightComponent);
+    dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
+    //dirLight->setPosition(glm::vec3(0,20,0));
+    dirLight->setPosition(glm::vec3(0,0,0));
+    lightComponent->setShadowMapping(true);
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
@@ -428,21 +432,22 @@ double diff = timer.stop();
     spot->setIsActive(false);
 
 
-    const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
+    /*const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
+    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));*/
 
 
     GUIManager* gui = new GUIManager;
-    Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    img->setPosition(0, gameCfg.windowHeight - img->getTexture()->getSize().y / 2.0f);
+    //Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
+    Image* img = gui->addImage(lightComponent->getShadowMap()->getTexture(0));
+    img->setPosition(0, 400);// / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
-    img->setScale(0.3f, 0.3f);
+    img->setScale(0.1f, 0.1f);
     //img->setPosition(100, 100);
 
 
     RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
     Label* label = gui->addLabel(font, "Virtual Bus Core++");
-    label->setPosition(10, gameCfg.windowHeight - 20);
+    label->setPosition(10, gameCfg.windowHeight - 60);
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
@@ -571,7 +576,7 @@ std::cout << "TEST" << diff << std::endl;
         labelTorque->setText(stringTorque);
 
         // Render the scene
-        renderer->render( GraphicsManager::getInstance().getRenderData() ); //graphMgr->GetRenderData());
+        renderer->renderAll();
 
         // Render GUI
         renderer->renderGUI(gui->getGUIRenderList());

@@ -1,5 +1,10 @@
 #version 330 core
 
+const int CASCADES_COUNT = 3;
+const float CascadeEndClipSpace[CASCADES_COUNT] = {25.0f, 100.0f, 500.0f};
+const float bias[CASCADES_COUNT] = {0.00005f, 0.0005f, 0.005f};
+const float size[CASCADES_COUNT] = {2048.0f, 1024.0f, 512.0f};
+
 struct Light
 {
 	vec3 Color;
@@ -46,6 +51,8 @@ in vec3 Normal;
 in vec3 TangentWorldspace;
 in vec3 BitangentWorldspace;
 #endif
+in vec4 PositionLightSpace[CASCADES_COUNT];
+in float ClipSpacePositionZ;
 
 out vec4 FragmentColor;
 
@@ -76,11 +83,13 @@ uniform sampler2D AlphaTexture;
 
 uniform vec3 CameraPosition;
 
+uniform sampler2D ShadowMap[CASCADES_COUNT];
+
 
 vec4 textureColor;
 
 
-vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
+vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
 	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
 	
@@ -94,7 +103,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 //	SpecularFactor = pow(SpecularFactor, 96);
 	vec4 SpecularColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * SpecularFactor;
 	
-	return (AmbientColor + DiffuseColor + SpecularColor * matSpecular) * textureColor;
+	return (AmbientColor + (DiffuseColor + SpecularColor * matSpecular) * ratio) * textureColor;
 }
 
 
@@ -105,7 +114,7 @@ vec4 CalculatePointLight(PointLight light, vec3 normal)
 	float Attenuation = light.Attenuation.constant + light.Attenuation.linear * Distance +
 						light.Attenuation.exp * Distance * Distance;
 						
-	return CalculateLight(light.Base, normal, normalize(Direction)) / Attenuation;
+	return CalculateLight(light.Base, normal, normalize(Direction), 1) / Attenuation;
 }
 
 
@@ -153,7 +162,40 @@ void main()
 	
 	for (int i = 0; i < Lights.DirCount; ++i)
 	{
-		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction);
+		int cascadeIndex;
+		for (int i = 0; i < CASCADES_COUNT; ++i)
+		{
+			if (ClipSpacePositionZ <= CascadeEndClipSpace[i])
+			{
+				cascadeIndex = i;
+				break;
+			}
+		}
+		//cascadeIndex = 0;
+		
+		// Shadows
+		vec3 Coords = PositionLightSpace[cascadeIndex].xyz / PositionLightSpace[cascadeIndex].w;
+		Coords = Coords * 0.5f + 0.5f;
+
+		float Depth = texture(ShadowMap[cascadeIndex], Coords.xy).r;
+		float CurrentDepth = Coords.z;
+
+		//float Ratio = CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;
+		float Ratio = 1.0f;
+		//vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
+		vec2 TexelSize = 1.0f / vec2(size[cascadeIndex], size[cascadeIndex]) / 2.0f;
+		for (int x = -2; x <= 2; ++x)
+		{
+			for (int y = -2; y <= 2; ++y)
+			{
+				float Depth = texture(ShadowMap[cascadeIndex], Coords.xy + vec2(x, y) * TexelSize).r;
+				Ratio += CurrentDepth - bias[cascadeIndex] > Depth ? 0.2f : 1.0f;
+			}
+		}
+
+		Ratio /= 25.0f;
+	
+		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction, Ratio);
 	}
 	
 	for (int i = 0; i < Lights.PointCount; ++i)
