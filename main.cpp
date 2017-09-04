@@ -376,11 +376,11 @@ int main()
 Timer timer;
 timer.start();
     bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
-    //bus->getSceneObject()->setPosition(150,5,-150);
+    //bus->getSceneObject()->setPosition(0,5,-150);
     //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
 
     sceneMgr->loadScene(gameCfg.mapFile);
-double diff = timer.stop();
+    double diff = timer.stop();
 
     bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
     bus->getSceneObject()->setRotation(sceneMgr->getBusStart().rotation.x,

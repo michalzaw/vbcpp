@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Gearbox model="gbx_ikarus260" />
+<Engine model="eng_wskmielec" />
+
+<Bus name="volvo" textures="test"> 
+	<Module type="main" model="module1.3ds" mass="9.6" > <!-- mass in tons -->
+		<Wheel name="wheel1" side="right" steering="1" powered="0" model="frontwh.3ds" mass="1" position="0.98,-1.05,2.0" radius="1" width="0.3" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
+		<Wheel name="wheel2" side="left" steering="1" powered="0" model="frontwh.3ds" mass="1" position="-0.98,-1.05,2.0" radius="1" width="0.3" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
+	
+		<Wheel name="wheel3" side="right" steering="0" powered="1" model="backwh.3ds" mass="1" position="0.87,-0.95,-2.83" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.95" />
+		<Wheel name="wheel4" side="left" steering="0" powered="1" model="backwh.3ds" mass="1" position="-0.87,-0.95,-2.83" radius="1" width="0.5" stiffness="245.0" damping="0.00035" brakeForce="0.95" />
+		
+		<Driver position="0.75,0.44,3.51"/>
+		
+		<SteeringWheel model="steeringwheel.3ds" position="0.75,0.08,4.1" rotation="0,0,0" scale="0.8,0.8,0.8"/>
+		
+		<Headlight name="headlight0" position="0.96,-0.52,3.39" rotation="-0.25,0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.43"/>
+		<Headlight name="headlight1" position="-0.96,-0.52,3.39" rotation="-0.25,-0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.45"/>
+		
+		<Light position="0.0,1.12,-2.13" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+		<Light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+		<Light position="0.0,1.12,2.38" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+	</Module>
+
+</Bus>
+
+
+<!-- 'textures' parameter should be moved to route/course configuration -->

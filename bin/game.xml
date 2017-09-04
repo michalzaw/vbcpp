@@ -5,8 +5,8 @@
 	<Resolution x="1024" y="768" />
 
 
-	<Map name="Demo" />
+	<Map name="Test" />
 	
-	<Bus model="h9" />
+	<Bus model="volvo" />
 
 </Game>
