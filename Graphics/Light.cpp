@@ -28,7 +28,7 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
 
 Light::~Light()
 {
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < CASCADE_COUNT; ++i)
     {
         if (_shadowMap[i] != NULL)
         {
@@ -85,12 +85,12 @@ void Light::setCutoff(float cutoff)
 
 void Light::setShadowMapping(bool isEnable)
 {
-    const int SHADOWMAPS_SIZE[3] = {2048, 1024, 512};
+    const int SHADOWMAPS_SIZE[CASCADE_COUNT] = {2048, 1024, 512};
     _isShadowMapping = isEnable;
 
     if (_isShadowMapping)
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < CASCADE_COUNT; ++i)
         {
             _shadowMap[i] = OGLDriver::getInstance().createFramebuffer();
             _shadowMap[i]->addTexture(TF_DEPTH_COMPONENT, SHADOWMAPS_SIZE[i], SHADOWMAPS_SIZE[i]);
@@ -108,7 +108,7 @@ void Light::setShadowMapping(bool isEnable)
     }
     else if (_shadowMap != NULL)
     {
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < CASCADE_COUNT; ++i)
         {
             OGLDriver::getInstance().deleteFramebuffer(_shadowMap[i]);
             _object->removeComponent(_cameraForShadowMap[i]);

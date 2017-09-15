@@ -36,6 +36,8 @@ struct LightAttenuation
 
 class Light : public Component
 {
+    static const int CASCADE_COUNT = 3;
+
     private:
         LightType   _lightType;
 
@@ -49,8 +51,8 @@ class Light : public Component
         float _cutoffCos;
 
         bool            _isShadowMapping;
-        Framebuffer*    _shadowMap[3];
-        CameraStatic*   _cameraForShadowMap[3];
+        Framebuffer*    _shadowMap[CASCADE_COUNT];
+        CameraStatic*   _cameraForShadowMap[CASCADE_COUNT];
 
     public:
         Light(LightType type);

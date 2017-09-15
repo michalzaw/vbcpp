@@ -15,7 +15,21 @@ const destT &absolute_cast(const srcT &v)
 #define FLOAT_ALMOST_ZERO(F) ((absolute_cast<unsigned>(F) & 0x7f800000L) == 0)
 
 
-glm::vec3 intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3)
+Frustum::Frustum()
+{
+    _isCalculatedPoints = false;
+}
+
+
+Frustum::Frustum(glm::mat4 matrix)
+{
+    _isCalculatedPoints = false;
+
+    set(matrix);
+}
+
+
+/*glm::vec3 Frustum::intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3)
 {
     float w = p1.a * p2.b * p3.c + p2.a * p3.b * p1.c + p3.a * p1.b * p2.c -
               p3.a * p2.b * p1.c - p1.a * p3.b * p2.c - p2.a * p1.b * p3.c;
@@ -30,9 +44,12 @@ glm::vec3 intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3)
                p3.a * p2.b * (-p1.d) - p1.a * p3.b * (-p2.d) - p2.a * p1.b * (-p3.d);
 
     return glm::vec3(wx / w, wy / w, wz / w);
-}
+}*/
 
-glm::vec3 intersectPlanes2(const Plane& P1, const Plane& P2, const Plane& P3)
+
+// Faster
+// http://asawicki.info/productions/artykuly/Zaawansowana_kamera_3D.php5
+glm::vec3 Frustum::intersectPlanes(const Plane& P1, const Plane& P2, const Plane& P3)
 {
     float fDet;
     float MN[9]  = { P1.a, P1.b, P1.c, P2.a, P2.b, P2.c, P3.a, P3.b, P3.c };
@@ -75,4 +92,108 @@ glm::vec3 intersectPlanes2(const Plane& P1, const Plane& P2, const Plane& P3)
 
     return out;
    //return true;
+}
+
+
+void Frustum::normalizePlanes()
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        float n = sqrtf(_planes[i].a * _planes[i].a + _planes[i].b * _planes[i].b + _planes[i].c * _planes[i].c);
+
+        _planes[i].a /= n;
+        _planes[i].b /= n;
+        _planes[i].c /= n;
+        _planes[i].d /= n;
+    }
+}
+
+void Frustum::calculatePoints()
+{
+    _points[FP_NEAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
+    _points[FP_NEAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
+    _points[FP_NEAR_LEFT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_TOP]);
+    _points[FP_NEAR_RIGHT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_TOP]);
+    _points[FP_FAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
+    _points[FP_FAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
+    _points[FP_FAR_LEFT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_TOP]);
+    _points[FP_FAR_RIGHT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_TOP]);
+}
+
+
+void Frustum::set(glm::mat4 matrix)
+{
+    _isCalculatedPoints = false;
+
+    _planes[FP_LEFT].set(matrix[0][3] + matrix[0][0], matrix[1][3] + matrix[1][0], matrix[2][3] + matrix[2][0], matrix[3][3] + matrix[3][0]);
+    _planes[FP_RIGHT].set(matrix[0][3] - matrix[0][0], matrix[1][3] - matrix[1][0], matrix[2][3] - matrix[2][0], matrix[3][3] - matrix[3][0]);
+    _planes[FP_TOP].set(matrix[0][3] - matrix[0][1], matrix[1][3] - matrix[1][1], matrix[2][3] - matrix[2][1], matrix[3][3] - matrix[3][1]);
+    _planes[FP_BOTTOM].set(matrix[0][3] + matrix[0][1], matrix[1][3] + matrix[1][1], matrix[2][3] + matrix[2][1], matrix[3][3] + matrix[3][1]);
+    _planes[FP_NEAR].set(matrix[0][3] + matrix[0][2], matrix[1][3] + matrix[1][2], matrix[2][3] + matrix[2][2], matrix[3][3] + matrix[3][2]);
+    _planes[FP_FAR].set(matrix[0][3] - matrix[0][2], matrix[1][3] - matrix[1][2], matrix[2][3] - matrix[2][2], matrix[3][3] - matrix[3][2]);
+
+
+    normalizePlanes();
+}
+
+
+const Plane& Frustum::getPlane(FrustumPlane plane)
+{
+    return _planes[plane];
+}
+
+
+glm::vec3* const Frustum::getPoints()
+{
+    if (!_isCalculatedPoints)
+    {
+        calculatePoints();
+
+        _isCalculatedPoints = true;
+    }
+
+    return _points;
+}
+
+
+void Frustum::applyTransform(const glm::mat4& transform)
+{
+    glm::vec3* points = getPoints();
+
+    for (int i = 0; i < 8; ++i)
+    {
+        glm::vec4 v = transform * glm::vec4(points[i], 1.0f);
+        _points[i] = glm::vec3(v.x, v.y, v.z);
+    }
+}
+
+
+AABB* Frustum::getAABB()
+{
+    glm::vec3* frustumPoints = _points;
+
+    glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
+    glm::vec3 max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+    for (int i = 0; i < 8; ++i)
+    {
+        if (frustumPoints[i].x < min.x)
+            min.x = frustumPoints[i].x;
+        if (frustumPoints[i].x > max.x)
+            max.x = frustumPoints[i].x;
+
+        if (frustumPoints[i].y < min.y)
+            min.y = frustumPoints[i].y;
+        if (frustumPoints[i].y > max.y)
+            max.y = frustumPoints[i].y;
+
+        if (frustumPoints[i].z < min.z)
+            min.z = frustumPoints[i].z;
+        if (frustumPoints[i].z > max.z)
+            max.z = frustumPoints[i].z;
+    }
+
+    _aabb.setSize(min, max);
+
+    return &_aabb;
 }
