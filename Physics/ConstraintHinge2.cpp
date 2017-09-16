@@ -8,7 +8,7 @@ ConstraintHinge2::ConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btV
 _pivot(btVector3(pivot)), _axisA(btVector3(axisA)), _axisB(btVector3(axisB))
 {
     std::cout << "Hinge2 Constraint - Konstruktor" << std::endl;
-    UpdateConstraint();
+    updateConstraint();
 }
 
 
@@ -30,7 +30,7 @@ void ConstraintHinge2::setDamping(int index, btScalar damping)
 }
 
 
-void ConstraintHinge2::UpdateConstraint()
+void ConstraintHinge2::updateConstraint()
 {
     safe_delete<btTypedConstraint>(_constraint);
 

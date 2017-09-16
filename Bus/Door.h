@@ -3,7 +3,7 @@
 
 #include "../Utils/RModel.h"
 #include "../Physics/PhysicalBodyConvexHull.hpp"
-#include "SoundComponent.h"
+#include "../Scene/SoundComponent.h"
 
 enum DoorState
 {

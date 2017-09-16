@@ -13,6 +13,7 @@
 
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
+#include "ConstraintBall.h"
 
 #include "../Utils/RefCounter.h"
 
@@ -56,6 +57,7 @@ class PhysicsManager : virtual public RefCounter
 
         ConstraintHinge*            createConstraintHinge(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB, btVector3 axisA, btVector3 axisB);
         ConstraintHinge2*           createConstraintHinge2(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivot, btVector3 axisA, btVector3 axisB);
+        ConstraintBall*             createConstraintBall(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB);
 
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);

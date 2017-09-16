@@ -148,6 +148,11 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="Bus/Bus.cpp" />
+		<Unit filename="Bus/Bus.h" />
+		<Unit filename="Bus/Door.h" />
+		<Unit filename="Bus/DoorSE.h" />
+		<Unit filename="Bus/DoorSimple.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
 		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />
@@ -217,6 +222,8 @@
 		<Unit filename="Graphics/Vertex.h" />
 		<Unit filename="Physics/Constraint.cpp" />
 		<Unit filename="Physics/Constraint.hpp" />
+		<Unit filename="Physics/ConstraintBall.cpp" />
+		<Unit filename="Physics/ConstraintBall.h" />
 		<Unit filename="Physics/ConstraintHinge.cpp" />
 		<Unit filename="Physics/ConstraintHinge.hpp" />
 		<Unit filename="Physics/ConstraintHinge2.cpp" />
@@ -237,13 +244,8 @@
 		<Unit filename="Physics/PhysicalBodyStaticPlane.hpp" />
 		<Unit filename="Physics/PhysicsManager.cpp" />
 		<Unit filename="Physics/PhysicsManager.hpp" />
-		<Unit filename="Scene/Bus.cpp" />
-		<Unit filename="Scene/Bus.h" />
 		<Unit filename="Scene/Component.cpp" />
 		<Unit filename="Scene/Component.h" />
-		<Unit filename="Scene/Door.h" />
-		<Unit filename="Scene/DoorSE.h" />
-		<Unit filename="Scene/DoorSimple.h" />
 		<Unit filename="Scene/SceneManager.cpp" />
 		<Unit filename="Scene/SceneManager.h" />
 		<Unit filename="Scene/SceneObject.cpp" />

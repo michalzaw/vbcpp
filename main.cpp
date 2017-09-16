@@ -28,7 +28,7 @@
 #include "Utils/ResourceManager.h"
 #include "Utils/Timer.h"
 
-#include "Scene/Bus.h"
+#include "Bus/Bus.h"
 
 // XML reader
 #include "Utils/tinyxml2.h"
@@ -395,7 +395,7 @@ timer.start();
     camFPS->setRotationSpeed(0.001f);
     camFPS->setMoveSpeed(8.0f);
     Camera->setRotation(0,degToRad(-90), 0);
-    Camera->setPosition(169,7,-151);
+    Camera->setPosition(10,7,-10);
     GraphicsManager::getInstance().setCurrentCamera(camFPS);
 
     // Light
@@ -432,8 +432,8 @@ timer.start();
     spot->setIsActive(false);
 
 
-    /*const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));*/
+    const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
+    sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;

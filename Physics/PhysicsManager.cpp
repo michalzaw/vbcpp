@@ -269,6 +269,20 @@ ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, Ph
 }
 
 
+ConstraintBall* PhysicsManager::createConstraintBall(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB)
+{
+    ConstraintBall* c = new ConstraintBall(bodyA, bodyB, pivotA, pivotB);
+
+    std::cout << "Constraint created: " << c << std::endl;
+    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+
+    _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
+
+    _constraints.push_back(c);
+
+    return c;
+}
+
 void PhysicsManager::addConstraint(Constraint* c)
 {
     _dynamicsWorld->addConstraint(c->getBulletConstraint());
