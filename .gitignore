@@ -5,6 +5,7 @@ bin/vbcpp*
 *.layout
 *.depend
 *.save
+*.ter
 
 # DIRECTORIES
 obj

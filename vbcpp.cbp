@@ -188,6 +188,7 @@
 		<Unit filename="Graphics/LoadMaterial.h" />
 		<Unit filename="Graphics/LoadShader.cpp" />
 		<Unit filename="Graphics/LoadShader.h" />
+		<Unit filename="Graphics/LoadTerrainModel.cpp" />
 		<Unit filename="Graphics/LoadTerrainModel.h" />
 		<Unit filename="Graphics/LoadTexture.cpp" />
 		<Unit filename="Graphics/LoadTexture.h" />
