@@ -22,7 +22,7 @@ class ConstraintHinge2 : public Constraint
         btVector3       _axisA;
         btVector3       _axisB;
 
-        void UpdateConstraint();
+        void updateConstraint();
 };
 
 

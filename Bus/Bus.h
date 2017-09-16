@@ -7,9 +7,9 @@
 #include "../Utils/Gearbox.h"
 #include "../Utils/Engine.h"
 
-#include "SceneObject.h"
-#include "SceneManager.h"
-#include "SoundManager.h"
+#include "../Scene/SceneObject.h"
+#include "../Scene/SceneManager.h"
+#include "../Scene/SoundManager.h"
 #include "../Physics/PhysicsManager.hpp"
 
 #include "DoorSimple.h"
@@ -21,6 +21,14 @@ enum WheelSide
 {
     WS_RIGHT = 0,
     WS_LEFT
+};
+
+
+struct Module
+{
+    SceneObject*            sceneObject;
+    PhysicalBodyConvexHull* body;
+    btVector3               jointPosition;
 };
 
 struct Wheel
@@ -47,7 +55,7 @@ class Bus : virtual public RefCounter
         Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
         virtual ~Bus();
 
-        SceneObject* getSceneObject() { return _sceneObject; }
+        SceneObject* getSceneObject() { return _modules[0].sceneObject; }
 
         // Steering wheel methods
         glm::vec3 getDriverPosition();
@@ -94,6 +102,8 @@ class Bus : virtual public RefCounter
         std::unique_ptr<Gearbox>    _gearbox;
         std::unique_ptr<Engine>     _engine;
 
+        std::vector<Module> _modules;
+
         float   _maxSteerAngle;
         float   _steerStep;
 
@@ -107,6 +117,7 @@ class Bus : virtual public RefCounter
 
         SceneObject*    _steeringWheelObject;
         glm::vec3       _driverPosition;
+        glm::vec3       _modulesJoint;
         LightsList      _lights;
         bool            _isEnableLights;
         HeadlightsList  _headlights;
