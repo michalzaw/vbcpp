@@ -180,7 +180,7 @@ void SceneManager::loadScene(std::string filename)
 
     std::string heightmapFullPath = dirPath + terrainHeightmap;
     std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
-    Model* terrModel = loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
+    Model* terrModel = TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
     RModel* terrain = new RModel("", terrModel);
     SceneObject* terrainObject = addSceneObject("terrain");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain), terrainObject);
