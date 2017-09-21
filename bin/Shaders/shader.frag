@@ -1,9 +1,9 @@
 #version 330 core
 
 const int CASCADES_COUNT = 3;
-const float CascadeEndClipSpace[CASCADES_COUNT] = {25.0f, 100.0f, 500.0f};
-const float bias[CASCADES_COUNT] = {0.00005f, 0.0005f, 0.005f};
-const float size[CASCADES_COUNT] = {2048.0f, 1024.0f, 512.0f};
+const float CascadeEndClipSpace[CASCADES_COUNT] = float[CASCADES_COUNT](25.0f, 100.0f, 500.0f);
+const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.00005f, 0.0005f, 0.005f);
+const float size[CASCADES_COUNT] = float[CASCADES_COUNT](2048.0f, 1024.0f, 512.0f);
 
 struct Light
 {
@@ -162,7 +162,7 @@ void main()
 	
 	for (int i = 0; i < Lights.DirCount; ++i)
 	{
-		int cascadeIndex;
+		int cascadeIndex = 0;
 		for (int i = 0; i < CASCADES_COUNT; ++i)
 		{
 			if (ClipSpacePositionZ <= CascadeEndClipSpace[i])
