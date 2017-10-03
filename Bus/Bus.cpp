@@ -382,7 +382,7 @@ void Bus::loadXMLdata(std::string busname)
             {
 
                 glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
-                glm::vec3 relativePos = _chasisBody->getSceneObject()->transformLocalPointToGlobal(doorPosition);
+                glm::vec3 relativePos = busModule.sceneObject->transformLocalPointToGlobal(doorPosition);
 
                 // poczatek IF
                 btVector3 busPivot = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
