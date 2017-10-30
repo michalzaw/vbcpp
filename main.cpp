@@ -90,23 +90,23 @@ struct GameConfig
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
-	if (glfwGetKey( window, GLFW_KEY_L ) == GLFW_PRESS)
+    if (key == GLFW_KEY_L && action == GLFW_PRESS)
 	{
 		//point3->setIsActive(!point3->isActive());
 		bus->setIsEnableHeadlights(!bus->isEnableHeadlights());
 
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_K ) == GLFW_PRESS)
+	if (key == GLFW_KEY_K && action == GLFW_PRESS)
 	{
 		bus->setIsEnableLights(!bus->isEnableLights());
 
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_H ) == GLFW_PRESS)
+	if (key == GLFW_KEY_H && action == GLFW_PRESS)
 	{
 	    Light* l = dynamic_cast<Light*>(dirLight->getComponent(0));
 
@@ -123,40 +123,40 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_U ) == GLFW_PRESS)
+	if (key == GLFW_KEY_U && action == GLFW_PRESS)
 	{
 		spot->rotate(0, 0, 0.01);
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_I ) == GLFW_PRESS)
+	if (key == GLFW_KEY_I && action == GLFW_PRESS)
 	{
 		spot->rotate(0, 0, -0.01);
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_O ) == GLFW_PRESS)
+	if (key == GLFW_KEY_O && action == GLFW_PRESS)
 	{
 		spot->rotate(0, 0.01, 0);
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
+	if (key == GLFW_KEY_P && action == GLFW_PRESS)
 	{
 		spot->rotate(0, -0.01, 0);
 	}
 
 
-	if (glfwGetKey( window, GLFW_KEY_Z ) == GLFW_PRESS)
+	if (key == GLFW_KEY_Z && action == GLFW_PRESS)
     {
         bus->doorOpenClose(1);
     }
 
 
-    if (glfwGetKey( window, GLFW_KEY_X ) == GLFW_PRESS)
+    if (key == GLFW_KEY_X && action == GLFW_PRESS)
     {
         bus->doorOpenClose(2);
     }
 
 
-	if (glfwGetKey( window, GLFW_KEY_C ) == GLFW_PRESS)
+	if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
 		if (camFPS->getSceneObject()->hasParent())
         {
@@ -173,13 +173,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_LEFT_SHIFT ) == GLFW_PRESS)
+	if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
         bus->getGearbox()->shiftUp();
 
-  	if (glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+  	if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
         bus->getGearbox()->shiftDown();
 
-  	if (glfwGetKey( window, GLFW_KEY_0 ) == GLFW_PRESS)
+  	if (key == GLFW_KEY_0 && action == GLFW_PRESS)
     {
         if (!bus->getEngine()->isRunning())
         {
@@ -197,7 +197,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     }
 
-    if (glfwGetKey( window, GLFW_KEY_P ) == GLFW_PRESS)
+    if (key == GLFW_KEY_P && action == GLFW_PRESS)
     {
         if (!physMgr->isRunning())
             physMgr->play();
@@ -228,7 +228,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     */
 
-    if (glfwGetKey( window, GLFW_KEY_SPACE ) == GLFW_PRESS)
+    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
         bus->toggleHandbrake();
     }
