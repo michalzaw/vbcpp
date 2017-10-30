@@ -27,6 +27,7 @@
 
 #include "Utils/ResourceManager.h"
 #include "Utils/Timer.h"
+#include "Utils/Helpers.hpp"
 
 #include "Bus/Bus.h"
 
@@ -483,11 +484,14 @@ timer.start();
     std::stringstream stream;
 
     // Time calculation variables
-    double t;
-    double dt = 1/60.0f;
+    double deltaTime = 0.0;
+    double accumulator = 0.0;
 
-    double timePhysicsPrev, timePhysicsCurr;
+    const double TIME_STEP = 1/60.0f;
+    const double MAX_ACCUMULATED_TIME = 1.0;
 
+    double timePhysicsCurr;
+    double timePhysicsPrev;
     timePhysicsPrev = timePhysicsCurr = glfwGetTime();
 
     //how long ago FPS counter was updated
@@ -505,29 +509,30 @@ std::cout << "TEST" << diff << std::endl;
     {
         nbFrames++;
 
+
         timePhysicsCurr = glfwGetTime();
-        double frameTime = timePhysicsCurr - timePhysicsPrev;
+        deltaTime = timePhysicsCurr - timePhysicsPrev;
+        timePhysicsPrev = timePhysicsCurr;
+
+        deltaTime = std::max(0.0, deltaTime);
+        accumulator += deltaTime;
+        accumulator = clamp(accumulator, 0.0, MAX_ACCUMULATED_TIME);
 
         //create string from frame/sec and display it in window title
         if ( timePhysicsCurr - lastFPSupdate >= 1.0f )
         {
-            float timing = double(nbFrames);
-
-            nbFrames = 0;
-            lastFPSupdate += 1.0f;
-
             // Convert the fps value into a string using an output stringstream
-			std::ostringstream stream;
-			stream << timing;
-			std::string sTiming = stream.str();
+			std::string sTiming = toString(nbFrames);
 
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
 //			win->setWindowTitle(newWindowTitle);
 			label->setText(newWindowTitle);
+
+            nbFrames = 0;
+            lastFPSupdate += 1.0f;
         }
 
-        timePhysicsPrev = timePhysicsCurr;
 
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
         glfwSetCursorPos(win->getWindow(), win->getWidth()/2, win->getHeight()/2);
@@ -535,18 +540,16 @@ std::cout << "TEST" << diff << std::endl;
         camFPS->setRotation(xpos, ypos);
 
 
-        while ( frameTime > 0.0f )
+        readInput(win->getWindow(), deltaTime);
+
+
+        while ( accumulator > TIME_STEP )
         {
-            float deltaTime = std::min(frameTime, dt);
+            physMgr->simulate(TIME_STEP);
+            bus->updatePhysics(TIME_STEP);
+            GraphicsManager::getInstance().update(TIME_STEP);
 
-            readInput(win->getWindow(), deltaTime);
-            physMgr->simulate(deltaTime);
-            bus->updatePhysics(deltaTime);
-            GraphicsManager::getInstance().update(deltaTime);
-
-            frameTime -= deltaTime;
-
-            t += deltaTime;
+            accumulator -= TIME_STEP;
         }
 
         sndMgr->update();
