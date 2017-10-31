@@ -194,6 +194,7 @@ void Bus::loadXMLdata(std::string busname)
             PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, X_AXIS, COL_WHEEL, collidesWith);
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
+            //wheelCyl->getRigidBody()->setFriction(1.0f);
             wheelObj->addComponent(wheelCyl);
 
             //ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));

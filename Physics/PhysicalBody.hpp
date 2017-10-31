@@ -47,7 +47,7 @@ class PhysicalBody : public Component
             _position = pos;
         }
 
-        void update();
+        virtual void update();
 
 
         virtual void changedTransform();

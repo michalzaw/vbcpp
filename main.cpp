@@ -43,6 +43,9 @@ using namespace tinyxml2;
 #include "Graphics/Prefab.h"
 #include "Graphics/Roads.h"
 #include "Utils/Collision.h"
+#include "Bus/BusRaycast.h"
+
+BusRaycast* busRaycast;
 
 // Definicje globalne
 
@@ -166,7 +169,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
         else
         {
-            bus->getSceneObject()->addChild(camFPS->getSceneObject());
+            //bus->getSceneObject()->addChild(camFPS->getSceneObject());
+            busRaycast->_busSceneObject->addChild(camFPS->getSceneObject());
             camFPS->getSceneObject()->setPosition(bus->getDriverPosition());
             camFPS->getSceneObject()->setRotation(0,0,0);
         }
@@ -266,37 +270,48 @@ void readInput(GLFWwindow* window, double deltaTime)
 
 	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
     {
-        bus->turnLeft(deltaTime);
+        //bus->turnLeft(deltaTime);
+        busRaycast->turnLeft(deltaTime);
     }
 
     if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
     {
-        bus->turnRight(deltaTime);
+        //bus->turnRight(deltaTime);
+        busRaycast->turnRight(deltaTime);
     }
 
     if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
     {
-        bus->accelerate();
+        //bus->accelerate();
+        busRaycast->_bulletVehicle->applyEngineForce(1000, 2);
+        busRaycast->_bulletVehicle->applyEngineForce(1000, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_RELEASE)
     {
-        bus->idle();
+        //bus->idle();
+        busRaycast->_bulletVehicle->applyEngineForce(0, 2);
+        busRaycast->_bulletVehicle->applyEngineForce(0, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
     {
-        bus->brakeOn();
+        //bus->brakeOn();
+        busRaycast->_bulletVehicle->setBrake(100, 2);
+        busRaycast->_bulletVehicle->setBrake(100, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
     {
-        bus->brakeOff();
+        //bus->brakeOff();
+        busRaycast->_bulletVehicle->setBrake(0, 2);
+        busRaycast->_bulletVehicle->setBrake(0, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_RELEASE && glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_RELEASE)
     {
-        bus->centerSteringWheel(deltaTime);
+        //bus->centerSteringWheel(deltaTime);
+        busRaycast->centerSteringWheel(deltaTime);
     }
 }
 
@@ -432,6 +447,8 @@ timer.start();
     spot->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
     spot->setIsActive(false);
 
+    busRaycast = new BusRaycast(sceneMgr, physMgr, sndMgr, "");
+
 
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
@@ -452,6 +469,10 @@ timer.start();
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
+    Label* velocity = gui->addLabel(font, "Velocity");
+    velocity->setPosition(10, gameCfg.windowHeight - 100);
+    velocity->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    velocity->scale(0.6f, 0.6f);
 
     engineIsRunning = gui->addLabel(font, "Engine off");
     engineIsRunning->setPosition(10, 70);
@@ -577,6 +598,8 @@ std::cout << "TEST" << diff << std::endl;
         std::string stringTorque("Torque: ");
         stringTorque += stream.str();
         labelTorque->setText(stringTorque);
+
+        velocity->setText(toString(busRaycast->_bulletVehicle->getCurrentSpeedKmHour()));
 
         // Render the scene
         renderer->renderAll();

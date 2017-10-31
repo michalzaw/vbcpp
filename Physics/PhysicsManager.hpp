@@ -9,6 +9,7 @@
 #include "PhysicalBodyStaticPlane.hpp"
 #include "PhysicalBodyConvexHull.hpp"
 #include "PhysicalBodyBvtTriangleMesh.hpp"
+#include "PhysicalBodyWheel.h"
 
 
 #include "ConstraintHinge.hpp"
@@ -51,6 +52,12 @@ class PhysicsManager : virtual public RefCounter
         PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
+        PhysicalBodyWheel*              createPhysicalBodyWheel(PhysicalBodyWheel* body)
+        {
+            _physicalBodies.push_back(body);
+
+            return body;
+        }
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);
