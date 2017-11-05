@@ -22,23 +22,30 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
     _bulletVehicle->setCoordinateSystem(0, 1, 2);
     _pMgr->getDynamicsWorld()->addVehicle(_bulletVehicle);
 
-    _bulletVehicle->addWheel(btVector3(1.0f, -0.6f, 2.6f), btVector3(0.0f, -1.0f, 0.0f),
+    _bulletVehicle->addWheel(btVector3(1.0f, -0.45f, 2.6f), btVector3(0.0f, -1.0f, 0.0f),
                              btVector3(-1.0f, 0.0f, 0.0f), 0.6f, 0.5, vehicleTuning, true);
-    _bulletVehicle->addWheel(btVector3(-1.0f, -0.6f, 2.6f), btVector3(0.0f, -1.0f, 0.0f),
+    _bulletVehicle->addWheel(btVector3(-1.0f, -0.45f, 2.6f), btVector3(0.0f, -1.0f, 0.0f),
                              btVector3(-1.0f, 0.0f, 0.0f), 0.6f, 0.5, vehicleTuning, true);
-    _bulletVehicle->addWheel(btVector3(1.0f, -0.6f, -1.85f), btVector3(0.0f, -1.0f, 0.0f),
+    _bulletVehicle->addWheel(btVector3(1.0f, -0.45f, -1.85f), btVector3(0.0f, -1.0f, 0.0f),
                              btVector3(-1.0f, 0.0f, 0.0f), 0.6f, 0.5, vehicleTuning, false);
-    _bulletVehicle->addWheel(btVector3(-1.0f, -0.6f, -1.85), btVector3(0.0f, -1.0f, 0.0f),
+    _bulletVehicle->addWheel(btVector3(-1.0f, -0.45f, -1.85), btVector3(0.0f, -1.0f, 0.0f),
                              btVector3(-1.0f, 0.0f, 0.0f), 0.6f, 0.5, vehicleTuning, false);
 
     for (int i = 0; i < _bulletVehicle->getNumWheels(); ++i)
 	{
 		btWheelInfo& wheel = _bulletVehicle->getWheelInfo(i);
 
-		wheel.m_suspensionStiffness = 20.0f;
+		// Original
+		/*wheel.m_suspensionStiffness = 20.0f;
 		wheel.m_wheelsDampingCompression = 4.472f;
 		wheel.m_wheelsDampingRelaxation = 3.578f;
 		wheel.m_frictionSlip = 1000.0f;
+		wheel.m_rollInfluence = 0.1f;*/
+
+		wheel.m_suspensionStiffness = 35.0f;//25.0f;
+		wheel.m_wheelsDampingCompression = 0.25f * 2 * sqrt(wheel.m_suspensionStiffness);
+		wheel.m_wheelsDampingRelaxation = 0.3f * 2 * sqrt(wheel.m_suspensionStiffness);
+		wheel.m_frictionSlip = 0.8f;
 		wheel.m_rollInfluence = 0.1f;
 	}
 

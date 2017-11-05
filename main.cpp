@@ -236,6 +236,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         bus->toggleHandbrake();
     }
+static float a = 0.6f;
+    if (key == GLFW_KEY_M && action == GLFW_PRESS)
+    {
+        a -= 0.03f;
+        btWheelInfo& wheel = busRaycast->_bulletVehicle->getWheelInfo(1);
+        wheel.m_suspensionRestLength1 = a;
+        btWheelInfo& wheel2 = busRaycast->_bulletVehicle->getWheelInfo(3);
+        wheel2.m_suspensionRestLength1 = a;
+    }
+
+    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+    {
+        a += 0.03f;
+        btWheelInfo& wheel = busRaycast->_bulletVehicle->getWheelInfo(1);
+        wheel.m_suspensionRestLength1 = a;
+        btWheelInfo& wheel2 = busRaycast->_bulletVehicle->getWheelInfo(3);
+        wheel2.m_suspensionRestLength1 = a;
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -297,13 +315,17 @@ void readInput(GLFWwindow* window, double deltaTime)
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
     {
         //bus->brakeOn();
-        busRaycast->_bulletVehicle->setBrake(100, 2);
-        busRaycast->_bulletVehicle->setBrake(100, 3);
+        busRaycast->_bulletVehicle->setBrake(40, 0);
+        busRaycast->_bulletVehicle->setBrake(40, 1);
+        busRaycast->_bulletVehicle->setBrake(20, 2);
+        busRaycast->_bulletVehicle->setBrake(20, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
     {
         //bus->brakeOff();
+        busRaycast->_bulletVehicle->setBrake(0, 0);
+        busRaycast->_bulletVehicle->setBrake(0, 1);
         busRaycast->_bulletVehicle->setBrake(0, 2);
         busRaycast->_bulletVehicle->setBrake(0, 3);
     }
