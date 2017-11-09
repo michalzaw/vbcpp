@@ -11,6 +11,44 @@
 #include "../Physics/PhysicalBodyWheel.h"
 
 
+class MyRaycaster : public btVehicleRaycaster
+{
+    btDynamicsWorld*	m_dynamicsWorld;
+
+    public:
+        MyRaycaster(btDynamicsWorld* world)
+            :m_dynamicsWorld(world)
+        {
+
+        }
+
+        virtual void* castRay(const btVector3& from,const btVector3& to, btVehicleRaycasterResult& result)
+        {
+            btCollisionWorld::ClosestRayResultCallback rayCallback(from,to);
+
+            rayCallback.m_collisionFilterMask = COL_TERRAIN | COL_ENV;
+            rayCallback.m_collisionFilterGroup = COL_WHEEL;
+
+            m_dynamicsWorld->rayTest(from, to, rayCallback);
+
+            if (rayCallback.hasHit())
+            {
+
+                const btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
+                if (body && body->hasContactResponse())
+                {
+                    result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
+                    result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
+                    result.m_hitNormalInWorld.normalize();
+                    result.m_distFraction = rayCallback.m_closestHitFraction;
+                    return (void*)body;
+                }
+            }
+            return 0;
+        }
+};
+
+
 class BusRaycast
 {
     public:

@@ -145,7 +145,7 @@ PhysicalBodyBox* PhysicsManager::createPhysicalBodyBox(btVector3 halfExtents, bt
 {
     PhysicalBodyBox* b = new PhysicalBodyBox(halfExtents, mass);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -157,7 +157,7 @@ PhysicalBodyCylinder* PhysicsManager::createPhysicalBodyCylinder(btVector3 dim, 
 {
     PhysicalBodyCylinder* b = new PhysicalBodyCylinder(dim, mass, align);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -169,7 +169,7 @@ PhysicalBodySphere* PhysicsManager::createPhysicalBodySphere(btScalar r, btScala
 {
     PhysicalBodySphere* b = new PhysicalBodySphere(r, mass);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -181,7 +181,7 @@ PhysicalBodyStaticPlane* PhysicsManager::createPhysicalBodyStaticPlane(btVector3
 {
     PhysicalBodyStaticPlane* b = new PhysicalBodyStaticPlane(planeNormal, offset);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -192,7 +192,7 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* ver
 {
     PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -203,7 +203,7 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* 
 {
     PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 
@@ -214,7 +214,7 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(R
 {
     PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model);
 
-    _dynamicsWorld->addRigidBody(b->getRigidBody());//, collisionGroup, collisionFilter);
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
     _physicalBodies.push_back(b);
 

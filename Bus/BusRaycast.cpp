@@ -17,7 +17,7 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
     _busSceneObject->addComponent(physicalBody);
 
     btRaycastVehicle::btVehicleTuning vehicleTuning;
-    btVehicleRaycaster* rayCaster = new btDefaultVehicleRaycaster(_pMgr->getDynamicsWorld());
+    btVehicleRaycaster* rayCaster = new MyRaycaster(_pMgr->getDynamicsWorld());
     _bulletVehicle = new btRaycastVehicle(vehicleTuning, physicalBody->getRigidBody(), rayCaster);
     _bulletVehicle->setCoordinateSystem(0, 1, 2);
     _pMgr->getDynamicsWorld()->addVehicle(_bulletVehicle);
