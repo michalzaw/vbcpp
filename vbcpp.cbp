@@ -148,8 +148,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="Bus/Bus.cpp" />
 		<Unit filename="Bus/Bus.h" />
+		<Unit filename="Bus/BusConstraint.cpp" />
+		<Unit filename="Bus/BusConstraint.h" />
 		<Unit filename="Bus/BusRaycast.cpp" />
 		<Unit filename="Bus/BusRaycast.h" />
 		<Unit filename="Bus/Door.h" />
@@ -241,6 +242,8 @@
 		<Unit filename="Physics/PhysicalBodyConvexHull.hpp" />
 		<Unit filename="Physics/PhysicalBodyCylinder.cpp" />
 		<Unit filename="Physics/PhysicalBodyCylinder.hpp" />
+		<Unit filename="Physics/PhysicalBodyRaycastVehicle.cpp" />
+		<Unit filename="Physics/PhysicalBodyRaycastVehicle.h" />
 		<Unit filename="Physics/PhysicalBodySphere.cpp" />
 		<Unit filename="Physics/PhysicalBodySphere.hpp" />
 		<Unit filename="Physics/PhysicalBodyStaticPlane.cpp" />

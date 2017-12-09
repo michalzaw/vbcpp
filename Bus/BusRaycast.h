@@ -4,114 +4,107 @@
 
 #include <string>
 
+#include "Bus.h"
+
 #include "../Scene/SceneManager.h"
 #include "../Scene/SoundManager.h"
 
 #include "../Physics/PhysicsManager.hpp"
 #include "../Physics/PhysicalBodyWheel.h"
+#include "../Physics/PhysicalBodyRaycastVehicle.h"
 
 
-class MyRaycaster : public btVehicleRaycaster
+struct BusRayCastModule
 {
-    btDynamicsWorld*	m_dynamicsWorld;
-
-    public:
-        MyRaycaster(btDynamicsWorld* world)
-            :m_dynamicsWorld(world)
-        {
-
-        }
-
-        virtual void* castRay(const btVector3& from,const btVector3& to, btVehicleRaycasterResult& result)
-        {
-            btCollisionWorld::ClosestRayResultCallback rayCallback(from,to);
-
-            rayCallback.m_collisionFilterMask = COL_TERRAIN | COL_ENV;
-            rayCallback.m_collisionFilterGroup = COL_WHEEL;
-
-            m_dynamicsWorld->rayTest(from, to, rayCallback);
-
-            if (rayCallback.hasHit())
-            {
-
-                const btRigidBody* body = btRigidBody::upcast(rayCallback.m_collisionObject);
-                if (body && body->hasContactResponse())
-                {
-                    result.m_hitPointInWorld = rayCallback.m_hitPointWorld;
-                    result.m_hitNormalInWorld = rayCallback.m_hitNormalWorld;
-                    result.m_hitNormalInWorld.normalize();
-                    result.m_distFraction = rayCallback.m_closestHitFraction;
-                    return (void*)body;
-                }
-            }
-            return 0;
-        }
+    SceneObject* sceneObject;
+    PhysicalBodyRaycastVehicle* rayCastVehicle;
 };
 
 
-class BusRaycast
+struct BusRayCastWheel
 {
-    public:
-        SceneManager*   _sMgr;
-        PhysicsManager* _pMgr;
-        SoundManager*   _sndMgr;
+    PhysicalBodyWheel* wheel;
+    bool                  steering;
+    bool                  powered;
+    bool                  handbrake;
+    float                 maxBrakeForce;
+};
 
-        SceneObject* _busSceneObject;
 
-        btRaycastVehicle* _bulletVehicle;
+typedef std::vector<Door*>  DoorList;
+typedef std::vector<Light*> LightsList;
 
-        float _wheelAngle;
+
+class BusRaycast : public Bus
+{
+    static constexpr float STEER_STEP = 0.3f;
+    static constexpr float DEAD_ZONE = 0.0025f;
 
     public:
         BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
         virtual ~BusRaycast();
 
-        void update()
-        {
-            _bulletVehicle->updateWheelTransform(0, true);
-            _bulletVehicle->updateWheelTransform(1, true);
-            _bulletVehicle->updateWheelTransform(2, true);
-            _bulletVehicle->updateWheelTransform(3, true);
-        }
+        SceneObject* getSceneObject() { return _modules[0].sceneObject; }
 
-        void turnRight(float dt)
-        {
-            _wheelAngle -= 0.3 * dt;
-            if (_wheelAngle < -0.55)
-                _wheelAngle = -0.55;
-            _bulletVehicle->setSteeringValue(_wheelAngle, 0);
-            _bulletVehicle->setSteeringValue(_wheelAngle, 1);
-        }
+        virtual BusRayCastModule& getModule(int index);
 
-        void turnLeft(float dt)
-        {
-            _wheelAngle += 0.3 * dt;
-            if (_wheelAngle > 0.55)
-                _wheelAngle = 0.55;
-            _bulletVehicle->setSteeringValue(_wheelAngle, 0);
-            _bulletVehicle->setSteeringValue(_wheelAngle, 1);
-        }
+        virtual glm::vec3 getDriverPosition();
+        virtual SceneObject* getSteeringWheelObject();
 
-        void centerSteringWheel(float dt)
-        {
-            float deadZone = 0.0025f;
+        virtual void setIsEnableLights(bool is);
+        virtual bool isEnableLights();
+        virtual void setIsEnableHeadlights(bool is);
+        virtual bool isEnableHeadlights();
 
-            if (_wheelAngle > deadZone)
-            {
-                _wheelAngle -= dt * 0.3;
+        virtual void turnLeft(float dt);
+        virtual void turnRight(float dt);
+        virtual void centerSteringWheel(float dt);
+        virtual void accelerate();
+        virtual void idle();
+        virtual void brakeOn();
+        virtual void brakeOff();
+        virtual void toggleHandbrake();
 
-                _bulletVehicle->setSteeringValue(_wheelAngle, 0);
-                _bulletVehicle->setSteeringValue(_wheelAngle, 1);
-            }
-            else
-            if (_wheelAngle < -deadZone)
-            {
-                _wheelAngle += dt * 0.3;
+        virtual Gearbox* getGearbox();
+        virtual Engine* getEngine();
+        virtual void startEngine();
+        virtual void stopEngine();
 
-                _bulletVehicle->setSteeringValue(_wheelAngle, 0);
-                _bulletVehicle->setSteeringValue(_wheelAngle, 1);
-            }
-        }
+        virtual void doorOpenClose(char doorGroup);
+        virtual Door* getDoor(unsigned char doorIndex);
+
+        virtual void update(float deltaTime);
+
+    public:
+        SceneManager*   _sMgr;
+        PhysicsManager* _pMgr;
+        SoundManager*   _sndMgr;
+
+        std::unique_ptr<Gearbox>    _gearbox;
+        std::unique_ptr<Engine>     _engine;
+
+        std::vector<BusRayCastModule> _modules;
+
+        float   _maxSteerAngle;
+        float   _steerAngle;
+
+        bool    _brake;
+        bool    _accelerate;
+        bool    _handbrake;
+        bool    _idle;
+
+        float   _brakeForce;
+        float   _brakeForceStep;
+
+        SceneObject*    _steeringWheelObject;
+        glm::vec3       _driverPosition;
+        LightsList      _lights;
+        bool            _isEnableLights;
+        LightsList      _headlights;
+        bool            _isEnableHeadlights;
+
+        std::vector<BusRayCastWheel*>       _wheels;
+        DoorList        _doors;
 };
 
 

@@ -2,14 +2,34 @@
 
 
 PhysicalBodyWheel::PhysicalBodyWheel(btRaycastVehicle* vehicle, int index)
-    : PhysicalBody(2), _vehicle(vehicle), _index(index)
+    : PhysicalBody(0), _vehicle(vehicle), _index(index)
 {
-
+    _steeringValue = _vehicle->getSteeringValue(_index);
 }
 
 PhysicalBodyWheel::~PhysicalBodyWheel()
 {
 
+}
+
+
+float PhysicalBodyWheel::getSteeringValue()
+{
+    return _steeringValue;
+}
+
+
+void PhysicalBodyWheel::setSteeringValue(float angle)
+{
+    _steeringValue = angle;
+
+    _vehicle->setSteeringValue(_steeringValue, _index);
+}
+
+
+btWheelInfo& PhysicalBodyWheel::getWheelInfo()
+{
+    return _vehicle->getWheelInfo(_index);
 }
 
 
