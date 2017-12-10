@@ -18,12 +18,6 @@
 
 #include <memory>
 
-enum WheelSide
-{
-    WS_RIGHT = 0,
-    WS_LEFT
-};
-
 
 struct Module
 {
@@ -44,8 +38,6 @@ struct Wheel
 };
 
 typedef std::vector<Wheel*> WheelList;
-typedef std::vector<Door*>  DoorList;
-typedef std::vector<Light*> LightsList;
 typedef std::vector<Light*> HeadlightsList;
 
 

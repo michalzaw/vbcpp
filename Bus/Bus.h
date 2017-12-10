@@ -16,6 +16,17 @@
 #include "Door.h"
 
 
+typedef std::vector<Door*>  DoorList;
+typedef std::vector<Light*> LightsList;
+
+
+enum WheelSide
+{
+    WS_RIGHT = 0,
+    WS_LEFT
+};
+
+
 class Bus : public RefCounter
 {
     public:

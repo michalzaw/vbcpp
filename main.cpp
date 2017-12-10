@@ -409,7 +409,10 @@ int main()
 Timer timer;
 timer.start();
     //bus = new BusConstraint(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
-    bus = new BusRaycast(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
+    if (gameCfg.busModel == "h9_raycast")
+        bus = new BusRaycast(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
+    else
+        bus = new BusConstraint(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
     //bus->getSceneObject()->setPosition(0,5,-150);
     //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
 

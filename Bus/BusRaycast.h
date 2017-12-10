@@ -5,6 +5,8 @@
 #include <string>
 
 #include "Bus.h"
+#include "DoorSimple.h"
+#include "DoorSE.h"
 
 #include "../Scene/SceneManager.h"
 #include "../Scene/SoundManager.h"
@@ -18,6 +20,7 @@ struct BusRayCastModule
 {
     SceneObject* sceneObject;
     PhysicalBodyRaycastVehicle* rayCastVehicle;
+    btVector3 jointPosition;
 };
 
 
@@ -28,11 +31,8 @@ struct BusRayCastWheel
     bool                  powered;
     bool                  handbrake;
     float                 maxBrakeForce;
+    WheelSide             wheelSide;
 };
-
-
-typedef std::vector<Door*>  DoorList;
-typedef std::vector<Light*> LightsList;
 
 
 class BusRaycast : public Bus
@@ -105,6 +105,10 @@ class BusRaycast : public Bus
 
         std::vector<BusRayCastWheel*>       _wheels;
         DoorList        _doors;
+
+        int             _collidesWith;
+
+        void loadXMLdata(std::string busname);
 };
 
 

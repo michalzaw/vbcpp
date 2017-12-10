@@ -1,13 +1,31 @@
 #include "BusRaycast.h"
 
+// XML reader
+#include "../Utils/tinyxml2.h"
+#include <sstream>
+#include <cstdlib>
+using namespace tinyxml2;
+
+#include "../Utils/Math.h"
+
+#include "../Graphics/GraphicsManager.h"
+#include "../Utils/ResourceManager.h"
+
+#include "../Utils/Helpers.hpp"
+#include "../Utils/Strings.h"
+
 
 BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
     : _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr),
     _maxSteerAngle(0.55f), _steerAngle(0.0f),
-    _steeringWheelObject(NULL),
-    _brake(false), _accelerate(false), _handbrake(true), _idle(true)
+    _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
+    _brake(false), _accelerate(false), _handbrake(true), _idle(true),
+    _isEnableLights(false), _isEnableHeadlights(false),
+    _collidesWith(COL_TERRAIN | COL_ENV)
 {
-    _modules.push_back(BusRayCastModule());
+    loadXMLdata(filename);
+
+    /*_modules.push_back(BusRayCastModule());
 
     _modules[0].sceneObject = _sMgr->addSceneObject("busRayCast");
     _modules[0].sceneObject->setPosition(0,5,0);
@@ -56,11 +74,11 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
 		btWheelInfo& wheel = _wheels[i]->wheel->getWheelInfo();
 
 		// Original
-		/*wheel.m_suspensionStiffness = 20.0f;
-		wheel.m_wheelsDampingCompression = 4.472f;
-		wheel.m_wheelsDampingRelaxation = 3.578f;
-		wheel.m_frictionSlip = 1000.0f;
-		wheel.m_rollInfluence = 0.1f;*/
+		//wheel.m_suspensionStiffness = 20.0f;
+		//wheel.m_wheelsDampingCompression = 4.472f;
+		//wheel.m_wheelsDampingRelaxation = 3.578f;
+		//wheel.m_frictionSlip = 1000.0f;
+		//wheel.m_rollInfluence = 0.1f;
 
 		wheel.m_suspensionStiffness = 35.0f;//25.0f;
 		wheel.m_wheelsDampingCompression = 0.25f * 2 * sqrt(wheel.m_suspensionStiffness);
@@ -99,12 +117,537 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
         _sndMgr->addSoundComponent(soundComp);
     }
 
-    _driverPosition = glm::vec3(0.75f, 0.44f, 3.51f);
+    _driverPosition = glm::vec3(0.75f, 0.44f, 3.51f);*/
 }
 
 
 BusRaycast::~BusRaycast()
 {
+    std::cout << "Bus Destruktor" << std::endl;
+
+    std::vector<BusRayCastWheel*>::iterator wit = _wheels.begin();
+
+    for (; wit != _wheels.end(); ++wit)
+    {
+        delete (*wit);
+    }
+    _wheels.clear();
+
+    DoorList::iterator dit = _doors.begin();
+
+    for (; dit != _doors.end(); ++dit)
+    {
+
+        delete (*dit);
+    }
+    _doors.clear();
+
+    _headlights.clear();
+}
+
+
+void BusRaycast::loadXMLdata(std::string busname)
+{
+    std::string filename = "Buses/" + busname + "/config.xml";
+
+    XMLDocument doc;
+    doc.LoadFile( filename.c_str() );
+
+    XMLElement* objElement = doc.FirstChildElement("Gearbox");
+
+    std::string gearboxFile(objElement->Attribute("model"));
+    _gearbox = std::unique_ptr<Gearbox> (new Gearbox(gearboxFile));
+
+    objElement = doc.FirstChildElement("Engine");
+    std::string engineFile(objElement->Attribute("model"));
+    _engine = std::unique_ptr<Engine> (new Engine(engineFile));
+
+    XMLElement* busElement = doc.FirstChildElement("Bus");
+
+    std::cout << "XML DATA" << std::endl;
+
+    std::string sObjName(busElement->Attribute("name"));
+
+
+    std::string sTextureFolder(busElement->Attribute("textures"));
+
+    std::cout<< sObjName << std::endl;
+
+    RModel* busModel = 0;
+
+    glm::vec3 busPosition = glm::vec3(0,0,0);
+    //glm::vec3 busRotation = glm::vec3(0,0,0);
+
+    std::string texturePath = "Buses/" + busname + "/" + sTextureFolder + "/";
+
+
+    BusRayCastModule busModule;
+
+
+
+    // Reading bus body configuration
+    XMLElement* moduleElement = busElement->FirstChildElement("Module");
+
+    while (moduleElement != nullptr)
+    {
+
+        //_sceneObject = _sMgr->addSceneObject(sObjName);
+        busModule.sceneObject = _sMgr->addSceneObject(sObjName);
+
+        std::string modelFile = std::string(moduleElement->Attribute("model"));
+        std::string modelPath = "Buses/" + busname + "/" + modelFile;
+
+        glm::vec3 modulePosition = glm::vec3(0,0,0);
+        modulePosition = XMLstringToVec3(moduleElement->Attribute("position"));
+
+        busModule.sceneObject->setPosition(modulePosition);
+
+        busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+        //GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
+        GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
+
+        //_sceneObject->addComponent(renderObj);
+
+        // Tworzenie fizycznego obiektu karoserii
+        const char* cMass = moduleElement->Attribute("mass");
+        float fMass = (float)atof(cMass);
+
+        if (busModel->getCollisionMeshSize() > 0)
+        {
+            int wheelCollidesWith = COL_TERRAIN | COL_ENV;
+
+            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), fMass, COL_BUS, _collidesWith);
+            busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, wheelCollidesWith);
+            busModule.rayCastVehicle->getRigidBody()->setActivationState( DISABLE_DEACTIVATION );
+
+            //_sceneObject->addComponent(_chasisBody);
+            busModule.sceneObject->addComponent(busModule.rayCastVehicle);
+
+            //btVector3 dirVec(0,0,1);
+            //btTransform tmpTransf = _chasisBody->getRigidBody()->getWorldTransform();
+            //btVector3 dir = tmpTransf.getBasis() * dirVec;
+        }
+        else
+        {
+            std::cout << "ERROR: Collision mesh not found in bus model!\n" << std::endl;
+            return;
+        }
+
+        // ########### WHEELS ###########
+        XMLElement* wheelElement = moduleElement->FirstChildElement("Wheel");
+        while (wheelElement != nullptr)
+        {
+            std::cout << "XML: Wheel data" << std::endl;
+
+            std::string wheelName(wheelElement->Attribute("name"));
+            std::cout << wheelName << std::endl;
+            std::string wheelModel(wheelElement->Attribute("model"));
+            std::string side(wheelElement->Attribute("side"));
+            float radius = (float)atof(wheelElement->Attribute("radius"));
+
+            int steering = (int)atoi(wheelElement->Attribute("steering"));
+            int powered = (int)atoi(wheelElement->Attribute("powered"));
+            int handbrake = (int)atoi(wheelElement->Attribute("handbrake"));
+
+            float suspensionRestLength = (float)atof(wheelElement->Attribute("suspensionRestLength"));
+            float suspensionStiffness = (float)atof(wheelElement->Attribute("suspensionStiffness"));
+            float dampingCompression = (float)atof(wheelElement->Attribute("dampingCompression"));
+            float dampingRelaxation = (float)atof(wheelElement->Attribute("dampingRelaxation"));
+            float frictionSlip = (float)atof(wheelElement->Attribute("frictionSlip"));
+            float rollInfluence = (float)atof(wheelElement->Attribute("rollInfluence"));
+            float brakeForce = (float)atof(wheelElement->Attribute("brakeForce"));
+
+            glm::vec3 wheelPosition = XMLstringToVec3(wheelElement->Attribute("position"));
+
+            SceneObject* wheelObj = _sMgr->addSceneObject(wheelName);
+
+            // obracamy model kola je¿li jest po lewej stronie
+            WheelSide wheelSide;
+            if (side == "right")
+            {
+                wheelSide = WS_RIGHT;
+            }
+            else
+                wheelSide = WS_LEFT;
+
+            btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
+
+            std::string modelPath = "Buses/" + busname + "/" + wheelModel;
+            RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+            GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelObj);
+
+            //wheelObj->addComponent(wheelRender);
+
+            PhysicalBodyWheel* wheelBody = _pMgr->createPhysicalBodyWheel(busModule.rayCastVehicle, btWheelPos, suspensionRestLength, radius, steering);
+            wheelObj->addComponent(wheelBody);
+
+            btWheelInfo& wheelInfo = wheelBody->getWheelInfo();
+            wheelInfo.m_suspensionStiffness = suspensionStiffness;
+            wheelInfo.m_wheelsDampingCompression = dampingCompression * 2 * sqrt(wheelInfo.m_suspensionStiffness);
+            wheelInfo.m_wheelsDampingRelaxation = dampingRelaxation * 2 * sqrt(wheelInfo.m_suspensionStiffness);
+            wheelInfo.m_frictionSlip = frictionSlip;
+            wheelInfo.m_rollInfluence = rollInfluence;
+
+            BusRayCastWheel* w = new BusRayCastWheel;
+            w->wheel = wheelBody;
+            w->steering = steering;
+            w->powered = powered;
+            w->handbrake = handbrake;
+            w->maxBrakeForce = brakeForce;
+            w->wheelSide = wheelSide;
+
+            _wheels.push_back(w);
+
+            wheelElement = wheelElement->NextSiblingElement("Wheel");
+        }
+
+        // ########### INTERIOR LIGHTS ###########
+        XMLElement* lightElement = moduleElement->FirstChildElement("Light");
+        while (lightElement != nullptr)
+        {
+            //std::cout << "XML: Light" << std::endl;
+
+            const char* cPosition = lightElement->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+
+            const char* cColor = lightElement->Attribute("color");
+            glm::vec3 color = XMLstringToVec3(cColor);
+
+            const char* cAttenuation = lightElement->Attribute("attenuation");
+            glm::vec3 attenuation = XMLstringToVec3(cAttenuation);
+
+            float ambientIntensity = (float)atof(lightElement->Attribute("ambientIntensity"));
+            float diffuseIntensity = (float)atof(lightElement->Attribute("diffuseIntensity"));
+
+
+            SceneObject* light = _sMgr->addSceneObject("busLight" + toString(_lights.size()));
+            Light* lightComponent = GraphicsManager::getInstance().addPointLight(color, ambientIntensity,
+                                                                                 diffuseIntensity,
+                                                                                 LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+            light->addComponent(lightComponent);
+            light->setPosition(position);
+            //_sceneObject->addChild(light);
+            busModule.sceneObject->addChild(light);
+
+            lightComponent->setIsActive(_isEnableLights);
+
+            _lights.push_back(lightComponent);
+
+            lightElement = lightElement->NextSiblingElement("Light");
+        }
+
+        // ########### DRIVER'S POSITION ###########
+        XMLElement* driverPositionElement = busElement->FirstChildElement("Driver");
+        if (driverPositionElement != nullptr)
+        {
+            const char* cPosition = driverPositionElement->Attribute("position");
+            _driverPosition = XMLstringToVec3(cPosition);
+
+            driverPositionElement = driverPositionElement->NextSiblingElement("Driver");
+        }
+
+
+
+
+
+        // ########### STEERING WHEEL ###########
+        XMLElement* steeringWheelElement = moduleElement->FirstChildElement("SteeringWheel");
+        if (steeringWheelElement != nullptr)
+        {
+            //std::cout << "XML: Steering wheel" << std::endl;
+
+            std::string modelFile = std::string(steeringWheelElement->Attribute("model"));
+            std::string modelPath = "Buses/" + busname + "/" + modelFile;
+
+            _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
+
+            RModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
+            GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
+
+            const char* cPosition = steeringWheelElement->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+            _steeringWheelObject->setPosition(position);
+
+            const char* cRotation = steeringWheelElement->Attribute("rotation");
+            glm::vec3 rotation(XMLstringToVec3(cRotation));
+            _steeringWheelObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+
+            const char* cScale = steeringWheelElement->Attribute("scale");
+            glm::vec3 scale(XMLstringToVec3(cScale));
+            _steeringWheelObject->setScale(scale);
+
+            //_sceneObject->addChild(_steeringWheelObject);
+            busModule.sceneObject->addChild(_steeringWheelObject);
+        }
+
+        // ########### HEADLIGHTS ###########
+        XMLElement* headlightElement = moduleElement->FirstChildElement("Headlight");
+        while (headlightElement != nullptr)
+        {
+            //std::cout << "XML: Headlights" << std::endl;
+
+            std::string headlightName(headlightElement->Attribute("name"));
+            const char* cPosition = headlightElement->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+
+            const char* cRotation = headlightElement->Attribute("rotation");
+            glm::vec3 rotation = XMLstringToVec3(cRotation);
+
+            const char* cColor = headlightElement->Attribute("color");
+            glm::vec3 color = XMLstringToVec3(cColor);
+
+            const char* cAttenuation = headlightElement->Attribute("attenuation");
+            glm::vec3 attenuation = XMLstringToVec3(cAttenuation);
+
+            float ambientIntensity = (float)atof(headlightElement->Attribute("ambientIntensity"));
+            float diffuseIntensity = (float)atof(headlightElement->Attribute("diffuseIntensity"));
+            float cutoff = (float)atof(headlightElement->Attribute("cutoff"));
+
+
+            SceneObject* light = _sMgr->addSceneObject(headlightName);
+            Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
+                                                                                diffuseIntensity, cutoff,
+                                                                                LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+            light->addComponent(lightComponent);
+            light->setPosition(position);
+            light->setRotation(rotation);
+            //_sceneObject->addChild(light);
+            busModule.sceneObject->addChild(light);
+
+            lightComponent->setIsActive(_isEnableHeadlights);
+
+            _headlights.push_back(lightComponent);
+
+            headlightElement = headlightElement->NextSiblingElement("Headlight");
+        }
+
+        // ########### DOORS ###########
+        XMLElement* doorElement = moduleElement->FirstChildElement("Door");
+        while (doorElement != nullptr)
+        {
+            std::cout << "XML: Door data" << std::endl;
+
+            std::string doorName(doorElement->Attribute("name"));
+            std::string doorType(doorElement->Attribute("type"));
+            std::string doorModel(doorElement->Attribute("model"));
+            float mass = (float)atof(doorElement->Attribute("mass"));
+            char group = (char)atoi(doorElement->Attribute("group"));
+
+            std::string openSound = "Buses/" + busname + "/" + std::string(doorElement->Attribute("doorOpenSound"));
+            std::string closeSound = "Buses/" + busname + "/" + std::string(doorElement->Attribute("doorCloseSound"));
+
+            std::cout << "Door open sound:" << openSound << std::endl;
+            std::cout << "Door open sound:" << closeSound <<std::endl;
+
+
+            // Create sound component
+            SoundComponent* openSoundComp = new SoundComponent(openSound, EST_PLAYER);
+            _sndMgr->addSoundComponent(openSoundComp);
+
+            SoundComponent* closeSoundComp = new SoundComponent(closeSound, EST_PLAYER);
+            _sndMgr->addSoundComponent(closeSoundComp);
+
+            SceneObject* doorObj = 0;
+
+            if (doorType == "s")
+            {
+
+                glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
+                glm::vec3 relativePos = busModule.sceneObject->transformLocalPointToGlobal(doorPosition);
+
+                // poczatek IF
+                btVector3 busPivot = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
+                btVector3 doorPivot = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
+
+                doorObj = _sMgr->addSceneObject(doorName);
+                doorObj->setPosition(doorPosition);
+
+                std::string modelPath = "Buses/" + busname + "/" + doorModel;
+
+                RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(dr), doorObj);
+
+                btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
+
+                int collidesWith = COL_ENV | COL_TERRAIN;
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, COL_DOOR, collidesWith);
+                doorObj->addComponent(doorBody);
+
+                //ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
+                ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
+
+                doorHinge->getBulletConstraint()->setLimit(-1.5,0);
+
+                Door* d = 0;
+                d = new DoorSimple(dr, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
+                _doors.push_back(d);
+            } // IF "S"
+            else
+            if (doorType == "se")
+            {
+                std::string armName(doorElement->Attribute("armName"));
+                std::string armModel(doorElement->Attribute("arm"));
+                float armMass = (float)atof(doorElement->Attribute("armMass"));
+                char group = (char)atoi(doorElement->Attribute("group"));
+
+                //float arm1lowLimit = (float)atof(doorElement->Attribute("arm1lowLimit"));
+                //float arm1highLimit = (float)atof(doorElement->Attribute("arm1highLimit"));
+                glm::vec2 arm1limits = XMLstringToVec2(doorElement->Attribute("arm1limits"));
+
+                std::string rotDir(doorElement->Attribute("rotationDir"));
+
+                RotationDir rdir;
+
+                if (rotDir == "CCW")
+                    rdir = ERD_CCW;
+                else
+                    rdir = ERD_CW;
+
+                glm::vec3 armPosition = XMLstringToVec3(doorElement->Attribute("armPosition"));
+                glm::vec3 armRelPos = glm::vec3(busPosition.x + armPosition.x, busPosition.y + armPosition.y, busPosition.z + armPosition.z);
+
+                btVector3 armPivotA = XMLstringToBtVec3(doorElement->Attribute("armPivotA"));
+                btVector3 armPivotB = XMLstringToBtVec3(doorElement->Attribute("armPivotB"));
+
+                SceneObject* armObj = _sMgr->addSceneObject(armName);
+                armObj->setPosition(armRelPos);
+
+                std::string armPath = "Buses/" + busname + "/" + armModel;
+
+                RModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+
+                btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
+
+                int collidesWith = COL_ENV | COL_TERRAIN;
+                PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, COL_DOOR, collidesWith);
+                armObj->addComponent(armBody);
+
+                //ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(_chasisBody, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
+                ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
+
+                busArmHinge->getBulletConstraint()->setLimit(arm1limits.x,arm1limits.y);
+
+                // arm 2
+
+                std::string arm2Name(doorElement->Attribute("arm2Name"));
+                std::string arm2Model(doorElement->Attribute("arm2"));
+                float arm2Mass = (float)atof(doorElement->Attribute("arm2Mass"));
+
+                //float arm2lowLimit = (float)atof(doorElement->Attribute("arm2lowLimit"));
+                //float arm2highLimit = (float)atof(doorElement->Attribute("arm2highLimit"));
+
+                glm::vec3 arm2Position = XMLstringToVec3(doorElement->Attribute("arm2Position"));
+                glm::vec3 arm2RelPos = glm::vec3(busPosition.x + arm2Position.x, busPosition.y + arm2Position.y, busPosition.z + arm2Position.z);
+
+                btVector3 arm2PivotA = XMLstringToBtVec3(doorElement->Attribute("arm2PivotA"));
+                btVector3 arm2PivotB = XMLstringToBtVec3(doorElement->Attribute("arm2PivotB"));
+
+                SceneObject* arm2Obj = _sMgr->addSceneObject(arm2Name);
+                arm2Obj->setPosition(arm2RelPos);
+
+                std::string arm2Path = "Buses/" + busname + "/" + arm2Model;
+
+                RModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+                //arm2Obj->addComponent(arm2Render);
+
+                btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
+
+                collidesWith = COL_NOTHING;
+                PhysicalBodyConvexHull* arm2Body = _pMgr->createPhysicalBodyConvexHull(arm2->getCollisionMesh(), arm2->getCollisionMeshSize(), arm2Mass, COL_DOOR, collidesWith);
+                arm2Obj->addComponent(arm2Body);
+
+                //_pMgr->createConstraintHinge(_chasisBody, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
+                _pMgr->createConstraintHinge(busModule.rayCastVehicle, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
+
+                //busArm2Hinge->getBulletConstraint()->setLimit(arm2lowLimit,arm2highLimit);
+
+                // door model
+
+                std::string doorName(doorElement->Attribute("name"));
+                std::string doorModel(doorElement->Attribute("model"));
+                float doorMass = (float)atof(doorElement->Attribute("mass"));
+
+                glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
+                glm::vec3 relativePos = glm::vec3(armPosition.x + doorPosition.x, armPosition.y + doorPosition.y, armPosition.z + doorPosition.z);
+
+                btVector3 doorPivotA = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
+                btVector3 doorPivotB = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
+
+                doorObj = _sMgr->addSceneObject(doorName);
+                doorObj->setPosition(relativePos);
+
+                std::string doorPath = "Buses/" + busname + "/" + doorModel;
+
+                RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
+                //doorObj->addComponent(doorRender);
+
+                btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
+
+                collidesWith = COL_ENV;
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(door->getCollisionMesh(), door->getCollisionMeshSize(), doorMass, COL_DOOR, collidesWith);
+                doorObj->addComponent(doorBody);
+
+                ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
+
+                if (rotDir == "CCW")
+                    armDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
+                else
+                    armDoorHinge->getBulletConstraint()->setLimit(0.0,1.9);
+
+                btVector3 pivotC = XMLstringToBtVec3(doorElement->Attribute("pivotC"));
+                btVector3 pivotD = XMLstringToBtVec3(doorElement->Attribute("pivotD"));
+
+                _pMgr->createConstraintHinge(arm2Body, doorBody, pivotC, pivotD, btVector3(0,1,0), btVector3(0,1,0));
+
+
+                Door* d = 0;
+                d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
+                _doors.push_back(d);
+            }
+
+
+            doorObj->addComponent(openSoundComp);
+            doorObj->addComponent(closeSoundComp);
+
+            doorElement = doorElement->NextSiblingElement("Door");
+        }
+
+
+        // Modules connection point
+        XMLElement* jointElement = moduleElement->FirstChildElement("Joint");
+        while (jointElement != nullptr)
+        {
+            busModule.jointPosition = XMLstringToBtVec3(jointElement->Attribute("position"));
+
+            jointElement = jointElement->NextSiblingElement("Joint");
+        }
+
+        _modules.push_back(busModule);
+
+        moduleElement = moduleElement->NextSiblingElement("Module");
+
+
+    }
+
+    // Create Sound Component if sound filename is defined in Engine XML config file
+    if (_engine->getSoundFilename() != "")
+    {
+        SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
+        //_sceneObject->addComponent(soundComp);
+        _modules[0].sceneObject->addComponent(soundComp);
+        soundComp->setGain(_engine->getSoundVolume());
+
+        _sndMgr->addSoundComponent(soundComp);
+    }
+
+    // If it's articulated bus - connect modules with a ball joint
+    if (_modules.size() > 1)
+    {
+        _pMgr->createConstraintBall(_modules[0].rayCastVehicle, _modules[1].rayCastVehicle, _modules[0].jointPosition, _modules[1].jointPosition);
+    }
 
 }
 
@@ -174,7 +717,7 @@ void BusRaycast::turnLeft(float dt)
 
         if (_steeringWheelObject)
         {
-            _steeringWheelObject->rotate(0.0f, -dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
+            _steeringWheelObject->rotate(0.0f, 2.5f * dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
         }
     }
 
@@ -199,7 +742,7 @@ void BusRaycast::turnRight(float dt)
 
         if (_steeringWheelObject)
         {
-            _steeringWheelObject->rotate(0.0f, dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
+            _steeringWheelObject->rotate(0.0f, 2.5f * -dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
         }
     }
 
@@ -224,7 +767,7 @@ void BusRaycast::centerSteringWheel(float dt)
 
         if (_steeringWheelObject)
         {
-            _steeringWheelObject->rotate(0.0f, dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
+            _steeringWheelObject->rotate(0.0f, 2.5f * -dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
         }
     }
     else if (_steerAngle < -DEAD_ZONE)
@@ -233,7 +776,7 @@ void BusRaycast::centerSteringWheel(float dt)
 
         if (_steeringWheelObject)
         {
-            _steeringWheelObject->rotate(0.0f, -dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
+            _steeringWheelObject->rotate(0.0f, 2.5f * dt * STEER_STEP * 2 * PI / _maxSteerAngle, 0.0f);
         }
     }
 
