@@ -873,7 +873,23 @@ void BusRaycast::stopEngine()
 
 void BusRaycast::doorOpenClose(char doorGroup)
 {
-
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->playOpenSound();
+                _doors[i]->open();
+            }
+            else
+            if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->playCloseSound();
+                _doors[i]->close();
+            }
+        }
+    }
 }
 
 
