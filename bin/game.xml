@@ -7,6 +7,12 @@
 
 	<Map name="Demo" />
 	
-	<Bus model="i211" />
+	<Bus model="h9" />
+	
+	<Configuration>
+		<Shadowmapping>true</Shadowmapping>
+        <ShadowmapSize>2048</ShadowmapSize>
+    </Configuration>
+
 
 </Game>

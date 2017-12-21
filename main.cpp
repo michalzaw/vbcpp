@@ -44,6 +44,8 @@ using namespace tinyxml2;
 #include "Graphics/Roads.h"
 #include "Utils/Collision.h"
 
+#include "Game/GameConfig.h"
+
 // Definicje globalne
 
 bool MOUSE_RIGHT_BUTTON_PRESSED = false;
@@ -68,22 +70,6 @@ Bus* bus = 0;
 Label* engineIsRunning = 0;
 
 std::string winTitle = "Virtual Bus Core++";
-
-
-struct GameConfig
-{
-    GameConfig()
-    : windowWidth(1024), windowHeight(768)
-    {
-
-    }
-
-    int windowWidth;
-    int windowHeight;
-    std::string mapFile;
-    std::string mapTexPath;
-    std::string busModel;
-} gameCfg;
 
 
 // kod
@@ -301,53 +287,16 @@ void readInput(GLFWwindow* window, double deltaTime)
 }
 
 
-void loadScene()
-{
-    std::string filename("game.xml");
-
-    XMLDocument doc;
-    doc.LoadFile( filename.c_str() );
-
-    XMLElement* objElement = doc.FirstChildElement("Game");
-
-    for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
-    {
-        const char* ename = child->Name();
-
-        // OBJECT TRANSFORM
-        if (strcmp(ename,"Resolution") == 0)
-        {
-            const char* cWidth = child->Attribute("x");
-            const char* cHeight = child->Attribute("y");
-
-            gameCfg.windowWidth = (int)atoi(cWidth);
-            gameCfg.windowHeight = (int)atoi(cHeight);
-        }
-        else
-        if (strcmp(ename,"Map") == 0)
-        {
-            gameCfg.mapFile = std::string(child->Attribute("name"));;
-            //gameCfg.mapTexPath = std::string(child->Attribute("texturePath"));
-        }
-        else
-        if (strcmp(ename,"Bus") == 0)
-        {
-            gameCfg.busModel = std::string(child->Attribute("model"));
-        }
-    }
-}
-
-
 // ### MAIN ###
 int main()
 {
     srand(static_cast<unsigned int>(time(NULL)));
 
-    loadScene();
+    GameConfig::getInstance().loadGameConfig("game.xml");
 
     win = new Window;
 
-    win->createWindow(gameCfg.windowWidth, gameCfg.windowHeight, 10, 40);
+    win->createWindow(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, 10, 40);
     win->setWindowTitle(winTitle);
 
     // Callbacki do obslugi zdarzen
@@ -376,11 +325,11 @@ int main()
 
 Timer timer;
 timer.start();
-    bus = new Bus(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
+    bus = new Bus(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
     //bus->getSceneObject()->setPosition(0,5,-150);
     //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
 
-    sceneMgr->loadScene(gameCfg.mapFile);
+    sceneMgr->loadScene(GameConfig::getInstance().mapFile);
     double diff = timer.stop();
 
     bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
@@ -390,7 +339,7 @@ timer.start();
 
     // Camera FPS
     SceneObject* Camera = sceneMgr->addSceneObject("cam1");
-    camFPS = GraphicsManager::getInstance().addCameraFPS(gameCfg.windowWidth, gameCfg.windowHeight, degToRad(58.0f), 0.1f, 1000);
+    camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     Camera->setPosition(glm::vec3(0,4,5));
     camFPS->setRotationSpeed(0.001f);
@@ -448,7 +397,7 @@ timer.start();
 
     RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
     Label* label = gui->addLabel(font, "Virtual Bus Core++");
-    label->setPosition(10, gameCfg.windowHeight - 60);
+    label->setPosition(10, GameConfig::getInstance().windowHeight - 60);
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 

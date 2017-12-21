@@ -165,6 +165,8 @@
 		<Unit filename="GUI/Image.h" />
 		<Unit filename="GUI/Label.cpp" />
 		<Unit filename="GUI/Label.h" />
+		<Unit filename="Game/GameConfig.cpp" />
+		<Unit filename="Game/GameConfig.h" />
 		<Unit filename="Graphics/AABB.h" />
 		<Unit filename="Graphics/Camera.cpp" />
 		<Unit filename="Graphics/Camera.h" />
