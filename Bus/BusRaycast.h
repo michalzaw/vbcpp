@@ -15,6 +15,12 @@
 #include "../Physics/PhysicalBodyWheel.h"
 #include "../Physics/PhysicalBodyRaycastVehicle.h"
 
+// XML reader
+#include "../Utils/tinyxml2.h"
+#include <sstream>
+#include <cstdlib>
+using namespace tinyxml2;
+
 
 struct BusRayCastModule
 {

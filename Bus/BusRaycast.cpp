@@ -1,11 +1,5 @@
 #include "BusRaycast.h"
 
-// XML reader
-#include "../Utils/tinyxml2.h"
-#include <sstream>
-#include <cstdlib>
-using namespace tinyxml2;
-
 #include "../Utils/Math.h"
 
 #include "../Graphics/GraphicsManager.h"
@@ -346,10 +340,6 @@ void BusRaycast::loadXMLdata(std::string busname)
             driverPositionElement = driverPositionElement->NextSiblingElement("Driver");
         }
 
-
-
-
-
         // ########### STEERING WHEEL ###########
         XMLElement* steeringWheelElement = moduleElement->FirstChildElement("SteeringWheel");
         if (steeringWheelElement != nullptr)
@@ -451,7 +441,6 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             if (doorType == "s")
             {
-
                 glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
                 glm::vec3 relativePos = busModule.sceneObject->transformLocalPointToGlobal(doorPosition);
 
@@ -480,7 +469,9 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 Door* d = 0;
                 d = new DoorSimple(dr, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
+                d->close();
                 _doors.push_back(d);
+
             } // IF "S"
             else
             if (doorType == "se")
@@ -490,8 +481,6 @@ void BusRaycast::loadXMLdata(std::string busname)
                 float armMass = (float)atof(doorElement->Attribute("armMass"));
                 char group = (char)atoi(doorElement->Attribute("group"));
 
-                //float arm1lowLimit = (float)atof(doorElement->Attribute("arm1lowLimit"));
-                //float arm1highLimit = (float)atof(doorElement->Attribute("arm1highLimit"));
                 glm::vec2 arm1limits = XMLstringToVec2(doorElement->Attribute("arm1limits"));
 
                 std::string rotDir(doorElement->Attribute("rotationDir"));
@@ -523,7 +512,6 @@ void BusRaycast::loadXMLdata(std::string busname)
                 PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, COL_DOOR, collidesWith);
                 armObj->addComponent(armBody);
 
-                //ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(_chasisBody, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
                 ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
                 busArmHinge->getBulletConstraint()->setLimit(arm1limits.x,arm1limits.y);
@@ -533,9 +521,6 @@ void BusRaycast::loadXMLdata(std::string busname)
                 std::string arm2Name(doorElement->Attribute("arm2Name"));
                 std::string arm2Model(doorElement->Attribute("arm2"));
                 float arm2Mass = (float)atof(doorElement->Attribute("arm2Mass"));
-
-                //float arm2lowLimit = (float)atof(doorElement->Attribute("arm2lowLimit"));
-                //float arm2highLimit = (float)atof(doorElement->Attribute("arm2highLimit"));
 
                 glm::vec3 arm2Position = XMLstringToVec3(doorElement->Attribute("arm2Position"));
                 glm::vec3 arm2RelPos = glm::vec3(busPosition.x + arm2Position.x, busPosition.y + arm2Position.y, busPosition.z + arm2Position.z);
@@ -550,7 +535,6 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 RModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
-                //arm2Obj->addComponent(arm2Render);
 
                 btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
 
@@ -558,10 +542,7 @@ void BusRaycast::loadXMLdata(std::string busname)
                 PhysicalBodyConvexHull* arm2Body = _pMgr->createPhysicalBodyConvexHull(arm2->getCollisionMesh(), arm2->getCollisionMeshSize(), arm2Mass, COL_DOOR, collidesWith);
                 arm2Obj->addComponent(arm2Body);
 
-                //_pMgr->createConstraintHinge(_chasisBody, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
                 _pMgr->createConstraintHinge(busModule.rayCastVehicle, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
-
-                //busArm2Hinge->getBulletConstraint()->setLimit(arm2lowLimit,arm2highLimit);
 
                 // door model
 
@@ -582,7 +563,6 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
-                //doorObj->addComponent(doorRender);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -605,6 +585,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 Door* d = 0;
                 d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
+                d->close();
                 _doors.push_back(d);
             }
 
@@ -639,6 +620,7 @@ void BusRaycast::loadXMLdata(std::string busname)
         //_sceneObject->addComponent(soundComp);
         _modules[0].sceneObject->addComponent(soundComp);
         soundComp->setGain(_engine->getSoundVolume());
+        soundComp->setPlayDistance(20.0f);
 
         _sndMgr->addSoundComponent(soundComp);
     }
@@ -863,7 +845,6 @@ void BusRaycast::stopEngine()
     {
         _engine->turnOff();
 
-        //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->stop();
     }
@@ -879,13 +860,11 @@ void BusRaycast::doorOpenClose(char doorGroup)
         {
             if (_doors[i]->getState() == EDS_CLOSING)
             {
-                _doors[i]->playOpenSound();
                 _doors[i]->open();
             }
             else
             if (_doors[i]->getState() == EDS_OPENING)
             {
-                _doors[i]->playCloseSound();
                 _doors[i]->close();
             }
         }
@@ -895,7 +874,7 @@ void BusRaycast::doorOpenClose(char doorGroup)
 
 Door* BusRaycast::getDoor(unsigned char doorIndex)
 {
-
+    _doors[doorIndex];
 }
 
 

@@ -8,7 +8,8 @@
 enum DoorState
 {
     EDS_OPENING = 0,
-    EDS_CLOSING = 1
+    EDS_CLOSING,
+    EDS_LOOSE
 };
 
 
@@ -18,23 +19,23 @@ class Door
         Door(RModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
         : _group(group), _doorModel(model), _doorBody(body), _state(EDS_CLOSING), _collidesWith(COL_TERRAIN), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
         {
-
         }
 
         virtual ~Door()
         {
-
         }
 
-        virtual void open() = 0;
-        virtual void close() = 0;
+        virtual void open() { _doorOpenSound->play(); }
+        virtual void close() { _doorCloseSound->play(); }
+        virtual void setLoose() = 0;
+
 
         void playOpenSound() { _doorOpenSound->play(); }
         void playCloseSound() { _doorCloseSound->play(); }
 
         PhysicalBodyConvexHull* getDoorBody() { return _doorBody; }
 
-        RModel* getDoorModel() { return _doorModel; }
+        const RModel* getDoorModel() const { return _doorModel; }
 
         char getGroup() { return _group; }
 

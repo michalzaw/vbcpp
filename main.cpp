@@ -187,14 +187,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             //bus->getEngine()->turnOn();
             bus->startEngine();
-            engineIsRunning->setText("Engine on");
+            //engineIsRunning->setText("Engine on");
             //soundComp->play();
         }
         else
         {
             //bus->getEngine()->turnOff();
             bus->stopEngine();
-            engineIsRunning->setText("Engine off");
+            //engineIsRunning->setText("Engine off");
             //soundComp->stop();
         }
     }
@@ -395,6 +395,8 @@ int main()
 
     physMgr = new PhysicsManager;
     sndMgr = new SoundManager();
+    sndMgr->setMute(true);
+
 	sceneMgr = new SceneManager(physMgr, sndMgr);
 
 
@@ -490,35 +492,35 @@ timer.start();
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
-    Label* velocity = gui->addLabel(font, "Velocity");
-    velocity->setPosition(10, gameCfg.windowHeight - 100);
-    velocity->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    velocity->scale(0.6f, 0.6f);
+//    Label* velocity = gui->addLabel(font, "Velocity");
+//    velocity->setPosition(10, gameCfg.windowHeight - 100);
+//    velocity->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    velocity->scale(0.6f, 0.6f);
+//
+//    engineIsRunning = gui->addLabel(font, "Engine off");
+//    engineIsRunning->setPosition(10, 70);
+//    engineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    engineIsRunning->scale(0.6f, 0.6f);
+//
+//    Label* gearRatio = gui->addLabel(font, "0");
+//    gearRatio->setPosition(10, 55);
+//    gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    gearRatio->scale(0.6f, 0.6f);
+//
+//    Label* labelRPM = gui->addLabel(font, "0");
+//    labelRPM->setPosition(10, 40);
+//    labelRPM->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    labelRPM->scale(0.6f, 0.6f);
+//
+//    Label* labelThrottle = gui->addLabel(font, "0");
+//    labelThrottle->setPosition(10, 25);
+//    labelThrottle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    labelThrottle->scale(0.6f, 0.6f);
 
-    engineIsRunning = gui->addLabel(font, "Engine off");
-    engineIsRunning->setPosition(10, 70);
-    engineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    engineIsRunning->scale(0.6f, 0.6f);
-
-    Label* gearRatio = gui->addLabel(font, "0");
-    gearRatio->setPosition(10, 55);
-    gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    gearRatio->scale(0.6f, 0.6f);
-
-    Label* labelRPM = gui->addLabel(font, "0");
-    labelRPM->setPosition(10, 40);
-    labelRPM->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelRPM->scale(0.6f, 0.6f);
-
-    Label* labelThrottle = gui->addLabel(font, "0");
-    labelThrottle->setPosition(10, 25);
-    labelThrottle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelThrottle->scale(0.6f, 0.6f);
-
-    Label* labelTorque = gui->addLabel(font, "0");
-    labelTorque->setPosition(10, 10);
-    labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelTorque->scale(0.6f, 0.6f);
+    //Label* labelTorque = gui->addLabel(font, "0");
+    //labelTorque->setPosition(10, 10);
+    //labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    //labelTorque->scale(0.6f, 0.6f);
 
 
     sndMgr->setActiveCamera(camFPS);
@@ -544,6 +546,7 @@ timer.start();
     int nbFrames = 0;
 
     physMgr->play();
+    sndMgr->setMute(false);
 
     // ========== MAIN LOOP START ==========
 std::cout << "TEST" << diff << std::endl;
@@ -568,8 +571,8 @@ std::cout << "TEST" << diff << std::endl;
 
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
-//			win->setWindowTitle(newWindowTitle);
-			label->setText(newWindowTitle);
+			win->setWindowTitle(newWindowTitle);
+			//label->setText(newWindowTitle);
 
             nbFrames = 0;
             lastFPSupdate += 1.0f;
@@ -596,29 +599,29 @@ std::cout << "TEST" << diff << std::endl;
 
         sndMgr->update();
 
-        stream.str(std::string());
-        stream << bus->getGearbox()->currentRatio();
-        std::string gearRatioString("Gear ratio: ");
-        gearRatioString += stream.str();
-        gearRatio->setText(gearRatioString);
+        //stream.str(std::string());
+        //stream << bus->getGearbox()->currentRatio();
+        //std::string gearRatioString("Gear ratio: ");
+        //gearRatioString += stream.str();
+        //gearRatio->setText(gearRatioString);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getCurrentRPM();
-        std::string stringRPM("RPM: ");
-        stringRPM += stream.str();
-        labelRPM->setText(stringRPM);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getCurrentRPM();
+        //std::string stringRPM("RPM: ");
+        //stringRPM += stream.str();
+        //labelRPM->setText(stringRPM);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getThrottle();
-        std::string stringThrottle("Throttle: ");
-        stringThrottle += stream.str();
-        labelThrottle->setText(stringThrottle);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getThrottle();
+        //std::string stringThrottle("Throttle: ");
+        //stringThrottle += stream.str();
+        //labelThrottle->setText(stringThrottle);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getCurrentTorque();
-        std::string stringTorque("Torque: ");
-        stringTorque += stream.str();
-        labelTorque->setText(stringTorque);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getCurrentTorque();
+        //std::string stringTorque("Torque: ");
+        //stringTorque += stream.str();
+        //labelTorque->setText(stringTorque);
 
         //velocity->setText(toString(bus->getModule(0).rayCastVehicle->getRayCastVehicle()->getCurrentSpeedKmHour()));
 
@@ -626,7 +629,7 @@ std::cout << "TEST" << diff << std::endl;
         renderer->renderAll();
 
         // Render GUI
-        renderer->renderGUI(gui->getGUIRenderList());
+        //renderer->renderGUI(gui->getGUIRenderList());
 
         // Swap buffers and poll events
         win->swapBuffers();
