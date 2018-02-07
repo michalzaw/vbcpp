@@ -1,4 +1,4 @@
-#include "Bus.h"
+#include "BusConstraint.h"
 
 // XML reader
 #include "../Utils/tinyxml2.h"
@@ -15,7 +15,7 @@ using namespace tinyxml2;
 
 #include "../Utils/Helpers.hpp"
 
-Bus::Bus(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
+BusConstraint::BusConstraint(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
 : _sceneObject(0), _chasisBody(0), _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr),
 _maxSteerAngle(0.55f), _steerStep(0.3f),
 _brake(false), _accelerate(false), _handbrake(true), _idle(true),
@@ -29,7 +29,7 @@ _collidesWith(COL_TERRAIN | COL_ENV)
     loadXMLdata(filename);
 }
 
-Bus::~Bus()
+BusConstraint::~BusConstraint()
 {
     std::cout << "Bus Destruktor" << std::endl;
 
@@ -56,7 +56,7 @@ Bus::~Bus()
 }
 
 
-void Bus::loadXMLdata(std::string busname)
+void BusConstraint::loadXMLdata(std::string busname)
 {
     std::string filename = "Buses/" + busname + "/config.xml";
 
@@ -194,6 +194,7 @@ void Bus::loadXMLdata(std::string busname)
             PhysicalBodyCylinder* wheelCyl = _pMgr->createPhysicalBodyCylinder(btVector3(width, radius, radius), mass, X_AXIS, COL_WHEEL, collidesWith);
             wheelCyl->getRigidBody()->setFriction(10.0f);
             wheelCyl->getRigidBody()->setRestitution(0.1f);
+            //wheelCyl->getRigidBody()->setFriction(1.0f);
             wheelObj->addComponent(wheelCyl);
 
             //ConstraintHinge2* hinge1 = _pMgr->createConstraintHinge2(_chasisBody, wheelCyl, btWheelPos, btVector3(0,1,0), btVector3(1,0,0));
@@ -580,13 +581,13 @@ void Bus::loadXMLdata(std::string busname)
 
 }
 
-glm::vec3 Bus::getDriverPosition()
+glm::vec3 BusConstraint::getDriverPosition()
 {
     return _driverPosition;
 }
 
 
-void Bus::setIsEnableLights(bool is)
+void BusConstraint::setIsEnableLights(bool is)
 {
     if (_lights.size() > 0)
     {
@@ -599,13 +600,13 @@ void Bus::setIsEnableLights(bool is)
 }
 
 
-bool Bus::isEnableLights()
+bool BusConstraint::isEnableLights()
 {
     return _isEnableLights;
 }
 
 
-void Bus::setIsEnableHeadlights(bool is)
+void BusConstraint::setIsEnableHeadlights(bool is)
 {
     if (_headlights.size() > 0)
     {
@@ -619,13 +620,13 @@ void Bus::setIsEnableHeadlights(bool is)
 }
 
 
-bool Bus::isEnableHeadlights()
+bool BusConstraint::isEnableHeadlights()
 {
     return _isEnableHeadlights;
 }
 
 
-void Bus::turnLeft(float dt)
+void BusConstraint::turnLeft(float dt)
 {
     WheelList::iterator it = _wheels.begin();
 
@@ -656,7 +657,7 @@ void Bus::turnLeft(float dt)
 }
 
 
-void Bus::turnRight(float dt)
+void BusConstraint::turnRight(float dt)
 {
     WheelList::iterator it = _wheels.begin();
 
@@ -685,7 +686,7 @@ void Bus::turnRight(float dt)
 }
 
 
-void Bus::centerSteringWheel(float dt)
+void BusConstraint::centerSteringWheel(float dt)
 {
     float deadZone = 0.0025f;
 
@@ -727,7 +728,7 @@ void Bus::centerSteringWheel(float dt)
 }
 
 
-void Bus::accelerate()
+void BusConstraint::accelerate()
 {
     _accelerate = true;
     _brake = false;
@@ -736,7 +737,7 @@ void Bus::accelerate()
 }
 
 
-void Bus::brakeOn()
+void BusConstraint::brakeOn()
 {
     _accelerate = false;
     _brake = true;
@@ -745,18 +746,18 @@ void Bus::brakeOn()
 }
 
 
-void Bus::brakeOff()
+void BusConstraint::brakeOff()
 {
     _brake = false;
 }
 
 
-void Bus::toggleHandbrake()
+void BusConstraint::toggleHandbrake()
 {
     _handbrake = !_handbrake;
 }
 
-void Bus::startEngine()
+void BusConstraint::startEngine()
 {
     if (_engine)
     {
@@ -769,7 +770,7 @@ void Bus::startEngine()
 }
 
 
-void Bus::stopEngine()
+void BusConstraint::stopEngine()
 {
     if (_engine)
     {
@@ -782,7 +783,7 @@ void Bus::stopEngine()
 }
 
 
-void Bus::idle()
+void BusConstraint::idle()
 {
     _accelerate = false;
     _brake = false;
@@ -792,7 +793,7 @@ void Bus::idle()
 }
 
 
-Door* Bus::getDoor(unsigned char doorIndex)
+Door* BusConstraint::getDoor(unsigned char doorIndex)
 {
     if (doorIndex <= _doors.size()-1)
         return _doors[doorIndex];
@@ -801,7 +802,7 @@ Door* Bus::getDoor(unsigned char doorIndex)
 }
 
 
-void Bus::doorOpenClose(char doorGroup)
+void BusConstraint::doorOpenClose(char doorGroup)
 {
     for (unsigned char i = 0; i < _doors.size(); i++)
     //if (doorIndex <= _doors.size()-1)
@@ -828,7 +829,7 @@ void Bus::doorOpenClose(char doorGroup)
 }
 
 
-void Bus::updatePhysics(float dt)
+void BusConstraint::update(float dt)
 {
     _engine->update(dt);
 

@@ -9,6 +9,8 @@
 #include "PhysicalBodyStaticPlane.hpp"
 #include "PhysicalBodyConvexHull.hpp"
 #include "PhysicalBodyBvtTriangleMesh.hpp"
+#include "PhysicalBodyRaycastVehicle.h"
+#include "PhysicalBodyWheel.h"
 
 
 #include "ConstraintHinge.hpp"
@@ -51,6 +53,9 @@ class PhysicsManager : virtual public RefCounter
         PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RModel* model, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
+        PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
+        PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
+        PhysicalBodyWheel*              createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel);
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);

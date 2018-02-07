@@ -32,15 +32,15 @@ class SoundComponent : virtual public Component
 {
     public:
         SoundComponent(std::string file, SoundType type, bool looping = false)
-        : Component(CT_SOUND), _source(0), _buffer(0), _looping(looping), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
+        : Component(CT_SOUND), _source(0), _buffer(0), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
         {
         std::cout << "Engine sound: " << file << std::endl;
             alGenSources( 1, &_source );
 
             _buffer =alutCreateBufferFromFile (file.c_str());
 
-            std::cout << "??? SoundComponend - Constructor" << std::endl;
-            std::cout << "Buffer" << _buffer << std::endl;
+            //std::cout << "??? SoundComponend - Constructor" << std::endl;
+            //std::cout << "Buffer" << _buffer << std::endl;
 
             if (_buffer == AL_NONE)
             {
@@ -118,18 +118,16 @@ class SoundComponent : virtual public Component
                 return _soundPosition;
         }
 
-
-        float getPlayDistance()
+        const float getPlayDistance() const
         {
             return _playDistance;
         }
 
-        void setPlayDistance(float distance)
+        void setPlayDistance(const float distance)
         {
             _playDistance = distance;
             alSourcei( _source, AL_MAX_DISTANCE, _playDistance);
         }
-
 
         void play()
         {
@@ -137,18 +135,14 @@ class SoundComponent : virtual public Component
 
             alGetSourcei(_source, AL_SOURCE_STATE, &state);
 
-            //std::cout << _source << "PLAY" << std::endl;
-
-            //_play = true;
-
-            if (state != AL_PLAYING)
+            if (state != AL_PLAYING && !_mute)
                 alSourcePlay(_source);
         }
 
         void stop()
         {
-            alSourceStop(_source);
-            //_play = false;
+            if (!_mute)
+                alSourceStop(_source);
         }
 
 
@@ -167,10 +161,16 @@ class SoundComponent : virtual public Component
             alSourcef( _source, AL_PITCH, pitch );
         }
 
+        void setMute(const bool mute)
+        {
+            _mute = mute;
+        }
+
     protected:
         ALuint  _source;
         ALuint  _buffer;
         bool    _looping;
+        bool    _mute;
 
         bool    _play;
 

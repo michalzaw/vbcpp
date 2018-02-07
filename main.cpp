@@ -29,7 +29,8 @@
 #include "Utils/Timer.h"
 #include "Utils/Helpers.hpp"
 
-#include "Bus/Bus.h"
+#include "Bus/BusConstraint.h"
+#include "Bus/BusRaycast.h"
 
 // XML reader
 #include "Utils/tinyxml2.h"
@@ -152,6 +153,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
         else
         {
+            //bus->getSceneObject()->addChild(camFPS->getSceneObject());
             bus->getSceneObject()->addChild(camFPS->getSceneObject());
             camFPS->getSceneObject()->setPosition(bus->getDriverPosition());
             camFPS->getSceneObject()->setRotation(0,0,0);
@@ -171,14 +173,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             //bus->getEngine()->turnOn();
             bus->startEngine();
-            engineIsRunning->setText("Engine on");
+            //engineIsRunning->setText("Engine on");
             //soundComp->play();
         }
         else
         {
             //bus->getEngine()->turnOff();
             bus->stopEngine();
-            engineIsRunning->setText("Engine off");
+            //engineIsRunning->setText("Engine off");
             //soundComp->stop();
         }
     }
@@ -218,6 +220,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         bus->toggleHandbrake();
     }
+static float a = 0.6f;
+    /*if (key == GLFW_KEY_M && action == GLFW_PRESS)
+    {
+        a -= 0.03f;
+        btWheelInfo& wheel = busRaycast->_bulletVehicle->getWheelInfo(1);
+        wheel.m_suspensionRestLength1 = a;
+        btWheelInfo& wheel2 = busRaycast->_bulletVehicle->getWheelInfo(3);
+        wheel2.m_suspensionRestLength1 = a;
+    }
+
+    if (key == GLFW_KEY_N && action == GLFW_PRESS)
+    {
+        a += 0.03f;
+        btWheelInfo& wheel = busRaycast->_bulletVehicle->getWheelInfo(1);
+        wheel.m_suspensionRestLength1 = a;
+        btWheelInfo& wheel2 = busRaycast->_bulletVehicle->getWheelInfo(3);
+        wheel2.m_suspensionRestLength1 = a;
+    }*/
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -263,21 +283,33 @@ void readInput(GLFWwindow* window, double deltaTime)
     if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
     {
         bus->accelerate();
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->applyEngineForce(1000, 2);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->applyEngineForce(1000, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_RELEASE)
     {
         bus->idle();
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->applyEngineForce(0, 2);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->applyEngineForce(0, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
     {
         bus->brakeOn();
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(40, 0);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(40, 1);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(20, 2);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(20, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
     {
         bus->brakeOff();
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(0, 0);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(0, 1);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(0, 2);
+        //busRaycast->getModule(0).rayCastVehicle->getRayCastVehicle()->setBrake(0, 3);
     }
 
     if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_RELEASE && glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_RELEASE)
@@ -312,6 +344,8 @@ int main()
 
     physMgr = new PhysicsManager;
     sndMgr = new SoundManager();
+    sndMgr->setMute(true);
+
 	sceneMgr = new SceneManager(physMgr, sndMgr);
 
 
@@ -325,7 +359,11 @@ int main()
 
 Timer timer;
 timer.start();
-    bus = new Bus(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
+    //bus = new BusConstraint(sceneMgr, physMgr, sndMgr, gameCfg.busModel);
+    if (GameConfig::getInstance().busModel == "h9_raycast")
+        bus = new BusRaycast(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
+    else
+        bus = new BusConstraint(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
     //bus->getSceneObject()->setPosition(0,5,-150);
     //bus->getSceneObject()->setRotation(0,degToRad(-90),0);
 
@@ -381,6 +419,8 @@ timer.start();
     spot->setRotation(glm::vec3(0.0f, 0.0f, degToRad(-45.0f)));
     spot->setIsActive(false);
 
+//    busRaycast = new BusRaycast(sceneMgr, physMgr, sndMgr, "");
+
 
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
@@ -401,31 +441,35 @@ timer.start();
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
+//    Label* velocity = gui->addLabel(font, "Velocity");
+//    velocity->setPosition(10, gameCfg.windowHeight - 100);
+//    velocity->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    velocity->scale(0.6f, 0.6f);
+//
+//    engineIsRunning = gui->addLabel(font, "Engine off");
+//    engineIsRunning->setPosition(10, 70);
+//    engineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    engineIsRunning->scale(0.6f, 0.6f);
+//
+//    Label* gearRatio = gui->addLabel(font, "0");
+//    gearRatio->setPosition(10, 55);
+//    gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    gearRatio->scale(0.6f, 0.6f);
+//
+//    Label* labelRPM = gui->addLabel(font, "0");
+//    labelRPM->setPosition(10, 40);
+//    labelRPM->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    labelRPM->scale(0.6f, 0.6f);
+//
+//    Label* labelThrottle = gui->addLabel(font, "0");
+//    labelThrottle->setPosition(10, 25);
+//    labelThrottle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+//    labelThrottle->scale(0.6f, 0.6f);
 
-    engineIsRunning = gui->addLabel(font, "Engine off");
-    engineIsRunning->setPosition(10, 70);
-    engineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    engineIsRunning->scale(0.6f, 0.6f);
-
-    Label* gearRatio = gui->addLabel(font, "0");
-    gearRatio->setPosition(10, 55);
-    gearRatio->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    gearRatio->scale(0.6f, 0.6f);
-
-    Label* labelRPM = gui->addLabel(font, "0");
-    labelRPM->setPosition(10, 40);
-    labelRPM->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelRPM->scale(0.6f, 0.6f);
-
-    Label* labelThrottle = gui->addLabel(font, "0");
-    labelThrottle->setPosition(10, 25);
-    labelThrottle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelThrottle->scale(0.6f, 0.6f);
-
-    Label* labelTorque = gui->addLabel(font, "0");
-    labelTorque->setPosition(10, 10);
-    labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelTorque->scale(0.6f, 0.6f);
+    //Label* labelTorque = gui->addLabel(font, "0");
+    //labelTorque->setPosition(10, 10);
+    //labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    //labelTorque->scale(0.6f, 0.6f);
 
 
     sndMgr->setActiveCamera(camFPS);
@@ -451,6 +495,7 @@ timer.start();
     int nbFrames = 0;
 
     physMgr->play();
+    sndMgr->setMute(false);
 
     // ========== MAIN LOOP START ==========
 std::cout << "TEST" << diff << std::endl;
@@ -475,8 +520,8 @@ std::cout << "TEST" << diff << std::endl;
 
 			// Append the FPS value to the window title details
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
-//			win->setWindowTitle(newWindowTitle);
-			label->setText(newWindowTitle);
+			win->setWindowTitle(newWindowTitle);
+			//label->setText(newWindowTitle);
 
             nbFrames = 0;
             lastFPSupdate += 1.0f;
@@ -495,7 +540,7 @@ std::cout << "TEST" << diff << std::endl;
         while ( accumulator > TIME_STEP )
         {
             physMgr->simulate(TIME_STEP);
-            bus->updatePhysics(TIME_STEP);
+            bus->update(TIME_STEP);
             GraphicsManager::getInstance().update(TIME_STEP);
 
             accumulator -= TIME_STEP;
@@ -503,35 +548,37 @@ std::cout << "TEST" << diff << std::endl;
 
         sndMgr->update();
 
-        stream.str(std::string());
-        stream << bus->getGearbox()->currentRatio();
-        std::string gearRatioString("Gear ratio: ");
-        gearRatioString += stream.str();
-        gearRatio->setText(gearRatioString);
+        //stream.str(std::string());
+        //stream << bus->getGearbox()->currentRatio();
+        //std::string gearRatioString("Gear ratio: ");
+        //gearRatioString += stream.str();
+        //gearRatio->setText(gearRatioString);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getCurrentRPM();
-        std::string stringRPM("RPM: ");
-        stringRPM += stream.str();
-        labelRPM->setText(stringRPM);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getCurrentRPM();
+        //std::string stringRPM("RPM: ");
+        //stringRPM += stream.str();
+        //labelRPM->setText(stringRPM);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getThrottle();
-        std::string stringThrottle("Throttle: ");
-        stringThrottle += stream.str();
-        labelThrottle->setText(stringThrottle);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getThrottle();
+        //std::string stringThrottle("Throttle: ");
+        //stringThrottle += stream.str();
+        //labelThrottle->setText(stringThrottle);
 
-        stream.str(std::string());
-        stream << bus->getEngine()->getCurrentTorque();
-        std::string stringTorque("Torque: ");
-        stringTorque += stream.str();
-        labelTorque->setText(stringTorque);
+        //stream.str(std::string());
+        //stream << bus->getEngine()->getCurrentTorque();
+        //std::string stringTorque("Torque: ");
+        //stringTorque += stream.str();
+        //labelTorque->setText(stringTorque);
+
+        //velocity->setText(toString(bus->getModule(0).rayCastVehicle->getRayCastVehicle()->getCurrentSpeedKmHour()));
 
         // Render the scene
         renderer->renderAll();
 
         // Render GUI
-        renderer->renderGUI(gui->getGUIRenderList());
+        //renderer->renderGUI(gui->getGUIRenderList());
 
         // Swap buffers and poll events
         win->swapBuffers();

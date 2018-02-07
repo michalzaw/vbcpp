@@ -188,6 +188,7 @@ void SceneManager::loadScene(std::string filename)
     PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
+    //terrainMesh->getRigidBody()->setFriction(1.5f);
     //terrainObject->addComponent(terrainObj);
     terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
 
@@ -273,8 +274,9 @@ void SceneManager::loadScene(std::string filename)
         //roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
         PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, COL_TERRAIN, collidesWith);
-        roadMesh->setRestitution(0.9f);
-        roadMesh->getRigidBody()->setFriction(1.0f);
+        terrainMesh->setRestitution(0.9f);
+        terrainMesh->getRigidBody()->setFriction(1.0f);
+        //terrainMesh->getRigidBody()->setFriction(1.5f);
         roadSceneObject->addComponent(roadMesh);
 
         roadElement = roadElement->NextSiblingElement("Road");

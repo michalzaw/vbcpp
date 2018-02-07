@@ -58,7 +58,8 @@ PhysicsManager::~PhysicsManager()
         PhysicalBody* body = _physicalBodies[j];
 
         //removePhysicalBody(body);
-        _dynamicsWorld->removeRigidBody(body->getRigidBody());
+        if (body->getRigidBody() != NULL)
+            _dynamicsWorld->removeRigidBody(body->getRigidBody());
 
         delete body;
 	}
@@ -225,6 +226,40 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(R
 btCompoundShape* PhysicsManager::createCompoundShape()
 {
     btCompoundShape* c = new btCompoundShape();
+}
+
+
+PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyRaycastVehicle* b = new PhysicalBodyRaycastVehicle(vertices, vertexCount, mass, this);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyRaycastVehicle* b = new PhysicalBodyRaycastVehicle(vertices, vertexCount, mass, this);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
+PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel)
+{
+    int index = vehicle->addWheel(connectionPoint, suspensionRestLength, radius, isFrontWheel);
+    PhysicalBodyWheel* b = new PhysicalBodyWheel(vehicle->getRayCastVehicle(), index);
+
+    _physicalBodies.push_back(b);
+
+    return b;
 }
 
 

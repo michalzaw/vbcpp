@@ -18,12 +18,10 @@ class DoorSE : virtual public Door
         : Door(model, body, openDoor, closeDoor, group),
         _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2), _rotationDir(dir)
         {
-            close();
         }
 
         virtual ~DoorSE()
         {
-
         }
 
         void open()
@@ -44,6 +42,11 @@ class DoorSE : virtual public Door
                 _constraint1->getBulletConstraint()->enableAngularMotor(true, -1.7f, 2.15f);
 
             _state = EDS_CLOSING;
+        }
+
+        void setLoose() override
+        {
+
         }
 
         RModel* getArmModel() { return _armModel; }

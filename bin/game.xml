@@ -7,12 +7,10 @@
 
 	<Map name="Demo" />
 	
-	<Bus model="h9" />
+	<Bus model="h9_raycast" />
 	
 	<Configuration>
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
     </Configuration>
-
-
 </Game>
