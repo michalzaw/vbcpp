@@ -1,20 +1,6 @@
 #include "Frustum.h"
 
 
-template <typename destT, typename srcT>
-destT &absolute_cast(srcT &v)
-{
-	return reinterpret_cast<destT&>(v);
-}
-template <typename destT, typename srcT>
-const destT &absolute_cast(const srcT &v)
-{
-	return reinterpret_cast<const destT&>(v);
-}
-
-#define FLOAT_ALMOST_ZERO(F) ((absolute_cast<unsigned>(F) & 0x7f800000L) == 0)
-
-
 Frustum::Frustum()
 {
     _isCalculatedPoints = false;
@@ -28,8 +14,8 @@ Frustum::Frustum(glm::mat4 matrix)
     set(matrix);
 }
 
-
-/*glm::vec3 Frustum::intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3)
+#ifdef INTERSECT_PLANES_FUNCTION_1
+glm::vec3 Frustum::intersectPlanes(const Plane& p1, const Plane& p2, const Plane& p3)
 {
     float w = p1.a * p2.b * p3.c + p2.a * p3.b * p1.c + p3.a * p1.b * p2.c -
               p3.a * p2.b * p1.c - p1.a * p3.b * p2.c - p2.a * p1.b * p3.c;
@@ -44,11 +30,13 @@ Frustum::Frustum(glm::mat4 matrix)
                p3.a * p2.b * (-p1.d) - p1.a * p3.b * (-p2.d) - p2.a * p1.b * (-p3.d);
 
     return glm::vec3(wx / w, wy / w, wz / w);
-}*/
+}
+#endif // INTERSECT_PLANES_FUNCTION_1
 
 
 // Faster
 // http://asawicki.info/productions/artykuly/Zaawansowana_kamera_3D.php5
+#ifdef INTERSECT_PLANES_FUNCTION_2
 glm::vec3 Frustum::intersectPlanes(const Plane& P1, const Plane& P2, const Plane& P3)
 {
     float fDet;
@@ -93,6 +81,7 @@ glm::vec3 Frustum::intersectPlanes(const Plane& P1, const Plane& P2, const Plane
     return out;
    //return true;
 }
+#endif // INTERSECT_PLANES_FUNCTION_2
 
 
 void Frustum::normalizePlanes()
@@ -136,6 +125,31 @@ void Frustum::set(glm::mat4 matrix)
     normalizePlanes();
 }
 
+void Frustum::setPoints(CameraStatic* camera)
+{
+    _isCalculatedPoints = true;
+
+    float ratio = (float)camera->getWindowWidth() / (float)camera->getWindowHeight();
+    float heightNear = 2 * tan(camera->getViewAngle() / 2.0f) * camera->getNearValue();
+    float widthNear = heightNear * ratio;
+
+    float heightFar =  2 * tan(camera->getViewAngle() / 2.0f) * camera->getFarValue();
+    float widthFar = heightFar * ratio;
+
+    glm::vec3 fc = camera->getPosition() + camera->getDirection() * camera->getFarValue();
+
+    _points[FP_FAR_LEFT_TOP] = fc + (camera->getUpVector() * heightFar / 2.0f) - (camera->getRightVector() * widthFar / 2.0f);
+    _points[FP_FAR_RIGHT_TOP] = fc + (camera->getUpVector() * heightFar / 2.0f) + (camera->getRightVector() * widthFar / 2.0f);
+    _points[FP_FAR_LEFT_BOTTOM] = fc - (camera->getUpVector() * heightFar / 2.0f) - (camera->getRightVector() * widthFar / 2.0f);
+    _points[FP_FAR_RIGHT_BOTTOM] = fc - (camera->getUpVector() * heightFar / 2.0f) + (camera->getRightVector() * widthFar / 2.0f);
+
+    glm::vec3 nc = camera->getPosition() + camera->getDirection() * camera->getNearValue();
+
+    _points[FP_NEAR_LEFT_TOP] = nc + (camera->getUpVector() * heightNear / 2.0f) - (camera->getRightVector() * widthNear / 2.0f);
+    _points[FP_NEAR_RIGHT_TOP] = nc + (camera->getUpVector() * heightNear / 2.0f) + (camera->getRightVector() * widthNear / 2.0f);
+    _points[FP_NEAR_LEFT_BOTTOM] = nc - (camera->getUpVector() * heightNear / 2.0f) - (camera->getRightVector() * widthNear / 2.0f);
+    _points[FP_NEAR_RIGHT_BOTTOM] = nc - (camera->getUpVector() * heightNear / 2.0f) + (camera->getRightVector() * widthNear / 2.0f);
+}
 
 const Plane& Frustum::getPlane(FrustumPlane plane)
 {

@@ -102,13 +102,25 @@ void Renderer::renderAll()
         Light* light = (*i);
         if (light->isShadowMapping())
         {
-            float cascadeStarts[3] = {currentCamera->getNearValue(), 25.0f, 100.0f};
-            float cascadeEnds[3] = {25.0f, 100.0f, 500.0f};//currentCamera->getFarValue()};
+            //float cascadeStarts[3] = {currentCamera->getNearValue(), 25.0f, 100.0f};
+            //float cascadeEnds[3] = {25.0f, 100.0f, 500.0f};//currentCamera->getFarValue()};
+
+            /* ======================================================================================================== */
+
+
+                float cascadeEnd[4] = {currentCamera->getNearValue(), 25.0f, 100.0f, 500.0f };
+
+
+            /* ======================================================================================================== */
 
             for (int i = 0; i < 3; ++i)
             {
                 Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
-                                                 cascadeStarts[i], cascadeEnds[i]) * currentCamera->getViewMatrix());
+                                                 cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
+
+                //currentCamera->setNearValue(cascadeStarts[i]);
+                //currentCamera->setFarValue(cascadeEnds[i]);
+                //frustum.setPoints(currentCamera);
 
                 frustum.applyTransform(light->getCameraForShadowMap(i)->getViewMatrix());
                 AABB* frustumAabb = frustum.getAABB();
@@ -119,8 +131,8 @@ void Renderer::renderAll()
                 light->getCameraForShadowMap(i)->setRight(max.x);
                 light->getCameraForShadowMap(i)->setBottom(min.y);
                 light->getCameraForShadowMap(i)->setTop(max.y);
-                light->getCameraForShadowMap(i)->setNearValue(-256.0f);
-                light->getCameraForShadowMap(i)->setFarValue(256.0f);
+                light->getCameraForShadowMap(i)->setNearValue(-max.z - 100.0f);
+                light->getCameraForShadowMap(i)->setFarValue(-min.z);
 
 
                 renderData->camera = light->getCameraForShadowMap(i);
@@ -128,6 +140,8 @@ void Renderer::renderAll()
                 light->getShadowMap(i)->bind();
                 renderDepth(renderData);
             }
+            //currentCamera->setNearValue(cascadeStarts[0]);
+            //currentCamera->setFarValue(1000.0f);
         }
     }
 
@@ -154,8 +168,9 @@ void Renderer::renderDepth(RenderData* renderData)
         Mesh* mesh = i->getMesh();
         RShader* shader;
 
-        if (mesh->material.transparency != 0.0f || mesh->material.shader == TRANSPARENCY_MATERIAL)
-            break;
+        if (mesh->material.transparency != 0.0f || mesh->material.shader == TRANSPARENCY_MATERIAL ||
+            mesh->material.shader == SKY_MATERIAL)
+            continue;
 
         bool isAlphaTest = mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == TRANSPARENCY_MATERIAL || mesh->material.shader == TREE_MATERIAL;
         if (isAlphaTest)

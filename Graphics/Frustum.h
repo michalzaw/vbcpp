@@ -6,6 +6,27 @@
 
 #include "AABB.h"
 
+#include "CameraStatic.hpp"
+
+
+//#define INTERSECT_PLANES_FUNCTION_1
+#define INTERSECT_PLANES_FUNCTION_2
+
+#define FLOAT_ALMOST_ZERO(F) ((absolute_cast<unsigned>(F) & 0x7f800000L) == 0)
+
+
+template <typename destT, typename srcT>
+destT &absolute_cast(srcT &v)
+{
+	return reinterpret_cast<destT&>(v);
+}
+
+template <typename destT, typename srcT>
+const destT &absolute_cast(const srcT &v)
+{
+	return reinterpret_cast<const destT&>(v);
+}
+
 
 struct Plane
 {
@@ -74,6 +95,7 @@ class Frustum
         Frustum(glm::mat4 matrix);
 
         void set(glm::mat4 matrix);
+        void setPoints(CameraStatic* camera);
 
         const Plane& getPlane(FrustumPlane plane);
         glm::vec3* const getPoints();

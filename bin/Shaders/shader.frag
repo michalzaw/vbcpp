@@ -180,8 +180,8 @@ void main()
 		float Depth = texture(ShadowMap[cascadeIndex], Coords.xy).r;
 		float CurrentDepth = Coords.z;
 
-		//float Ratio = CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;
-		float Ratio = 1.0f;
+		float Ratio = CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;
+		/*float Ratio = 1.0f;
 		//vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
 		vec2 TexelSize = 1.0f / vec2(size[cascadeIndex], size[cascadeIndex]) / 2.0f;
 		for (int x = -2; x <= 2; ++x)
@@ -193,7 +193,7 @@ void main()
 			}
 		}
 
-		Ratio /= 25.0f;
+		Ratio /= 25.0f;*/
 	
 		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction, Ratio);
 	}
