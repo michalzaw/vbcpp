@@ -44,7 +44,6 @@ bool isAABBIntersectFrustum(Frustum& frustum, AABB& aabb)
 
 bool isAABBInAABB(AABB& aabb1, AABB& aabb2)
 {
-    std::cout << "Aabb\n";
     if (aabb2.getMinCoords().x < aabb1.getMinCoords().x ||
         aabb2.getMinCoords().y < aabb1.getMinCoords().y ||
         aabb2.getMinCoords().z < aabb1.getMinCoords().z ||
@@ -56,6 +55,17 @@ bool isAABBInAABB(AABB& aabb1, AABB& aabb2)
     }
 
     return true;
+}
+
+
+bool isAABBIntersectAABB(AABB& aabb1, AABB& aabb2)
+{
+    return (aabb1.getMinCoords().x <= aabb2.getMaxCoords().x &&
+            aabb1.getMaxCoords().x >= aabb2.getMinCoords().x &&
+            aabb1.getMinCoords().y <= aabb2.getMaxCoords().y &&
+            aabb1.getMaxCoords().y >= aabb2.getMinCoords().y &&
+            aabb1.getMinCoords().z <= aabb2.getMaxCoords().z &&
+            aabb1.getMaxCoords().z >= aabb2.getMinCoords().z);
 }
 
 

@@ -102,16 +102,7 @@ void Renderer::renderAll()
         Light* light = (*i);
         if (light->isShadowMapping())
         {
-            //float cascadeStarts[3] = {currentCamera->getNearValue(), 25.0f, 100.0f};
-            //float cascadeEnds[3] = {25.0f, 100.0f, 500.0f};//currentCamera->getFarValue()};
-
-            /* ======================================================================================================== */
-
-
-                float cascadeEnd[4] = {currentCamera->getNearValue(), 25.0f, 100.0f, 500.0f };
-
-
-            /* ======================================================================================================== */
+            float cascadeEnd[4] = {currentCamera->getNearValue(), 25.0f, 100.0f, 500.0f };
 
             for (int i = 0; i < 3; ++i)
             {
@@ -135,17 +126,54 @@ void Renderer::renderAll()
                 light->getCameraForShadowMap(i)->setFarValue(-min.z);
 
 
-                renderData->camera = light->getCameraForShadowMap(i);
+                /* =========================================================================== */
+
+
+                glm::mat4 lightViewMatrix = light->getCameraForShadowMap(i)->getViewMatrix();
+                // transpose(M) == inverse(M), because light view matrix is orthogonal
+                glm::mat4 inverseLightViewMatrix = glm::transpose(lightViewMatrix);
+
+                glm::vec3 aabbVertices[] = {
+                    glm::vec3(min.x, min.y, min.z),
+                    glm::vec3(min.x, min.y, max.z),
+                    glm::vec3(min.x, max.y, min.z),
+                    glm::vec3(min.x, max.y, max.z),
+                    glm::vec3(max.x, min.y, min.z),
+                    glm::vec3(max.x, min.y, max.z),
+                    glm::vec3(max.x, max.y, min.z),
+                    glm::vec3(max.x, max.y, max.z)
+                };
+
+                glm::vec3 min2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+                glm::vec3 max2(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+
+                for (int j = 0; j < 8; ++j)
+                {
+                    glm::vec4 v = inverseLightViewMatrix * glm::vec4(aabbVertices[j].x, aabbVertices[j].y, aabbVertices[j].z, 1.0f);
+
+                    min2.x = std::min(min2.x, v.x);
+                    min2.y = std::min(min2.y, v.y);
+                    min2.z = std::min(min2.z, v.z);
+                    max2.x = std::max(max2.x, v.x);
+                    max2.y = std::max(max2.y, v.y);
+                    max2.z = std::max(max2.z, v.z);
+                }
+
+
+                /* =========================================================================== */
 
                 light->getShadowMap(i)->bind();
-                renderDepth(renderData);
+
+                AABB aabb(min2, max2);
+                RenderData* renderDataForShadowMap = GraphicsManager::getInstance().getRenderData(aabb, light->getCameraForShadowMap(i));
+                renderDepth(renderDataForShadowMap);
+
+                delete renderDataForShadowMap;
             }
             //currentCamera->setNearValue(cascadeStarts[0]);
             //currentCamera->setFarValue(1000.0f);
         }
     }
-
-    renderData->camera = currentCamera;
 
     OGLDriver::getInstance().getDefaultFramebuffer()->bind();
     renderScene(renderData);

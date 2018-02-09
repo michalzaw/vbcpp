@@ -22,8 +22,8 @@
 
 #include <memory>
 
-#define ALL_OBJECTS
-//#define FRUSTUM_CULLING
+//#define ALL_OBJECTS
+#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
 class GraphicsManager
@@ -85,6 +85,7 @@ class GraphicsManager
 
 
         RenderData* getRenderData();
+        RenderData* getRenderData(AABB& aabb, CameraStatic* camera);
 };
 
 
