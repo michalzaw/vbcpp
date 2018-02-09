@@ -106,6 +106,8 @@ void Renderer::renderAll()
 
             for (int i = 0; i < 3; ++i)
             {
+                CameraStatic* cameraForShadowMap = light->getCameraForShadowMap(i);
+
                 Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
                                                  cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
 
@@ -113,59 +115,19 @@ void Renderer::renderAll()
                 //currentCamera->setFarValue(cascadeEnds[i]);
                 //frustum.setPoints(currentCamera);
 
-                frustum.applyTransform(light->getCameraForShadowMap(i)->getViewMatrix());
+                frustum.applyTransform(cameraForShadowMap->getViewMatrix());
                 AABB* frustumAabb = frustum.getAABB();
                 glm::vec3 min = frustumAabb->getMinCoords();
                 glm::vec3 max = frustumAabb->getMaxCoords();
 
-                light->getCameraForShadowMap(i)->setLeft(min.x);
-                light->getCameraForShadowMap(i)->setRight(max.x);
-                light->getCameraForShadowMap(i)->setBottom(min.y);
-                light->getCameraForShadowMap(i)->setTop(max.y);
-                light->getCameraForShadowMap(i)->setNearValue(-max.z - 100.0f);
-                light->getCameraForShadowMap(i)->setFarValue(-min.z);
+                cameraForShadowMap->setOrthoProjectionParams(min.x, max.x, min.y, max.y, -max.z - 100.0f, -min.z);
 
-
-                /* =========================================================================== */
-
-
-                glm::mat4 lightViewMatrix = light->getCameraForShadowMap(i)->getViewMatrix();
-                // transpose(M) == inverse(M), because light view matrix is orthogonal
-                glm::mat4 inverseLightViewMatrix = glm::transpose(lightViewMatrix);
-
-                glm::vec3 aabbVertices[] = {
-                    glm::vec3(min.x, min.y, min.z),
-                    glm::vec3(min.x, min.y, max.z),
-                    glm::vec3(min.x, max.y, min.z),
-                    glm::vec3(min.x, max.y, max.z),
-                    glm::vec3(max.x, min.y, min.z),
-                    glm::vec3(max.x, min.y, max.z),
-                    glm::vec3(max.x, max.y, min.z),
-                    glm::vec3(max.x, max.y, max.z)
-                };
-
-                glm::vec3 min2(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-                glm::vec3 max2(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-
-                for (int j = 0; j < 8; ++j)
-                {
-                    glm::vec4 v = inverseLightViewMatrix * glm::vec4(aabbVertices[j].x, aabbVertices[j].y, aabbVertices[j].z, 1.0f);
-
-                    min2.x = std::min(min2.x, v.x);
-                    min2.y = std::min(min2.y, v.y);
-                    min2.z = std::min(min2.z, v.z);
-                    max2.x = std::max(max2.x, v.x);
-                    max2.y = std::max(max2.y, v.y);
-                    max2.z = std::max(max2.z, v.z);
-                }
-
-
-                /* =========================================================================== */
 
                 light->getShadowMap(i)->bind();
 
-                AABB aabb(min2, max2);
-                RenderData* renderDataForShadowMap = GraphicsManager::getInstance().getRenderData(aabb, light->getCameraForShadowMap(i));
+                GraphicsManager::getInstance().setCurrentCamera(cameraForShadowMap);
+                RenderData* renderDataForShadowMap = GraphicsManager::getInstance().getRenderDataForDepthRendering();
+
                 renderDepth(renderDataForShadowMap);
 
                 delete renderDataForShadowMap;
@@ -174,6 +136,8 @@ void Renderer::renderAll()
             //currentCamera->setFarValue(1000.0f);
         }
     }
+
+    GraphicsManager::getInstance().setCurrentCamera(currentCamera);
 
     OGLDriver::getInstance().getDefaultFramebuffer()->bind();
     renderScene(renderData);
@@ -196,8 +160,7 @@ void Renderer::renderDepth(RenderData* renderData)
         Mesh* mesh = i->getMesh();
         RShader* shader;
 
-        if (mesh->material.transparency != 0.0f || mesh->material.shader == TRANSPARENCY_MATERIAL ||
-            mesh->material.shader == SKY_MATERIAL)
+        if (mesh->material.shader == TRANSPARENCY_MATERIAL || mesh->material.shader == SKY_MATERIAL)
             continue;
 
         bool isAlphaTest = mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == TRANSPARENCY_MATERIAL || mesh->material.shader == TREE_MATERIAL;

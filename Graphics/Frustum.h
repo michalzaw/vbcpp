@@ -6,8 +6,6 @@
 
 #include "AABB.h"
 
-#include "CameraStatic.hpp"
-
 
 //#define INTERSECT_PLANES_FUNCTION_1
 #define INTERSECT_PLANES_FUNCTION_2
@@ -26,6 +24,9 @@ const destT &absolute_cast(const srcT &v)
 {
 	return reinterpret_cast<const destT&>(v);
 }
+
+
+class CameraStatic;
 
 
 struct Plane

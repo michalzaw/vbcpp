@@ -262,6 +262,7 @@ void CameraStatic::setFarValue(GLfloat value)
 	_farValue = value;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -270,6 +271,7 @@ void CameraStatic::setNearValue(GLfloat value)
 	_nearValue = value;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -278,6 +280,7 @@ void CameraStatic::setViewAngle(GLfloat angle)
 	_viewAngle = angle;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -287,6 +290,7 @@ void CameraStatic::setWindowDimensions(GLint width, GLint height)
 	_windowHeight = height;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -295,6 +299,7 @@ void CameraStatic::setLeft(GLfloat left)
     _left = left;
 
 	_projectionMatrixIs = false;
+	_aabbIs = false;
 }
 
 
@@ -303,6 +308,7 @@ void CameraStatic::setRight(GLfloat right)
     _right = right;
 
 	_projectionMatrixIs = false;
+	_aabbIs = false;
 }
 
 
@@ -311,6 +317,7 @@ void CameraStatic::setBottom(GLfloat bottom)
     _bottom = bottom;
 
 	_projectionMatrixIs = false;
+	_aabbIs = false;
 }
 
 
@@ -319,6 +326,78 @@ void CameraStatic::setTop(GLfloat top)
     _top = top;
 
 	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setOrthoProjectionParams(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
+{
+    _left = left;
+    _right = right;
+    _bottom = bottom;
+    _top = top;
+    _nearValue = near;
+    _farValue = far;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+AABB* CameraStatic::getAABB()
+{
+    if (!_aabbIs)
+    {
+        if (CPT_PERSPECTIVE)
+        {
+            Frustum frustum(getProjectionMatrix() * getViewMatrix());
+            _aabb = *frustum.getAABB();
+        }
+        else // CPT_ORTHOGRAPHIC
+        {
+            glm::vec3 position = getPosition();
+
+            glm::mat4 inverseViewMatrix;
+            if (position.x == 0.0f && position.y == 0.0f && position.z == 0.0f)
+                // transpose(M) == inverse(M), because view matrix is orthogonal
+                inverseViewMatrix = glm::transpose(getViewMatrix());
+            else
+                inverseViewMatrix = glm::inverse(getViewMatrix());
+
+
+            glm::vec3 vertices[] = {
+                glm::vec3(_left, _bottom, -_farValue),
+                glm::vec3(_left, _bottom, -_nearValue),
+                glm::vec3(_left, _top, -_farValue),
+                glm::vec3(_left, _top, -_nearValue),
+                glm::vec3(_right, _bottom, -_farValue),
+                glm::vec3(_right, _bottom, -_nearValue),
+                glm::vec3(_right, _top, -_farValue),
+                glm::vec3(_right, _top, -_nearValue)
+            };
+
+            glm::vec3 min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+            glm::vec3 max(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+
+            for (int j = 0; j < 8; ++j)
+            {
+                glm::vec4 v = inverseViewMatrix * glm::vec4(vertices[j].x, vertices[j].y, vertices[j].z, 1.0f);
+
+                min.x = std::min(min.x, v.x);
+                min.y = std::min(min.y, v.y);
+                min.z = std::min(min.z, v.z);
+                max.x = std::max(max.x, v.x);
+                max.y = std::max(max.y, v.y);
+                max.z = std::max(max.z, v.z);
+            }
+
+            _aabb.setSize(min, max);
+        }
+
+        _aabbIs = true;
+    }
+
+	return &_aabb;
 }
 
 

@@ -85,7 +85,7 @@ class GraphicsManager
 
 
         RenderData* getRenderData();
-        RenderData* getRenderData(AABB& aabb, CameraStatic* camera);
+        RenderData* getRenderDataForDepthRendering();
 };
 
 

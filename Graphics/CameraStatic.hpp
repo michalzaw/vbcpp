@@ -8,6 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "AABB.h"
+#include "Frustum.h"
+
 #include "../Scene/Component.h"
 
 #include "../Utils/Math.h"
@@ -66,6 +69,10 @@ class CameraStatic : public Component
 		void setBottom(GLfloat bottom);
 		void setTop(GLfloat top);
 
+		void setOrthoProjectionParams(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far);
+
+		AABB* getAABB();
+
 		virtual void changedTransform()
 		{
 		    _viewMatrixIs = false;
@@ -76,6 +83,7 @@ class CameraStatic : public Component
 		    _localUpVectorIs = false;
 		    _localDirectionIs = false;
 		    _localRightVectorIs = false;
+		    _aabbIs = false;
 		}
 
 	protected:
@@ -102,6 +110,8 @@ class CameraStatic : public Component
 		GLfloat     _right;
 		GLfloat     _bottom;
 		GLfloat     _top;
+
+		AABB        _aabb;                 bool _aabbIs;
 
 		vec3 transformToGlobal(glm::vec3 vector);
 

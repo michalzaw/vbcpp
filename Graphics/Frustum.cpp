@@ -1,5 +1,7 @@
 #include "Frustum.h"
 
+#include "CameraStatic.hpp"
+
 
 Frustum::Frustum()
 {

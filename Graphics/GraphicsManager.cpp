@@ -278,39 +278,29 @@ RenderData* GraphicsManager::getRenderData()
 }
 #endif // FRUSTUM_CULLING
 
-RenderData* GraphicsManager::getRenderData(AABB& aabb, CameraStatic* camera)
+RenderData* GraphicsManager::getRenderDataForDepthRendering()
 {
     RenderData* renderData = new RenderData;
-    renderData->camera = camera;
-    //renderData->light = *(_lights.begin());
+    renderData->camera = _currentCamera;
 
-    //Frustum frustum(renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix());
+    AABB* cameraAabb = renderData->camera->getAABB();
 
-    for (std::list<Light*>::iterator i = _lights.begin(); i != _lights.end(); ++i)
-    {
-        if ((*i)->isActive())
-            renderData->lights.push_back(*i);
-    }
-//int k = 0;
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
     {
         RenderObject* object = *i;
 
-        if (!(*i)->isActive() || !isAABBIntersectAABB(aabb, *object->getAABB()))//!isPointInFrustum(frustum, object->getAABB()->getCenterPosition()))
+        if (!(*i)->isActive() || !isAABBIntersectAABB(*cameraAabb, *object->getAABB()))
             continue;
-//k++;
+
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
             RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
-                renderData->renderList.insert(renderData->renderList.begin(), renderElement);
-            else
                 renderData->renderList.push_back(renderElement);
         }
     }
 
-//std::cout << k << std::endl;
     return renderData;
 }
 
