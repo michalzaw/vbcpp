@@ -2,7 +2,8 @@
 
 const int CASCADES_COUNT = 3;
 const float CascadeEndClipSpace[CASCADES_COUNT] = float[CASCADES_COUNT](25.0f, 100.0f, 500.0f);
-const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.00005f, 0.0005f, 0.005f);
+//const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.00005f, 0.0005f, 0.005f);
+const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005f);
 const float size[CASCADES_COUNT] = float[CASCADES_COUNT](2048.0f, 1024.0f, 512.0f);
 
 struct Light
@@ -83,7 +84,7 @@ uniform sampler2D AlphaTexture;
 
 uniform vec3 CameraPosition;
 
-uniform sampler2D ShadowMap[CASCADES_COUNT];
+uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 
 
 vec4 textureColor;
@@ -174,13 +175,17 @@ void main()
 		//cascadeIndex = 0;
 		
 		// Shadows
+		float Ratio = 1.0f;
+#ifdef SHADOWMAPPING
 		vec3 Coords = PositionLightSpace[cascadeIndex].xyz / PositionLightSpace[cascadeIndex].w;
 		Coords = Coords * 0.5f + 0.5f;
 
-		float Depth = texture(ShadowMap[cascadeIndex], Coords.xy).r;
+		//float Depth = texture(ShadowMap[cascadeIndex], Coords.xy).r;
 		float CurrentDepth = Coords.z;
 
-		float Ratio = CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;
+		Coords.z -= bias[cascadeIndex];//0.0005f;//
+		Ratio = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+		Ratio = Ratio * 0.8f + 0.2f;
 		/*float Ratio = 1.0f;
 		//vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
 		vec2 TexelSize = 1.0f / vec2(size[cascadeIndex], size[cascadeIndex]) / 2.0f;
@@ -194,6 +199,7 @@ void main()
 		}
 
 		Ratio /= 25.0f;*/
+#endif
 	
 		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction, Ratio);
 	}

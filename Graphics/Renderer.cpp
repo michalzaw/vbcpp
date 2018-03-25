@@ -3,12 +3,25 @@
 
 Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */)
 //    : _OGLDriver(driver)
-    : _screenWidth(screenWidth), _screenHeight(screenHeight)
+    : _screenWidth(screenWidth), _screenHeight(screenHeight),
+    _isShadowMappingEnable(false)
+{
+
+}
+
+Renderer::~Renderer()
+{
+    OGLDriver::getInstance().deleteUBO(_lightUBO);
+}
+
+
+void Renderer::init()
 {
     std::vector<std::string> defines;
     // Load shaders
     // SOLID_MATERIAL
     defines.push_back("SOLID");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(shdr1);
 
@@ -19,6 +32,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     // NORMALMAPPING_MATERIAL
     defines.clear();
     defines.push_back("NORMALMAPPING");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(shader);
 
@@ -26,6 +40,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* alphaTestShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(alphaTestShader);
 
@@ -33,6 +48,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("TRANSPARENCY");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* transparencyShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(transparencyShader);
 
@@ -40,6 +56,7 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(treeShader);
 
@@ -77,17 +94,19 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     _shaderList[SOLID_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
     _shaderList[NORMALMAPPING_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
 
-    framebuffer = new Framebuffer();
-    framebuffer->init();
-    framebuffer->addTexture(TF_DEPTH_COMPONENT, 512, 512);
-    framebuffer->setViewport(UintRect(0, 0, 512, 512));
-
     OGLDriver::getInstance().getDefaultFramebuffer()->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 }
 
-Renderer::~Renderer()
+
+void Renderer::setIsShadowMappingEnable(bool isEnable)
 {
-    OGLDriver::getInstance().deleteUBO(_lightUBO);
+    _isShadowMappingEnable = isEnable;
+}
+
+
+bool Renderer::isShadowMappingEnable()
+{
+    return _isShadowMappingEnable;
 }
 
 
@@ -97,43 +116,48 @@ void Renderer::renderAll()
 
     CameraStatic* currentCamera = renderData->camera;
 
-    for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
+    if (_isShadowMappingEnable)
     {
-        Light* light = (*i);
-        if (light->isShadowMapping())
+        for (std::list<Light*>::iterator i = renderData->lights.begin(); i != renderData->lights.end(); ++i)
         {
-            float cascadeEnd[4] = {currentCamera->getNearValue(), 25.0f, 100.0f, 500.0f };
-
-            for (int i = 0; i < 3; ++i)
+            Light* light = (*i);
+            if (light->isShadowMapping())
             {
-                CameraStatic* cameraForShadowMap = light->getCameraForShadowMap(i);
+                ShadowMap* shadowMap = light->getShadowMap();
 
-                Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
-                                                 cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
+                float cascadeEnd[4] = {currentCamera->getNearValue(), 25.0f, 100.0f, 500.0f };
 
-                //currentCamera->setNearValue(cascadeStarts[i]);
-                //currentCamera->setFarValue(cascadeEnds[i]);
-                //frustum.setPoints(currentCamera);
+                for (int i = 0; i < 3; ++i)
+                {
+                    CameraStatic* cameraForShadowMap = shadowMap->getCameraForShadowMap(i);
 
-                frustum.applyTransform(cameraForShadowMap->getViewMatrix());
-                AABB* frustumAabb = frustum.getAABB();
-                glm::vec3 min = frustumAabb->getMinCoords();
-                glm::vec3 max = frustumAabb->getMaxCoords();
+                    Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
+                                                     cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
 
-                cameraForShadowMap->setOrthoProjectionParams(min.x, max.x, min.y, max.y, -max.z - 100.0f, -min.z);
+                    //currentCamera->setNearValue(cascadeStarts[i]);
+                    //currentCamera->setFarValue(cascadeEnds[i]);
+                    //frustum.setPoints(currentCamera);
+
+                    frustum.applyTransform(cameraForShadowMap->getViewMatrix());
+                    AABB* frustumAabb = frustum.getAABB();
+                    glm::vec3 min = frustumAabb->getMinCoords();
+                    glm::vec3 max = frustumAabb->getMaxCoords();
+
+                    cameraForShadowMap->setOrthoProjectionParams(min.x, max.x, min.y, max.y, -max.z - 100.0f, -min.z);
 
 
-                light->getShadowMap(i)->bind();
+                    shadowMap->getShadowMap(i)->bind();
 
-                GraphicsManager::getInstance().setCurrentCamera(cameraForShadowMap);
-                RenderData* renderDataForShadowMap = GraphicsManager::getInstance().getRenderDataForDepthRendering();
+                    GraphicsManager::getInstance().setCurrentCamera(cameraForShadowMap);
+                    RenderData* renderDataForShadowMap = GraphicsManager::getInstance().getRenderDataForDepthRendering();
 
-                renderDepth(renderDataForShadowMap);
+                    renderDepth(renderDataForShadowMap);
 
-                delete renderDataForShadowMap;
+                    delete renderDataForShadowMap;
+                }
+                //currentCamera->setNearValue(cascadeStarts[0]);
+                //currentCamera->setFarValue(1000.0f);
             }
-            //currentCamera->setNearValue(cascadeStarts[0]);
-            //currentCamera->setFarValue(1000.0f);
         }
     }
 
@@ -208,7 +232,7 @@ void Renderer::renderDepth(RenderData* renderData)
 void Renderer::renderScene(RenderData* renderData)
 {
     glm::mat4 lightSpaceMatrix[3];
-    RTexture* shadowMap[3];
+    RTexture* shadowMaps[3];
 
 
     // Aktualizacja UBO swiatel
@@ -221,12 +245,13 @@ void Renderer::renderScene(RenderData* renderData)
         {
             case LT_DIRECTIONAL:
             {
-                if ((*i)->isShadowMapping())
+                if (_isShadowMappingEnable && (*i)->isShadowMapping())
                 {
+                    ShadowMap* shadowMap = (*i)->getShadowMap();
                     for (int j = 0; j < 3; ++j)
                     {
-                        lightSpaceMatrix[j] = (*i)->getCameraForShadowMap(j)->getProjectionMatrix() * (*i)->getCameraForShadowMap(j)->getViewMatrix();
-                        shadowMap[j] = (*i)->getShadowMap(j)->getTexture(0);
+                        lightSpaceMatrix[j] = shadowMap->getCameraForShadowMap(j)->getProjectionMatrix() * shadowMap->getCameraForShadowMap(j)->getViewMatrix();
+                        shadowMaps[j] = shadowMap->getShadowMap(j)->getTexture(0);
                     }
                 }
                 std::string lname = "LightsBlock.DirLights[";
@@ -414,12 +439,15 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform("NormalMatrix", i->getTransformMatrices().normalMatrix);
         //for (int j = 0; j < 3; ++j)
         //{
+        if (_isShadowMappingEnable)
+        {
             shader->setUniform("LightSpaceMatrix[0]", lightSpaceMatrix[0]);
-            shader->bindTexture("ShadowMap[0]", shadowMap[0]);
+            shader->bindTexture("ShadowMap[0]", shadowMaps[0]);
             shader->setUniform("LightSpaceMatrix[1]", lightSpaceMatrix[1]);
-            shader->bindTexture("ShadowMap[1]", shadowMap[1]);
+            shader->bindTexture("ShadowMap[1]", shadowMaps[1]);
             shader->setUniform("LightSpaceMatrix[2]", lightSpaceMatrix[2]);
-            shader->bindTexture("ShadowMap[2]", shadowMap[2]);
+            shader->bindTexture("ShadowMap[2]", shadowMaps[2]);
+        }
         //}
 
         model->getVBO()->bind();

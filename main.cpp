@@ -351,6 +351,8 @@ int main()
 
 
 	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
+	renderer->setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
+	renderer->init();
 
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -393,7 +395,7 @@ timer.start();
     dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
     //dirLight->setPosition(glm::vec3(0,20,0));
     dirLight->setPosition(glm::vec3(0,0,0));
-    lightComponent->setShadowMapping(true);
+    lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
 
     point = sceneMgr->addSceneObject("point1");
     point->addComponent(GraphicsManager::getInstance().addPointLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.f, 0.2f, LightAttenuation(1.0f, 0.1f, 0.01f)));
@@ -428,10 +430,10 @@ timer.start();
 
     GUIManager* gui = new GUIManager;
     //Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    Image* img = gui->addImage(lightComponent->getShadowMap()->getTexture(0));
-    img->setPosition(0, 400);// / 2.0f);
+    //Image* img = gui->addImage(lightComponent->getShadowMap()->getShadowMap(0)->getTexture(0));
+    //img->setPosition(0, 400);// / 2.0f);
     //img->setTextureRect(UintRect(256, 0, 256, 256));
-    img->setScale(0.1f, 0.1f);
+    //img->setScale(0.1f, 0.1f);
     //img->setPosition(100, 100);
 
 

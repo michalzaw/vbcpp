@@ -9,6 +9,7 @@
 #include "Framebuffer.h"
 #include "OGLDriver.h"
 #include "CameraStatic.hpp"
+#include "ShadowMap.h"
 
 #include "../Scene/Component.h"
 
@@ -36,8 +37,6 @@ struct LightAttenuation
 
 class Light : public Component
 {
-    static const int CASCADE_COUNT = 3;
-
     private:
         LightType   _lightType;
 
@@ -51,8 +50,7 @@ class Light : public Component
         float _cutoffCos;
 
         bool            _isShadowMapping;
-        Framebuffer*    _shadowMap[CASCADE_COUNT];
-        CameraStatic*   _cameraForShadowMap[CASCADE_COUNT];
+        ShadowMap*      _shadowMap;
 
     public:
         Light(LightType type);
@@ -77,8 +75,7 @@ class Light : public Component
         float               getCutoff();
         float               getCutoffCos();
         bool                isShadowMapping();
-        Framebuffer*        getShadowMap(int index = 0);
-        CameraStatic*       getCameraForShadowMap(int index = 0);
+        ShadowMap*          getShadowMap();
 
 };
 

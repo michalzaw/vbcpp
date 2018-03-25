@@ -9,7 +9,7 @@ Light::Light(LightType type)
     _lightType(type),
     _color(1.0f, 1.0f, 1.0f), _ambientIntensity(0.5f), _diffuseIntensity(1.0f),
     _cutoff(0.0f), _cutoffCos(1.0f),
-    _isShadowMapping(false), _shadowMap({NULL, NULL, NULL}), _cameraForShadowMap({NULL, NULL, NULL})
+    _isShadowMapping(false), _shadowMap(NULL)
 {
 
 }
@@ -20,7 +20,7 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
     _lightType(type),
     _color(color), _ambientIntensity(ambientIntensity), _diffuseIntensity(diffuseIntensity),
     _cutoff(0.0f), _cutoffCos(1.0f),
-    _isShadowMapping(false), _shadowMap({NULL, NULL, NULL}), _cameraForShadowMap({NULL, NULL, NULL})
+    _isShadowMapping(false), _shadowMap(NULL)
 {
 
 }
@@ -28,18 +28,7 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
 
 Light::~Light()
 {
-    for (int i = 0; i < CASCADE_COUNT; ++i)
-    {
-        if (_shadowMap[i] != NULL)
-        {
-            OGLDriver::getInstance().deleteFramebuffer(_shadowMap[i]);
-        }
-
-        if (_cameraForShadowMap[i] != NULL)
-        {
-            _object->removeComponent(_cameraForShadowMap[i]);
-        }
-    }
+    delete _shadowMap;
 }
 
 
@@ -85,34 +74,17 @@ void Light::setCutoff(float cutoff)
 
 void Light::setShadowMapping(bool isEnable)
 {
-    const int SHADOWMAPS_SIZE[CASCADE_COUNT] = {2048, 1024, 512};
     _isShadowMapping = isEnable;
 
-    if (_isShadowMapping)
+    if (_isShadowMapping && _shadowMap == NULL)
     {
-        for (int i = 0; i < CASCADE_COUNT; ++i)
-        {
-            _shadowMap[i] = OGLDriver::getInstance().createFramebuffer();
-            _shadowMap[i]->addTexture(TF_DEPTH_COMPONENT, SHADOWMAPS_SIZE[i], SHADOWMAPS_SIZE[i]);
-            _shadowMap[i]->setViewport(UintRect(0, 0, SHADOWMAPS_SIZE[i], SHADOWMAPS_SIZE[i]));
-
-            _cameraForShadowMap[i] = GraphicsManager::getInstance().addCameraStatic(CPT_ORTHOGRAPHIC);
-            _cameraForShadowMap[i]->setLeft(-256.0f);
-            _cameraForShadowMap[i]->setRight(256.0f);
-            _cameraForShadowMap[i]->setBottom(-256.0f);
-            _cameraForShadowMap[i]->setTop(256.0f);
-            _cameraForShadowMap[i]->setNearValue(-256.0f);
-            _cameraForShadowMap[i]->setFarValue(256.0f);
-            _object->addComponent(_cameraForShadowMap[i]);
-        }
+        _shadowMap = new ShadowMap(_object);
+        _shadowMap->create();
     }
-    else if (_shadowMap != NULL)
+
+    if (!isShadowMapping() && _shadowMap != NULL)
     {
-        for (int i = 0; i < CASCADE_COUNT; ++i)
-        {
-            OGLDriver::getInstance().deleteFramebuffer(_shadowMap[i]);
-            _object->removeComponent(_cameraForShadowMap[i]);
-        }
+        delete _shadowMap;
     }
 }
 
@@ -203,13 +175,7 @@ bool Light::isShadowMapping()
 }
 
 
-Framebuffer* Light::getShadowMap(int index)
+ShadowMap* Light::getShadowMap()
 {
-    return _shadowMap[index];
-}
-
-
-CameraStatic* Light::getCameraForShadowMap(int index)
-{
-    return _cameraForShadowMap[index];
+    return _shadowMap;
 }

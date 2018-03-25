@@ -35,16 +35,22 @@ class Renderer : virtual public RefCounter
         unsigned int _screenWidth;
         unsigned int _screenHeight;
 
+        bool _isShadowMappingEnable;
+
     public:
         Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */);
         ~Renderer();
+
+        void init();
+
+        void setIsShadowMappingEnable(bool isEnable);
+        bool isShadowMappingEnable();
 
         void renderAll();
         void renderDepth(RenderData* renderData);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 
-        Framebuffer* framebuffer;
 };
 
 
