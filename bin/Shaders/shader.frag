@@ -81,6 +81,11 @@ uniform sampler2D NormalmapTexture;
 #ifdef TRANSPARENCY
 uniform sampler2D AlphaTexture;
 #endif
+#ifdef GRASS
+uniform vec4 grassColor;
+uniform vec4 grassFraction;
+uniform sampler2D NoiseTexture;
+#endif
 
 uniform vec3 CameraPosition;
 
@@ -153,6 +158,14 @@ void main()
 #endif
 	
 	textureColor = texture2D(Texture, TexCoord);
+	
+#ifdef GRASS
+	textureColor = textureColor * grassColor;
+	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
+	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
+	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
+	//	discard;
+#endif
 	
 #ifdef ALPHA_TEST
 	if (textureColor.a < 0.1f)

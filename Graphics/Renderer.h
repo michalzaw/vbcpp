@@ -35,11 +35,18 @@ class Renderer : virtual public RefCounter
         unsigned int _screenWidth;
         unsigned int _screenHeight;
 
+        RModel* grassModel;
+        RTexture2D* heightmapTexture;
+        RTexture2D* grassDensityTexture;
+        RTexture2D* perlinNoiseTexture;
+
         bool _isShadowMappingEnable;
 
     public:
         Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */);
         ~Renderer();
+
+        glm::vec4 grassColor;
 
         void init();
 
@@ -48,6 +55,7 @@ class Renderer : virtual public RefCounter
 
         void renderAll();
         void renderDepth(RenderData* renderData);
+        void renderGrass3(CameraStatic* camera, glm::mat4* lightSpaceMatrix, RTexture** shadowMaps);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 

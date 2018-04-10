@@ -6,7 +6,13 @@ Renderer::Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriv
     : _screenWidth(screenWidth), _screenHeight(screenHeight),
     _isShadowMappingEnable(false)
 {
+    grassModel = ResourceManager::getInstance().loadModel("Objects\\grass\\grass3.3ds", "Objects\\grass\\");
+    heightmapTexture = ResourceManager::getInstance().loadTexture("Maps\\Demo\\terrain_map.bmp");
+    grassDensityTexture = ResourceManager::getInstance().loadTexture("Maps\\Demo\\grass.bmp");
+    perlinNoiseTexture = ResourceManager::getInstance().loadTexture("perlin.jpg");
 
+    grassColor = glm::vec4(0.31, 0.48, 0.29, 1);
+    grassColor = glm::vec4(1, 1, 1, 1);
 }
 
 Renderer::~Renderer()
@@ -56,6 +62,7 @@ void Renderer::init()
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    defines.push_back("TRANSPARENCY");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(treeShader);
@@ -85,6 +92,16 @@ void Renderer::init()
     defines.push_back("ALPHA_TEST");
     RShader* shadowmapshader2 = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
     _shaderList.push_back(shadowmapshader2);
+
+    // GRASS_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("TRANSPARENCY");
+    defines.push_back("GRASS");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    RShader* grassShader = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
+    _shaderList.push_back(grassShader);
 
 
     // Create UBO for lights
@@ -514,6 +531,8 @@ void Renderer::renderScene(RenderData* renderData)
         }
     }
 
+    renderGrass3(camera, lightSpaceMatrix, shadowMaps);
+
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
@@ -542,6 +561,94 @@ void Renderer::renderScene(RenderData* renderData)
         glDisableVertexAttribArray(0);
     }
     #endif
+}
+
+void Renderer::renderGrass3(CameraStatic* camera, glm::mat4* lightSpaceMatrix, RTexture** shadowMaps)
+{//glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    Frustum frustum(glm::perspective(camera->getViewAngle(), (float)camera->getWindowWidth() / (float)camera->getWindowHeight(),
+                                     camera->getNearValue(), 30.0f) * camera->getViewMatrix());
+    AABB* aabb = frustum.getAABB();
+    glm::vec3 min = aabb->getMinCoords();
+    min = glm::vec3((float)((int)(min.x / 0.5)) * 0.5, (float)min.y, (float)((int)(min.z / 0.5)) * 0.5);
+    glm::vec3 max = aabb->getMaxCoords();
+    max = glm::vec3((int)max.x, (int)max.y, (int)max.z);
+    float width = (max.x - min.x) / 0.5;
+    float height = (max.z - min.z) / 0.5;
+    float a = width * height;
+    //std::cout << width << " " << height << " " <<a << std::endl;
+    //a /= 3.0;
+
+    RShader* shader = _shaderList[GRASS_MATERIAL];
+    shader->enable();
+
+    glDisable(GL_BLEND);
+
+    grassModel->getVBO()->bind();
+    grassModel->getIBO()->bind();
+
+    for (int i = 0; i < grassModel->getQuantumOfMeshes(); ++i)
+    {
+        glm::mat4 M = glm::mat4(1.0f);//glm::translate(glm::vec3(0.0f, 0.5f, 0.0f));// * glm::scale(glm::vec3(1.0f, 0.5f, 1.0f));
+        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * M;
+        shader->setUniform("MVP", MVP);
+        shader->setUniform("ModelMatrix", M);
+        shader->setUniform("NormalMatrix", M);
+
+        if (_isShadowMappingEnable)
+        {
+            shader->setUniform("LightSpaceMatrix[0]", lightSpaceMatrix[0]);
+            shader->bindTexture("ShadowMap[0]", shadowMaps[0]);
+            shader->setUniform("LightSpaceMatrix[1]", lightSpaceMatrix[1]);
+            shader->bindTexture("ShadowMap[1]", shadowMaps[1]);
+            shader->setUniform("LightSpaceMatrix[2]", lightSpaceMatrix[2]);
+            shader->bindTexture("ShadowMap[2]", shadowMaps[2]);
+        }
+
+        Mesh* mesh = grassModel->getMesh(i);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+
+        if (mesh->material.diffuseTexture != NULL)
+            shader->bindTexture("Texture", mesh->material.diffuseTexture);
+        if (mesh->material.alphaTexture != NULL)
+            shader->bindTexture("AlphaTexture", mesh->material.alphaTexture);
+        shader->setUniform("matAmbient", mesh->material.ambientColor);
+        shader->setUniform("matDiffuse", mesh->material.diffuseColor);
+        shader->setUniform("matSpecular", mesh->material.specularColor);
+
+        shader->setUniform("Transparency", mesh->material.transparency);
+
+        shader->setUniform("SpecularPower", mesh->material.shininess);
+        shader->setUniform("CameraPosition", camera->getPosition());
+        shader->setUniform("a", 1.0f);
+
+        shader->setUniform("grassColor", grassColor);
+        //shader->setUniform("grassColor", glm::vec4(1, 1, 1, 1));
+        shader->bindTexture("heightmap", heightmapTexture);
+        shader->bindTexture("noiseTexture", perlinNoiseTexture);
+        shader->bindTexture("grassDensity", grassDensityTexture);
+        shader->setUniform("min", min);
+        shader->setUniform("width", (int)width);;
+
+        glDrawElementsInstanced(grassModel->getPrimitiveType(),
+                                mesh->quantumOfVertice,
+                                GL_UNSIGNED_INT,
+                                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                                (int)a);
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
+
+    }
+    glEnable(GL_BLEND);
+    //glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 }
 
 

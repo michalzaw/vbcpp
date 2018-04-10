@@ -186,7 +186,7 @@ void Frustum::applyTransform(const glm::mat4& transform)
 
 AABB* Frustum::getAABB()
 {
-    glm::vec3* frustumPoints = _points;
+    glm::vec3* frustumPoints = getPoints();
 
     glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
     glm::vec3 max(-FLT_MAX, -FLT_MAX, -FLT_MAX);

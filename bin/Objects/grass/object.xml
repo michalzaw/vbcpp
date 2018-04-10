@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="mich" name="grass" comment="Grass" />
+
+	<Components>
+	
+		<Component type="render" model="grass.3ds" />
+	</Components>
+	
+</Object>

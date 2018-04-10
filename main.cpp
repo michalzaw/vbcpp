@@ -72,7 +72,7 @@ Label* engineIsRunning = 0;
 
 std::string winTitle = "Virtual Bus Core++";
 
-
+bool alphaToCoverage = true;
 // kod
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -238,6 +238,12 @@ static float a = 0.6f;
         btWheelInfo& wheel2 = busRaycast->_bulletVehicle->getWheelInfo(3);
         wheel2.m_suspensionRestLength1 = a;
     }*/
+
+    if (key == GLFW_KEY_T && action == GLFW_PRESS)
+    {
+        alphaToCoverage = !alphaToCoverage;
+        alphaToCoverage ? glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE) : glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    }
 }
 
 // Callback dla pojedynczych zdarzeń - przyciski myszy
@@ -472,7 +478,7 @@ timer.start();
     //labelTorque->setPosition(10, 10);
     //labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     //labelTorque->scale(0.6f, 0.6f);
-
+glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
 
     sndMgr->setActiveCamera(camFPS);
 
