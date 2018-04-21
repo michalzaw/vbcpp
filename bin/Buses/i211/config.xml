@@ -33,8 +33,8 @@
 		<Light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
 		<Light position="0.0,1.12,2.38" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
 	
-		<Headlights name="headlight0" position="0.96,-0.52,3.39" rotation="-0.25,0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.43"/>
-		<Headlights name="headlight1" position="-0.96,-0.52,3.39" rotation="-0.25,-0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.45"/>
+		<Headlight name="headlight0" position="0.96,-0.52,3.39" rotation="-0.25,0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.43"/>
+		<Headlight name="headlight1" position="-0.96,-0.52,3.39" rotation="-0.25,-0.1,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.5" cutoff="0.45"/>
 	</Module>
 	
 	<Driver position="0.75,0.44,3.51"/>

@@ -37,7 +37,15 @@ void GameConfig::loadGameConfig(const char* filename)
             {
                 const char* ename = configElement->Name();
 
-                if (strcmp(ename,"Shadowmapping") == 0)
+                if (strcmp(ename,"Fullscreen") == 0)
+                {
+                    const char* value = configElement->GetText();
+                    if (strcmp(value,"true") == 0)
+                        isFullscreen = true;
+                    else
+                        isFullscreen = false;
+                }
+                else if (strcmp(ename,"Shadowmapping") == 0)
                 {
                     const char* value = configElement->GetText();
                     if (strcmp(value,"true") == 0)

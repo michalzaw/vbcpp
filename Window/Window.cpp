@@ -3,7 +3,7 @@
 #include <cstdio>
 
 Window::Window()
-: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window")
+: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _isFullscreen(false)
 {
     glfwSetErrorCallback(errorCallback);
 }
@@ -14,12 +14,13 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100)
+bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100, bool isFullscreen = false)
 {
     _width = w;
     _height = h;
     _xPos = posx;
     _yPos = posy;
+    _isFullscreen = isFullscreen;
 
     if ( !glfwInit() )
     {
@@ -37,7 +38,7 @@ bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 
 	glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
 
 	// Create window with given size and title
-	_win = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
+	_win = glfwCreateWindow(_width, _height, _title.c_str(), _isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 
 	if (!_win)
         return false;

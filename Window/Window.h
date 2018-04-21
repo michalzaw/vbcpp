@@ -17,7 +17,7 @@ class Window
         Window();
         ~Window();
 
-        bool createWindow(int w, int h, int posx, int posy);
+        bool createWindow(int w, int h, int posx, int posy, bool isFullscreen);
         GLFWwindow* getWindow() { return _win; }
 
         int getHeight() { return _height; }
@@ -36,6 +36,7 @@ class Window
         int         _width, _height;
         int         _xPos, _yPos;
         string      _title;
+        bool        _isFullscreen;
 
         static void errorCallback(int error, const char* description);
         bool initGLEW();

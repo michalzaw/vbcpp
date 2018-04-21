@@ -16,6 +16,7 @@ SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
         std::cout << "Create SceneManager\n";
     #endif // _DEBUG_MODE
     _physicsManager->grab();
+    _soundManager->grab();
 
     _busStart.position = glm::vec3(0,3,0);
     _busStart.rotation = glm::vec3(0,0,0);
@@ -40,6 +41,7 @@ SceneManager::~SceneManager()
     }
 
     _physicsManager->drop();
+    _soundManager->drop();
 
     //delete _graphicsManager;
     //delete _physicsManager;

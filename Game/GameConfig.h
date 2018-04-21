@@ -17,7 +17,7 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isShadowmappingEnable(true), shadowmapSize(1024)
+            isFullscreen(false), isShadowmappingEnable(true), shadowmapSize(1024)
         {}
         GameConfig(const GameConfig&) {}
 
@@ -38,6 +38,7 @@ class GameConfig
         std::string mapTexPath;
         std::string busModel;
 
+        bool isFullscreen;
         bool isShadowmappingEnable;
         int shadowmapSize;
 
