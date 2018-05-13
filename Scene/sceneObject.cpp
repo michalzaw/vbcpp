@@ -60,6 +60,10 @@ SceneObject::~SceneObject()
                 delete *i;
                 break;
 
+            case CT_GRASS:
+                GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(*i));
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -237,6 +241,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_TREE_COMPONENT:
                     delete *i;
+                    break;
+
+                case CT_GRASS:
+                    GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(*i));
                     break;
 
             }

@@ -19,7 +19,8 @@ enum ComponentType
     CT_LIGHT,
     CT_PHYSICAL_BODY,
     CT_TREE_COMPONENT,
-    CT_SOUND
+    CT_SOUND,
+    CT_GRASS
 };
 
 

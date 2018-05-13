@@ -139,6 +139,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = ALPHA_TEST_MATERIAL;
     else if (strcmp(type, "transparency") == 0)
         sMaterial.shader = TRANSPARENCY_MATERIAL;
+    else if (strcmp(type, "grass") == 0)
+        sMaterial.shader = GRASS_MATERIAL;
 
     return sMaterial;
 }

@@ -19,6 +19,11 @@ GraphicsManager::~GraphicsManager()
         delete *i;
     }
 
+    for (std::list<Grass*>::iterator i = _grassComponents.begin(); i != _grassComponents.end(); ++i)
+    {
+        delete *i;
+    }
+
     for (std::vector<CameraStatic*>::iterator i = _cameras.begin(); i != _cameras.end(); ++i)
     {
         delete *i;
@@ -51,6 +56,15 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     _quadTree->addObject(object);
 
     return object;
+}
+
+Grass* GraphicsManager::addGrassComponent(RModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
+{
+    Grass* grass = new Grass(model, terrainHeightmap, grassDensityTexture);
+
+    _grassComponents.push_back(grass);
+
+    return grass;
 }
 
 CameraStatic* GraphicsManager::addCameraStatic(CameraProjectionType projectionType)
@@ -113,6 +127,21 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
             i = _renderObjects.erase(i);
 
             delete object;
+
+            return;
+        }
+    }
+}
+
+void GraphicsManager::removeGrassComponent(Grass* grass)
+{
+    for (std::list<Grass*>::iterator i = _grassComponents.begin(); i != _grassComponents.end(); ++i)
+    {
+        if (*i == grass)
+        {
+            i = _grassComponents.erase(i);
+
+            delete grass;
 
             return;
         }
@@ -227,8 +256,8 @@ RenderData* GraphicsManager::getRenderData()
 
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else
@@ -264,12 +293,25 @@ RenderData* GraphicsManager::getRenderData()
 //k++;
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else
                 renderData->renderList.push_back(renderElement);
+        }
+    }
+
+    for (std::list<Grass*>::iterator i = _grassComponents.begin(); i != _grassComponents.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        {
+            RenderListElement renderElement(RET_GRASS, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
+
+            renderData->renderList.push_back(renderElement);
         }
     }
 
@@ -294,8 +336,8 @@ RenderData* GraphicsManager::getRenderDataForDepthRendering()
 
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.push_back(renderElement);
         }
@@ -332,8 +374,8 @@ RenderData* GraphicsManager::getRenderData()
 
         for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
         {
-            RenderListElement renderElement(object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject());
+            RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
             if (object->getModel()->getMesh(j)->material.transparency == 0.0f)
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else

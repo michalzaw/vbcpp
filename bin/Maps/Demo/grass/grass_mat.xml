@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="grass" name="Material.001" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="0,0,0,0" diffuse_texture="grass2.png" normalmap_texture="" alpha_texture="grass2.png" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

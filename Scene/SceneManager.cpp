@@ -193,6 +193,32 @@ void SceneManager::loadScene(std::string filename)
     terrainObject->addComponent(terrainMesh);//terrainObj->setIsActive(false);
 
 
+    XMLElement* grassElement = scnElement->FirstChildElement("Grass");
+    if (grassElement == nullptr)
+    {
+        std::cout << "Grass element not found!" << std::endl;
+    }
+    else if (GameConfig::getInstance().isGrassEnable)
+    {
+        std::string grassModelFileName(grassElement->Attribute("model"));
+        std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
+        std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+
+        std::cout << "==> GRASS" << std::endl;
+        std::cout << "Model: " << grassModelFileName << std::endl;
+        std::cout << "heightmap: " << terrainHeightmapForGrassFileName << std::endl;
+        std::cout << "density texture: " << grassDensityTextureFileName << std::endl;
+
+        RModel* grassModel = ResourceManager::getInstance().loadModel(dirPath + "grass/" + grassModelFileName, dirPath + "grass/");
+        RTexture2D* heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(dirPath + terrainHeightmapForGrassFileName);
+        RTexture2D* grassDensityTexture = ResourceManager::getInstance().loadTexture(dirPath + grassDensityTextureFileName);
+
+        SceneObject* grassObject = addSceneObject("grass");
+        Grass* grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
+        grassObject->addComponent(grassComponent);
+    }
+
+
     XMLElement* objects = scnElement->FirstChildElement("Objects");
 
     XMLElement* objectElement = objects->FirstChildElement("Object");
