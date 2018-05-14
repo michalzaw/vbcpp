@@ -284,6 +284,19 @@ RenderData* GraphicsManager::getRenderData()
             renderData->lights.push_back(*i);
     }
 //int k = 0;
+    for (std::list<Grass*>::iterator i = _grassComponents.begin(); i != _grassComponents.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        {
+            RenderListElement renderElement(RET_GRASS, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
+                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
+
+            renderData->renderList.push_back(renderElement);
+        }
+    }
+
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
     {
         RenderObject* object = *i;
@@ -299,19 +312,6 @@ RenderData* GraphicsManager::getRenderData()
                 renderData->renderList.insert(renderData->renderList.begin(), renderElement);
             else
                 renderData->renderList.push_back(renderElement);
-        }
-    }
-
-    for (std::list<Grass*>::iterator i = _grassComponents.begin(); i != _grassComponents.end(); ++i)
-    {
-        RenderObject* object = *i;
-
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
-        {
-            RenderListElement renderElement(RET_GRASS, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
-                                            glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
-
-            renderData->renderList.push_back(renderElement);
         }
     }
 
