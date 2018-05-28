@@ -1,21 +1,6 @@
 #include "LoadTerrainModel.h"
 
 
-bool TerrainLoader::isTerFileExists(std::string fileName)
-{
-	FILE* file;
-    file = fopen(fileName.c_str(), "r");
-    if (file)
-    {
-        fclose(file);
-        return 1;
-    }
-
-    fclose(file);
-    return 0;
-}
-
-
 std::string TerrainLoader::createTerFileName(std::string heightmapFilename)
 {
     std::string terFileName = heightmapFilename;
@@ -23,6 +8,16 @@ std::string TerrainLoader::createTerFileName(std::string heightmapFilename)
     terFileName += TER_EXTENSION;
 
     return terFileName;
+}
+
+
+std::string TerrainLoader::createTerrainHeightAndNormalMapFileName(std::string heightmapFilename)
+{
+    std::string fileName = heightmapFilename;
+    fileName.erase(fileName.size() - 4, 4);
+    fileName += HEIGHT_NORMAL_MAP_SUFFIX;
+
+    return fileName;
 }
 
 
@@ -133,9 +128,9 @@ Model* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilename, st
     const float cellSize = 1.0f;
 
     int width, height, chanels;
-    unsigned char* heightmapData = SOIL_load_image(heightmapFilename, &width, &height, &chanels, SOIL_LOAD_L);
+    unsigned char* heightmapData = SOIL_load_image(heightmapFilename, &width, &height, &chanels, SOIL_LOAD_RGBA);
 
-    glm::vec3 startPosition(static_cast<float>(width) / -2.0f, 0.0f, static_cast<float>(height) / 2.0f);
+    glm::vec3 startPosition(static_cast<float>(width - 1) / -2.0f, 0.0f, static_cast<float>(height - 1) / 2.0f);
     glm::vec3 vertexPosition = startPosition;
 
 
@@ -150,7 +145,7 @@ Model* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilename, st
 
         for (int x = 0; x < width; ++x)
         {
-            int color = static_cast<int>(heightmapData[(height - z - 1) * width + x]);
+            int color = static_cast<int>(heightmapData[((height - z - 1) * width + x) * 4]);
             vertexPosition.y = static_cast<float>(color) / 255.0f * maxHeight;
 
 
@@ -240,6 +235,20 @@ Model* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilename, st
     }
 
 
+    // Save height and normals into new tga file (r - height; g, b, a - normal)
+    for (int z = 0; z < height; ++z)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            heightmapData[((height - z - 1) * width + x) * 4 + 1] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.x * 0.5f + 0.5f) * 255);
+            heightmapData[((height - z - 1) * width + x) * 4 + 2] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.y * 0.5f + 0.5f) * 255);
+            heightmapData[((height - z - 1) * width + x) * 4 + 3] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.z * 0.5f + 0.5f) * 255);
+        }
+    }
+
+    SOIL_save_image(createTerrainHeightAndNormalMapFileName(heightmapFilename).c_str(), SOIL_SAVE_TYPE_TGA, width, height, chanels, heightmapData);
+
+
     std::vector<MeshMender::Vertex> v;
     std::vector<unsigned int> in;
 
@@ -301,7 +310,7 @@ Model* TerrainLoader::loadTerrainModel(const char* heightmapFilename, std::strin
 {
     std::string terFileName = createTerFileName(heightmapFilename);
 
-    if (!isTerFileExists(terFileName))
+    if (!FilesHelper::isFileExists(terFileName))
     {
         Model* model = loadTerrainFromHeightmap(heightmapFilename, materialFileName, materialName, texturePath, maxHeight);
 

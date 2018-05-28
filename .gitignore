@@ -6,6 +6,7 @@ bin/vbcpp*
 *.depend
 *.save
 *.ter
+*_gen.*
 
 # DIRECTORIES
 obj

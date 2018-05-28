@@ -204,6 +204,12 @@ void SceneManager::loadScene(std::string filename)
         std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
         std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
 
+        std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
+        if (FilesHelper::isFileExists(dirPath + terrainHeightNormalMapFileName))
+        {
+            terrainHeightmapForGrassFileName = terrainHeightNormalMapFileName;
+        }
+
         std::cout << "==> GRASS" << std::endl;
         std::cout << "Model: " << grassModelFileName << std::endl;
         std::cout << "heightmap: " << terrainHeightmapForGrassFileName << std::endl;
@@ -212,6 +218,8 @@ void SceneManager::loadScene(std::string filename)
         RModel* grassModel = ResourceManager::getInstance().loadModel(dirPath + "grass/" + grassModelFileName, dirPath + "grass/");
         RTexture2D* heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(dirPath + terrainHeightmapForGrassFileName);
         RTexture2D* grassDensityTexture = ResourceManager::getInstance().loadTexture(dirPath + grassDensityTextureFileName);
+        heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
+        heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
 
         SceneObject* grassObject = addSceneObject("grass");
         Grass* grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);

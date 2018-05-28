@@ -50,14 +50,16 @@ void main()
 	vec3 Offset = vec3(mod(gl_InstanceID, width) * 0.5, 0.0f, gl_InstanceID / width * 0.5f);
 	Offset += min;
 	Offset.y = 0;
-	Offset.x += float(Random(int(Offset.z * 512 + Offset.x), 3) & 0xFF) / 512.0;
-	Offset.z += float(Random(int(Offset.z * 512 + Offset.x), 2) & 0xFF) / 512.0;
+	Offset.x += float(Random(int(Offset.z * 512 + Offset.x), 3) & 0xFF) / 1024.0;
+	Offset.z += float(Random(int(Offset.z * 512 + Offset.x), 2) & 0xFF) / 1024.0;
 	if (VertexUV.y <= -0.5f)
 	{
 		Offset.y -= float(Random(int(Offset.z * 512 + Offset.x), 2) & 0xFF) / 1024.0;
 	}
 	
-	float h = texture2D(heightmap, vec2((Offset.x / 256.0f * 0.5f) + 0.5f, (Offset.z / 256.0f * 0.5f) + 0.5f)).r * TERRAIN_MAX_HEIGHT;
+	vec4 heightNormal = texture2D(heightmap, vec2((Offset.x / 256.0f * 0.5f) + 0.5f, (Offset.z / 256.0f * 0.5f) + 0.5f));
+	float h = heightNormal.r * TERRAIN_MAX_HEIGHT;
+	//float h = texture2D(heightmap, vec2((Offset.x + 256.0f) / 511.0f, (Offset.z + 255.0f) / 511.0f)).r * TERRAIN_MAX_HEIGHT;
 	Offset.y += h;
 	//vec3 vertexPositionWithOffset = VertexPosition + Offset;
 	
@@ -87,7 +89,8 @@ void main()
 	TexCoord = VertexUV;
 
 #ifdef SOLID
-	Normal = (NormalMatrix /* rotationMatrix */ * vec4(0.0f, 1.0f, 0.0f, 0.0f)).xyz;
+	Normal = vec3((heightNormal.g - 0.5) * 2, (heightNormal.b - 0.5) * 2, (heightNormal.a - 0.5) * 2);
+	Normal = (NormalMatrix /* rotationMatrix */ * vec4(Normal, 0.0f)).xyz;
 #endif
 #ifdef NORMALMAPPING
 	mat3 NM = mat3(NormalMatrix);
