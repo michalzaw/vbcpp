@@ -65,6 +65,9 @@ class RTexture : public Resource
 
         void setAnisotropyFiltering(bool isEnable, float anisotropy = 1.0f);
 
+        void setParameter(GLenum name, GLint value);
+        void setParameter(GLenum name, GLfloat value);
+
         glm::uvec2 getSize();
 
         inline void bind()

@@ -61,6 +61,22 @@ void RTexture::setAnisotropyFiltering(bool isEnable, float anisotropy)
 }
 
 
+void RTexture::setParameter(GLenum name, GLint value)
+{
+    bind();
+
+    glTexParameteri(_type, name, value);
+}
+
+
+void RTexture::setParameter(GLenum name, GLfloat value)
+{
+    bind();
+
+    glTexParameterf(_type, name, value);
+}
+
+
 glm::uvec2 RTexture::getSize()
 {
     return _size;
