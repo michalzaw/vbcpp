@@ -26,10 +26,7 @@ float TERRAIN_MAX_HEIGHT = 20;
 out vec3 Position;
 out vec2 TexCoord;
 out vec3 Normal;
-#ifdef NORMALMAPPING
-	out vec3 TangentWorldspace;
-	out vec3 BitangentWorldspace;
-#endif
+
 out vec4 PositionLightSpace[CASCADES_COUNT];
 out float ClipSpacePositionZ;
 
@@ -39,31 +36,30 @@ int Random(int Seed, int Iterations)
 	for (int i = 0; i < Iterations; ++i)
 	{
 		Value = ((Value >> 7) ^ (Value << 9)) * 15485863;
-		//Value = Value * 15485863;
 	}
 	return Value;
 }
 
 void main()
 {
+	vec2 terrainSize = textureSize(heightmap, 0);
 	
 	vec3 Offset = vec3(mod(gl_InstanceID, width) * 0.5, 0.0f, gl_InstanceID / width * 0.5f);
 	Offset += min;
+	int grassIndex = int(Offset.z * terrainSize.x + Offset.x);
 	Offset.y = 0;
-	Offset.x += float(Random(int(Offset.z * 512 + Offset.x), 3) & 0xFF) / 1024.0;
-	Offset.z += float(Random(int(Offset.z * 512 + Offset.x), 2) & 0xFF) / 1024.0;
+	Offset.x += float(Random(grassIndex, 3) & 0xFF) / 1024.0;
+	Offset.z += float(Random(grassIndex, 2) & 0xFF) / 1024.0;
 	if (VertexUV.y <= -0.5f)
 	{
-		Offset.y -= float(Random(int(Offset.z * 512 + Offset.x), 2) & 0xFF) / 1024.0;
+		Offset.y -= float(Random(grassIndex, 2) & 0xFF) / 1024.0;
 	}
 	
-	vec4 heightNormal = texture2D(heightmap, vec2((Offset.x / 256.0f * 0.5f) + 0.5f, (Offset.z / 256.0f * 0.5f) + 0.5f));
+	vec4 heightNormal = texture2D(heightmap, vec2((Offset.x / (terrainSize.x * 0.5f) * 0.5f) + 0.5f, (Offset.z / (terrainSize.y * 0.5f) * 0.5f) + 0.5f));
 	float h = heightNormal.r * TERRAIN_MAX_HEIGHT;
-	//float h = texture2D(heightmap, vec2((Offset.x + 256.0f) / 511.0f, (Offset.z + 255.0f) / 511.0f)).r * TERRAIN_MAX_HEIGHT;
 	Offset.y += h;
-	//vec3 vertexPositionWithOffset = VertexPosition + Offset;
 	
-	float angle = float(Random(int(Offset.z * 512 + Offset.x), 4) & 0xFF) / 41.0f; // 255 / 41 ~= 2 * pi = 360
+	float angle = float(Random(grassIndex, 4) & 0xFF) / 41.0f; // 255 / 41 ~= 2 * pi = 360
 	float sina = sin(angle);
 	float cosa = cos(angle);
 	
@@ -90,14 +86,9 @@ void main()
 
 #ifdef SOLID
 	Normal = vec3((heightNormal.g - 0.5) * 2, (heightNormal.b - 0.5) * 2, (heightNormal.a - 0.5) * 2);
-	Normal = (NormalMatrix /* rotationMatrix */ * vec4(Normal, 0.0f)).xyz;
+	Normal = (NormalMatrix * vec4(Normal, 0.0f)).xyz;
 #endif
-#ifdef NORMALMAPPING
-	mat3 NM = mat3(NormalMatrix);
-	Normal = NM * VertexNormal;
-	TangentWorldspace = NM * VertexTangent;
-	BitangentWorldspace = NM * VertexBitangent;
-#endif
+
 	for (int i = 0; i < 3; ++i)
 	{
 		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(vertexPositionWithRotationAndOffset, 1.0f);
