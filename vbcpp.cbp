@@ -183,6 +183,8 @@
 		<Unit filename="Graphics/Frustum.h" />
 		<Unit filename="Graphics/GraphicsManager.cpp" />
 		<Unit filename="Graphics/GraphicsManager.h" />
+		<Unit filename="Graphics/Grass.cpp" />
+		<Unit filename="Graphics/Grass.h" />
 		<Unit filename="Graphics/IBO.cpp" />
 		<Unit filename="Graphics/IBO.h" />
 		<Unit filename="Graphics/Light.cpp" />
@@ -270,6 +272,7 @@
 		<Unit filename="Utils/Collision.h" />
 		<Unit filename="Utils/Engine.cpp" />
 		<Unit filename="Utils/Engine.h" />
+		<Unit filename="Utils/FilesHelper.h" />
 		<Unit filename="Utils/Gearbox.cpp" />
 		<Unit filename="Utils/Gearbox.h" />
 		<Unit filename="Utils/Helpers.cpp" />

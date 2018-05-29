@@ -56,6 +56,7 @@ void Renderer::init()
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    defines.push_back("TRANSPARENCY");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
     _shaderList.push_back(treeShader);
@@ -85,6 +86,16 @@ void Renderer::init()
     defines.push_back("ALPHA_TEST");
     RShader* shadowmapshader2 = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
     _shaderList.push_back(shadowmapshader2);
+
+    // GRASS_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("TRANSPARENCY");
+    defines.push_back("GRASS");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    RShader* grassShader = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
+    _shaderList.push_back(grassShader);
 
 
     // Create UBO for lights
@@ -413,6 +424,7 @@ void Renderer::renderScene(RenderData* renderData)
         }
         if (mesh->material.shader == TREE_MATERIAL)
         {
+            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             glDisable(GL_BLEND);
             //shader->setUniform("n",);
             shader->setUniform("CameraPositionWorldspace", camera->getPosition());
@@ -427,8 +439,9 @@ void Renderer::renderScene(RenderData* renderData)
 
             shader->setUniform("d", d);
         }
-        if (mesh->material.shader == ALPHA_TEST_MATERIAL)
+        if (mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == GRASS_MATERIAL)
         {
+            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             glDisable(GL_BLEND);
         }
 
@@ -492,10 +505,44 @@ void Renderer::renderScene(RenderData* renderData)
         //    renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
 
         model->getIBO()->bind();
-        glDrawElements(model->getPrimitiveType(),
-                       mesh->quantumOfVertice,
-                       GL_UNSIGNED_INT,
-                       (void*)(mesh->firstVertex * sizeof(unsigned int)));
+
+        if (i->getType() != RET_GRASS)
+        {
+            glDrawElements(model->getPrimitiveType(),
+                           mesh->quantumOfVertice,
+                           GL_UNSIGNED_INT,
+                           (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        }
+        else
+        {
+            glDisable(GL_CULL_FACE);
+
+            Frustum frustum(glm::perspective(camera->getViewAngle(), (float)camera->getWindowWidth() / (float)camera->getWindowHeight(),
+                                     camera->getNearValue(), 30.0f) * camera->getViewMatrix());
+            AABB* aabb = frustum.getAABB();
+            glm::vec3 min = aabb->getMinCoords();
+            min = glm::vec3((float)((int)(min.x / 0.5)) * 0.5, (float)min.y, (float)((int)(min.z / 0.5)) * 0.5);
+            glm::vec3 max = aabb->getMaxCoords();
+            max = glm::vec3((int)max.x, (int)max.y, (int)max.z);
+            float width = (max.x - min.x) / 0.5;
+            float height = (max.z - min.z) / 0.5;
+            float a = width * height;
+
+            Grass* grass = static_cast<Grass*>(i->getRenderObject());
+            shader->setUniform("grassColor", grass->getGrassColor());
+            shader->bindTexture("heightmap", grass->getTerrainHeightmap());
+            shader->bindTexture("grassDensity", grass->getGrassDensityTexture());
+            shader->setUniform("min", min);
+            shader->setUniform("width", (int)width);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                                mesh->quantumOfVertice,
+                                GL_UNSIGNED_INT,
+                                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                                (int)a);
+
+            glEnable(GL_CULL_FACE);
+        }
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -508,8 +555,9 @@ void Renderer::renderScene(RenderData* renderData)
         if (mesh->material.shader == SKY_MATERIAL)
             glEnable(GL_CULL_FACE);
 
-        if (mesh->material.shader == TREE_MATERIAL || mesh->material.shader == ALPHA_TEST_MATERIAL)
+        if (mesh->material.shader == TREE_MATERIAL || mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == GRASS_MATERIAL)
         {
+            glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             glEnable(GL_BLEND);
         }
     }

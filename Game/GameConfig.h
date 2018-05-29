@@ -17,7 +17,7 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isFullscreen(false), isShadowmappingEnable(true), shadowmapSize(1024)
+            isFullscreen(false), isShadowmappingEnable(true), shadowmapSize(1024), isGrassEnable(true)
         {}
         GameConfig(const GameConfig&) {}
 
@@ -41,6 +41,7 @@ class GameConfig
         bool isFullscreen;
         bool isShadowmappingEnable;
         int shadowmapSize;
+        bool isGrassEnable;
 
 };
 

@@ -15,13 +15,15 @@
 #include "NVMeshMender/NVMeshMender.h"
 #include "LoadMaterial.h"
 
+#include "../Utils/FilesHelper.h"
+
 
 class TerrainLoader
 {
     static constexpr char* TER_EXTENSION = ".ter";
+    static constexpr char* HEIGHT_NORMAL_MAP_SUFFIX = "_gen.tga";
 
     private:
-        static bool isTerFileExists(std::string fileName);
         static std::string createTerFileName(std::string heightmapFilename);
 
         static void saveTerFile(const char* fileName, Model* model);
@@ -31,6 +33,8 @@ class TerrainLoader
 
     public:
         static Model* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
+
+        static std::string createTerrainHeightAndNormalMapFileName(std::string heightmapFilename);
 
 };
 

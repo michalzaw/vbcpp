@@ -58,6 +58,15 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     shadowmapSize = (int)atoi(configElement->GetText());
                 }
+                else
+                if (strcmp(ename,"Grass") == 0)
+                {
+                    const char* value = configElement->GetText();
+                    if (strcmp(value,"true") == 0)
+                        isGrassEnable = true;
+                    else
+                        isGrassEnable = false;
+                }
             }
         }
     }

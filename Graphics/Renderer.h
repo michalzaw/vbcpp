@@ -41,6 +41,8 @@ class Renderer : virtual public RefCounter
         Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */);
         ~Renderer();
 
+        glm::vec4 grassColor;
+
         void init();
 
         void setIsShadowMappingEnable(bool isEnable);

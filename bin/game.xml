@@ -14,5 +14,7 @@
 		
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
+		
+		<Grass>true</Grass>
     </Configuration>
 </Game>

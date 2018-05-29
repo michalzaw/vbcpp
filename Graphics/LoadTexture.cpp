@@ -39,8 +39,8 @@
 
 RTexture2D* loadTexture(const char* fileName, bool mipmaping)
 {
-    int width, height;
-    unsigned char* image = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGBA);
+    int width, height, chanels;
+    unsigned char* image = SOIL_load_image(fileName, &width, &height, &chanels, SOIL_LOAD_RGBA);
 
     RTexture2D* texture = new RTexture2D(fileName, image, TF_RGBA, glm::uvec2(width, height));
 

@@ -8,8 +8,16 @@
 #include "CameraStatic.hpp"
 #include "Light.h"
 #include "Transform.h"
+#include "RenderObject.h"
 #include "../Utils/RModel.h"
 #include "../Scene/SceneObject.h"
+
+
+enum RenderElementType
+{
+    RET_SINGLE,
+    RET_GRASS
+};
 
 
 struct TransformMatrices
@@ -29,6 +37,8 @@ struct TransformMatrices
 class RenderListElement
 {
     private:
+        RenderElementType _type;
+
         RModel*     _model;
         Mesh*       _mesh;
         TransformMatrices _matrices;
@@ -36,10 +46,14 @@ class RenderListElement
         float       _distanceFromCamera;
 
         SceneObject* _object; /* !!!!!!!!!! */
+        RenderObject* _renderObject;
 
     public:
-        RenderListElement(RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object);
+        RenderListElement(RenderElementType type, RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object, RenderObject* renderObject);
         ~RenderListElement();
+
+        inline RenderElementType getType()
+        { return _type; }
 
         inline RModel* getModel()
         { return _model; }
@@ -55,6 +69,9 @@ class RenderListElement
 
         inline SceneObject* getObject()
         { return _object; }
+
+        inline RenderObject* getRenderObject()
+        { return _renderObject; }
 
 };
 
