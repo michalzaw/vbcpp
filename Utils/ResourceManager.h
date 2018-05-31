@@ -10,6 +10,7 @@
 #include <iostream>
 #include <list>
 #include <memory>
+#include <sstream>
 
 typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
@@ -24,8 +25,13 @@ class ResourceManager
         Resource* findResource(std::string path);
 
         RTexture2D* loadTexture(std::string path);
+        void reloadTexture(RTexture2D* texture);
+        void reloadTexture(std::string path);
+        void reloadAllTextures();
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>());
+        void reloadShader(RShader* shader);
+        void reloadAllShaders();
 
         RModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
 

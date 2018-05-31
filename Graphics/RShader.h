@@ -30,13 +30,21 @@ enum ShaderType
 
 class RShader : virtual public Resource
 {
+    friend class ResourceManager;
+
     private:
         GLuint _shaderID;
 
         int _textureLocation;
 
+        void setNewShader(GLuint newId)
+        {
+            glDeleteProgram(_shaderID);
+            _shaderID = newId;
+        }
+
     public:
-        RShader(std::string path, GLuint id) : Resource(path),  _shaderID(id), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
+        RShader(std::string path, GLuint id) : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0) {  std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n"; }
         virtual ~RShader()
         {
             std::cout << "RShader: Destruktor: " << _shaderID << "\n";

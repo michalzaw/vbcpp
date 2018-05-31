@@ -93,6 +93,37 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
 }
 
 
+void ResourceManager::reloadTexture(RTexture2D* texture)
+{
+    ::loadTexture(texture->getPath().c_str(), true, texture);
+}
+
+
+void ResourceManager::reloadTexture(std::string path)
+{
+    Resource* texture = findResource(path);
+    if (texture != NULL)
+    {
+        reloadTexture(dynamic_cast<RTexture2D*>(texture));
+    }
+}
+
+
+void ResourceManager::reloadAllTextures()
+{
+    std::list<std::unique_ptr<Resource>>::iterator it;
+    for ( it = _resources.begin(); it != _resources.end(); ++it)
+    {
+        if ( (*it)->getType() == RT_TEXTURE )
+        {
+            std::unique_ptr<Resource>& res = *it;
+
+            reloadTexture(dynamic_cast<RTexture2D*>(res.get()));
+        }
+    }
+}
+
+
 // Ładowanie shaderów
 RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines)
 {
@@ -125,6 +156,42 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
     }
     else
         return 0;
+}
+
+
+void ResourceManager::reloadShader(RShader* shader)
+{
+    std::istringstream stream(shader->getPath());
+
+    std::string vertexShaderFilename;
+    std::string fragmentShaderFilename;
+    std::vector<std::string> defines;
+
+    getline(stream, vertexShaderFilename, ';');
+    getline(stream, fragmentShaderFilename, ';');
+
+    string s;
+    while (getline(stream, s, ';'))
+    {
+        defines.push_back(s);
+    }
+
+    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines));
+}
+
+
+void ResourceManager::reloadAllShaders()
+{
+    std::list<std::unique_ptr<Resource>>::iterator it;
+    for ( it = _resources.begin(); it != _resources.end(); ++it)
+    {
+        if ( (*it)->getType() == RT_SHADER )
+        {
+            std::unique_ptr<Resource>& res = *it;
+
+            reloadShader(dynamic_cast<RShader*>(res.get()));
+        }
+    }
 }
 
 

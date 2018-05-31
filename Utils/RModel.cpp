@@ -1,7 +1,7 @@
 #include "RModel.h"
 
 RModel::RModel(std::string path, Model* m)
-: Resource(path)
+: Resource(RT_MODEL, path)
 {
     std::cout << "*** RModel: Konstruktor: " << _path << std::endl;
 

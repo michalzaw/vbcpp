@@ -4,7 +4,7 @@
 
 
 RTexture::RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size)
-    : Resource(path),
+    : Resource(RT_TEXTURE, path),
     _type(type),
     _format(format),
     _size(size),

@@ -40,5 +40,9 @@ void RTexture2D::setTexSubImage(unsigned char* data, int offsetX, int offsetY, i
     if (offsetX + width > _size.x || offsetY + height > _size.y)
         return;
 
+    bind();
+
     glTexSubImage2D(_type, 0, offsetX, offsetY, width, height, _format, GL_UNSIGNED_BYTE, data);
+
+    _isGenerateMipmap = false;
 }

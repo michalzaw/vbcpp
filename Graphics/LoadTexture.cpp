@@ -37,12 +37,21 @@
 }*/
 
 
-RTexture2D* loadTexture(const char* fileName, bool mipmaping)
+RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTexture)
 {
     int width, height, chanels;
     unsigned char* image = SOIL_load_image(fileName, &width, &height, &chanels, SOIL_LOAD_RGBA);
 
-    RTexture2D* texture = new RTexture2D(fileName, image, TF_RGBA, glm::uvec2(width, height));
+    RTexture2D* texture;
+    if (oldTexture == NULL)
+    {
+        texture = new RTexture2D(fileName, image, TF_RGBA, glm::uvec2(width, height));
+    }
+    else
+    {
+        texture = oldTexture;
+        texture->setTexSubImage(image, 0, 0, width, height);
+    }
 
     std::cout << "Loading texture: " << fileName << std::endl;
     std::cout << "SOIL result: " << SOIL_last_result() << std::endl;

@@ -128,6 +128,16 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         bus->toggleHandbrake();
     }
+
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS)
+    {
+        ResourceManager::getInstance().reloadAllShaders();
+    }
+
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS)
+    {
+        ResourceManager::getInstance().reloadAllTextures();
+    }
 }
 
 
