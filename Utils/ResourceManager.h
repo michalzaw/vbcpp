@@ -4,7 +4,7 @@
 #include "RTexture.h"
 #include "../Graphics/RShader.h"
 #include "../Graphics/Model.h"
-#include "RModel.h"
+#include "RStaticModel.h"
 #include "RFont.h"
 
 #include <iostream>
@@ -33,7 +33,7 @@ class ResourceManager
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 
-        RModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
+        RStaticModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 

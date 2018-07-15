@@ -34,6 +34,7 @@ void MaterialLoader::openFile(const char* fileName)
 void MaterialLoader::closeFile()
 {
     delete _xmlFile;
+    _xmlFile = NULL;
 }
 
 

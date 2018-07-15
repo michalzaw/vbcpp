@@ -5,18 +5,18 @@
 <Engine model="eng_wskmielec" />
 
 <Bus name="autosan" textures="PKS"> 
-	<Module type="main" model="h9.3ds" mass="800" position="0,0,0" > <!-- mass in tons -->
+	<Module type="main" model="h9.fbx" mass="800" position="0,0,0" > <!-- mass in tons -->
 
-		<Wheel name="wheel1" side="right" steering="1" powered="0" handbrake="0" model="fwheel.3ds" position="1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />
-		<Wheel name="wheel2" side="left" steering="1" powered="0" handbrake="0" model="fwheel.3ds" position="-1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />
+		<Wheel name="wheel1" side="right" steering="1" powered="0" handbrake="0" model="fwheel.fbx" position="1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />
+		<Wheel name="wheel2" side="left" steering="1" powered="0" handbrake="0" model="fwheel.fbx" position="-1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />
 	
-		<Wheel name="wheel3" side="right" steering="0" powered="1" handbrake="1" model="rwheel.3ds" position="1.0,-0.45,-1.85" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="20.0" />
-		<Wheel name="wheel4" side="left" steering="0" powered="1" handbrake="1" model="rwheel.3ds" position="-1.0,-0.45,-1.85" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="20.0" />
+		<Wheel name="wheel3" side="right" steering="0" powered="1" handbrake="1" model="rwheel.fbx" position="1.0,-0.45,-1.85" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="20.0" />
+		<Wheel name="wheel4" side="left" steering="0" powered="1" handbrake="1" model="rwheel.fbx" position="-1.0,-0.45,-1.85" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="20.0" />
 	
-		<Door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
-		<Door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
+		<Door name="df1" group="1" type="s" model="df1.fbx" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
+		<Door name="dr1" group="2" type="s" model="dr1.fbx" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 	
-		<SteeringWheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
+		<SteeringWheel model="steeringwheel.fbx" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
 		
 		<Light position="0.0,1.12,-2.13" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
 		<Light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>

@@ -110,6 +110,7 @@
 					<Add library="freetype" />
 					<Add library="OpenAL32.dll" />
 					<Add library="alut" />
+					<Add library="assimp" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -141,6 +142,7 @@
 					<Add library="freetype" />
 					<Add library="OpenAL32.dll" />
 					<Add library="alut" />
+					<Add library="assimp" />
 					<Add directory="lib/win32" />
 				</Linker>
 			</Target>
@@ -223,6 +225,8 @@
 		<Unit filename="Graphics/Roads.h" />
 		<Unit filename="Graphics/ShadowMap.cpp" />
 		<Unit filename="Graphics/ShadowMap.h" />
+		<Unit filename="Graphics/StaticModelLoader.cpp" />
+		<Unit filename="Graphics/StaticModelLoader.h" />
 		<Unit filename="Graphics/TreeComponent.h" />
 		<Unit filename="Graphics/UBO.h" />
 		<Unit filename="Graphics/VAO.h" />
@@ -282,6 +286,8 @@
 		<Unit filename="Utils/RFont.h" />
 		<Unit filename="Utils/RModel.cpp" />
 		<Unit filename="Utils/RModel.h" />
+		<Unit filename="Utils/RStaticModel.cpp" />
+		<Unit filename="Utils/RStaticModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />
 		<Unit filename="Utils/RTexture.h" />
 		<Unit filename="Utils/RTexture2D.cpp" />

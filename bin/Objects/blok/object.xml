@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="blok_vb.3ds" />
+		<Component type="render" model="blok_vb.fbx" />
 	
 		<Component type="physics" mass="0" body="static" />
 	</Components>

@@ -191,8 +191,8 @@ void Renderer::renderDepth(RenderData* renderData)
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        RModel* model = i->getModel();
-        Mesh* mesh = i->getMesh();
+        RStaticModel* model = i->getModel();
+        StaticModelMesh* mesh = i->getMesh();
         RShader* shader;
 
         if (mesh->material.shader == TRANSPARENCY_MATERIAL || mesh->material.shader == SKY_MATERIAL)
@@ -209,7 +209,7 @@ void Renderer::renderDepth(RenderData* renderData)
         glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
         shader->setUniform("MVP", MVP);
 
-        model->getVBO()->bind();
+        mesh->vbo->bind();
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -222,9 +222,9 @@ void Renderer::renderDepth(RenderData* renderData)
             shader->bindTexture("AlphaTexture", mesh->material.diffuseTexture);
         }
 
-        model->getIBO()->bind();
+        mesh->ibo->bind();
         glDrawElements(model->getPrimitiveType(),
-                       mesh->quantumOfVertice,
+                       mesh->indicesCount,
                        GL_UNSIGNED_INT,
                        (void*)(mesh->firstVertex * sizeof(unsigned int)));
 
@@ -412,8 +412,8 @@ void Renderer::renderScene(RenderData* renderData)
 
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
-        RModel* model = i->getModel();
-        Mesh* mesh = i->getMesh();
+        RStaticModel* model = i->getModel();
+        StaticModelMesh* mesh = i->getMesh();
 
         RShader* shader = _shaderList[mesh->material.shader];
         shader->enable();
@@ -463,7 +463,7 @@ void Renderer::renderScene(RenderData* renderData)
         }
         //}
 
-        model->getVBO()->bind();
+        mesh->vbo->bind();
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
@@ -504,12 +504,12 @@ void Renderer::renderScene(RenderData* renderData)
         //    renderObject->GetModel()->GetMesh(meshIndex).firstVertex,
         //    renderObject->GetModel()->GetMesh(meshIndex).quantumOfVertice);
 
-        model->getIBO()->bind();
+        mesh->ibo->bind();
 
         if (i->getType() != RET_GRASS)
         {
             glDrawElements(model->getPrimitiveType(),
-                           mesh->quantumOfVertice,
+                           mesh->indicesCount,
                            GL_UNSIGNED_INT,
                            (void*)(mesh->firstVertex * sizeof(unsigned int)));
         }
@@ -536,7 +536,7 @@ void Renderer::renderScene(RenderData* renderData)
             shader->setUniform("width", (int)width);
 
             glDrawElementsInstanced(model->getPrimitiveType(),
-                                mesh->quantumOfVertice,
+                                mesh->indicesCount,
                                 GL_UNSIGNED_INT,
                                 (void*)(mesh->firstVertex * sizeof(unsigned int)),
                                 (int)a);

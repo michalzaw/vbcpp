@@ -93,13 +93,11 @@ class Cube : public Prefab
             }
 
 
-            Mesh* meshes = new Mesh[1];
-            meshes[0].firstVertex = 0;
-            meshes[0].quantumOfVertice = 36;
-            meshes[0].material = _material;
+            StaticModelMesh* meshes = new StaticModelMesh[1];
+            meshes[0].setMeshData(vertices, 24, indices, 36, _material);
 
 
-            _model = new RModel("", new Model(vertices, 24, indices, 36, meshes, 1));
+            _model = new RStaticModel("", meshes, 1);
         }
 
     public:

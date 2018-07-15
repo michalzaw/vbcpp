@@ -1,7 +1,7 @@
 #ifndef DOOR_H_INCLUDED
 #define DOOR_H_INCLUDED
 
-#include "../Utils/RModel.h"
+#include "../Utils/RStaticModel.h"
 #include "../Physics/PhysicalBodyConvexHull.hpp"
 #include "../Scene/SoundComponent.h"
 
@@ -16,7 +16,7 @@ enum DoorState
 class Door
 {
     public:
-        Door(RModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
+        Door(RStaticModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
         : _group(group), _doorModel(model), _doorBody(body), _state(EDS_CLOSING), _collidesWith(COL_TERRAIN), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
         {
         }
@@ -35,7 +35,7 @@ class Door
 
         PhysicalBodyConvexHull* getDoorBody() { return _doorBody; }
 
-        const RModel* getDoorModel() const { return _doorModel; }
+        const RStaticModel* getDoorModel() const { return _doorModel; }
 
         char getGroup() { return _group; }
 
@@ -43,7 +43,7 @@ class Door
 
         protected:
             char                     _group;
-            RModel*                  _doorModel;
+            RStaticModel*            _doorModel;
             PhysicalBodyConvexHull*  _doorBody;
             DoorState                _state;
             int                      _collidesWith;

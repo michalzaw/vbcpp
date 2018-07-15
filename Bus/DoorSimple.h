@@ -7,7 +7,7 @@
 class DoorSimple : virtual public Door
 {
     public:
-        DoorSimple(RModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
+        DoorSimple(RStaticModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
         : Door(model, body, openDoor, closeDoor, group), _hinge(hinge)
         {
         }

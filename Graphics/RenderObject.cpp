@@ -2,7 +2,7 @@
 
 #include "GraphicsManager.h"
 
-RenderObject::RenderObject(RModel* model)
+RenderObject::RenderObject(RStaticModel* model)
     : Component(CT_RENDER_OBJECT),
     _model(model),
     _isCalculatedAABB(false)
@@ -63,13 +63,13 @@ void RenderObject::calculateNewAABB()
 }
 
 
-void RenderObject::setModel(RModel* model)
+void RenderObject::setModel(RStaticModel* model)
 {
     _model = model;
 }
 
 
-RModel* RenderObject::getModel()
+RStaticModel* RenderObject::getModel()
 {
     return _model;
 

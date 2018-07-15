@@ -9,7 +9,7 @@
 #include "Light.h"
 #include "Transform.h"
 #include "RenderObject.h"
-#include "../Utils/RModel.h"
+#include "../Utils/RStaticModel.h"
 #include "../Scene/SceneObject.h"
 
 
@@ -39,8 +39,8 @@ class RenderListElement
     private:
         RenderElementType _type;
 
-        RModel*     _model;
-        Mesh*       _mesh;
+        RStaticModel*     _model;
+        StaticModelMesh*  _mesh;
         TransformMatrices _matrices;
 
         float       _distanceFromCamera;
@@ -49,16 +49,16 @@ class RenderListElement
         RenderObject* _renderObject;
 
     public:
-        RenderListElement(RenderElementType type, RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object, RenderObject* renderObject);
+        RenderListElement(RenderElementType type, RStaticModel* model, StaticModelMesh* mesh, TransformMatrices matrices, float distance, SceneObject* object, RenderObject* renderObject);
         ~RenderListElement();
 
         inline RenderElementType getType()
         { return _type; }
 
-        inline RModel* getModel()
+        inline RStaticModel* getModel()
         { return _model; }
 
-        inline Mesh* getMesh()
+        inline StaticModelMesh* getMesh()
         { return _mesh; }
 
         inline TransformMatrices& getTransformMatrices()
