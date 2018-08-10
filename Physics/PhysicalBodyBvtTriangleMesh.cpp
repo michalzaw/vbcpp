@@ -36,7 +36,7 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
             {
                 for (unsigned int k = 0; k < 3; k++)
                 {
-                    index = indices[j+k];
+                    index = indices[j+k] - mesh->firstVertexInVbo;
 
                     if (index > vertexCount) continue;
 

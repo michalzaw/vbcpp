@@ -17,6 +17,12 @@ VBO::~VBO()
 }
 
 
+unsigned int VBO::getVertexSize()
+{
+    return _vertexSize;
+}
+
+
 unsigned int VBO::getBufferSize()
 {
     return _bufferSize;

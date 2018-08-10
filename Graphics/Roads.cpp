@@ -243,7 +243,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
 
         for (int j = 0; j < indicesCount; ++j)
         {
-            collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j]].position;
+            collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
         }
 
         counter += indicesCount;

@@ -22,7 +22,7 @@ struct StaticModelMesh
     IBO* ibo;
 
     unsigned int firstVertex;
-
+    unsigned int firstVertexInVbo;
     Material material;
 
     ~StaticModelMesh()
@@ -39,12 +39,12 @@ struct StaticModelMesh
 
         if (vbo)
         {
-            OGLDriver::getInstance().deleteVBO(vbo);
+            //OGLDriver::getInstance().deleteVBO(vbo);
         }
 
         if (ibo)
         {
-            OGLDriver::getInstance().deleteIBO(ibo);
+            //OGLDriver::getInstance().deleteIBO(ibo);
         }
 
     }
@@ -59,10 +59,20 @@ struct StaticModelMesh
         this->firstVertex = 0;
         this->material = material;
 
-        vbo = OGLDriver::getInstance().createVBO(verticesCount * sizeof(Vertex));
-        vbo->addVertexData(vertices, verticesCount);
+        int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(material.shader, verticesCount, sizeof(vertices[0]));
+        int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(material.shader, indicesCount);
+        vbo = OGLDriver::getInstance().vbos[material.shader][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
+        ibo = OGLDriver::getInstance().ibos[material.shader][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
 
-        ibo = OGLDriver::getInstance().createIBO(indicesCount * sizeof(unsigned int));
+        firstVertexInVbo = vbo->getQuantumOfVertices();
+        for (unsigned int i = 0; i < this->indicesCount; ++i)
+        {
+            this->indices[i] += firstVertexInVbo;
+        }
+
+        this->firstVertex = ibo->getIndicesCount();
+
+        vbo->addVertexData(vertices, verticesCount);
         ibo->addIndices(indices, indicesCount);
     }
 
