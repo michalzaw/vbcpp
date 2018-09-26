@@ -217,21 +217,21 @@ void SceneObject::removeComponent(Component* component)
             i = _components.erase(i);
 
             /* USUWANIE Z POSZCZEGOLNYCH PODSYSTEMOW */
-            switch ((*i)->getType())
+            switch (component->getType())
             {
                 case CT_RENDER_OBJECT:
                     //_sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
-                    GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(*i));
+                    GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(component));
                     break;
 
                 case CT_CAMERA:
                     //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
-                    GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
+                    GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(component));
                     break;
 
                 case CT_LIGHT:
                     //_sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
-                    GraphicsManager::getInstance().removeLight(static_cast<Light*>(*i));
+                    GraphicsManager::getInstance().removeLight(static_cast<Light*>(component));
                     break;
 
                 case CT_PHYSICAL_BODY:
@@ -244,7 +244,7 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_GRASS:
-                    GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(*i));
+                    GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(component));
                     break;
 
             }

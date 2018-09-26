@@ -28,7 +28,8 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
 
 Light::~Light()
 {
-    delete _shadowMap;
+    if (_shadowMap != NULL)
+        delete _shadowMap;
 }
 
 
