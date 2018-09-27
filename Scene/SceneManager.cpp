@@ -186,6 +186,7 @@ void SceneManager::loadScene(std::string filename)
     //RModel* terrain = new RModel("", terrModel);
     SceneObject* terrainObject = addSceneObject("terrain");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrModel), terrainObject);
+    terrainObj->setIsCastShadows(false);
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
     PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrModel, COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
@@ -308,6 +309,7 @@ void SceneManager::loadScene(std::string filename)
         //RStaticModel* roadModel2 = new RStaticModel;
         SceneObject* roadSceneObject = addSceneObject(name);
         RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel), roadSceneObject);
+        roadRenderObject->setIsCastShadows(false);
         //roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
         PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel, COL_TERRAIN, collidesWith);

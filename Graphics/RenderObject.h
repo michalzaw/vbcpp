@@ -18,6 +18,8 @@ class RenderObject : public Component
     protected:
         RStaticModel* _model;
 
+        bool _isCastShadows;
+
         AABB _aabb;
         bool _isCalculatedAABB;
 
@@ -29,6 +31,9 @@ class RenderObject : public Component
 
         void setModel(RStaticModel* model);
         RStaticModel* getModel();
+
+        void setIsCastShadows(bool isCastShadows);
+        bool isCastShadows();
 
         AABB* getAABB();
 

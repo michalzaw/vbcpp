@@ -331,7 +331,7 @@ RenderData* GraphicsManager::getRenderDataForDepthRendering()
     {
         RenderObject* object = *i;
 
-        if (!(*i)->isActive() || !isAABBIntersectAABB(*cameraAabb, *object->getAABB()))
+        if (!(*i)->isActive() || !isAABBIntersectAABB(*cameraAabb, *object->getAABB()) || !object->isCastShadows())
             continue;
 
         for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)

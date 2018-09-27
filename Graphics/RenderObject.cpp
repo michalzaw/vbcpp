@@ -5,6 +5,7 @@
 RenderObject::RenderObject(RStaticModel* model)
     : Component(CT_RENDER_OBJECT),
     _model(model),
+    _isCastShadows(true),
     _isCalculatedAABB(false)
 {
     #ifdef _DEBUG_MODE
@@ -73,6 +74,18 @@ RStaticModel* RenderObject::getModel()
 {
     return _model;
 
+}
+
+
+void RenderObject::setIsCastShadows(bool isCastShadows)
+{
+    _isCastShadows = isCastShadows;
+}
+
+
+bool RenderObject::isCastShadows()
+{
+    return _isCastShadows;
 }
 
 
