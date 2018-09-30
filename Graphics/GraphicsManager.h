@@ -24,11 +24,13 @@
 
 
 //#define ALL_OBJECTS
-#define FRUSTUM_CULLING
+//#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
 class GraphicsManager
 {
+    friend class Renderer;
+
     private:
         std::list<RenderObject*>    _renderObjects;
         std::list<Grass*>           _grassComponents;

@@ -11,9 +11,10 @@
 
 class ShadowMap
 {
-    private:
+    public:
         static const int CASCADE_COUNT = 3;
 
+    private:
         int _shadowmapSize[CASCADE_COUNT];
 
         Framebuffer*    _shadowMap[CASCADE_COUNT];

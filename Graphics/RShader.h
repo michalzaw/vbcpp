@@ -34,7 +34,6 @@ class RShader : virtual public Resource
 
     private:
         GLuint _shaderID;
-
         int _textureLocation;
 
         void setNewShader(GLuint newId)
@@ -60,6 +59,11 @@ class RShader : virtual public Resource
         void disable()
         {
             glUseProgram(0);
+        }
+
+        inline void resetTextureLocation()
+        {
+            _textureLocation = 0;
         }
 
         inline void setUniform(const char* name, int* values, int count = 1)

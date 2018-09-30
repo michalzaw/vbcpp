@@ -1,5 +1,7 @@
 #include "GraphicsManager.h"
 
+#include "Renderer.h"
+
 #include "../Scene/SceneObject.h"
 
 
@@ -182,6 +184,7 @@ void GraphicsManager::removeLight(Light* light)
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
+    Renderer::getInstance().setCurrentMainCamera(camera);
 }
 
 
@@ -318,7 +321,6 @@ RenderData* GraphicsManager::getRenderData()
 //std::cout << k << std::endl;
     return renderData;
 }
-#endif // FRUSTUM_CULLING
 
 RenderData* GraphicsManager::getRenderDataForDepthRendering()
 {
@@ -345,6 +347,7 @@ RenderData* GraphicsManager::getRenderDataForDepthRendering()
 
     return renderData;
 }
+#endif // FRUSTUM_CULLING
 
 #ifdef QUAD_TREE
 RenderData* GraphicsManager::getRenderData()

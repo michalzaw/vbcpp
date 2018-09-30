@@ -37,7 +37,7 @@ void Framebuffer::init()
 
 void Framebuffer::bind()
 {
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
     glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
 
@@ -53,7 +53,7 @@ void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height)
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 
-    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 }
 
 
@@ -76,7 +76,7 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     }
     _fboBuffs.push_back(attachment);
 
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
 
     _textures.push_back(texture);
 
