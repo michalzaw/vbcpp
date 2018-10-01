@@ -545,7 +545,7 @@ void Renderer::renderDepth(RenderData* renderData)
         }
 
         glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
-        shader->setUniform("MVP", MVP);
+        shader->setUniform(UNIFORM_MVP, MVP);
 
         mesh->vbo->bind();
 
@@ -557,7 +557,7 @@ void Renderer::renderDepth(RenderData* renderData)
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
 
-            shader->bindTexture("AlphaTexture", mesh->material.diffuseTexture);
+            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, mesh->material.diffuseTexture);
         }
 
         mesh->ibo->bind();
@@ -645,34 +645,34 @@ void Renderer::renderScene(RenderData* renderData)
                 d = static_cast<TreeComponent*>(treeComponent)->getWindVector();
             }
 
-            shader->setUniform("d", d);
+            shader->setUniform(UNIFORM_WIND_DIRECTION, d);
         }
 
 
         glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
-        shader->setUniform("MVP", MVP);
-        shader->setUniform("ModelMatrix", i->object->getGlobalTransformMatrix());
-        shader->setUniform("NormalMatrix", i->object->getGlobalNormalMatrix());
+        shader->setUniform(UNIFORM_MVP, MVP);
+        shader->setUniform(UNIFORM_MODEL_MATRIX, i->object->getGlobalTransformMatrix());
+        shader->setUniform(UNIFORM_NORMAL_MATRIX, i->object->getGlobalNormalMatrix());
 
-        shader->setUniform("matAmbient", mesh->material.ambientColor);
-        shader->setUniform("matDiffuse", mesh->material.diffuseColor);
-        shader->setUniform("matSpecular", mesh->material.specularColor);
+        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, mesh->material.ambientColor);
+        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, mesh->material.diffuseColor);
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, mesh->material.specularColor);
 
-        shader->setUniform("Transparency", mesh->material.transparency);
+        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, mesh->material.transparency);
 
-        shader->setUniform("SpecularPower", mesh->material.shininess);
-        shader->setUniform("CameraPosition", camera->getPosition());
-        shader->setUniform("a", 1.0f);
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, mesh->material.shininess);
+        shader->setUniform(UNIFORM_CAMERA_POSITION, camera->getPosition());
+        //shader->setUniform("a", 1.0f);
 
 
         if (_isShadowMappingEnable)
         {
-            shader->setUniform("LightSpaceMatrix[0]", lightSpaceMatrix[0]);
-            shader->bindTexture("ShadowMap[0]", _shadowMap->getShadowMap(0)->getTexture(0));
-            shader->setUniform("LightSpaceMatrix[1]", lightSpaceMatrix[1]);
-            shader->bindTexture("ShadowMap[1]", _shadowMap->getShadowMap(1)->getTexture(0));
-            shader->setUniform("LightSpaceMatrix[2]", lightSpaceMatrix[2]);
-            shader->bindTexture("ShadowMap[2]", _shadowMap->getShadowMap(2)->getTexture(0));
+            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_1, lightSpaceMatrix[0]);
+            shader->bindTexture(UNIFORM_SHADOW_MAP_1, _shadowMap->getShadowMap(0)->getTexture(0));
+            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_2, lightSpaceMatrix[1]);
+            shader->bindTexture(UNIFORM_SHADOW_MAP_2, _shadowMap->getShadowMap(1)->getTexture(0));
+            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_3, lightSpaceMatrix[2]);
+            shader->bindTexture(UNIFORM_SHADOW_MAP_3, _shadowMap->getShadowMap(2)->getTexture(0));
         }
 
         mesh->vbo->bind();
@@ -695,13 +695,13 @@ void Renderer::renderScene(RenderData* renderData)
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
 
-            shader->bindTexture("NormalmapTexture", mesh->material.normalmapTexture);
+            shader->bindTexture(UNIFORM_NOTMALMAP_TEXTURE, mesh->material.normalmapTexture);
         }
 
         if (mesh->material.diffuseTexture != NULL)
-            shader->bindTexture("Texture", mesh->material.diffuseTexture);
+            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, mesh->material.diffuseTexture);
         if (mesh->material.alphaTexture != NULL)
-            shader->bindTexture("AlphaTexture", mesh->material.alphaTexture);
+            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, mesh->material.alphaTexture);
 
 
 
@@ -728,11 +728,11 @@ void Renderer::renderScene(RenderData* renderData)
             float a = width * height;
 
             Grass* grass = static_cast<Grass*>(i->renderObject);
-            shader->setUniform("grassColor", grass->getGrassColor());
-            shader->bindTexture("heightmap", grass->getTerrainHeightmap());
-            shader->bindTexture("grassDensity", grass->getGrassDensityTexture());
-            shader->setUniform("min", min);
-            shader->setUniform("width", (int)width);
+            shader->setUniform(UNIFORM_GRASS_COLOR, grass->getGrassColor());
+            shader->bindTexture(UNIFORM_HEIGHTMAP, grass->getTerrainHeightmap());
+            shader->bindTexture(UNIFORM_GRASS_DENSITY, grass->getGrassDensityTexture());
+            shader->setUniform(UNIFORM_GRASS_MIN, min);
+            shader->setUniform(UNIFORM_GRASS_WIDTH, (int)width);
 
             glDrawElementsInstanced(model->getPrimitiveType(),
                                 mesh->indicesCount,
@@ -886,14 +886,14 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
         RShader* shader = _shaderList[i->getShaderType()];
         shader->enable();
 
-        shader->setUniform("VerticesTransformMatrix", projectionMatrix * i->getVerticesTransformMatrix());
-        shader->setUniform("TexCoordTransformMatrix", i->getTexCoordTransformMatrix());
-        shader->setUniform("color", i->getColor());
+        shader->setUniform(UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX, projectionMatrix * i->getVerticesTransformMatrix());
+        shader->setUniform(UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX, i->getTexCoordTransformMatrix());
+        shader->setUniform(UNIFORM_GUI_COLOR, i->getColor());
 
         i->getVBO()->bind();
 
 
-        shader->bindTexture("Texture", i->getTexture());
+        shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, i->getTexture());
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);
