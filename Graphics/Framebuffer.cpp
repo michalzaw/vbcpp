@@ -39,8 +39,6 @@ void Framebuffer::bind()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
-    glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
-
     glViewport(_viewport.position.x, _viewport.position.y, _viewport.size.x, _viewport.size.y);
 }
 
@@ -73,14 +71,22 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     else
     {
         attachment = GL_COLOR_ATTACHMENT0 + _fboBuffs.size();
+
+        _fboBuffs.push_back(attachment);
     }
-    _fboBuffs.push_back(attachment);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
 
     _textures.push_back(texture);
 
-    glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+    if (_fboBuffs.size() > 0)
+    {
+        glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+    }
+    else
+    {
+        glDrawBuffer(GL_NONE);
+    }
 }
 
 
