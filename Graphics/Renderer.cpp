@@ -352,85 +352,72 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _renderDataList.push_back(mainRenderData);
 
 
+    _shaderList.resize(NUMBER_OF_SHADERS);
     std::vector<std::string> defines;
+
     // Load shaders
     // SOLID_MATERIAL
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-	RShader* shdr1 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(shdr1);
+	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // NOTEXTURE_MATERIAL
-    RShader* shdr2 = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
-    _shaderList.push_back(shdr2);
+    _shaderList[NOTEXTURE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
 
     // NORMALMAPPING_MATERIAL
     defines.clear();
     defines.push_back("NORMALMAPPING");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(shader);
+    _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // ALPHA_TEST_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    RShader* alphaTestShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(alphaTestShader);
-
-    // TRANSPARENCY_MATERIAL
-    defines.clear();
-    defines.push_back("SOLID");
-    defines.push_back("TRANSPARENCY");
-    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    RShader* transparencyShader = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(transparencyShader);
+    _shaderList[ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // TREE_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
-    defines.push_back("TRANSPARENCY");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    RShader* treeShader = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(treeShader);
-
-    // GUI_IMAGE_SHADER
-    RShader* guishader = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
-    _shaderList.push_back(guishader);
-
-    // GUI_LABEL_SHADER
-    RShader* guishader2 = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/LabelShader.frag");
-    _shaderList.push_back(guishader2);
-
-    // SKY_MATERIAL
-    RShader* skyshader = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
-    _shaderList.push_back(skyshader);
-
-    // DEBUG_SHADER
-    RShader* debugshader = ResourceManager::getInstance().loadShader("Shaders/debug.vert", "Shaders/debug.frag");
-    _shaderList.push_back(debugshader);
-
-    // SHADOWMAP_SHADER
-    RShader* shadowmapshader = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag");
-    _shaderList.push_back(shadowmapshader);
-
-    // SHADOWMAP_ALPHA_TEST_SHADER
-    defines.clear();
-    defines.push_back("ALPHA_TEST");
-    RShader* shadowmapshader2 = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
-    _shaderList.push_back(shadowmapshader2);
+    _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
 
     // GRASS_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
-    defines.push_back("TRANSPARENCY");
     defines.push_back("GRASS");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    RShader* grassShader = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
-    _shaderList.push_back(grassShader);
+    _shaderList[GRASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
+
+    // SKY_MATERIAL
+    _shaderList[SKY_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
+
+    // GLASS_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("TRANSPARENCY");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
+
+    // GUI_IMAGE_SHADER
+    _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
+
+    // GUI_LABEL_SHADER
+    _shaderList[GUI_LABEL_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/LabelShader.frag");
+
+    // DEBUG_SHADER
+    _shaderList[DEBUG_SHADER] = ResourceManager::getInstance().loadShader("Shaders/debug.vert", "Shaders/debug.frag");
+
+    // SHADOWMAP_SHADER
+    _shaderList[SHADOWMAP_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag");
+
+    // SHADOWMAP_ALPHA_TEST_SHADER
+    defines.clear();
+    defines.push_back("ALPHA_TEST");
+    _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
 
 
     // Create UBO for lights
@@ -611,7 +598,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-                glEnable(GL_BLEND);
+            }
+            else if (currentShader == GLASS_MATERIAL)
+            {
+                glDisable(GL_BLEND);
             }
 
             if (mesh->material.shader == SKY_MATERIAL)
@@ -621,7 +611,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (mesh->material.shader == TREE_MATERIAL || mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == GRASS_MATERIAL)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-                glDisable(GL_BLEND);
+            }
+            else if (mesh->material.shader == GLASS_MATERIAL)
+            {
+                glEnable(GL_BLEND);
             }
 
             currentShader = mesh->material.shader;
@@ -700,8 +693,6 @@ void Renderer::renderScene(RenderData* renderData)
 
         if (mesh->material.diffuseTexture != NULL)
             shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, mesh->material.diffuseTexture);
-        if (mesh->material.alphaTexture != NULL)
-            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, mesh->material.alphaTexture);
 
 
 
@@ -752,9 +743,9 @@ void Renderer::renderScene(RenderData* renderData)
             glDisableVertexAttribArray(4);
         }
     }
-    glEnable(GL_BLEND);
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glDisable(GL_BLEND);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB
@@ -878,6 +869,7 @@ void Renderer::renderScene(RenderData* renderData)
 void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIObjectsList)
 {
     glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
 
     glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, 0.0f, (float)_screenHeight, 1.0f, -1.5f);
 
@@ -961,5 +953,6 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
 
 
     delete renderList;
+    glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
 }

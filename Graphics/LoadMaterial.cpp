@@ -105,27 +105,6 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
-
-
-    // Alpha texture
-    const char* alphaTextureName = materialElement->Attribute("alpha_texture");
-    if (alphaTextureName != NULL)
-    {
-    texStr = std::string(alphaTextureName);
-
-    std::cout << "Alpha texture: " << texStr << std::endl;
-
-    for(unsigned int i = 0; i < texStr.size(); i++ )
-        texStr[i] = tolower(texStr[i]);
-
-    texturePath = texPath + texStr;
-
-
-    if(texStr != "")
-        sMaterial.alphaTexture = ResourceManager::getInstance().loadTexture(texturePath);
-    }
-
-
     const char* type = materialElement->Attribute("type");
 
     if (strcmp(type, "normalmapping") == 0)
@@ -138,8 +117,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = TREE_MATERIAL;
     else if (strcmp(type, "alpha_test") == 0)
         sMaterial.shader = ALPHA_TEST_MATERIAL;
-    else if (strcmp(type, "transparency") == 0)
-        sMaterial.shader = TRANSPARENCY_MATERIAL;
+    else if (strcmp(type, "glass") == 0)
+        sMaterial.shader = GLASS_MATERIAL;
     else if (strcmp(type, "grass") == 0)
         sMaterial.shader = GRASS_MATERIAL;
 
