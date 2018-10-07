@@ -182,12 +182,13 @@ void SceneManager::loadScene(std::string filename)
 
     std::string heightmapFullPath = dirPath + terrainHeightmap;
     std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
-    Model* terrModel = TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
-    RModel* terrain = new RModel("", terrModel);
+    RStaticModel* terrModel = TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
+    //RModel* terrain = new RModel("", terrModel);
     SceneObject* terrainObject = addSceneObject("terrain");
-    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrain), terrainObject);
+    RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrModel), terrainObject);
+    terrainObj->setIsCastShadows(false);
     int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrain, COL_TERRAIN, collidesWith);
+    PhysicalBodyBvtTriangleMesh* terrainMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(terrModel, COL_TERRAIN, collidesWith);
     terrainMesh->setRestitution(0.9f);
     terrainMesh->getRigidBody()->setFriction(1.0f);
     //terrainMesh->getRigidBody()->setFriction(1.5f);
@@ -217,7 +218,7 @@ void SceneManager::loadScene(std::string filename)
         std::cout << "heightmap: " << terrainHeightmapForGrassFileName << std::endl;
         std::cout << "density texture: " << grassDensityTextureFileName << std::endl;
 
-        RModel* grassModel = ResourceManager::getInstance().loadModel(dirPath + "grass/" + grassModelFileName, dirPath + "grass/");
+        RStaticModel* grassModel = ResourceManager::getInstance().loadModel(dirPath + "grass/" + grassModelFileName, dirPath + "grass/");
         RTexture2D* heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(dirPath + terrainHeightmapForGrassFileName);
         RTexture2D* grassDensityTexture = ResourceManager::getInstance().loadTexture(dirPath + grassDensityTextureFileName);
         heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
@@ -303,13 +304,15 @@ void SceneManager::loadScene(std::string filename)
         //std::cout << profiles[profileName].size() << std::endl;
         //std::cout << segments.size() << std::endl;
         // create road
-        Model* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
-        RModel* roadModel2 = new RModel("", roadModel);
+        RStaticModel* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
+        //RModel* roadModel2 = new RModel("", roadModel);
+        //RStaticModel* roadModel2 = new RStaticModel;
         SceneObject* roadSceneObject = addSceneObject(name);
-        RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel2), roadSceneObject);
+        RenderObject* roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel), roadSceneObject);
+        roadRenderObject->setIsCastShadows(false);
         //roadSceneObject->addComponent(roadRenderObject);
         int collidesWith = COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR;
-        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel2, COL_TERRAIN, collidesWith);
+        PhysicalBodyBvtTriangleMesh* roadMesh = _physicsManager->createPhysicalBodyBvtTriangleMesh(roadModel, COL_TERRAIN, collidesWith);
         terrainMesh->setRestitution(0.9f);
         terrainMesh->getRigidBody()->setFriction(1.0f);
         //terrainMesh->getRigidBody()->setFriction(1.5f);
@@ -374,7 +377,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
     glm::vec3 scale(1,1,1);
 
-    RModel* model = 0;
+    RStaticModel* model = 0;
 
 
     XMLElement* componentElement = components->FirstChildElement("Component");

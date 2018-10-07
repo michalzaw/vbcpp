@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="terenzab.3ds" />
+		<Component type="render" model="terenzab.fbx" />
 		<Component type="physics" body="static" />
 
 	</Components>

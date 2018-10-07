@@ -25,28 +25,46 @@
 //#define DRAW_AABB
 
 
-class Renderer : virtual public RefCounter
+class Renderer
 {
     private:
+        bool _isInitialized;
+
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
         UBO* _lightUBO;
+
+        std::vector<RenderData*> _renderDataList;
 
         unsigned int _screenWidth;
         unsigned int _screenHeight;
 
         bool _isShadowMappingEnable;
+        ShadowMap* _shadowMap;      // Cienie wspierane tylko dla jednego swiatla keirunkowego
+
+        void prepareLightsData();
+        void prepareRenderData();
+
+        void createRenderDatasForShadowMap(ShadowMap* shadowMap);
+        void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
+
+        Renderer();
 
     public:
-        Renderer(unsigned int screenWidth, unsigned int screenHeight/* OGLDriver* driver */);
         ~Renderer();
+
+        static Renderer& getInstance();
 
         glm::vec4 grassColor;
 
-        void init();
+        void init(unsigned int screenWidth, unsigned int screenHeight);
 
         void setIsShadowMappingEnable(bool isEnable);
         bool isShadowMappingEnable();
+        void registerShadowMap(ShadowMap* shadowMap);
+        void unregisterShadowMap(ShadowMap* shadowMap);
+
+        void setCurrentMainCamera(CameraStatic* camera);
 
         void renderAll();
         void renderDepth(RenderData* renderData);

@@ -1,7 +1,7 @@
 #include "Grass.h"
 
 
-Grass::Grass(RModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
+Grass::Grass(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
     : RenderObject(model),
     _terrainHeightmap(terrainHeightmap), _grassDensityTexture(grassDensityTexture),
     _grassColor(1.0f, 1.0f, 1.0f, 1.0f)

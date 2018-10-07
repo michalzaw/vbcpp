@@ -167,7 +167,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
     std::cout<< sObjName << std::endl;
 
-    RModel* busModel = 0;
+    RStaticModel* busModel = 0;
 
     glm::vec3 busPosition = glm::vec3(0,0,0);
     //glm::vec3 busRotation = glm::vec3(0,0,0);
@@ -267,7 +267,7 @@ void BusRaycast::loadXMLdata(std::string busname)
             btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
 
             std::string modelPath = "Buses/" + busname + "/" + wheelModel;
-            RModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+            RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
             GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelObj);
 
             //wheelObj->addComponent(wheelRender);
@@ -351,7 +351,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
 
-            RModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
+            RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
             GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
 
             const char* cPosition = steeringWheelElement->Attribute("position");
@@ -453,7 +453,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 std::string modelPath = "Buses/" + busname + "/" + doorModel;
 
-                RModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+                RStaticModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(dr), doorObj);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
@@ -503,7 +503,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 std::string armPath = "Buses/" + busname + "/" + armModel;
 
-                RModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
+                RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
 
                 btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
@@ -533,7 +533,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 std::string arm2Path = "Buses/" + busname + "/" + arm2Model;
 
-                RModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
+                RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
 
                 btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
@@ -561,7 +561,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
-                RModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
+                RStaticModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
                 GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);

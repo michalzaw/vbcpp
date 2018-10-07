@@ -10,7 +10,7 @@ uniform mat4 MVP;
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
-uniform vec3 CameraPositionWorldspace;
+uniform vec3 CameraPosition;
 //uniform vec3 n;
 uniform vec3 d;
 
@@ -31,7 +31,7 @@ void main()
 	Position = (ModelMatrix * vec4(0.0f, 0.0f, 0.0f, 1.0f)).xyz;//(ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
 	TexCoord = VertexUV;
 	//Normal = (NormalMatrix * vec4(normalize(vec3(VertexPosition.x, 0.0f, VertexPosition.z)), 0.0f)).xyz;//(NormalMatrix * vec4(VertexNormal, 0.0f)).xyz;//
-	Normal = CameraPositionWorldspace - Position;
+	Normal = CameraPosition - Position;
 	Normal = normalize(vec3(Normal.x, 0.0f, Normal.z));
 	//Normal = normalize(vec3(n.x, 0.0f, n.z));
 	//Normal = n;

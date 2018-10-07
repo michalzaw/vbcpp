@@ -1,6 +1,7 @@
 #include "Light.h"
 
 #include "GraphicsManager.h"
+#include "Renderer.h"
 #include "../Scene/SceneObject.h"
 
 
@@ -81,10 +82,14 @@ void Light::setShadowMapping(bool isEnable)
     {
         _shadowMap = new ShadowMap(_object);
         _shadowMap->create();
+
+        Renderer::getInstance().registerShadowMap(_shadowMap);
     }
 
     if (!isShadowMapping() && _shadowMap != NULL)
     {
+        Renderer::getInstance().unregisterShadowMap(_shadowMap);
+
         delete _shadowMap;
     }
 }

@@ -13,7 +13,7 @@ class Grass : public RenderObject
         glm::vec4   _grassColor;
 
     public:
-        Grass(RModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
+        Grass(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         ~Grass();
 
         void setGrassColor(glm::vec4 grassColor);

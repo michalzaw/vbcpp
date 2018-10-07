@@ -37,9 +37,7 @@ void Framebuffer::init()
 
 void Framebuffer::bind()
 {
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fboId);
-
-    glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+    glBindFramebuffer(GL_FRAMEBUFFER, _fboId);
 
     glViewport(_viewport.position.x, _viewport.position.y, _viewport.size.x, _viewport.size.y);
 }
@@ -53,7 +51,7 @@ void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height)
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
 
-    glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
 }
 
 
@@ -73,14 +71,22 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     else
     {
         attachment = GL_COLOR_ATTACHMENT0 + _fboBuffs.size();
-    }
-    _fboBuffs.push_back(attachment);
 
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
+        _fboBuffs.push_back(attachment);
+    }
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
 
     _textures.push_back(texture);
 
-    glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+    if (_fboBuffs.size() > 0)
+    {
+        glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+    }
+    else
+    {
+        glDrawBuffer(GL_NONE);
+    }
 }
 
 

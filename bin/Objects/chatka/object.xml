@@ -5,7 +5,7 @@
 	<Description author="test" name="Chatka" comment="Wiejska chatka drewniana" />
 
 	<Components>
-		<Component type="render" model="chatka.3ds" scale="1,1,1" />
+		<Component type="render" model="chatka.fbx" scale="1,1,1" />
 	
 		<Component type="physics" mass="0" body="static" />
 	</Components>

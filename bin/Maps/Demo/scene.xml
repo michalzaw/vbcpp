@@ -8,7 +8,7 @@
 	
 	<Start position="150,5,-151" rotation="0,-90,0" />
 	
-	<Grass model="grass.3ds" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />
+	<Grass model="grass.fbx" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />
 	
 	<Objects>
 		<Object name="jezioro" position="185,2.8,0" rotation="0,0,0" />

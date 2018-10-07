@@ -1,5 +1,7 @@
 #include "GraphicsManager.h"
 
+#include "Renderer.h"
+
 #include "../Scene/SceneObject.h"
 
 
@@ -58,7 +60,7 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-Grass* GraphicsManager::addGrassComponent(RModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
+Grass* GraphicsManager::addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
 {
     Grass* grass = new Grass(model, terrainHeightmap, grassDensityTexture);
 
@@ -182,6 +184,7 @@ void GraphicsManager::removeLight(Light* light)
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
+    Renderer::getInstance().setCurrentMainCamera(camera);
 }
 
 
@@ -254,7 +257,7 @@ RenderData* GraphicsManager::getRenderData()
         if (!(*i)->isActive())
             continue;
 
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
         {
             RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
@@ -288,7 +291,7 @@ RenderData* GraphicsManager::getRenderData()
     {
         RenderObject* object = *i;
 
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
         {
             RenderListElement renderElement(RET_GRASS, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
@@ -304,7 +307,7 @@ RenderData* GraphicsManager::getRenderData()
         if (!(*i)->isActive() || !isAABBIntersectFrustum(frustum, *object->getAABB()))//!isPointInFrustum(frustum, object->getAABB()->getCenterPosition()))
             continue;
 //k++;
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
         {
             RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
@@ -318,7 +321,6 @@ RenderData* GraphicsManager::getRenderData()
 //std::cout << k << std::endl;
     return renderData;
 }
-#endif // FRUSTUM_CULLING
 
 RenderData* GraphicsManager::getRenderDataForDepthRendering()
 {
@@ -331,10 +333,10 @@ RenderData* GraphicsManager::getRenderDataForDepthRendering()
     {
         RenderObject* object = *i;
 
-        if (!(*i)->isActive() || !isAABBIntersectAABB(*cameraAabb, *object->getAABB()))
+        if (!(*i)->isActive() || !isAABBIntersectAABB(*cameraAabb, *object->getAABB()) || !object->isCastShadows())
             continue;
 
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
         {
             RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);
@@ -345,6 +347,7 @@ RenderData* GraphicsManager::getRenderDataForDepthRendering()
 
     return renderData;
 }
+#endif // FRUSTUM_CULLING
 
 #ifdef QUAD_TREE
 RenderData* GraphicsManager::getRenderData()
@@ -372,7 +375,7 @@ RenderData* GraphicsManager::getRenderData()
         if (!(*i)->isActive())
             continue;
 
-        for (int j = 0; j < object->getModel()->getQuantumOfMeshes(); ++j)
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
         {
             RenderListElement renderElement(RET_SINGLE, object->getModel(), object->getModel()->getMesh(j), TransformMatrices(object->getSceneObject()->getGlobalTransformMatrix(), object->getSceneObject()->getGlobalNormalMatrix()),
                                             glm::length(renderData->camera->getPosition() - object->getSceneObject()->getPosition()), object->getSceneObject(), object);

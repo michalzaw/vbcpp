@@ -78,9 +78,6 @@ uniform float SpecularPower;
 #ifdef NORMALMAPPING
 uniform sampler2D NormalmapTexture;
 #endif
-#ifdef TRANSPARENCY
-uniform sampler2D AlphaTexture;
-#endif
 #ifdef GRASS
 uniform vec4 grassColor;
 uniform vec4 grassFraction;
@@ -235,8 +232,8 @@ void main()
 	//FragmentColor = texture2D(Texture, TexCoord) * (amb + diff + spec);
 	FragmentColor = LightsColor;
 	
-	FragmentColor.a = 1 - Transparency;
-#ifdef TRANSPARENCY
-	FragmentColor.a = texture2D(AlphaTexture, TexCoord).a;
+	FragmentColor.a = 1.0f;
+#ifdef ALPHA_TEST
+	FragmentColor.a = textureColor.a;
 #endif
 }

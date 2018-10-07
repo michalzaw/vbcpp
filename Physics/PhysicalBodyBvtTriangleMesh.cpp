@@ -1,6 +1,6 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
-PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RModel* model)
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
 : PhysicalBody(0),
 _model(model)
 {
@@ -23,23 +23,28 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 
     if (_model)
     {
-        unsigned int* indices = _model->getIndices();
-        Vertex* vertices = _model->getVertices();
-
-        vertexCount = _model->getQuantumOfVertices();
-
-        for (unsigned int j = 0; j < _model->getIndicesSize(); j += 3)
+        for (int i = 0; i < _model->getMeshesCount(); ++i)
         {
-            for (unsigned int k = 0; k < 3; k++)
+            StaticModelMesh* mesh = _model->getMesh(i);
+
+            unsigned int* indices = mesh->indices;
+            Vertex* vertices = mesh->vertices;
+
+            vertexCount = mesh->verticesCount;
+
+            for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
             {
-                index = indices[j+k];
+                for (unsigned int k = 0; k < 3; k++)
+                {
+                    index = indices[j+k] - mesh->firstVertexInVbo;
 
-                if (index > vertexCount) continue;
+                    if (index > vertexCount) continue;
 
-                tmp_vertices[k] = btVector3(vertices[index].position[0], vertices[index].position[1], vertices[index].position[2]);
+                    tmp_vertices[k] = btVector3(vertices[index].position[0], vertices[index].position[1], vertices[index].position[2]);
+                }
+
+                triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[3]);
             }
-
-            triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[3]);
         }
     }
 

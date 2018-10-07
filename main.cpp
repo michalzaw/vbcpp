@@ -234,9 +234,9 @@ int main()
 	sceneMgr = new SceneManager(physMgr, sndMgr);
 
 
-	Renderer* renderer = new Renderer(win->getWidth(), win->getHeight());
-	renderer->setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
-	renderer->init();
+	Renderer& renderer = Renderer::getInstance();
+	renderer.setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
+	renderer.init(win->getWidth(), win->getHeight());
 
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -395,10 +395,10 @@ int main()
         labelTorque->setText("Torque: " + toString(bus->getEngine()->getCurrentTorque()));
 
         // Render the scene
-        renderer->renderAll();
+        renderer.renderAll();
 
         // Render GUI
-        renderer->renderGUI(gui->getGUIRenderList());
+        renderer.renderGUI(gui->getGUIRenderList());
 
         // Swap buffers and poll events
         win->swapBuffers();
@@ -416,7 +416,6 @@ int main()
 
     sndMgr->drop();
     physMgr->drop();
-    renderer->drop();
     delete sceneMgr;
 
     delete win;

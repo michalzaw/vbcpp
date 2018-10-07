@@ -10,12 +10,12 @@
 
 #include <SOIL/soil.h>
 
-#include "Model.h"
 #include "Material.h"
 #include "NVMeshMender/NVMeshMender.h"
 #include "LoadMaterial.h"
 
 #include "../Utils/FilesHelper.h"
+#include "../Utils/RStaticModel.h"
 
 
 class TerrainLoader
@@ -26,13 +26,13 @@ class TerrainLoader
     private:
         static std::string createTerFileName(std::string heightmapFilename);
 
-        static void saveTerFile(const char* fileName, Model* model);
-        static Model* loadTerFile(const char* fileName, std::string materialFileName, std::string texturePath);
+        static void saveTerFile(const char* fileName, RStaticModel* model);
+        static RStaticModel* loadTerFile(const char* fileName, std::string materialFileName, std::string texturePath);
 
-        static Model* loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
+        static RStaticModel* loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
 
     public:
-        static Model* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
+        static RStaticModel* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
 
         static std::string createTerrainHeightAndNormalMapFileName(std::string heightmapFilename);
 

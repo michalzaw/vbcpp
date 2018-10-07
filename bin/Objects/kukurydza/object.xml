@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="corn.3ds" />
+		<Component type="render" model="corn.fbx" />
 		<!-- <Component type="tree" /> -->
  	</Components>
 	

@@ -8,7 +8,7 @@
 #include "Model.h"
 #include "AABB.h"
 
-#include "../Utils/RModel.h"
+#include "../Utils/RStaticModel.h"
 
 #include "../Scene/Component.h"
 
@@ -16,7 +16,9 @@
 class RenderObject : public Component
 {
     protected:
-        RModel* _model;
+        RStaticModel* _model;
+
+        bool _isCastShadows;
 
         AABB _aabb;
         bool _isCalculatedAABB;
@@ -24,11 +26,14 @@ class RenderObject : public Component
         void calculateNewAABB();
 
     public:
-        RenderObject(RModel* model = NULL);
+        RenderObject(RStaticModel* model = NULL);
         virtual ~RenderObject();
 
-        void setModel(RModel* model);
-        RModel* getModel();
+        void setModel(RStaticModel* model);
+        RStaticModel* getModel();
+
+        void setIsCastShadows(bool isCastShadows);
+        bool isCastShadows();
 
         AABB* getAABB();
 

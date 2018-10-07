@@ -12,8 +12,8 @@ enum RotationDir
 class DoorSE : virtual public Door
 {
     public:
-        DoorSE(RModel* model, PhysicalBodyConvexHull* body,
-               RModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2,
+        DoorSE(RStaticModel* model, PhysicalBodyConvexHull* body,
+               RStaticModel* armModel, PhysicalBodyConvexHull* armBody, ConstraintHinge* constraint1, ConstraintHinge* constraint2,
                SoundComponent* openDoor, SoundComponent* closeDoor, RotationDir dir = ERD_CCW, char group = 1)
         : Door(model, body, openDoor, closeDoor, group),
         _armModel(armModel), _armBody(armBody), _constraint1(constraint1), _constraint2(constraint2), _rotationDir(dir)
@@ -49,13 +49,13 @@ class DoorSE : virtual public Door
 
         }
 
-        RModel* getArmModel() { return _armModel; }
+        RStaticModel* getArmModel() { return _armModel; }
         PhysicalBodyConvexHull* getArmBody() { return _armBody; }
 
         ConstraintHinge* getConstraint1() { return _constraint1; }
 
     protected:
-        RModel*                 _armModel;
+        RStaticModel*           _armModel;
         PhysicalBodyConvexHull* _armBody;
         ConstraintHinge*        _constraint1;   // bus - arm
         ConstraintHinge*        _constraint2;   // arm - door

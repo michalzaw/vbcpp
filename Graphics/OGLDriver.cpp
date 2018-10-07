@@ -6,6 +6,9 @@ static std::unique_ptr<OGLDriver> drvInstance;
 OGLDriver::OGLDriver()
 {
     //_defaultVAO = NULL;
+
+    vbos = new std::vector<VBO*>[13];
+    ibos = new std::vector<IBO*>[13];
 }
 
 
@@ -37,6 +40,9 @@ OGLDriver::~OGLDriver()
     }
 
     delete _defaultFramebuffer;
+
+    delete[] vbos;
+    delete[] ibos;
 
 }
 

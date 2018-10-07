@@ -3,6 +3,7 @@
 #include "../Graphics/LoadTexture.h"
 #include "../Graphics/LoadShader.h"
 #include "../Graphics/Load3ds.h"
+#include "../Graphics/StaticModelLoader.h"
 #include "../GUI/FontLoader.h"
 
 
@@ -195,37 +196,29 @@ void ResourceManager::reloadAllShaders()
 }
 
 
-RModel* ResourceManager::loadModel(std::string path, std::string texturePath)
+RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePath)
 {
     Resource* res = findResource(path);
     if (res != 0)
     {
-        RModel* model = dynamic_cast<RModel*>(res);
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
         return model;
     }
 
 
-    Load3ds l3ds;
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModel(path, texturePath) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
-    Model* mTemp = l3ds.loadModel(path, texturePath);
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
-    if (mTemp)
+    if ( m )
     {
-        std::unique_ptr<RModel> model( new RModel(path, mTemp) );
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
-
-        RModel* m = dynamic_cast<RModel*>( model.get() );
-
-        if ( m )
-        {
-            _resources.push_back(std::move(model));
-            return m;
-        }
-        else
-            return 0;
+        _resources.push_back(std::move(model));
+        return m;
     }
-
-    return 0;
+    else
+        return 0;
 }
 
 

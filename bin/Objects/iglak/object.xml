@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="iglak.3ds" />
+		<Component type="render" model="iglak.fbx" />
 		<Component type="tree" />
 	</Components>
 	

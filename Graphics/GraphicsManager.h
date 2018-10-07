@@ -24,11 +24,13 @@
 
 
 //#define ALL_OBJECTS
-#define FRUSTUM_CULLING
+//#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
 class GraphicsManager
 {
+    friend class Renderer;
+
     private:
         std::list<RenderObject*>    _renderObjects;
         std::list<Grass*>           _grassComponents;
@@ -56,7 +58,7 @@ class GraphicsManager
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
-        Grass*          addGrassComponent(RModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
+        Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
         Light*          addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);

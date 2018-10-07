@@ -9,7 +9,7 @@
 #include "Light.h"
 #include "Transform.h"
 #include "RenderObject.h"
-#include "../Utils/RModel.h"
+#include "../Utils/RStaticModel.h"
 #include "../Scene/SceneObject.h"
 
 
@@ -20,58 +20,19 @@ enum RenderElementType
 };
 
 
-struct TransformMatrices
+struct RenderListElement
 {
-    glm::mat4& transformMatrix;
-    glm::mat4& normalMatrix;
+    RenderElementType   type;
 
-    TransformMatrices(glm::mat4& transform, glm::mat4& normal)
-        : transformMatrix(transform), normalMatrix(normal)
-    {
+    RStaticModel*       model;
+    StaticModelMesh*    mesh;
 
-    }
+    float               distanceFromCamera;
 
-};
+    SceneObject*        object;
+    RenderObject*       renderObject;
 
-
-class RenderListElement
-{
-    private:
-        RenderElementType _type;
-
-        RModel*     _model;
-        Mesh*       _mesh;
-        TransformMatrices _matrices;
-
-        float       _distanceFromCamera;
-
-        SceneObject* _object; /* !!!!!!!!!! */
-        RenderObject* _renderObject;
-
-    public:
-        RenderListElement(RenderElementType type, RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object, RenderObject* renderObject);
-        ~RenderListElement();
-
-        inline RenderElementType getType()
-        { return _type; }
-
-        inline RModel* getModel()
-        { return _model; }
-
-        inline Mesh* getMesh()
-        { return _mesh; }
-
-        inline TransformMatrices& getTransformMatrices()
-        { return _matrices; }
-
-        inline float getDistanceFromCamera()
-        { return _distanceFromCamera; }
-
-        inline SceneObject* getObject()
-        { return _object; }
-
-        inline RenderObject* getRenderObject()
-        { return _renderObject; }
+    RenderListElement();
 
 };
 
@@ -80,7 +41,8 @@ struct RenderData
 {
     std::list<RenderListElement> renderList;
     CameraStatic* camera;
-    std::list<Light*> lights;
+    Framebuffer* framebuffer;
+    glm::mat4 MVMatrix;
 
 };
 

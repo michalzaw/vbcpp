@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="domek_vbcpp.3ds" />
+		<Component type="render" model="domek_vbcpp.fbx" />
 	
 		<Component type="physics" mass="0" body="static" />
 	</Components>

@@ -20,6 +20,7 @@ class VBO
         VBO(unsigned int size);
         ~VBO();
 
+        unsigned int getVertexSize();
         unsigned int getBufferSize();
         unsigned int getQuantumOfVertices();
 
