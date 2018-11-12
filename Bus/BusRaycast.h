@@ -78,6 +78,7 @@ class BusRaycast : public Bus
 
         virtual void doorOpenClose(char doorGroup);
         virtual Door* getDoor(unsigned char doorIndex);
+        virtual int getDoorsCount();
 
         virtual void update(float deltaTime);
 
@@ -115,6 +116,20 @@ class BusRaycast : public Bus
         int             _collidesWith;
 
         void loadXMLdata(std::string busname);
+        bool isAllDoorClosed()
+        {
+            for (unsigned char i = 0; i < _doors.size(); i++)
+            {
+                if (_doors[i]->getState() == EDS_OPENING)
+                    return false;
+            }
+            return true;
+        }
+
+        void setRandomNumberOfPassengersGettingOff()
+        {
+            _numberOfPassengersGettingOff = rand() % _numberOfPassengers;
+        }
 };
 
 

@@ -866,6 +866,9 @@ void BusRaycast::doorOpenClose(char doorGroup)
             if (_doors[i]->getState() == EDS_OPENING)
             {
                 _doors[i]->close();
+
+                if (isAllDoorClosed())
+                    setRandomNumberOfPassengersGettingOff();
             }
         }
     }
@@ -874,7 +877,16 @@ void BusRaycast::doorOpenClose(char doorGroup)
 
 Door* BusRaycast::getDoor(unsigned char doorIndex)
 {
-    _doors[doorIndex];
+    if (doorIndex <= _doors.size()-1)
+        return _doors[doorIndex];
+    else
+        return 0;
+}
+
+
+int BusRaycast::getDoorsCount()
+{
+    return _doors.size();
 }
 
 

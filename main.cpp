@@ -24,6 +24,7 @@
 #include "GUI/GUIManager.h"
 
 #include "Game/GameConfig.h"
+#include "Game/BusStopSystem.h"
 
 
 // Definicje globalne
@@ -274,6 +275,29 @@ int main()
     lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
 
 
+    //--------------------------------------------------------------------------------
+    SceneObject* busStopObject1 = sceneMgr->addSceneObject("busStop1");
+    busStopObject1->addComponent(BusStopSystem::getInstance().addBusStopComponent("Przystanek 1"));
+    busStopObject1->setPosition(140,0.1,-155);
+
+    SceneObject* busStopObject2 = sceneMgr->addSceneObject("busStop2");
+    busStopObject2->addComponent(BusStopSystem::getInstance().addBusStopComponent("Przystanek 2"));
+    busStopObject2->setPosition(-100,0.1,-155);
+
+    SceneObject* busStopObject3 = sceneMgr->addSceneObject("busStop3");
+    busStopObject3->addComponent(BusStopSystem::getInstance().addBusStopComponent("Przystanek 3"));
+    busStopObject3->setPosition(-85,0.3,90);
+
+    SceneObject* busStopObject4 = sceneMgr->addSceneObject("busStop4");
+    busStopObject4->addComponent(BusStopSystem::getInstance().addBusStopComponent("Przystanek 4"));
+    busStopObject4->setPosition(-110,0.1,165);
+
+    SceneObject* busStopObject5 = sceneMgr->addSceneObject("busStop5");
+    busStopObject5->addComponent(BusStopSystem::getInstance().addBusStopComponent("Przystanek 5"));
+    busStopObject5->setPosition(145,3.3,-28);
+    //--------------------------------------------------------------------------------
+
+
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     sceneMgr->addSky(loadTextureCubeMap(skyboxTextures, true));
 
@@ -313,6 +337,26 @@ int main()
     labelTorque->setPosition(10, 10);
     labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelTorque->scale(0.6f, 0.6f);
+
+    Label* labelBusStop = gui->addLabel(font, "");
+    labelBusStop->setPosition(450, 730);
+    labelBusStop->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelBusStop->scale(0.6f, 0.6f);
+
+    Label* labelBusStop2 = gui->addLabel(font, "");
+    labelBusStop2->setPosition(450, 705);
+    labelBusStop2->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelBusStop2->scale(0.6f, 0.6f);
+
+    Label* labelPassengers = gui->addLabel(font, "Liczba pasazerow: " + toString(bus->getNumberOfPassengers()));
+    labelPassengers->setPosition(10, 105);
+    labelPassengers->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelPassengers->scale(0.6f, 0.6f);
+
+    Label* labelPassengersGettingOff = gui->addLabel(font, "Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
+    labelPassengersGettingOff->setPosition(10, 90);
+    labelPassengersGettingOff->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelPassengersGettingOff->scale(0.6f, 0.6f);
 
 
     sndMgr->setActiveCamera(camFPS);
@@ -382,6 +426,7 @@ int main()
             physMgr->simulate(TIME_STEP);
             bus->update(TIME_STEP);
             GraphicsManager::getInstance().update(TIME_STEP);
+            BusStopSystem::getInstance().update(TIME_STEP, bus);
 
             accumulator -= TIME_STEP;
         }
@@ -393,6 +438,21 @@ int main()
         labelRPM->setText("RPM: " + toString(bus->getEngine()->getCurrentRPM()));
         labelThrottle->setText("Throttle: " + toString(bus->getEngine()->getThrottle()));
         labelTorque->setText("Torque: " + toString(bus->getEngine()->getCurrentTorque()));
+
+        BusStopSystem& busStopSystem = BusStopSystem::getInstance();
+        if (busStopSystem.getCurrentBusStop() != NULL)
+        {
+            labelBusStop->setText(busStopSystem.getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem.getDistanceToCurrentBusStop()) + "m)");
+            labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem.getCurrentBusStop()->getNumberOfPassengers()));
+
+            labelPassengers->setText("Liczba pasazerow w autobusie: " + toString(bus->getNumberOfPassengers()));
+            labelPassengersGettingOff->setText("Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
+        }
+        else
+        {
+            labelBusStop->setText("");
+            labelBusStop2->setText("");
+        }
 
         // Render the scene
         renderer.renderAll();

@@ -170,6 +170,9 @@
 		<Unit filename="GUI/Image.h" />
 		<Unit filename="GUI/Label.cpp" />
 		<Unit filename="GUI/Label.h" />
+		<Unit filename="Game/BusStopComponent.h" />
+		<Unit filename="Game/BusStopSystem.cpp" />
+		<Unit filename="Game/BusStopSystem.h" />
 		<Unit filename="Game/GameConfig.cpp" />
 		<Unit filename="Game/GameConfig.h" />
 		<Unit filename="Graphics/AABB.h" />

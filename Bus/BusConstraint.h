@@ -81,6 +81,7 @@ class BusConstraint : public Bus
         void doorOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex);
+        int getDoorsCount();
 
         // Update internal physics - doors, wheels etc
         void update(float dt);

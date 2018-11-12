@@ -29,7 +29,18 @@ enum WheelSide
 
 class Bus : public RefCounter
 {
+
+    protected:
+        unsigned int _numberOfPassengers;
+        unsigned int _numberOfPassengersGettingOff;
+
     public:
+        Bus()
+        {
+            _numberOfPassengers = 0;
+            _numberOfPassengersGettingOff = 0;
+        }
+
         virtual SceneObject* getSceneObject() = 0;
 
         virtual glm::vec3 getDriverPosition() = 0;
@@ -56,8 +67,29 @@ class Bus : public RefCounter
 
         virtual void doorOpenClose(char doorGroup) = 0;
         virtual Door* getDoor(unsigned char doorIndex) = 0;
+        virtual int getDoorsCount() = 0;
 
         virtual void update(float deltaTime) = 0;
+
+        void setNumberOfPassengers(unsigned int number)
+        {
+            _numberOfPassengers = number;
+        }
+
+        unsigned int getNumberOfPassengers()
+        {
+            return _numberOfPassengers;
+        }
+
+        void setNumberOfPassengersGettingOff(unsigned int number)
+        {
+            _numberOfPassengersGettingOff = number;
+        }
+
+        unsigned int getNumberOfPassengersGettingOff()
+        {
+            return _numberOfPassengersGettingOff;
+        }
 
 };
 

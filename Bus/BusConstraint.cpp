@@ -802,6 +802,12 @@ Door* BusConstraint::getDoor(unsigned char doorIndex)
 }
 
 
+int BusConstraint::getDoorsCount()
+{
+    return _doors.size();
+}
+
+
 void BusConstraint::doorOpenClose(char doorGroup)
 {
     for (unsigned char i = 0; i < _doors.size(); i++)

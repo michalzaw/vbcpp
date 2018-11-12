@@ -64,6 +64,10 @@ SceneObject::~SceneObject()
                 GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(*i));
                 break;
 
+            case CT_BUS_STOP:
+                BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -245,6 +249,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_GRASS:
                     GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(component));
+                    break;
+
+                case CT_BUS_STOP:
+                    BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
                     break;
 
             }

@@ -20,7 +20,9 @@ enum ComponentType
     CT_PHYSICAL_BODY,
     CT_TREE_COMPONENT,
     CT_SOUND,
-    CT_GRASS
+    CT_GRASS,
+
+    CT_BUS_STOP
 };
 
 

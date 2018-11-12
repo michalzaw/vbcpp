@@ -13,6 +13,8 @@
 #include "SceneObject.h"
 #include "Skybox.h"
 
+#include "../Game/BusStopSystem.h"
+
 
 struct BusStart
 {
