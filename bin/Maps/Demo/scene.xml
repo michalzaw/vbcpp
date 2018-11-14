@@ -143,10 +143,18 @@
 		<Object name="blok" position="-20,0,0" rotation="0,45,0" />
 		<Object name="blok" position="-20,0,-40" rotation="0,45,0" />
 		
-		<Object name="wiata" position="140,0.1,-155" rotation="0,180,0" />
-		<Object name="wiata" position="-100,0.1,-155" rotation="0,180,0" />
-		<Object name="wiata" position="-85,0.3,90" rotation="0,-90,0" />
-		<Object name="wiata" position="-110,0.1,165" rotation="0,180,0" />
+		<Object name="wiata" position="140,0.1,-155" rotation="0,180,0" >
+			<Component type="bus-stop" busStopName="Staromiejska" />
+		</Object>
+		<Object name="wiata" position="-100,0.1,-155" rotation="0,180,0" >
+			<Component type="bus-stop" busStopName="Papiernia NZ" />
+		</Object>
+		<Object name="wiata" position="-85,0.3,90" rotation="0,-90,0" >
+			<Component type="bus-stop" busStopName="Osiedle Rozane" />
+		</Object>
+		<Object name="wiata" position="-110,0.1,165" rotation="0,180,0" >
+			<Component type="bus-stop" busStopName="Handlowa" />
+		</Object>
 		
 		<Object name="most" position="-80,0,130" rotation="0,90,0" />
 		
@@ -160,7 +168,9 @@
 		
 		<Object name="chatka" position="156,3.3,-35" rotation="0,70,0" />
 		
-		<Object name="wiata" position="145,3.3,-28" rotation="0,90,0" />
+		<Object name="wiata" position="145,3.3,-28" rotation="0,90,0" >
+			<Component type="bus-stop" busStopName="Plac Mlynarza" />
+		</Object>
 		
 		<Object name="biedronka" position="-55,0,55" rotation="0,180,0" />
 		

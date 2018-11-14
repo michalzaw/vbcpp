@@ -248,7 +248,26 @@ void SceneManager::loadScene(std::string filename)
         std::cout << "Position: " << cPosition << std::endl;
         std::cout << "Rotation: " << cRotation << std::endl;
 
-        loadObject(name, position, rotation);
+        SceneObject* sceneObject = loadObject(name, position, rotation);
+
+        // Components properties defined per instance
+        XMLElement* componentElement = objectElement->FirstChildElement("Component");
+        while (componentElement != nullptr)
+        {
+            std::string componentType = componentElement->Attribute("type");
+            std::cout << "Component: " << componentType << std::endl;
+
+            if (componentType == "bus-stop")
+            {
+                std::string busStopName = componentElement->Attribute("busStopName");
+
+                BusStopComponent* component = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
+                component->setName(busStopName);
+            }
+
+            componentElement = componentElement->NextSiblingElement("Component");
+        }
+
 
         objectElement = objectElement->NextSiblingElement("Object");
     }
@@ -323,7 +342,7 @@ void SceneManager::loadScene(std::string filename)
 }
 
 
-void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 rotation)
+SceneObject* SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 rotation)
 {
     /*
     SceneObject* crate = sceneMgr->addSceneObject("crate");
@@ -351,14 +370,14 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
     if (objElement == nullptr)
     {
         std::cout << "Object element not found!" << std::endl;
-        return;
+        return NULL;
     }
 
     XMLElement* objDesc = objElement->FirstChildElement("Description");
     if (objDesc == nullptr)
     {
         std::cout << "Description element not found" << std::endl;
-        return;
+        return NULL;
     }
 
     // Load file description
@@ -379,6 +398,7 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
     RStaticModel* model = 0;
 
+    SceneObject* sceneObject;
 
     XMLElement* componentElement = components->FirstChildElement("Component");
     std::cout << "COMPONENTS: " << comment << std::endl;
@@ -386,8 +406,6 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
     {
         std::string componentType = componentElement->Attribute("type");
         std::cout << "Component: " << componentType << std::endl;
-
-        SceneObject* sceneObject;
 
         if (componentType == "render")
         {
@@ -515,6 +533,12 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
             sceneObject->addComponent(sound);
         }
+        else
+        if (componentType == "bus-stop")
+        {
+            BusStopComponent* component = BusStopSystem::getInstance().addBusStopComponent("Przystanek");
+            sceneObject->addComponent(component);
+		}
 
         //sceneObject->setPosition(position);
         //sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
@@ -522,6 +546,8 @@ void SceneManager::loadObject(std::string name, glm::vec3 position, glm::vec3 ro
 
         componentElement = componentElement->NextSiblingElement("Component");
     }
+
+    return sceneObject;
 }
 
 

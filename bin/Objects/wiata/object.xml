@@ -7,6 +7,7 @@
 	<Components>
 		<Component type="render" model="wiata2.fbx" />
 		<!-- <Component type="physics" mass="0" body="static" /> -->
+		<Component type="bus-stop" />
 	</Components>
 	
 </Object>

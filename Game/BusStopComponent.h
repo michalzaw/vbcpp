@@ -43,6 +43,11 @@ class BusStopComponent : public Component
             return _numberOfPassengers;
         }
 
+        void setName(std::string name)
+        {
+            _name = name;
+        }
+
         std::string getName()
         {
             return _name;
