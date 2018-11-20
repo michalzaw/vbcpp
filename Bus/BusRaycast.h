@@ -128,7 +128,10 @@ class BusRaycast : public Bus
 
         void setRandomNumberOfPassengersGettingOff()
         {
-            _numberOfPassengersGettingOff = rand() % _numberOfPassengers;
+            if (_numberOfPassengers != 0)
+                _numberOfPassengersGettingOff = rand() % _numberOfPassengers;
+            else
+                _numberOfPassengersGettingOff = 0;
         }
 };
 
