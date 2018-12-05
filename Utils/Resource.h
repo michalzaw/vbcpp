@@ -11,7 +11,8 @@ enum ResourceType
     RT_TEXTURE,
     RT_SHADER,
     RT_MODEL,
-    RT_FONT
+    RT_FONT,
+    RT_SOUND
 };
 
 class Resource

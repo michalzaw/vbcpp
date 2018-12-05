@@ -253,3 +253,27 @@ RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 
     return 0;
 }
+
+
+RSound* ResourceManager::loadSound(std::string path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RSound* sound = dynamic_cast<RSound*>(res);
+        return sound;
+    }
+
+    std::unique_ptr<RSound> sound( ::loadSound(path.c_str()) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << sound.get()->getPath() << std::endl;
+
+    RSound* s = dynamic_cast<RSound*>( sound.get() );
+
+    if ( s )
+    {
+        _resources.push_back(std::move(sound));
+        return s;
+    }
+    else
+        return 0;
+}

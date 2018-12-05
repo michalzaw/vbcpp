@@ -6,6 +6,7 @@
 #include "../Graphics/Model.h"
 #include "RStaticModel.h"
 #include "RFont.h"
+#include "SoundLoader.h"
 
 #include <iostream>
 #include <list>
@@ -36,6 +37,8 @@ class ResourceManager
         RStaticModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
+
+        RSound* loadSound(std::string path);
 
     protected:
         resourcePtrList _resources;

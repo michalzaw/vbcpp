@@ -289,6 +289,7 @@
 		<Unit filename="Utils/RFont.h" />
 		<Unit filename="Utils/RModel.cpp" />
 		<Unit filename="Utils/RModel.h" />
+		<Unit filename="Utils/RSound.h" />
 		<Unit filename="Utils/RStaticModel.cpp" />
 		<Unit filename="Utils/RStaticModel.h" />
 		<Unit filename="Utils/RTexture.cpp" />
@@ -301,6 +302,8 @@
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />
 		<Unit filename="Utils/ResourceManager.h" />
+		<Unit filename="Utils/SoundLoader.cpp" />
+		<Unit filename="Utils/SoundLoader.h" />
 		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/Timer.h" />
 		<Unit filename="Utils/tinyxml2.cpp" />

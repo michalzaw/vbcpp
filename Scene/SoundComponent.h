@@ -10,6 +10,8 @@
 
 #include "Component.h"
 
+#include "../Utils/RSound.h"
+
 
 enum SoundType
 {
@@ -31,60 +33,44 @@ enum SoundType
 class SoundComponent : virtual public Component
 {
     public:
-        SoundComponent(std::string file, SoundType type, bool looping = false)
-        : Component(CT_SOUND), _source(0), _buffer(0), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
+        SoundComponent(RSound* sound, SoundType type, bool looping = false)
+        : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
         {
-        std::cout << "Engine sound: " << file << std::endl;
             alGenSources( 1, &_source );
 
-            _buffer =alutCreateBufferFromFile (file.c_str());
-
-            //std::cout << "??? SoundComponend - Constructor" << std::endl;
-            //std::cout << "Buffer" << _buffer << std::endl;
-
-            if (_buffer == AL_NONE)
+            if (_object)
             {
-                ALenum error = alutGetError ();
-                fprintf (stderr, "Error loading file: '%s'\n",
-                alutGetErrorString (error));
+                update();
+
+                //glm::vec3 pos = _object->getPosition();
+
+                //alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
+                alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
             }
+
             else
             {
-                if (_object)
-                {
-                    update();
-
-                    //glm::vec3 pos = _object->getPosition();
-
-                    //alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
-                    alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
-                }
-
-                else
-                {
-                    fprintf (stderr, "Sound component not attached to any Scene Object! Using default values\n");
+                fprintf (stderr, "Sound component not attached to any Scene Object! Using default values\n");
 
 
-                    alSource3f( _source, AL_POSITION, 0., 1., 0. );
-                    alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
-                }
-
-                alSourcef( _source, AL_PITCH, 1.0f );
-                alSourcef( _source, AL_GAIN, 1. );
-                alSourcei( _source, AL_LOOPING, looping );
-
-                alSourcei( _source, AL_REFERENCE_DISTANCE, 1.0f); // 1.0f
-                alSourcei( _source, AL_MAX_DISTANCE, _playDistance);  // 1000.0f
-
-                alSourcei(_source, AL_BUFFER, _buffer);
+                alSource3f( _source, AL_POSITION, 0., 1., 0. );
+                alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
             }
+
+            alSourcef( _source, AL_PITCH, 1.0f );
+            alSourcef( _source, AL_GAIN, 1. );
+            alSourcei( _source, AL_LOOPING, looping );
+
+            alSourcei( _source, AL_REFERENCE_DISTANCE, 1.0f); // 1.0f
+            alSourcei( _source, AL_MAX_DISTANCE, _playDistance);  // 1000.0f
+
+            alSourcei(_source, AL_BUFFER, _sound->getBuffer());
         }
 
         virtual ~SoundComponent()
         {
 
             alDeleteSources(1, &_source);
-            alDeleteBuffers(1, &_buffer);
         }
 
         ALuint getSource()
@@ -168,7 +154,7 @@ class SoundComponent : virtual public Component
 
     protected:
         ALuint  _source;
-        ALuint  _buffer;
+        RSound* _sound;
         bool    _looping;
         bool    _mute;
 

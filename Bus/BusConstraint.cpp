@@ -371,10 +371,12 @@ void BusConstraint::loadXMLdata(std::string busname)
 
 
             // Create sound component
-            SoundComponent* openSoundComp = new SoundComponent(openSound, EST_PLAYER);
+            RSound* openSoundResource = ResourceManager::getInstance().loadSound(openSound);
+            SoundComponent* openSoundComp = new SoundComponent(openSoundResource, EST_PLAYER);
             _sndMgr->addSoundComponent(openSoundComp);
 
-            SoundComponent* closeSoundComp = new SoundComponent(closeSound, EST_PLAYER);
+            RSound* closeSoundResource = ResourceManager::getInstance().loadSound(closeSound);
+            SoundComponent* closeSoundComp = new SoundComponent(closeSoundResource, EST_PLAYER);
             _sndMgr->addSoundComponent(closeSoundComp);
 
             SceneObject* doorObj = 0;
@@ -565,7 +567,8 @@ void BusConstraint::loadXMLdata(std::string busname)
     // Create Sound Component if sound filename is defined in Engine XML config file
     if (_engine->getSoundFilename() != "")
     {
-        SoundComponent* soundComp = new SoundComponent(_engine->getSoundFilename(), EST_PLAYER, true);
+        RSound* engineSound = ResourceManager::getInstance().loadSound(_engine->getSoundFilename());
+        SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
         //_sceneObject->addComponent(soundComp);
         _modules[0].sceneObject->addComponent(soundComp);
         soundComp->setGain(_engine->getSoundVolume());

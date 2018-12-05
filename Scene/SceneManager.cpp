@@ -504,7 +504,8 @@ SceneObject* SceneManager::loadObject(std::string name, glm::vec3 position, glm:
             //float playDistance = atoi(componentElement->Attribute("playDistance"));
             //float volume = atoi(componentElement->Attribute("volume"));
 
-            SoundComponent* sound = new SoundComponent(soundPath, EST_AMBIENT, looping);
+            RSound* soundResource = ResourceManager::getInstance().loadSound(soundPath);
+            SoundComponent* sound = new SoundComponent(soundResource, EST_AMBIENT, looping);
             _soundManager->addSoundComponent(sound);
 
             // if set in config file - we set play distance accordingly (otherwise - play distance is 10.0f by default)
