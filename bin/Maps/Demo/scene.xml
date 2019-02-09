@@ -144,16 +144,16 @@
 		<Object name="blok" position="-20,0,-40" rotation="0,45,0" />
 		
 		<Object name="wiata" position="140,0.1,-155" rotation="0,180,0" >
-			<Component type="bus-stop" busStopName="Staromiejska" />
+			<Component type="bus-stop" busStopName="Staromiejska" id="0" announcement="Maps/Demo/announcements/Staromiejska.wav" />
 		</Object>
 		<Object name="wiata" position="-100,0.1,-155" rotation="0,180,0" >
-			<Component type="bus-stop" busStopName="Papiernia NZ" />
+			<Component type="bus-stop" busStopName="Papiernia NZ" id="1" announcement="Maps/Demo/announcements/Papiernia NZ.wav" />
 		</Object>
 		<Object name="wiata" position="-85,0.3,90" rotation="0,-90,0" >
-			<Component type="bus-stop" busStopName="Osiedle Rozane" />
+			<Component type="bus-stop" busStopName="Osiedle Rozane" id="2" announcement="Maps/Demo/announcements/Osiedle Rozane.wav" />
 		</Object>
 		<Object name="wiata" position="-110,0.1,165" rotation="0,180,0" >
-			<Component type="bus-stop" busStopName="Handlowa" />
+			<Component type="bus-stop" busStopName="Handlowa" id="3" announcement="Maps/Demo/announcements/Handlowa.wav" />
 		</Object>
 		
 		<Object name="most" position="-80,0,130" rotation="0,90,0" />
@@ -169,7 +169,7 @@
 		<Object name="chatka" position="156,3.3,-35" rotation="0,70,0" />
 		
 		<Object name="wiata" position="145,3.3,-28" rotation="0,90,0" >
-			<Component type="bus-stop" busStopName="Plac Mlynarza" />
+			<Component type="bus-stop" busStopName="Plac Mlynarza" id="4" announcement="Maps/Demo/announcements/PLAC MLYNARZA.wav" />
 		</Object>
 		
 		<Object name="biedronka" position="-55,0,55" rotation="0,180,0" />

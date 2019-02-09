@@ -96,6 +96,14 @@ class BusStopSystem
                     minDistance = distance;
                     nearestBusStop = _busStops[i];
                 }
+
+                if (distance < 50.0f && !_busStops[i]->getAnnouncementIsPlay())
+                {
+                    bus->getAnnouncementSource()->setSound(_busStops[i]->getAnnouncementSound());
+                    bus->getAnnouncementSource()->play();
+
+                    _busStops[i]->setAnnouncementIsPlay(true);
+                }
             }
 
             if (minDistance < MIN_DISTANCE_TO_BUS_STOP)

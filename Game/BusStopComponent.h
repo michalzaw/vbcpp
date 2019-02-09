@@ -16,6 +16,10 @@ class BusStopComponent : public Component
 
     private:
         std::string _name;
+        int _id;
+        std::string _announcementFileName;
+        RSound* _announcementSound;
+        bool _announcementIsPlay;
         unsigned int _numberOfPassengers;
 
         float _time;
@@ -23,7 +27,8 @@ class BusStopComponent : public Component
     public:
         BusStopComponent(std::string name)
             : Component(CT_BUS_STOP),
-            _name(name), _numberOfPassengers(0), _time(0.0f)
+            _name(name), _numberOfPassengers(0), _time(0.0f),
+            _announcementIsPlay(false)
         {
 
         }
@@ -51,6 +56,38 @@ class BusStopComponent : public Component
         std::string getName()
         {
             return _name;
+        }
+
+        void setId(int id)
+        {
+            _id = id;
+        }
+
+        int getId()
+        {
+            return _id;
+        }
+
+        void setAnnouncementFileName(std::string announcementFileName);
+
+        std::string getAnnouncementFileName()
+        {
+            return _announcementFileName;
+        }
+
+        bool getAnnouncementIsPlay()
+        {
+            return _announcementIsPlay;
+        }
+
+        void setAnnouncementIsPlay(bool announcementIsPlay)
+        {
+            _announcementIsPlay = announcementIsPlay;
+        }
+
+        RSound* getAnnouncementSound()
+        {
+            return _announcementSound;
         }
 
         void onTrigger(float deltaTime, Bus* bus)

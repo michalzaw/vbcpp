@@ -33,6 +33,7 @@ class Bus : public RefCounter
     protected:
         unsigned int _numberOfPassengers;
         unsigned int _numberOfPassengersGettingOff;
+        SoundComponent* _announcementSource;
 
     public:
         Bus()
@@ -89,6 +90,11 @@ class Bus : public RefCounter
         unsigned int getNumberOfPassengersGettingOff()
         {
             return _numberOfPassengersGettingOff;
+        }
+
+        SoundComponent* getAnnouncementSource()
+        {
+            return _announcementSource;
         }
 
 };

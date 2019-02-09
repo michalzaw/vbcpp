@@ -41,6 +41,7 @@ class SceneManager
 
         //GraphicsManager*    getGraphicsManager();
         PhysicsManager*     getPhysicsManager() { return _physicsManager; };
+        SoundManager*       getSoundManager() { return _soundManager; };
 
 
         SceneObject*    addSceneObject(std::string name);

@@ -64,7 +64,8 @@ class SoundComponent : virtual public Component
             alSourcei( _source, AL_REFERENCE_DISTANCE, 1.0f); // 1.0f
             alSourcei( _source, AL_MAX_DISTANCE, _playDistance);  // 1000.0f
 
-            alSourcei(_source, AL_BUFFER, _sound->getBuffer());
+            if (_sound != NULL)
+                alSourcei(_source, AL_BUFFER, _sound->getBuffer());
         }
 
         virtual ~SoundComponent()
@@ -150,6 +151,13 @@ class SoundComponent : virtual public Component
         void setMute(const bool mute)
         {
             _mute = mute;
+        }
+
+        void setSound(RSound* sound)
+        {
+            _sound = sound;
+
+            alSourcei(_source, AL_BUFFER, _sound->getBuffer());
         }
 
     protected:

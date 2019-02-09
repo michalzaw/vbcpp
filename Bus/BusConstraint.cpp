@@ -576,6 +576,14 @@ void BusConstraint::loadXMLdata(std::string busname)
         _sndMgr->addSoundComponent(soundComp);
     }
 
+    // Create announcement source component
+    _announcementSource = new SoundComponent(NULL, EST_PLAYER, false);
+    _modules[0].sceneObject->addComponent(_announcementSource);
+    _announcementSource->setGain(1.0f);
+    _announcementSource->setPlayDistance(20.0f);
+
+    _sndMgr->addSoundComponent(_announcementSource);
+
     // If it's articulated bus - connect modules with a ball joint
     if (_modules.size() > 1)
     {

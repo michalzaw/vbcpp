@@ -260,9 +260,13 @@ void SceneManager::loadScene(std::string filename)
             if (componentType == "bus-stop")
             {
                 std::string busStopName = componentElement->Attribute("busStopName");
+                int busStopId = atoi(componentElement->Attribute("id"));
+                std::string announcementFileName = componentElement->Attribute("announcement");
 
                 BusStopComponent* component = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
                 component->setName(busStopName);
+                component->setId(busStopId);
+                component->setAnnouncementFileName(announcementFileName);
             }
 
             componentElement = componentElement->NextSiblingElement("Component");
