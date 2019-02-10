@@ -257,18 +257,27 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             // obracamy model kola je¿li jest po lewej stronie
             WheelSide wheelSide;
+            float wheelAngle;
             if (side == "right")
             {
+                wheelAngle = 0.0f;
                 wheelSide = WS_RIGHT;
             }
             else
+            {
+                wheelAngle = 180.0f;
                 wheelSide = WS_LEFT;
+            }
 
             btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
 
+            SceneObject* wheelSubObjectForModel = _sMgr->addSceneObject(wheelName + "Model");
+            wheelSubObjectForModel->setRotation(0.0f, degToRad(wheelAngle), 0.0f);
+            wheelObj->addChild(wheelSubObjectForModel);
+
             std::string modelPath = "Buses/" + busname + "/" + wheelModel;
             RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelObj);
+            GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
 
             //wheelObj->addComponent(wheelRender);
 
@@ -351,7 +360,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
 
-            RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
+            RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
             GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
 
             const char* cPosition = steeringWheelElement->Attribute("position");
@@ -368,6 +377,35 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             //_sceneObject->addChild(_steeringWheelObject);
             busModule.sceneObject->addChild(_steeringWheelObject);
+        }
+
+        // ########### DESKTOP ###########
+        XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
+        if (desktopElement != nullptr)
+        {
+            //std::cout << "XML: Steering wheel" << std::endl;
+
+            std::string modelFile = std::string(desktopElement->Attribute("model"));
+            std::string modelPath = "Buses/" + busname + "/" + modelFile;
+
+            _desktopObject = _sMgr->addSceneObject("desktop");
+
+            RStaticModel* desktopModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+            GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
+
+            const char* cPosition = desktopElement->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+            _desktopObject->setPosition(position);
+
+            const char* cRotation = desktopElement->Attribute("rotation");
+            glm::vec3 rotation(XMLstringToVec3(cRotation));
+            _desktopObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+
+            const char* cScale = desktopElement->Attribute("scale");
+            glm::vec3 scale(XMLstringToVec3(cScale));
+            _desktopObject->setScale(scale);
+
+            busModule.sceneObject->addChild(_desktopObject);
         }
 
         // ########### HEADLIGHTS ###########

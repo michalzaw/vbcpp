@@ -244,7 +244,7 @@ int main()
 	GraphicsManager::getInstance().setWindVelocity(0.6f);
 
 
-    if (GameConfig::getInstance().busModel == "h9_raycast")
+    if (GameConfig::getInstance().busModel == "h9_raycast" || GameConfig::getInstance().busModel == "MAN")
         bus = new BusRaycast(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
     else
         bus = new BusConstraint(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);

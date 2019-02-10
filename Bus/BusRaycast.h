@@ -104,6 +104,7 @@ class BusRaycast : public Bus
         float   _brakeForceStep;
 
         SceneObject*    _steeringWheelObject;
+        SceneObject*    _desktopObject;
         glm::vec3       _driverPosition;
         LightsList      _lights;
         bool            _isEnableLights;

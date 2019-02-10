@@ -7,12 +7,12 @@
 
 	<Map name="Demo" />
 	
-	<Bus model="h9_raycast" />
+	<Bus model="MAN" />
 	
 	<Configuration>
 		<Fullscreen>false</Fullscreen>
 		
-		<Shadowmapping>true</Shadowmapping>
+		<Shadowmapping>false</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
 		
 		<Grass>true</Grass>
