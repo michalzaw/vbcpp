@@ -121,6 +121,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = GLASS_MATERIAL;
     else if (strcmp(type, "grass") == 0)
         sMaterial.shader = GRASS_MATERIAL;
+    else if (strcmp(type, "car_paint") == 0)
+        sMaterial.shader = CAR_PAINT;
 
     return sMaterial;
 }

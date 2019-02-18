@@ -6,6 +6,11 @@ const float CascadeEndClipSpace[CASCADES_COUNT] = float[CASCADES_COUNT](25.0f, 1
 const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005f);
 const float size[CASCADES_COUNT] = float[CASCADES_COUNT](2048.0f, 1024.0f, 512.0f);
 
+const float Air = 1.0;
+const float Glass = 1.51714;
+const float R0 = ((Air - Glass) * (Air - Glass)) / ((Air + Glass) * (Air + Glass));
+
+
 struct Light
 {
 	vec3 Color;
@@ -88,6 +93,7 @@ uniform vec3 CameraPosition;
 
 uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 
+uniform samplerCube env;
 
 vec4 textureColor;
 
@@ -230,8 +236,26 @@ void main()
 	
 	//FragmentColor = (AmbientColor + DiffuseColor + SpecularColor);
 	//FragmentColor = texture2D(Texture, TexCoord) * (amb + diff + spec);
-	FragmentColor = LightsColor;
 	
+	FragmentColor.rgb = LightsColor.rgb;
+	
+#ifdef CAR_PAINT
+	vec3 vector = normalize(vec3(Position - CameraPosition));
+	
+	vec3 reflection = reflect(vector, Normal);
+	
+	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), 1);
+	
+	
+	vec3 FragmentToEye = normalize(CameraPosition - Position);
+	float vvv = clamp(dot(Normal, FragmentToEye), 0.0f, 1.0f);
+	
+	//FragmentColor.rgb = texture(env, normalize(reflection)).rgb * (1.0f - 0.9f * vvv) + 0.8f * LightsColor.rgb;
+	fresnel = mix(0.2, 0.5, fresnel);
+	FragmentColor.rgb = mix(0.8 * LightsColor.rgb, texture(env, normalize(reflection)).rgb * LightsColor.rgb, fresnel);
+	//FragmentColor.rgb = LightsColor.rgb;
+	//FragmentColor.rgb = 0.1f * texture(env, normalize(reflection)).rgb * (1.0f - 0.5f * vvv) + (1 - fresnel) * LightsColor.rgb;
+#endif
 	FragmentColor.a = 1.0f;
 #ifdef ALPHA_TEST
 	FragmentColor.a = textureColor.a;

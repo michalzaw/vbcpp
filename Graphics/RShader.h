@@ -19,6 +19,7 @@ enum ShaderType
     GRASS_MATERIAL,
     SKY_MATERIAL,
     GLASS_MATERIAL,
+    CAR_PAINT,
 
     GUI_IMAGE_SHADER,
     GUI_LABEL_SHADER,
@@ -62,6 +63,7 @@ enum UniformName
     UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX,
     UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX,
     UNIFORM_GUI_COLOR,
+    ENV,
 
     NUMBER_OF_UNIFORMS
 };
@@ -115,6 +117,7 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX] = "VerticesTransformMatrix";
             _uniformsNames[UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX] = "TexCoordTransformMatrix";
             _uniformsNames[UNIFORM_GUI_COLOR] = "color";
+            _uniformsNames[ENV] = "env";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

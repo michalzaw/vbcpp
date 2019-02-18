@@ -71,6 +71,8 @@ class Renderer
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 
+        RTexture* envMap;
+
 };
 
 

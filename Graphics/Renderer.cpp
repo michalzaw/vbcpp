@@ -361,6 +361,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+
+
+    defines.push_back("CAR_PAINT");
+	_shaderList[CAR_PAINT] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+
     // NOTEXTURE_MATERIAL
     _shaderList[NOTEXTURE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
 
@@ -397,10 +403,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     // GLASS_MATERIAL
     defines.clear();
-    defines.push_back("SOLID");
-    defines.push_back("TRANSPARENCY");
-    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
+    //defines.push_back("SOLID");
+    //defines.push_back("TRANSPARENCY");
+    //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/glass.vert", "Shaders/glass.frag");
 
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
@@ -615,6 +621,7 @@ void Renderer::renderScene(RenderData* renderData)
             else if (mesh->material.shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
+                shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, envMap);
             }
 
             currentShader = mesh->material.shader;
@@ -625,6 +632,7 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
+                shader->bindTexture(ENV, envMap);
 
 
 
