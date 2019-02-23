@@ -42,6 +42,8 @@ enum UniformName
     UNIFORM_DIFFUSE_TEXTURE,
     UNIFORM_NOTMALMAP_TEXTURE,
     UNIFORM_ALPHA_TEXTURE,
+    UNIFORM_ENVIRONMENTMAP_TEXTURE,
+    UNIFORM_GLASS_TEXTURE,
     UNIFORM_MATERIAL_AMBIENT_COLOR,
     UNIFORM_MATERIAL_DIFFUSE_COLOR,
     UNIFORM_MATERIAL_SPECULAR_COLOR,
@@ -63,7 +65,7 @@ enum UniformName
     UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX,
     UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX,
     UNIFORM_GUI_COLOR,
-    ENV,
+    UNIFORM_DAY_NIGHT_RATIO,
 
     NUMBER_OF_UNIFORMS
 };
@@ -96,6 +98,8 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_DIFFUSE_TEXTURE] = "Texture";
             _uniformsNames[UNIFORM_NOTMALMAP_TEXTURE] = "NormalmapTexture";
             _uniformsNames[UNIFORM_ALPHA_TEXTURE] = "AlphaTexture";
+            _uniformsNames[UNIFORM_ENVIRONMENTMAP_TEXTURE] = "environmentMap";
+            _uniformsNames[UNIFORM_GLASS_TEXTURE] = "glassTexture";
             _uniformsNames[UNIFORM_MATERIAL_AMBIENT_COLOR] = "matAmbient";
             _uniformsNames[UNIFORM_MATERIAL_DIFFUSE_COLOR] = "matDiffuse";
             _uniformsNames[UNIFORM_MATERIAL_SPECULAR_COLOR] = "matSpecular";
@@ -117,7 +121,7 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX] = "VerticesTransformMatrix";
             _uniformsNames[UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX] = "TexCoordTransformMatrix";
             _uniformsNames[UNIFORM_GUI_COLOR] = "color";
-            _uniformsNames[ENV] = "env";
+            _uniformsNames[UNIFORM_DAY_NIGHT_RATIO] = "dayNightRatio";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

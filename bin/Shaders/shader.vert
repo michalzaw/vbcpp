@@ -32,9 +32,9 @@ void main()
 	Position = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
 	TexCoord = VertexUV;
 
-#ifdef SOLID
+//#ifdef SOLID
 	Normal = (NormalMatrix * vec4(VertexNormal, 0.0f)).xyz;
-#endif
+//#endif
 #ifdef NORMALMAPPING
 	mat3 NM = mat3(NormalMatrix);
 	Normal = NM * VertexNormal;

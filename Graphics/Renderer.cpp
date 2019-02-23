@@ -363,7 +363,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
 
 
+    defines.push_back("SOLID");
     defines.push_back("CAR_PAINT");
+    defines.push_back("REFLECTION");
 	_shaderList[CAR_PAINT] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
 
@@ -373,6 +375,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // NORMALMAPPING_MATERIAL
     defines.clear();
     defines.push_back("NORMALMAPPING");
+    defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
@@ -403,10 +406,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     // GLASS_MATERIAL
     defines.clear();
-    //defines.push_back("SOLID");
+    defines.push_back("GLASS");
+    defines.push_back("REFLECTION");
     //defines.push_back("TRANSPARENCY");
     //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/glass.vert", "Shaders/glass.frag");
+    _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
@@ -622,6 +626,9 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glEnable(GL_BLEND);
                 shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, envMap);
+
+                if (mesh->material.glassTexture != NULL)
+                    shader->bindTexture(UNIFORM_GLASS_TEXTURE, mesh->material.glassTexture);
             }
 
             currentShader = mesh->material.shader;
@@ -632,7 +639,8 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
-                shader->bindTexture(ENV, envMap);
+                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, envMap);
+                shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, dayNightRatio);
 
 
 

@@ -6,9 +6,11 @@ const float CascadeEndClipSpace[CASCADES_COUNT] = float[CASCADES_COUNT](25.0f, 1
 const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005f);
 const float size[CASCADES_COUNT] = float[CASCADES_COUNT](2048.0f, 1024.0f, 512.0f);
 
+#ifdef REFLECTION
 const float Air = 1.0;
 const float Glass = 1.51714;
 const float R0 = ((Air - Glass) * (Air - Glass)) / ((Air + Glass) * (Air + Glass));
+#endif
 
 
 struct Light
@@ -88,14 +90,22 @@ uniform vec4 grassColor;
 uniform vec4 grassFraction;
 uniform sampler2D NoiseTexture;
 #endif
+#ifdef REFLECTION
+uniform samplerCube environmentMap;
+#endif
+#ifdef GLASS
+uniform sampler2D glassTexture;
+uniform float dayNightRatio;
+#endif
 
 uniform vec3 CameraPosition;
 
 uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 
-uniform samplerCube env;
-
 vec4 textureColor;
+vec4 ambient;
+vec4 diffuse;
+vec4 specular;
 
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
@@ -112,7 +122,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 //	SpecularFactor = pow(SpecularFactor, 96);
 	vec4 SpecularColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * SpecularFactor;
 	
-	return (AmbientColor + (DiffuseColor + SpecularColor * matSpecular) * ratio) * textureColor;
+	return AmbientColor * ambient + (DiffuseColor * diffuse + SpecularColor * specular) * ratio;
 }
 
 
@@ -146,21 +156,36 @@ vec4 CalculateSpotLight(SpotLight light, vec3 normal)
 
 void main()
 {
-#ifdef SOLID
 	vec3 normal = normalize(Normal);
-#endif
 	
 #ifdef NORMALMAPPING
 	vec3 n = normalize(texture2D(NormalmapTexture, TexCoord).rgb * 2.0f - 1.0f);
 	
 	mat3 TBN = mat3(normalize(TangentWorldspace),
 					normalize(BitangentWorldspace),
-					normalize(Normal));
+					normal);
 	
-	vec3 normal = normalize(TBN * n);
+	normal = normalize(TBN * n);
 #endif
 	
+#ifdef SOLID
 	textureColor = texture2D(Texture, TexCoord);
+	ambient = textureColor;
+	diffuse = textureColor;
+	specular = matSpecular * textureColor;
+#endif
+
+#ifdef GLASS
+	vec3 vector = normalize(vec3(Position - CameraPosition));
+	vec3 reflection = reflect(vector, Normal);
+	
+	float reflectionValue = texture2D(glassTexture, TexCoord).r;
+	reflectionValue = (reflectionValue * dayNightRatio - 0.5f * dayNightRatio + 0.5f) * 0.7 + 0.3;
+
+	ambient.rgb = texture(environmentMap, normalize(reflection)).rgb * 0.3 * reflectionValue;
+	diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
 	
 #ifdef GRASS
 	textureColor = textureColor * grassColor;
@@ -252,11 +277,18 @@ void main()
 	
 	//FragmentColor.rgb = texture(env, normalize(reflection)).rgb * (1.0f - 0.9f * vvv) + 0.8f * LightsColor.rgb;
 	fresnel = mix(0.2, 0.5, fresnel);
-	FragmentColor.rgb = mix(0.8 * LightsColor.rgb, texture(env, normalize(reflection)).rgb * LightsColor.rgb, fresnel);
+	FragmentColor.rgb = mix(0.8 * LightsColor.rgb, texture(environmentMap, normalize(reflection)).rgb * LightsColor.rgb, fresnel);
 	//FragmentColor.rgb = LightsColor.rgb;
 	//FragmentColor.rgb = 0.1f * texture(env, normalize(reflection)).rgb * (1.0f - 0.5f * vvv) + (1 - fresnel) * LightsColor.rgb;
 #endif
 	FragmentColor.a = 1.0f;
+	
+#ifdef GLASS
+	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), 0.5);
+	
+	float q = mix(0.3f, 0.6f, reflectionValue);
+	FragmentColor.a = mix(q, mix(q, 1.0f, reflectionValue), fresnel);//0.3
+#endif
 #ifdef ALPHA_TEST
 	FragmentColor.a = textureColor.a;
 #endif

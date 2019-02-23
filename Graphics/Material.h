@@ -15,7 +15,7 @@ class Material
 {
     public:
         Material()
-        : diffuseTexture(NULL), normalmapTexture(NULL), shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
+        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
         virtual ~Material()
         { }
 
@@ -28,6 +28,7 @@ class Material
 
     RTexture* diffuseTexture;
     RTexture* normalmapTexture;
+    RTexture* glassTexture;
 
     float shininess;
     float transparency;

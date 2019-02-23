@@ -72,6 +72,7 @@ class Renderer
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 
         RTexture* envMap;
+        float dayNightRatio;
 
 };
 

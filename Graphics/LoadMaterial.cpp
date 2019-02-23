@@ -105,6 +105,26 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
+
+    // glass texture
+    const char* c = materialElement->Attribute("glass_texture");
+    if (c != NULL)
+    {
+        texStr = std::string(c);
+
+        std::cout << "GlassTexture: " << texStr << std::endl;
+
+        for(unsigned int i = 0; i < texStr.size(); i++ )
+            texStr[i] = tolower(texStr[i]);
+
+        texturePath = texPath + texStr;
+
+
+        if(texStr != "")
+            sMaterial.glassTexture = ResourceManager::getInstance().loadTexture(texturePath);
+    }
+
+
     const char* type = materialElement->Attribute("type");
 
     if (strcmp(type, "normalmapping") == 0)
