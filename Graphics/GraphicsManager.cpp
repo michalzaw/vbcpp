@@ -8,7 +8,8 @@
 static std::unique_ptr<GraphicsManager> gmInstance;
 
 GraphicsManager::GraphicsManager()
-    : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f)
+    : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f),
+    _globalEnvironmentCaptureComponent(NULL)
 {
     _quadTree = new QuadTree(glm::vec3(512, 512, 512));
 }
@@ -120,6 +121,24 @@ Light* GraphicsManager::addSpotLight(glm::vec3 color, float ambientIntensity, fl
 }
 
 
+EnvironmentCaptureComponent* GraphicsManager::addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap)
+{
+    EnvironmentCaptureComponent* component = new EnvironmentCaptureComponent(environmentMap);
+
+    _environmentCaptureComponents.push_back(component);
+
+    return component;
+}
+
+
+EnvironmentCaptureComponent* GraphicsManager::addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap)
+{
+    _globalEnvironmentCaptureComponent = addEnvironmentCaptureComponent(environmentMap);
+
+    return _globalEnvironmentCaptureComponent;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -181,6 +200,25 @@ void GraphicsManager::removeLight(Light* light)
 }
 
 
+void GraphicsManager::removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component)
+{
+    for (std::list<EnvironmentCaptureComponent*>::iterator i = _environmentCaptureComponents.begin(); i != _environmentCaptureComponents.end(); ++i)
+    {
+        if (*i == component)
+        {
+            i = _environmentCaptureComponents.erase(i);
+
+            if (_globalEnvironmentCaptureComponent == component)
+                _globalEnvironmentCaptureComponent = NULL;
+
+            delete component;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -227,6 +265,12 @@ glm::vec3 GraphicsManager::getWindVector()
 float GraphicsManager::getWindValue()
 {
     return _windValue;
+}
+
+
+EnvironmentCaptureComponent* GraphicsManager::getGlobalEnvironmentCaptureComponent()
+{
+    return _globalEnvironmentCaptureComponent;
 }
 
 

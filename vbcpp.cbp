@@ -183,6 +183,8 @@
 		<Unit filename="Graphics/CameraFPS.hpp" />
 		<Unit filename="Graphics/CameraStatic.cpp" />
 		<Unit filename="Graphics/CameraStatic.hpp" />
+		<Unit filename="Graphics/EnvironmentCaptureComponent.cpp" />
+		<Unit filename="Graphics/EnvironmentCaptureComponent.h" />
 		<Unit filename="Graphics/Framebuffer.cpp" />
 		<Unit filename="Graphics/Framebuffer.h" />
 		<Unit filename="Graphics/Frustum.cpp" />

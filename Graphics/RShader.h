@@ -14,12 +14,12 @@ enum ShaderType
     SOLID_MATERIAL,
     NOTEXTURE_MATERIAL,
     NORMALMAPPING_MATERIAL,
+    CAR_PAINT_MATERIAL,
     ALPHA_TEST_MATERIAL,
     TREE_MATERIAL,
     GRASS_MATERIAL,
     SKY_MATERIAL,
     GLASS_MATERIAL,
-    CAR_PAINT,
 
     GUI_IMAGE_SHADER,
     GUI_LABEL_SHADER,
@@ -43,6 +43,9 @@ enum UniformName
     UNIFORM_NOTMALMAP_TEXTURE,
     UNIFORM_ALPHA_TEXTURE,
     UNIFORM_ENVIRONMENTMAP_TEXTURE,
+    UNIFORM_ENVIRONMENTMAP_2_TEXTURE,
+    UNIFORM_ENVIRONMENTMAP_MATRIX,
+    UNIFORM_ENVIRONMENTMAP_2_MATRIX,
     UNIFORM_GLASS_TEXTURE,
     UNIFORM_MATERIAL_AMBIENT_COLOR,
     UNIFORM_MATERIAL_DIFFUSE_COLOR,
@@ -99,6 +102,9 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_NOTMALMAP_TEXTURE] = "NormalmapTexture";
             _uniformsNames[UNIFORM_ALPHA_TEXTURE] = "AlphaTexture";
             _uniformsNames[UNIFORM_ENVIRONMENTMAP_TEXTURE] = "environmentMap";
+            _uniformsNames[UNIFORM_ENVIRONMENTMAP_2_TEXTURE] = "environmentMap2";
+            _uniformsNames[UNIFORM_ENVIRONMENTMAP_MATRIX] = "environmentMap1Rotation";
+            _uniformsNames[UNIFORM_ENVIRONMENTMAP_2_MATRIX] = "environmentMap2Rotation";
             _uniformsNames[UNIFORM_GLASS_TEXTURE] = "glassTexture";
             _uniformsNames[UNIFORM_MATERIAL_AMBIENT_COLOR] = "matAmbient";
             _uniformsNames[UNIFORM_MATERIAL_DIFFUSE_COLOR] = "matDiffuse";

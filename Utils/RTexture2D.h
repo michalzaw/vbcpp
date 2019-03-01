@@ -16,6 +16,8 @@ class RTexture2D : public RTexture
 
         void setTexSubImage(unsigned char* data, int offsetX, int offsetY, int width, int height);
 
+        static RTexture2D* createWhiteTexture(string path, glm::uvec2 size);
+
 };
 
 

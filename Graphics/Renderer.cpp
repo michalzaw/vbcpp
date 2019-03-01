@@ -361,14 +361,6 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
-
-
-    defines.push_back("SOLID");
-    defines.push_back("CAR_PAINT");
-    defines.push_back("REFLECTION");
-	_shaderList[CAR_PAINT] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-
-
     // NOTEXTURE_MATERIAL
     _shaderList[NOTEXTURE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
 
@@ -378,6 +370,14 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // CAR_PAINT_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("CAR_PAINT");
+    defines.push_back("REFLECTION");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // ALPHA_TEST_MATERIAL
     defines.clear();
@@ -491,6 +491,18 @@ void Renderer::unregisterShadowMap(ShadowMap* shadowMap)
 void Renderer::setCurrentMainCamera(CameraStatic* camera)
 {
     _renderDataList[_renderDataList.size() - 1]->camera = camera;
+}
+
+
+void Renderer::setDayNightRatio(float ratio)
+{
+    _dayNightRatio = ratio;
+}
+
+
+float Renderer::getDayNightRatio()
+{
+    return _dayNightRatio;
 }
 
 
@@ -625,10 +637,6 @@ void Renderer::renderScene(RenderData* renderData)
             else if (mesh->material.shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
-                shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, envMap);
-
-                if (mesh->material.glassTexture != NULL)
-                    shader->bindTexture(UNIFORM_GLASS_TEXTURE, mesh->material.glassTexture);
             }
 
             currentShader = mesh->material.shader;
@@ -639,9 +647,45 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
-                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, envMap);
-                shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, dayNightRatio);
+        if (mesh->material.shader == GLASS_MATERIAL || mesh->material.shader == CAR_PAINT_MATERIAL)
+        {
+            if (mesh->material.glassTexture != NULL)
+                shader->bindTexture(UNIFORM_GLASS_TEXTURE, mesh->material.glassTexture);
 
+
+            if (mesh->material.reflectionTexture1 == EMT_GLOBAL)
+            {
+                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+            }
+            else
+            {
+                Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
+                if (c != NULL)
+                {
+                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                }
+            }
+
+            if (mesh->material.reflectionTexture2 == EMT_GLOBAL)
+            {
+                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+            }
+            else
+            {
+                Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
+                if (c != NULL)
+                {
+                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                }
+            }
+        }
+
+
+        shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
 
 
         if (mesh->material.shader == TREE_MATERIAL)

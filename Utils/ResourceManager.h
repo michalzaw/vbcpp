@@ -18,6 +18,8 @@ typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
 class ResourceManager
 {
+    static constexpr char* DEFAULT_WHITE_TEXTURE_NAME = ".defaultTexture";
+
     public:
         virtual ~ResourceManager();
 
@@ -29,6 +31,8 @@ class ResourceManager
         void reloadTexture(RTexture2D* texture);
         void reloadTexture(std::string path);
         void reloadAllTextures();
+
+        RTexture2D* loadDefaultWhiteTexture();
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>());
         void reloadShader(RShader* shader);

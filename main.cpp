@@ -65,13 +65,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         {
             l->setAmbientIntensity(0.05);
             l->setDiffuseIntensity(0.0);
-            Renderer::getInstance().dayNightRatio = -1.0f;
+            Renderer::getInstance().setDayNightRatio(-1.0f);
         }
         else
         {
             l->setAmbientIntensity(0.5);
             l->setDiffuseIntensity(0.5);
-            Renderer::getInstance().dayNightRatio = 1.0f;
+            Renderer::getInstance().setDayNightRatio(1.0f);
         }
 
 	}
@@ -214,7 +214,6 @@ void readInput(GLFWwindow* window, double deltaTime)
 // ### MAIN ###
 int main()
 {
-    Renderer::getInstance().dayNightRatio = 1.0f;
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");
@@ -241,6 +240,7 @@ int main()
 	Renderer& renderer = Renderer::getInstance();
 	renderer.setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
 	renderer.init(win->getWidth(), win->getHeight());
+    renderer.setDayNightRatio(1.0f);
 
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -281,7 +281,7 @@ int main()
     const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     RTextureCubeMap* skyboxTexture = loadTextureCubeMap(skyboxTextures, true);
     sceneMgr->addSky(skyboxTexture);
-    renderer.envMap = loadTextureCubeMap(skyboxTextures, true);;
+    GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(loadTextureCubeMap(skyboxTextures, true));
 
 
     GUIManager* gui = new GUIManager;

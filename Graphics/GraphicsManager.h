@@ -15,6 +15,7 @@
 #include "Light.h"
 #include "QuadTree.h"
 #include "Grass.h"
+#include "EnvironmentCaptureComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -36,6 +37,7 @@ class GraphicsManager
         std::list<Grass*>           _grassComponents;
         std::vector<CameraStatic*>  _cameras;
         std::list<Light*>           _lights;
+        std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
 
         QuadTree* _quadTree;
 
@@ -45,6 +47,8 @@ class GraphicsManager
         float       _windVelocity;
         float       _windValue;
         glm::vec3   _windVector;
+
+        EnvironmentCaptureComponent* _globalEnvironmentCaptureComponent;
 
         GraphicsManager();
 
@@ -64,6 +68,8 @@ class GraphicsManager
         Light*          addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
         Light*          addPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
         Light*          addSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
+        EnvironmentCaptureComponent* addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
+        EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -71,6 +77,7 @@ class GraphicsManager
         void removeGrassComponent(Grass* grass);
         void removeCamera(CameraStatic* camera);
         void removeLight(Light* light);
+        void removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -84,6 +91,9 @@ class GraphicsManager
         float       getWindVelocity();
         glm::vec3   getWindVector();
         float       getWindValue();
+
+
+        EnvironmentCaptureComponent* getGlobalEnvironmentCaptureComponent();
 
 
         void update(float deltaTime);

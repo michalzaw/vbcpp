@@ -21,6 +21,7 @@ enum ComponentType
     CT_TREE_COMPONENT,
     CT_SOUND,
     CT_GRASS,
+    CT_ENVIRONMENT_CAPTURE_COMPONENT,
 
     CT_BUS_STOP
 };

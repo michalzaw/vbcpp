@@ -46,3 +46,14 @@ void RTexture2D::setTexSubImage(unsigned char* data, int offsetX, int offsetY, i
 
     _isGenerateMipmap = false;
 }
+
+
+RTexture2D* RTexture2D::createWhiteTexture(string path, glm::uvec2 size)
+{
+    unsigned char data[16] = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
+    RTexture2D* texture = new RTexture2D(path, data, TF_RGBA, size);
+    texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+    texture->setClampMode(TCM_REPEAT);
+
+    return texture;
+}

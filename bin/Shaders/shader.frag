@@ -92,6 +92,9 @@ uniform sampler2D NoiseTexture;
 #endif
 #ifdef REFLECTION
 uniform samplerCube environmentMap;
+uniform samplerCube environmentMap2;
+uniform mat4 environmentMap1Rotation;
+uniform mat4 environmentMap2Rotation;
 #endif
 #ifdef GLASS
 uniform sampler2D glassTexture;
@@ -180,9 +183,12 @@ void main()
 	vec3 reflection = reflect(vector, Normal);
 	
 	float reflectionValue = texture2D(glassTexture, TexCoord).r;
+	float t = reflectionValue;
 	reflectionValue = (reflectionValue * dayNightRatio - 0.5f * dayNightRatio + 0.5f) * 0.7 + 0.3;
 
-	ambient.rgb = texture(environmentMap, normalize(reflection)).rgb * 0.3 * reflectionValue;
+	ambient.rgb = mix(texture(environmentMap, mat3(environmentMap1Rotation) * normalize(reflection)).rgb * matDiffuse.rgb * reflectionValue,
+					  texture(environmentMap2, mat3(environmentMap2Rotation) * normalize(reflection)).rgb * matDiffuse.rgb * reflectionValue,
+					  1 - t);
 	diffuse = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 #endif
@@ -284,9 +290,9 @@ void main()
 	FragmentColor.a = 1.0f;
 	
 #ifdef GLASS
-	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), 0.5);
+	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), matDiffuse.a);
 	
-	float q = mix(0.3f, 0.6f, reflectionValue);
+	float q = mix(Transparency * 0.0f, Transparency, reflectionValue);
 	FragmentColor.a = mix(q, mix(q, 1.0f, reflectionValue), fresnel);//0.3
 #endif
 #ifdef ALPHA_TEST

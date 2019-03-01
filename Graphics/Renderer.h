@@ -42,6 +42,8 @@ class Renderer
         bool _isShadowMappingEnable;
         ShadowMap* _shadowMap;      // Cienie wspierane tylko dla jednego swiatla keirunkowego
 
+        float _dayNightRatio;
+
         void prepareLightsData();
         void prepareRenderData();
 
@@ -66,13 +68,13 @@ class Renderer
 
         void setCurrentMainCamera(CameraStatic* camera);
 
+        void setDayNightRatio(float ratio);
+        float getDayNightRatio();
+
         void renderAll();
         void renderDepth(RenderData* renderData);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
-
-        RTexture* envMap;
-        float dayNightRatio;
 
 };
 

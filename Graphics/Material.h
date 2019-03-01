@@ -5,17 +5,27 @@
 #include <glm/glm.hpp>
 
 #include "RShader.h"
+#include "EnvironmentCaptureComponent.h"
 #include "../Utils/RTexture.h"
 #include <memory>
 using namespace std;
 
 #include "../Utils/RTexture.h"
 
+
+enum EnvironmentMapType
+{
+    EMT_LOCAL,
+    EMT_GLOBAL
+};
+
+
 class Material
 {
     public:
         Material()
-        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
+        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
+        shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
         virtual ~Material()
         { }
 
@@ -29,6 +39,9 @@ class Material
     RTexture* diffuseTexture;
     RTexture* normalmapTexture;
     RTexture* glassTexture;
+
+    EnvironmentMapType reflectionTexture1;
+    EnvironmentMapType reflectionTexture2;
 
     float shininess;
     float transparency;

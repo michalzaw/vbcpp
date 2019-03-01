@@ -3,6 +3,7 @@
 #include "../Utils/Math.h"
 
 #include "../Graphics/GraphicsManager.h"
+#include "../Graphics/LoadTexture.h"
 #include "../Utils/ResourceManager.h"
 
 #include "../Utils/Helpers.hpp"
@@ -634,6 +635,25 @@ void BusRaycast::loadXMLdata(std::string busname)
             doorObj->addComponent(closeSoundComp);
 
             doorElement = doorElement->NextSiblingElement("Door");
+        }
+
+        // ########### ENVIRONMENT CAPTURE COMPONENT ###########
+        XMLElement* componentElement = moduleElement->FirstChildElement("Component");
+        if (componentElement != nullptr)
+        {
+            std::string type = std::string(componentElement->Attribute("type"));
+            if (type == "environmentCapture")
+            {
+                std::string textures = std::string(componentElement->Attribute("textures"));
+                const char* t[6];
+                istringstream stream(textures);
+                std::string s;
+                int index = 0;
+                while (getline(stream, s, ',')) {
+                    t[index++] = ("Buses/" + busname + "/" + s).c_str();
+                }
+                busModule.sceneObject->addComponent(GraphicsManager::getInstance().addEnvironmentCaptureComponent(loadTextureCubeMap(t, true)));
+            }
         }
 
 

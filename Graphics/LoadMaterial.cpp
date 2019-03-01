@@ -106,7 +106,7 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 
 
 
-    // glass texture
+    // glass texture - okresla ktora czesc szyby jest zewnetrzna - bialy, wewnetrzna - czarny. Wykorzystywane np w autobusie.
     const char* c = materialElement->Attribute("glass_texture");
     if (c != NULL)
     {
@@ -124,6 +124,25 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
             sMaterial.glassTexture = ResourceManager::getInstance().loadTexture(texturePath);
     }
 
+    // reflection texture - global lub local, 1 dla czesci zewnetrznej, 2 dla czesci wewnetrznej szyby
+    const char* reflectionTexture1 = materialElement->Attribute("reflection_texture_1");
+    if (reflectionTexture1 != NULL)
+    {
+        std::string reflectionTexture1Str(reflectionTexture1);
+        if (reflectionTexture1Str == "local")
+            sMaterial.reflectionTexture1 = EMT_LOCAL;
+        else if (reflectionTexture1Str == "global")
+            sMaterial.reflectionTexture1 = EMT_GLOBAL;
+    }
+    const char* reflectionTexture2 = materialElement->Attribute("reflection_texture_2");
+    if (reflectionTexture2 != NULL)
+    {
+        std::string reflectionTexture2Str(reflectionTexture2);
+        if (reflectionTexture2Str == "local")
+            sMaterial.reflectionTexture2 = EMT_LOCAL;
+        else if (reflectionTexture2Str == "global")
+            sMaterial.reflectionTexture2 = EMT_GLOBAL;
+    }
 
     const char* type = materialElement->Attribute("type");
 
@@ -142,7 +161,14 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     else if (strcmp(type, "grass") == 0)
         sMaterial.shader = GRASS_MATERIAL;
     else if (strcmp(type, "car_paint") == 0)
-        sMaterial.shader = CAR_PAINT;
+        sMaterial.shader = CAR_PAINT_MATERIAL;
+
+
+    if (sMaterial.shader == GLASS_MATERIAL && sMaterial.glassTexture == NULL)
+    {
+        sMaterial.glassTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+    }
+
 
     return sMaterial;
 }

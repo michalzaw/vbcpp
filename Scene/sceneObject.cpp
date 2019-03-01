@@ -68,6 +68,10 @@ SceneObject::~SceneObject()
                 BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
                 break;
 
+            case CT_ENVIRONMENT_CAPTURE_COMPONENT:
+                GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -253,6 +257,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_BUS_STOP:
                     BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
+                    break;
+
+                case CT_ENVIRONMENT_CAPTURE_COMPONENT:
+                    GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
                     break;
 
             }
