@@ -28,8 +28,11 @@ class ResourceManager
         Resource* findResource(std::string path);
 
         RTexture2D* loadTexture(std::string path);
+        // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
+        RTextureCubeMap* loadTextureCubeMap(std::string* fileNames);
         void reloadTexture(RTexture2D* texture);
         void reloadTexture(std::string path);
+        void reloadTexture(RTextureCubeMap* texture);
         void reloadAllTextures();
 
         RTexture2D* loadDefaultWhiteTexture();

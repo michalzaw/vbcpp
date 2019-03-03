@@ -75,7 +75,7 @@ RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTex
 }
 
 
-RTextureCubeMap* loadTextureCubeMap(const char** filesNames, bool mipmaping)
+RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, bool mipmaping, RTextureCubeMap* oldTexture)
 {
     std::cout << "Loading cube map" << std::endl;
 
@@ -84,16 +84,25 @@ RTextureCubeMap* loadTextureCubeMap(const char** filesNames, bool mipmaping)
 
     for (int i = 0; i < 6; ++i)
     {
-        cubeMapFaces[i] = SOIL_load_image(filesNames[i], &width, &height, 0, SOIL_LOAD_RGBA);
+        cubeMapFaces[i] = SOIL_load_image(filesNames[i].c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
 
         std::cout << "Loading texture: " << filesNames[i] << std::endl;
         std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+
+        if (oldTexture != NULL)
+        {
+            oldTexture->setTexSubImage(cubeMapFaces[i], (CubeMapFace)(CMF_POSITIVE_X + i), 0, 0, width, height);
+        }
     }
 
     if (width != height)
         return NULL;
 
-    RTextureCubeMap* texture = new RTextureCubeMap("", cubeMapFaces, TF_RGBA, width);
+    RTextureCubeMap* texture;
+    if (oldTexture == NULL)
+        texture = new RTextureCubeMap(path, cubeMapFaces, TF_RGBA, width);
+    else
+        texture = oldTexture;
 
     if (mipmaping)
     {

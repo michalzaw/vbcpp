@@ -94,6 +94,53 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
 }
 
 
+RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
+{
+    std::string path = "";
+    for (int i = 0; i < 6; ++i)
+    {
+        path += fileNames[i] + ";";
+    }
+
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RTextureCubeMap* tex = dynamic_cast<RTextureCubeMap*>(res);
+        return tex;
+    }
+
+    // Zasob nie istnieje
+    RTextureCubeMap* texture = ::loadTextureCubeMap(fileNames, path.c_str(), true);
+
+    if ( texture )
+    {
+        //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
+        std::unique_ptr<RTexture> tex (texture);
+        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
+        //GLuint texID = tex->getID();
+        _resources.push_back(std::move(tex));
+
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Musialem odwolac sie do utworzonej tekstury poprzez iterator do ostatniego elementu na liscie (nowa tekstura jest zawsze wrzucana na koniec listy)
+        std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
+        std::unique_ptr<Resource>& res = *(--it);
+
+        RTextureCubeMap* t = dynamic_cast<RTextureCubeMap*>(res.get());
+
+
+        //std::cout << "Texture ID: " << tID << std::endl;
+
+        return t;
+    }
+
+    return 0;
+}
+
+
 void ResourceManager::reloadTexture(RTexture2D* texture)
 {
     ::loadTexture(texture->getPath().c_str(), true, texture);
@@ -110,6 +157,20 @@ void ResourceManager::reloadTexture(std::string path)
 }
 
 
+void ResourceManager::reloadTexture(RTextureCubeMap* texture)
+{
+    /*std::string fileNames[6];
+    istringstream stream(texture->getPath());
+    std::string s;
+    int index = 0;
+    while (getline(stream, s, ';')) {
+        fileNames[index++] = s;
+    }
+
+    ::loadTextureCubeMap(fileNames, texture->getPath().c_str(), true, texture);*/
+}
+
+
 void ResourceManager::reloadAllTextures()
 {
     std::list<std::unique_ptr<Resource>>::iterator it;
@@ -119,7 +180,11 @@ void ResourceManager::reloadAllTextures()
         {
             std::unique_ptr<Resource>& res = *it;
 
-            reloadTexture(dynamic_cast<RTexture2D*>(res.get()));
+            RTexture* texture = dynamic_cast<RTexture*>(res.get());
+            if (texture->getTextureType() == TT_2D)
+                reloadTexture(dynamic_cast<RTexture2D*>(texture));
+            else if (texture->getTextureType() == TT_CUBE)
+                reloadTexture(dynamic_cast<RTextureCubeMap*>(texture));
         }
     }
 }

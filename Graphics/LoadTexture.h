@@ -16,7 +16,7 @@
 RTexture2D* loadTexture(const char* fileName, bool mipmaping = true, RTexture2D* oldTexture = NULL);
 
 // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
-RTextureCubeMap* loadTextureCubeMap(const char** filesNames, bool mipmaping = true);
+RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, bool mipmaping = true, RTextureCubeMap* oldTexture = NULL);
 
 
 GLuint loadTextureRect(const char* fileName);

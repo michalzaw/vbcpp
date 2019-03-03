@@ -278,10 +278,10 @@ int main()
     lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
 
 
-    const char* skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    RTextureCubeMap* skyboxTexture = loadTextureCubeMap(skyboxTextures, true);
+    std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
+    RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
     sceneMgr->addSky(skyboxTexture);
-    GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(loadTextureCubeMap(skyboxTextures, true));
+    GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
 
     GUIManager* gui = new GUIManager;

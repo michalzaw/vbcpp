@@ -70,14 +70,16 @@ class RTexture : public Resource
 
         glm::uvec2 getSize();
 
+        TextureType getTextureType();
+
         inline void bind()
         {
-            glBindTexture(_type, _texID);
+            glBindTexture(_textureType, _texID);
         }
 
     protected:
         GLuint      _texID;
-        TextureType _type;
+        TextureType _textureType;
         TextureFormat _format;
         glm::uvec2  _size;
 

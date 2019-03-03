@@ -12,7 +12,7 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat format, g
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_type, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
 }
 
 
@@ -25,7 +25,7 @@ RTexture2D::RTexture2D(TextureFormat format, glm::uvec2 size)
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_type, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
 }
 
 
@@ -42,7 +42,7 @@ void RTexture2D::setTexSubImage(unsigned char* data, int offsetX, int offsetY, i
 
     bind();
 
-    glTexSubImage2D(_type, 0, offsetX, offsetY, width, height, _format, GL_UNSIGNED_BYTE, data);
+    glTexSubImage2D(_textureType, 0, offsetX, offsetY, width, height, _format, GL_UNSIGNED_BYTE, data);
 
     _isGenerateMipmap = false;
 }

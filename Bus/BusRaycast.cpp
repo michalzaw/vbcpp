@@ -645,14 +645,15 @@ void BusRaycast::loadXMLdata(std::string busname)
             if (type == "environmentCapture")
             {
                 std::string textures = std::string(componentElement->Attribute("textures"));
-                const char* t[6];
+                std::string t[6];
                 istringstream stream(textures);
                 std::string s;
                 int index = 0;
                 while (getline(stream, s, ',')) {
-                    t[index++] = ("Buses/" + busname + "/" + s).c_str();
+                    t[index++] = "Buses/" + busname + "/" + s;
                 }
-                busModule.sceneObject->addComponent(GraphicsManager::getInstance().addEnvironmentCaptureComponent(loadTextureCubeMap(t, true)));
+                RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(t);
+                busModule.sceneObject->addComponent(GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap));
             }
         }
 
