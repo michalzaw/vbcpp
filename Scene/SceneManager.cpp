@@ -544,6 +544,21 @@ SceneObject* SceneManager::loadObject(std::string name, glm::vec3 position, glm:
             BusStopComponent* component = BusStopSystem::getInstance().addBusStopComponent("Przystanek");
             sceneObject->addComponent(component);
 		}
+		else
+        if (componentType == "environmentCapture")
+        {
+            std::string textures = std::string(componentElement->Attribute("textures"));
+            std::string t[6];
+            istringstream stream(textures);
+            std::string s;
+            int index = 0;
+            while (getline(stream, s, ',')) {
+                t[index++] = dirPath + s;
+            }
+            RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(t);
+            EnvironmentCaptureComponent* component = GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap);
+            sceneObject->addComponent(component);
+        }
 
         //sceneObject->setPosition(position);
         //sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z) );
