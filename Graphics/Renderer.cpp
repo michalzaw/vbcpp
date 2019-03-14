@@ -7,7 +7,8 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
-    _isShadowMappingEnable(false), _shadowMap(NULL)
+    _isShadowMappingEnable(false), _shadowMap(NULL),
+    _mainRenderData(NULL)
 {
 
 }
@@ -29,7 +30,7 @@ Renderer& Renderer::getInstance()
 
 bool compareByShader(const RenderListElement& a, const RenderListElement& b)
 {
-    return a.mesh->material.shader < b.mesh->material.shader;
+    return a.material->shader < b.material->shader;
 }
 
 
@@ -220,6 +221,122 @@ void Renderer::prepareRenderData()
 {
     GraphicsManager& graphicsManager = GraphicsManager::getInstance();
 
+
+    _renderDataList.clear();
+    for (int i = 0; i < _renderDataListForShadowmapping.size(); ++i)
+    {
+        _renderDataList.push_back(_renderDataListForShadowmapping[i]);
+    }
+    for (int i = 0; i < graphicsManager._mirrorComponents.size(); ++i)
+    {
+        graphicsManager._mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(graphicsManager.getCurrentCamera()->getPosition());
+        RenderData* renderData = new RenderData;
+        renderData->camera = graphicsManager._mirrorComponents[i];
+        renderData->framebuffer = graphicsManager._mirrorComponents[i]->getFramebuffer();
+        renderData->renderPass = RP_NORMAL;
+        _renderDataList.push_back(renderData);
+    }
+    _renderDataList.push_back(_mainRenderData);
+
+
+    for (int i = 0; i < _renderDataList.size(); ++i)
+    {
+        _renderDataList[i]->renderList.clear();
+        _renderDataList[i]->MVMatrix = _renderDataList[i]->camera->getProjectionMatrix() * _renderDataList[i]->camera->getViewMatrix();
+    }
+
+
+    RenderListElement tempRenderElement;
+
+    for (std::list<RenderObject*>::iterator i = graphicsManager._renderObjects.begin(); i != graphicsManager._renderObjects.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < _renderDataList.size(); ++j)
+        {
+            RenderPass renderPass = _renderDataList[j]->renderPass;
+            bool isCastShadows = object->isCastShadows();
+
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass == RP_NORMAL) &&
+                isObjectInCamera(object, _renderDataList[j]->camera))
+            {
+                tempRenderElement.model = object->getModel();
+                tempRenderElement.object = object->getSceneObject();
+                tempRenderElement.renderObject = object;
+
+                for (int k = 0; k < tempRenderElement.model->getMeshesCount(); ++k)
+                {
+                    tempRenderElement.mesh = tempRenderElement.model->getMesh(k);
+                    tempRenderElement.material = object->getMaterial(tempRenderElement.mesh->materialIndex);
+                    if (renderPass == RP_SHADOWS)
+                    {
+                        if (tempRenderElement.material->shader == ALPHA_TEST_MATERIAL || tempRenderElement.material->shader == TREE_MATERIAL)
+                            _renderDataList[j]->renderList.insert(_renderDataList[j]->renderList.begin(), tempRenderElement);
+                        else if (tempRenderElement.material->transparency == 0.0f) // czy materia³ nie jest przezroczysty lub skybox itd.
+                            _renderDataList[j]->renderList.push_back(tempRenderElement);
+                    }
+                    else
+                    {
+                        _renderDataList[j]->renderList.push_back(tempRenderElement);
+                    }
+                }
+            }
+        }
+    }
+
+    for (std::list<Grass*>::iterator i = graphicsManager._grassComponents.begin(); i != graphicsManager._grassComponents.end(); ++i)
+    {
+        RenderObject* object = *i;
+
+        tempRenderElement.type = RET_GRASS;
+        tempRenderElement.model = object->getModel();
+        tempRenderElement.object = object->getSceneObject();
+        tempRenderElement.renderObject = object;
+
+        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
+        {
+            tempRenderElement.mesh = tempRenderElement.model->getMesh(j);
+            tempRenderElement.material = object->getMaterial(tempRenderElement.mesh->materialIndex);
+            _renderDataList[_renderDataList.size() - 1]->renderList.push_back(tempRenderElement);
+        }
+    }
+
+    _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
+}
+
+
+bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
+{
+    if (camera->getProjctionType() == CPT_ORTHOGRAPHIC)
+    {
+        if (isAABBIntersectAABB(*(camera->getAABB()), *object->getAABB()))
+            return true;
+    }
+    else // CPT_PERSPECTIVE
+    {
+        Frustum frustum(camera->getProjectionMatrix() * camera->getViewMatrix());
+        if (isAABBIntersectFrustum(frustum, *object->getAABB()))
+            return true;
+    }
+
+    return false;
+}
+
+
+/*void Renderer::prepareRenderData()
+{
+    _renderDataList.clear();
+    for (int i = 0; i < _renderDataListForShadowmapping.size(); ++i)
+    {
+        _renderDataList.push_back(_renderDataListForShadowmapping[i]);
+    }
+    _renderDataList.push_back(_mainRenderData);
+
+    GraphicsManager& graphicsManager = GraphicsManager::getInstance();
+
     for (int i = 0; i < _renderDataList.size(); ++i)
     {
         _renderDataList[i]->renderList.clear();
@@ -299,7 +416,7 @@ void Renderer::prepareRenderData()
     }
 
     _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
-}
+}*/
 
 
 void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
@@ -309,7 +426,8 @@ void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
         RenderData* renderData = new RenderData;
         renderData->camera = shadowMap->getCameraForShadowMap(i);
         renderData->framebuffer = shadowMap->getShadowMap(i);
-        _renderDataList.insert(_renderDataList.begin(), renderData);
+        renderData->renderPass = RP_SHADOWS;
+        _renderDataListForShadowmapping.insert(_renderDataListForShadowmapping.begin(), renderData);
     }
 }
 
@@ -318,12 +436,12 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 {
     for (int i = 0; i < shadowMap->CASCADE_COUNT; ++i)
     {
-        for (std::vector<RenderData*>::iterator j = _renderDataList.begin(); j != _renderDataList.end(); ++j)
+        for (std::vector<RenderData*>::iterator j = _renderDataListForShadowmapping.begin(); j != _renderDataListForShadowmapping.end(); ++j)
         {
             if (shadowMap->getShadowMap(i) == (*j)->framebuffer)
             {
                 RenderData* renderData = (*j);
-                _renderDataList.erase(j);
+                _renderDataListForShadowmapping.erase(j);
                 delete renderData;
 
                 break;
@@ -346,10 +464,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
 
-    RenderData* mainRenderData = new RenderData;
-    mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
-    mainRenderData->framebuffer = defaultFramebuffer;
-    _renderDataList.push_back(mainRenderData);
+    _mainRenderData = new RenderData;
+    _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
+    _mainRenderData->framebuffer = defaultFramebuffer;
+    _mainRenderData->renderPass = RP_NORMAL;
 
 
     _shaderList.resize(NUMBER_OF_SHADERS);
@@ -378,6 +496,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+	_shaderList[MIRROR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // ALPHA_TEST_MATERIAL
     defines.clear();
@@ -490,7 +613,8 @@ void Renderer::unregisterShadowMap(ShadowMap* shadowMap)
 
 void Renderer::setCurrentMainCamera(CameraStatic* camera)
 {
-    _renderDataList[_renderDataList.size() - 1]->camera = camera;
+    //_renderDataList[_renderDataList.size() - 1]->camera = camera;
+    _mainRenderData->camera = camera;
 }
 
 
@@ -511,12 +635,13 @@ void Renderer::renderAll()
     prepareLightsData();
     prepareRenderData();
 
-    for (int i = 0; i < _renderDataList.size() - 1; ++i)
+    for (int i = 0; i < _renderDataList.size(); ++i)
     {
-        renderDepth(_renderDataList[i]);
+        if (_renderDataList[i]->renderPass == RP_SHADOWS)
+            renderDepth(_renderDataList[i]);
+        else
+            renderScene(_renderDataList[i]);
     }
-
-    renderScene(_renderDataList[_renderDataList.size() - 1]);
 }
 
 
@@ -534,9 +659,10 @@ void Renderer::renderDepth(RenderData* renderData)
     {
         RStaticModel* model = i->model;
         StaticModelMesh* mesh = i->mesh;
+        Material* material = i->material;
 
         ShaderType shaderType;
-        bool isAlphaTest = mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == TREE_MATERIAL;
+        bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL;
         if (isAlphaTest)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
         else
@@ -566,7 +692,7 @@ void Renderer::renderDepth(RenderData* renderData)
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
 
-            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, mesh->material.diffuseTexture);
+            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, material->diffuseTexture);
         }
 
         mesh->ibo->bind();
@@ -607,9 +733,10 @@ void Renderer::renderScene(RenderData* renderData)
     {
         RStaticModel* model = i->model;
         StaticModelMesh* mesh = i->mesh;
+        Material* material = i->material;
 
-        RShader* shader = _shaderList[mesh->material.shader];
-        if (mesh->material.shader != currentShader)
+        RShader* shader = _shaderList[material->shader];
+        if (material->shader != currentShader)
         {
             shader->enable();
 
@@ -626,20 +753,20 @@ void Renderer::renderScene(RenderData* renderData)
                 glDisable(GL_BLEND);
             }
 
-            if (mesh->material.shader == SKY_MATERIAL)
+            if (material->shader == SKY_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (mesh->material.shader == TREE_MATERIAL || mesh->material.shader == ALPHA_TEST_MATERIAL || mesh->material.shader == GRASS_MATERIAL)
+            else if (material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-            else if (mesh->material.shader == GLASS_MATERIAL)
+            else if (material->shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
             }
 
-            currentShader = mesh->material.shader;
+            currentShader = material->shader;
         }
         else
         {
@@ -647,13 +774,13 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
-        if (mesh->material.shader == GLASS_MATERIAL || mesh->material.shader == CAR_PAINT_MATERIAL)
+        if (material->shader == GLASS_MATERIAL || material->shader == CAR_PAINT_MATERIAL)
         {
-            if (mesh->material.glassTexture != NULL)
-                shader->bindTexture(UNIFORM_GLASS_TEXTURE, mesh->material.glassTexture);
+            if (material->glassTexture != NULL)
+                shader->bindTexture(UNIFORM_GLASS_TEXTURE, material->glassTexture);
 
 
-            if (mesh->material.reflectionTexture1 == EMT_GLOBAL)
+            if (material->reflectionTexture1 == EMT_GLOBAL)
             {
                 shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
                 shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
@@ -668,7 +795,7 @@ void Renderer::renderScene(RenderData* renderData)
                 }
             }
 
-            if (mesh->material.reflectionTexture2 == EMT_GLOBAL)
+            if (material->reflectionTexture2 == EMT_GLOBAL)
             {
                 shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
                 shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
@@ -688,7 +815,7 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
 
 
-        if (mesh->material.shader == TREE_MATERIAL)
+        if (material->shader == TREE_MATERIAL)
         {
             glm::vec3 d = GraphicsManager::getInstance().getWindVector();
 
@@ -707,13 +834,13 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(UNIFORM_MODEL_MATRIX, i->object->getGlobalTransformMatrix());
         shader->setUniform(UNIFORM_NORMAL_MATRIX, i->object->getGlobalNormalMatrix());
 
-        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, mesh->material.ambientColor);
-        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, mesh->material.diffuseColor);
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, mesh->material.specularColor);
+        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
+        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, material->specularColor);
 
-        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, mesh->material.transparency);
+        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, material->transparency);
 
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, mesh->material.shininess);
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, material->shininess);
         shader->setUniform(UNIFORM_CAMERA_POSITION, camera->getPosition());
         //shader->setUniform("a", 1.0f);
 
@@ -740,7 +867,7 @@ void Renderer::renderScene(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
-        if (mesh->material.normalmapTexture != NULL)
+        if (material->normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
@@ -748,11 +875,11 @@ void Renderer::renderScene(RenderData* renderData)
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
 
-            shader->bindTexture(UNIFORM_NOTMALMAP_TEXTURE, mesh->material.normalmapTexture);
+            shader->bindTexture(UNIFORM_NOTMALMAP_TEXTURE, material->normalmapTexture);
         }
 
-        if (mesh->material.diffuseTexture != NULL)
-            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, mesh->material.diffuseTexture);
+        if (material->diffuseTexture != NULL)
+            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, material->diffuseTexture);
 
 
 
@@ -797,7 +924,7 @@ void Renderer::renderScene(RenderData* renderData)
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
-        if (mesh->material.normalmapTexture != 0)
+        if (material->normalmapTexture != 0)
         {
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);

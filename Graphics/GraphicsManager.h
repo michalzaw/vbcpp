@@ -16,6 +16,7 @@
 #include "QuadTree.h"
 #include "Grass.h"
 #include "EnvironmentCaptureComponent.h"
+#include "MirrorComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -38,6 +39,7 @@ class GraphicsManager
         std::vector<CameraStatic*>  _cameras;
         std::list<Light*>           _lights;
         std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
+        std::vector<MirrorComponent*> _mirrorComponents;
 
         QuadTree* _quadTree;
 
@@ -50,7 +52,11 @@ class GraphicsManager
 
         EnvironmentCaptureComponent* _globalEnvironmentCaptureComponent;
 
+        std::list<Material*> _pendingMaterialsForMirrorComponent;
+
         GraphicsManager();
+
+        void findAndAssigneMirrorComponentToPendingMaterials(MirrorComponent* mirrorComponent);
 
     public:
         ~GraphicsManager();
@@ -70,6 +76,7 @@ class GraphicsManager
         Light*          addSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
         EnvironmentCaptureComponent* addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
+        MirrorComponent*addMirrorComponent(std::string name);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -78,6 +85,7 @@ class GraphicsManager
         void removeCamera(CameraStatic* camera);
         void removeLight(Light* light);
         void removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component);
+        void removeMirrorComponent(MirrorComponent* mirrorComponent);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -94,6 +102,11 @@ class GraphicsManager
 
 
         EnvironmentCaptureComponent* getGlobalEnvironmentCaptureComponent();
+
+        // Znajdz mirror component w obiekcie i wsrod jego dzieci, name - nazwa obiektu
+        MirrorComponent* findMirrorComponent(SceneObject* object, std::string name);
+        // Zarejestruj material w liscie oczekujacej na nieistniejacy jeszcze MirrorComponent
+        void registerPendingMaterialForMirrorComponent(Material* material);
 
 
         void update(float deltaTime);

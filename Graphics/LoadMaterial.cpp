@@ -144,6 +144,13 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
             sMaterial.reflectionTexture2 = EMT_GLOBAL;
     }
 
+    // mirror_name - name komponentu MirrorComonent
+    const char* mirrorName = materialElement->Attribute("mirror_name");
+    if (mirrorName != NULL)
+    {
+        sMaterial.mirrorName = std::string(mirrorName);
+    }
+
     const char* type = materialElement->Attribute("type");
 
     if (strcmp(type, "normalmapping") == 0)
@@ -162,6 +169,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = GRASS_MATERIAL;
     else if (strcmp(type, "car_paint") == 0)
         sMaterial.shader = CAR_PAINT_MATERIAL;
+    else if (strcmp(type, "mirror") == 0)
+        sMaterial.shader = MIRROR_MATERIAL;
 
 
     if (sMaterial.shader == GLASS_MATERIAL && sMaterial.glassTexture == NULL)

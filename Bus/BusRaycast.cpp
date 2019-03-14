@@ -657,6 +657,35 @@ void BusRaycast::loadXMLdata(std::string busname)
             }
         }
 
+        // ########### MIRROR COMPONENT ###########
+        XMLElement* mirrorElement = moduleElement->FirstChildElement("Mirror");
+        while (mirrorElement != nullptr)
+        {
+            std::cout << "XML: Mirror component" << std::endl;
+
+            const char* cName = mirrorElement->Attribute("name");
+            std::string name(cName);
+
+            const char* cPosition = mirrorElement->Attribute("position");
+            glm::vec3 position = XMLstringToVec3(cPosition);
+
+            const char* cNormal = mirrorElement->Attribute("normal");
+            glm::vec3 normal = XMLstringToVec3(cNormal);
+
+            SceneObject* mirrorObject = _sMgr->addSceneObject(name);
+            MirrorComponent* mirrorComponent = GraphicsManager::getInstance().addMirrorComponent(name);
+            mirrorComponent->setNormalVector(normal);
+
+            mirrorObject->addComponent(mirrorComponent);
+            mirrorObject->setPosition(position);
+            mirrorObject->setRotation(0, degToRad(180), 0);
+            busModule.sceneObject->addChild(mirrorObject);
+
+            _mirrors.push_back(mirrorComponent);
+
+            mirrorElement = mirrorElement->NextSiblingElement("Mirror");
+        }
+
 
         // Modules connection point
         XMLElement* jointElement = moduleElement->FirstChildElement("Joint");

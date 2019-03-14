@@ -17,6 +17,7 @@ class RenderObject : public Component
 {
     protected:
         RStaticModel* _model;
+        Material*     _materials;
 
         bool _isCastShadows;
 
@@ -31,6 +32,8 @@ class RenderObject : public Component
 
         void setModel(RStaticModel* model);
         RStaticModel* getModel();
+
+        Material* getMaterial(unsigned int index);
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();

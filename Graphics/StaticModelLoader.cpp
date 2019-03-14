@@ -181,6 +181,7 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
 
 
     StaticModelMesh* meshes = new StaticModelMesh[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
+    Material* materials = new Material[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
 
     MaterialLoader matLoader;
 	matLoader.openFile(xmlFileName.c_str());
@@ -213,9 +214,9 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
             indices[j] = meshesIndices[i][j];
         }
 
-        Material material = matLoader.loadMaterial(materialName.C_Str(), texturesPath);
+        materials[meshCounter] = matLoader.loadMaterial(materialName.C_Str(), texturesPath);
 
-        meshes[meshCounter].setMeshData(vertices, meshesVertices[i].size(), indices, meshesIndices[i].size(), material);
+        meshes[meshCounter].setMeshData(vertices, meshesVertices[i].size(), indices, meshesIndices[i].size(), meshCounter, materials[meshCounter].shader);
 
         ++meshCounter;
     }
@@ -236,7 +237,7 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
     delete[] meshesIndices;
 
 
-    RStaticModel* model = new RStaticModel(fileName, meshes, !isCollisionMeshExist ? meshesCount : (meshesCount - 1), GL_TRIANGLES, colMesh, collisionMesh.size());
+    RStaticModel* model = new RStaticModel(fileName, meshes, !isCollisionMeshExist ? meshesCount : (meshesCount - 1), materials, GL_TRIANGLES, colMesh, collisionMesh.size());
 
     return model;
 }

@@ -34,7 +34,7 @@ void TerrainLoader::saveTerFile(const char* fileName, RStaticModel* model)
     // Header
     file.write("TER001", 6 * sizeof(char));
 
-    std::string materialName = model->getMesh(0)->material.name;
+    std::string materialName = model->getMaterial(0)->name;
     unsigned int materialNameLenght = materialName.length();
     file.write((char*)&materialNameLenght, sizeof(materialNameLenght));
     file.write(materialName.c_str(), materialNameLenght * sizeof(char));
@@ -109,12 +109,14 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
 
     MaterialLoader matLoader;
     matLoader.openFile(materialFileName.c_str());
-    Material material = matLoader.loadMaterial(materialName, texturePath);
+
+    Material* materials = new Material[1];
+    materials[0] = matLoader.loadMaterial(materialName, texturePath);
 
     StaticModelMesh* meshes = new StaticModelMesh[1];
-    meshes[0].setMeshData(vertices, verticesSize, indices, indicesSize, material);
+    meshes[0].setMeshData(vertices, verticesSize, indices, indicesSize, 0, materials[0].shader);
 
-    RStaticModel* model = new RStaticModel("", meshes, 1, GL_TRIANGLES, collisionMesh, collisionMeshSize);
+    RStaticModel* model = new RStaticModel("", meshes, 1, materials, GL_TRIANGLES, collisionMesh, collisionMeshSize);
 
     return model;
 }
@@ -299,9 +301,11 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
 
     StaticModelMesh* meshes = new StaticModelMesh[1];
-    meshes[0].setMeshData(vert, v.size(), ind, in.size(), material);
+    Material* materials = new Material[1];
+    materials[0] = material;
+    meshes[0].setMeshData(vert, v.size(), ind, in.size(), 0, materials[0].shader);
 
-    RStaticModel* model = new RStaticModel("", meshes, 1, GL_TRIANGLES, collisionMesh, indicesSize);
+    RStaticModel* model = new RStaticModel("", meshes, 1, materials, GL_TRIANGLES, collisionMesh, indicesSize);
 
 
     return model;

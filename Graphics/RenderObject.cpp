@@ -4,17 +4,27 @@
 
 RenderObject::RenderObject(RStaticModel* model)
     : Component(CT_RENDER_OBJECT),
-    _model(model),
+    _model(NULL),
+    _materials(NULL),
     _isCastShadows(true),
     _isCalculatedAABB(false)
 {
     #ifdef _DEBUG_MODE
         printf("*** RenderObject: Konstruktor\n");
     #endif // _DEBUG_MODE
+
+    if (model != NULL)
+    {
+        setModel(model);
+    }
 }
 
 RenderObject::~RenderObject()
 {
+    if (_materials)
+    {
+        delete[] _materials;
+    }
     #ifdef _DEBUG_MODE
         printf("*** RenderObject: Destruktor\n");
     #endif // _DEBUG_MODE
@@ -67,6 +77,30 @@ void RenderObject::calculateNewAABB()
 void RenderObject::setModel(RStaticModel* model)
 {
     _model = model;
+
+    if (_materials)
+    {
+        delete[] _materials;
+    }
+
+    _materials = new Material[_model->getMeshesCount()];
+    for (int i = 0; i < _model->getMeshesCount(); ++i)
+    {
+        _materials[i] = *(_model->getMaterial(i));
+
+        if (_materials[i].shader == MIRROR_MATERIAL)
+        {
+            MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _materials[i].mirrorName);
+            if (mirrorComponent != NULL)
+            {
+                _materials[i].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+            }
+            else
+            {
+                GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_materials[i]);
+            }
+        }
+    }
 }
 
 
@@ -74,6 +108,12 @@ RStaticModel* RenderObject::getModel()
 {
     return _model;
 
+}
+
+
+Material* RenderObject::getMaterial(unsigned int index)
+{
+    return &_materials[index];
 }
 
 

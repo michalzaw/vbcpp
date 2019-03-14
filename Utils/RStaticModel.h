@@ -23,7 +23,7 @@ struct StaticModelMesh
 
     unsigned int firstVertex;
     unsigned int firstVertexInVbo;
-    Material material;
+    unsigned int materialIndex;
 
     ~StaticModelMesh()
     {
@@ -50,19 +50,19 @@ struct StaticModelMesh
     }
 
     void setMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
-                     Material material)
+                     unsigned int materialIndex, ShaderType shaderType)
     {
         this->vertices = vertices;
         this->verticesCount = verticesCount;
         this->indices = indices;
         this->indicesCount = indicesCount;
         this->firstVertex = 0;
-        this->material = material;
+        this->materialIndex = materialIndex;
 
-        int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(material.shader, verticesCount, sizeof(vertices[0]));
-        int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(material.shader, indicesCount);
-        vbo = OGLDriver::getInstance().vbos[material.shader][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
-        ibo = OGLDriver::getInstance().ibos[material.shader][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
+        int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
+        int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
+        vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
+        ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
 
         firstVertexInVbo = vbo->getQuantumOfVertices();
         for (unsigned int i = 0; i < this->indicesCount; ++i)
@@ -84,6 +84,7 @@ class RStaticModel : public Resource
     private:
         StaticModelMesh*_meshes;
         unsigned int    _meshesCount;
+        Material*       _materials;
 
         glm::vec3*      _collisionMesh;
         unsigned int    _collisionMeshSize;
@@ -98,7 +99,7 @@ class RStaticModel : public Resource
         void createAabbVbo();
 
     public:
-        RStaticModel(string path, StaticModelMesh* meshes, unsigned int meshesCount, GLenum primitiveType = GL_TRIANGLES,
+        RStaticModel(string path, StaticModelMesh* meshes, unsigned int meshesCount, Material* materials, GLenum primitiveType = GL_TRIANGLES,
                      glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
@@ -110,6 +111,7 @@ class RStaticModel : public Resource
 
         unsigned int    getMeshesCount();
         StaticModelMesh*getMesh(unsigned int i);
+        Material*       getMaterial(unsigned int i);
         unsigned int    getCollisionMeshSize();
         glm::vec3*      getCollisionMesh();
 

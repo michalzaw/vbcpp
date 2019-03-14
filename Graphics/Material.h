@@ -49,6 +49,8 @@ class Material
     glm::vec2 offset;
     glm::vec2 scale;
 
+    std::string mirrorName;
+
     //RShader* _shader;
     ShaderType shader;
 

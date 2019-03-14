@@ -82,7 +82,7 @@ class BusRaycast : public Bus
 
         virtual void update(float deltaTime);
 
-    public:
+    private:
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
         SoundManager*   _sndMgr;
@@ -115,6 +115,8 @@ class BusRaycast : public Bus
         DoorList        _doors;
 
         int             _collidesWith;
+
+        std::vector<MirrorComponent*> _mirrors;
 
         void loadXMLdata(std::string busname);
         bool isAllDoorClosed()

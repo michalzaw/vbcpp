@@ -208,6 +208,7 @@
 		<Unit filename="Graphics/LoadTexture.cpp" />
 		<Unit filename="Graphics/LoadTexture.h" />
 		<Unit filename="Graphics/Material.h" />
+		<Unit filename="Graphics/MirrorComponent.h" />
 		<Unit filename="Graphics/Model.cpp" />
 		<Unit filename="Graphics/Model.h" />
 		<Unit filename="Graphics/NVMeshMender/NVMeshMender.cpp" />

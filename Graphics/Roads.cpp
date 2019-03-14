@@ -7,6 +7,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
     std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
     std::vector<unsigned int>* lanesIndicesArray = new std::vector<unsigned int>[lanesCount];
     StaticModelMesh* meshes = new StaticModelMesh[lanesCount];
+    Material* materials = new Material[lanesCount];
     float* t = new float[lanesCount];       // wsp. do obliczania texCoordow
     glm::vec3* lastPoints = new glm::vec3[lanesCount];
 
@@ -231,7 +232,8 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
             indices[j] = lanesIndicesArray[i][j];
         }
 
-        meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, roadLanes[i].material);
+        materials[i] = roadLanes[i].material;
+        meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, materials[i].shader);
     }
 
 
@@ -256,7 +258,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
     delete[] lastPoints;
 
 
-    RStaticModel* model = new RStaticModel("", meshes, lanesCount, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
+    RStaticModel* model = new RStaticModel("", meshes, lanesCount, materials, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
 
     return model;
 }

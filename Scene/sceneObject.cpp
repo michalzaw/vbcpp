@@ -72,6 +72,10 @@ SceneObject::~SceneObject()
                 GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
                 break;
 
+            case CT_MIRROR:
+                GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -203,6 +207,12 @@ void SceneObject::removeAllChildren()
 }
 
 
+std::list<SceneObject*>& SceneObject::getChildren()
+{
+    return _childrens;
+}
+
+
 void SceneObject::addComponent(Component* component)
 {
     if (component != NULL)
@@ -261,6 +271,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:
                     GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                    break;
+
+                case CT_MIRROR:
+                    GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
                     break;
 
             }

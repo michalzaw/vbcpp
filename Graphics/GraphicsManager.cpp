@@ -139,6 +139,18 @@ EnvironmentCaptureComponent* GraphicsManager::addGlobalEnvironmentCaptureCompone
 }
 
 
+MirrorComponent* GraphicsManager::addMirrorComponent(std::string name)
+{
+    MirrorComponent* mirrorComponent = new MirrorComponent(name);
+
+    _mirrorComponents.push_back(mirrorComponent);
+
+    findAndAssigneMirrorComponentToPendingMaterials(mirrorComponent);
+
+    return mirrorComponent;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -219,6 +231,22 @@ void GraphicsManager::removeEnvironmetnCaptureComponent(EnvironmentCaptureCompon
 }
 
 
+void GraphicsManager::removeMirrorComponent(MirrorComponent* mirrorComponent)
+{
+    for (std::vector<MirrorComponent*>::iterator i = _mirrorComponents.begin(); i != _mirrorComponents.end(); ++i)
+    {
+        if (*i == mirrorComponent)
+        {
+            i = _mirrorComponents.erase(i);
+
+            delete mirrorComponent;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -271,6 +299,54 @@ float GraphicsManager::getWindValue()
 EnvironmentCaptureComponent* GraphicsManager::getGlobalEnvironmentCaptureComponent()
 {
     return _globalEnvironmentCaptureComponent;
+}
+
+
+MirrorComponent* GraphicsManager::findMirrorComponent(SceneObject* object, std::string name)
+{
+    if (object != NULL)
+    {
+        Component* mirrorComponent = object->getComponent(CT_MIRROR);
+        if (mirrorComponent != NULL)
+        {
+            MirrorComponent* m = static_cast<MirrorComponent*>(mirrorComponent);
+            if (m->getName() == name)
+                return m;
+        }
+
+        std::list<SceneObject*>& children = object->getChildren();
+        for (std::list<SceneObject*>::iterator i = children.begin(); i != children.end(); ++i)
+        {
+            MirrorComponent* mirrorComponent = findMirrorComponent(*i, name);
+            if (mirrorComponent != NULL)
+                return mirrorComponent;
+        }
+    }
+
+    return NULL;
+}
+
+
+void GraphicsManager::registerPendingMaterialForMirrorComponent(Material* material)
+{
+    _pendingMaterialsForMirrorComponent.push_back(material);
+}
+
+
+void GraphicsManager::findAndAssigneMirrorComponentToPendingMaterials(MirrorComponent* mirrorComponent)
+{
+    for (std::list<Material*>::iterator i = _pendingMaterialsForMirrorComponent.begin();
+         i != _pendingMaterialsForMirrorComponent.end();
+         ++i)
+    {
+        if ((*i)->mirrorName == mirrorComponent->getName())
+        {
+            (*i)->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+
+            i = _pendingMaterialsForMirrorComponent.erase(i);
+            break;
+        }
+    }
 }
 
 

@@ -35,6 +35,8 @@ class Renderer
         UBO* _lightUBO;
 
         std::vector<RenderData*> _renderDataList;
+        std::vector<RenderData*> _renderDataListForShadowmapping;
+        RenderData*              _mainRenderData;
 
         unsigned int _screenWidth;
         unsigned int _screenHeight;
@@ -46,6 +48,8 @@ class Renderer
 
         void prepareLightsData();
         void prepareRenderData();
+
+        bool isObjectInCamera(RenderObject* object, CameraStatic* camera);
 
         void createRenderDatasForShadowMap(ShadowMap* shadowMap);
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);

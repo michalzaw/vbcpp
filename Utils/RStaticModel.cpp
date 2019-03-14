@@ -1,12 +1,13 @@
 #include "RStaticModel.h"
 
 
-RStaticModel::RStaticModel(string path, StaticModelMesh* meshes, unsigned int meshesCount, GLenum primitiveType,
+RStaticModel::RStaticModel(string path, StaticModelMesh* meshes, unsigned int meshesCount, Material* materials, GLenum primitiveType,
              glm::vec3* collisionMesh, unsigned int collisionMeshSize)
     : Resource(RT_MODEL, path)
 {
     _meshes = meshes;
     _meshesCount = meshesCount;
+    _materials = materials;
 
     _collisionMesh = collisionMesh;
     _collisionMeshSize = collisionMeshSize;
@@ -29,6 +30,11 @@ RStaticModel::~RStaticModel()
     if (_collisionMesh)
     {
         delete[] _collisionMesh;
+    }
+
+    if (_materials)
+    {
+        delete[] _materials;
     }
 
     if (_aabbVbo)
@@ -89,6 +95,15 @@ StaticModelMesh* RStaticModel::getMesh(unsigned int i)
 {
     if (i < _meshesCount)
         return &_meshes[i];
+    else
+        return NULL;
+}
+
+
+Material* RStaticModel::getMaterial(unsigned int i)
+{
+    if (i < _meshesCount)
+        return &_materials[i];
     else
         return NULL;
 }

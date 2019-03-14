@@ -20,12 +20,20 @@ enum RenderElementType
 };
 
 
+enum RenderPass
+{
+    RP_SHADOWS,
+    RP_NORMAL
+};
+
+
 struct RenderListElement
 {
     RenderElementType   type;
 
     RStaticModel*       model;
     StaticModelMesh*    mesh;
+    Material*           material;
 
     float               distanceFromCamera;
 
@@ -43,6 +51,7 @@ struct RenderData
     CameraStatic* camera;
     Framebuffer* framebuffer;
     glm::mat4 MVMatrix;
+    RenderPass renderPass;
 
 };
 

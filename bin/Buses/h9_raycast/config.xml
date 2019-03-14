@@ -24,6 +24,10 @@
 	
 		<Headlight name="headlight0" position="0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
 		<Headlight name="headlight1" position="-0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
+	
+		<Mirror name="mirrorLeft" position="1.35,0.57,4.33" normal="-0.247501,-0.0382323,-0.968133"/>
+		<Mirror name="mirrorRight" position="-1.25,0.51,4.43" normal="0.49688,0,-0.86782"/>
+		<Mirror name="mirrorIn" position="0,0.76,4.37" normal="0.332873,-0.273856,-0.90233"/>
 	</Module>
 	
 	<Driver position="0.75,0.44,3.51"/>
