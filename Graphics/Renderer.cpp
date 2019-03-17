@@ -229,12 +229,16 @@ void Renderer::prepareRenderData()
     }
     for (int i = 0; i < graphicsManager._mirrorComponents.size(); ++i)
     {
-        graphicsManager._mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(graphicsManager.getCurrentCamera()->getPosition());
-        RenderData* renderData = new RenderData;
-        renderData->camera = graphicsManager._mirrorComponents[i];
-        renderData->framebuffer = graphicsManager._mirrorComponents[i]->getFramebuffer();
-        renderData->renderPass = RP_NORMAL;
-        _renderDataList.push_back(renderData);
+        Frustum frustum(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
+        if (isPointInFrustum(frustum, graphicsManager._mirrorComponents[i]->getPosition()))
+        {
+            graphicsManager._mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(graphicsManager.getCurrentCamera()->getPosition());
+            RenderData* renderData = new RenderData;
+            renderData->camera = graphicsManager._mirrorComponents[i];
+            renderData->framebuffer = graphicsManager._mirrorComponents[i]->getFramebuffer();
+            renderData->renderPass = RP_MIRROR;
+            _renderDataList.push_back(renderData);
+        }
     }
     _renderDataList.push_back(_mainRenderData);
 
@@ -260,7 +264,7 @@ void Renderer::prepareRenderData()
             RenderPass renderPass = _renderDataList[j]->renderPass;
             bool isCastShadows = object->isCastShadows();
 
-            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass == RP_NORMAL) &&
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
                 isObjectInCamera(object, _renderDataList[j]->camera))
             {
                 tempRenderElement.model = object->getModel();
@@ -498,9 +502,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // MIRROR_MATERIAL
-    defines.clear();
-    defines.push_back("SOLID");
-	_shaderList[MIRROR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+	_shaderList[MIRROR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/mirror.frag");
 
     // ALPHA_TEST_MATERIAL
     defines.clear();
@@ -551,6 +553,36 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.clear();
     defines.push_back("ALPHA_TEST");
     _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
+    // MIRROR_SOLID_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+	_shaderList[MIRROR_SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_ALPHA_TEST_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    _shaderList[MIRROR_ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_GLASS_MATERIAL
+    defines.clear();
+    defines.push_back("GLASS");
+    defines.push_back("REFLECTION");
+    _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+
+    _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
+    _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[NOTEXTURE_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[NORMALMAPPING_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[CAR_PAINT_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[MIRROR_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[ALPHA_TEST_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
+    _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
 
 
     // Create UBO for lights
@@ -639,7 +671,9 @@ void Renderer::renderAll()
     {
         if (_renderDataList[i]->renderPass == RP_SHADOWS)
             renderDepth(_renderDataList[i]);
-        else
+        else if (_renderDataList[i]->renderPass == RP_MIRROR)
+            renderToMirrorTexture(_renderDataList[i]);
+        else // RP_NORMAL
             renderScene(_renderDataList[i]);
     }
 }
@@ -708,6 +742,150 @@ void Renderer::renderDepth(RenderData* renderData)
         }
     }
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
+
+void Renderer::renderToMirrorTexture(RenderData* renderData)
+{
+    renderData->framebuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    CameraStatic* camera = renderData->camera;
+
+    ShaderType currentShader;
+    for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
+    {
+        RStaticModel* model = i->model;
+        StaticModelMesh* mesh = i->mesh;
+        Material* material = i->material;
+
+        ShaderType shaderType = _shaderListForMirrorRendering[material->shader];
+        RShader* shader = _shaderList[shaderType];
+        if (shaderType != currentShader)
+        {
+            shader->enable();
+
+            if (currentShader == SKY_MATERIAL)
+            {
+                glEnable(GL_CULL_FACE);
+            }
+            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            {
+                glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+            }
+            else if (currentShader == MIRROR_GLASS_MATERIAL)
+            {
+                glDisable(GL_BLEND);
+            }
+
+            if (shaderType == SKY_MATERIAL)
+            {
+                glDisable(GL_CULL_FACE);
+            }
+            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            {
+                glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+            }
+            else if (shaderType == MIRROR_GLASS_MATERIAL)
+            {
+                glEnable(GL_BLEND);
+            }
+
+            currentShader = shaderType;
+        }
+        else
+        {
+            shader->resetTextureLocation();
+        }
+
+
+        if (shaderType == MIRROR_GLASS_MATERIAL)
+        {
+            if (material->glassTexture != NULL)
+                shader->bindTexture(UNIFORM_GLASS_TEXTURE, material->glassTexture);
+
+
+            if (material->reflectionTexture1 == EMT_GLOBAL)
+            {
+                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+            }
+            else
+            {
+                Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
+                if (c != NULL)
+                {
+                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                }
+            }
+
+            if (material->reflectionTexture2 == EMT_GLOBAL)
+            {
+                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+            }
+            else
+            {
+                Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
+                if (c != NULL)
+                {
+                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                }
+            }
+        }
+
+
+        shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
+
+
+        glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
+        shader->setUniform(UNIFORM_MVP, MVP);
+        shader->setUniform(UNIFORM_MODEL_MATRIX, i->object->getGlobalTransformMatrix());
+        shader->setUniform(UNIFORM_NORMAL_MATRIX, i->object->getGlobalNormalMatrix());
+
+        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
+        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, material->specularColor);
+
+        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, material->transparency);
+
+        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, material->shininess);
+        shader->setUniform(UNIFORM_CAMERA_POSITION, camera->getPosition());
+
+
+        mesh->vbo->bind();
+        mesh->ibo->bind();
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+
+        glEnableVertexAttribArray(2);
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+
+        if (material->diffuseTexture != NULL)
+            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, material->diffuseTexture);
+
+
+        if (i->type != RET_GRASS)
+        {
+            glDrawElements(model->getPrimitiveType(),
+                           mesh->indicesCount,
+                           GL_UNSIGNED_INT,
+                           (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        }
+
+        glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
+    }
+    glEnable(GL_CULL_FACE);
+    glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    glDisable(GL_BLEND);
 }
 
 

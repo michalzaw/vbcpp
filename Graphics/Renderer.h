@@ -32,6 +32,7 @@ class Renderer
 
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
+        std::vector<ShaderType> _shaderListForMirrorRendering;
         UBO* _lightUBO;
 
         std::vector<RenderData*> _renderDataList;
@@ -77,6 +78,7 @@ class Renderer
 
         void renderAll();
         void renderDepth(RenderData* renderData);
+        void renderToMirrorTexture(RenderData* renderData);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
 

@@ -208,6 +208,40 @@ void readInput(GLFWwindow* window, double deltaTime)
     {
         bus->centerSteringWheel(deltaTime);
     }
+
+    static float x = 0;
+    static float angle = 0;
+    if (glfwGetKey( window, GLFW_KEY_E ) == GLFW_PRESS)
+    {
+        if (x < 1.0f)
+        {
+            x += deltaTime;
+            float x1 = glm::mix(-PI / 2.0f, PI / 2.0f, x);
+            float sinx1 = sinf(x1);
+            sinx1 = sinx1 * 0.5f + 0.5f;
+            sinx1 *= 25.0f;
+
+            float delta = sinx1 - angle;
+            angle += delta;
+            camFPS->getSceneObject()->rotate(0, degToRad(-delta), 0);
+        }
+    }
+
+    if (glfwGetKey( window, GLFW_KEY_E ) == GLFW_RELEASE)
+    {
+        if (x > 0.0f)
+        {
+            x -= deltaTime;
+            float x1 = glm::mix(-PI / 2.0f, PI / 2.0f, x);
+            float sinx1 = sinf(x1);
+            sinx1 = sinx1 * 0.5f + 0.5f;
+            sinx1 *= 25.0f;
+
+            float delta = sinx1 - angle;
+            angle += delta;
+            camFPS->getSceneObject()->rotate(0, degToRad(-delta), 0);
+        }
+    }
 }
 
 

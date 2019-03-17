@@ -23,6 +23,7 @@ enum RenderElementType
 enum RenderPass
 {
     RP_SHADOWS,
+    RP_MIRROR,
     RP_NORMAL
 };
 
