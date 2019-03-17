@@ -12,6 +12,7 @@
 #include "../Scene/SceneObject.h"
 
 #include "../Graphics/Light.h"
+#include "../Graphics/MirrorComponent.h"
 
 #include "Door.h"
 
@@ -69,6 +70,9 @@ class Bus : public RefCounter
         virtual void doorOpenClose(char doorGroup) = 0;
         virtual Door* getDoor(unsigned char doorIndex) = 0;
         virtual int getDoorsCount() = 0;
+
+        virtual MirrorComponent* getMirror(int index) = 0;
+        virtual int getMirrorsCount() = 0;
 
         virtual void update(float deltaTime) = 0;
 

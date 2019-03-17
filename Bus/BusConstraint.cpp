@@ -819,6 +819,18 @@ int BusConstraint::getDoorsCount()
 }
 
 
+MirrorComponent* BusConstraint::getMirror(int index)
+{
+    return NULL;
+}
+
+
+int BusConstraint::getMirrorsCount()
+{
+    return 0;
+}
+
+
 void BusConstraint::doorOpenClose(char doorGroup)
 {
     for (unsigned char i = 0; i < _doors.size(); i++)

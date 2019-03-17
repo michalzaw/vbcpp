@@ -42,6 +42,9 @@ Bus* bus = NULL;
 std::string winTitle = "Virtual Bus Core++";
 
 
+bool mirrorControl = false;
+int mirrorControlIndex = -1;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -141,6 +144,20 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         ResourceManager::getInstance().reloadAllTextures();
     }
+
+    if (key == GLFW_KEY_M && action == GLFW_PRESS)
+    {
+        ++mirrorControlIndex;
+        if (mirrorControlIndex < bus->getMirrorsCount())
+        {
+            mirrorControl = true;
+        }
+        else
+        {
+            mirrorControl = false;
+            mirrorControlIndex = -1;
+        }
+    }
 }
 
 
@@ -174,39 +191,64 @@ void readInput(GLFWwindow* window, double deltaTime)
 		camFPS->strafeLeft(deltaTime);
 	}
 
-	if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+	if (mirrorControl)
     {
-        bus->turnLeft(deltaTime);
-    }
+        if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+        {
+            bus->getMirror(mirrorControlIndex)->getSceneObject()->rotate(0.0f, -0.01f, 0.0f);
+        }
 
-    if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
-    {
-        bus->turnRight(deltaTime);
-    }
+        if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+        {
+            bus->getMirror(mirrorControlIndex)->getSceneObject()->rotate(0.0f, 0.01f, 0.0f);
+        }
 
-    if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
-    {
-        bus->accelerate();
-    }
+        if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
+        {
+            bus->getMirror(mirrorControlIndex)->getSceneObject()->rotate(0.01f, 0.0f, 0.0f);
+        }
 
-    if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_RELEASE)
-    {
-        bus->idle();
+        if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
+        {
+            bus->getMirror(mirrorControlIndex)->getSceneObject()->rotate(-0.01f, 0.0f, 0.0f);
+        }
     }
-
-    if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
+    else
     {
-        bus->brakeOn();
-    }
+        if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_PRESS)
+        {
+            bus->turnLeft(deltaTime);
+        }
 
-    if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
-    {
-        bus->brakeOff();
-    }
+        if (glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_PRESS)
+        {
+            bus->turnRight(deltaTime);
+        }
 
-    if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_RELEASE && glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_RELEASE)
-    {
-        bus->centerSteringWheel(deltaTime);
+        if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_PRESS)
+        {
+            bus->accelerate();
+        }
+
+        if (glfwGetKey( window, GLFW_KEY_UP ) == GLFW_RELEASE)
+        {
+            bus->idle();
+        }
+
+        if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_PRESS)
+        {
+            bus->brakeOn();
+        }
+
+        if (glfwGetKey( window, GLFW_KEY_DOWN ) == GLFW_RELEASE)
+        {
+            bus->brakeOff();
+        }
+
+        if (glfwGetKey( window, GLFW_KEY_LEFT ) == GLFW_RELEASE && glfwGetKey( window, GLFW_KEY_RIGHT ) == GLFW_RELEASE)
+        {
+            bus->centerSteringWheel(deltaTime);
+        }
     }
 
     static float x = 0;

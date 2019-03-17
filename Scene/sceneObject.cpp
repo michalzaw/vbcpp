@@ -444,6 +444,8 @@ void SceneObject::rotate(glm::vec3 deltaRotation)
 {
     _rotation += deltaRotation;
 
+    _rotationMode = RM_EULER_ANGLES;
+
     changedTransform();
 }
 

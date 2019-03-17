@@ -83,6 +83,9 @@ class BusConstraint : public Bus
         Door* getDoor(unsigned char doorIndex);
         int getDoorsCount();
 
+        MirrorComponent* getMirror(int index);
+        int getMirrorsCount();
+
         // Update internal physics - doors, wheels etc
         void update(float dt);
 

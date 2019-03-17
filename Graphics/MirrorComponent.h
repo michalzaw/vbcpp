@@ -53,7 +53,9 @@ class MirrorComponent : public CameraStatic
         void calculateReflectionVectorAndRotateCamera(glm::vec3 mainCameraPosition)
         {
             glm::vec3 cameraToMirror = glm::normalize(getPosition() - mainCameraPosition);
-            glm::vec3 reflection = glm::normalize(glm::reflect(cameraToMirror, glm::normalize(getSceneObject()->getParent()->transformLocalVectorToGlobal(_normalVector))));
+            glm::vec3 reflection = glm::normalize(glm::reflect(cameraToMirror, glm::normalize(getSceneObject()->transformLocalVectorToGlobal(_normalVector))));
+
+            //std::cout << getSceneObject()->getRotation().x << " " << getSceneObject()->getRotation().y << " " << getSceneObject()->getRotation().z << std::endl;
 
             _localDirection = _direction = reflection;
             _localRightVector = _rightVector = glm::normalize(glm::cross(_direction, getSceneObject()->getParent()->transformLocalVectorToGlobal(glm::vec3(0, 1, 0))));

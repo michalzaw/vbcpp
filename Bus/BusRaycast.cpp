@@ -669,6 +669,9 @@ void BusRaycast::loadXMLdata(std::string busname)
             const char* cPosition = mirrorElement->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
 
+            const char* cRotation = mirrorElement->Attribute("rotation");
+            glm::vec3 rotation = XMLstringToVec3(cRotation);
+
             const char* cNormal = mirrorElement->Attribute("normal");
             glm::vec3 normal = XMLstringToVec3(cNormal);
 
@@ -678,7 +681,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             mirrorObject->addComponent(mirrorComponent);
             mirrorObject->setPosition(position);
-            mirrorObject->setRotation(0, degToRad(180), 0);
+            mirrorObject->setRotation(rotation);
             busModule.sceneObject->addChild(mirrorObject);
 
             _mirrors.push_back(mirrorComponent);
@@ -986,6 +989,21 @@ Door* BusRaycast::getDoor(unsigned char doorIndex)
 int BusRaycast::getDoorsCount()
 {
     return _doors.size();
+}
+
+
+MirrorComponent* BusRaycast::getMirror(int index)
+{
+    if (index <= _mirrors.size()-1)
+        return _mirrors[index];
+    else
+        return NULL;
+}
+
+
+int BusRaycast::getMirrorsCount()
+{
+    return _mirrors.size();
 }
 
 

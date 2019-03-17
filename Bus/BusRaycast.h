@@ -80,6 +80,9 @@ class BusRaycast : public Bus
         virtual Door* getDoor(unsigned char doorIndex);
         virtual int getDoorsCount();
 
+        virtual MirrorComponent* getMirror(int index);
+        virtual int getMirrorsCount();
+
         virtual void update(float deltaTime);
 
     private:
