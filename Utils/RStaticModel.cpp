@@ -79,7 +79,7 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
         }
     }
 
-    for (int i = 0; i < node->childrenCount; ++i)
+    for (int i = 0; i < node->children.size(); ++i)
     {
         findMinAndMaxVertices(node->children[i], nodeTransform, min, max);
     }

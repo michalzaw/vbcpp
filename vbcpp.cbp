@@ -211,6 +211,8 @@
 		<Unit filename="Graphics/MirrorComponent.h" />
 		<Unit filename="Graphics/Model.cpp" />
 		<Unit filename="Graphics/Model.h" />
+		<Unit filename="Graphics/ModelNode.cpp" />
+		<Unit filename="Graphics/ModelNode.h" />
 		<Unit filename="Graphics/NVMeshMender/NVMeshMender.cpp" />
 		<Unit filename="Graphics/NVMeshMender/NVMeshMender.h" />
 		<Unit filename="Graphics/OGLDriver.cpp" />

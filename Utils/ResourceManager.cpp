@@ -329,6 +329,70 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 }
 
 
+RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames)
+{
+    std::string pathForResourceManager = path + "-";
+    for (int i = 0; i < nodesToSkipNames.size(); ++i)
+    {
+        pathForResourceManager += ";" + nodesToSkipNames[i];
+    }
+
+    Resource* res = findResource(pathForResourceManager);
+    if (res != 0)
+    {
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
+        return model;
+    }
+
+
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModel(path, texturePath, nodesToSkipNames) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
+
+    if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
+RStaticModel* ResourceManager::loadModelNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames)
+{
+    std::string pathForResourceManager = path + "+";
+    for (int i = 0; i < nodesToLoadNames.size(); ++i)
+    {
+        pathForResourceManager += ";" + nodesToLoadNames[i];
+    }
+
+    Resource* res = findResource(pathForResourceManager);
+    if (res != 0)
+    {
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
+        return model;
+    }
+
+
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModelNodes(path, texturePath, nodesToLoadNames) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
+
+    if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
 RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 {
     Resource* res = findResource(path);

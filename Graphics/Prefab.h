@@ -104,8 +104,6 @@ class Cube : public Prefab
             modelNode->meshes = meshes;
             modelNode->meshesCount = 1;
             modelNode->parent = NULL;
-            modelNode->childrenCount = 0;
-            modelNode->children = NULL;
 
             setModel(new RStaticModel("", modelNode, materials, 1));
         }

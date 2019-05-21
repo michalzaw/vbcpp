@@ -10,7 +10,7 @@ ModelNode::ModelNode(StaticModelNode* staticModelNode, ModelNode* parent)
     _meshesCount = staticModelNode->meshesCount;
 
     _parent = parent;
-    _childrenCount = staticModelNode->childrenCount;
+    _childrenCount = staticModelNode->children.size();
     _children = new ModelNode*[_childrenCount];
 
     for (int i = 0; i < _childrenCount; ++i)

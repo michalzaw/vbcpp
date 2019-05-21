@@ -24,6 +24,9 @@ class StaticModelLoader
         Assimp::Importer _assimpImporter;
         const aiScene* _assimpScene;
 
+        std::vector<std::string> _nodesToSkipNames;
+        std::vector<std::string> _nodesToLoadNames;
+
         Material* _materials;
 
         std::vector<glm::vec3> _collisionMesh;
@@ -41,6 +44,8 @@ class StaticModelLoader
             _materialLoader = new MaterialLoader;
         }
         RStaticModel* loadModel(std::string fileName, std::string texturesPath);
+        RStaticModel* loadModel(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames);
+        RStaticModel* loadModelNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames);
         //RStaticModel* loadModel2(std::string fileName, std::string texturesPath);
 
 };

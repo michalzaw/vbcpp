@@ -89,8 +89,7 @@ struct StaticModelNode
     unsigned int        meshesCount;
 
     StaticModelNode*    parent;
-    StaticModelNode**   children;
-    unsigned int        childrenCount;
+    std::vector<StaticModelNode*>   children;
 
     StaticModelNode()
     {
@@ -98,8 +97,6 @@ struct StaticModelNode
         meshesCount = 0;
 
         parent = NULL;
-        children = NULL;
-        childrenCount = 0;
     }
 
     ~StaticModelNode()
@@ -109,14 +106,9 @@ struct StaticModelNode
             delete[] meshes;
         }
 
-        if (children)
+        for (int i = 0; i < children.size(); ++i)
         {
-            for (int i = 0; i < childrenCount; ++i)
-            {
-                delete children[i];
-            }
-
-            delete[] children;
+            delete children[i];
         }
     }
 

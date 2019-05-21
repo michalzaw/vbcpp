@@ -46,7 +46,7 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
         }
     }
 
-    for (int i = 0; i < staticModelNode->childrenCount; ++i)
+    for (int i = 0; i < staticModelNode->children.size(); ++i)
     {
         addModelNodeToTriangleMesh(triMesh, staticModelNode->children[i], nodeTransform);
     }

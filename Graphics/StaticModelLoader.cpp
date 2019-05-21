@@ -1,5 +1,6 @@
 #include "StaticModelLoader.h"
 #include <iostream>
+#include <algorithm>
 
 
 void StaticModelLoader::saveMaterialsDataToXml(std::string fileName)
@@ -148,6 +149,17 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
     glm::mat4 nodeTransform = calculateGlmMatrix(assimpNode->mTransformation);
     glm::mat4 globalNodeTransform = parentTransform * nodeTransform;
 
+    std::string nodeName = std::string(assimpNode->mName.C_Str());
+    if (std::find(_nodesToSkipNames.begin(), _nodesToSkipNames.end(), nodeName) != _nodesToSkipNames.end())
+    {
+        return NULL;
+    }
+
+    if (!_nodesToLoadNames.empty() && parent != NULL && std::find(_nodesToLoadNames.begin(), _nodesToLoadNames.end(), nodeName) == _nodesToLoadNames.end())
+    {
+        return NULL;
+    }
+
     bool isCollisionMeshExist = isNodeContainsCollisionMesh(assimpNode);
 
     unsigned int meshesCount = isCollisionMeshExist ? assimpNode->mNumMeshes - 1 : assimpNode->mNumMeshes;
@@ -250,18 +262,20 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
 
     // create model node
     StaticModelNode* modelNode = new StaticModelNode;
-    modelNode->name = std::string(assimpNode->mName.C_Str());
+    modelNode->name = nodeName;
     modelNode->transformMatrix = nodeTransform;
     modelNode->meshes = meshes;
     modelNode->meshesCount = meshesCount;
     modelNode->parent = parent;
-    modelNode->childrenCount = assimpNode->mNumChildren;
-    modelNode->children = new StaticModelNode*[modelNode->childrenCount];
 
     // node children
-    for (unsigned int i = 0; i < modelNode->childrenCount; ++i)
+    for (unsigned int i = 0; i < assimpNode->mNumChildren; ++i)
     {
-        modelNode->children[i] = createModelNode(assimpNode->mChildren[i], globalNodeTransform, modelNode);
+        StaticModelNode* node = createModelNode(assimpNode->mChildren[i], globalNodeTransform, modelNode);
+        if (node != NULL)
+        {
+            modelNode->children.push_back(node);
+        }
     }
 
     return modelNode;
@@ -312,8 +326,26 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
     RStaticModel* model = new RStaticModel(fileName, rootNode, _materials, materialsCount, GL_TRIANGLES, colMesh, _collisionMesh.size());
 
     _materialLoader->closeFile();
+    _nodesToLoadNames.clear();
+    _nodesToSkipNames.clear();
 
     return model;
+}
+
+
+RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames)
+{
+    _nodesToSkipNames = nodesToSkipNames;
+
+    return loadModel(fileName, texturesPath);
+}
+
+
+RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames)
+{
+    _nodesToLoadNames = nodesToLoadNames;
+
+    return loadModel(fileName, texturesPath);
 }
 
 
