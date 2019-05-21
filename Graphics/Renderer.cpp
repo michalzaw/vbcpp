@@ -217,9 +217,9 @@ void Renderer::prepareLightsData()
 }
 
 
-void addStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform)
+void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform)
 {
-    glm::mat4 t = parentTransform * modelNode->transformMatrix;
+    glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
     tempRenderElement.transformMatrix = t;
 
     for (int k = 0; k < modelNode->getMeshesCount(); ++k)
@@ -240,16 +240,16 @@ void addStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListElemen
         }
     }
 
-    for (int i = 0; i < modelNode->childrenCount; ++i)
+    for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        addStaticModelNodeToRenderList(modelNode->children[i], tempRenderElement, renderList, renderPass, t);
+        addStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, renderPass, t);
     }
 }
 
 
-void addGrassStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform)
+void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform)
 {
-    glm::mat4 t = parentTransform * modelNode->transformMatrix;
+    glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
     tempRenderElement.transformMatrix = t;
 
     for (int j = 0; j < modelNode->getMeshesCount(); ++j)
@@ -260,9 +260,9 @@ void addGrassStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListE
         renderList.push_back(tempRenderElement);
     }
 
-    for (int i = 0; i < modelNode->childrenCount; ++i)
+    for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        addGrassStaticModelNodeToRenderList(modelNode->children[i], tempRenderElement, renderList, t);
+        addGrassStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, t);
     }
 }
 
@@ -321,7 +321,7 @@ void Renderer::prepareRenderData()
                 tempRenderElement.object = object->getSceneObject();
                 tempRenderElement.renderObject = object;
 
-                StaticModelNode* modelNode = tempRenderElement.model->getRootNode();
+                ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
                 addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass, glm::mat4(1.0f));
             }
         }
@@ -336,7 +336,7 @@ void Renderer::prepareRenderData()
         tempRenderElement.object = object->getSceneObject();
         tempRenderElement.renderObject = object;
 
-        StaticModelNode* modelNode = tempRenderElement.model->getRootNode();
+        ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
         addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList, glm::mat4(1.0f));
     }
 

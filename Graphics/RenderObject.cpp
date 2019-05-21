@@ -21,6 +21,11 @@ RenderObject::RenderObject(RStaticModel* model)
 
 RenderObject::~RenderObject()
 {
+    if (_modelRootNode)
+    {
+        delete _modelRootNode;
+    }
+
     if (_materials)
     {
         delete[] _materials;
@@ -78,6 +83,8 @@ void RenderObject::setModel(RStaticModel* model)
 {
     _model = model;
 
+    _modelRootNode = new ModelNode(_model->getRootNode());
+
     if (_materials)
     {
         delete[] _materials;
@@ -108,6 +115,12 @@ RStaticModel* RenderObject::getModel()
 {
     return _model;
 
+}
+
+
+ModelNode* RenderObject::getModelRootNode()
+{
+    return _modelRootNode;
 }
 
 
