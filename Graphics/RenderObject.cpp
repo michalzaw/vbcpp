@@ -83,8 +83,8 @@ void RenderObject::setModel(RStaticModel* model)
         delete[] _materials;
     }
 
-    _materials = new Material[_model->getMeshesCount()];
-    for (int i = 0; i < _model->getMeshesCount(); ++i)
+    _materials = new Material[_model->getMaterialsCount()];
+    for (int i = 0; i < _model->getMaterialsCount(); ++i)
     {
         _materials[i] = *(_model->getMaterial(i));
 

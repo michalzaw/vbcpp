@@ -15,6 +15,7 @@ class PhysicalBodyBvtTriangleMesh : public PhysicalBody
     private:
         RStaticModel*  _model;
 
+        void addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform);
         btTriangleMesh* buildTriangleMesh();
         void updateBody();
 };

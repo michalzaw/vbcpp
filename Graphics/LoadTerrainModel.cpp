@@ -23,9 +23,10 @@ std::string TerrainLoader::createTerrainHeightAndNormalMapFileName(std::string h
 
 void TerrainLoader::saveTerFile(const char* fileName, RStaticModel* model)
 {
-    if (model->getMeshesCount() != 1)
+    StaticModelNode* modelRootNode = model->getRootNode();
+    if (modelRootNode == NULL || modelRootNode->meshesCount != 1)
     {
-        std::cout << "Terrain model cannot save to: " << fileName << ", meshes count: " << model->getMeshesCount() << std::endl;
+        std::cout << "Terrain model cannot save to: " << fileName << ", meshes count: " << modelRootNode->getMeshesCount() << std::endl;
         return;
     }
 
@@ -39,20 +40,20 @@ void TerrainLoader::saveTerFile(const char* fileName, RStaticModel* model)
     file.write((char*)&materialNameLenght, sizeof(materialNameLenght));
     file.write(materialName.c_str(), materialNameLenght * sizeof(char));
 
-    unsigned int verticesSize = model->getMesh(0)->verticesCount;
+    unsigned int verticesSize = modelRootNode->getMesh(0)->verticesCount;
     file.write((char*)&verticesSize, sizeof(verticesSize));
 
-    unsigned int indicesSize = model->getMesh(0)->indicesCount;
+    unsigned int indicesSize = modelRootNode->getMesh(0)->indicesCount;
     file.write((char*)&indicesSize, sizeof(indicesSize));
 
     unsigned int collisionMeshSize = model-> getCollisionMeshSize();
     file.write((char*)&collisionMeshSize, sizeof(collisionMeshSize));
 
     // Vertices array
-    file.write((char*)model->getMesh(0)->vertices, sizeof(Vertex) * verticesSize);
+    file.write((char*)modelRootNode->getMesh(0)->vertices, sizeof(Vertex) * verticesSize);
 
     // Indices array
-    file.write((char*)model->getMesh(0)->indices, sizeof(unsigned int) * indicesSize);
+    file.write((char*)modelRootNode->getMesh(0)->indices, sizeof(unsigned int) * indicesSize);
 
     // Collision mesh vertices array
     file.write((char*)model->getCollisionMesh(), sizeof(glm::vec3) * collisionMeshSize);
@@ -116,7 +117,16 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
     StaticModelMesh* meshes = new StaticModelMesh[1];
     meshes[0].setMeshData(vertices, verticesSize, indices, indicesSize, 0, materials[0].shader);
 
-    RStaticModel* model = new RStaticModel("", meshes, 1, materials, GL_TRIANGLES, collisionMesh, collisionMeshSize);
+    StaticModelNode* modelNode = new StaticModelNode;
+    modelNode->name = "terrain";
+    modelNode->transformMatrix = glm::mat4(1.0f);
+    modelNode->meshes = meshes;
+    modelNode->meshesCount = 1;
+    modelNode->parent = NULL;
+    modelNode->childrenCount = 0;
+    modelNode->children = NULL;
+
+    RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, collisionMeshSize);
 
     return model;
 }
@@ -305,7 +315,16 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     materials[0] = material;
     meshes[0].setMeshData(vert, v.size(), ind, in.size(), 0, materials[0].shader);
 
-    RStaticModel* model = new RStaticModel("", meshes, 1, materials, GL_TRIANGLES, collisionMesh, indicesSize);
+    StaticModelNode* modelNode = new StaticModelNode;
+    modelNode->name = "terrain";
+    modelNode->transformMatrix = glm::mat4(1.0f);
+    modelNode->meshes = meshes;
+    modelNode->meshesCount = 1;
+    modelNode->parent = NULL;
+    modelNode->childrenCount = 0;
+    modelNode->children = NULL;
+
+    RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, indicesSize);
 
 
     return model;

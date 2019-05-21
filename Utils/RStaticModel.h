@@ -78,13 +78,72 @@ struct StaticModelMesh
 
 };
 
+// Przebudowac na klase
+struct StaticModelNode
+{
+    std::string name;
+
+    glm::mat4 transformMatrix;
+
+    StaticModelMesh*    meshes;
+    unsigned int        meshesCount;
+
+    StaticModelNode*    parent;
+    StaticModelNode**   children;
+    unsigned int        childrenCount;
+
+    StaticModelNode()
+    {
+        meshes = NULL;
+        meshesCount = 0;
+
+        parent = NULL;
+        children = NULL;
+        childrenCount = 0;
+    }
+
+    ~StaticModelNode()
+    {
+        if (meshes)
+        {
+            delete[] meshes;
+        }
+
+        if (children)
+        {
+            for (int i = 0; i < childrenCount; ++i)
+            {
+                delete children[i];
+            }
+
+            delete[] children;
+        }
+    }
+
+
+    unsigned int    getMeshesCount()
+    {
+        return meshesCount;
+    }
+    StaticModelMesh*getMesh(unsigned int i)
+    {
+        if (i < meshesCount)
+            return &meshes[i];
+
+        return NULL;
+    }
+
+};
+
 
 class RStaticModel : public Resource
 {
     private:
-        StaticModelMesh*_meshes;
-        unsigned int    _meshesCount;
+        StaticModelNode*_rootNode;
+
+
         Material*       _materials;
+        unsigned int    _materialsCount;
 
         glm::vec3*      _collisionMesh;
         unsigned int    _collisionMeshSize;
@@ -95,23 +154,27 @@ class RStaticModel : public Resource
         VBO* _aabbVbo;
         IBO* _aabbIbo;
 
+        void findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parentTransform, glm::vec3& min, glm::vec3& max);
         void calculateAABB();
         void createAabbVbo();
 
     public:
-        RStaticModel(string path, StaticModelMesh* meshes, unsigned int meshesCount, Material* materials, GLenum primitiveType = GL_TRIANGLES,
-                     glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
+        RStaticModel(string path, StaticModelNode* rootNode, Material* materials, unsigned int materialsCount,
+                     GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
         {
-            _meshesCount = 0;
+            _rootNode = NULL;
+
             _collisionMeshSize = 0;
         }
         ~RStaticModel();
 
-        unsigned int    getMeshesCount();
-        StaticModelMesh*getMesh(unsigned int i);
+        StaticModelNode* getRootNode();
+
         Material*       getMaterial(unsigned int i);
+        unsigned int    getMaterialsCount();
+
         unsigned int    getCollisionMeshSize();
         glm::vec3*      getCollisionMesh();
 

@@ -217,6 +217,56 @@ void Renderer::prepareLightsData()
 }
 
 
+void addStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform)
+{
+    glm::mat4 t = parentTransform * modelNode->transformMatrix;
+    tempRenderElement.transformMatrix = t;
+
+    for (int k = 0; k < modelNode->getMeshesCount(); ++k)
+    {
+        tempRenderElement.mesh = modelNode->getMesh(k);
+        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex);
+        //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
+        if (renderPass == RP_SHADOWS)
+        {
+            if (tempRenderElement.material->shader == ALPHA_TEST_MATERIAL || tempRenderElement.material->shader == TREE_MATERIAL)
+                renderList.insert(renderList.begin(), tempRenderElement);
+            else if (tempRenderElement.material->transparency == 0.0f) // czy materia³ nie jest przezroczysty lub skybox itd.
+                renderList.push_back(tempRenderElement);
+        }
+        else
+        {
+            renderList.push_back(tempRenderElement);
+        }
+    }
+
+    for (int i = 0; i < modelNode->childrenCount; ++i)
+    {
+        addStaticModelNodeToRenderList(modelNode->children[i], tempRenderElement, renderList, renderPass, t);
+    }
+}
+
+
+void addGrassStaticModelNodeToRenderList(StaticModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform)
+{
+    glm::mat4 t = parentTransform * modelNode->transformMatrix;
+    tempRenderElement.transformMatrix = t;
+
+    for (int j = 0; j < modelNode->getMeshesCount(); ++j)
+    {
+        tempRenderElement.mesh = modelNode->getMesh(j);
+        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex);
+        //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
+        renderList.push_back(tempRenderElement);
+    }
+
+    for (int i = 0; i < modelNode->childrenCount; ++i)
+    {
+        addGrassStaticModelNodeToRenderList(modelNode->children[i], tempRenderElement, renderList, t);
+    }
+}
+
+
 void Renderer::prepareRenderData()
 {
     GraphicsManager& graphicsManager = GraphicsManager::getInstance();
@@ -271,22 +321,8 @@ void Renderer::prepareRenderData()
                 tempRenderElement.object = object->getSceneObject();
                 tempRenderElement.renderObject = object;
 
-                for (int k = 0; k < tempRenderElement.model->getMeshesCount(); ++k)
-                {
-                    tempRenderElement.mesh = tempRenderElement.model->getMesh(k);
-                    tempRenderElement.material = object->getMaterial(tempRenderElement.mesh->materialIndex);
-                    if (renderPass == RP_SHADOWS)
-                    {
-                        if (tempRenderElement.material->shader == ALPHA_TEST_MATERIAL || tempRenderElement.material->shader == TREE_MATERIAL)
-                            _renderDataList[j]->renderList.insert(_renderDataList[j]->renderList.begin(), tempRenderElement);
-                        else if (tempRenderElement.material->transparency == 0.0f) // czy materia³ nie jest przezroczysty lub skybox itd.
-                            _renderDataList[j]->renderList.push_back(tempRenderElement);
-                    }
-                    else
-                    {
-                        _renderDataList[j]->renderList.push_back(tempRenderElement);
-                    }
-                }
+                StaticModelNode* modelNode = tempRenderElement.model->getRootNode();
+                addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass, glm::mat4(1.0f));
             }
         }
     }
@@ -300,12 +336,8 @@ void Renderer::prepareRenderData()
         tempRenderElement.object = object->getSceneObject();
         tempRenderElement.renderObject = object;
 
-        for (int j = 0; j < object->getModel()->getMeshesCount(); ++j)
-        {
-            tempRenderElement.mesh = tempRenderElement.model->getMesh(j);
-            tempRenderElement.material = object->getMaterial(tempRenderElement.mesh->materialIndex);
-            _renderDataList[_renderDataList.size() - 1]->renderList.push_back(tempRenderElement);
-        }
+        StaticModelNode* modelNode = tempRenderElement.model->getRootNode();
+        addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList, glm::mat4(1.0f));
     }
 
     _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
@@ -713,7 +745,8 @@ void Renderer::renderDepth(RenderData* renderData)
             shader->resetTextureLocation();
         }
 
-        glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
+        glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
+        glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
         shader->setUniform(UNIFORM_MVP, MVP);
 
         mesh->vbo->bind();
@@ -840,10 +873,12 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
 
 
-        glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
+        glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
+        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->transformMatrix;
+        glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
         shader->setUniform(UNIFORM_MVP, MVP);
-        shader->setUniform(UNIFORM_MODEL_MATRIX, i->object->getGlobalTransformMatrix());
-        shader->setUniform(UNIFORM_NORMAL_MATRIX, i->object->getGlobalNormalMatrix());
+        shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);
+        shader->setUniform(UNIFORM_NORMAL_MATRIX, normalMatrix);
 
         shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
         shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
@@ -1007,10 +1042,12 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
-        glm::mat4 MVP = renderData->MVMatrix * i->object->getGlobalTransformMatrix();
+        glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
+        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->transformMatrix;
+        glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
         shader->setUniform(UNIFORM_MVP, MVP);
-        shader->setUniform(UNIFORM_MODEL_MATRIX, i->object->getGlobalTransformMatrix());
-        shader->setUniform(UNIFORM_NORMAL_MATRIX, i->object->getGlobalNormalMatrix());
+        shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);
+        shader->setUniform(UNIFORM_NORMAL_MATRIX, normalMatrix);
 
         shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
         shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
@@ -1070,6 +1107,8 @@ void Renderer::renderScene(RenderData* renderData)
         }
         else
         {
+            shader->setUniform(UNIFORM_VP, renderData->MVMatrix);
+
             glDisable(GL_CULL_FACE);
 
             Frustum frustum(glm::perspective(camera->getViewAngle(), (float)camera->getWindowWidth() / (float)camera->getWindowHeight(),

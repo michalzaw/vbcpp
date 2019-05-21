@@ -24,10 +24,24 @@ class StaticModelLoader
         Assimp::Importer _assimpImporter;
         const aiScene* _assimpScene;
 
+        Material* _materials;
+
+        std::vector<glm::vec3> _collisionMesh;
+
+        MaterialLoader* _materialLoader;
+        std::string _texturesPath;
+
         void saveMaterialsDataToXml(std::string fileName);
+        bool isNodeContainsCollisionMesh(aiNode* assimpNode);
+        StaticModelNode* createModelNode(aiNode* node, glm::mat4 parentTransform = glm::mat4(1.0f), StaticModelNode* parent = NULL);
 
     public:
+        StaticModelLoader()
+        {
+            _materialLoader = new MaterialLoader;
+        }
         RStaticModel* loadModel(std::string fileName, std::string texturesPath);
+        //RStaticModel* loadModel2(std::string fileName, std::string texturesPath);
 
 };
 

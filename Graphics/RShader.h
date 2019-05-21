@@ -42,6 +42,7 @@ enum ShaderType
 enum UniformName
 {
     UNIFORM_MVP,
+    UNIFORM_VP,
     UNIFORM_MODEL_MATRIX,
     UNIFORM_NORMAL_MATRIX,
     UNIFORM_DIFFUSE_TEXTURE,
@@ -101,6 +102,7 @@ class RShader : virtual public Resource
             : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0)
         {
             _uniformsNames[UNIFORM_MVP] = "MVP";
+            _uniformsNames[UNIFORM_VP] = "VP";
             _uniformsNames[UNIFORM_MODEL_MATRIX] = "ModelMatrix";
             _uniformsNames[UNIFORM_NORMAL_MATRIX] = "NormalMatrix";
             _uniformsNames[UNIFORM_DIFFUSE_TEXTURE] = "Texture";

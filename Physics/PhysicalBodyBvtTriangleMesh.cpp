@@ -15,37 +15,51 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
 }
 
 
+void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform)
+{
+    glm::mat4 nodeTransform = parentTransform * staticModelNode->transformMatrix;
+
+    for (int i = 0; i < staticModelNode->getMeshesCount(); ++i)
+    {
+        StaticModelMesh* mesh = staticModelNode->getMesh(i);
+
+        unsigned int* indices = mesh->indices;
+        Vertex* vertices = mesh->vertices;
+
+        unsigned int vertexCount = mesh->verticesCount;
+
+        for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
+        {
+            btVector3 tmp_vertices[3];
+
+            for (unsigned int k = 0; k < 3; k++)
+            {
+                unsigned index = indices[j+k] - mesh->firstVertexInVbo;
+
+                if (index > vertexCount) continue;
+
+                glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
+                tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+            }
+
+            triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
+        }
+    }
+
+    for (int i = 0; i < staticModelNode->childrenCount; ++i)
+    {
+        addModelNodeToTriangleMesh(triMesh, staticModelNode->children[i], nodeTransform);
+    }
+}
+
+
 btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 {
     btTriangleMesh* triMesh = new btTriangleMesh(true, false);
-    btVector3 tmp_vertices[3];
-    unsigned int index, vertexCount;
 
     if (_model)
     {
-        for (int i = 0; i < _model->getMeshesCount(); ++i)
-        {
-            StaticModelMesh* mesh = _model->getMesh(i);
-
-            unsigned int* indices = mesh->indices;
-            Vertex* vertices = mesh->vertices;
-
-            vertexCount = mesh->verticesCount;
-
-            for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
-            {
-                for (unsigned int k = 0; k < 3; k++)
-                {
-                    index = indices[j+k] - mesh->firstVertexInVbo;
-
-                    if (index > vertexCount) continue;
-
-                    tmp_vertices[k] = btVector3(vertices[index].position[0], vertices[index].position[1], vertices[index].position[2]);
-                }
-
-                triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[3]);
-            }
-        }
+        addModelNodeToTriangleMesh(triMesh, _model->getRootNode(), glm::mat4(1.0f));
     }
 
     if (!triMesh)

@@ -41,6 +41,8 @@ struct RenderListElement
     SceneObject*        object;
     RenderObject*       renderObject;
 
+    glm::mat4           transformMatrix;
+
     RenderListElement();
 
 };
