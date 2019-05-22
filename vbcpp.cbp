@@ -232,10 +232,13 @@
 		<Unit filename="Graphics/Renderer.h" />
 		<Unit filename="Graphics/Roads.cpp" />
 		<Unit filename="Graphics/Roads.h" />
+		<Unit filename="Graphics/RotationMode.h" />
 		<Unit filename="Graphics/ShadowMap.cpp" />
 		<Unit filename="Graphics/ShadowMap.h" />
 		<Unit filename="Graphics/StaticModelLoader.cpp" />
 		<Unit filename="Graphics/StaticModelLoader.h" />
+		<Unit filename="Graphics/Transform.cpp" />
+		<Unit filename="Graphics/Transform.h" />
 		<Unit filename="Graphics/TreeComponent.h" />
 		<Unit filename="Graphics/UBO.h" />
 		<Unit filename="Graphics/VAO.h" />
