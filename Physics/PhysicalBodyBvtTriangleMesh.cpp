@@ -17,7 +17,7 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
 
 void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform)
 {
-    glm::mat4 nodeTransform = parentTransform * staticModelNode->transformMatrix;
+    glm::mat4 nodeTransform = parentTransform * staticModelNode->transform.getTransformMatrix();
 
     for (int i = 0; i < staticModelNode->getMeshesCount(); ++i)
     {

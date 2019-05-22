@@ -119,7 +119,6 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
 
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = "terrain";
-    modelNode->transformMatrix = glm::mat4(1.0f);
     modelNode->meshes = meshes;
     modelNode->meshesCount = 1;
     modelNode->parent = NULL;
@@ -315,7 +314,6 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = "terrain";
-    modelNode->transformMatrix = glm::mat4(1.0f);
     modelNode->meshes = meshes;
     modelNode->meshesCount = 1;
     modelNode->parent = NULL;

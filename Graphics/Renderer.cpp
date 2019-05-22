@@ -217,10 +217,12 @@ void Renderer::prepareLightsData()
 }
 
 
-void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform)
+void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
 {
     glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
+    glm::mat4 n = parentNormalMatrix * modelNode->getNormalMatrix();
     tempRenderElement.transformMatrix = t;
+    tempRenderElement.normalMatrix = n;
 
     for (int k = 0; k < modelNode->getMeshesCount(); ++k)
     {
@@ -242,15 +244,17 @@ void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tem
 
     for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        addStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, renderPass, t);
+        addStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, renderPass, t, n);
     }
 }
 
 
-void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform)
+void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
 {
     glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
+    glm::mat4 n = parentNormalMatrix * modelNode->getNormalMatrix();
     tempRenderElement.transformMatrix = t;
+    tempRenderElement.normalMatrix = n;
 
     for (int j = 0; j < modelNode->getMeshesCount(); ++j)
     {
@@ -262,7 +266,7 @@ void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement
 
     for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        addGrassStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, t);
+        addGrassStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, t, n);
     }
 }
 
@@ -322,7 +326,7 @@ void Renderer::prepareRenderData()
                 tempRenderElement.renderObject = object;
 
                 ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
-                addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass, glm::mat4(1.0f));
+                addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass);
             }
         }
     }
@@ -337,7 +341,7 @@ void Renderer::prepareRenderData()
         tempRenderElement.renderObject = object;
 
         ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
-        addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList, glm::mat4(1.0f));
+        addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList);
     }
 
     _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
@@ -874,7 +878,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
 
         glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
-        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->transformMatrix;
+        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->normalMatrix;
         glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
         shader->setUniform(UNIFORM_MVP, MVP);
         shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);
@@ -1043,7 +1047,7 @@ void Renderer::renderScene(RenderData* renderData)
 
 
         glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
-        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->transformMatrix;
+        glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->normalMatrix;
         glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
         shader->setUniform(UNIFORM_MVP, MVP);
         shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);

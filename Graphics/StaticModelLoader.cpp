@@ -124,6 +124,19 @@ void print(aiNode* assimpNode, int spaces)
 }
 
 
+void StaticModelLoader::getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform)
+{
+    aiVector3t<ai_real> position;
+    aiVector3t<ai_real> rotation;
+    aiVector3t<ai_real> scale;
+    assimpNode->mTransformation.Decompose(scale, rotation, position);
+
+    transform.setPosition(position.x, position.y, position.z);
+    transform.setRotation(rotation.x, rotation.y, rotation.z);
+    transform.setScale(scale.x, scale.y, scale.z);
+}
+
+
 bool StaticModelLoader::isNodeContainsCollisionMesh(aiNode* assimpNode)
 {
     unsigned int meshesCount = assimpNode->mNumMeshes;
@@ -146,8 +159,10 @@ bool StaticModelLoader::isNodeContainsCollisionMesh(aiNode* assimpNode)
 
 StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat4 parentTransform, StaticModelNode* parent)
 {
-    glm::mat4 nodeTransform = calculateGlmMatrix(assimpNode->mTransformation);
-    glm::mat4 globalNodeTransform = parentTransform * nodeTransform;
+    Transform nodeTransform;
+    getTransformFromAssimpNode(assimpNode, nodeTransform);
+
+    glm::mat4 globalNodeTransform = parentTransform * nodeTransform.getTransformMatrix();
 
     std::string nodeName = std::string(assimpNode->mName.C_Str());
     if (std::find(_nodesToSkipNames.begin(), _nodesToSkipNames.end(), nodeName) != _nodesToSkipNames.end())
@@ -263,7 +278,7 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
     // create model node
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = nodeName;
-    modelNode->transformMatrix = nodeTransform;
+    modelNode->transform = nodeTransform;
     modelNode->meshes = meshes;
     modelNode->meshesCount = meshesCount;
     modelNode->parent = parent;

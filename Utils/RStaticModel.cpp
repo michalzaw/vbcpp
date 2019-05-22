@@ -52,7 +52,7 @@ RStaticModel::~RStaticModel()
 
 void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parentTransform, glm::vec3& min, glm::vec3& max)
 {
-    glm::mat4 nodeTransform = parentTransform * node->transformMatrix;
+    glm::mat4 nodeTransform = parentTransform * node->transform.getTransformMatrix();
 
     for (int i = 0; i < node->meshesCount; ++i)
     {

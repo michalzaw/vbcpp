@@ -2,6 +2,8 @@
 #define MODELNODE_H_INCLUDED
 
 
+#include "Transform.h"
+
 #include "../Utils/RStaticModel.h"
 
 
@@ -10,7 +12,7 @@ class ModelNode
     private:
         std::string _name;
 
-        glm::mat4 _transformMatrix;
+        Transform _transform;
 
         StaticModelMesh*    _meshes;
         unsigned int        _meshesCount;
@@ -24,7 +26,9 @@ class ModelNode
         ~ModelNode();
 
         std::string getName();
+        Transform& getTransform();
         glm::mat4& getTransformMatrix();
+        glm::mat4& getNormalMatrix();
 
         StaticModelMesh* getMesh(unsigned int i);
         unsigned int getMeshesCount();

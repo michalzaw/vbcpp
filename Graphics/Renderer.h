@@ -48,7 +48,14 @@ class Renderer
         float _dayNightRatio;
 
         void prepareLightsData();
+
+
+        void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass,
+                                            glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
+        void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList,
+                                                 glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
         void prepareRenderData();
+
 
         bool isObjectInCamera(RenderObject* object, CameraStatic* camera);
 

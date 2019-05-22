@@ -8,13 +8,7 @@
 
 #include "Component.h"
 
-
-enum RotationMode
-{
-    RM_EULER_ANGLES,
-    RM_QUATERNION
-
-};
+#include "../Graphics/RotationMode.h"
 
 
 class SceneManager;

@@ -42,6 +42,7 @@ struct RenderListElement
     RenderObject*       renderObject;
 
     glm::mat4           transformMatrix;
+    glm::mat4           normalMatrix;
 
     RenderListElement();
 

@@ -260,7 +260,6 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
 
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = "road";
-    modelNode->transformMatrix = glm::mat4(1.0f);
     modelNode->meshes = meshes;
     modelNode->meshesCount = lanesCount;
     modelNode->parent = NULL;

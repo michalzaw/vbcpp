@@ -35,6 +35,7 @@ class StaticModelLoader
         std::string _texturesPath;
 
         void saveMaterialsDataToXml(std::string fileName);
+        void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);
         bool isNodeContainsCollisionMesh(aiNode* assimpNode);
         StaticModelNode* createModelNode(aiNode* node, glm::mat4 parentTransform = glm::mat4(1.0f), StaticModelNode* parent = NULL);
 

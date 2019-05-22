@@ -8,6 +8,7 @@
 #include "../Graphics/VBO.h"
 #include "../Graphics/IBO.h"
 #include "../Graphics/AABB.h"
+#include "../Graphics/Transform.h"
 
 
 struct StaticModelMesh
@@ -83,7 +84,7 @@ struct StaticModelNode
 {
     std::string name;
 
-    glm::mat4 transformMatrix;
+    Transform transform;
 
     StaticModelMesh*    meshes;
     unsigned int        meshesCount;

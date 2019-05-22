@@ -100,7 +100,6 @@ class Cube : public Prefab
 
             StaticModelNode* modelNode = new StaticModelNode;
             modelNode->name = "object";
-            modelNode->transformMatrix = glm::mat4(1.0f);
             modelNode->meshes = meshes;
             modelNode->meshesCount = 1;
             modelNode->parent = NULL;
