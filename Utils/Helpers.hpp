@@ -33,5 +33,11 @@ btVector3 XMLstringToBtVec3(const char* xmlstring);
 
 inline int next_p2(int n) { int res = 1; while (res < n) res <<= 1; return res; }
 
+template <typename T>
+inline bool isVectorContains(std::vector<T>& vector, std::string string)
+{
+    return std::find(vector.begin(), vector.end(), string) != vector.end();
+}
+
 
 #endif // HELPERS_HPP_INCLUDED

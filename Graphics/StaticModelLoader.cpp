@@ -3,6 +3,15 @@
 #include <algorithm>
 
 
+using namespace tinyxml2;
+
+
+StaticModelLoader::StaticModelLoader()
+{
+    _materialLoader = new MaterialLoader;
+}
+
+
 void StaticModelLoader::saveMaterialsDataToXml(std::string fileName)
 {
     if (_assimpScene == NULL)
@@ -91,36 +100,16 @@ void StaticModelLoader::saveMaterialsDataToXml(std::string fileName)
 }
 
 
-glm::mat4 calculateGlmMatrix(aiMatrix4x4& assimpMatrix)
+void StaticModelLoader::loadAllMaterials()
 {
-    glm::mat4 matrix;
-
-    matrix[0][0] = (GLfloat)assimpMatrix.a1; matrix[0][1] = (GLfloat)assimpMatrix.b1;  matrix[0][2] = (GLfloat)assimpMatrix.c1; matrix[0][3] = (GLfloat)assimpMatrix.d1;
-    matrix[1][0] = (GLfloat)assimpMatrix.a2; matrix[1][1] = (GLfloat)assimpMatrix.b2;  matrix[1][2] = (GLfloat)assimpMatrix.c2; matrix[1][3] = (GLfloat)assimpMatrix.d2;
-    matrix[2][0] = (GLfloat)assimpMatrix.a3; matrix[2][1] = (GLfloat)assimpMatrix.b3;  matrix[2][2] = (GLfloat)assimpMatrix.c3; matrix[2][3] = (GLfloat)assimpMatrix.d3;
-    matrix[3][0] = (GLfloat)assimpMatrix.a4; matrix[3][1] = (GLfloat)assimpMatrix.b4;  matrix[3][2] = (GLfloat)assimpMatrix.c4; matrix[3][3] = (GLfloat)assimpMatrix.d4;
-
-    return matrix;
-}
-
-
-void print(aiNode* assimpNode, int spaces)
-{
-    for (int i = 0; i < spaces; ++i)
-        std::cout << " ";
-    std::cout << assimpNode->mName.C_Str() << std::endl;
-
-    aiMatrix4x4& assimpMatrix = assimpNode->mTransformation;
-
-    std::cout << (GLfloat)assimpMatrix.a1 << " " << (GLfloat)assimpMatrix.b1 << " " << (GLfloat)assimpMatrix.c1 << " " << (GLfloat)assimpMatrix.d1 << std::endl;
-    std::cout << (GLfloat)assimpMatrix.a2 << " " << (GLfloat)assimpMatrix.b2 << " " << (GLfloat)assimpMatrix.c2 << " " << (GLfloat)assimpMatrix.d2 << std::endl;
-    std::cout << (GLfloat)assimpMatrix.a3 << " " << (GLfloat)assimpMatrix.b3 << " " << (GLfloat)assimpMatrix.c3 << " " << (GLfloat)assimpMatrix.d3 << std::endl;
-    std::cout << (GLfloat)assimpMatrix.a4 << " " << (GLfloat)assimpMatrix.b4 << " " << (GLfloat)assimpMatrix.c4 << " " << (GLfloat)assimpMatrix.d4 << std::endl;
-
-    system("pause");
-
-    for (int i = 0; i < assimpNode->mNumChildren; ++i)
-        print(assimpNode->mChildren[i], spaces + 2);
+    _materialsCount = _assimpScene->mNumMaterials;
+	_materials = new Material[_materialsCount];
+	for (int i = 0; i < _materialsCount; ++i)
+    {
+        aiString materialName;
+        _assimpScene->mMaterials[i]->Get(AI_MATKEY_NAME, materialName);
+        _materials[i] = _materialLoader->loadMaterial(materialName.C_Str(), _texturesPath);
+    }
 }
 
 
@@ -147,13 +136,41 @@ bool StaticModelLoader::isNodeContainsCollisionMesh(aiNode* assimpNode)
 
         aiString materialName;
         _assimpScene->mMaterials[materialIndexInScene]->Get(AI_MATKEY_NAME, materialName);
-        if (strcmp(materialName.C_Str(), "Collision") == 0)
+        if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
         {
             return true;
         }
     }
 
     return false;
+}
+
+
+void StaticModelLoader::getMeshMenderVertexFromAssimpMesh(const aiMesh* assimpMesh, unsigned int vertexIndex, MeshMender::Vertex& outVertex)
+{
+    const aiVector3D zeroVector(0.0f, 0.0f, 0.0f);
+
+    const aiVector3D* position = &(assimpMesh->mVertices[vertexIndex]);
+    const aiVector3D* normal = &(assimpMesh->mNormals[vertexIndex]);
+    const aiVector3D* texCoord = assimpMesh->HasTextureCoords(0) ? &(assimpMesh->mTextureCoords[0][vertexIndex]) : &zeroVector;
+    const aiVector3D* tangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mTangents[vertexIndex]) : &zeroVector;
+    const aiVector3D* bitangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mBitangents[vertexIndex]) : &zeroVector;
+
+    outVertex.pos = Vector3(position->x, position->y, position->z);
+    outVertex.normal = Vector3(normal->x, normal->y, normal->z);
+    outVertex.s = texCoord->x;
+    outVertex.t = texCoord->y;
+    outVertex.tangent = Vector3(tangent->x, tangent->y, tangent->z);
+    outVertex.binormal = Vector3(bitangent->x, bitangent->y, bitangent->z);
+}
+
+
+void StaticModelLoader::runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices)
+{
+    std::vector<unsigned int> temp;
+    MeshMender mender;
+    mender.Mend(vertices, indices, temp, 0.7f, 0.7f, 0.7f, 1.0f,
+                MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
 }
 
 
@@ -165,12 +182,12 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
     glm::mat4 globalNodeTransform = parentTransform * nodeTransform.getTransformMatrix();
 
     std::string nodeName = std::string(assimpNode->mName.C_Str());
-    if (std::find(_nodesToSkipNames.begin(), _nodesToSkipNames.end(), nodeName) != _nodesToSkipNames.end())
+    if (isVectorContains(_nodesToSkipNames, nodeName))
     {
         return NULL;
     }
 
-    if (!_nodesToLoadNames.empty() && parent != NULL && std::find(_nodesToLoadNames.begin(), _nodesToLoadNames.end(), nodeName) == _nodesToLoadNames.end())
+    if (!_nodesToLoadNames.empty() && parent != NULL && !isVectorContains(_nodesToLoadNames, nodeName))
     {
         return NULL;
     }
@@ -178,23 +195,21 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
     bool isCollisionMeshExist = isNodeContainsCollisionMesh(assimpNode);
 
     unsigned int meshesCount = isCollisionMeshExist ? assimpNode->mNumMeshes - 1 : assimpNode->mNumMeshes;
-    std::vector<MeshMender::Vertex>* meshesVertices = new std::vector<MeshMender::Vertex>[meshesCount];
-    std::vector<unsigned int>* meshesIndices = new std::vector<unsigned int>[meshesCount];
-    unsigned int* meshesMaterialIndex = new unsigned int[meshesCount];
-
     StaticModelMesh* meshes = new StaticModelMesh[meshesCount];
-
     int meshesIndex = 0;
 
     for (int i = 0; i < assimpNode->mNumMeshes; ++i)
     {
+        std::vector<MeshMender::Vertex> meshVertices;
+        std::vector<unsigned int> meshIndices;
+
         const aiMesh* assimpMesh = _assimpScene->mMeshes[assimpNode->mMeshes[i]];
         unsigned int materialIndexInScene = assimpMesh->mMaterialIndex;
 
         // ----------------------------------------
         aiString materialName;
         _assimpScene->mMaterials[materialIndexInScene]->Get(AI_MATKEY_NAME, materialName);
-        if (strcmp(materialName.C_Str(), "Collision") == 0)
+        if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
         {
             for (int j = 0; j < assimpMesh->mNumVertices; ++j)
             {
@@ -203,31 +218,17 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
                 _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
             }
 
-            isCollisionMeshExist = true;
-
             continue;
         }
         // ----------------------------------------
 
         // meshes vertices
-        const aiVector3D zeroVector(0.0f, 0.0f, 0.0f);
         for (int j = 0; j < assimpMesh->mNumVertices; ++j)
         {
-            const aiVector3D* position = &(assimpMesh->mVertices[j]);
-            const aiVector3D* normal = &(assimpMesh->mNormals[j]);
-            const aiVector3D* texCoord = assimpMesh->HasTextureCoords(0) ? &(assimpMesh->mTextureCoords[0][j]) : &zeroVector;
-            const aiVector3D* tangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mTangents[j]) : &zeroVector;
-            const aiVector3D* bitangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mBitangents[j]) : &zeroVector;
-
             MeshMender::Vertex vertex;
-            vertex.pos = Vector3(position->x, position->y, position->z);
-            vertex.normal = Vector3(normal->x, normal->y, normal->z);
-            vertex.s = texCoord->x;
-            vertex.t = texCoord->y;
-            vertex.tangent = Vector3(tangent->x, tangent->y, tangent->z);
-            vertex.binormal = Vector3(bitangent->x, bitangent->y, bitangent->z);
+            getMeshMenderVertexFromAssimpMesh(assimpMesh, j, vertex);
 
-            meshesVertices[meshesIndex].push_back(vertex);
+            meshVertices.push_back(vertex);
         }
 
         // meshes indices
@@ -235,45 +236,32 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
         {
             const aiFace& face = assimpMesh->mFaces[j];
             assert(face.mNumIndices == 3);
-            meshesIndices[meshesIndex].push_back(face.mIndices[0]);
-            meshesIndices[meshesIndex].push_back(face.mIndices[1]);
-            meshesIndices[meshesIndex].push_back(face.mIndices[2]);
+            meshIndices.push_back(face.mIndices[0]);
+            meshIndices.push_back(face.mIndices[1]);
+            meshIndices.push_back(face.mIndices[2]);
         }
-
-        // meshes material index
-        meshesMaterialIndex[meshesIndex] = materialIndexInScene;
 
         // Mesh mender pass
-        std::vector<unsigned int> temp;
-        MeshMender mender;
-        mender.Mend(meshesVertices[meshesIndex], meshesIndices[meshesIndex], temp, 0.7f, 0.7f, 0.7f, 1.0f,
-                    MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+        runMeshMender(meshVertices, meshIndices);
 
         // vertices and indices array
-        Vertex* vertices = new Vertex[meshesVertices[meshesIndex].size()];
-        for (unsigned int j = 0; j < meshesVertices[meshesIndex].size(); ++j)
+        Vertex* vertices = new Vertex[meshVertices.size()];
+        for (unsigned int j = 0; j < meshVertices.size(); ++j)
         {
-            vertices[j].position = meshesVertices[meshesIndex][j].pos;
-            vertices[j].texCoord = glm::vec2(meshesVertices[meshesIndex][j].s, meshesVertices[meshesIndex][j].t);
-            vertices[j].normal = meshesVertices[meshesIndex][j].normal;
-            vertices[j].tangent = meshesVertices[meshesIndex][j].tangent;
-            vertices[j].bitangent = meshesVertices[meshesIndex][j].binormal;
+            vertices[j] = meshVertices[j];
         }
 
-        unsigned int* indices = new unsigned int[meshesIndices[meshesIndex].size()];
-        for (unsigned int j = 0; j < meshesIndices[meshesIndex].size(); ++j)
+        unsigned int* indices = new unsigned int[meshIndices.size()];
+        for (unsigned int j = 0; j < meshIndices.size(); ++j)
         {
-            indices[j] = meshesIndices[meshesIndex][j];
+            indices[j] = meshIndices[j];
         }
 
         // create mesh
-        meshes[meshesIndex].setMeshData(vertices, meshesVertices[meshesIndex].size(), indices, meshesIndices[meshesIndex].size(), materialIndexInScene, _materials[materialIndexInScene].shader);
+        meshes[meshesIndex].setMeshData(vertices, meshVertices.size(), indices, meshIndices.size(), materialIndexInScene, _materials[materialIndexInScene].shader);
 
         meshesIndex++;
     }
-
-    delete[] meshesVertices;
-    delete[] meshesIndices;
 
     // create model node
     StaticModelNode* modelNode = new StaticModelNode;
@@ -297,50 +285,40 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
 }
 
 
-RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string texturePath)
+RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, std::string texturesPath)
 {
-    _texturesPath = texturePath;
+    _texturesPath = texturesPath;
 
-    unsigned int importFlags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace |
-                               aiProcess_FlipUVs;
-    _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), importFlags);
-
+    _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY);
     if (_assimpScene == NULL)
     {
         std::cout << "Error parsing file: " << fileName << ": " << _assimpImporter.GetErrorString() << std::endl;
         return NULL;
     }
 
-    std::string xmlFileName = MaterialLoader::createMaterialFileName(fileName);
-
-    if (!FilesHelper::isFileExists(xmlFileName))
+    std::string materialXmlFileName = MaterialLoader::createMaterialFileName(fileName);
+    if (!FilesHelper::isFileExists(materialXmlFileName))
     {
-        saveMaterialsDataToXml(xmlFileName);
+        saveMaterialsDataToXml(materialXmlFileName);
     }
 
-	_materialLoader->openFile(xmlFileName.c_str());
+	_materialLoader->openFile(materialXmlFileName.c_str());
+    loadAllMaterials();
 
-	unsigned int materialsCount = _assimpScene->mNumMaterials;
-	_materials = new Material[materialsCount];
-	for (int i = 0; i < materialsCount; ++i)
-    {
-        aiString materialName;
-        _assimpScene->mMaterials[i]->Get(AI_MATKEY_NAME, materialName);
-        _materials[i] = _materialLoader->loadMaterial(materialName.C_Str(), _texturesPath);
-    }
-
-	_collisionMesh.clear();
 
     StaticModelNode* rootNode = createModelNode(_assimpScene->mRootNode);
+
 
     glm::vec3* colMesh = new glm::vec3[_collisionMesh.size()];
     for (int i = 0; i < _collisionMesh.size(); ++i)
     {
         colMesh[i] = _collisionMesh[i];
     }
-    RStaticModel* model = new RStaticModel(fileName, rootNode, _materials, materialsCount, GL_TRIANGLES, colMesh, _collisionMesh.size());
+
+    RStaticModel* model = new RStaticModel(fileName, rootNode, _materials, _materialsCount, GL_TRIANGLES, colMesh, _collisionMesh.size());
 
     _materialLoader->closeFile();
+	_collisionMesh.clear();
     _nodesToLoadNames.clear();
     _nodesToSkipNames.clear();
 
@@ -348,39 +326,37 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
 }
 
 
-RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames)
+RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames)
 {
     _nodesToSkipNames = nodesToSkipNames;
 
-    return loadModel(fileName, texturesPath);
+    return loadModelWithHierarchy(fileName, texturesPath);
 }
 
 
-RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames)
+RStaticModel* StaticModelLoader::loadModelWithHierarchyOnlyNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames)
 {
     _nodesToLoadNames = nodesToLoadNames;
 
-    return loadModel(fileName, texturesPath);
+    return loadModelWithHierarchy(fileName, texturesPath);
 }
 
 
-/*RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string texturesPath)
+RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string texturesPath)
 {
-    unsigned int importFlags = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace |
-                               aiProcess_FlipUVs | aiProcess_PreTransformVertices;
-    _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), importFlags);
+    _texturesPath = texturesPath;
 
+    _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITHOUT_HIERARCHY);
     if (_assimpScene == NULL)
     {
         std::cout << "Error parsing file: " << fileName << ": " << _assimpImporter.GetErrorString() << std::endl;
         return NULL;
     }
 
-    std::string xmlFileName = MaterialLoader::createMaterialFileName(fileName);
-
-    if (!FilesHelper::isFileExists(xmlFileName))
+    std::string materialXmlFileName = MaterialLoader::createMaterialFileName(fileName);
+    if (!FilesHelper::isFileExists(materialXmlFileName))
     {
-        saveMaterialsDataToXml(xmlFileName);
+        saveMaterialsDataToXml(materialXmlFileName);
     }
 
 
@@ -398,7 +374,7 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
         // ----------------------------------------
         aiString materialName;
         _assimpScene->mMaterials[meshIndex]->Get(AI_MATKEY_NAME, materialName);
-        if (strcmp(materialName.C_Str(), "Collision") == 0)
+        if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
         {
             for (int j = 0; j < assimpMesh->mNumVertices; ++j)
             {
@@ -417,19 +393,8 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
         const aiVector3D zeroVector(0.0f, 0.0f, 0.0f);
         for (int j = 0; j < assimpMesh->mNumVertices; ++j)
         {
-            const aiVector3D* position = &(assimpMesh->mVertices[j]);
-            const aiVector3D* normal = &(assimpMesh->mNormals[j]);
-            const aiVector3D* texCoord = assimpMesh->HasTextureCoords(0) ? &(assimpMesh->mTextureCoords[0][j]) : &zeroVector;
-            const aiVector3D* tangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mTangents[j]) : &zeroVector;
-            const aiVector3D* bitangent = assimpMesh->HasTangentsAndBitangents() ? &(assimpMesh->mBitangents[j]) : &zeroVector;
-
             MeshMender::Vertex vertex;
-            vertex.pos = Vector3(position->x, position->y, position->z);
-            vertex.normal = Vector3(normal->x, normal->y, normal->z);
-            vertex.s = texCoord->x;
-            vertex.t = texCoord->y;
-            vertex.tangent = Vector3(tangent->x, tangent->y, tangent->z);
-            vertex.binormal = Vector3(bitangent->x, bitangent->y, bitangent->z);
+            getMeshMenderVertexFromAssimpMesh(assimpMesh, j, vertex);
 
             meshesVertices[meshIndex].push_back(vertex);
         }
@@ -447,10 +412,7 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
 
     for (int i = 0; i < meshesCount; ++i)
     {
-        std::vector<unsigned int> temp;
-        MeshMender mender;
-        mender.Mend(meshesVertices[i], meshesIndices[i], temp, 0.7f, 0.7f, 0.7f, 1.0f,
-                    MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+        runMeshMender(meshesVertices[i], meshesIndices[i]);
     }
 
 
@@ -458,7 +420,7 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
     Material* materials = new Material[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
 
     MaterialLoader matLoader;
-	matLoader.openFile(xmlFileName.c_str());
+	matLoader.openFile(materialXmlFileName.c_str());
 
 	unsigned int meshCounter = 0;
     for (int i = 0; i < meshesCount; ++i)
@@ -466,7 +428,7 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
         aiString materialName;
         _assimpScene->mMaterials[i]->Get(AI_MATKEY_NAME, materialName);
         // ----------------------------------------
-        if (strcmp(materialName.C_Str(), "Collision") == 0)
+        if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
         {
             continue;
         }
@@ -475,11 +437,7 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
         Vertex* vertices = new Vertex[meshesVertices[i].size()];
         for (unsigned int j = 0; j < meshesVertices[i].size(); ++j)
         {
-            vertices[j].position = meshesVertices[i][j].pos;
-            vertices[j].texCoord = glm::vec2(meshesVertices[i][j].s, meshesVertices[i][j].t);
-            vertices[j].normal = meshesVertices[i][j].normal;
-            vertices[j].tangent = meshesVertices[i][j].tangent;
-            vertices[j].bitangent = meshesVertices[i][j].binormal;
+            vertices[j] = meshesVertices[i][j];
         }
 
         unsigned int* indices = new unsigned int[meshesIndices[i].size()];
@@ -510,8 +468,13 @@ RStaticModel* StaticModelLoader::loadModelNodes(std::string fileName, std::strin
     delete[] meshesVertices;
     delete[] meshesIndices;
 
+    StaticModelNode* rootNode = new StaticModelNode;
+    rootNode->name = "RootNode";
+    rootNode->meshes = meshes;
+    rootNode->meshesCount = !isCollisionMeshExist ? meshesCount : (meshesCount - 1);
+    rootNode->parent = NULL;
 
-    RStaticModel* model = new RStaticModel(fileName, meshes, !isCollisionMeshExist ? meshesCount : (meshesCount - 1), materials, GL_TRIANGLES, colMesh, collisionMesh.size());
+    RStaticModel* model = new RStaticModel(fileName, rootNode, materials, rootNode->meshesCount, GL_TRIANGLES, colMesh, collisionMesh.size());
 
     return model;
-}*/
+}
