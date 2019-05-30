@@ -4,7 +4,7 @@
 ModelNode::ModelNode(StaticModelNode* staticModelNode, ModelNode* parent)
 {
     _name = staticModelNode->name;
-    _transform = staticModelNode->transform;
+    _transformNode = staticModelNode->transform;
 
     _meshes = staticModelNode->meshes;
     _meshesCount = staticModelNode->meshesCount;
@@ -40,6 +40,12 @@ std::string ModelNode::getName()
 }
 
 
+Transform& ModelNode::getTransformNode()
+{
+    return _transformNode;
+}
+
+
 Transform& ModelNode::getTransform()
 {
     return _transform;
@@ -48,13 +54,15 @@ Transform& ModelNode::getTransform()
 
 glm::mat4& ModelNode::getTransformMatrix()
 {
-    return _transform.getTransformMatrix();
+    _transformMatrix = _transformNode.getTransformMatrix() * _transform.getTransformMatrix();
+    return _transformMatrix;
 }
 
 
 glm::mat4& ModelNode::getNormalMatrix()
 {
-    return _transform.getNormalMatrix();
+    _normalMatrix = _transformNode.getNormalMatrix() * _transform.getNormalMatrix();
+    return _normalMatrix;
 }
 
 

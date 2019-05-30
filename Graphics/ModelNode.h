@@ -12,7 +12,10 @@ class ModelNode
     private:
         std::string _name;
 
+        Transform _transformNode;
         Transform _transform;
+        glm::mat4 _transformMatrix;
+        glm::mat4 _normalMatrix;
 
         StaticModelMesh*    _meshes;
         unsigned int        _meshesCount;
@@ -26,6 +29,7 @@ class ModelNode
         ~ModelNode();
 
         std::string getName();
+        Transform& getTransformNode();
         Transform& getTransform();
         glm::mat4& getTransformMatrix();
         glm::mat4& getNormalMatrix();
