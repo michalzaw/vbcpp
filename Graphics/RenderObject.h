@@ -6,6 +6,7 @@
 #include <cstdio>
 
 #include "Model.h"
+#include "ModelNode.h"
 #include "AABB.h"
 
 #include "../Utils/RStaticModel.h"
@@ -17,6 +18,7 @@ class RenderObject : public Component
 {
     protected:
         RStaticModel* _model;
+        ModelNode*    _modelRootNode;
         Material*     _materials;
 
         bool _isCastShadows;
@@ -32,6 +34,7 @@ class RenderObject : public Component
 
         void setModel(RStaticModel* model);
         RStaticModel* getModel();
+        ModelNode* getModelRootNode();
 
         Material* getMaterial(unsigned int index);
 

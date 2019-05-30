@@ -41,7 +41,10 @@ class ResourceManager
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 
-        RStaticModel* loadModel(std::string path, std::string texturePath /*, OGLDriver* driver */);
+        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath /*, OGLDriver* driver */);
+        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames);
+        RStaticModel* loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames);
+        RStaticModel* loadModel(std::string path, std::string texturePath);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 

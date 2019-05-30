@@ -10,7 +10,7 @@ layout (location = 4) in vec3 VertexBitangent;
 
 const int CASCADES_COUNT = 3;
 
-uniform mat4 MVP;
+uniform mat4 VP;
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
@@ -73,25 +73,25 @@ void main()
 							   sina, 0, cosa, 0,
 							   0, 0, 0, 1);
 		
-	vec3 vertexPositionWithRotationAndOffset = (translationMatrix * rotationMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	vec3 vertexPositionWithRotationAndOffset = (translationMatrix * rotationMatrix * ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
 	
 	float density = texture2D(grassDensity, vec2((Offset.x / 256.0f * 0.5f) + 0.5f, (Offset.z / 256.0f * 0.5f) + 0.5f)).r;
 	if (density < 0.2)
 		vertexPositionWithRotationAndOffset.y = 0;
 	
-	gl_Position = MVP * vec4(vertexPositionWithRotationAndOffset, 1.0f);
+	gl_Position = VP * vec4(vertexPositionWithRotationAndOffset, 1.0f);
 
-	Position = (ModelMatrix * vec4(vertexPositionWithRotationAndOffset, 1.0f)).xyz;
+	Position = (/*ModelMatrix */ vec4(vertexPositionWithRotationAndOffset, 1.0f)).xyz;
 	TexCoord = VertexUV;
 
 #ifdef SOLID
 	Normal = vec3((heightNormal.g - 0.5) * 2, (heightNormal.b - 0.5) * 2, (heightNormal.a - 0.5) * 2);
-	Normal = (NormalMatrix * vec4(Normal, 0.0f)).xyz;
+	//Normal = (NormalMatrix * vec4(Normal, 0.0f)).xyz;
 #endif
 
 	for (int i = 0; i < 3; ++i)
 	{
-		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(vertexPositionWithRotationAndOffset, 1.0f);
+		PositionLightSpace[i] = LightSpaceMatrix[i] /* ModelMatrix*/ * vec4(vertexPositionWithRotationAndOffset, 1.0f);
 	}
 	
 	ClipSpacePositionZ = gl_Position.z;

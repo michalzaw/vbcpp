@@ -258,7 +258,13 @@ RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, s
     delete[] lastPoints;
 
 
-    RStaticModel* model = new RStaticModel("", meshes, lanesCount, materials, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
+    StaticModelNode* modelNode = new StaticModelNode;
+    modelNode->name = "road";
+    modelNode->meshes = meshes;
+    modelNode->meshesCount = lanesCount;
+    modelNode->parent = NULL;
+
+    RStaticModel* model = new RStaticModel("", modelNode, materials, lanesCount, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
 
     return model;
 }

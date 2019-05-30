@@ -303,6 +303,96 @@ void ResourceManager::reloadAllShaders()
 }
 
 
+RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
+        return model;
+    }
+
+
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
+
+    if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
+RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames)
+{
+    std::string pathForResourceManager = path + "-";
+    for (int i = 0; i < nodesToSkipNames.size(); ++i)
+    {
+        pathForResourceManager += ";" + nodesToSkipNames[i];
+    }
+
+    Resource* res = findResource(pathForResourceManager);
+    if (res != 0)
+    {
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
+        return model;
+    }
+
+
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath, nodesToSkipNames) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
+
+    if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
+RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames)
+{
+    std::string pathForResourceManager = path + "+";
+    for (int i = 0; i < nodesToLoadNames.size(); ++i)
+    {
+        pathForResourceManager += ";" + nodesToLoadNames[i];
+    }
+
+    Resource* res = findResource(pathForResourceManager);
+    if (res != 0)
+    {
+        RStaticModel* model = dynamic_cast<RStaticModel*>(res);
+        return model;
+    }
+
+
+    StaticModelLoader loader;
+    std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNodes(path, texturePath, nodesToLoadNames) );
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+
+    RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
+
+    if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
 RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePath)
 {
     Resource* res = findResource(path);

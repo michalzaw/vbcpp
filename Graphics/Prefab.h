@@ -98,8 +98,13 @@ class Cube : public Prefab
             materials[0] = _material;
             meshes[0].setMeshData(vertices, 24, indices, 36, 0, materials[0].shader);
 
+            StaticModelNode* modelNode = new StaticModelNode;
+            modelNode->name = "object";
+            modelNode->meshes = meshes;
+            modelNode->meshesCount = 1;
+            modelNode->parent = NULL;
 
-            setModel(new RStaticModel("", meshes, 1, materials));
+            setModel(new RStaticModel("", modelNode, materials, 1));
         }
 
     public:

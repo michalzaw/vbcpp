@@ -8,16 +8,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 
-
-/*class SceneObject;
-
-
-enum RotationMode
-{
-    RM_EULER_ANGLES,
-    RM_QUATERNION
-
-};
+#include "RotationMode.h"
 
 
 class Transform
@@ -30,43 +21,48 @@ class Transform
         glm::quat _rotationQuaternion;
         glm::vec3 _scale;
 
-        // TODO Inne macierze np. odwrotna
         mutable glm::mat4 _transformMatrix;
         mutable glm::mat4 _normalMatrix;
-        mutable bool _transformMatrixIs;
-        mutable bool _normalMatrixIs;
-
-        SceneObject* _object;
+        mutable bool _transformMatrixIsCalculated;
+        mutable bool _normalMatrixIsCalculated;
 
         void updateTransformMatrix() const;
         void changed();
 
     public:
-        Transform(SceneObject* object);
+        Transform();
+        Transform(glm::vec3 position, glm::vec3 rotation, glm::vec3 scale);
         Transform(const Transform& t);
         ~Transform();
 
-        void setPosition(glm::vec3 position);
-        void setRotation(glm::vec3 rotation);
-        void setRotation(float x, float y, float z, float w);
+        void setPosition(glm::vec3 position);                               // Set in local space
+        void setPosition(float x, float y, float z);
+        void setRotation(glm::vec3 rotation);                               // Rotations in radians
+        void setRotation(float x, float y, float z);
+        void setRotationQuaternion(glm::quat rotation);
+        void setRotationQuaternion(float x, float y, float z, float w);
         void setScale(glm::vec3 scale);
+        void setScale(float x, float y, float z);
+        void setScale(float scale);
 
-        glm::vec3 getPosition() const;
+        void move(glm::vec3 deltaPosition);
+        void move(float dx, float dy, float dz);
+        void rotate(glm::vec3 deltaRotation);
+        void rotate(float dx, float dy, float dz);
+        void scale(glm::vec3 scale);
+        void scale(float x, float y, float z);
+
+        glm::vec3 getPosition() const;                                      // In local space
         glm::vec3 getRotation() const;
+        glm::quat getRotationQuaternion() const;
         glm::vec3 getScale() const;
 
         glm::mat4& getTransformMatrix() const;
         glm::mat4& getNormalMatrix() const;
 
         Transform& operator=(const Transform& t);
-        Transform& operator*=(const Transform& t);
 
-        void setObject(SceneObject* object)
-        {
-            _object = object;
-        }
-
-};*/
+};
 
 
 #endif // TRANSFORM_H_INCLUDED
