@@ -86,6 +86,10 @@ class BusConstraint : public Bus
         MirrorComponent* getMirror(int index);
         int getMirrorsCount();
 
+        SceneObject* getDesktopObject();
+
+        float getBusSpeed();
+
         // Update internal physics - doors, wheels etc
         void update(float dt);
 

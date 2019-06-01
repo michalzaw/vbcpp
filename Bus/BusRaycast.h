@@ -7,6 +7,7 @@
 #include "Bus.h"
 #include "DoorSimple.h"
 #include "DoorSE.h"
+#include "Desktop.h"
 
 #include "../Scene/SceneManager.h"
 #include "../Scene/SoundManager.h"
@@ -83,6 +84,10 @@ class BusRaycast : public Bus
         virtual MirrorComponent* getMirror(int index);
         virtual int getMirrorsCount();
 
+        virtual SceneObject* getDesktopObject();
+
+        virtual float getBusSpeed();
+
         virtual void update(float deltaTime);
 
     private:
@@ -120,6 +125,8 @@ class BusRaycast : public Bus
         int             _collidesWith;
 
         std::vector<MirrorComponent*> _mirrors;
+
+        Desktop* _desktop;
 
         void loadXMLdata(std::string busname);
         bool isAllDoorClosed()

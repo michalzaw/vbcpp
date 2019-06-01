@@ -831,6 +831,18 @@ int BusConstraint::getMirrorsCount()
 }
 
 
+SceneObject* BusConstraint::getDesktopObject()
+{
+    return NULL;
+}
+
+
+float BusConstraint::getBusSpeed()
+{
+    return 0.0f;
+}
+
+
 void BusConstraint::doorOpenClose(char doorGroup)
 {
     for (unsigned char i = 0; i < _doors.size(); i++)

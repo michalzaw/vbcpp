@@ -124,6 +124,33 @@ ModelNode* RenderObject::getModelRootNode()
 }
 
 
+
+ModelNode* RenderObject::getModelNodeByName(std::string name, ModelNode* node)
+{
+    if (node->getName() == name)
+    {
+        return node;
+    }
+
+    for (int i = 0; i < node->getChildrenCount(); ++i)
+    {
+        ModelNode* returnedNode = getModelNodeByName(name, node->getChildren()[i]);
+        if (returnedNode != NULL)
+        {
+            return returnedNode;
+        }
+    }
+
+    return NULL;
+}
+
+
+ModelNode* RenderObject::getModelNodeByName(std::string name)
+{
+    return getModelNodeByName(name, _modelRootNode);
+}
+
+
 Material* RenderObject::getMaterial(unsigned int index)
 {
     return &_materials[index];

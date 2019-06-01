@@ -74,6 +74,10 @@ class Bus : public RefCounter
         virtual MirrorComponent* getMirror(int index) = 0;
         virtual int getMirrorsCount() = 0;
 
+        virtual SceneObject* getDesktopObject() = 0;
+
+        virtual float getBusSpeed() = 0;
+
         virtual void update(float deltaTime) = 0;
 
         void setNumberOfPassengers(unsigned int number)

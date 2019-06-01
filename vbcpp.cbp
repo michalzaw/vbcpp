@@ -155,6 +155,8 @@
 		<Unit filename="Bus/BusConstraint.h" />
 		<Unit filename="Bus/BusRaycast.cpp" />
 		<Unit filename="Bus/BusRaycast.h" />
+		<Unit filename="Bus/Desktop.cpp" />
+		<Unit filename="Bus/Desktop.h" />
 		<Unit filename="Bus/Door.h" />
 		<Unit filename="Bus/DoorSE.h" />
 		<Unit filename="Bus/DoorSimple.h" />

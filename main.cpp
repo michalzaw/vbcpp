@@ -371,6 +371,11 @@ int main()
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
 
+    Label* labelSpeed = gui->addLabel(font, "Speed: ");
+    labelSpeed->setPosition(10, 85);
+    labelSpeed->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+    labelSpeed->scale(0.6f, 0.6f);
+
     Label* labelEngineIsRunning = gui->addLabel(font, "Engine off");
     labelEngineIsRunning->setPosition(10, 70);
     labelEngineIsRunning->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -407,12 +412,12 @@ int main()
     labelBusStop2->scale(0.6f, 0.6f);
 
     Label* labelPassengers = gui->addLabel(font, "Liczba pasazerow: " + toString(bus->getNumberOfPassengers()));
-    labelPassengers->setPosition(10, 105);
+    labelPassengers->setPosition(10, 120);
     labelPassengers->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelPassengers->scale(0.6f, 0.6f);
 
     Label* labelPassengersGettingOff = gui->addLabel(font, "Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
-    labelPassengersGettingOff->setPosition(10, 90);
+    labelPassengersGettingOff->setPosition(10, 105);
     labelPassengersGettingOff->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelPassengersGettingOff->scale(0.6f, 0.6f);
 
@@ -491,6 +496,7 @@ int main()
 
         sndMgr->update();
 
+        labelSpeed->setText("Speed: " + toString((int)bus->getBusSpeed()) + "km/h");
         labelEngineIsRunning->setText(bus->getEngine()->isRunning() ? "Engine on" : "Engine off");
         labelGearRatio->setText("Gear ratio: " + toString(bus->getGearbox()->currentRatio()));
         labelRPM->setText("RPM: " + toString(bus->getEngine()->getCurrentRPM()));

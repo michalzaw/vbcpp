@@ -16,7 +16,8 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
     _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
     _brake(false), _accelerate(false), _handbrake(true), _idle(true),
     _isEnableLights(false), _isEnableHeadlights(false),
-    _collidesWith(COL_TERRAIN | COL_ENV)
+    _collidesWith(COL_TERRAIN | COL_ENV),
+    _desktop(NULL)
 {
     loadXMLdata(filename);
 
@@ -138,6 +139,11 @@ BusRaycast::~BusRaycast()
     _doors.clear();
 
     _headlights.clear();
+
+    if (_desktop != NULL)
+    {
+        delete _desktop;
+    }
 }
 
 
@@ -391,8 +397,8 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             _desktopObject = _sMgr->addSceneObject("desktop");
 
-            RStaticModel* desktopModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
+            RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath);
+            RenderObject* desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
 
             const char* cPosition = desktopElement->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
@@ -407,6 +413,10 @@ void BusRaycast::loadXMLdata(std::string busname)
             _desktopObject->setScale(scale);
 
             busModule.sceneObject->addChild(_desktopObject);
+
+            _desktop = new Desktop(desktopRenderObject);
+            _desktop->setIndicator(DIT_SPEEDOMETER, "wsk.001", degToRad(212.0f), 120.0f);
+            _desktop->setIndicator(DIT_TACHOMER, "wsk.002", 3.14f, 3000.0f);
         }
 
         // ########### HEADLIGHTS ###########
@@ -1007,6 +1017,18 @@ int BusRaycast::getMirrorsCount()
 }
 
 
+SceneObject* BusRaycast::getDesktopObject()
+{
+    return _desktopObject;
+}
+
+
+float BusRaycast::getBusSpeed()
+{
+    return _modules[0].rayCastVehicle->getRayCastVehicle()->getCurrentSpeedKmHour();
+}
+
+
 void BusRaycast::update(float deltaTime)
 {
     _engine->update(deltaTime);
@@ -1100,4 +1122,7 @@ void BusRaycast::update(float deltaTime)
     }
 
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
+
+    _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
+    _desktop->setIndicatorValue(DIT_TACHOMER, _engine->getCurrentRPM());
 }

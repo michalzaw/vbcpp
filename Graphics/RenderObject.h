@@ -28,6 +28,8 @@ class RenderObject : public Component
 
         void calculateNewAABB();
 
+        ModelNode* getModelNodeByName(std::string name, ModelNode* node);
+
     public:
         RenderObject(RStaticModel* model = NULL);
         virtual ~RenderObject();
@@ -35,6 +37,7 @@ class RenderObject : public Component
         void setModel(RStaticModel* model);
         RStaticModel* getModel();
         ModelNode* getModelRootNode();
+        ModelNode* getModelNodeByName(std::string name);
 
         Material* getMaterial(unsigned int index);
 
