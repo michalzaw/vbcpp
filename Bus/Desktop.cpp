@@ -3,6 +3,16 @@
 #include "../Utils/Helpers.hpp"
 
 
+DesktopIndicatorType getDesktopIndicatorTypeFromString(std::string name)
+{
+    for (int i = 0; i < INDICATORS_COUNT; ++i)
+    {
+        if (desktopIndicatorTypeStrings[i] == name)
+            return static_cast<DesktopIndicatorType>(i);
+    }
+}
+
+
 Desktop::Desktop(RenderObject* desktopRenderObject)
     : _desktopRenderObject(desktopRenderObject)
 {

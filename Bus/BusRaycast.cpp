@@ -388,36 +388,7 @@ void BusRaycast::loadXMLdata(std::string busname)
 
         // ########### DESKTOP ###########
         XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
-        if (desktopElement != nullptr)
-        {
-            //std::cout << "XML: Steering wheel" << std::endl;
-
-            std::string modelFile = std::string(desktopElement->Attribute("model"));
-            std::string modelPath = "Buses/" + busname + "/" + modelFile;
-
-            _desktopObject = _sMgr->addSceneObject("desktop");
-
-            RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath);
-            RenderObject* desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
-
-            const char* cPosition = desktopElement->Attribute("position");
-            glm::vec3 position = XMLstringToVec3(cPosition);
-            _desktopObject->setPosition(position);
-
-            const char* cRotation = desktopElement->Attribute("rotation");
-            glm::vec3 rotation(XMLstringToVec3(cRotation));
-            _desktopObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
-
-            const char* cScale = desktopElement->Attribute("scale");
-            glm::vec3 scale(XMLstringToVec3(cScale));
-            _desktopObject->setScale(scale);
-
-            busModule.sceneObject->addChild(_desktopObject);
-
-            _desktop = new Desktop(desktopRenderObject);
-            _desktop->setIndicator(DIT_SPEEDOMETER, "wsk.001", degToRad(212.0f), 120.0f);
-            _desktop->setIndicator(DIT_TACHOMER, "wsk.002", 3.14f, 3000.0f);
-        }
+        loadDesktopFromXml(desktopElement, busname, texturePath, busModule);
 
         // ########### HEADLIGHTS ###########
         XMLElement* headlightElement = moduleElement->FirstChildElement("Headlight");
@@ -743,6 +714,59 @@ void BusRaycast::loadXMLdata(std::string busname)
         _pMgr->createConstraintBall(_modules[0].rayCastVehicle, _modules[1].rayCastVehicle, _modules[0].jointPosition, _modules[1].jointPosition);
     }
 
+}
+
+
+void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busname, std::string texturePath, BusRayCastModule& busModule)
+{
+    if (desktopElement != nullptr)
+    {
+        std::string modelFile = std::string(desktopElement->Attribute("model"));
+        std::string modelPath = "Buses/" + busname + "/" + modelFile;
+
+        _desktopObject = _sMgr->addSceneObject("desktop");
+
+        RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath);
+        RenderObject* desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
+
+        const char* cPosition = desktopElement->Attribute("position");
+        glm::vec3 position = XMLstringToVec3(cPosition);
+        _desktopObject->setPosition(position);
+
+        const char* cRotation = desktopElement->Attribute("rotation");
+        glm::vec3 rotation(XMLstringToVec3(cRotation));
+        _desktopObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
+
+        const char* cScale = desktopElement->Attribute("scale");
+        glm::vec3 scale(XMLstringToVec3(cScale));
+        _desktopObject->setScale(scale);
+
+        busModule.sceneObject->addChild(_desktopObject);
+
+        _desktop = new Desktop(desktopRenderObject);
+
+        XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
+        while (indicatorElement != nullptr)
+        {
+            const char* cType = indicatorElement->Attribute("type");
+            DesktopIndicatorType type = getDesktopIndicatorTypeFromString(cType);
+
+            const char* cModelNodeName = indicatorElement->Attribute("modelNodeName");
+            std::string modelNodeName(cModelNodeName);
+
+            float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
+            float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
+
+            float minValue = 0.0f;
+            const char* cMinValue = indicatorElement->Attribute("minValue");
+            if (cMinValue != nullptr)
+                minValue = (float)atof(cMinValue);
+
+            _desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue);
+
+            indicatorElement = indicatorElement->NextSiblingElement("Indicator");
+        }
+    }
 }
 
 
@@ -1124,5 +1148,5 @@ void BusRaycast::update(float deltaTime)
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 
     _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
-    _desktop->setIndicatorValue(DIT_TACHOMER, _engine->getCurrentRPM());
+    _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
 }

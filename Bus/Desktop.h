@@ -11,10 +11,14 @@
 enum DesktopIndicatorType
 {
     DIT_SPEEDOMETER,
-    DIT_TACHOMER,
+    DIT_TACHOMETER,
 
     INDICATORS_COUNT
 };
+
+
+const std::string desktopIndicatorTypeStrings[] = { "speedometer", "tachometer" };
+DesktopIndicatorType getDesktopIndicatorTypeFromString(std::string name);
 
 
 enum DesktopButtonTypes

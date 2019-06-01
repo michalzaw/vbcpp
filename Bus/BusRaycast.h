@@ -146,6 +146,8 @@ class BusRaycast : public Bus
             else
                 _numberOfPassengersGettingOff = 0;
         }
+
+        void loadDesktopFromXml(XMLElement* desktopXmlElement, std::string busname, std::string texturePath, BusRayCastModule& module);
 };
 
 
