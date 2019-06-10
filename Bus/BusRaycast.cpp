@@ -745,6 +745,13 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
         _desktop = new Desktop(desktopRenderObject);
 
+        std::vector<glm::vec3> translateForStates;
+        translateForStates.push_back(glm::vec3(0.0f, 0.0f, -0.005f));
+        std::vector<glm::vec3> rotateForStates;
+        rotateForStates.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+        _desktop->setButton(DBT_DOOR_1, "button1", translateForStates, rotateForStates, true);
+        _desktop->setButton(DBT_DOOR_2, "button2", translateForStates, rotateForStates, true);
+
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
         {
@@ -947,6 +954,7 @@ void BusRaycast::brakeOff()
 void BusRaycast::toggleHandbrake()
 {
     _handbrake = !_handbrake;
+    _desktop->setButtonState(DBT_DOOR_2, 1);
 }
 
 
@@ -971,6 +979,8 @@ void BusRaycast::startEngine()
         //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->play();
+
+        _desktop->setButtonState(DBT_DOOR_1, 1);
     }
 }
 
@@ -983,6 +993,8 @@ void BusRaycast::stopEngine()
 
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->stop();
+
+        _desktop->setButtonState(DBT_DOOR_1, 1);
     }
 }
 
@@ -1149,4 +1161,6 @@ void BusRaycast::update(float deltaTime)
 
     _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
     _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
+
+    _desktop->update(deltaTime);
 }

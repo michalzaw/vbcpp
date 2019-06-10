@@ -2,9 +2,9 @@
 #define ENVIRONMENTCAPTURECOMPONENT_H_INCLUDED
 
 
-#include <../Scene/Component.h>
+#include "../Scene/Component.h"
 
-#include <../Utils/RTextureCubeMap.h>
+#include "../Utils/RTextureCubeMap.h"
 
 
 class EnvironmentCaptureComponent : public Component

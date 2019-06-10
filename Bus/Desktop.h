@@ -2,10 +2,10 @@
 #define DESKTOP_H_INCLUDED
 
 
-#include <../Graphics/RenderObject.h>
-#include <../Graphics/ModelNode.h>
+#include "../Graphics/RenderObject.h"
+#include "../Graphics/ModelNode.h"
 
-#include <../Scene/SceneObject.h>
+#include "../Scene/SceneObject.h"
 
 
 enum DesktopIndicatorType
@@ -44,6 +44,39 @@ struct Indicator
 };
 
 
+struct DesktopButton
+{
+    ModelNode* modelNode;
+    unsigned int statesCount;
+    std::vector<glm::vec3> translateForStates;
+    std::vector<glm::vec3> rotateForStates;
+    bool isReturning;
+
+    unsigned int currentState;
+
+    DesktopButton()
+    {
+        modelNode = NULL;
+    }
+
+    void setData(ModelNode* modelNode, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning)
+    {
+        this->modelNode = modelNode;
+        this->statesCount = translateForStates.size() + 1;
+        this->translateForStates = translateForStates;
+        this->rotateForStates = rotateForStates;
+        this->isReturning = isReturning;
+
+        this->translateForStates.insert(this->translateForStates.begin(), glm::vec3(0.0f, 0.0f, 0.0f));
+        this->rotateForStates.insert(this->rotateForStates.begin(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+
+        this->currentState = 0;
+    }
+
+};
+
+
 class Desktop
 {
     private:
@@ -51,6 +84,7 @@ class Desktop
         RenderObject* _desktopRenderObject;
 
         Indicator _indicators[INDICATORS_COUNT];
+        DesktopButton _buttons[BUTTONS_COUNT];
 
     public:
         Desktop(RenderObject* desktopRenderObject);
@@ -58,7 +92,13 @@ class Desktop
         void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f);
         Indicator& getIndicator(DesktopIndicatorType type);
 
+        void setButton(DesktopButtonTypes type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
+        DesktopButton& getButton(DesktopButtonTypes type);
+
         void setIndicatorValue(DesktopIndicatorType type, float value);
+        void setButtonState(DesktopButtonTypes type, unsigned int state);
+
+        void update(float deltaTime);
 
 };
 
