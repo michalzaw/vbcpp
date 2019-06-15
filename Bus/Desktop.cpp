@@ -13,10 +13,22 @@ DesktopIndicatorType getDesktopIndicatorTypeFromString(std::string name)
 }
 
 
-Desktop::Desktop(RenderObject* desktopRenderObject)
-    : _desktopRenderObject(desktopRenderObject)
+DesktopButtonType getDesktopButtonTypeFromString(std::string name)
 {
-    _desktopSceneObject = _desktopRenderObject->getSceneObject();
+    for (int i = 0; i < BUTTONS_COUNT; ++i)
+    {
+        if (desktopButtonTypeStrings[i] == name)
+            return static_cast<DesktopButtonType>(i);
+    }
+}
+
+
+Desktop::Desktop(RenderObject* desktopRenderObject)
+    : _desktopRenderObject(desktopRenderObject),
+    _desktopSceneObject(NULL)
+{
+    if (_desktopRenderObject != NULL)
+        _desktopSceneObject = _desktopRenderObject->getSceneObject();
 }
 
 
@@ -37,7 +49,7 @@ Indicator& Desktop::getIndicator(DesktopIndicatorType type)
 }
 
 
-void Desktop::setButton(DesktopButtonTypes type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning)
+void Desktop::setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning)
 {
     ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(buttonNodeNameInModel);
 
@@ -45,7 +57,7 @@ void Desktop::setButton(DesktopButtonTypes type, std::string buttonNodeNameInMod
 }
 
 
-DesktopButton& Desktop::getButton(DesktopButtonTypes type)
+DesktopButton& Desktop::getButton(DesktopButtonType type)
 {
     return _buttons[type];
 }
@@ -63,7 +75,7 @@ void Desktop::setIndicatorValue(DesktopIndicatorType type, float value)
 }
 
 
-void Desktop::setButtonState(DesktopButtonTypes type, unsigned int state)
+void Desktop::setButtonState(DesktopButtonType type, unsigned int state)
 {
     DesktopButton& button = getButton(type);
     if (button.modelNode == NULL || state >= button.statesCount)

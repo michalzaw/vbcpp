@@ -714,6 +714,9 @@ void BusRaycast::loadXMLdata(std::string busname)
         _pMgr->createConstraintBall(_modules[0].rayCastVehicle, _modules[1].rayCastVehicle, _modules[0].jointPosition, _modules[1].jointPosition);
     }
 
+    if (_desktop == NULL)
+        _desktop = new Desktop(NULL);
+
 }
 
 
@@ -745,13 +748,6 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
         _desktop = new Desktop(desktopRenderObject);
 
-        std::vector<glm::vec3> translateForStates;
-        translateForStates.push_back(glm::vec3(0.0f, 0.0f, -0.005f));
-        std::vector<glm::vec3> rotateForStates;
-        rotateForStates.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-        _desktop->setButton(DBT_DOOR_1, "button1", translateForStates, rotateForStates, true);
-        _desktop->setButton(DBT_DOOR_2, "button2", translateForStates, rotateForStates, true);
-
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
         {
@@ -772,6 +768,43 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
             _desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue);
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
+        }
+
+        XMLElement* buttonElement = desktopElement->FirstChildElement("Button");
+        while (buttonElement != nullptr)
+        {
+            const char* cType = buttonElement->Attribute("type");
+            DesktopButtonType type = getDesktopButtonTypeFromString(cType);
+
+            const char* cModelNodeName = buttonElement->Attribute("modelNodeName");
+            std::string modelNodeName(cModelNodeName);
+
+            const char* value = buttonElement->Attribute("isReturning");
+            bool isReturning = false;
+            if (strcmp(value,"true") == 0)
+                isReturning = true;
+
+            std::vector<glm::vec3> translationForStates;
+            std::vector<glm::vec3> rotationForStates;
+
+            XMLElement* buttonStateElement = buttonElement->FirstChildElement("State");
+            while (buttonStateElement != nullptr)
+            {
+
+                const char* cTranslation = buttonStateElement->Attribute("translation");
+                glm::vec3 translation = XMLstringToVec3(cTranslation);
+                translationForStates.push_back(translation);
+
+                const char* cRotation = buttonStateElement->Attribute("rotation");
+                glm::vec3 rotation(XMLstringToVec3(cRotation));
+                rotationForStates.push_back(rotation);
+
+                buttonStateElement = buttonStateElement->NextSiblingElement("State");
+            }
+
+            _desktop->setButton(type, modelNodeName, translationForStates, rotationForStates, isReturning);
+
+            buttonElement = buttonElement->NextSiblingElement("Button");
         }
     }
 }
@@ -1159,8 +1192,11 @@ void BusRaycast::update(float deltaTime)
 
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 
-    _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
-    _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
+    if (_desktop != NULL)
+    {
+        _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
+        _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
 
-    _desktop->update(deltaTime);
+        _desktop->update(deltaTime);
+    }
 }

@@ -21,13 +21,16 @@ const std::string desktopIndicatorTypeStrings[] = { "speedometer", "tachometer" 
 DesktopIndicatorType getDesktopIndicatorTypeFromString(std::string name);
 
 
-enum DesktopButtonTypes
+enum DesktopButtonType
 {
     DBT_DOOR_1,
     DBT_DOOR_2,
 
     BUTTONS_COUNT
 };
+
+const std::string desktopButtonTypeStrings[] = { "door1", "door2" };
+DesktopButtonType getDesktopButtonTypeFromString(std::string name);
 
 
 struct Indicator
@@ -92,11 +95,11 @@ class Desktop
         void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f);
         Indicator& getIndicator(DesktopIndicatorType type);
 
-        void setButton(DesktopButtonTypes type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
-        DesktopButton& getButton(DesktopButtonTypes type);
+        void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
+        DesktopButton& getButton(DesktopButtonType type);
 
         void setIndicatorValue(DesktopIndicatorType type, float value);
-        void setButtonState(DesktopButtonTypes type, unsigned int state);
+        void setButtonState(DesktopButtonType type, unsigned int state);
 
         void update(float deltaTime);
 
