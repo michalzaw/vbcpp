@@ -1,0 +1,76 @@
+set (GRAPHICS_SOURCES
+		Graphics/AABB.h
+		Graphics/Camera.cpp
+		Graphics/Camera.h
+		Graphics/CameraFPS.cpp
+		Graphics/CameraFPS.hpp
+		Graphics/CameraStatic.cpp
+		Graphics/CameraStatic.hpp
+		Graphics/EnvironmentCaptureComponent.cpp
+		Graphics/EnvironmentCaptureComponent.h
+		Graphics/Framebuffer.cpp
+		Graphics/Framebuffer.h
+		Graphics/Frustum.cpp
+		Graphics/Frustum.h
+		Graphics/GraphicsManager.cpp
+		Graphics/GraphicsManager.h
+		Graphics/Grass.cpp
+		Graphics/Grass.h
+		Graphics/IBO.cpp
+		Graphics/IBO.h
+		Graphics/Light.cpp
+		Graphics/Light.h
+		Graphics/LoadMaterial.cpp
+		Graphics/LoadMaterial.h
+		Graphics/LoadShader.cpp
+		Graphics/LoadShader.h
+		Graphics/LoadTerrainModel.cpp
+		Graphics/LoadTerrainModel.h
+		Graphics/LoadTexture.cpp
+		Graphics/LoadTexture.h
+		Graphics/Material.h
+		Graphics/MirrorComponent.h
+		Graphics/Model.cpp
+		Graphics/Model.h
+		Graphics/ModelNode.cpp
+		Graphics/ModelNode.h
+		Graphics/NVMeshMender/NVMeshMender.cpp
+		Graphics/NVMeshMender/NVMeshMender.h
+		Graphics/OGLDriver.cpp
+		Graphics/OGLDriver.h
+		Graphics/Prefab.h
+		Graphics/QuadTree.cpp
+		Graphics/QuadTree.h
+		Graphics/QuadTreeNode.cpp
+		Graphics/QuadTreeNode.h
+		Graphics/RShader.h
+		Graphics/Rect.h
+		Graphics/RenderData.cpp
+		Graphics/RenderData.h
+		Graphics/RenderObject.cpp
+		Graphics/RenderObject.h
+		Graphics/Renderer.cpp
+		Graphics/Renderer.h
+		Graphics/Roads.cpp
+		Graphics/Roads.h
+		Graphics/RotationMode.h
+		Graphics/ShadowMap.cpp
+		Graphics/ShadowMap.h
+		Graphics/StaticModelLoader.cpp
+		Graphics/StaticModelLoader.h
+		Graphics/Transform.cpp
+		Graphics/Transform.h
+		Graphics/TreeComponent.h
+		Graphics/UBO.h
+		Graphics/VAO.h
+		Graphics/VBO.cpp
+)
+
+set (GRAPHICS_HEADERS
+		Graphics/VBO.h
+		Graphics/Vector3.h
+		Graphics/Vertex.h
+)
+
+set (GRAPHICS_SOURCES ${GRAPHICS_SOURCES} PARENT_SCOPE)
+set (GRAPHICS_HEADERS ${GRAPHICS_HEADERS} PARENT_SCOPE)
