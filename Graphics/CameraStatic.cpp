@@ -2,6 +2,8 @@
 
 #include "../Scene/SceneObject.h"
 
+#include <algorithm>
+
 
 /*CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 	: Component(CT_CAMERA),

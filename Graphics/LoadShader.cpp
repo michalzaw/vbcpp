@@ -1,5 +1,7 @@
 #include "LoadShader.h"
 
+#include <sstream>
+
 
 bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const std::vector<std::string>& defines)
 {

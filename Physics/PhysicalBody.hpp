@@ -1,7 +1,7 @@
 #ifndef PHYSICALBODY_HPP_INCLUDED
 #define PHYSICALBODY_HPP_INCLUDED
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "../Scene/Component.h"
 #include "../Scene/SceneObject.h"

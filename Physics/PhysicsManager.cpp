@@ -226,6 +226,8 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(R
 btCompoundShape* PhysicsManager::createCompoundShape()
 {
     btCompoundShape* c = new btCompoundShape();
+
+	return c;
 }
 
 

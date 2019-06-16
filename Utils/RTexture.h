@@ -1,7 +1,7 @@
 #ifndef RTEXTURE_H_INCLUDED
 #define RTEXTURE_H_INCLUDED
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 #include <glm/glm.hpp>
 

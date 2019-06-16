@@ -1,7 +1,7 @@
 #ifndef SHADER_H_INCLUDED
 #define SHADER_H_INCLUDED
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 #include <glm/glm.hpp>
 
 #include "../Utils/Resource.h"
@@ -205,26 +205,32 @@ class RShader : virtual public Resource
 
         inline void getUniformOffset(const char** names, unsigned int count, int* offsets)
         {
-            GLuint uniformIndices[count];
+            GLuint* uniformIndices = new GLuint[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
 
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_OFFSET, offsets);
+
+			delete[] uniformIndices;
         }
 
         inline void getUniformArrayStride(const char** names, unsigned int count, int* arrayStrides)
         {
-            GLuint uniformIndices[count];
+            GLuint* uniformIndices = new GLuint[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
 
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_ARRAY_STRIDE, arrayStrides);
+
+			delete[] uniformIndices;
         }
 
         inline void getUniformMatrixStride(const char** names, unsigned int count, int* matrixStrides)
         {
-            GLuint uniformIndices[count];
+            GLuint* uniformIndices = new GLuint[count];
             glGetUniformIndices(_shaderID, count, names, uniformIndices);
 
             glGetActiveUniformsiv(_shaderID, count, uniformIndices, GL_UNIFORM_MATRIX_STRIDE, matrixStrides);
+
+			delete[] uniformIndices;
         }
 
         inline void setUniformBlockBinding(const char* blocksname, unsigned int location)

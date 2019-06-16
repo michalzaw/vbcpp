@@ -2,7 +2,7 @@
 #define WINDOW_H_INCLUDED
 
 // GLFW, GLEW
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 // Include GLU header with GLFW
 #define GLFW_INCLUDE_GLU

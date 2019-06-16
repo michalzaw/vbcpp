@@ -466,8 +466,6 @@ SceneObject* SceneManager::loadObject(std::string name, glm::vec3 position, glm:
             if (bodyType == "static")
             {
                 std::cout << "- Creating static Convex Hull collision shape" << std::endl;
-                float mass = atoi(componentElement->Attribute("mass"));
-
 
                 int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR |COL_ENV;
 

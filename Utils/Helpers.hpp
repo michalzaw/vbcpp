@@ -7,8 +7,9 @@
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 template<typename T> void safe_delete(T*& a) {
   delete a;

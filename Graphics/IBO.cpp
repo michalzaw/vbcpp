@@ -1,5 +1,7 @@
 #include "IBO.h"
 
+#include <cstddef>
+
 
 IBO::IBO(unsigned int size)
     : _iboId(0), _bufferSize(size), _indicesCount(0)

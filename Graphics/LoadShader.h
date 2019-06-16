@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 
 //GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName);

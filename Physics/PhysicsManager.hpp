@@ -1,7 +1,7 @@
 #ifndef PHYSICSMANAGER_HPP_INCLUDED
 #define PHYSICSMANAGER_HPP_INCLUDED
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "PhysicalBodyBox.hpp"
 #include "PhysicalBodyCylinder.hpp"

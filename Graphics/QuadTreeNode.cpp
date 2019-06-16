@@ -4,7 +4,7 @@
 QuadTreeNode::QuadTreeNode(AABB aabb)
     : _aabb(aabb),
     _parent(NULL),
-    _children({NULL, NULL, NULL, NULL})
+    _children{NULL, NULL, NULL, NULL}
 {
 
 }
