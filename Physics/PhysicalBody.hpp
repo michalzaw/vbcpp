@@ -66,6 +66,12 @@ class PhysicalBody : public Component
         bool _isUpdateTransformFromObject;
 
         virtual void updateBody() { }
+
+        virtual void onAttachedToScenObject()
+        {
+            if (_rigidBody)
+                _rigidBody->setUserPointer(_object);
+        }
 };
 
 #endif // PHYSICALBODY_HPP_INCLUDED

@@ -45,8 +45,20 @@ std::string winTitle = "Virtual Bus Core++";
 bool mirrorControl = false;
 int mirrorControlIndex = -1;
 
+bool cameraControll = true;
+
+
+void onSceneObjectClick(SceneObject* sceneObject)
+{
+    std::cout << sceneObject->getName() << std::endl;
+}
+
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    if (key == GLFW_KEY_O && action == GLFW_PRESS)
+        cameraControll = !cameraControll;
+
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         win->setCloseFlag();
 
@@ -164,7 +176,52 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    if (action == GLFW_RELEASE)
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
 
+        glm::vec4 rayStartNDC((xpos / win->getWidth() - 0.5f) * 2.0f,
+                              (ypos / win->getHeight() - 0.5f) * 2.0f,
+                              -1.0f,
+                              1.0f);
+
+        glm::vec4 rayEndNDC((xpos / win->getWidth() - 0.5f) * 2.0f,
+                            (ypos / win->getHeight() - 0.5f) * 2.0f,
+                            0.0f,
+                            1.0f);
+
+        glm::mat4 viewProjectionInv = glm::inverse(camFPS->getProjectionMatrix() * camFPS->getViewMatrix());
+
+        glm::vec4 rayStartWorldspace = viewProjectionInv * rayStartNDC;
+        rayStartWorldspace /= rayStartWorldspace.w;
+
+        glm::vec4 rayEndWorldspace = viewProjectionInv * rayEndNDC;
+        rayEndWorldspace /= rayEndWorldspace.w;
+
+        glm::vec3 rayDir = glm::normalize(glm::vec3(rayEndWorldspace - rayStartWorldspace));
+        glm::vec3 rayEnd = glm::vec3(rayStartWorldspace) + 1000.0f * rayDir;
+
+        btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStartWorldspace.x, rayStartWorldspace.y, rayStartWorldspace.z),
+                                                               btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
+
+        rayCallback.m_collisionFilterMask = COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL;
+        rayCallback.m_collisionFilterGroup = COL_ENV;
+
+        physMgr->getDynamicsWorld()->rayTest(btVector3(rayStartWorldspace.x, rayStartWorldspace.y, rayStartWorldspace.z),
+                                             btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
+                                             rayCallback);
+
+        if (rayCallback.hasHit())
+        {
+            void* data = rayCallback.m_collisionObject->getUserPointer();
+            if (data != NULL)
+            {
+                SceneObject* object = static_cast<SceneObject*>(data);
+                onSceneObjectClick(object);
+            }
+        }
+    }
 }
 
 
@@ -302,7 +359,7 @@ int main()
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetMouseButtonCallback(win->getWindow(), mouse_button_callback);
 
-    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    //glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Inicjalizujemy potrzebne rzeczy
     OGLDriver::getInstance().initialize();
@@ -475,10 +532,13 @@ int main()
         }
 
 
-        glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
-        glfwSetCursorPos(win->getWindow(), win->getWidth()/2, win->getHeight()/2);
+        if (cameraControll)
+        {
+            glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
+            glfwSetCursorPos(win->getWindow(), win->getWidth()/2, win->getHeight()/2);
 
-        camFPS->setRotation(xpos, ypos);
+            camFPS->setRotation(xpos, ypos);
+        }
 
 
         readInput(win->getWindow(), deltaTime);

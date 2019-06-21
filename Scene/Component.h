@@ -38,6 +38,8 @@ class Component
 
         bool _isActive;
 
+        virtual void onAttachedToScenObject() {}
+
     public:
         Component(ComponentType type);
         ~Component();

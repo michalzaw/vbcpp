@@ -28,6 +28,7 @@ void Component::setSceneObject(SceneObject* object)
     {
         _object = object;
 
+        onAttachedToScenObject();
         //_objectTransform = _object->getTransform();
     }
 }
