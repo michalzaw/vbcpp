@@ -296,6 +296,12 @@ float GraphicsManager::getWindValue()
 }
 
 
+std::list<RenderObject*>& GraphicsManager::getRenderObjects()
+{
+    return _renderObjects;
+}
+
+
 EnvironmentCaptureComponent* GraphicsManager::getGlobalEnvironmentCaptureComponent()
 {
     return _globalEnvironmentCaptureComponent;

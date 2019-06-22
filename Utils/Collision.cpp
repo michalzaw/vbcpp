@@ -14,6 +14,7 @@ bool isPointInFrustum(Frustum& frustum, glm::vec3 point)
     return true;
 }
 
+
 bool isAABBIntersectFrustum(Frustum& frustum, AABB& aabb)
 {
     glm::vec3 point;
@@ -85,6 +86,118 @@ bool isAABBInFrustum(Frustum& frustum, AABB& aabb)
     {
         return false;
     }
+
+    return true;
+}
+
+
+// http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
+bool isRayIntersectOBB(glm::vec3 rayOrigin, glm::vec3 rayDirection, AABB& aabb, glm::mat4 modelMatrix, float& intersectionDistance)
+{
+    float min = 0.0f;
+    float max = 100000.0f;
+
+    glm::vec3 obbPositionWorldspace(modelMatrix[3].x, modelMatrix[3].y, modelMatrix[3].z);
+
+    glm::vec3 deltaPosition = obbPositionWorldspace - rayOrigin;
+
+    {
+        glm::vec3 xAxis(modelMatrix[0].x, modelMatrix[0].y, modelMatrix[0].z);
+        float e = glm::dot(xAxis, deltaPosition);
+        float f = glm::dot(rayDirection, xAxis);
+
+        if (fabs(f) > 0.001f)
+        {
+            float t1 = (e + aabb.getMinCoords().x) / f;
+            float t2 = (e + aabb.getMaxCoords().x) / f;
+
+            if (t1 > t2)
+            {
+                float w = t1;
+                t1 = t2;
+                t2 = w;
+            }
+
+            if (t2 < max)
+                max = t2;
+            if (t1 > min)
+                min = t1;
+
+            if (max < min)
+                return false;
+        }
+        else
+        {
+            if (-e + aabb.getMinCoords().x > 0.0f || -e + aabb.getMaxCoords().x < 0.0f)
+                return false;
+        }
+    }
+
+    {
+        glm::vec3 yAxis(modelMatrix[1].x, modelMatrix[1].y, modelMatrix[1].z);
+        float e = glm::dot(yAxis, deltaPosition);
+        float f = glm::dot(rayDirection, yAxis);
+
+        if (fabs(f) > 0.001f)
+        {
+            float t1 = (e + aabb.getMinCoords().y) / f;
+            float t2 = (e + aabb.getMaxCoords().y) / f;
+
+            if (t1 > t2)
+            {
+                float w = t1;
+                t1 = t2;
+                t2 = w;
+            }
+
+            if (t2 < max)
+                max = t2;
+            if (t1 > min)
+                min = t1;
+
+            if (max < min)
+                return false;
+        }
+        else
+        {
+            if (-e + aabb.getMinCoords().y > 0.0f || -e + aabb.getMaxCoords().y < 0.0f)
+                return false;
+        }
+    }
+
+    {
+        glm::vec3 zAxis(modelMatrix[2].x, modelMatrix[2].y, modelMatrix[2].z);
+        float e = glm::dot(zAxis, deltaPosition);
+        float f = glm::dot(rayDirection, zAxis);
+
+        if (fabs(f) > 0.001f)
+        {
+            float t1 = (e + aabb.getMinCoords().z) / f;
+            float t2 = (e + aabb.getMaxCoords().z) / f;
+
+            if (t1 > t2)
+            {
+                float w = t1;
+                t1 = t2;
+                t2 = w;
+            }
+
+            if (t2 < max)
+                max = t2;
+            if (t1 > min)
+                min = t1;
+
+            if (max < min)
+                return false;
+        }
+        else
+        {
+            if (-e + aabb.getMinCoords().z > 0.0f || -e + aabb.getMaxCoords().z < 0.0f)
+                return false;
+        }
+    }
+
+    intersectionDistance = min;
 
     return true;
 }

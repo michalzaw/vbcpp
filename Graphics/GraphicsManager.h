@@ -101,6 +101,9 @@ class GraphicsManager
         float       getWindValue();
 
 
+        std::list<RenderObject*>& getRenderObjects();
+
+
         EnvironmentCaptureComponent* getGlobalEnvironmentCaptureComponent();
 
         // Znajdz mirror component w obiekcie i wsrod jego dzieci, name - nazwa obiektu

@@ -202,7 +202,23 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glm::vec3 rayDir = glm::normalize(glm::vec3(rayEndWorldspace - rayStartWorldspace));
         glm::vec3 rayEnd = glm::vec3(rayStartWorldspace) + 1000.0f * rayDir;
 
-        btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStartWorldspace.x, rayStartWorldspace.y, rayStartWorldspace.z),
+
+        std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+        for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+        {
+            RenderObject* renderObject = *i;
+            AABB* aabb = renderObject->getModel()->getAABB();
+            float distance;
+            if (isRayIntersectOBB(glm::vec3(rayStartWorldspace), rayDir, *aabb, renderObject->getSceneObject()->getGlobalTransformMatrix(), distance))
+            {
+                if (distance > 0.0f)
+                    std::cout << renderObject->getSceneObject()->getName() << " " << distance << std::endl;
+            }
+        }
+        std::cout << std::endl;
+
+
+        /*btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStartWorldspace.x, rayStartWorldspace.y, rayStartWorldspace.z),
                                                                btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
 
         rayCallback.m_collisionFilterMask = COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL;
@@ -220,7 +236,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 SceneObject* object = static_cast<SceneObject*>(data);
                 onSceneObjectClick(object);
             }
-        }
+        }*/
     }
 }
 
