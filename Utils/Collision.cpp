@@ -91,7 +91,6 @@ bool isAABBInFrustum(Frustum& frustum, AABB& aabb)
 }
 
 
-// http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
 bool isRayIntersectOBB(glm::vec3 rayOrigin, glm::vec3 rayDirection, AABB& aabb, glm::mat4 modelMatrix, float& intersectionDistance)
 {
     float min = 0.0f;

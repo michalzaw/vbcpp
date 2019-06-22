@@ -92,6 +92,8 @@ struct StaticModelNode
     StaticModelNode*    parent;
     std::vector<StaticModelNode*>   children;
 
+    AABB aabb;
+
     StaticModelNode()
     {
         meshes = NULL;

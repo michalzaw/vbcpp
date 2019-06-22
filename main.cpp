@@ -173,6 +173,29 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 
+void rayTestWithModelNode(ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
+{
+    AABB& aabb = modelNode->getStaticModelNode()->aabb;
+    glm::mat4 modelMatrix = parentTransform * modelNode->getTransformMatrix();
+    float distance;
+    if (isRayIntersectOBB(rayStart, rayDir, aabb, modelMatrix, distance))
+    {
+        glm::vec4 rayStartLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayStart.x, rayStart.y, rayStart.z, 1.0f);
+        glm::vec4 rayDirLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayDir.x, rayDir.y, rayDir.z, 0.0f);
+
+        if (distance > 0.0f && (modelNode->getName() == "button1" || modelNode->getName() == "button2" || modelNode->getName() == "wsk.001" || modelNode->getName() == "wsk.002"))
+        {
+            std::cout << modelNode->getName() << " " << distance << std::endl;
+        }
+    }
+
+    for (int i = 0; i < modelNode->getChildrenCount(); ++i)
+    {
+        rayTestWithModelNode(modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
+    }
+}
+
+
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -180,6 +203,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
         double xpos, ypos;
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
+        ypos = win->getHeight() - ypos;
 
         glm::vec4 rayStartNDC((xpos / win->getWidth() - 0.5f) * 2.0f,
                               (ypos / win->getHeight() - 0.5f) * 2.0f,
@@ -203,7 +227,17 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glm::vec3 rayEnd = glm::vec3(rayStartWorldspace) + 1000.0f * rayDir;
 
 
+        // collision with model nodes
         std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+        for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+        {
+            RenderObject* renderObject = *i;
+            rayTestWithModelNode(renderObject->getModelRootNode(), glm::vec3(rayStartWorldspace), rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+        }
+
+
+        // collision with the whole model
+        /*std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
         for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
         {
             RenderObject* renderObject = *i;
@@ -214,10 +248,12 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
                 if (distance > 0.0f)
                     std::cout << renderObject->getSceneObject()->getName() << " " << distance << std::endl;
             }
-        }
-        std::cout << std::endl;
+
+            rayTestWithModelNode(renderObject->getModelRootNode(), glm::vec3(rayStartWorldspace), rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+        }*/
 
 
+        // bullet physics engine
         /*btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStartWorldspace.x, rayStartWorldspace.y, rayStartWorldspace.z),
                                                                btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
 

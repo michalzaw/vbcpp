@@ -54,6 +54,8 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
 {
     glm::mat4 nodeTransform = parentTransform * node->transform.getTransformMatrix();
 
+    glm::vec3 nodeMin(FLT_MAX, FLT_MAX, FLT_MAX);
+    glm::vec3 nodeMax(FLT_MIN, FLT_MIN, FLT_MIN);
     for (int i = 0; i < node->meshesCount; ++i)
     {
         for (int j = 0; j < node->meshes[i].verticesCount; ++j)
@@ -76,8 +78,29 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
                 min.z = v.z;
             else if (v.z > max.z)
                 max.z = v.z;
+
+
+            // local aabb for node
+            glm::vec3 vl = node->meshes[i].vertices[j].position;
+
+            if (vl.x < nodeMin.x)
+                nodeMin.x = vl.x;
+            else if (vl.x > nodeMax.x)
+                nodeMax.x = vl.x;
+
+            if (vl.y < nodeMin.y)
+                nodeMin.y = vl.y;
+            else if (vl.y > nodeMax.y)
+                nodeMax.y = vl.y;
+
+            if (vl.z < nodeMin.z)
+                nodeMin.z = vl.z;
+            else if (vl.z > nodeMax.z)
+                nodeMax.z = vl.z;
         }
     }
+
+    node->aabb.setSize(nodeMin, nodeMax);
 
     for (int i = 0; i < node->children.size(); ++i)
     {

@@ -12,6 +12,8 @@ class ModelNode
     private:
         std::string _name;
 
+        StaticModelNode* _staticModelNode;
+
         Transform _transformNode;
         Transform _transform;
         glm::mat4 _transformMatrix;
@@ -29,6 +31,7 @@ class ModelNode
         ~ModelNode();
 
         std::string getName();
+        StaticModelNode* getStaticModelNode();
         Transform& getTransformNode();
         Transform& getTransform();
         glm::mat4& getTransformMatrix();
