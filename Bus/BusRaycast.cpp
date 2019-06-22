@@ -1,5 +1,7 @@
 #include "BusRaycast.h"
 
+#include "../Scene/ClickableObject.h"
+
 #include "../Utils/Math.h"
 
 #include "../Graphics/GraphicsManager.h"
@@ -715,7 +717,7 @@ void BusRaycast::loadXMLdata(std::string busname)
     }
 
     if (_desktop == NULL)
-        _desktop = new Desktop(NULL);
+        _desktop = new Desktop(NULL, this);
 
 }
 
@@ -728,6 +730,7 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
         std::string modelPath = "Buses/" + busname + "/" + modelFile;
 
         _desktopObject = _sMgr->addSceneObject("desktop");
+        _desktopObject->addComponent(new ClickableObject);
 
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath);
         RenderObject* desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
@@ -746,7 +749,7 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
         busModule.sceneObject->addChild(_desktopObject);
 
-        _desktop = new Desktop(desktopRenderObject);
+        _desktop = new Desktop(desktopRenderObject, this);
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)

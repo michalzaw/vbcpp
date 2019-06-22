@@ -172,8 +172,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
 }
 
-
-void rayTestWithModelNode(ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
+void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
 {
     AABB& aabb = modelNode->getStaticModelNode()->aabb;
     glm::mat4 modelMatrix = parentTransform * modelNode->getTransformMatrix();
@@ -183,15 +182,19 @@ void rayTestWithModelNode(ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 ra
         glm::vec4 rayStartLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayStart.x, rayStart.y, rayStart.z, 1.0f);
         glm::vec4 rayDirLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayDir.x, rayDir.y, rayDir.z, 0.0f);
 
-        if (distance > 0.0f && (modelNode->getName() == "button1" || modelNode->getName() == "button2" || modelNode->getName() == "wsk.001" || modelNode->getName() == "wsk.002"))
+        if (distance > 0.0f);// && (modelNode->getName() == "button1" || modelNode->getName() == "button2" || modelNode->getName() == "wsk.001" || modelNode->getName() == "wsk.002"))
         {
-            std::cout << modelNode->getName() << " " << distance << std::endl;
+            ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
+            if (clickableObject != NULL)
+            {
+                clickableObject->click(modelNode);
+            }
         }
     }
 
     for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        rayTestWithModelNode(modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
+        rayTestWithModelNode(renderObject, modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
     }
 }
 
@@ -232,7 +235,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
         {
             RenderObject* renderObject = *i;
-            rayTestWithModelNode(renderObject->getModelRootNode(), glm::vec3(rayStartWorldspace), rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+            rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), glm::vec3(rayStartWorldspace), rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
         }
 
 

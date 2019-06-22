@@ -6,6 +6,10 @@
 #include "../Graphics/ModelNode.h"
 
 #include "../Scene/SceneObject.h"
+#include "../Scene/ClickableObject.h"
+
+
+class Bus;
 
 
 enum DesktopIndicatorType
@@ -85,12 +89,15 @@ class Desktop
     private:
         SceneObject* _desktopSceneObject;
         RenderObject* _desktopRenderObject;
+        ClickableObject* _clickableObject;
 
         Indicator _indicators[INDICATORS_COUNT];
         DesktopButton _buttons[BUTTONS_COUNT];
 
+        Bus* _bus;
+
     public:
-        Desktop(RenderObject* desktopRenderObject);
+        Desktop(RenderObject* desktopRenderObject, Bus* bus);
 
         void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f);
         Indicator& getIndicator(DesktopIndicatorType type);

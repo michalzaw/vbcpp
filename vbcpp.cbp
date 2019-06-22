@@ -276,6 +276,7 @@
 		<Unit filename="Physics/PhysicalBodyWheel.h" />
 		<Unit filename="Physics/PhysicsManager.cpp" />
 		<Unit filename="Physics/PhysicsManager.hpp" />
+		<Unit filename="Scene/ClickableObject.h" />
 		<Unit filename="Scene/Component.cpp" />
 		<Unit filename="Scene/Component.h" />
 		<Unit filename="Scene/SceneManager.cpp" />

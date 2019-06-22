@@ -23,6 +23,7 @@ enum ComponentType
     CT_GRASS,
     CT_ENVIRONMENT_CAPTURE_COMPONENT,
     CT_MIRROR,
+    CT_CLICKABLE_OBJECT,
 
     CT_BUS_STOP
 };
