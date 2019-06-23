@@ -28,6 +28,7 @@ DesktopButtonType getDesktopButtonTypeFromString(std::string name)
 Desktop::Desktop(RenderObject* desktopRenderObject, Bus* bus)
     : _desktopRenderObject(desktopRenderObject),
     _desktopSceneObject(NULL),
+    _clickableObject(NULL),
     _bus(bus)
 {
     if (_desktopRenderObject != NULL)
@@ -98,7 +99,7 @@ void Desktop::update(float deltaTime)
 {
     if (_clickableObject != NULL && _clickableObject->isClicked())
     {
-        ModelNode* node;
+        ModelNode* node = NULL;
         if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[DBT_DOOR_1].modelNode))
         {
             if (_bus->getEngine()->isRunning())
@@ -115,14 +116,17 @@ void Desktop::update(float deltaTime)
             node = _buttons[DBT_DOOR_2].modelNode;
         }
 
-        for (int i = 0; i < node->getMeshesCount(); ++i)
+        if (node != NULL)
         {
-            if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
-                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
-                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
-            else
-                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
+            for (int i = 0; i < node->getMeshesCount(); ++i)
+            {
+                if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
+                else
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
 
+            }
         }
         /*for (int i = 0; i < BUTTONS_COUNT; ++i)
         {
@@ -132,8 +136,8 @@ void Desktop::update(float deltaTime)
                 //setButtonState(static_cast<DesktopButtonType>(i), _buttons[i].currentState + 1);
             }
         }*/
+        _clickableObject->clear();
     }
-    _clickableObject->clear();
 
     for (int i = 0; i < BUTTONS_COUNT; ++i)
     {
