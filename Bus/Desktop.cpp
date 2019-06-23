@@ -98,16 +98,31 @@ void Desktop::update(float deltaTime)
 {
     if (_clickableObject != NULL && _clickableObject->isClicked())
     {
+        ModelNode* node;
         if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[DBT_DOOR_1].modelNode))
         {
             if (_bus->getEngine()->isRunning())
                 _bus->stopEngine();
             else
                 _bus->startEngine();
+
+            node = _buttons[DBT_DOOR_1].modelNode;
         }
         if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[DBT_DOOR_2].modelNode))
         {
             _bus->toggleHandbrake();
+
+            node = _buttons[DBT_DOOR_2].modelNode;
+        }
+
+        for (int i = 0; i < node->getMeshesCount(); ++i)
+        {
+            if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
+                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
+                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
+            else
+                _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
+
         }
         /*for (int i = 0; i < BUTTONS_COUNT; ++i)
         {

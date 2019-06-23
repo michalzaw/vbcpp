@@ -25,7 +25,7 @@ class Material
     public:
         Material()
         : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
-        shininess(0), transparency(0), shader(SOLID_MATERIAL) {}
+        shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0) {}
         virtual ~Material()
         { }
 
@@ -35,6 +35,7 @@ class Material
     glm::vec4 ambientColor;
     glm::vec4 diffuseColor;
     glm::vec4 specularColor;
+    glm::vec4 emissiveColor;
 
     RTexture* diffuseTexture;
     RTexture* normalmapTexture;

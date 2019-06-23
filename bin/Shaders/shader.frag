@@ -79,6 +79,7 @@ uniform LightsBlock
 uniform vec4 matAmbient;
 uniform vec4 matDiffuse;
 uniform vec4 matSpecular;
+uniform vec4 matEmissive;
 uniform float Transparency;
 uniform sampler2D Texture;
 uniform float SpecularPower;
@@ -298,4 +299,6 @@ void main()
 #ifdef ALPHA_TEST
 	FragmentColor.a = textureColor.a;
 #endif
+
+	FragmentColor += matEmissive * textureColor;
 }

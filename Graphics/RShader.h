@@ -56,6 +56,7 @@ enum UniformName
     UNIFORM_MATERIAL_AMBIENT_COLOR,
     UNIFORM_MATERIAL_DIFFUSE_COLOR,
     UNIFORM_MATERIAL_SPECULAR_COLOR,
+    UNIFORM_MATERIAL_EMISSIVE_COLOR,
     UNIFORM_MATERIAL_SPECULAR_POWER,
     UNIFORM_MATERIAL_TRANSPARENCY,
     UNIFORM_CAMERA_POSITION,
@@ -116,6 +117,7 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_MATERIAL_AMBIENT_COLOR] = "matAmbient";
             _uniformsNames[UNIFORM_MATERIAL_DIFFUSE_COLOR] = "matDiffuse";
             _uniformsNames[UNIFORM_MATERIAL_SPECULAR_COLOR] = "matSpecular";
+            _uniformsNames[UNIFORM_MATERIAL_EMISSIVE_COLOR] = "matEmissive";
             _uniformsNames[UNIFORM_MATERIAL_SPECULAR_POWER] = "SpecularPower";
             _uniformsNames[UNIFORM_MATERIAL_TRANSPARENCY] = "Transparency";
             _uniformsNames[UNIFORM_CAMERA_POSITION] = "CameraPosition";

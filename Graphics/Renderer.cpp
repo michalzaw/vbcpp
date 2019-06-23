@@ -1056,6 +1056,7 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
         shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
         shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, material->specularColor);
+        shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, material->emissiveColor);
 
         shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, material->transparency);
 
