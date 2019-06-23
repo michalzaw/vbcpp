@@ -19,7 +19,7 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
     _brake(false), _accelerate(false), _handbrake(true), _idle(true),
     _isEnableLights(false), _isEnableHeadlights(false),
     _collidesWith(COL_TERRAIN | COL_ENV),
-    _desktop(NULL)
+    _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
     loadXMLdata(filename);
 
@@ -717,7 +717,7 @@ void BusRaycast::loadXMLdata(std::string busname)
     }
 
     if (_desktop == NULL)
-        _desktop = new Desktop(NULL, this);
+        _desktop = new Desktop(NULL);
 
 }
 
@@ -730,10 +730,12 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
         std::string modelPath = "Buses/" + busname + "/" + modelFile;
 
         _desktopObject = _sMgr->addSceneObject("desktop");
-        _desktopObject->addComponent(new ClickableObject);
+
+        _desktopClickableObject = GraphicsManager::getInstance().addClickableObject();
+        _desktopObject->addComponent(_desktopClickableObject);
 
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath);
-        RenderObject* desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
+        _desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), _desktopObject);
 
         const char* cPosition = desktopElement->Attribute("position");
         glm::vec3 position = XMLstringToVec3(cPosition);
@@ -749,7 +751,7 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
         busModule.sceneObject->addChild(_desktopObject);
 
-        _desktop = new Desktop(desktopRenderObject, this);
+        _desktop = new Desktop(_desktopRenderObject);
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
@@ -808,6 +810,43 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
             _desktop->setButton(type, modelNodeName, translationForStates, rotationForStates, isReturning);
 
             buttonElement = buttonElement->NextSiblingElement("Button");
+        }
+    }
+}
+
+
+void BusRaycast::catchInputFromDesktop()
+{
+    if (_desktopClickableObject != NULL && _desktopClickableObject->isClicked())
+    {
+        ModelNode* node = NULL;
+        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_1).modelNode))
+        {
+            if (_engine->isRunning())
+                stopEngine();
+            else
+                startEngine();
+
+            node = _desktop->getButton(DBT_DOOR_1).modelNode;
+        }
+        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_2).modelNode))
+        {
+            toggleHandbrake();
+
+            node = _desktop->getButton(DBT_DOOR_2).modelNode;
+        }
+
+        if (node != NULL)
+        {
+            for (int i = 0; i < node->getMeshesCount(); ++i)
+            {
+                if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
+                else
+                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
+
+            }
         }
     }
 }
@@ -1103,6 +1142,8 @@ float BusRaycast::getBusSpeed()
 
 void BusRaycast::update(float deltaTime)
 {
+    catchInputFromDesktop();
+
     _engine->update(deltaTime);
 
     SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));

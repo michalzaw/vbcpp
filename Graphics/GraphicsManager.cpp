@@ -151,6 +151,16 @@ MirrorComponent* GraphicsManager::addMirrorComponent(std::string name)
 }
 
 
+ClickableObject* GraphicsManager::addClickableObject()
+{
+    ClickableObject* clickableObject = new ClickableObject();
+
+    _clickableObjects.push_back(clickableObject);
+
+    return clickableObject;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -240,6 +250,22 @@ void GraphicsManager::removeMirrorComponent(MirrorComponent* mirrorComponent)
             i = _mirrorComponents.erase(i);
 
             delete mirrorComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeClickableObject(ClickableObject* clickableObject)
+{
+    for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
+    {
+        if (*i == clickableObject)
+        {
+            i = _clickableObjects.erase(i);
+
+            delete clickableObject;
 
             return;
         }
@@ -360,6 +386,11 @@ void GraphicsManager::update(float deltaTime)
 {
     _windValue += _windVelocity * deltaTime;
     _windVector = _windDirection * sinf(_windValue);
+
+    for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
+    {
+        (*i)->clear();
+    }
 }
 
 

@@ -127,6 +127,8 @@ class BusRaycast : public Bus
         std::vector<MirrorComponent*> _mirrors;
 
         Desktop* _desktop;
+        RenderObject* _desktopRenderObject;
+        ClickableObject* _desktopClickableObject;
 
         void loadXMLdata(std::string busname);
         bool isAllDoorClosed()
@@ -148,6 +150,8 @@ class BusRaycast : public Bus
         }
 
         void loadDesktopFromXml(XMLElement* desktopXmlElement, std::string busname, std::string texturePath, BusRayCastModule& module);
+
+        void catchInputFromDesktop();
 };
 
 

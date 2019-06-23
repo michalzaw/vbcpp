@@ -21,6 +21,8 @@
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
 
+#include "../Scene/ClickableObject.h"
+
 #include "../Utils/Collision.h"
 #include "../Utils/RModel.h"
 
@@ -40,6 +42,7 @@ class GraphicsManager
         std::list<Light*>           _lights;
         std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
         std::vector<MirrorComponent*> _mirrorComponents;
+        std::list<ClickableObject*> _clickableObjects;
 
         QuadTree* _quadTree;
 
@@ -77,6 +80,7 @@ class GraphicsManager
         EnvironmentCaptureComponent* addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
         MirrorComponent*addMirrorComponent(std::string name);
+        ClickableObject*addClickableObject();
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -86,6 +90,7 @@ class GraphicsManager
         void removeLight(Light* light);
         void removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component);
         void removeMirrorComponent(MirrorComponent* mirrorComponent);
+        void removeClickableObject(ClickableObject* clickableObject);
 
 
         void setCurrentCamera(CameraStatic* camera);

@@ -76,6 +76,10 @@ SceneObject::~SceneObject()
                 GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
                 break;
 
+            case CT_CLICKABLE_OBJECT:
+                GraphicsManager::getInstance().removeClickableObject(static_cast<ClickableObject*>(*i));
+                break;
+
         }
 
         /* ------------------------------------- */
@@ -275,6 +279,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_MIRROR:
                     GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                    break;
+
+                case CT_CLICKABLE_OBJECT:
+                    GraphicsManager::getInstance().removeClickableObject(static_cast<ClickableObject*>(*i));
                     break;
 
             }

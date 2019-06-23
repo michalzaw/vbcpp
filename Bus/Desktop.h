@@ -89,15 +89,12 @@ class Desktop
     private:
         SceneObject* _desktopSceneObject;
         RenderObject* _desktopRenderObject;
-        ClickableObject* _clickableObject;
 
         Indicator _indicators[INDICATORS_COUNT];
         DesktopButton _buttons[BUTTONS_COUNT];
 
-        Bus* _bus;
-
     public:
-        Desktop(RenderObject* desktopRenderObject, Bus* bus);
+        Desktop(RenderObject* desktopRenderObject);
 
         void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f);
         Indicator& getIndicator(DesktopIndicatorType type);

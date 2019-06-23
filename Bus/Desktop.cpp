@@ -25,16 +25,13 @@ DesktopButtonType getDesktopButtonTypeFromString(std::string name)
 }
 
 
-Desktop::Desktop(RenderObject* desktopRenderObject, Bus* bus)
+Desktop::Desktop(RenderObject* desktopRenderObject)
     : _desktopRenderObject(desktopRenderObject),
-    _desktopSceneObject(NULL),
-    _clickableObject(NULL),
-    _bus(bus)
+    _desktopSceneObject(NULL)
 {
     if (_desktopRenderObject != NULL)
     {
         _desktopSceneObject = _desktopRenderObject->getSceneObject();
-        _clickableObject = static_cast<ClickableObject*>(_desktopSceneObject->getComponent(CT_CLICKABLE_OBJECT));
     }
 }
 
@@ -97,48 +94,6 @@ void Desktop::setButtonState(DesktopButtonType type, unsigned int state)
 
 void Desktop::update(float deltaTime)
 {
-    if (_clickableObject != NULL && _clickableObject->isClicked())
-    {
-        ModelNode* node = NULL;
-        if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[DBT_DOOR_1].modelNode))
-        {
-            if (_bus->getEngine()->isRunning())
-                _bus->stopEngine();
-            else
-                _bus->startEngine();
-
-            node = _buttons[DBT_DOOR_1].modelNode;
-        }
-        if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[DBT_DOOR_2].modelNode))
-        {
-            _bus->toggleHandbrake();
-
-            node = _buttons[DBT_DOOR_2].modelNode;
-        }
-
-        if (node != NULL)
-        {
-            for (int i = 0; i < node->getMeshesCount(); ++i)
-            {
-                if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
-                else
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
-
-            }
-        }
-        /*for (int i = 0; i < BUTTONS_COUNT; ++i)
-        {
-            if (isVectorContains(_clickableObject->getClickedNodes(), _buttons[i].modelNode))
-            {
-                //std::cout << "Desktop: " << _buttons[i].modelNode->getName() << std::endl << std::endl;
-                //setButtonState(static_cast<DesktopButtonType>(i), _buttons[i].currentState + 1);
-            }
-        }*/
-        _clickableObject->clear();
-    }
-
     for (int i = 0; i < BUTTONS_COUNT; ++i)
     {
         if (_buttons[i].modelNode != NULL)
