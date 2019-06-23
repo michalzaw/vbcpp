@@ -37,6 +37,19 @@ const std::string desktopButtonTypeStrings[] = { "door1", "door2" };
 DesktopButtonType getDesktopButtonTypeFromString(std::string name);
 
 
+enum DesktopLightType
+{
+    DLT_DOOR_1,
+    DLT_DOOR_2,
+    DLT_BACKLIGHTING,
+
+    DESKTOP_LIGHTS_COUNT
+};
+
+const std::string desktopLightTypeStrings[] = { "door1", "door2", "backlighting" };
+DesktopLightType getDesktopLightTypeFromString(std::string name);
+
+
 struct Indicator
 {
     ModelNode* modelNode;
@@ -84,6 +97,22 @@ struct DesktopButton
 };
 
 
+struct DesktopLight
+{
+    ModelNode* modelNode;
+    glm::vec3 desktopBacklightingColor;
+    glm::vec3 lightColor;
+
+    bool isBacklightEnable;
+    bool isLightEnable;
+
+    DesktopLight()
+        : modelNode(NULL), isBacklightEnable(false), isLightEnable(false)
+    {}
+
+};
+
+
 class Desktop
 {
     private:
@@ -92,6 +121,7 @@ class Desktop
 
         Indicator _indicators[INDICATORS_COUNT];
         DesktopButton _buttons[BUTTONS_COUNT];
+        DesktopLight _lights[DESKTOP_LIGHTS_COUNT];
 
     public:
         Desktop(RenderObject* desktopRenderObject);
@@ -102,8 +132,14 @@ class Desktop
         void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
         DesktopButton& getButton(DesktopButtonType type);
 
+        void setLight(DesktopLightType type, std::string lightNodeNameInModel, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor);
+        DesktopLight& getDesktopLight(DesktopLightType type);
+
         void setIndicatorValue(DesktopIndicatorType type, float value);
         void setButtonState(DesktopButtonType type, unsigned int state);
+        void setLightBacklightingState(DesktopLightType type, bool isEnable);
+        void setLightState(DesktopLightType type, bool isEnable);
+        void setDesktopBacklightingState(bool isEnable);
 
         void update(float deltaTime);
 

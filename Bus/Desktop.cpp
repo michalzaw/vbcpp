@@ -25,6 +25,16 @@ DesktopButtonType getDesktopButtonTypeFromString(std::string name)
 }
 
 
+DesktopLightType getDesktopLightTypeFromString(std::string name)
+{
+    for (int i = 0; i < DESKTOP_LIGHTS_COUNT; ++i)
+    {
+        if (desktopLightTypeStrings[i] == name)
+            return static_cast<DesktopLightType>(i);
+    }
+}
+
+
 Desktop::Desktop(RenderObject* desktopRenderObject)
     : _desktopRenderObject(desktopRenderObject),
     _desktopSceneObject(NULL)
@@ -67,6 +77,22 @@ DesktopButton& Desktop::getButton(DesktopButtonType type)
 }
 
 
+void Desktop::setLight(DesktopLightType type, std::string lightNodeNameInModel, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor)
+{
+    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(lightNodeNameInModel);
+
+    _lights[type].modelNode = modelNode;
+    _lights[type].desktopBacklightingColor = desktopBacklightingColor;
+    _lights[type].lightColor = lightColor;
+}
+
+
+DesktopLight& Desktop::getDesktopLight(DesktopLightType type)
+{
+    return _lights[type];
+}
+
+
 void Desktop::setIndicatorValue(DesktopIndicatorType type, float value)
 {
     Indicator& indicator = getIndicator(type);
@@ -89,6 +115,53 @@ void Desktop::setButtonState(DesktopButtonType type, unsigned int state)
 
     //button.modelNode->getTransform().setPosition(button.translateForStates[state]);
     //button.modelNode->getTransform().setRotation(button.rotateForStates[state]);
+}
+
+
+void Desktop::setLightBacklightingState(DesktopLightType type, bool isEnable)
+{
+    DesktopLight& light = getDesktopLight(type);
+    if (light.isBacklightEnable == isEnable || light.modelNode == NULL)
+        return;
+
+    light.isBacklightEnable = isEnable;
+
+    glm::vec3 color = light.desktopBacklightingColor;
+    if (!isEnable)
+        color = -color;
+
+    for (int i = 0; i < light.modelNode->getMeshesCount(); ++i)
+    {
+        _desktopRenderObject->getMaterial(light.modelNode->getMesh(i)->materialIndex)->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
+    }
+}
+
+
+void Desktop::setLightState(DesktopLightType type, bool isEnable)
+{
+    DesktopLight& light = getDesktopLight(type);
+    if (light.isLightEnable == isEnable || light.modelNode == NULL)
+        return;
+
+    light.isLightEnable = isEnable;
+
+    glm::vec3 color = light.lightColor;
+    if (!isEnable)
+        color = -color;
+
+    for (int i = 0; i < light.modelNode->getMeshesCount(); ++i)
+    {
+        _desktopRenderObject->getMaterial(light.modelNode->getMesh(i)->materialIndex)->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
+    }
+}
+
+
+void Desktop::setDesktopBacklightingState(bool isEnable)
+{
+    for (int i = 0; i < DESKTOP_LIGHTS_COUNT; ++i)
+    {
+        setLightBacklightingState(static_cast<DesktopLightType>(i), isEnable);
+    }
 }
 
 

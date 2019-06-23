@@ -811,6 +811,28 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }
+
+        XMLElement* lightElement = desktopElement->FirstChildElement("Light");
+        while (lightElement != nullptr)
+        {
+            const char* cType = lightElement->Attribute("type");
+            DesktopLightType type = getDesktopLightTypeFromString(cType);
+
+            const char* cModelNodeName = lightElement->Attribute("modelNodeName");
+            std::string modelNodeName(cModelNodeName);
+
+            const char* cBacklightingColor = lightElement->Attribute("backlightingColor");
+            glm::vec3 backlightingColor = XMLstringToVec3(cBacklightingColor);
+
+            const char* cLightColor = lightElement->Attribute("lightColor");
+            glm::vec3 lightColor = XMLstringToVec3(cLightColor);
+
+            _desktop->setLight(type, modelNodeName, backlightingColor, lightColor);
+
+            lightElement = lightElement->NextSiblingElement("Light");
+        }
+
+        _desktop->setLightState(DLT_DOOR_2, _handbrake);
     }
 }
 
@@ -834,19 +856,6 @@ void BusRaycast::catchInputFromDesktop()
             toggleHandbrake();
 
             node = _desktop->getButton(DBT_DOOR_2).modelNode;
-        }
-
-        if (node != NULL)
-        {
-            for (int i = 0; i < node->getMeshesCount(); ++i)
-            {
-                if (_desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.0f ||
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor.r == 0.5f)
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(1.5f, 1.5f, 1.5f, 0.0f);
-                else
-                    _desktopRenderObject->getMaterial(node->getMesh(i)->materialIndex)->emissiveColor = glm::vec4(0.5f, 0.5f, 0.5f, 0.0f);
-
-            }
         }
     }
 }
@@ -900,6 +909,8 @@ void BusRaycast::setIsEnableHeadlights(bool is)
 
         _isEnableHeadlights = is;
     }
+
+    _desktop->setDesktopBacklightingState(is);
 }
 
 
@@ -1030,6 +1041,7 @@ void BusRaycast::toggleHandbrake()
 {
     _handbrake = !_handbrake;
     _desktop->setButtonState(DBT_DOOR_2, 1);
+    _desktop->setLightState(DLT_DOOR_2, _handbrake);
 }
 
 
@@ -1056,6 +1068,7 @@ void BusRaycast::startEngine()
         sndC->play();
 
         _desktop->setButtonState(DBT_DOOR_1, 1);
+        _desktop->setLightState(DLT_DOOR_1, true);
     }
 }
 
@@ -1070,6 +1083,7 @@ void BusRaycast::stopEngine()
         sndC->stop();
 
         _desktop->setButtonState(DBT_DOOR_1, 1);
+        _desktop->setLightState(DLT_DOOR_1, false);
     }
 }
 
