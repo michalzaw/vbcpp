@@ -841,21 +841,16 @@ void BusRaycast::catchInputFromDesktop()
 {
     if (_desktopClickableObject != NULL && _desktopClickableObject->isClicked())
     {
-        ModelNode* node = NULL;
         if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_1).modelNode))
         {
             if (_engine->isRunning())
                 stopEngine();
             else
                 startEngine();
-
-            node = _desktop->getButton(DBT_DOOR_1).modelNode;
         }
         if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_2).modelNode))
         {
             toggleHandbrake();
-
-            node = _desktop->getButton(DBT_DOOR_2).modelNode;
         }
     }
 }
@@ -1040,7 +1035,8 @@ void BusRaycast::brakeOff()
 void BusRaycast::toggleHandbrake()
 {
     _handbrake = !_handbrake;
-    _desktop->setButtonState(DBT_DOOR_2, 1);
+    //_desktop->setButtonState(DBT_DOOR_2, 1);
+    _desktop->clickButton(DBT_DOOR_2);
     _desktop->setLightState(DLT_DOOR_2, _handbrake);
 }
 
@@ -1067,7 +1063,8 @@ void BusRaycast::startEngine()
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->play();
 
-        _desktop->setButtonState(DBT_DOOR_1, 1);
+        //_desktop->setButtonState(DBT_DOOR_1, 1);
+        _desktop->clickButton(DBT_DOOR_1);
         _desktop->setLightState(DLT_DOOR_1, true);
     }
 }
@@ -1082,7 +1079,8 @@ void BusRaycast::stopEngine()
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->stop();
 
-        _desktop->setButtonState(DBT_DOOR_1, 1);
+        //_desktop->setButtonState(DBT_DOOR_1, 1);
+        _desktop->clickButton(DBT_DOOR_1);
         _desktop->setLightState(DLT_DOOR_1, false);
     }
 }

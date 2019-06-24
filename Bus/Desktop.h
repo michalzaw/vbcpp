@@ -57,6 +57,8 @@ struct Indicator
     float maxAngle;
     float minValue;
 
+    float currentValue;
+
     Indicator()
     {
         modelNode = NULL;
@@ -137,6 +139,7 @@ class Desktop
 
         void setIndicatorValue(DesktopIndicatorType type, float value);
         void setButtonState(DesktopButtonType type, unsigned int state);
+        void clickButton(DesktopButtonType type);
         void setLightBacklightingState(DesktopLightType type, bool isEnable);
         void setLightState(DesktopLightType type, bool isEnable);
         void setDesktopBacklightingState(bool isEnable);

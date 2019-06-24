@@ -100,8 +100,9 @@ void Desktop::setIndicatorValue(DesktopIndicatorType type, float value)
         return;
 
     float v = clamp(value, indicator.minValue, indicator.maxValue) - indicator.minValue;
+    indicator.currentValue = -v / (indicator.maxValue - indicator.minValue) * indicator.maxAngle;
 
-    indicator.modelNode->getTransform().setRotation(0, -v / (indicator.maxValue - indicator.minValue) * indicator.maxAngle, 0);
+    //indicator.modelNode->getTransform().setRotation(0, indicator.currentValue, 0);
 }
 
 
@@ -115,6 +116,14 @@ void Desktop::setButtonState(DesktopButtonType type, unsigned int state)
 
     //button.modelNode->getTransform().setPosition(button.translateForStates[state]);
     //button.modelNode->getTransform().setRotation(button.rotateForStates[state]);
+}
+
+
+void Desktop::clickButton(DesktopButtonType type)
+{
+    DesktopButton& button = getButton(type);
+
+    button.currentState = (button.currentState + 1) % button.statesCount;
 }
 
 
@@ -194,6 +203,22 @@ void Desktop::update(float deltaTime)
 
             _buttons[i].modelNode->getTransform().setPosition(pos);
 
+        }
+    }
+
+    for (int i = 0; i < INDICATORS_COUNT; ++i)
+    {
+
+        if (_indicators[i].modelNode != NULL)
+        {
+            float destRot = _indicators[i].currentValue;
+            float curRot = _indicators[i].modelNode->getTransform().getRotation().y;
+            if (destRot == curRot)
+            {
+                continue;
+            }
+
+            _indicators[i].modelNode->getTransform().rotate(0, (destRot - curRot) * 4.0f * deltaTime, 0);
         }
     }
 }
