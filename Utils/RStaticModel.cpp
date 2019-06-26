@@ -17,7 +17,6 @@ RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, Material* mat
 
 
     calculateAABB();
-    createAabbVbo();
 }
 
 
@@ -36,16 +35,6 @@ RStaticModel::~RStaticModel()
     if (_collisionMesh)
     {
         delete[] _collisionMesh;
-    }
-
-    if (_aabbVbo)
-    {
-        OGLDriver::getInstance().deleteVBO(_aabbVbo);
-    }
-
-    if (_aabbIbo)
-    {
-        OGLDriver::getInstance().deleteIBO(_aabbIbo);
     }
 }
 
@@ -120,12 +109,6 @@ void RStaticModel::calculateAABB()
 }
 
 
-void RStaticModel::createAabbVbo()
-{
-
-}
-
-
 StaticModelNode* RStaticModel::getRootNode()
 {
     return _rootNode;
@@ -177,16 +160,4 @@ glm::vec3* RStaticModel::getCollisionMesh()
 AABB* RStaticModel::getAABB()
 {
     return &_aabb;
-}
-
-
-VBO* RStaticModel::getAabbVbo()
-{
-    return _aabbVbo;
-}
-
-
-IBO* RStaticModel::getAabbIbo()
-{
-    return _aabbIbo;
 }

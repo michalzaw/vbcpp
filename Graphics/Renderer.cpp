@@ -8,14 +8,23 @@ Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
     _isShadowMappingEnable(false), _shadowMap(NULL),
-    _mainRenderData(NULL)
+    _mainRenderData(NULL),
+    _renderObjectsAAABB(true), _renderObjectsOBB(false)
 {
+    float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
+    _aabbVbo = OGLDriver::getInstance().createVBO(24 * sizeof(float));
+    _aabbVbo->addVertexData(indices, 24);
 }
 
 Renderer::~Renderer()
 {
     OGLDriver::getInstance().deleteUBO(_lightUBO);
+
+    if (_aabbVbo)
+    {
+        OGLDriver::getInstance().deleteVBO(_aabbVbo);
+    }
 }
 
 
@@ -329,6 +338,9 @@ void Renderer::prepareRenderData()
                 addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass);
             }
         }
+#ifdef DRAW_AABB
+        _renderObjectsInCurrentFrame.push_back(*i);
+#endif // DRAW_AABB
     }
 
     for (std::list<Grass*>::iterator i = graphicsManager._grassComponents.begin(); i != graphicsManager._grassComponents.end(); ++i)
@@ -695,6 +707,18 @@ void Renderer::setDayNightRatio(float ratio)
 float Renderer::getDayNightRatio()
 {
     return _dayNightRatio;
+}
+
+
+void Renderer::toogleRenderAABBFlag()
+{
+    _renderObjectsAAABB = !_renderObjectsAAABB;
+}
+
+
+void Renderer::toogleRenderOBBFlag()
+{
+    _renderObjectsOBB = !_renderObjectsOBB;
 }
 
 
@@ -1158,31 +1182,79 @@ void Renderer::renderScene(RenderData* renderData)
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB
-    for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
+    RShader* shader = _shaderList[DEBUG_SHADER];
+    shader->enable();
+    glPointSize(50);
+    glLineWidth(2);
+    _aabbVbo->bind();
+
+    if (_renderObjectsAAABB)
     {
-        RModel* model = i->getModel();
-        Mesh* mesh = i->getMesh();
-        glPointSize(50);
-        glLineWidth(3);
-        RShader* shader = _shaderList[DEBUG_SHADER];
-        shader->enable();
+        for (std::vector<RenderObject*>::iterator i = _renderObjectsInCurrentFrame.begin(); i != _renderObjectsInCurrentFrame.end(); ++i)
+        {
+            RenderObject* renderObject = *i;
 
-        glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix() * i->getTransformMatrices().transformMatrix;
-        shader->setUniform("MVP", MVP);
+            glm::vec3 min = renderObject->getAABB()->getMinCoords();
+            glm::vec3 max = renderObject->getAABB()->getMaxCoords();
 
-        model->getAabbVbo()->bind();
+            glm::vec3 vertices[8];
+            vertices[0] = glm::vec3(min.x, min.y, min.z);
+            vertices[1] = glm::vec3(min.x, min.y, max.z);
+            vertices[2] = glm::vec3(min.x, max.y, min.z);
+            vertices[3] = glm::vec3(min.x, max.y, max.z);
+            vertices[4] = glm::vec3(max.x, min.y, min.z);
+            vertices[5] = glm::vec3(max.x, min.y, max.z);
+            vertices[6] = glm::vec3(max.x, max.y, min.z);
+            vertices[7] = glm::vec3(max.x, max.y, max.z);
 
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+            shader->setUniform(UNIFORM_MVP, _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
+            shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, glm::vec4(0.5f, 0.0f, 0.0f, 1.0f));
 
-        model->getAabbIbo()->bind();
-        glDrawElements(GL_LINES,
-                       24,
-                       GL_UNSIGNED_INT,
-                       (void*)0);
+            for (int i = 0; i < 8; ++i)
+                shader->setUniform((UniformName)(UNIFORM_DEBUG_VERTEX_INDEX_1 + i), vertices[i]);
 
-        glDisableVertexAttribArray(0);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+            glDrawArrays(GL_LINES, 0, 24);
+
+            glDisableVertexAttribArray(0);
+        }
     }
+    if (_renderObjectsOBB)
+    {
+        for (std::vector<RenderObject*>::iterator i = _renderObjectsInCurrentFrame.begin(); i != _renderObjectsInCurrentFrame.end(); ++i)
+        {
+            RenderObject* renderObject = *i;
+
+            glm::vec3 min = renderObject->getModel()->getAABB()->getMinCoords();
+            glm::vec3 max = renderObject->getModel()->getAABB()->getMaxCoords();
+
+            glm::vec3 vertices[8];
+            vertices[0] = glm::vec3(min.x, min.y, min.z);
+            vertices[1] = glm::vec3(min.x, min.y, max.z);
+            vertices[2] = glm::vec3(min.x, max.y, min.z);
+            vertices[3] = glm::vec3(min.x, max.y, max.z);
+            vertices[4] = glm::vec3(max.x, min.y, min.z);
+            vertices[5] = glm::vec3(max.x, min.y, max.z);
+            vertices[6] = glm::vec3(max.x, max.y, min.z);
+            vertices[7] = glm::vec3(max.x, max.y, max.z);
+
+            shader->setUniform(UNIFORM_MVP, _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix() * renderObject->getSceneObject()->getGlobalTransformMatrix());
+            shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
+
+            for (int i = 0; i < 8; ++i)
+                shader->setUniform((UniformName)(UNIFORM_DEBUG_VERTEX_INDEX_1 + i), vertices[i]);
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+            glDrawArrays(GL_LINES, 0, 24);
+
+            glDisableVertexAttribArray(0);
+        }
+    }
+    _renderObjectsInCurrentFrame.clear();
     #endif
 }
 

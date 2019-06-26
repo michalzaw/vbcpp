@@ -45,6 +45,12 @@ class Renderer
         bool _isShadowMappingEnable;
         ShadowMap* _shadowMap;      // Cienie wspierane tylko dla jednego swiatla keirunkowego
 
+        // Data for debug rendering
+        VBO* _aabbVbo;
+        std::vector<RenderObject*> _renderObjectsInCurrentFrame;
+        bool _renderObjectsAAABB;
+        bool _renderObjectsOBB;
+
         float _dayNightRatio;
 
         void prepareLightsData();
@@ -82,6 +88,9 @@ class Renderer
 
         void setDayNightRatio(float ratio);
         float getDayNightRatio();
+
+        void toogleRenderAABBFlag();
+        void toogleRenderOBBFlag();
 
         void renderAll();
         void renderDepth(RenderData* renderData);

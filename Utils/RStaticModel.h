@@ -146,12 +146,9 @@ class RStaticModel : public Resource
         GLenum          _primitiveType;
 
         AABB _aabb;
-        VBO* _aabbVbo;
-        IBO* _aabbIbo;
 
         void findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parentTransform, glm::vec3& min, glm::vec3& max);
         void calculateAABB();
-        void createAabbVbo();
 
     public:
         RStaticModel(string path, StaticModelNode* rootNode, Material* materials, unsigned int materialsCount,
@@ -176,8 +173,6 @@ class RStaticModel : public Resource
         GLenum getPrimitiveType() {return _primitiveType;}
 
         AABB* getAABB();
-        VBO* getAabbVbo();
-        IBO* getAabbIbo();
 
 };
 

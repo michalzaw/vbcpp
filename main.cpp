@@ -147,16 +147,6 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         bus->toggleHandbrake();
     }
 
-    if (key == GLFW_KEY_1 && action == GLFW_PRESS)
-    {
-        ResourceManager::getInstance().reloadAllShaders();
-    }
-
-    if (key == GLFW_KEY_2 && action == GLFW_PRESS)
-    {
-        ResourceManager::getInstance().reloadAllTextures();
-    }
-
     if (key == GLFW_KEY_M && action == GLFW_PRESS)
     {
         ++mirrorControlIndex;
@@ -169,6 +159,24 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             mirrorControl = false;
             mirrorControlIndex = -1;
         }
+    }
+
+    // debug
+    if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        ResourceManager::getInstance().reloadAllShaders();
+    }
+    if (key == GLFW_KEY_2 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        ResourceManager::getInstance().reloadAllTextures();
+    }
+    if (key == GLFW_KEY_3 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().toogleRenderAABBFlag();
+    }
+    if (key == GLFW_KEY_4 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().toogleRenderOBBFlag();
     }
 }
 

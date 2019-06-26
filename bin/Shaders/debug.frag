@@ -2,7 +2,9 @@
 
 out vec4 FragmentColor;
 
+uniform vec4 matEmissive;
+
 void main()
 {
-	FragmentColor = vec4(1.0f, 0.0f, 0.0f, 0.5f);
+	FragmentColor = matEmissive;
 }

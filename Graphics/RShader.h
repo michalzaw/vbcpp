@@ -76,6 +76,14 @@ enum UniformName
     UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX,
     UNIFORM_GUI_COLOR,
     UNIFORM_DAY_NIGHT_RATIO,
+    UNIFORM_DEBUG_VERTEX_INDEX_1,
+    UNIFORM_DEBUG_VERTEX_INDEX_2,
+    UNIFORM_DEBUG_VERTEX_INDEX_3,
+    UNIFORM_DEBUG_VERTEX_INDEX_4,
+    UNIFORM_DEBUG_VERTEX_INDEX_5,
+    UNIFORM_DEBUG_VERTEX_INDEX_6,
+    UNIFORM_DEBUG_VERTEX_INDEX_7,
+    UNIFORM_DEBUG_VERTEX_INDEX_8,
 
     NUMBER_OF_UNIFORMS
 };
@@ -137,6 +145,14 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX] = "TexCoordTransformMatrix";
             _uniformsNames[UNIFORM_GUI_COLOR] = "color";
             _uniformsNames[UNIFORM_DAY_NIGHT_RATIO] = "dayNightRatio";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_1] = "indices[0]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_2] = "indices[1]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_3] = "indices[2]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_4] = "indices[3]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_5] = "indices[4]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
+            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {
