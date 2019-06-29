@@ -31,7 +31,7 @@ class StaticModelLoader
         const aiScene* _assimpScene;
 
         std::vector<std::string> _nodesToSkipNames;
-        std::vector<std::string> _nodesToLoadNames;
+        std::string _nodeToLoadName;
 
         unsigned int _materialsCount;
         Material* _materials;
@@ -40,6 +40,8 @@ class StaticModelLoader
 
         MaterialLoader* _materialLoader;
         std::string _texturesPath;
+
+        Transform _lastNodeTransform;
 
 
         void saveMaterialsDataToXml(std::string fileName);
@@ -58,7 +60,7 @@ class StaticModelLoader
 
         RStaticModel* loadModelWithHierarchy(std::string fileName, std::string texturesPath);
         RStaticModel* loadModelWithHierarchy(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames);
-        RStaticModel* loadModelWithHierarchyOnlyNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames);
+        RStaticModel* loadModelWithHierarchyOnlyNode(std::string fileName, std::string texturesPath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel);
 
         RStaticModel* loadModel(std::string fileName, std::string texturesPath);
 

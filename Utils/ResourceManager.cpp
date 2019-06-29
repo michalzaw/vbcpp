@@ -361,13 +361,9 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 }
 
 
-RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames)
+RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel)
 {
-    std::string pathForResourceManager = path + "+";
-    for (int i = 0; i < nodesToLoadNames.size(); ++i)
-    {
-        pathForResourceManager += ";" + nodesToLoadNames[i];
-    }
+    std::string pathForResourceManager = path + "+" + nodeToLoadName;
 
     Resource* res = findResource(pathForResourceManager);
     if (res != 0)
@@ -378,7 +374,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path,
 
 
     StaticModelLoader loader;
-    std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNodes(path, texturePath, nodesToLoadNames) );
+    std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodeToLoadName, loadedNodeTransformInModel) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );

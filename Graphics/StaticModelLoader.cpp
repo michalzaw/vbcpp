@@ -187,9 +187,15 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
         return NULL;
     }
 
-    if (!_nodesToLoadNames.empty() && parent != NULL && !isVectorContains(_nodesToLoadNames, nodeName))
+    bool isLoadingSingleNode = false;
+    if (!_nodeToLoadName.empty() && parent != NULL && _nodeToLoadName != nodeName)
     {
         return NULL;
+    }
+    else if (_nodeToLoadName == nodeName)
+    {
+        isLoadingSingleNode = true;
+        _lastNodeTransform = nodeTransform;
     }
 
     bool isCollisionMeshExist = isNodeContainsCollisionMesh(assimpNode);
@@ -266,7 +272,8 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
     // create model node
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = nodeName;
-    modelNode->transform = nodeTransform;
+    if (!isLoadingSingleNode)
+        modelNode->transform = nodeTransform;
     modelNode->meshes = meshes;
     modelNode->meshesCount = meshesCount;
     modelNode->parent = parent;
@@ -319,8 +326,8 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
 
     _materialLoader->closeFile();
 	_collisionMesh.clear();
-    _nodesToLoadNames.clear();
     _nodesToSkipNames.clear();
+    _nodeToLoadName.clear();
 
     return model;
 }
@@ -334,11 +341,14 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
 }
 
 
-RStaticModel* StaticModelLoader::loadModelWithHierarchyOnlyNodes(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToLoadNames)
+RStaticModel* StaticModelLoader::loadModelWithHierarchyOnlyNode(std::string fileName, std::string texturesPath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel)
 {
-    _nodesToLoadNames = nodesToLoadNames;
+    _nodeToLoadName = nodeToLoadName;
 
-    return loadModelWithHierarchy(fileName, texturesPath);
+    RStaticModel* staticModel = loadModelWithHierarchy(fileName, texturesPath);
+    loadedNodeTransformInModel = _lastNodeTransform;
+
+    return staticModel;
 }
 
 
