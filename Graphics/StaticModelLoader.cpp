@@ -220,7 +220,13 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
             for (int j = 0; j < assimpMesh->mNumVertices; ++j)
             {
                 const aiVector3D* position = &(assimpMesh->mVertices[j]);
-                glm::vec4 v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
+
+                glm::vec4 v;
+                if (!isLoadingSingleNode)
+                    v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
+                else
+                    v = glm::vec4(position->x, position->y, position->z, 1.0f);
+
                 _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
             }
 
