@@ -441,7 +441,47 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             std::string doorName(doorElement->Attribute("name"));
             std::string doorType(doorElement->Attribute("type"));
-            std::string doorModel(doorElement->Attribute("model"));
+
+            bool isDoorLoadedFromSeparateMode = true;
+
+            const char* cDoorModelName = doorElement->Attribute("model");
+            std::string doorModelName;
+            if (cDoorModelName != NULL)
+            {
+                doorModelName = cDoorModelName;
+                isDoorLoadedFromSeparateMode = true;
+            }
+
+            const char* cDoorModelNodeName = doorElement->Attribute("modelNode");
+            std::string doorModelNodeName;
+            if (cDoorModelNodeName != NULL)
+            {
+                doorModelNodeName = cDoorModelNodeName;
+                isDoorLoadedFromSeparateMode = false;
+            }
+
+            glm::vec3 doorPosition;
+            glm::vec3 doorRotation(0.0f, 0.0f, 0.0f);
+            RStaticModel* doorModel;
+            if (isDoorLoadedFromSeparateMode)
+            {
+                std::string doorModelPath = "Buses/" + busname + "/" + doorModelName;
+
+                doorModel = ResourceManager::getInstance().loadModel(doorModelPath, texturePath);
+
+                doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
+            }
+            else
+            {
+                std::string doorModelPath = modelPath;
+                Transform doorTransform;
+
+                doorModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(doorModelPath, texturePath, doorModelNodeName, doorTransform);
+
+                doorPosition = doorTransform.getPosition();
+                doorRotation = doorTransform.getRotation();
+            }
+
             float mass = (float)atof(doorElement->Attribute("mass"));
             char group = (char)atoi(doorElement->Attribute("group"));
 
@@ -465,34 +505,41 @@ void BusRaycast::loadXMLdata(std::string busname)
 
             if (doorType == "s")
             {
-                glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
                 glm::vec3 relativePos = busModule.sceneObject->transformLocalPointToGlobal(doorPosition);
 
                 // poczatek IF
                 btVector3 busPivot = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
                 btVector3 doorPivot = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
 
+                const char* cAxisA = doorElement->Attribute("axisA");
+                btVector3 axisA(0, 1, 0);
+                if (cAxisA != NULL)
+                    axisA = XMLstringToBtVec3(cAxisA);
+
+                const char* cAxisB = doorElement->Attribute("axisB");
+                btVector3 axisB(0, 1, 0);
+                if (cAxisB != NULL)
+                    axisB = XMLstringToBtVec3(cAxisB);
+
                 doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(doorPosition);
 
-                std::string modelPath = "Buses/" + busname + "/" + doorModel;
-
-                RStaticModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(dr), doorObj);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
                 int collidesWith = COL_ENV | COL_TERRAIN;
-                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(dr->getCollisionMesh(), dr->getCollisionMeshSize(), mass, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, collidesWith);
                 doorObj->addComponent(doorBody);
+                doorObj->setRotation(doorRotation);
 
                 //ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(_chasisBody, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
-                ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, doorBody, busPivot, doorPivot, btVector3(0,1,0), btVector3(0,1,0));
+                ConstraintHinge* doorHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, doorBody, busPivot, doorPivot, axisA, axisB);
 
                 doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
                 Door* d = 0;
-                d = new DoorSimple(dr, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
+                d = new DoorSimple(doorModel, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
                 d->close();
                 _doors.push_back(d);
 
@@ -570,11 +617,6 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 // door model
 
-                std::string doorName(doorElement->Attribute("name"));
-                std::string doorModel(doorElement->Attribute("model"));
-                float doorMass = (float)atof(doorElement->Attribute("mass"));
-
-                glm::vec3 doorPosition = XMLstringToVec3(doorElement->Attribute("position"));
                 glm::vec3 relativePos = glm::vec3(armPosition.x + doorPosition.x, armPosition.y + doorPosition.y, armPosition.z + doorPosition.z);
 
                 btVector3 doorPivotA = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
@@ -583,15 +625,12 @@ void BusRaycast::loadXMLdata(std::string busname)
                 doorObj = _sMgr->addSceneObject(doorName);
                 doorObj->setPosition(relativePos);
 
-                std::string doorPath = "Buses/" + busname + "/" + doorModel;
-
-                RStaticModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
                 collidesWith = COL_ENV;
-                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(door->getCollisionMesh(), door->getCollisionMeshSize(), doorMass, COL_DOOR, collidesWith);
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, collidesWith);
                 doorObj->addComponent(doorBody);
 
                 ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
