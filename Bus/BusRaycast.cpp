@@ -205,7 +205,10 @@ void BusRaycast::loadXMLdata(std::string busname)
 
         busModule.sceneObject->setPosition(modulePosition);
 
-        busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
+        std::vector<std::string> nodeToSkip;
+        nodeToSkip.push_back("d0r2_1");
+        nodeToSkip.push_back("d0r1_1");
+        busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath, nodeToSkip);
         //GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
         GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
 
@@ -648,6 +651,88 @@ void BusRaycast::loadXMLdata(std::string busname)
 
                 Door* d = 0;
                 d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
+                d->close();
+                _doors.push_back(d);
+            }
+            else if (doorType == "classic")
+            {
+                // arm
+                float armMass = (float)atof(doorElement->Attribute("armMass"));
+
+                bool isArmLoadedFromSeparateMode = true;
+
+                const char* cArmModelName = doorElement->Attribute("armModel");
+                std::string armModelName;
+                if (cArmModelName != NULL)
+                {
+                    armModelName = cArmModelName;
+                    isArmLoadedFromSeparateMode = true;
+                }
+
+                const char* cArmModelNodeName = doorElement->Attribute("armModelNode");
+                std::string armModelNodeName;
+                if (cArmModelNodeName != NULL)
+                {
+                    armModelNodeName = cArmModelNodeName;
+                    isArmLoadedFromSeparateMode = false;
+                }
+
+                glm::vec3 armPosition(0.0f, 0.0f, 0.0f);
+                glm::vec3 armRotation(0.0f, 0.0f, 0.0f);
+                RStaticModel* armModel;
+                if (isArmLoadedFromSeparateMode)
+                {
+                    std::string armModelPath = "Buses/" + busname + "/" + armModelName;
+
+                    armModel = ResourceManager::getInstance().loadModel(armModelPath, texturePath);
+
+                    armPosition = XMLstringToVec3(doorElement->Attribute("armPosition"));
+                    armRotation = XMLstringToVec3(doorElement->Attribute("armRotation"));
+                }
+                else
+                {
+                    std::string armModelPath = modelPath;
+                    Transform armTransform;
+
+                    armModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(armModelPath, texturePath, armModelNodeName, armTransform);
+
+                    armPosition = armTransform.getPosition();
+                    armRotation = armTransform.getRotation();
+                }
+
+                SceneObject* armObject = _sMgr->addSceneObject("arm");
+                armObject->setPosition(armPosition);
+                armObject->setRotation(armRotation);
+
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel), armObject);
+
+                int armCollidesWith = COL_TERRAIN | COL_ENV;
+                PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, armCollidesWith);
+                armObject->addComponent(armBody);
+
+
+                // door object
+                doorObj = _sMgr->addSceneObject(doorName);
+                doorObj->setPosition(doorPosition);
+                doorObj->setRotation(doorRotation);
+
+                GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+
+                int doorCollidesWith = COL_TERRAIN | COL_ENV;
+                PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, doorCollidesWith);
+                doorObj->addComponent(doorBody);
+
+
+                // constraints
+                ConstraintHinge* hingeBusToArm = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, btVector3(armPosition.x, armPosition.y, armPosition.z), btVector3(0,0,0), btVector3(0,1,0), btVector3(0,0,1));
+                ConstraintHinge* hingeArmToDoor = _pMgr->createConstraintHinge(armBody, doorBody, btVector3(-0.04037, 0.26, -0.00992), btVector3(0,-0.03867,0), btVector3(0,0,1), btVector3(0,0,1));
+
+                hingeBusToArm->getBulletConstraint()->setLimit(0, 1.5);
+                hingeArmToDoor->getBulletConstraint()->setLimit(-3.14,0);
+                //hingeArmToDoor2->getBulletConstraint()->setLimit(-1.5,0);
+
+                Door* d = 0;
+                d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, group);
                 d->close();
                 _doors.push_back(d);
             }

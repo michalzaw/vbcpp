@@ -158,6 +158,7 @@
 		<Unit filename="Bus/Desktop.cpp" />
 		<Unit filename="Bus/Desktop.h" />
 		<Unit filename="Bus/Door.h" />
+		<Unit filename="Bus/DoorClassic.h" />
 		<Unit filename="Bus/DoorSE.h" />
 		<Unit filename="Bus/DoorSimple.h" />
 		<Unit filename="GUI/FontLoader.cpp" />

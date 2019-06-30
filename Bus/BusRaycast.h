@@ -7,6 +7,7 @@
 #include "Bus.h"
 #include "DoorSimple.h"
 #include "DoorSE.h"
+#include "DoorClassic.h"
 #include "Desktop.h"
 
 #include "../Scene/SceneManager.h"
