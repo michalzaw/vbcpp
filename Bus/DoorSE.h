@@ -3,12 +3,6 @@
 
 #include "Door.h"
 
-enum RotationDir
-{
-    ERD_CCW = 0,
-    ERD_CW
-};
-
 class DoorSE : virtual public Door
 {
     public:

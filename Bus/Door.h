@@ -12,6 +12,12 @@ enum DoorState
     EDS_LOOSE
 };
 
+enum RotationDir
+{
+    ERD_CCW = 0,
+    ERD_CW
+};
+
 
 class Door
 {

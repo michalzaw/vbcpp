@@ -158,6 +158,7 @@
 		<Unit filename="Bus/Desktop.cpp" />
 		<Unit filename="Bus/Desktop.h" />
 		<Unit filename="Bus/Door.h" />
+		<Unit filename="Bus/DoorClassic.cpp" />
 		<Unit filename="Bus/DoorClassic.h" />
 		<Unit filename="Bus/DoorSE.h" />
 		<Unit filename="Bus/DoorSimple.h" />
@@ -319,6 +320,7 @@
 		<Unit filename="Utils/SoundLoader.h" />
 		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/Timer.h" />
+		<Unit filename="Utils/XmlUtils.h" />
 		<Unit filename="Utils/tinyxml2.cpp" />
 		<Unit filename="Utils/tinyxml2.h" />
 		<Unit filename="Window/Window.cpp" />

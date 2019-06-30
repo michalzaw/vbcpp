@@ -10,6 +10,7 @@
 
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Strings.h"
+#include "../Utils/XmlUtils.h"
 
 
 BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
@@ -656,38 +657,40 @@ void BusRaycast::loadXMLdata(std::string busname)
             }
             else if (doorType == "classic")
             {
+                std::string rotDir = XmlUtils::getAttributeStringOptional(doorElement, "rotationDir", "CW");
+                RotationDir rotationDirection;
+
+                if (rotDir == "CCW")
+                    rotationDirection = ERD_CCW;
+                else
+                    rotationDirection = ERD_CW;
+
+
                 // arm
                 float armMass = (float)atof(doorElement->Attribute("armMass"));
 
+
                 bool isArmLoadedFromSeparateMode = true;
 
-                const char* cArmModelName = doorElement->Attribute("armModel");
-                std::string armModelName;
-                if (cArmModelName != NULL)
-                {
-                    armModelName = cArmModelName;
-                    isArmLoadedFromSeparateMode = true;
-                }
-
-                const char* cArmModelNodeName = doorElement->Attribute("armModelNode");
-                std::string armModelNodeName;
-                if (cArmModelNodeName != NULL)
-                {
-                    armModelNodeName = cArmModelNodeName;
+                std::string armModelName = XmlUtils::getAttributeStringOptional(doorElement, "armModel");
+                if (armModelName.empty())
                     isArmLoadedFromSeparateMode = false;
-                }
 
-                glm::vec3 armPosition(0.0f, 0.0f, 0.0f);
-                glm::vec3 armRotation(0.0f, 0.0f, 0.0f);
+                std::string armModelNodeName = XmlUtils::getAttributeString(doorElement, "armModelNode");
+
+
                 RStaticModel* armModel;
+                glm::vec3 armPosition;
+                glm::vec3 armRotation;
+
                 if (isArmLoadedFromSeparateMode)
                 {
                     std::string armModelPath = "Buses/" + busname + "/" + armModelName;
 
                     armModel = ResourceManager::getInstance().loadModel(armModelPath, texturePath);
 
-                    armPosition = XMLstringToVec3(doorElement->Attribute("armPosition"));
-                    armRotation = XMLstringToVec3(doorElement->Attribute("armRotation"));
+                    armPosition = XmlUtils::getAttributeVec3(doorElement, "armPosition");
+                    armRotation = XmlUtils::getAttributeVec3(doorElement, "armRotation");
                 }
                 else
                 {
@@ -699,6 +702,7 @@ void BusRaycast::loadXMLdata(std::string busname)
                     armPosition = armTransform.getPosition();
                     armRotation = armTransform.getRotation();
                 }
+
 
                 SceneObject* armObject = _sMgr->addSceneObject("arm");
                 armObject->setPosition(armPosition);
@@ -724,15 +728,43 @@ void BusRaycast::loadXMLdata(std::string busname)
 
 
                 // constraints
-                ConstraintHinge* hingeBusToArm = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, btVector3(armPosition.x, armPosition.y, armPosition.z), btVector3(0,0,0), btVector3(0,1,0), btVector3(0,0,1));
-                ConstraintHinge* hingeArmToDoor = _pMgr->createConstraintHinge(armBody, doorBody, btVector3(-0.04037, 0.26, -0.00992), btVector3(0,-0.03867,0), btVector3(0,0,1), btVector3(0,0,1));
+                btVector3 busToArmPivotA;
+                btVector3 busToArmPivotB;
+                if (!isDoorLoadedFromSeparateMode)
+                {
+                    busToArmPivotA = btVector3(armPosition.x, armPosition.y, armPosition.z);
+                    busToArmPivotB = btVector3(0,0,0);
+                }
+                else
+                {
+                    busToArmPivotA = XmlUtils::getAttributeBtVector3(doorElement, "busToArmPivotA");
+                    busToArmPivotB = XmlUtils::getAttributeBtVector3(doorElement, "busToArmPivotB");
+                }
+                btVector3 busToArmAxisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "busToArmAxisA", btVector3(0,1,0));
+                btVector3 busToArmAxisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "busToArmAxisB", btVector3(0,1,0));
 
-                hingeBusToArm->getBulletConstraint()->setLimit(0, 1.5);
-                hingeArmToDoor->getBulletConstraint()->setLimit(-3.14,0);
-                //hingeArmToDoor2->getBulletConstraint()->setLimit(-1.5,0);
+                btVector3 armToDoorPivotA = XmlUtils::getAttributeBtVector3(doorElement, "armToDoorPivotA");
+                btVector3 armToDoorPivotB = XmlUtils::getAttributeBtVector3(doorElement, "armToDoorPivotB");
+                btVector3 armToDoorAxisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "armToDoorAxisA", btVector3(0,1,0));
+                btVector3 armToDoorAxisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "armToDoorAxisB", btVector3(0,1,0));
+
+
+                ConstraintHinge* hingeBusToArm = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, busToArmPivotA, busToArmPivotB, busToArmAxisA, busToArmAxisB);
+                ConstraintHinge* hingeArmToDoor = _pMgr->createConstraintHinge(armBody, doorBody, armToDoorPivotA, armToDoorPivotB, armToDoorAxisA, armToDoorAxisB);
+
+                if (rotationDirection == ERD_CW)
+                {
+                    hingeBusToArm->getBulletConstraint()->setLimit(0, 1.5);
+                    hingeArmToDoor->getBulletConstraint()->setLimit(-3.14,0);
+                }
+                else if (rotationDirection == ERD_CCW)
+                {
+                    hingeBusToArm->getBulletConstraint()->setLimit(-1.5 ,0);
+                    hingeArmToDoor->getBulletConstraint()->setLimit(0, 3.14);
+                }
 
                 Door* d = 0;
-                d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, group);
+                d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, rotationDirection, group);
                 d->close();
                 _doors.push_back(d);
             }
