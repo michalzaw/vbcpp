@@ -3,6 +3,7 @@
 
 
 #include <string>
+#include <unordered_map>
 
 #include "Bus.h"
 #include "DoorSimple.h"
@@ -22,6 +23,19 @@
 #include <sstream>
 #include <cstdlib>
 using namespace tinyxml2;
+
+
+struct ModelNodeAndTransform
+{
+    RStaticModel* model;
+    Transform transform;
+
+    ModelNodeAndTransform()
+    {}
+    ModelNodeAndTransform(RStaticModel* m, Transform& t)
+        : model(m), transform(t)
+    {}
+};
 
 
 struct BusRayCastModule
@@ -150,7 +164,8 @@ class BusRaycast : public Bus
                 _numberOfPassengersGettingOff = 0;
         }
 
-        void loadModelNodesToSkip(XMLElement* moduleElement, std::vector<std::string>& modelNodesToSkip);
+        void loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
+                            std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes);
         void loadDesktopFromXml(XMLElement* desktopXmlElement, std::string busname, std::string texturePath, BusRayCastModule& module);
 
         void catchInputFromDesktop();

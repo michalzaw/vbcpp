@@ -207,7 +207,8 @@ void BusRaycast::loadXMLdata(std::string busname)
         busModule.sceneObject->setPosition(modulePosition);
 
         std::vector<std::string> nodeToSkip;
-        loadModelNodesToSkip(moduleElement, nodeToSkip);
+        std::unordered_map<std::string, ModelNodeAndTransform> modelNodes;
+        loadModelNodes(moduleElement, modelPath, texturePath, nodeToSkip, modelNodes);
 
         busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath, nodeToSkip);
         //GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
@@ -478,9 +479,10 @@ void BusRaycast::loadXMLdata(std::string busname)
             else
             {
                 std::string doorModelPath = modelPath;
-                Transform doorTransform;
+                Transform& doorTransform = modelNodes[doorModelNodeName].transform;
 
-                doorModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(doorModelPath, texturePath, doorModelNodeName, doorTransform);
+                //doorModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(doorModelPath, texturePath, doorModelNodeName, doorTransform);
+                doorModel = modelNodes[doorModelNodeName].model;
 
                 doorPosition = doorTransform.getPosition();
                 doorRotation = doorTransform.getRotation();
@@ -696,9 +698,10 @@ void BusRaycast::loadXMLdata(std::string busname)
                 else
                 {
                     std::string armModelPath = modelPath;
-                    Transform armTransform;
+                    Transform& armTransform = modelNodes[armModelNodeName].transform;
 
-                    armModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(armModelPath, texturePath, armModelNodeName, armTransform);
+                    //armModel = ResourceManager::getInstance().loadModelWithHierarchyOnlyNode(armModelPath, texturePath, armModelNodeName, armTransform);
+                    armModel = modelNodes[armModelNodeName].model;
 
                     armPosition = armTransform.getPosition();
                     armRotation = armTransform.getRotation();
@@ -879,7 +882,8 @@ void BusRaycast::loadXMLdata(std::string busname)
 }
 
 
-void BusRaycast::loadModelNodesToSkip(XMLElement* moduleElement, std::vector<std::string>& modelNodesToSkip)
+void BusRaycast::loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
+                                std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes)
 {
     XMLElement* doorElement = moduleElement->FirstChildElement("Door");
     while (doorElement != nullptr)
@@ -888,12 +892,22 @@ void BusRaycast::loadModelNodesToSkip(XMLElement* moduleElement, std::vector<std
         std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
 
         if (!doorModelNodeName.empty())
-            modelNodesToSkip.push_back(doorModelNodeName);
+            modelNodesNames.push_back(doorModelNodeName);
 
         if (!armModelNodeName.empty())
-            modelNodesToSkip.push_back(armModelNodeName);
+            modelNodesNames.push_back(armModelNodeName);
 
         doorElement = doorElement->NextSiblingElement("Door");
+    }
+
+    std::vector<Transform> loadedNodesTransformsInModel;
+    std::vector<RStaticModel*> loadedNodes;
+
+    ResourceManager::getInstance().loadModelWithHierarchyOnlyNodes(modelPath, texturePath, modelNodesNames, loadedNodesTransformsInModel, loadedNodes);
+
+    for (int i = 0; i < modelNodesNames.size(); ++i)
+    {
+        modelNodes[modelNodesNames[i]] = ModelNodeAndTransform(loadedNodes[i], loadedNodesTransformsInModel[i]);
     }
 }
 

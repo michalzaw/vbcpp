@@ -44,6 +44,8 @@ class ResourceManager
         RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath /*, OGLDriver* driver */);
         RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames);
         RStaticModel* loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel);
+        void loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames,
+                                             std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes);
         RStaticModel* loadModel(std::string path, std::string texturePath);
 
         RFont* loadFont(std::string path, int pixelSize = 32);

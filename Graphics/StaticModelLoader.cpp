@@ -7,6 +7,7 @@ using namespace tinyxml2;
 
 
 StaticModelLoader::StaticModelLoader()
+    : _assimpScene(NULL)
 {
     _materialLoader = new MaterialLoader;
 }
@@ -302,7 +303,10 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
 {
     _texturesPath = texturesPath;
 
-    _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY);
+    if (_assimpScene == NULL)
+    {
+        _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY);
+    }
     if (_assimpScene == NULL)
     {
         std::cout << "Error parsing file: " << fileName << ": " << _assimpImporter.GetErrorString() << std::endl;
