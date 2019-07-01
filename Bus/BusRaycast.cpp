@@ -207,8 +207,8 @@ void BusRaycast::loadXMLdata(std::string busname)
         busModule.sceneObject->setPosition(modulePosition);
 
         std::vector<std::string> nodeToSkip;
-        nodeToSkip.push_back("d0r2_1");
-        nodeToSkip.push_back("d0r1_1");
+        loadModelNodesToSkip(moduleElement, nodeToSkip);
+
         busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, texturePath, nodeToSkip);
         //GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
         GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
@@ -875,6 +875,25 @@ void BusRaycast::loadXMLdata(std::string busname)
     if (_desktop == NULL)
         _desktop = new Desktop(NULL);
 
+}
+
+
+void BusRaycast::loadModelNodesToSkip(XMLElement* moduleElement, std::vector<std::string>& modelNodesToSkip)
+{
+    XMLElement* doorElement = moduleElement->FirstChildElement("Door");
+    while (doorElement != nullptr)
+    {
+        std::string doorModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "modelNode");
+        std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
+
+        if (!doorModelNodeName.empty())
+            modelNodesToSkip.push_back(doorModelNodeName);
+
+        if (!armModelNodeName.empty())
+            modelNodesToSkip.push_back(armModelNodeName);
+
+        doorElement = doorElement->NextSiblingElement("Door");
+    }
 }
 
 

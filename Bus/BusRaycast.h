@@ -150,6 +150,7 @@ class BusRaycast : public Bus
                 _numberOfPassengersGettingOff = 0;
         }
 
+        void loadModelNodesToSkip(XMLElement* moduleElement, std::vector<std::string>& modelNodesToSkip);
         void loadDesktopFromXml(XMLElement* desktopXmlElement, std::string busname, std::string texturePath, BusRayCastModule& module);
 
         void catchInputFromDesktop();
