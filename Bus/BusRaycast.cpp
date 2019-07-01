@@ -657,6 +657,7 @@ void BusRaycast::loadXMLdata(std::string busname)
             }
             else if (doorType == "classic")
             {
+                float velocity = XmlUtils::getAttributeFloatOptional(doorElement, "velocity", 1.0f);
                 std::string rotDir = XmlUtils::getAttributeStringOptional(doorElement, "rotationDir", "CW");
                 RotationDir rotationDirection;
 
@@ -764,7 +765,7 @@ void BusRaycast::loadXMLdata(std::string busname)
                 }
 
                 Door* d = 0;
-                d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, rotationDirection, group);
+                d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, velocity, rotationDirection, group);
                 d->close();
                 _doors.push_back(d);
             }

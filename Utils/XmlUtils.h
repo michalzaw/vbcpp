@@ -13,6 +13,11 @@ class XmlUtils
             return std::string(xmlElement->Attribute(attributeName));
         }
 
+        static float getAttributeFloat(XMLElement* xmlElement, const char* attributeName)
+        {
+            return (float)atof(xmlElement->Attribute(attributeName));
+        }
+
         static glm::vec2 getAttributeVec2(XMLElement* xmlElement, const char* attributeName)
         {
             const char* cValue = xmlElement->Attribute(attributeName);
@@ -43,6 +48,15 @@ class XmlUtils
             const char* cValue = xmlElement->Attribute(attributeName);
             if (cValue != NULL)
                 return std::string(cValue);
+            else
+                return defaultValue;
+        }
+
+        static float getAttributeFloatOptional(XMLElement* xmlElement, const char* attributeName, float defaultValue = 0.0f)
+        {
+            const char* cValue = xmlElement->Attribute(attributeName);
+            if (cValue != NULL)
+                return (float)atof(cValue);
             else
                 return defaultValue;
         }

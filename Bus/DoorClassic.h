@@ -11,7 +11,7 @@ class DoorClassic : public Door
 {
     public:
         DoorClassic(RStaticModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hingeBusToArm, ConstraintHinge* hingeArmToDoor,
-                    SoundComponent* openDoor, SoundComponent* closeDoor, RotationDir rotationDir = ERD_CW, char group = 1);
+                    SoundComponent* openDoor, SoundComponent* closeDoor, float velocity, RotationDir rotationDir = ERD_CW, char group = 1);
 
         virtual ~DoorClassic();
 
@@ -26,6 +26,8 @@ class DoorClassic : public Door
         ConstraintHinge*        _hingeBusToArm;
         ConstraintHinge*        _hingeArmToDoor;
         RotationDir             _rotationDir;
+
+        float                   _velocity;
 };
 
 
