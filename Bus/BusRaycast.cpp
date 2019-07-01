@@ -1021,8 +1021,6 @@ void BusRaycast::loadDesktopFromXml(XMLElement* desktopElement, std::string busn
 
             lightElement = lightElement->NextSiblingElement("Light");
         }
-
-        _desktop->setLightState(DLT_DOOR_2, _handbrake);
     }
 }
 
@@ -1033,14 +1031,11 @@ void BusRaycast::catchInputFromDesktop()
     {
         if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_1).modelNode))
         {
-            if (_engine->isRunning())
-                stopEngine();
-            else
-                startEngine();
+            doorOpenClose(1);
         }
         if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_2).modelNode))
         {
-            toggleHandbrake();
+            doorOpenClose(2);
         }
     }
 }
@@ -1225,9 +1220,6 @@ void BusRaycast::brakeOff()
 void BusRaycast::toggleHandbrake()
 {
     _handbrake = !_handbrake;
-    //_desktop->setButtonState(DBT_DOOR_2, 1);
-    _desktop->clickButton(DBT_DOOR_2);
-    _desktop->setLightState(DLT_DOOR_2, _handbrake);
 }
 
 
@@ -1252,10 +1244,6 @@ void BusRaycast::startEngine()
         //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->play();
-
-        //_desktop->setButtonState(DBT_DOOR_1, 1);
-        _desktop->clickButton(DBT_DOOR_1);
-        _desktop->setLightState(DLT_DOOR_1, true);
     }
 }
 
@@ -1268,10 +1256,6 @@ void BusRaycast::stopEngine()
 
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
         sndC->stop();
-
-        //_desktop->setButtonState(DBT_DOOR_1, 1);
-        _desktop->clickButton(DBT_DOOR_1);
-        _desktop->setLightState(DLT_DOOR_1, false);
     }
 }
 
@@ -1279,6 +1263,8 @@ void BusRaycast::stopEngine()
 
 void BusRaycast::doorOpenClose(char doorGroup)
 {
+    _desktop->clickButton((DesktopButtonType)(DBT_DOOR_1 + doorGroup - 1));
+
     for (unsigned char i = 0; i < _doors.size(); i++)
     {
         if (_doors[i]->getGroup() == doorGroup)
@@ -1286,11 +1272,15 @@ void BusRaycast::doorOpenClose(char doorGroup)
             if (_doors[i]->getState() == EDS_CLOSING)
             {
                 _doors[i]->open();
+
+                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), true);
             }
             else
             if (_doors[i]->getState() == EDS_OPENING)
             {
                 _doors[i]->close();
+
+                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), false);
 
                 if (isAllDoorClosed())
                     setRandomNumberOfPassengersGettingOff();
