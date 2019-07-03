@@ -44,7 +44,7 @@ Bus* BusLoader::loadBus(const std::string& busName)
 
     if (busType == "raycast")
     {
-        return loadBusRaycast(busElement, busName);
+        return loadBusRaycast(busElement);
     }
     else if (busType == "constraint")
     {
@@ -58,9 +58,9 @@ Bus* BusLoader::loadBus(const std::string& busName)
 }
 
 
-BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement, const std::string& busName)
+BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
 {
-    _bus = new BusRaycast(_sMgr, _pMgr, _sndMgr, busName);
+    _bus = new BusRaycast();
     _bus->_engine = std::move(_engine);
     _bus->_gearbox = std::move(_gearbox);
 

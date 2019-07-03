@@ -11,15 +11,14 @@
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
+#include "../Utils/Logger.h"
 
 
-BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
-    : _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr),
-    _maxSteerAngle(0.55f), _steerAngle(0.0f),
-    _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
+BusRaycast::BusRaycast()
+    : _maxSteerAngle(0.55f), _steerAngle(0.0f),
     _brake(false), _accelerate(false), _handbrake(true), _idle(true),
     _isEnableLights(false), _isEnableHeadlights(false),
-    _collidesWith(COL_TERRAIN | COL_ENV),
+    _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
 
@@ -28,31 +27,49 @@ BusRaycast::BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* s
 
 BusRaycast::~BusRaycast()
 {
-    std::cout << "Bus Destruktor" << std::endl;
+    Logger::info("Bus Destruktor");
 
-    std::vector<BusRayCastWheel*>::iterator wit = _wheels.begin();
+    SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
 
-    for (; wit != _wheels.end(); ++wit)
+    for (BusRayCastModule& module : _modules)
     {
-        delete (*wit);
+        sceneManager->removeSceneObject(module.sceneObject);
     }
-    _wheels.clear();
 
-    DoorList::iterator dit = _doors.begin();
-
-    for (; dit != _doors.end(); ++dit)
+    for (BusRayCastWheel* wheel : _wheels)
     {
-
-        delete (*dit);
+        sceneManager->removeSceneObject(wheel->wheel->getSceneObject());
+        delete wheel;
     }
-    _doors.clear();
 
-    _headlights.clear();
+    for (Door* door : _doors)
+    {
+        delete door;
+    }
 
     if (_desktop != NULL)
     {
         delete _desktop;
     }
+}
+
+
+bool BusRaycast::isAllDoorClosed()
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getState() == EDS_OPENING)
+            return false;
+    }
+    return true;
+}
+
+void BusRaycast::setRandomNumberOfPassengersGettingOff()
+{
+    if (_numberOfPassengers != 0)
+        _numberOfPassengersGettingOff = rand() % _numberOfPassengers;
+    else
+        _numberOfPassengersGettingOff = 0;
 }
 
 

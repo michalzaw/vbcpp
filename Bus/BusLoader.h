@@ -50,7 +50,7 @@ class BusLoader
 
         BusRaycast* _bus;
 
-        BusRaycast* loadBusRaycast(XMLElement* busElement, const std::string& busName);
+        BusRaycast* loadBusRaycast(XMLElement* busElement);
         void loadEngineAndGearbox(XMLDocument& doc);
         bool loadBusModules(XMLElement* busElement);
 

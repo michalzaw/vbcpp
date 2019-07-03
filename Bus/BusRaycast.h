@@ -18,12 +18,6 @@
 #include "../Physics/PhysicalBodyWheel.h"
 #include "../Physics/PhysicalBodyRaycastVehicle.h"
 
-// XML reader
-#include "../Utils/tinyxml2.h"
-#include <sstream>
-#include <cstdlib>
-using namespace tinyxml2;
-
 
 struct BusRayCastModule
 {
@@ -52,7 +46,7 @@ class BusRaycast : public Bus
     static constexpr float DEAD_ZONE = 0.0025f;
 
     public:
-        BusRaycast(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
+        BusRaycast();
         virtual ~BusRaycast();
 
         SceneObject* getSceneObject() { return _modules[0].sceneObject; }
@@ -95,10 +89,6 @@ class BusRaycast : public Bus
         virtual void update(float deltaTime);
 
     private:
-        SceneManager*   _sMgr;
-        PhysicsManager* _pMgr;
-        SoundManager*   _sndMgr;
-
         std::unique_ptr<Gearbox>    _gearbox;
         std::unique_ptr<Engine>     _engine;
 
@@ -126,31 +116,14 @@ class BusRaycast : public Bus
         std::vector<BusRayCastWheel*>       _wheels;
         DoorList        _doors;
 
-        int             _collidesWith;
-
         std::vector<MirrorComponent*> _mirrors;
 
         Desktop* _desktop;
         RenderObject* _desktopRenderObject;
         ClickableObject* _desktopClickableObject;
 
-        bool isAllDoorClosed()
-        {
-            for (unsigned char i = 0; i < _doors.size(); i++)
-            {
-                if (_doors[i]->getState() == EDS_OPENING)
-                    return false;
-            }
-            return true;
-        }
-
-        void setRandomNumberOfPassengersGettingOff()
-        {
-            if (_numberOfPassengers != 0)
-                _numberOfPassengersGettingOff = rand() % _numberOfPassengers;
-            else
-                _numberOfPassengersGettingOff = 0;
-        }
+        bool isAllDoorClosed();
+        void setRandomNumberOfPassengersGettingOff();
 
         void catchInputFromDesktop();
 };

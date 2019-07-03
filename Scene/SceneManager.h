@@ -45,9 +45,9 @@ class SceneManager
 
 
         SceneObject*    addSceneObject(std::string name);
-        void            removeSceneObject(SceneObject* object);
+        void            removeSceneObject(SceneObject* object, bool removeChildren = true);
 
-        void            removeSceneObject(std::string name);
+        void            removeSceneObject(std::string name, bool removeChildren = true);
 
         SceneObject*    getSceneObject(std::string name);
 
