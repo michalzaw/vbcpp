@@ -18,6 +18,12 @@ class XmlUtils
             return (float)atof(xmlElement->Attribute(attributeName));
         }
 
+        static bool getAttributeBool(XMLElement* xmlElement, const char* attributeName)
+        {
+            const char* value = xmlElement->Attribute(attributeName);
+            return strcmp(value, "true") == 0;
+        }
+
         static glm::vec2 getAttributeVec2(XMLElement* xmlElement, const char* attributeName)
         {
             const char* cValue = xmlElement->Attribute(attributeName);

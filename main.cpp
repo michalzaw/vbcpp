@@ -20,6 +20,7 @@
 
 #include "Bus/BusConstraint.h"
 #include "Bus/BusRaycast.h"
+#include "Bus/BusLoader.h"
 
 #include "GUI/GUIManager.h"
 
@@ -443,10 +444,8 @@ int main()
 	GraphicsManager::getInstance().setWindVelocity(0.6f);
 
 
-    if (GameConfig::getInstance().busModel == "h9_raycast" || GameConfig::getInstance().busModel == "MAN")
-        bus = new BusRaycast(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
-    else
-        bus = new BusConstraint(sceneMgr, physMgr, sndMgr, GameConfig::getInstance().busModel);
+	BusLoader busLoader(sceneMgr, physMgr, sndMgr);
+	bus = busLoader.loadBus(GameConfig::getInstance().busModel);
 
     sceneMgr->loadScene(GameConfig::getInstance().mapFile);
 

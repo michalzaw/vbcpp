@@ -153,6 +153,8 @@
 		<Unit filename="Bus/Bus.h" />
 		<Unit filename="Bus/BusConstraint.cpp" />
 		<Unit filename="Bus/BusConstraint.h" />
+		<Unit filename="Bus/BusLoader.cpp" />
+		<Unit filename="Bus/BusLoader.h" />
 		<Unit filename="Bus/BusRaycast.cpp" />
 		<Unit filename="Bus/BusRaycast.h" />
 		<Unit filename="Bus/Desktop.cpp" />
@@ -178,6 +180,7 @@
 		<Unit filename="Game/BusStopComponent.h" />
 		<Unit filename="Game/BusStopSystem.cpp" />
 		<Unit filename="Game/BusStopSystem.h" />
+		<Unit filename="Game/Directories.h" />
 		<Unit filename="Game/GameConfig.cpp" />
 		<Unit filename="Game/GameConfig.h" />
 		<Unit filename="Graphics/AABB.h" />
@@ -298,6 +301,7 @@
 		<Unit filename="Utils/Gearbox.h" />
 		<Unit filename="Utils/Helpers.cpp" />
 		<Unit filename="Utils/Helpers.hpp" />
+		<Unit filename="Utils/Logger.h" />
 		<Unit filename="Utils/Math.h" />
 		<Unit filename="Utils/RFont.cpp" />
 		<Unit filename="Utils/RFont.h" />

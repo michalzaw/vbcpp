@@ -25,19 +25,6 @@
 using namespace tinyxml2;
 
 
-struct ModelNodeAndTransform
-{
-    RStaticModel* model;
-    Transform transform;
-
-    ModelNodeAndTransform()
-    {}
-    ModelNodeAndTransform(RStaticModel* m, Transform& t)
-        : model(m), transform(t)
-    {}
-};
-
-
 struct BusRayCastModule
 {
     SceneObject* sceneObject;
@@ -59,6 +46,8 @@ struct BusRayCastWheel
 
 class BusRaycast : public Bus
 {
+    friend class BusLoader;
+
     static constexpr float STEER_STEP = 0.3f;
     static constexpr float DEAD_ZONE = 0.0025f;
 
@@ -145,7 +134,6 @@ class BusRaycast : public Bus
         RenderObject* _desktopRenderObject;
         ClickableObject* _desktopClickableObject;
 
-        void loadXMLdata(std::string busname);
         bool isAllDoorClosed()
         {
             for (unsigned char i = 0; i < _doors.size(); i++)
@@ -163,10 +151,6 @@ class BusRaycast : public Bus
             else
                 _numberOfPassengersGettingOff = 0;
         }
-
-        void loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
-                            std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes);
-        void loadDesktopFromXml(XMLElement* desktopXmlElement, std::string busname, std::string texturePath, BusRayCastModule& module);
 
         void catchInputFromDesktop();
 };
