@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include "../Utils/Helpers.hpp"
+
 
 static std::unique_ptr<Renderer> rendererInstance;
 
@@ -283,6 +285,15 @@ void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderL
 void Renderer::prepareRenderData()
 {
     GraphicsManager& graphicsManager = GraphicsManager::getInstance();
+
+
+    for (int i = 0; i < _renderDataList.size(); ++i)
+    {
+        if ( _renderDataList[i] != _mainRenderData && !isVectorContains(_renderDataListForShadowmapping, _renderDataList[i]))
+        {
+            delete _renderDataList[i];
+        }
+    }
 
 
     _renderDataList.clear();
