@@ -4,7 +4,7 @@
 <Gearbox model="gbx_ikarus260" />
 <Engine model="eng_wskmielec" />
 
-<Bus name="autosan" textures="PKS"> 
+<Bus type="constraint" name="autosan" textures="PKS"> 
 	<Module type="main" model="h9.3ds" mass="9.6" position="0,0,0" > <!-- mass in tons -->
 
 		<Wheel name="wheel1" side="right" steering="1" powered="0" model="fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="228.0" damping="0.00053" brakeForce="2.0"/>

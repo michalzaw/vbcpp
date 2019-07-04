@@ -4,7 +4,7 @@
 <Gearbox model="gbx_ikarus260" />
 <Engine model="eng_wskmielec" />
 
-<Bus name="Ikarus" textures="211"> 
+<Bus type="constraint" name="Ikarus" textures="211"> 
 	<Module type="main" model="i211.3ds" mass="9.6" position="0,0,0"> <!-- mass in tons -->
 
 		<Wheel name="wheel1" side="right" steering="1" powered="0" model="frontwh.3ds" mass="1" position="0.9,-1.2,2.4" radius="1" width="0.3" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>

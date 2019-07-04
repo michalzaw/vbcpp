@@ -4,7 +4,7 @@
 <Gearbox model="gbx_ikarus260" />
 <Engine model="eng_wskmielec" />
 
-<Bus name="urbino" textures="poznan"> 
+<Bus type="constraint" name="urbino" textures="poznan"> 
 	<Module type="main" model="module1.3ds" mass="9.6" position="0,0,0" > <!-- mass in tons -->
 		<Wheel name="wheel1" side="right" steering="1" powered="0" model="wh_front_r.3ds" mass="1" position="1.05,-1.05,2.1" radius="1" width="0.3" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
 		<Wheel name="wheel2" side="left" steering="1" powered="0" model="wh_front_l.3ds" mass="1" position="-1.05,-1.05,2.1" radius="1" width="0.3" stiffness="198.0" damping="0.00031" brakeForce="2.0"/>
