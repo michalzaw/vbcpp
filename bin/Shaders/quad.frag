@@ -13,15 +13,16 @@ uniform sampler2D Texture;
 
 out vec4 Color;
 
-float exposure = 0.05f;
+uniform float exposure;
+//float exposure = 0.05f;
 //float exposure = 2.0f;
 
 
 vec3 toneMap(vec3 hdrColor)
 {
-	return hdrColor / (hdrColor + vec3(1.0f));
+	//return hdrColor / (hdrColor + vec3(1.0f));
 	
-	//return vec3(1.0f) - exp(-hdrColor * exposure);
+	return vec3(1.0f) - exp(-hdrColor * exposure);
 }
 
 

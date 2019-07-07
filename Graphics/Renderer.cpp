@@ -9,6 +9,7 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
+    _alphaToCoverage(true), _exposure(0.05f),
     _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _isShadowMappingEnable(false), _shadowMap(NULL),
     _mainRenderData(NULL),
@@ -692,6 +693,18 @@ bool Renderer::isAlphaToCoverageEnable()
 }
 
 
+void Renderer::setExposure(float exposure)
+{
+    _exposure = exposure;
+}
+
+
+float Renderer::getExposure()
+{
+    return _exposure;
+}
+
+
 void Renderer::setMsaaAntialiasing(bool isEnable)
 {
     _msaaAntialiasing = isEnable;
@@ -815,6 +828,7 @@ void Renderer::renderAll()
 
     _shaderList[QUAD_SHADER]->enable();
     _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, _mainRenderData->framebuffer->getTexture(0));
+    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);

@@ -86,6 +86,7 @@ enum UniformName
     UNIFORM_DEBUG_VERTEX_INDEX_6,
     UNIFORM_DEBUG_VERTEX_INDEX_7,
     UNIFORM_DEBUG_VERTEX_INDEX_8,
+    UNIFORM_TONEMAPPING_EXPOSURE,
 
     NUMBER_OF_UNIFORMS
 };
@@ -155,6 +156,7 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
+            _uniformsNames[UNIFORM_TONEMAPPING_EXPOSURE] = "exposure";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

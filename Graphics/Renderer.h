@@ -32,6 +32,8 @@ class Renderer
 
         bool _alphaToCoverage;
 
+        float _exposure;
+
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
         Framebuffer* _defaultFramebuffer;
@@ -88,6 +90,8 @@ class Renderer
 
         void setAlphaToCoverage(bool isEnable);
         bool isAlphaToCoverageEnable();
+        void setExposure(float exposure);
+        float getExposure();
         void setMsaaAntialiasing(bool isEnable);
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);

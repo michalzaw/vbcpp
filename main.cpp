@@ -409,6 +409,16 @@ void readInput(GLFWwindow* window, double deltaTime)
             camFPS->getSceneObject()->rotate(0, degToRad(-delta), 0);
         }
     }
+
+    if (glfwGetKey( window, GLFW_KEY_6 ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() * 1.1f);
+    }
+    if (glfwGetKey( window, GLFW_KEY_7 ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() / 1.1f);
+    }
+
 }
 
 
