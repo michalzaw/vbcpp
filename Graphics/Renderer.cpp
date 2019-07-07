@@ -680,6 +680,18 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 }
 
 
+void Renderer::setAlphaToCoverage(bool isEnable)
+{
+    _alphaToCoverage = isEnable;
+}
+
+
+bool Renderer::isAlphaToCoverageEnable()
+{
+    return _alphaToCoverage;
+}
+
+
 void Renderer::setMsaaAntialiasing(bool isEnable)
 {
     _msaaAntialiasing = isEnable;
@@ -1072,7 +1084,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL)
+            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }

@@ -30,6 +30,8 @@ class Renderer
     private:
         bool _isInitialized;
 
+        bool _alphaToCoverage;
+
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
         Framebuffer* _defaultFramebuffer;
@@ -84,6 +86,8 @@ class Renderer
 
         void init(unsigned int screenWidth, unsigned int screenHeight);
 
+        void setAlphaToCoverage(bool isEnable);
+        bool isAlphaToCoverageEnable();
         void setMsaaAntialiasing(bool isEnable);
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);
