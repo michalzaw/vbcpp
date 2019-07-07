@@ -3,13 +3,16 @@
 #include <iostream>
 
 
-RTexture::RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size)
+RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size)
     : Resource(RT_TEXTURE, path),
     _textureType(type),
-    _format(format),
+    _internalFormat(internalFormat),
     _size(size),
     _isGenerateMipmap(false)
 {
+    _format = _internalFormat;
+    if (_format == TF_RGBA_16F || _format == TF_RGBA_32F)
+        _format = TF_RGBA;
 
 }
 

@@ -30,6 +30,9 @@ class Renderer
     private:
         bool _isInitialized;
 
+        Framebuffer* _defaultFramebuffer;
+        VBO* _quadVBO;
+
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
         std::vector<ShaderType> _shaderListForMirrorRendering;

@@ -3,8 +3,8 @@
 #include <iostream>
 
 
-RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, TextureFormat format, unsigned int size)
-    : RTexture(path, TT_CUBE, format, glm::uvec2(size, size))
+RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, TextureFormat internalFormat, unsigned int size)
+    : RTexture(path, TT_CUBE, internalFormat, glm::uvec2(size, size))
 {
     std::cout << "RTextureCubeMap - Konstruktor: " << _path << std::endl;
 
@@ -14,13 +14,13 @@ RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, Texture
 
     for (int i = 0; i < 6; ++i)
     {
-        glTexImage2D(CMF_POSITIVE_X + i, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data[i]);
+        glTexImage2D(CMF_POSITIVE_X + i, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data[i]);
     }
 }
 
 
-RTextureCubeMap::RTextureCubeMap(TextureFormat format, unsigned int size)
-    : RTexture("", TT_CUBE, format, glm::uvec2(size, size))
+RTextureCubeMap::RTextureCubeMap(TextureFormat internalFormat, unsigned int size)
+    : RTexture("", TT_CUBE, internalFormat, glm::uvec2(size, size))
 {
     std::cout << "RTextureCubeMap - Konstruktor: " << _path << std::endl;
 
@@ -30,7 +30,7 @@ RTextureCubeMap::RTextureCubeMap(TextureFormat format, unsigned int size)
 
     for (int i = 0; i < 6; ++i)
     {
-        glTexImage2D(CMF_POSITIVE_X + i, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
+        glTexImage2D(CMF_POSITIVE_X + i, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
     }
 
 }

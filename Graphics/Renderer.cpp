@@ -17,6 +17,16 @@ Renderer::Renderer()
 
     _aabbVbo = OGLDriver::getInstance().createVBO(24 * sizeof(float));
     _aabbVbo->addVertexData(indices, 24);
+
+    float quadVertices[] =
+    {
+        -1.0f, -1.0f,
+        1.0f, -1.0f,
+        -1.0f, 1.0f,
+        1.0f, 1.0f
+    };
+    _quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
+    _quadVBO->addVertexData(quadVertices, 4 * 2);
 }
 
 Renderer::~Renderer()
@@ -523,13 +533,19 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-    Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
-    defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+    _defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+    _defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+
+    Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
+    framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, true, 8);
+    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, true, 8);
+    framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
 
     _mainRenderData = new RenderData;
     _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
-    _mainRenderData->framebuffer = defaultFramebuffer;
+    _mainRenderData->framebuffer = framebuffer;
     _mainRenderData->renderPass = RP_NORMAL;
 
 
@@ -629,6 +645,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("GLASS");
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // QUAD_SHADER
+    _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag");
 
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
@@ -747,6 +766,21 @@ void Renderer::renderAll()
         else // RP_NORMAL
             renderScene(_renderDataList[i]);
     }
+
+    _defaultFramebuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _quadVBO->bind();
+
+    _shaderList[QUAD_SHADER]->enable();
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, _mainRenderData->framebuffer->getTexture(0));
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(0);
 }
 
 

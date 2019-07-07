@@ -26,6 +26,8 @@ class Framebuffer
 
         bool _isInitialized;
 
+        void checkFramebufferStatus();
+
     public:
         Framebuffer();
         ~Framebuffer();
@@ -33,8 +35,8 @@ class Framebuffer
         void init();
         void bind();
 
-        void addDepthRenderbuffer(unsigned int width, unsigned int height);
-        void addTexture(TextureFormat format, unsigned int width, unsigned int height);
+        void addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
+        void addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
 
         int getTexturesCount();
         RTexture* getTexture(int index = 0);

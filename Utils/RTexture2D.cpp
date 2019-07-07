@@ -2,9 +2,11 @@
 
 #include <iostream>
 
+#include "Logger.h"
 
-RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat format, glm::uvec2 size)
-    : RTexture(path, TT_2D, format, size)
+
+RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size)
+    : RTexture(path, TT_2D, internalFormat, size)
 {
     std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
 
@@ -12,12 +14,12 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat format, g
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
 }
 
 
-RTexture2D::RTexture2D(TextureFormat format, glm::uvec2 size)
-    : RTexture("", TT_2D, format, size)
+RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMultisample, int samplesCount)
+    : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size)
 {
     std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
 
@@ -25,7 +27,10 @@ RTexture2D::RTexture2D(TextureFormat format, glm::uvec2 size)
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
+    if (_textureType == TT_2D_MULTISAMPLE)
+        glTexImage2DMultisample(_textureType, samplesCount, _internalFormat, _size.x, _size.y, GL_TRUE);
+    else
+        glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
 }
 
 

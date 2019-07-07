@@ -14,7 +14,9 @@ enum TextureType
     TT_2D   = GL_TEXTURE_2D,
     TT_3D   = GL_TEXTURE_3D,
     TT_CUBE = GL_TEXTURE_CUBE_MAP,
-    TT_RECT = GL_TEXTURE_RECTANGLE
+    TT_RECT = GL_TEXTURE_RECTANGLE,
+
+    TT_2D_MULTISAMPLE = GL_TEXTURE_2D_MULTISAMPLE
 
 };
 
@@ -23,6 +25,8 @@ enum TextureFormat
 {
     TF_RGB              = GL_RGB,
     TF_RGBA             = GL_RGBA,
+    TF_RGBA_16F         = GL_RGBA16F,
+    TF_RGBA_32F         = GL_RGBA32F,
     TF_DEPTH_COMPONENT  = GL_DEPTH_COMPONENT
 
 };
@@ -55,7 +59,7 @@ class RTexture : public Resource
         //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
         //RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
         //RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
-        RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size);
+        RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size);
         virtual ~RTexture();
 
         //GLuint getID() { return _texID; }
@@ -80,6 +84,7 @@ class RTexture : public Resource
     protected:
         GLuint      _texID;
         TextureType _textureType;
+        TextureFormat _internalFormat;
         TextureFormat _format;
         glm::uvec2  _size;
 
