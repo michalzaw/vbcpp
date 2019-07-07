@@ -4,6 +4,7 @@
 
 #include <string>
 #include <sstream>
+#include <cstring>
 
 
 // Convert number to string
@@ -51,6 +52,19 @@ inline float toFloat(const char* String)
 	float Temp;
 	Stream >> Temp;
 	return Temp;
+}
+
+
+// Convert string to bool
+inline bool toBool(std::string String)
+{
+    return strcmp(String.c_str(), "true") == 0;
+}
+
+
+inline bool toBool(const char* String)
+{
+    return strcmp(String, "true") == 0;
 }
 
 

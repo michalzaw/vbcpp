@@ -12,6 +12,9 @@
 	<Configuration>
 		<Fullscreen>false</Fullscreen>
 		
+		<MsaaAntialiasing>true</MsaaAntialiasing>
+		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
+		
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
 		

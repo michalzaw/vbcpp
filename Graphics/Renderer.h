@@ -30,6 +30,8 @@ class Renderer
     private:
         bool _isInitialized;
 
+        bool _msaaAntialiasing;
+        int _msaaAntialiasingLevel;
         Framebuffer* _defaultFramebuffer;
         VBO* _quadVBO;
 
@@ -82,6 +84,10 @@ class Renderer
 
         void init(unsigned int screenWidth, unsigned int screenHeight);
 
+        void setMsaaAntialiasing(bool isEnable);
+        bool isMsaaAntialiasingEnable();
+        void setMsaaAntialiasingLevel(int level);
+        int getMsaaAntialiasingLevel();
         void setIsShadowMappingEnable(bool isEnable);
         bool isShadowMappingEnable();
         void registerShadowMap(ShadowMap* shadowMap);

@@ -9,6 +9,7 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
+    _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _isShadowMappingEnable(false), _shadowMap(NULL),
     _mainRenderData(NULL),
     _renderObjectsAAABB(true), _renderObjectsOBB(false)
@@ -537,8 +538,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
     Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
-    framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, true, 8);
-    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, true, 8);
+    framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
@@ -647,7 +648,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // QUAD_SHADER
-    _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag");
+    defines.clear();
+    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
+    std::unordered_map<std::string, std::string> constants;
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag", defines, constants);
 
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
@@ -672,6 +677,30 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
 
     _isInitialized = true;
+}
+
+
+void Renderer::setMsaaAntialiasing(bool isEnable)
+{
+    _msaaAntialiasing = isEnable;
+}
+
+
+bool Renderer::isMsaaAntialiasingEnable()
+{
+    return _msaaAntialiasing;
+}
+
+
+void Renderer::setMsaaAntialiasingLevel(int level)
+{
+    _msaaAntialiasingLevel = level;
+}
+
+
+int Renderer::getMsaaAntialiasingLevel()
+{
+    return _msaaAntialiasingLevel;
 }
 
 

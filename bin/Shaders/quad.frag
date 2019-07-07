@@ -1,70 +1,56 @@
 #version 330 core
 
+const int SAMPLES_COUNT = {samplesCount};
+
 in vec2 texCoord;
 
+#ifdef MULTISAMPLE
 uniform sampler2DMS Texture;
+#endif
+#ifdef NOT_MULTISAMPLE
+uniform sampler2D Texture;
+#endif
 
 out vec4 Color;
 
 float exposure = 0.05f;
 //float exposure = 2.0f;
 
-void main()
+
+vec3 toneMap(vec3 hdrColor)
 {
-	vec2 temp = floor(textureSize(Texture) * texCoord);
+	return hdrColor / (hdrColor + vec3(1.0f));
 	
-	vec3 c = vec3(0, 0, 0);
-	for (int i = 0; i < 8; ++i)
-	{
-		vec3 hdrColor = texelFetch(Texture, ivec2(temp), i).rgb;
-		
-		vec3 mapped = hdrColor / (hdrColor + vec3(1.0f));
-		//vec3 mapped = vec3(1.0f) - exp(-hdrColor * exposure);
-		
-		c += mapped;
-	}
-	
-	
-	float gamma = 2.2;
-    Color.rgb = pow(c / 8, vec3(1.0/gamma));
-	Color.a = 1.0f;
-	
-	
-	
-	//Color.rgb = vec3((Color.r + Color.g + Color.b) / 3.0f);
-	//Color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+	//return vec3(1.0f) - exp(-hdrColor * exposure);
 }
 
 
-
-/*
-oryginalna wersja
-#version 330 core
-
-in vec2 texCoord;
-
-uniform sampler2D Texture;
-
-out vec4 Color;
-
-float exposure = 0.05f;
-
 void main()
 {
+#ifdef MULTISAMPLE
+	vec2 temp = floor(textureSize(Texture) * texCoord);
+	
+	vec3 resultColor = vec3(0, 0, 0);
+	for (int i = 0; i < SAMPLES_COUNT; ++i)
+	{
+		vec3 hdrColor = texelFetch(Texture, ivec2(temp), i).rgb;
+
+		vec3 ldrColor = toneMap(hdrColor);
+		
+		resultColor += ldrColor;
+	}
+	
+	resultColor = resultColor / SAMPLES_COUNT;
+#endif
+
+#ifdef NOT_MULTISAMPLE
 	vec3 hdrColor = texture2D(Texture, texCoord).rgb;
+
+	vec3 resultColor = toneMap(hdrColor);
+#endif
 	
-	
-	
-	vec3 mapped = hdrColor / (hdrColor + vec3(1.0f));
-	//vec3 mapped = vec3(1.0f) - exp(-hdrColor * exposure);
-	
-	
+	// gamma correction;
 	float gamma = 2.2;
-    Color.rgb = pow(mapped, vec3(1.0/gamma));
+    Color.rgb = pow(resultColor, vec3(1.0 / gamma));
 	Color.a = 1.0f;
-	
-	
-	
-	//Color.rgb = vec3((Color.r + Color.g + Color.b) / 3.0f);
-	//Color = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-}*/
+}

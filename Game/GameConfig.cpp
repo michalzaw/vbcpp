@@ -1,5 +1,7 @@
 #include "GameConfig.h"
 
+#include "../Utils/Strings.h"
+
 
 void GameConfig::loadGameConfig(const char* filename)
 {
@@ -39,33 +41,27 @@ void GameConfig::loadGameConfig(const char* filename)
 
                 if (strcmp(ename,"Fullscreen") == 0)
                 {
-                    const char* value = configElement->GetText();
-                    if (strcmp(value,"true") == 0)
-                        isFullscreen = true;
-                    else
-                        isFullscreen = false;
+                    isFullscreen = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename,"MsaaAntialiasing") == 0)
+                {
+                    msaaAntialiasing = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename,"MsaaAntialiasingLevel") == 0)
+                {
+                    msaaAntialiasingLevel = toInt(configElement->GetText());
                 }
                 else if (strcmp(ename,"Shadowmapping") == 0)
                 {
-                    const char* value = configElement->GetText();
-                    if (strcmp(value,"true") == 0)
-                        isShadowmappingEnable = true;
-                    else
-                        isShadowmappingEnable = false;
+                    isShadowmappingEnable = toBool(configElement->GetText());
                 }
-                else
-                if (strcmp(ename,"ShadowmapSize") == 0)
+                else if (strcmp(ename,"ShadowmapSize") == 0)
                 {
-                    shadowmapSize = (int)atoi(configElement->GetText());
+                    shadowmapSize = toInt(configElement->GetText());
                 }
-                else
-                if (strcmp(ename,"Grass") == 0)
+                else if (strcmp(ename,"Grass") == 0)
                 {
-                    const char* value = configElement->GetText();
-                    if (strcmp(value,"true") == 0)
-                        isGrassEnable = true;
-                    else
-                        isGrassEnable = false;
+                    isGrassEnable = toBool(configElement->GetText());
                 }
             }
         }

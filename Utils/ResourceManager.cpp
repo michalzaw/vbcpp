@@ -233,14 +233,21 @@ RTexture2D* ResourceManager::loadDefaultWhiteTexture()
 
 
 // Ładowanie shaderów
-RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines)
+RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines,
+                                     const std::unordered_map<std::string, std::string>& constants)
 {
     std::string path = vertexPath + ";" + fragmPath;
     for (int i = 0; i < defines.size(); ++i)
     {
         path += ";" + defines[i];
     }
+    if (constants.size() > 0)
+        path += ";c:";
 
+    for (std::pair<std::string, std::string> element : constants)
+    {
+        path += ";" + element.first + ":" + element.second;
+    }
 
     Resource* res = findResource(path);
     if (res != 0)
@@ -251,7 +258,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
-    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines)) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
 
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
 
@@ -274,6 +281,7 @@ void ResourceManager::reloadShader(RShader* shader)
     std::string vertexShaderFilename;
     std::string fragmentShaderFilename;
     std::vector<std::string> defines;
+    std::unordered_map<std::string, std::string> constants;
 
     getline(stream, vertexShaderFilename, ';');
     getline(stream, fragmentShaderFilename, ';');
@@ -281,10 +289,23 @@ void ResourceManager::reloadShader(RShader* shader)
     string s;
     while (getline(stream, s, ';'))
     {
+        if (s == "c:")
+            break;
+
         defines.push_back(s);
     }
 
-    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines));
+    while (getline(stream, s, ';'))
+    {
+        unsigned int pos = s.find(":");
+        std::string name = s.substr(0, pos);
+        std::string value = s.substr(pos + 1, s.size() - pos);
+
+        constants[name] = value;
+    }
+
+
+    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
 }
 
 

@@ -1,7 +1,25 @@
 #include "LoadShader.h"
 
 
-bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const std::vector<std::string>& defines)
+std::string ShaderLoader::replaceConstatnsInLine(std::string line, const std::unordered_map<std::string, std::string>& constants)
+{
+    for (std::pair<std::string, std::string> element : constants)
+    {
+        const std::string& constName = "{" + element.first + "}";
+        const std::string& constValue = element.second;
+
+        unsigned int pos = line.find(constName);
+        if (pos != std::string::npos)
+        {
+            line.replace(pos, constName.size(), constValue);
+        }
+    }
+
+    return line;
+}
+
+
+bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const std::vector<std::string>& defines, const std::unordered_map<std::string, std::string>& constants)
 {
     std::ifstream file;
 
@@ -25,7 +43,7 @@ bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const
                     pos = fileNameStr.rfind("/");
                     std::string path = fileNameStr.substr(0, pos + 1) + includedFileName;
 
-                    if (!loadShaderCode(path.c_str(), code, defines))
+                    if (!loadShaderCode(path.c_str(), code, defines, constants))
                     {
                         std::cout << "Can not open included shader file: " << path << "!\n";
                     }
@@ -52,7 +70,10 @@ bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const
             else
             {
                 if (mode)
+                {
+                    line = replaceConstatnsInLine(line, constants);
                     code += "\n" + line;
+                }
             }
         }
 
@@ -118,16 +139,17 @@ GLuint ShaderLoader::linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId)
 }
 
 
-GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fragmentShaderFileName, const std::vector<std::string>& defines)
+GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fragmentShaderFileName, const std::vector<std::string>& defines,
+                                const std::unordered_map<std::string, std::string>& constants)
 {
 	std::string vertexShaderCode;
 	std::string fragmentShaderCode;
 
-	if (!loadShaderCode(vertexShaderFileName, vertexShaderCode, defines))
+	if (!loadShaderCode(vertexShaderFileName, vertexShaderCode, defines, constants))
     {
         std::cout << "Can not open VertexShaderFile: " << vertexShaderFileName << "!\n";
     }
-    if (!loadShaderCode(fragmentShaderFileName, fragmentShaderCode, defines))
+    if (!loadShaderCode(fragmentShaderFileName, fragmentShaderCode, defines, constants))
     {
         std::cout << "Can not open FragmentShaderFile: " << fragmentShaderFileName << "!\n";
     }
