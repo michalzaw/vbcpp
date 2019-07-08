@@ -18,6 +18,19 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalF
 }
 
 
+RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, glm::uvec2 size)
+    : RTexture(path, TT_2D, internalFormat, size)
+{
+    std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
+
+
+    glGenTextures(1, &_texID);
+    bind();
+
+    glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_FLOAT, data);
+}
+
+
 RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMultisample, int samplesCount)
     : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size)
 {
@@ -48,6 +61,19 @@ void RTexture2D::setTexSubImage(unsigned char* data, int offsetX, int offsetY, i
     bind();
 
     glTexSubImage2D(_textureType, 0, offsetX, offsetY, width, height, _format, GL_UNSIGNED_BYTE, data);
+
+    _isGenerateMipmap = false;
+}
+
+
+void RTexture2D::setTexSubImage(float* data, int offsetX, int offsetY, int width, int height)
+{
+    if (offsetX + width > _size.x || offsetY + height > _size.y)
+        return;
+
+    bind();
+
+    glTexSubImage2D(_textureType, 0, offsetX, offsetY, width, height, _format, GL_FLOAT, data);
 
     _isGenerateMipmap = false;
 }

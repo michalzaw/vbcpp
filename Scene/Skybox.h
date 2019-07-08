@@ -16,7 +16,7 @@ class Skybox : public SceneObject
     private:
 
     public:
-        Skybox(RTextureCubeMap* texture, SceneManager* sceneManager);
+        Skybox(RTexture* texture, SceneManager* sceneManager);
         ~Skybox();
 
 };

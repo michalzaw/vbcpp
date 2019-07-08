@@ -51,7 +51,7 @@ class SceneManager
 
         SceneObject*    getSceneObject(std::string name);
 
-        void addSky(RTextureCubeMap* texture);
+        void addSky(RTexture* texture);
 
 
 

@@ -94,6 +94,49 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
 }
 
 
+RTexture2D* ResourceManager::loadTextureHDR(std::string path, bool mipmapping)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RTexture2D* tex = dynamic_cast<RTexture2D*>(res);
+        return tex;
+    }
+
+    // Zasob nie istnieje
+    int width, height;
+    //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
+    RTexture2D* texture = ::loadTextureHDR(path.c_str(), mipmapping);
+
+    if ( texture )
+    {
+        //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
+        std::unique_ptr<RTexture> tex (texture);
+        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
+        //GLuint texID = tex->getID();
+        _resources.push_back(std::move(tex));
+
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Musialem odwolac sie do utworzonej tekstury poprzez iterator do ostatniego elementu na liscie (nowa tekstura jest zawsze wrzucana na koniec listy)
+        std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
+        std::unique_ptr<Resource>& res = *(--it);
+
+        RTexture2D* t = dynamic_cast<RTexture2D*>(res.get());
+
+
+        //std::cout << "Texture ID: " << tID << std::endl;
+
+        return t;
+    }
+
+    return 0;
+}
+
+
 RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
 {
     std::string path = "";

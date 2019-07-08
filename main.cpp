@@ -492,7 +492,8 @@ int main()
 
     std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
-    sceneMgr->addSky(skyboxTexture);
+    RTexture2D* t = ResourceManager::getInstance().loadTextureHDR("Skybox/sky.hdr");
+    sceneMgr->addSky(t);
     GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
 

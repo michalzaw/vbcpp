@@ -1,5 +1,8 @@
 #include "LoadTerrainModel.h"
 
+#include <stb_image/stb_image.h>
+#include <stb_image/stb_image_write.h>
+
 
 std::string TerrainLoader::createTerFileName(std::string heightmapFilename)
 {
@@ -141,7 +144,7 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     const float cellSize = 1.0f;
 
     int width, height, chanels;
-    unsigned char* heightmapData = SOIL_load_image(heightmapFilename, &width, &height, &chanels, SOIL_LOAD_RGBA);
+    unsigned char* heightmapData = stbi_load(heightmapFilename, &width, &height, &chanels, STBI_rgb_alpha);
 
     glm::vec3 startPosition(static_cast<float>(width - 1) / -2.0f, 0.0f, static_cast<float>(height - 1) / 2.0f);
     glm::vec3 vertexPosition = startPosition;
@@ -259,7 +262,8 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
         }
     }
 
-    SOIL_save_image(createTerrainHeightAndNormalMapFileName(heightmapFilename).c_str(), SOIL_SAVE_TYPE_TGA, width, height, chanels, heightmapData);
+    stbi_flip_vertically_on_write(0);
+    stbi_write_tga(createTerrainHeightAndNormalMapFileName(heightmapFilename).c_str(), width, height, STBI_rgb_alpha, heightmapData);
 
 
     std::vector<MeshMender::Vertex> v;
@@ -319,6 +323,9 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     modelNode->parent = NULL;
 
     RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, indicesSize);
+
+
+    stbi_image_free(heightmapData);
 
 
     return model;

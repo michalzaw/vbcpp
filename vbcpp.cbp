@@ -100,7 +100,6 @@
 					<Add library="lib/win32/glfw3dll.a" />
 					<Add library="glew32" />
 					<Add library="3ds" />
-					<Add library="SOIL" />
 					<Add library="opengl32" />
 					<Add library="glu32" />
 					<Add library="gdi32" />
@@ -132,7 +131,6 @@
 					<Add library="lib/win32/glfw3dll.a" />
 					<Add library="glew32" />
 					<Add library="3ds" />
-					<Add library="SOIL" />
 					<Add library="opengl32" />
 					<Add library="glu32" />
 					<Add library="gdi32" />
@@ -325,6 +323,7 @@
 		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/Timer.h" />
 		<Unit filename="Utils/XmlUtils.h" />
+		<Unit filename="Utils/stb_image.cpp" />
 		<Unit filename="Utils/tinyxml2.cpp" />
 		<Unit filename="Utils/tinyxml2.h" />
 		<Unit filename="Window/Window.cpp" />
