@@ -541,8 +541,18 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+
+    for (int i = 0; i < 2; ++i)
+    {
+        _blurFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
+        _blurFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth / 10.0f, _screenHeight / 10.0f, false);
+        _blurFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
+        _blurFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth / 10.0f, _screenHeight / 10.0f));
+    }
 
 
     _mainRenderData = new RenderData;
@@ -648,10 +658,24 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
-    // QUAD_SHADER
+    // BLUR_SHADER_MSAA
     defines.clear();
     defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
     std::unordered_map<std::string, std::string> constants;
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[BLUR_SHADER_MSAA] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
+
+    // BLUR_SHADER
+    defines.clear();
+    defines.push_back("NOT_MULTISAMPLE");
+    constants.clear();
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[BLUR_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
+
+    // QUAD_SHADER
+    defines.clear();
+    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
+    constants.clear();
     constants["samplesCount"] = toString(_msaaAntialiasingLevel);
     _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag", defines, constants);
 
@@ -821,13 +845,59 @@ void Renderer::renderAll()
             renderScene(_renderDataList[i]);
     }
 
+
+    glDisable(GL_DEPTH_TEST);
+
+
+    // blur
+    bool isHorizontal = true;
+    bool isFirstIteration = true;
+    int amount = 10;
+    ShaderType shaderType;
+    for (unsigned int i = 0; i < amount; i++)
+    {
+        _blurFramebuffers[isHorizontal]->bind();
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (isFirstIteration)
+            shaderType = BLUR_SHADER_MSAA;
+        else
+            shaderType = BLUR_SHADER;
+
+        _shaderList[shaderType]->enable();
+
+        _shaderList[shaderType]->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
+
+        RTexture* texture = isFirstIteration ? _mainRenderData->framebuffer->getTexture(1) : _blurFramebuffers[!isHorizontal]->getTexture(0);
+        _shaderList[shaderType]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
+
+
+        _quadVBO->bind();
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+        glDisableVertexAttribArray(0);
+
+
+        isHorizontal = !isHorizontal;
+        if (isFirstIteration)
+            isFirstIteration = false;
+    }
+
+
+
+    // render quad on screen
     _defaultFramebuffer->bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _quadVBO->bind();
 
     _shaderList[QUAD_SHADER]->enable();
-    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, _mainRenderData->framebuffer->getTexture(0));
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, t == 0 ? _mainRenderData->framebuffer->getTexture(0) : _blurFramebuffers[!isHorizontal]->getTexture(0));
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_BLOOM_TEXTURE, _blurFramebuffers[!isHorizontal]->getTexture(0));
     _shaderList[QUAD_SHADER]->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
 
     glEnableVertexAttribArray(0);
@@ -836,6 +906,9 @@ void Renderer::renderAll()
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     glDisableVertexAttribArray(0);
+
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 

@@ -62,7 +62,9 @@ in vec3 BitangentWorldspace;
 in vec4 PositionLightSpace[CASCADES_COUNT];
 in float ClipSpacePositionZ;
 
-out vec4 FragmentColor;
+//out vec4 FragmentColor;
+layout (location = 0) out vec4 FragmentColor;
+layout (location = 1) out vec4 BrightnessColor;  
 
 
 uniform LightsBlock
@@ -117,7 +119,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity * 0.05;
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
-	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor * 20;
+	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 20;
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
@@ -205,8 +207,8 @@ void main()
 #endif
 	
 #ifdef ALPHA_TEST
-	//if (textureColor.a < 0.1f)
-	//	discard;
+	if (textureColor.a < 0.1f)
+		discard;
 #endif
 	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -305,7 +307,15 @@ void main()
 	FragmentColor += matEmissive * textureColor;
 	
 #ifdef ALPHA_TEST
-	float _Cutoff = 0.1f;
+	float _Cutoff = 0.3f;
 	FragmentColor.a = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
 #endif
+
+
+
+	float brightness = dot(FragmentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 4.0f)
+		BrightnessColor = vec4(FragmentColor.rgb, 1.0f);
+	else
+		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }

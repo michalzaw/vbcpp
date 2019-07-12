@@ -38,6 +38,7 @@ class Renderer
         int _msaaAntialiasingLevel;
         Framebuffer* _defaultFramebuffer;
         VBO* _quadVBO;
+        Framebuffer* _blurFramebuffers[2];
 
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
@@ -80,6 +81,7 @@ class Renderer
         Renderer();
 
     public:
+        int t;
         ~Renderer();
 
         static Renderer& getInstance();
