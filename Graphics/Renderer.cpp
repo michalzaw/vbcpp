@@ -11,6 +11,7 @@ Renderer::Renderer()
     _screenWidth(0), _screenHeight(0),
     _alphaToCoverage(true), _exposure(0.05f),
     _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
+    _bloom(false),
     _isShadowMappingEnable(false), _shadowMap(NULL),
     _mainRenderData(NULL),
     _renderObjectsAAABB(true), _renderObjectsOBB(false)
@@ -753,6 +754,18 @@ int Renderer::getMsaaAntialiasingLevel()
 }
 
 
+void Renderer::setBloom(bool isEnable)
+{
+    _bloom = isEnable;
+}
+
+
+bool Renderer::isBloomEnable()
+{
+    return _bloom;
+}
+
+
 void Renderer::setIsShadowMappingEnable(bool isEnable)
 {
     _isShadowMappingEnable = isEnable;
@@ -850,41 +863,44 @@ void Renderer::renderAll()
 
 
     // blur
-    bool isHorizontal = true;
-    bool isFirstIteration = true;
-    int amount = 10;
-    ShaderType shaderType;
-    for (unsigned int i = 0; i < amount; i++)
+    if (_bloom)
     {
-        _blurFramebuffers[isHorizontal]->bind();
-        glClear(GL_COLOR_BUFFER_BIT);
+        bool isHorizontal = true;
+        bool isFirstIteration = true;
+        int amount = 10;
+        ShaderType shaderType;
+        for (unsigned int i = 0; i < amount; i++)
+        {
+            _blurFramebuffers[isHorizontal]->bind();
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        if (isFirstIteration)
-            shaderType = BLUR_SHADER_MSAA;
-        else
-            shaderType = BLUR_SHADER;
+            if (isFirstIteration)
+                shaderType = BLUR_SHADER_MSAA;
+            else
+                shaderType = BLUR_SHADER;
 
-        _shaderList[shaderType]->enable();
+            _shaderList[shaderType]->enable();
 
-        _shaderList[shaderType]->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
+            _shaderList[shaderType]->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
 
-        RTexture* texture = isFirstIteration ? _mainRenderData->framebuffer->getTexture(1) : _blurFramebuffers[!isHorizontal]->getTexture(0);
-        _shaderList[shaderType]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
-
-
-        _quadVBO->bind();
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-        glDisableVertexAttribArray(0);
+            RTexture* texture = isFirstIteration ? _mainRenderData->framebuffer->getTexture(1) : _blurFramebuffers[!isHorizontal]->getTexture(0);
+            _shaderList[shaderType]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
 
 
-        isHorizontal = !isHorizontal;
-        if (isFirstIteration)
-            isFirstIteration = false;
+            _quadVBO->bind();
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glDisableVertexAttribArray(0);
+
+
+            isHorizontal = !isHorizontal;
+            if (isFirstIteration)
+                isFirstIteration = false;
+        }
     }
 
 
@@ -896,9 +912,10 @@ void Renderer::renderAll()
     _quadVBO->bind();
 
     _shaderList[QUAD_SHADER]->enable();
-    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, t == 0 ? _mainRenderData->framebuffer->getTexture(0) : _blurFramebuffers[!isHorizontal]->getTexture(0));
-    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_BLOOM_TEXTURE, _blurFramebuffers[!isHorizontal]->getTexture(0));
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, t == 0 ? _mainRenderData->framebuffer->getTexture(0) : _blurFramebuffers[0]->getTexture(0));
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_BLOOM_TEXTURE, _blurFramebuffers[0]->getTexture(0));
     _shaderList[QUAD_SHADER]->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
+    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_BLOOM_RATIO, _bloom ? 1.0f : 0.0f);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);

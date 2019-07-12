@@ -43,6 +43,7 @@ class GameConfig
         int msaaAntialiasingLevel;
         bool isShadowmappingEnable;
         int shadowmapSize;
+        bool isBloomEnabled;
         bool isGrassEnable;
 
 };

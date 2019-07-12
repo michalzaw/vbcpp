@@ -39,6 +39,7 @@ class Renderer
         Framebuffer* _defaultFramebuffer;
         VBO* _quadVBO;
         Framebuffer* _blurFramebuffers[2];
+        bool _bloom;
 
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
@@ -98,6 +99,8 @@ class Renderer
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);
         int getMsaaAntialiasingLevel();
+        void setBloom(bool isEnable);
+        bool isBloomEnable();
         void setIsShadowMappingEnable(bool isEnable);
         bool isShadowMappingEnable();
         void registerShadowMap(ShadowMap* shadowMap);

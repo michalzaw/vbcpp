@@ -59,6 +59,10 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     shadowmapSize = toInt(configElement->GetText());
                 }
+                else if (strcmp(ename,"Bloom") == 0)
+                {
+                    isBloomEnabled = toBool(configElement->GetText());
+                }
                 else if (strcmp(ename,"Grass") == 0)
                 {
                     isGrassEnable = toBool(configElement->GetText());

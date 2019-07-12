@@ -16,6 +16,7 @@ uniform sampler2D BloomTexture;
 out vec4 Color;
 
 uniform float exposure;
+uniform float BloomRatio;
 //float exposure = 0.05f;
 //float exposure = 2.0f;
 
@@ -37,7 +38,7 @@ void main()
 	vec3 resultColor = vec3(0, 0, 0);
 	for (int i = 0; i < SAMPLES_COUNT; ++i)
 	{
-		vec3 hdrColor = texelFetch(Texture, ivec2(temp), i).rgb + texture2D(BloomTexture, texCoord).rgb;//texelFetch(BloomTexture, ivec2(temp2), i).rgb;
+		vec3 hdrColor = texelFetch(Texture, ivec2(temp), i).rgb + BloomRatio * texture2D(BloomTexture, texCoord).rgb;//texelFetch(BloomTexture, ivec2(temp2), i).rgb;
 
 		vec3 ldrColor = toneMap(hdrColor);
 		
@@ -48,7 +49,7 @@ void main()
 #endif
 
 #ifdef NOT_MULTISAMPLE
-	vec3 hdrColor = texture2D(Texture, texCoord).rgb + texture2D(BloomTexture, texCoord).rgb;
+	vec3 hdrColor = texture2D(Texture, texCoord).rgb + BloomRatio * texture2D(BloomTexture, texCoord).rgb;
 
 	vec3 resultColor = toneMap(hdrColor);
 #endif

@@ -470,6 +470,7 @@ int main()
 	Renderer& renderer = Renderer::getInstance();
 	renderer.setMsaaAntialiasing(GameConfig::getInstance().msaaAntialiasing);
 	renderer.setMsaaAntialiasingLevel(GameConfig::getInstance().msaaAntialiasingLevel);
+	renderer.setBloom(GameConfig::getInstance().isBloomEnabled);
 	renderer.setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
 	renderer.init(win->getWidth(), win->getHeight());
     renderer.setDayNightRatio(1.0f);
