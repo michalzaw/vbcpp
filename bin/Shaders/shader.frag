@@ -198,18 +198,37 @@ void main()
 	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 #endif
 	
+float isGrass = 0.0f;
 #ifdef GRASS
 	textureColor = textureColor * grassColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
 	//	discard;
+	isGrass = 1.0f;
 #endif
 	
 #ifdef ALPHA_TEST
 	if (textureColor.a < 0.1f)
 		discard;
+	
+	vec3 eyeToFramgent = normalize(Position - CameraPosition);
+	vec3 lightDir = Lights.DirLights[0].Direction;
+	
+	float miFactor = max(dot(-lightDir, eyeToFramgent), 0.0f);
+	
+	miFactor = mix(miFactor, 0, isGrass);
+	
+	diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
+	//diffuse.rgb = mix(diffuse.rgb, 1.5 * diffuse.rgb, miFactor);
+	//ambient.rgb = mix(ambient.rgb, 4 * vec3(ambient.g * 0.9, ambient.g * 1.0, ambient.g * 0.2), miFactor);
+	
+	float DiffuseFactor = dot(normal, -lightDir);
+	//if (miFactor > 0.0f)
+	float normalFactor = mix(1, -1, miFactor);
+		normal = normalFactor * normal;
 #endif
+
 	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -314,7 +333,7 @@ void main()
 
 
 	float brightness = dot(FragmentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
-	if (brightness > 4.0f)
+	if (brightness > 0.1f)
 		BrightnessColor = vec4(FragmentColor.rgb, 1.0f);
 	else
 		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
