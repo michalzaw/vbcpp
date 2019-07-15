@@ -167,6 +167,8 @@
 		<Unit filename="EditorMain.cpp" />
 		<Unit filename="Editor/Editor.cpp" />
 		<Unit filename="Editor/Editor.h" />
+		<Unit filename="Editor/EditorGUI.cpp" />
+		<Unit filename="Editor/EditorGUI.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
 		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />

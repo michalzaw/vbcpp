@@ -33,6 +33,10 @@ class CameraFPS : virtual public CameraStatic
 
 		void setRotationSpeed(float speed);
 
+		float getMoveSpeed();
+
+		float getRotationSpeed();
+
 		//void setCursorPos(GLdouble xpos, GLdouble ypos);
 
 		void reset();

@@ -17,7 +17,7 @@ class Window
         Window();
         ~Window();
 
-        bool createWindow(int w, int h, int posx, int posy, bool isFullscreen);
+        bool createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100, bool isFullscreen = false, bool isResizable = false);
         GLFWwindow* getWindow() { return _win; }
 
         int getHeight() { return _height; }

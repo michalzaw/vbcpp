@@ -26,6 +26,10 @@ class Editor
 
         std::unique_ptr<EditorGUI> _editorGUI;
 
+        bool _cameraActive;
+        CameraFPS* _camera;
+        SceneObject* _cameraObject;
+
         bool createWindow();
         void initializeEngineSubsystems();
 
@@ -33,7 +37,17 @@ class Editor
         Editor();
         ~Editor();
 
+        std::shared_ptr<Window> getWindow();
+
         void run();
+
+        void processInput(double deltaTime);
+
+        void mouseButtonCallback(int button, int action, int mods);
+        void keyCallback(int key, int scancode, int action, int mods);
+        void charCallback(unsigned int c);
+        void changeWindowSizeCallback(int width, int height);
+        void changeFramebufferSizeCallback(int width, int height);
 
 };
 
