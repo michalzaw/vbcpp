@@ -50,6 +50,7 @@ class SceneManager
         void            removeSceneObject(std::string name, bool removeChildren = true);
 
         SceneObject*    getSceneObject(std::string name);
+        std::list<SceneObject*>& getSceneObjects();
 
         void addSky(RTextureCubeMap* texture);
 

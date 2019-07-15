@@ -164,6 +164,9 @@
 		<Unit filename="Bus/DoorClassic.h" />
 		<Unit filename="Bus/DoorSE.h" />
 		<Unit filename="Bus/DoorSimple.h" />
+		<Unit filename="EditorMain.cpp" />
+		<Unit filename="Editor/Editor.cpp" />
+		<Unit filename="Editor/Editor.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
 		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />

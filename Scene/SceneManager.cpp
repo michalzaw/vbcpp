@@ -132,6 +132,12 @@ SceneObject* SceneManager::getSceneObject(std::string name)
 }
 
 
+std::list<SceneObject*>& SceneManager::getSceneObjects()
+{
+    return _sceneObjects;
+}
+
+
 void SceneManager::addSky(RTextureCubeMap* texture)
 {
     if (_sky != NULL)

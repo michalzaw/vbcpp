@@ -409,7 +409,7 @@ void readInput(GLFWwindow* window, double deltaTime)
 
 
 // ### MAIN ###
-int main()
+int main2()
 {
     srand(static_cast<unsigned int>(time(NULL)));
 

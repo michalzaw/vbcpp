@@ -25,7 +25,9 @@ enum ComponentType
     CT_MIRROR,
     CT_CLICKABLE_OBJECT,
 
-    CT_BUS_STOP
+    CT_BUS_STOP,
+
+    COMPONENTS_TYPE_SIZE
 };
 
 
