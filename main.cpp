@@ -17,6 +17,7 @@
 #include "Utils/Timer.h"
 #include "Utils/Helpers.hpp"
 #include "Utils/Math.h"
+#include "Utils/RaycastingUtils.h"
 
 #include "Bus/BusConstraint.h"
 #include "Bus/BusRaycast.h"
@@ -191,7 +192,7 @@ void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm:
         glm::vec4 rayStartLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayStart.x, rayStart.y, rayStart.z, 1.0f);
         glm::vec4 rayDirLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayDir.x, rayDir.y, rayDir.z, 0.0f);
 
-        if (distance > 0.0f);// && (modelNode->getName() == "button1" || modelNode->getName() == "button2" || modelNode->getName() == "wsk.001" || modelNode->getName() == "wsk.002"))
+        if (distance > 0.0f)
         {
             ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
             if (clickableObject != NULL)
@@ -217,34 +218,16 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glfwGetCursorPos(win->getWindow(), &xpos, &ypos);
         ypos = win->getHeight() - ypos;
 
-        glm::vec4 rayStartNDC((xpos / win->getWidth() - 0.5f) * 2.0f,
-                              (ypos / win->getHeight() - 0.5f) * 2.0f,
-                              -1.0f,
-                              1.0f);
-
-        glm::vec4 rayEndNDC((xpos / win->getWidth() - 0.5f) * 2.0f,
-                            (ypos / win->getHeight() - 0.5f) * 2.0f,
-                            0.0f,
-                            1.0f);
-
-        glm::mat4 viewProjectionInv = glm::inverse(camFPS->getProjectionMatrix() * camFPS->getViewMatrix());
-
-        glm::vec4 rayStartWorldspace = viewProjectionInv * rayStartNDC;
-        rayStartWorldspace /= rayStartWorldspace.w;
-
-        glm::vec4 rayEndWorldspace = viewProjectionInv * rayEndNDC;
-        rayEndWorldspace /= rayEndWorldspace.w;
-
-        glm::vec3 rayDir = glm::normalize(glm::vec3(rayEndWorldspace - rayStartWorldspace));
-        glm::vec3 rayEnd = glm::vec3(rayStartWorldspace) + 1000.0f * rayDir;
-
+        glm::vec3 rayStart;
+        glm::vec3 rayDir;
+        calculateRay(xpos, ypos, camFPS, rayStart, rayDir);
 
         // collision with model nodes
         std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
         for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
         {
             RenderObject* renderObject = *i;
-            rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), glm::vec3(rayStartWorldspace), rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+            rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
         }
 
 

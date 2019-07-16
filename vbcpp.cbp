@@ -335,6 +335,8 @@
 		<Unit filename="Utils/RTexture2D.h" />
 		<Unit filename="Utils/RTextureCubeMap.cpp" />
 		<Unit filename="Utils/RTextureCubeMap.h" />
+		<Unit filename="Utils/RaycastingUtils.cpp" />
+		<Unit filename="Utils/RaycastingUtils.h" />
 		<Unit filename="Utils/RefCounter.h" />
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />

@@ -2,6 +2,8 @@
 
 #include "../Bus/BusLoader.h"
 
+#include "../Utils/RaycastingUtils.h"
+
 
 std::list<Editor*> editorInstances;
 
@@ -278,6 +280,34 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
      if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
     {
         _cameraActive = false;
+    }
+
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
+        ypos = _window->getHeight() - ypos;
+
+        glm::vec3 rayStart;
+        glm::vec3 rayDir;
+        calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+        // collision with render objects
+        std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+        for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+        {
+            RenderObject* renderObject = *i;
+            AABB* aabb = renderObject->getModel()->getAABB();
+            glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+            float distance;
+            if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+            {
+                if (distance > 0.0f)
+                {
+                    _editorGUI->setSelectedSceneObject(renderObject->getSceneObject());
+                }
+            }
+        }
     }
 }
 

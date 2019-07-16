@@ -35,6 +35,16 @@ void EditorGUI::initializeImGui()
 
     ImGui_ImplGlfw_InitForOpenGL(_window->getWindow(), true);
     ImGui_ImplOpenGL3_Init("#version 130");
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
+    io.Fonts->AddFontDefault();
+}
+
+
+void EditorGUI::setSelectedSceneObject(SceneObject* sceneObject)
+{
+    _selectedSceneObject = sceneObject;
 }
 
 
@@ -74,6 +84,13 @@ void EditorGUI::drawMainMenu()
     {
         if ( ImGui::BeginMenu("File") )
         {
+            if ( ImGui::MenuItem("New", "CTRL+N") ) {}
+            ImGui::Separator();
+            if ( ImGui::MenuItem("Open", "CTRL+O") ) {}
+            if ( ImGui::MenuItem("Save", "CTRL+S") ) {}
+            if ( ImGui::MenuItem("Save as...", "CTRL+SHIFT+S") ) {}
+            ImGui::Separator();
+            if ( ImGui::MenuItem("Exit") ) {}
             ImGui::EndMenu();
         }
         if ( ImGui::BeginMenu("Edit") )

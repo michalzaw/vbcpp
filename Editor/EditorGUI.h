@@ -43,7 +43,10 @@ class EditorGUI
         EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager);
         ~EditorGUI();
 
+        void setSelectedSceneObject(SceneObject* sceneObject);
+
         void draw();
+
 };
 
 
