@@ -142,6 +142,11 @@ void EditorGUI::inspectSceneObject(SceneObject* object)
 {
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
+    if (object->getChildren().empty())
+        node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
+    if (object == _selectedSceneObject)
+        node_flags = node_flags | ImGuiTreeNodeFlags_Selected;
+
     ImGui::PushID(object);
     bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)object, node_flags, object->getName().c_str());
 
