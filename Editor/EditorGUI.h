@@ -6,6 +6,8 @@
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
 
+#include "EditorEvent.h"
+
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
 
@@ -21,6 +23,8 @@ class EditorGUI
 
         SceneObject* _selectedSceneObject;
 
+        std::list<EditorEvent> _events;
+
         bool _styleDark;
 
         bool _showObjectProperties;
@@ -29,6 +33,9 @@ class EditorGUI
         bool _showFileIODialog;
         bool _showDemo;
         bool _showTestWindow;
+        bool _showOpenDialog;
+
+        char _openDialogEditTextBuffer[1024];
 
         void initializeImGui();
 
@@ -36,6 +43,7 @@ class EditorGUI
         void drawTestWindow();
         void drawSceneGraph();
         void drawObjectProperties();
+        void drawOpenDialog();
 
         void inspectSceneObject(SceneObject* object = nullptr);
 
@@ -44,6 +52,9 @@ class EditorGUI
         ~EditorGUI();
 
         void setSelectedSceneObject(SceneObject* sceneObject);
+
+        bool hasNextEvent();
+        EditorEvent getNextEvent();
 
         void draw();
 

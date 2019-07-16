@@ -104,7 +104,7 @@ Editor::~Editor()
 bool Editor::createWindow()
 {
     _window = std::make_shared<Window>();
-    if (!_window->createWindow(1024, 768, 10, 40, false, false))
+    if (!_window->createWindow(1024, 768, 10, 40, false, true))
     {
         return false;
     }
@@ -131,6 +131,16 @@ void Editor::initializeEngineSubsystems()
     _soundManager = new SoundManager;
     _sceneManager = new SceneManager(_physicsManager, _soundManager);
 
+    clearScene();
+}
+
+
+void Editor::clearScene()
+{
+    _sceneManager->clearScene();
+
+    std::cout << "GraphicsManager: " << GraphicsManager::getInstance().getRenderObjects().size() << std::endl;
+
     _cameraObject = _sceneManager->addSceneObject("cam1");
     _camera = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     _cameraObject->addComponent(_camera);
@@ -147,14 +157,14 @@ void Editor::initializeEngineSubsystems()
     dirLight->setPosition(glm::vec3(0,0,0));
     lightComponent->setShadowMapping(false);
 
-    // ---------------------------------------------------
     std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
     _sceneManager->addSky(skyboxTexture);
     GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
-	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
-    Bus* bus = busLoader.loadBus("h9_raycast");
+    // ---------------------------------------------------
+	/*BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
+    Bus* bus = busLoader.loadBus("h9_raycast");*/
 }
 
 
@@ -225,6 +235,28 @@ void Editor::run()
         lastYPos = yPos;
 
 
+        // custom events from GUI
+        while (_editorGUI->hasNextEvent())
+        {
+            EditorEvent event = _editorGUI->getNextEvent();
+
+            switch (event.type)
+            {
+                case EET_NEW_CLICK:
+                    clearScene();
+                    _editorGUI->setSelectedSceneObject(nullptr);
+                    break;
+
+                case EET_OPEN_CLICK:
+                    clearScene();
+                    _editorGUI->setSelectedSceneObject(nullptr);
+
+                    _sceneManager->loadScene(event.params);
+                    break;
+            }
+        }
+
+
         // fixed update
         while ( accumulator > TIME_STEP )
         {
@@ -293,6 +325,9 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
         calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
         // collision with render objects
+        SceneObject* selectedObject = nullptr;
+        float d = std::numeric_limits<float>::max();
+
         std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
         for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
         {
@@ -302,12 +337,15 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
             float distance;
             if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
             {
-                if (distance > 0.0f)
+                if (distance > 0.0f && distance < d)
                 {
-                    _editorGUI->setSelectedSceneObject(renderObject->getSceneObject());
+                    selectedObject = renderObject->getSceneObject();
+                    d = distance;
                 }
             }
         }
+
+        _editorGUI->setSelectedSceneObject(selectedObject);
     }
 }
 
@@ -334,5 +372,6 @@ void Editor::changeWindowSizeCallback(int width, int height)
 void Editor::changeFramebufferSizeCallback(int width, int height)
 {
     // TODO: change size all render targets in Renderer
-    glViewport(0, 0, width, height);
+    Renderer::getInstance().setWindowDimensions(width, height);
+
 }

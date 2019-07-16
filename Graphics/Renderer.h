@@ -89,6 +89,15 @@ class Renderer
         void setDayNightRatio(float ratio);
         float getDayNightRatio();
 
+        void setWindowDimensions(unsigned int screenWidth, unsigned int screenHeight)
+        {
+            _screenWidth = screenWidth;
+            _screenHeight = screenHeight;
+
+            Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+            defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+        }
+
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
 

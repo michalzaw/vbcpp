@@ -117,6 +117,13 @@ class GraphicsManager
         void registerPendingMaterialForMirrorComponent(Material* material);
 
 
+        void clearQuadTree()
+        {
+            //delete _quadTree;
+            //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
+        }
+
+
         void update(float deltaTime);
 
 

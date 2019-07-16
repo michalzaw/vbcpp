@@ -1,5 +1,7 @@
 #include "EditorGUI.h"
 
+#include "../Utils/Strings.h"
+
 
 EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
     : _window(window), _sceneManager(sceneManager),
@@ -10,7 +12,9 @@ EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
     _showAddSceneObjectDialog(false),
     _showFileIODialog(false),
     _showDemo(false),
-    _showTestWindow(false)
+    _showTestWindow(false),
+    _showOpenDialog(false),
+    _openDialogEditTextBuffer("")
 {
     initializeImGui();
 }
@@ -48,6 +52,22 @@ void EditorGUI::setSelectedSceneObject(SceneObject* sceneObject)
 }
 
 
+bool  EditorGUI::hasNextEvent()
+{
+    return !_events.empty();
+}
+
+
+EditorEvent  EditorGUI::getNextEvent()
+{
+    EditorEvent event = _events.front();
+
+    _events.pop_front();
+
+    return event;
+}
+
+
 void EditorGUI::draw()
 {
     ImGui_ImplOpenGL3_NewFrame();
@@ -73,6 +93,11 @@ void EditorGUI::draw()
         drawObjectProperties();
     }
 
+    if (_showOpenDialog)
+    {
+        drawOpenDialog();
+    }
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -84,9 +109,9 @@ void EditorGUI::drawMainMenu()
     {
         if ( ImGui::BeginMenu("File") )
         {
-            if ( ImGui::MenuItem("New", "CTRL+N") ) {}
+            if ( ImGui::MenuItem("New", "CTRL+N") ) { _events.push_back(EditorEvent(EET_NEW_CLICK)); }
             ImGui::Separator();
-            if ( ImGui::MenuItem("Open", "CTRL+O") ) {}
+            if ( ImGui::MenuItem("Open", "CTRL+O") ) { memset(_openDialogEditTextBuffer, 0, strlen(_openDialogEditTextBuffer)); _showOpenDialog = true; }
             if ( ImGui::MenuItem("Save", "CTRL+S") ) {}
             if ( ImGui::MenuItem("Save as...", "CTRL+SHIFT+S") ) {}
             ImGui::Separator();
@@ -384,6 +409,26 @@ void EditorGUI::drawObjectProperties()
                     }
                 }
             }*/
+        }
+    }
+    ImGui::End();
+}
+
+
+void EditorGUI::drawOpenDialog()
+{
+    if (ImGui::Begin("Open map", &_showOpenDialog))
+    {
+        ImGui::InputText("Map name", _openDialogEditTextBuffer, IM_ARRAYSIZE(_openDialogEditTextBuffer));
+
+        if (ImGui::Button("Open"))
+        {
+            std::string mapName = (_openDialogEditTextBuffer);
+            mapName = trim(mapName);
+
+            _events.push_back(EditorEvent(EET_OPEN_CLICK, mapName));
+
+            _showOpenDialog = false;
         }
     }
     ImGui::End();

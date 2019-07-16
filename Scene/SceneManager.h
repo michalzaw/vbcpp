@@ -49,6 +49,19 @@ class SceneManager
 
         void            removeSceneObject(std::string name, bool removeChildren = true);
 
+        void clearScene()
+        {
+            for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+            {
+                delete *i;
+            }
+
+            _sceneObjects.clear();
+
+            _sky = NULL;
+            GraphicsManager::getInstance().clearQuadTree();
+        }
+
         SceneObject*    getSceneObject(std::string name);
         std::list<SceneObject*>& getSceneObjects();
 

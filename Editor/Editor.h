@@ -32,6 +32,7 @@ class Editor
 
         bool createWindow();
         void initializeEngineSubsystems();
+        void clearScene();
 
     public:
         Editor();

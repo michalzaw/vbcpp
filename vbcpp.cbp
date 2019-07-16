@@ -167,6 +167,7 @@
 		<Unit filename="EditorMain.cpp" />
 		<Unit filename="Editor/Editor.cpp" />
 		<Unit filename="Editor/Editor.h" />
+		<Unit filename="Editor/EditorEvent.h" />
 		<Unit filename="Editor/EditorGUI.cpp" />
 		<Unit filename="Editor/EditorGUI.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
@@ -343,6 +344,7 @@
 		<Unit filename="Utils/ResourceManager.h" />
 		<Unit filename="Utils/SoundLoader.cpp" />
 		<Unit filename="Utils/SoundLoader.h" />
+		<Unit filename="Utils/Strings.cpp" />
 		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/Timer.h" />
 		<Unit filename="Utils/XmlUtils.h" />
