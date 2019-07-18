@@ -30,7 +30,11 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
 Light::~Light()
 {
     if (_shadowMap != NULL)
+    {
+        Renderer::getInstance().unregisterShadowMap(_shadowMap);
+
         delete _shadowMap;
+    }
 }
 
 

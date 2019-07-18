@@ -37,6 +37,21 @@ GraphicsManager::~GraphicsManager()
         delete *i;
     }
 
+    for (std::list<EnvironmentCaptureComponent*>::iterator i = _environmentCaptureComponents.begin(); i != _environmentCaptureComponents.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::vector<MirrorComponent*>::iterator i = _mirrorComponents.begin(); i != _mirrorComponents.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
+    {
+        delete *i;
+    }
+
     //delete _quadTree;
 }
 

@@ -265,7 +265,12 @@ PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVe
 
 void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
 {
-    _dynamicsWorld->removeRigidBody(physicalBody->getRigidBody());
+	btRigidBody* rigidBody = physicalBody->getRigidBody();
+	if (rigidBody != nullptr)
+	{
+		_dynamicsWorld->removeRigidBody(rigidBody);
+		_dynamicsWorld->removeCollisionObject(rigidBody);
+	}
 
     _physicalBodies.remove(physicalBody);
 

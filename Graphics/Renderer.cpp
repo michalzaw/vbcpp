@@ -27,6 +27,10 @@ Renderer::~Renderer()
     {
         OGLDriver::getInstance().deleteVBO(_aabbVbo);
     }
+
+    OGLDriver::getInstance().deleteFramebuffer(_mainRenderData->framebuffer);
+
+    delete _mainRenderData;
 }
 
 

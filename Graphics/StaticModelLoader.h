@@ -57,6 +57,10 @@ class StaticModelLoader
 
     public:
         StaticModelLoader();
+		~StaticModelLoader()
+		{
+			delete _materialLoader;
+		}
 
         RStaticModel* loadModelWithHierarchy(std::string fileName, std::string texturesPath);
         RStaticModel* loadModelWithHierarchy(std::string fileName, std::string texturesPath, std::vector<std::string> nodesToSkipNames);

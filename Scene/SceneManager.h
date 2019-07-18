@@ -35,6 +35,9 @@ class SceneManager
 
         BusStart    _busStart;
 
+        RStaticModel* terrainModel;
+        std::list<RStaticModel*> roadsModels;
+
     public:
         SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
@@ -60,6 +63,16 @@ class SceneManager
 
             _sky = NULL;
             GraphicsManager::getInstance().clearQuadTree();
+
+            if (terrainModel != NULL)
+            {
+                delete terrainModel;
+                terrainModel = NULL;
+            }
+            for (std::list<RStaticModel*>::iterator i = roadsModels.begin(); i != roadsModels.end(); ++i)
+            {
+                delete *i;
+            }
         }
 
         SceneObject*    getSceneObject(std::string name);
