@@ -172,6 +172,8 @@
 		<Unit filename="Editor/EditorEvent.h" />
 		<Unit filename="Editor/EditorGUI.cpp" />
 		<Unit filename="Editor/EditorGUI.h" />
+		<Unit filename="Editor/Windows/CameraSettingsWindow.cpp" />
+		<Unit filename="Editor/Windows/CameraSettingsWindow.h" />
 		<Unit filename="Editor/Windows/EditorWindow.cpp" />
 		<Unit filename="Editor/Windows/EditorWindow.h" />
 		<Unit filename="Editor/Windows/NewDialogWindow.cpp" />

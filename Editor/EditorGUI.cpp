@@ -13,8 +13,9 @@ EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
 
     _sceneGraphWindow.reset(new SceneGraphWindow(_sceneManager, _selectedSceneObject));
     _objectPropertiesWindow.reset(new ObjectPropertiesWindow(_sceneManager, _selectedSceneObject));
-    _newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events));
+    _newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events, true));
     _openDialogWindow.reset(new OpenDialogWindow(_sceneManager, _selectedSceneObject, &_events));
+    _cameraSettingsWindow.reset(new CameraSettingsWindow(_sceneManager, _selectedSceneObject));
 }
 
 
@@ -93,6 +94,7 @@ void EditorGUI::draw()
     _objectPropertiesWindow->draw();
     _newDialogWindow->draw();
     _openDialogWindow->draw();
+    _cameraSettingsWindow->draw();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -127,7 +129,7 @@ void EditorGUI::drawMainMenu()
         if (ImGui::BeginMenu("Windows"))
         {
             ImGui::MenuItem("Object Properties", NULL, _objectPropertiesWindow->getOpenFlagPointer());
-            //ImGui::MenuItem("CameraFPS Settings", NULL, &_showCameraFPSSettings);
+            ImGui::MenuItem("Camera Settings", NULL, _cameraSettingsWindow->getOpenFlagPointer());
             ImGui::MenuItem("Demo", NULL, &_showDemo);
             //ImGui::MenuItem("Test", NULL, &_showTestWindow);
             ImGui::EndMenu();

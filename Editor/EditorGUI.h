@@ -11,6 +11,7 @@
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/NewDialogWindow.h"
 #include "Windows/OpenDialogWindow.h"
+#include "Windows/CameraSettingsWindow.h"
 
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
@@ -35,6 +36,7 @@ class EditorGUI
         std::unique_ptr<ObjectPropertiesWindow> _objectPropertiesWindow;
         std::unique_ptr<NewDialogWindow> _newDialogWindow;
         std::unique_ptr<OpenDialogWindow> _openDialogWindow;
+        std::unique_ptr<CameraSettingsWindow> _cameraSettingsWindow;
 
         bool _showDemo;
 
