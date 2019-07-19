@@ -8,7 +8,8 @@
 class OpenDialogWindow : public EditorWindow
 {
     private:
-        char _inputTextNameBuffer[1024];
+        std::vector<std::string> _availableMapsNames;
+        int _listBoxMapSelectedItem;
 
         virtual void drawWindow() override;
 

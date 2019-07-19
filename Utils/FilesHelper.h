@@ -2,6 +2,10 @@
 #define FILESHELPER_H_INCLUDED
 
 
+#include <vector>
+#include <string>
+
+
 class FilesHelper
 {
     public:
@@ -18,6 +22,8 @@ class FilesHelper
             fclose(file);
             return 0;
         }
+
+        static std::vector<std::string> getDirectoriesList(std::string path);
 
 };
 

@@ -2,8 +2,6 @@
 
 #include "../Graphics/Renderer.h"
 
-#include "../Utils/Strings.h"
-
 
 EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
     : _window(window), _sceneManager(sceneManager),

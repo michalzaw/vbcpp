@@ -92,6 +92,7 @@
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add option="-DWIN32" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
 					<Add directory="include/freetype" />
@@ -124,6 +125,7 @@
 				<Compiler>
 					<Add option="-march=i686" />
 					<Add option="-std=c++11" />
+					<Add option="-DWIN32" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
 					<Add directory="include/freetype" />
@@ -326,6 +328,7 @@
 		<Unit filename="Utils/Collision.h" />
 		<Unit filename="Utils/Engine.cpp" />
 		<Unit filename="Utils/Engine.h" />
+		<Unit filename="Utils/FilesHelper.cpp" />
 		<Unit filename="Utils/FilesHelper.h" />
 		<Unit filename="Utils/Gearbox.cpp" />
 		<Unit filename="Utils/Gearbox.h" />

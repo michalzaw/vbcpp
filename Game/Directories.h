@@ -7,6 +7,7 @@
 namespace GameDirectories
 {
     const std::string BUSES = "Buses/";
+    const std::string MAPS = "Maps/";
 }
 
 
