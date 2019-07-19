@@ -73,6 +73,8 @@ class SceneManager
             {
                 delete *i;
             }
+
+            roadsModels.clear();
         }
 
         SceneObject*    getSceneObject(std::string name);

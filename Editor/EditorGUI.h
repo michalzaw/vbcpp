@@ -7,6 +7,10 @@
 #include "../ImGui/imgui_impl_opengl3.h"
 
 #include "EditorEvent.h"
+#include "Windows/SceneGraphWindow.h"
+#include "Windows/ObjectPropertiesWindow.h"
+#include "Windows/NewDialogWindow.h"
+#include "Windows/OpenDialogWindow.h"
 
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
@@ -27,23 +31,16 @@ class EditorGUI
 
         bool _styleDark;
 
-        bool _showObjectProperties;
-        bool _showCameraFPSSettings;
-        bool _showAddSceneObjectDialog;
-        bool _showFileIODialog;
-        bool _showDemo;
-        bool _showTestWindow;
-        bool _showOpenDialog;
+        std::unique_ptr<SceneGraphWindow> _sceneGraphWindow;
+        std::unique_ptr<ObjectPropertiesWindow> _objectPropertiesWindow;
+        std::unique_ptr<NewDialogWindow> _newDialogWindow;
+        std::unique_ptr<OpenDialogWindow> _openDialogWindow;
 
-        char _openDialogEditTextBuffer[1024];
+        bool _showDemo;
 
         void initializeImGui();
 
         void drawMainMenu();
-        void drawTestWindow();
-        void drawSceneGraph();
-        void drawObjectProperties();
-        void drawOpenDialog();
 
         void inspectSceneObject(SceneObject* object = nullptr);
 

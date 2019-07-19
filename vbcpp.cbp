@@ -170,6 +170,16 @@
 		<Unit filename="Editor/EditorEvent.h" />
 		<Unit filename="Editor/EditorGUI.cpp" />
 		<Unit filename="Editor/EditorGUI.h" />
+		<Unit filename="Editor/Windows/EditorWindow.cpp" />
+		<Unit filename="Editor/Windows/EditorWindow.h" />
+		<Unit filename="Editor/Windows/NewDialogWindow.cpp" />
+		<Unit filename="Editor/Windows/NewDialogWindow.h" />
+		<Unit filename="Editor/Windows/ObjectPropertiesWindow.cpp" />
+		<Unit filename="Editor/Windows/ObjectPropertiesWindow.h" />
+		<Unit filename="Editor/Windows/OpenDialogWindow.cpp" />
+		<Unit filename="Editor/Windows/OpenDialogWindow.h" />
+		<Unit filename="Editor/Windows/SceneGraphWindow.cpp" />
+		<Unit filename="Editor/Windows/SceneGraphWindow.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
 		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />
