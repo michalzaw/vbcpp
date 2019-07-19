@@ -162,6 +162,10 @@ void Editor::clearScene()
     _sceneManager->addSky(skyboxTexture);
     GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
+    _axisObject = _sceneManager->addSceneObject("axis");
+    RenderObject* axisRenderObject = new RenderObject(ResourceManager::getInstance().loadModel("axis.fbx", ""));
+    GraphicsManager::getInstance().addRenderObject(axisRenderObject, _axisObject);
+
     // ---------------------------------------------------
 	/*BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
     Bus* bus = busLoader.loadBus("h9_raycast");*/
@@ -218,21 +222,24 @@ void Editor::run()
 
 
         // input
-        processInput(deltaTime);
-
-        glfwGetCursorPos(_window->getWindow(), &xPos, &yPos);
-
-        if (_cameraActive)
+        if (!_editorGUI->GUIhasFocus())
         {
-            double dx = (xPos - lastXPos);
-            double dy = (yPos - lastYPos);
+            processInput(deltaTime);
 
-            if(_camera)
-                _cameraObject->rotate(-dy * _camera->getRotationSpeed(), -dx * _camera->getRotationSpeed(), 0.0f);
+            glfwGetCursorPos(_window->getWindow(), &xPos, &yPos);
+
+            if (_cameraActive)
+            {
+                double dx = (xPos - lastXPos);
+                double dy = (yPos - lastYPos);
+
+                if(_camera)
+                    _cameraObject->rotate(-dy * _camera->getRotationSpeed(), -dx * _camera->getRotationSpeed(), 0.0f);
+            }
+
+            lastXPos = xPos;
+            lastYPos = yPos;
         }
-
-        lastXPos = xPos;
-        lastYPos = yPos;
 
 
         // custom events from GUI
@@ -261,6 +268,11 @@ void Editor::run()
         while ( accumulator > TIME_STEP )
         {
             accumulator -= TIME_STEP;
+
+            if (_editorGUI->getSelectedSceneObject() != nullptr)
+            {
+                _axisObject->setPosition(_editorGUI->getSelectedSceneObject()->getPosition());
+            }
         }
 
 
@@ -304,6 +316,11 @@ void Editor::processInput(double deltaTime)
 
 void Editor::mouseButtonCallback(int button, int action, int mods)
 {
+    if (_editorGUI->GUIhasFocus())
+    {
+        return;
+    }
+
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
     {
         _cameraActive = true;

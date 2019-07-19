@@ -1,5 +1,7 @@
 #include "EditorGUI.h"
 
+#include "../Graphics/Renderer.h"
+
 #include "../Utils/Strings.h"
 
 
@@ -52,19 +54,31 @@ void EditorGUI::setSelectedSceneObject(SceneObject* sceneObject)
 }
 
 
-bool  EditorGUI::hasNextEvent()
+SceneObject* EditorGUI::getSelectedSceneObject()
+{
+    return _selectedSceneObject;
+}
+
+
+bool EditorGUI::hasNextEvent()
 {
     return !_events.empty();
 }
 
 
-EditorEvent  EditorGUI::getNextEvent()
+EditorEvent EditorGUI::getNextEvent()
 {
     EditorEvent event = _events.front();
 
     _events.pop_front();
 
     return event;
+}
+
+
+bool EditorGUI::GUIhasFocus()
+{
+    return (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard);
 }
 
 
@@ -167,7 +181,14 @@ void EditorGUI::drawTestWindow()
 
 void EditorGUI::drawSceneGraph()
 {
-    if (ImGui::Begin("Scene Graph"))
+    glm::uvec2 windowSize(Renderer::getInstance().getWindowDimensions());
+
+    ImGui::SetNextWindowSize(ImVec2(200, windowSize.y - 18), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100, windowSize.y - 18), ImVec2(500, windowSize.y - 18));
+    ImGui::SetNextWindowPos(ImVec2(0, 18));
+
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+    if (ImGui::Begin("Scene Graph", nullptr, windowFlags))
     {
         std::list<SceneObject*>& sceneObjects = _sceneManager->getSceneObjects();
         for (std::list<SceneObject*>::iterator i = sceneObjects.begin(); i != sceneObjects.end(); ++i)
@@ -215,8 +236,17 @@ void EditorGUI::inspectSceneObject(SceneObject* object)
 
 void EditorGUI::drawObjectProperties()
 {
-    if (ImGui::Begin("Object Properties", &_showObjectProperties))
+    glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
+
+    ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowSizeConstraints(ImVec2(100, mainWindowSize.y - 18), ImVec2(500, mainWindowSize.y - 18));
+
+    ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+    if (ImGui::Begin("Object Properties", &_showObjectProperties, windowFlags))
     {
+        ImVec2 windowSize = ImGui::GetWindowSize();
+        ImGui::SetWindowPos(ImVec2(mainWindowSize.x - windowSize.x, 18));
+
         if (_selectedSceneObject)
         {
             // Object's name

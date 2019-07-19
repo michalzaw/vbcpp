@@ -52,9 +52,12 @@ class EditorGUI
         ~EditorGUI();
 
         void setSelectedSceneObject(SceneObject* sceneObject);
+        SceneObject* getSelectedSceneObject();
 
         bool hasNextEvent();
         EditorEvent getNextEvent();
+
+        bool GUIhasFocus();
 
         void draw();
 

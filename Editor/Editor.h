@@ -30,6 +30,8 @@ class Editor
         CameraFPS* _camera;
         SceneObject* _cameraObject;
 
+        SceneObject* _axisObject;
+
         bool createWindow();
         void initializeEngineSubsystems();
         void clearScene();

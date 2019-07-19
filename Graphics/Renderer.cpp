@@ -725,6 +725,22 @@ float Renderer::getDayNightRatio()
 }
 
 
+void Renderer::setWindowDimensions(unsigned int screenWidth, unsigned int screenHeight)
+{
+    _screenWidth = screenWidth;
+    _screenHeight = screenHeight;
+
+    Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+    defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+}
+
+
+glm::uvec2 Renderer::getWindowDimensions()
+{
+    return glm::uvec2(_screenWidth, _screenHeight);
+}
+
+
 void Renderer::toogleRenderAABBFlag()
 {
     _renderObjectsAAABB = !_renderObjectsAAABB;
