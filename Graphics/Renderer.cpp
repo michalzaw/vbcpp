@@ -634,6 +634,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // EDITOR_AXIS_SHADER
+    _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
+
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
@@ -1036,6 +1039,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
+            }
+            else if (material->shader == EDITOR_AXIS_SHADER)
+            {
+                glClear(GL_DEPTH_BUFFER_BIT);
             }
 
             currentShader = material->shader;

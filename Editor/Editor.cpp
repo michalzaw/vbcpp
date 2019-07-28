@@ -163,7 +163,9 @@ void Editor::clearScene()
     GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
     _axisObject = _sceneManager->addSceneObject("axis");
-    RenderObject* axisRenderObject = new RenderObject(ResourceManager::getInstance().loadModel("axis.fbx", ""));
+    RStaticModel* axisModel = ResourceManager::getInstance().loadModel("axis.fbx", "");
+    axisModel->getMaterial(0)->shader = EDITOR_AXIS_SHADER;
+    RenderObject* axisRenderObject = new RenderObject(axisModel);
     GraphicsManager::getInstance().addRenderObject(axisRenderObject, _axisObject);
 
     // ---------------------------------------------------
