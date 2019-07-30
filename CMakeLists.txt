@@ -4,8 +4,13 @@ project(VBCPP)
 
 set(BIN_NAME vbcpp)
 
+set(CMAKE_CXX_STANDARD 11)
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 #set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+
+set(OPENAL_INCLUDE_DIR ../openal-soft/include)
+set(OPENAL_LIBRARY OpenAL)
 
 add_subdirectory(libs/glew)
 add_subdirectory(libs/glfw-3.3)
@@ -13,8 +18,10 @@ add_subdirectory(libs/soil)
 add_subdirectory(libs/bullet)
 add_subdirectory(libs/assimp-4.0.1)
 add_subdirectory(libs/freetype)
+add_subdirectory(libs/openal-soft)
+add_subdirectory(libs/freealut)
 
-SET_TARGET_PROPERTIES(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Libs/assimp")
+#SET_TARGET_PROPERTIES(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(assimp PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(IrrXML PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(zlibstatic PROPERTIES FOLDER "Libs/assimp")
@@ -41,7 +48,22 @@ SET_TARGET_PROPERTIES(uninstall PROPERTIES FOLDER "Libs/GLFW3")
 SET_TARGET_PROPERTIES(glfw PROPERTIES FOLDER "Libs/GLFW3")
 SET_TARGET_PROPERTIES(soil PROPERTIES FOLDER "Libs/SOIL")
 
-FIND_PACKAGE(OpenAL) 
+SET_TARGET_PROPERTIES(alrecord PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(altonegen PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(common PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(makehrtf PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(native-tools PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(OpenAL PROPERTIES FOLDER "Libs/OpenAL")
+SET_TARGET_PROPERTIES(openal-info PROPERTIES FOLDER "Libs/OpenAL")
+
+SET_TARGET_PROPERTIES(alut PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(hello_world PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(playfile PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(test_errorstuff PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(test_fileloader PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(test_memoryloader PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(test_version PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
 
 add_subdirectory(Bus)
 source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
@@ -97,6 +119,12 @@ include_directories (libs/freetype/include)
 
 include_directories (libs/glm/include)
 
+find_library(OpenAL PATHS lib)
+include_directories (libs/openal-soft/include)
+
+find_library(alut PATHS lib)
+include_directories (libs/freealut/include)
+
 add_executable(${BIN_NAME}
                     ${BUS_SOURCES}
                     ${BUS_HEADERS}
@@ -119,4 +147,4 @@ add_executable(${BIN_NAME}
 
 set_target_properties (${BIN_NAME} PROPERTIES VS_STARTUP_PROJECT ${BIN_NAME})
 
-target_link_libraries(${BIN_NAME} glfw glew soil BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype)
+target_link_libraries(${BIN_NAME} glfw glew soil BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
