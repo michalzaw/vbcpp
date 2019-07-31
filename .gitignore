@@ -13,3 +13,7 @@ obj
 doc
 
 build*/
+*.ilk
+*.dll
+*.pdb
+*.exe
