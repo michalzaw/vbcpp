@@ -144,7 +144,9 @@ void Engine::calculateTorqueLine()
     int pointCount = _torqueCurve.size();
     _curveParams.resize(pointCount);
 
-	for ( char i = 0; i < pointCount; i++ )
+	// TODO: verify
+	//for ( char i = 0; i < pointCount; i++ )
+	for (char i = 0; i < pointCount - 1; i++)
 	{
 		_curveParams[i].a = ( static_cast<float>(_torqueCurve[i+1].torque) - static_cast<float>(_torqueCurve[i].torque) ) / ( static_cast<float>(_torqueCurve[i+1].rpm) - static_cast<float>(_torqueCurve[i].rpm) );
 		//printf("Torque a parameter: %3.2f\n", _curveParams[i].a );
@@ -183,7 +185,7 @@ void Engine::update(float dt)
 
 float Engine::getMaxTorque()
 {
-    float maxTorque;
+    float maxTorque = 0.0f;
 
 	if ( _currentRPM < _torqueCurve[0].rpm )
         maxTorque = 0.0f;

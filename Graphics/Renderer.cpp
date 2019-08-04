@@ -1025,7 +1025,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
     CameraStatic* camera = renderData->camera;
 
-    ShaderType currentShader;
+    ShaderType currentShader = NUMBER_OF_SHADERS;
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
         RStaticModel* model = i->model;
@@ -1181,7 +1181,7 @@ void Renderer::renderScene(RenderData* renderData)
 
     CameraStatic* camera = renderData->camera;
 
-    ShaderType currentShader;
+    ShaderType currentShader = NUMBER_OF_SHADERS;
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
         RStaticModel* model = i->model;

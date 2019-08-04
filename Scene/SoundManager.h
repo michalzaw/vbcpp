@@ -78,7 +78,7 @@ class SoundManager : virtual public RefCounter
 
                 glm::vec3 fwd = glm::cross(up, right);
 
-                alListenerf(AL_VELOCITY, 1.0f);
+                alListenerf(AL_METERS_PER_UNIT, 1.0f);
 
                 float orient[6] = { /*fwd:*/ fwd.x, fwd.y, fwd.z, /*up:*/ up.x, up.y, up.z };
                 alListenerfv( AL_ORIENTATION, orient );

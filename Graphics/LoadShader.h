@@ -7,7 +7,7 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 
 //GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName);

@@ -1,5 +1,7 @@
 #include "LoadShader.h"
 
+#include <sstream>
+
 
 std::string ShaderLoader::replaceConstatnsInLine(std::string line, const std::unordered_map<std::string, std::string>& constants)
 {
