@@ -106,7 +106,7 @@
 #else
 #include IMGUI_IMPL_OPENGL_LOADER_CUSTOM
 #endif*/
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 #endif
 
 // Desktop GL has glDrawElementsBaseVertex() which GL ES and WebGL don't have.

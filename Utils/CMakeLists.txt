@@ -1,8 +1,10 @@
 set (UTILS_SOURCES
 	Utils/Collision.cpp
 	Utils/Engine.cpp
+	Utils/FilesHelper.cpp
 	Utils/Gearbox.cpp
 	Utils/Helpers.cpp
+	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
 	Utils/RStaticModel.cpp
@@ -11,6 +13,8 @@ set (UTILS_SOURCES
 	Utils/RTextureCubeMap.cpp
 	Utils/ResourceManager.cpp
 	Utils/SoundLoader.cpp
+	Utils/stb_image.cpp
+	Utils/Strings.cpp
 	Utils/tinyxml2.cpp
 )
 
@@ -19,8 +23,10 @@ set (UTILS_HEADERS
 	Utils/Engine.h
 	Utils/FilesHelper.h
 	Utils/Gearbox.h
-	Utils/Math.h
 	Utils/Helpers.hpp
+	Utils/Logger.h
+	Utils/Math.h
+	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h
 	Utils/RSound.h
@@ -35,6 +41,7 @@ set (UTILS_HEADERS
 	Utils/Strings.h
 	Utils/Timer.h
 	Utils/tinyxml2.h
+	Utils/XmlUtils.h
 )
 
 set (UTILS_SOURCES ${UTILS_SOURCES} PARENT_SCOPE)

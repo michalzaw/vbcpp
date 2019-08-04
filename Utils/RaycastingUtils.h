@@ -2,7 +2,7 @@
 #define RAYCASTINGUTILS_H_INCLUDED
 
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 #include "../Graphics/CameraStatic.hpp"
 

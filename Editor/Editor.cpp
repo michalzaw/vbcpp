@@ -125,7 +125,15 @@ void Editor::initializeEngineSubsystems()
     OGLDriver::getInstance().initialize();
 
     Renderer& renderer = Renderer::getInstance();
-    renderer.init(_window->getWidth(), _window->getHeight());
+	renderer.setMsaaAntialiasing(true);
+	renderer.setMsaaAntialiasingLevel(4);
+	renderer.setBloom(false);
+	renderer.setIsShadowMappingEnable(false);
+	renderer.init(_window->getWidth(), _window->getHeight());
+	renderer.setDayNightRatio(1.0f);
+	renderer.setAlphaToCoverage(true);
+	renderer.setExposure(1.87022f);
+	renderer.t = 0;
 
     _physicsManager = new PhysicsManager;
     _soundManager = new SoundManager;

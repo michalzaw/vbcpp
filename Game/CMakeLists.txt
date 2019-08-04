@@ -7,6 +7,7 @@ set (GAME_SOURCES
 set (GAME_HEADERS 
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h
+	Game/Directories.h
 	Game/GameConfig.h
     
 )

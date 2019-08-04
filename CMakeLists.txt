@@ -19,12 +19,12 @@ set(OPENAL_LIBRARY OpenAL)
 
 add_subdirectory(libs/glew)
 add_subdirectory(libs/glfw-3.3)
-add_subdirectory(libs/soil)
 add_subdirectory(libs/bullet)
 add_subdirectory(libs/assimp-4.0.1)
 add_subdirectory(libs/freetype)
 add_subdirectory(libs/openal-soft)
 add_subdirectory(libs/freealut)
+#add_subdirectory(libs/stb_image)
 
 #SET_TARGET_PROPERTIES(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(assimp PROPERTIES FOLDER "Libs/assimp")
@@ -51,7 +51,6 @@ SET_TARGET_PROPERTIES(LinearMath PROPERTIES FOLDER "Libs/Bullet")
 SET_TARGET_PROPERTIES(freetype PROPERTIES FOLDER "Libs/FreeType")
 SET_TARGET_PROPERTIES(uninstall PROPERTIES FOLDER "Libs/GLFW3")
 SET_TARGET_PROPERTIES(glfw PROPERTIES FOLDER "Libs/GLFW3")
-SET_TARGET_PROPERTIES(soil PROPERTIES FOLDER "Libs/SOIL")
 SET_TARGET_PROPERTIES(alrecord PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(altonegen PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(common PROPERTIES FOLDER "Libs/OpenAL")
@@ -71,6 +70,9 @@ SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
 add_subdirectory(Bus)
 source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
 
+add_subdirectory(Editor)
+source_group("Editor" FILES ${EDITOR_SOURCES} ${EDITOR_HEADERS})
+
 add_subdirectory(Game)
 source_group("Game" FILES ${GAME_SOURCES} ${GAME_HEADERS})
 
@@ -79,6 +81,9 @@ source_group("Graphics" FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
 
 add_subdirectory(GUI)
 source_group("GUI" FILES ${GUI_SOURCES} ${GUI_HEADERS})
+
+add_subdirectory(ImGui)
+source_group("ImGui" FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 
 add_subdirectory(Physics)
 source_group("Physics" FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
@@ -94,6 +99,7 @@ source_group("Window" FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
 set (SOURCES 
     main.cpp
+	EditorMain.cpp
 )
 
 source_group("VBCPP_MAIN_GROUP" FILES ${SOURCES})
@@ -103,9 +109,6 @@ include_directories (libs/glew/include)
 
 find_library(glfw glfw3 PATHS lib)
 include_directories (libs/glfw-3.3/include)
-
-find_library(soil PATHS lib)
-include_directories (libs/soil/inc)
 
 find_library(BulletCollision PATHS lib)
 find_library(BulletDynamics PATHS lib)
@@ -128,13 +131,19 @@ include_directories (libs/openal-soft/include)
 find_library(alut PATHS lib)
 include_directories (libs/freealut/include)
 
+include_directories (libs/stb_image)
+
 add_executable(${BIN_NAME}
                     ${BUS_SOURCES}
                     ${BUS_HEADERS}
+                    ${EDITOR_SOURCES}
+                    ${EDITOR_HEADERS}
                     ${GAME_SOURCES}
                     ${GAME_HEADERS}
                     ${GRAPHICS_SOURCES} 
                     ${GRAPHICS_HEADERS}
+                    ${IMGUI_SOURCES}
+                    ${IMGUI_HEADERS}
                     ${GUI_SOURCES}
                     ${GUI_HEADERS}
                     ${PHYSICS_SOURCES}
@@ -154,4 +163,4 @@ set_target_properties(${BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIR
 #VS working dir
 set_target_properties(${BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${BIN_NAME} glfw glew soil BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)

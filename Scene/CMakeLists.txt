@@ -6,6 +6,7 @@ set (SCENE_SOURCES
 )
 
 set (SCENE_HEADERS 
+	Scene/ClickableObject.h
 	Scene/Component.h
 	Scene/SceneManager.h
 	Scene/SceneObject.h

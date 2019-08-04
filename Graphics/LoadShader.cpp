@@ -10,7 +10,7 @@ std::string ShaderLoader::replaceConstatnsInLine(std::string line, const std::un
         const std::string& constName = "{" + element.first + "}";
         const std::string& constValue = element.second;
 
-        unsigned int pos = line.find(constName);
+        size_t pos = line.find(constName);
         if (pos != std::string::npos)
         {
             line.replace(pos, constName.size(), constValue);

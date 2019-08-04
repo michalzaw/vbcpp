@@ -1,15 +1,19 @@
 set (BUS_SOURCES
 	Bus/BusConstraint.cpp
+	Bus/BusLoader.cpp
 	Bus/BusRaycast.cpp
 	Bus/Desktop.cpp
+	Bus/DoorClassic.cpp
 )
 
 set (BUS_HEADERS
 	Bus/Bus.h
 	Bus/BusConstraint.h
+	Bus/BusLoader.h
 	Bus/BusRaycast.h
 	Bus/Desktop.h
 	Bus/Door.h
+	Bus/DoorClassic.h
 	Bus/DoorSE.h
 	Bus/DoorSimple.h
 )
