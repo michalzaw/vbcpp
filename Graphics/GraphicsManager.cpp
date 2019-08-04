@@ -11,7 +11,7 @@ GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f),
     _globalEnvironmentCaptureComponent(NULL)
 {
-    _quadTree = new QuadTree(glm::vec3(512, 512, 512));
+    //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
 }
 
 
@@ -37,7 +37,22 @@ GraphicsManager::~GraphicsManager()
         delete *i;
     }
 
-    delete _quadTree;
+    for (std::list<EnvironmentCaptureComponent*>::iterator i = _environmentCaptureComponents.begin(); i != _environmentCaptureComponents.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::vector<MirrorComponent*>::iterator i = _mirrorComponents.begin(); i != _mirrorComponents.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
+    {
+        delete *i;
+    }
+
+    //delete _quadTree;
 }
 
 GraphicsManager& GraphicsManager::getInstance()
@@ -56,7 +71,7 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     owner->addComponent(object);
 
     _renderObjects.push_back(object);
-    _quadTree->addObject(object);
+    //_quadTree->addObject(object);
 
     return object;
 }

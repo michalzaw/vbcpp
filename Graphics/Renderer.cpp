@@ -40,6 +40,10 @@ Renderer::~Renderer()
     {
         OGLDriver::getInstance().deleteVBO(_aabbVbo);
     }
+
+    OGLDriver::getInstance().deleteFramebuffer(_mainRenderData->framebuffer);
+
+    delete _mainRenderData;
 }
 
 
@@ -680,6 +684,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     constants["samplesCount"] = toString(_msaaAntialiasingLevel);
     _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag", defines, constants);
 
+    // EDITOR_AXIS_SHADER
+    _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
@@ -828,6 +834,22 @@ void Renderer::setDayNightRatio(float ratio)
 float Renderer::getDayNightRatio()
 {
     return _dayNightRatio;
+}
+
+
+void Renderer::setWindowDimensions(unsigned int screenWidth, unsigned int screenHeight)
+{
+    _screenWidth = screenWidth;
+    _screenHeight = screenHeight;
+
+    Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+    defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+}
+
+
+glm::uvec2 Renderer::getWindowDimensions()
+{
+    return glm::uvec2(_screenWidth, _screenHeight);
 }
 
 
@@ -1195,6 +1217,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
+            }
+            else if (material->shader == EDITOR_AXIS_SHADER)
+            {
+                glClear(GL_DEPTH_BUFFER_BIT);
             }
 
             currentShader = material->shader;

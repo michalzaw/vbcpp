@@ -135,8 +135,9 @@ glm::vec3 CameraStatic::getUpVector()
 {
     if (!_upVectorIs)
     {
-        _upVector = transformToGlobal(getLocalUpVector());
+        //_upVector = transformToGlobal(getLocalUpVector());
 
+        _upVector = glm::cross(getRightVector(), getDirection());
         _upVectorIs = true;
     }
 

@@ -68,4 +68,7 @@ inline bool toBool(const char* String)
 }
 
 
+std::string trim(const std::string& string);
+
+
 #endif // STRINGS_H_INCLUDED

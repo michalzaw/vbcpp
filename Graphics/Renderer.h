@@ -111,6 +111,9 @@ class Renderer
         void setDayNightRatio(float ratio);
         float getDayNightRatio();
 
+        void setWindowDimensions(unsigned int screenWidth, unsigned int screenHeight);
+        glm::uvec2 getWindowDimensions();
+
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
 

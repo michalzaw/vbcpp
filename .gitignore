@@ -11,3 +11,7 @@ bin/vbcpp*
 # DIRECTORIES
 obj
 doc
+
+#ImGui
+bin/imgui_log.txt
+bin/imgui.ini

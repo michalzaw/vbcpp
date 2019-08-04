@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="solid" name="Material.001" ambient="0,0,0,1" diffuse="0.64,0.64,0.64,1" specular="0.25,0.25,0.25,1" diffuse_texture="axisTexture.png" normalmap_texture="" alpha_texture="" shininess="9.60784" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

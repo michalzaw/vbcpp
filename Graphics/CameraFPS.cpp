@@ -163,6 +163,16 @@ void CameraFPS::setRotationSpeed(float speed)
 	_rotateSpeed = speed;
 }
 
+float CameraFPS::getMoveSpeed()
+{
+    return _moveSpeed;
+}
+
+float CameraFPS::getRotationSpeed()
+{
+    return _rotateSpeed;
+}
+
 /*void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)
 {
     _oldXpos = xpos;

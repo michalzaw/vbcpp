@@ -99,7 +99,7 @@ extern "C" {
 #elif defined(GLFW_EXPOSE_NATIVE_EGL)
  #include <EGL/egl.h>
 #else
- #error "No context API selected"
+/* #error "No context API selected"*/
 #endif
 
 

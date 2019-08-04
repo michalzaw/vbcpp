@@ -10,7 +10,7 @@ using namespace tinyxml2;
 #include "../Graphics/LoadTerrainModel.h"
 
 SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr)
+    : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr), terrainModel(NULL)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";
@@ -132,6 +132,12 @@ SceneObject* SceneManager::getSceneObject(std::string name)
 }
 
 
+std::list<SceneObject*>& SceneManager::getSceneObjects()
+{
+    return _sceneObjects;
+}
+
+
 void SceneManager::addSky(RTexture* texture)
 {
     if (_sky != NULL)
@@ -203,6 +209,7 @@ void SceneManager::loadScene(std::string filename)
     std::string heightmapFullPath = dirPath + terrainHeightmap;
     std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
     RStaticModel* terrModel = TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, dirPath, 20);//, terrainMaterial, 20);
+    terrainModel = terrModel;
     //RModel* terrain = new RModel("", terrModel);
     SceneObject* terrainObject = addSceneObject("terrain");
     RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrModel), terrainObject);
@@ -348,6 +355,7 @@ void SceneManager::loadScene(std::string filename)
         //std::cout << segments.size() << std::endl;
         // create road
         RStaticModel* roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
+        roadsModels.push_back(roadModel);
         //RModel* roadModel2 = new RModel("", roadModel);
         //RStaticModel* roadModel2 = new RStaticModel;
         SceneObject* roadSceneObject = addSceneObject(name);

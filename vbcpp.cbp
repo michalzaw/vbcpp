@@ -92,6 +92,7 @@
 				<Compiler>
 					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add option="-DWIN32" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
 					<Add directory="include/freetype" />
@@ -123,6 +124,7 @@
 				<Compiler>
 					<Add option="-march=i686" />
 					<Add option="-std=c++11" />
+					<Add option="-DWIN32" />
 					<Add directory="include" />
 					<Add directory="include/bullet" />
 					<Add directory="include/freetype" />
@@ -162,6 +164,24 @@
 		<Unit filename="Bus/DoorClassic.h" />
 		<Unit filename="Bus/DoorSE.h" />
 		<Unit filename="Bus/DoorSimple.h" />
+		<Unit filename="EditorMain.cpp" />
+		<Unit filename="Editor/Editor.cpp" />
+		<Unit filename="Editor/Editor.h" />
+		<Unit filename="Editor/EditorEvent.h" />
+		<Unit filename="Editor/EditorGUI.cpp" />
+		<Unit filename="Editor/EditorGUI.h" />
+		<Unit filename="Editor/Windows/CameraSettingsWindow.cpp" />
+		<Unit filename="Editor/Windows/CameraSettingsWindow.h" />
+		<Unit filename="Editor/Windows/EditorWindow.cpp" />
+		<Unit filename="Editor/Windows/EditorWindow.h" />
+		<Unit filename="Editor/Windows/NewDialogWindow.cpp" />
+		<Unit filename="Editor/Windows/NewDialogWindow.h" />
+		<Unit filename="Editor/Windows/ObjectPropertiesWindow.cpp" />
+		<Unit filename="Editor/Windows/ObjectPropertiesWindow.h" />
+		<Unit filename="Editor/Windows/OpenDialogWindow.cpp" />
+		<Unit filename="Editor/Windows/OpenDialogWindow.h" />
+		<Unit filename="Editor/Windows/SceneGraphWindow.cpp" />
+		<Unit filename="Editor/Windows/SceneGraphWindow.h" />
 		<Unit filename="GUI/FontLoader.cpp" />
 		<Unit filename="GUI/FontLoader.h" />
 		<Unit filename="GUI/GUIManager.cpp" />
@@ -251,6 +271,20 @@
 		<Unit filename="Graphics/VBO.h" />
 		<Unit filename="Graphics/Vector3.h" />
 		<Unit filename="Graphics/Vertex.h" />
+		<Unit filename="ImGui/imconfig.h" />
+		<Unit filename="ImGui/imgui.cpp" />
+		<Unit filename="ImGui/imgui.h" />
+		<Unit filename="ImGui/imgui_demo.cpp" />
+		<Unit filename="ImGui/imgui_draw.cpp" />
+		<Unit filename="ImGui/imgui_impl_glfw.cpp" />
+		<Unit filename="ImGui/imgui_impl_glfw.h" />
+		<Unit filename="ImGui/imgui_impl_opengl3.cpp" />
+		<Unit filename="ImGui/imgui_impl_opengl3.h" />
+		<Unit filename="ImGui/imgui_internal.h" />
+		<Unit filename="ImGui/imgui_widgets.cpp" />
+		<Unit filename="ImGui/imstb_rectpack.h" />
+		<Unit filename="ImGui/imstb_textedit.h" />
+		<Unit filename="ImGui/imstb_truetype.h" />
 		<Unit filename="Physics/Constraint.cpp" />
 		<Unit filename="Physics/Constraint.hpp" />
 		<Unit filename="Physics/ConstraintBall.cpp" />
@@ -294,6 +328,7 @@
 		<Unit filename="Utils/Collision.h" />
 		<Unit filename="Utils/Engine.cpp" />
 		<Unit filename="Utils/Engine.h" />
+		<Unit filename="Utils/FilesHelper.cpp" />
 		<Unit filename="Utils/FilesHelper.h" />
 		<Unit filename="Utils/Gearbox.cpp" />
 		<Unit filename="Utils/Gearbox.h" />
@@ -314,12 +349,15 @@
 		<Unit filename="Utils/RTexture2D.h" />
 		<Unit filename="Utils/RTextureCubeMap.cpp" />
 		<Unit filename="Utils/RTextureCubeMap.h" />
+		<Unit filename="Utils/RaycastingUtils.cpp" />
+		<Unit filename="Utils/RaycastingUtils.h" />
 		<Unit filename="Utils/RefCounter.h" />
 		<Unit filename="Utils/Resource.h" />
 		<Unit filename="Utils/ResourceManager.cpp" />
 		<Unit filename="Utils/ResourceManager.h" />
 		<Unit filename="Utils/SoundLoader.cpp" />
 		<Unit filename="Utils/SoundLoader.h" />
+		<Unit filename="Utils/Strings.cpp" />
 		<Unit filename="Utils/Strings.h" />
 		<Unit filename="Utils/Timer.h" />
 		<Unit filename="Utils/XmlUtils.h" />

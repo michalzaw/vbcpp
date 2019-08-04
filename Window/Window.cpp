@@ -14,7 +14,7 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100, bool isFullscreen = false)
+bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool isResizable)
 {
     _width = w;
     _height = h;
@@ -35,7 +35,7 @@ bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+	glfwWindowHint( GLFW_RESIZABLE, isResizable );
 
 	// Create window with given size and title
 	_win = glfwCreateWindow(_width, _height, _title.c_str(), _isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
