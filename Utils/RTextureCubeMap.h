@@ -23,8 +23,8 @@ class RTextureCubeMap : public RTexture
 
     public:
         // data: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
-        RTextureCubeMap(std::string path, unsigned char** data, TextureFormat format, unsigned int size);
-        RTextureCubeMap(TextureFormat format, unsigned int size);
+        RTextureCubeMap(std::string path, unsigned char** data, TextureFormat internalFormat, unsigned int size);
+        RTextureCubeMap(TextureFormat internalFormat, unsigned int size);
         virtual ~RTextureCubeMap();
 
         void setTexSubImage(unsigned char* data, CubeMapFace face, int offsetX, int offsetY, int width, int height);

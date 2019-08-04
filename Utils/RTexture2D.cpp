@@ -2,9 +2,11 @@
 
 #include <iostream>
 
+#include "Logger.h"
 
-RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat format, glm::uvec2 size)
-    : RTexture(path, TT_2D, format, size)
+
+RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size)
+    : RTexture(path, TT_2D, internalFormat, size)
 {
     std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
 
@@ -12,12 +14,12 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat format, g
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, data);
 }
 
 
-RTexture2D::RTexture2D(TextureFormat format, glm::uvec2 size)
-    : RTexture("", TT_2D, format, size)
+RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, glm::uvec2 size)
+    : RTexture(path, TT_2D, internalFormat, size)
 {
     std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
 
@@ -25,7 +27,23 @@ RTexture2D::RTexture2D(TextureFormat format, glm::uvec2 size)
     glGenTextures(1, &_texID);
     bind();
 
-    glTexImage2D(_textureType, 0, _format, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
+    glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_FLOAT, data);
+}
+
+
+RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMultisample, int samplesCount)
+    : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size)
+{
+    std::cout << "RTexture2D - Konstruktor: " << _path << std::endl;
+
+
+    glGenTextures(1, &_texID);
+    bind();
+
+    if (_textureType == TT_2D_MULTISAMPLE)
+        glTexImage2DMultisample(_textureType, samplesCount, _internalFormat, _size.x, _size.y, GL_TRUE);
+    else
+        glTexImage2D(_textureType, 0, _internalFormat, _size.x, _size.y, 0, _format, GL_UNSIGNED_BYTE, NULL);
 }
 
 
@@ -43,6 +61,19 @@ void RTexture2D::setTexSubImage(unsigned char* data, int offsetX, int offsetY, i
     bind();
 
     glTexSubImage2D(_textureType, 0, offsetX, offsetY, width, height, _format, GL_UNSIGNED_BYTE, data);
+
+    _isGenerateMipmap = false;
+}
+
+
+void RTexture2D::setTexSubImage(float* data, int offsetX, int offsetY, int width, int height)
+{
+    if (offsetX + width > _size.x || offsetY + height > _size.y)
+        return;
+
+    bind();
+
+    glTexSubImage2D(_textureType, 0, offsetX, offsetY, width, height, _format, GL_FLOAT, data);
 
     _isGenerateMipmap = false;
 }

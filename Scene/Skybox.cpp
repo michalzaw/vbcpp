@@ -3,7 +3,7 @@
 #include "SceneManager.h"
 
 
-Skybox::Skybox(RTextureCubeMap* texture, SceneManager* sceneManager)
+Skybox::Skybox(RTexture* texture, SceneManager* sceneManager)
     : SceneObject("sky", sceneManager)
 {
     //RModel* skyModel = ResourceManager::getInstance().loadModel("data/cube.3ds", "");

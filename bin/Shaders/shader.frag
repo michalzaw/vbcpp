@@ -62,7 +62,9 @@ in vec3 BitangentWorldspace;
 in vec4 PositionLightSpace[CASCADES_COUNT];
 in float ClipSpacePositionZ;
 
-out vec4 FragmentColor;
+//out vec4 FragmentColor;
+layout (location = 0) out vec4 FragmentColor;
+layout (location = 1) out vec4 BrightnessColor;  
 
 
 uniform LightsBlock
@@ -114,10 +116,10 @@ vec4 specular;
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
-	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
+	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity * 0.05;
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
-	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;
+	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 20;
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
@@ -174,6 +176,8 @@ void main()
 	
 #ifdef SOLID
 	textureColor = texture2D(Texture, TexCoord);
+	float gamma = 2.2;
+	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
 	ambient = textureColor;
 	diffuse = textureColor;
 	specular = matSpecular * textureColor;
@@ -194,18 +198,37 @@ void main()
 	specular = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 #endif
 	
+float isGrass = 0.0f;
 #ifdef GRASS
 	textureColor = textureColor * grassColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
 	//	discard;
+	isGrass = 1.0f;
 #endif
 	
 #ifdef ALPHA_TEST
 	if (textureColor.a < 0.1f)
 		discard;
+	
+	vec3 eyeToFramgent = normalize(Position - CameraPosition);
+	vec3 lightDir = Lights.DirLights[0].Direction;
+	
+	float miFactor = max(dot(-lightDir, eyeToFramgent), 0.0f);
+	
+	miFactor = mix(miFactor, 0, isGrass);
+	
+	diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
+	//diffuse.rgb = mix(diffuse.rgb, 1.5 * diffuse.rgb, miFactor);
+	//ambient.rgb = mix(ambient.rgb, 4 * vec3(ambient.g * 0.9, ambient.g * 1.0, ambient.g * 0.2), miFactor);
+	
+	float DiffuseFactor = dot(normal, -lightDir);
+	//if (miFactor > 0.0f)
+	float normalFactor = mix(1, -1, miFactor);
+		normal = normalFactor * normal;
 #endif
+
 	
 	vec4 LightsColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -301,4 +324,17 @@ void main()
 #endif
 
 	FragmentColor += matEmissive * textureColor;
+	
+#ifdef ALPHA_TEST
+	float _Cutoff = 0.3f;
+	FragmentColor.a = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
+#endif
+
+
+
+	float brightness = dot(FragmentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+	if (brightness > 0.1f)
+		BrightnessColor = vec4(FragmentColor.rgb, 1.0f);
+	else
+		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }

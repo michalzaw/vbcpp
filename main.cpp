@@ -17,6 +17,7 @@
 #include "Utils/Timer.h"
 #include "Utils/Helpers.hpp"
 #include "Utils/Math.h"
+#include "Utils/Logger.h"
 
 #include "Bus/BusConstraint.h"
 #include "Bus/BusRaycast.h"
@@ -179,6 +180,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     {
         Renderer::getInstance().toogleRenderOBBFlag();
     }
+    if (key == GLFW_KEY_5 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
+    }
+    if (key == GLFW_KEY_8 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
+    }
 }
 
 void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
@@ -211,6 +220,9 @@ void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm:
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
+    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
+        cameraControll = !cameraControll;
+
     if (action == GLFW_RELEASE)
     {
         double xpos, ypos;
@@ -405,6 +417,27 @@ void readInput(GLFWwindow* window, double deltaTime)
             camFPS->getSceneObject()->rotate(0, degToRad(-delta), 0);
         }
     }
+
+    if (glfwGetKey( window, GLFW_KEY_6 ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() * 1.1f);
+        //dirLight->rotate(0, -0.001, 0);
+        //Light* l = static_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+        //Logger::info("Light dir: " + toString(l->getDirection().x) + ", " + toString(l->getDirection().y) + ", " + toString(l->getDirection().z));
+    }
+    if (glfwGetKey( window, GLFW_KEY_7 ) == GLFW_PRESS)
+    {
+        Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() / 1.1f);
+        //dirLight->rotate(0, 0.001, 0);
+        //Light* l = static_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+        //Logger::info("Light dir: " + toString(l->getDirection().x) + ", " + toString(l->getDirection().y) + ", " + toString(l->getDirection().z));
+    }
+    if (glfwGetKey( window, GLFW_KEY_8 ) == GLFW_PRESS)
+    {
+        Logger::info("Exposure: " + toString(Renderer::getInstance().getExposure()));
+        //Logger::info("Light dir: " + toString(dirLight->getRotation().x) + ", " + toString(dirLight->getRotation().y) + ", " + toString(dirLight->getRotation().z));
+    }
+
 }
 
 
@@ -435,9 +468,15 @@ int main()
 
 
 	Renderer& renderer = Renderer::getInstance();
+	renderer.setMsaaAntialiasing(GameConfig::getInstance().msaaAntialiasing);
+	renderer.setMsaaAntialiasingLevel(GameConfig::getInstance().msaaAntialiasingLevel);
+	renderer.setBloom(GameConfig::getInstance().isBloomEnabled);
 	renderer.setIsShadowMappingEnable(GameConfig::getInstance().isShadowmappingEnable);
 	renderer.init(win->getWidth(), win->getHeight());
     renderer.setDayNightRatio(1.0f);
+    renderer.setAlphaToCoverage(true);
+    renderer.setExposure(1.87022f);
+    renderer.t = 0;
 
 
 	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
@@ -459,23 +498,26 @@ int main()
     camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     camFPS->setRotationSpeed(0.001f);
-    camFPS->setMoveSpeed(8.0f);
+    camFPS->setMoveSpeed(50.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(10,7,-10);
+    Camera->setPosition(0, 0, 0);
     GraphicsManager::getInstance().setCurrentCamera(camFPS);
 
     // Light
     dirLight = sceneMgr->addSceneObject("light");
     Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
     dirLight->addComponent(lightComponent);
-    dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
+    //dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
+    dirLight->setRotation(glm::vec3(-0.646995, -1.71602, 0));
     dirLight->setPosition(glm::vec3(0,0,0));
     lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
 
 
     std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
     RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
-    sceneMgr->addSky(skyboxTexture);
+    RTexture2D* t = ResourceManager::getInstance().loadTextureHDR("Skybox/HDR_029_Sky_Cloudy_Ref.hdr");
+    sceneMgr->addSky(t);
     GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
 
@@ -644,7 +686,7 @@ int main()
         renderer.renderAll();
 
         // Render GUI
-        renderer.renderGUI(gui->getGUIRenderList());
+        //renderer.renderGUI(gui->getGUIRenderList());
 
         // Swap buffers and poll events
         win->swapBuffers();

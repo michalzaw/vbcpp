@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-#include <SOIL/soil.h>
+//#include <SOIL/soil.h>
 
 #include "Material.h"
 #include "NVMeshMender/NVMeshMender.h"

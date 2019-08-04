@@ -94,6 +94,49 @@ RTexture2D* ResourceManager::loadTexture(std::string path)
 }
 
 
+RTexture2D* ResourceManager::loadTextureHDR(std::string path, bool mipmapping)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RTexture2D* tex = dynamic_cast<RTexture2D*>(res);
+        return tex;
+    }
+
+    // Zasob nie istnieje
+    int width, height;
+    //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
+    RTexture2D* texture = ::loadTextureHDR(path.c_str(), mipmapping);
+
+    if ( texture )
+    {
+        //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
+        std::unique_ptr<RTexture> tex (texture);
+        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
+        //GLuint texID = tex->getID();
+        _resources.push_back(std::move(tex));
+
+
+        // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+        // Musialem odwolac sie do utworzonej tekstury poprzez iterator do ostatniego elementu na liscie (nowa tekstura jest zawsze wrzucana na koniec listy)
+        std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
+        std::unique_ptr<Resource>& res = *(--it);
+
+        RTexture2D* t = dynamic_cast<RTexture2D*>(res.get());
+
+
+        //std::cout << "Texture ID: " << tID << std::endl;
+
+        return t;
+    }
+
+    return 0;
+}
+
+
 RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
 {
     std::string path = "";
@@ -233,14 +276,21 @@ RTexture2D* ResourceManager::loadDefaultWhiteTexture()
 
 
 // Ładowanie shaderów
-RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines)
+RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines,
+                                     const std::unordered_map<std::string, std::string>& constants)
 {
     std::string path = vertexPath + ";" + fragmPath;
     for (int i = 0; i < defines.size(); ++i)
     {
         path += ";" + defines[i];
     }
+    if (constants.size() > 0)
+        path += ";c:";
 
+    for (std::pair<std::string, std::string> element : constants)
+    {
+        path += ";" + element.first + ":" + element.second;
+    }
 
     Resource* res = findResource(path);
     if (res != 0)
@@ -251,7 +301,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
-    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines)) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
 
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
 
@@ -274,6 +324,7 @@ void ResourceManager::reloadShader(RShader* shader)
     std::string vertexShaderFilename;
     std::string fragmentShaderFilename;
     std::vector<std::string> defines;
+    std::unordered_map<std::string, std::string> constants;
 
     getline(stream, vertexShaderFilename, ';');
     getline(stream, fragmentShaderFilename, ';');
@@ -281,10 +332,23 @@ void ResourceManager::reloadShader(RShader* shader)
     string s;
     while (getline(stream, s, ';'))
     {
+        if (s == "c:")
+            break;
+
         defines.push_back(s);
     }
 
-    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines));
+    while (getline(stream, s, ';'))
+    {
+        unsigned int pos = s.find(":");
+        std::string name = s.substr(0, pos);
+        std::string value = s.substr(pos + 1, s.size() - pos);
+
+        constants[name] = value;
+    }
+
+
+    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
 }
 
 

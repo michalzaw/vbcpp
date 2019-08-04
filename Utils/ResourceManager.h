@@ -28,6 +28,7 @@ class ResourceManager
         Resource* findResource(std::string path);
 
         RTexture2D* loadTexture(std::string path);
+        RTexture2D* loadTextureHDR(std::string path, bool mipmapping = false);
         // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
         RTextureCubeMap* loadTextureCubeMap(std::string* fileNames);
         void reloadTexture(RTexture2D* texture);
@@ -37,7 +38,8 @@ class ResourceManager
 
         RTexture2D* loadDefaultWhiteTexture();
 
-        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>());
+        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>(),
+                            const std::unordered_map<std::string, std::string>& constants = std::unordered_map<std::string, std::string>());
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 

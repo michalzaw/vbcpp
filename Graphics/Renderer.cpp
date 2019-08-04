@@ -9,6 +9,9 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
+    _alphaToCoverage(true), _exposure(0.05f),
+    _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
+    _bloom(false),
     _isShadowMappingEnable(false), _shadowMap(NULL),
     _mainRenderData(NULL),
     _renderObjectsAAABB(true), _renderObjectsOBB(false)
@@ -17,6 +20,16 @@ Renderer::Renderer()
 
     _aabbVbo = OGLDriver::getInstance().createVBO(24 * sizeof(float));
     _aabbVbo->addVertexData(indices, 24);
+
+    float quadVertices[] =
+    {
+        -1.0f, -1.0f,
+        1.0f, -1.0f,
+        -1.0f, 1.0f,
+        1.0f, 1.0f
+    };
+    _quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
+    _quadVBO->addVertexData(quadVertices, 4 * 2);
 }
 
 Renderer::~Renderer()
@@ -523,13 +536,29 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-    Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
-    defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+    _defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+    _defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+
+    Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
+    framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+
+    for (int i = 0; i < 2; ++i)
+    {
+        _blurFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
+        _blurFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth / 10.0f, _screenHeight / 10.0f, false);
+        _blurFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
+        _blurFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth / 10.0f, _screenHeight / 10.0f));
+    }
 
 
     _mainRenderData = new RenderData;
     _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
-    _mainRenderData->framebuffer = defaultFramebuffer;
+    _mainRenderData->framebuffer = framebuffer;
     _mainRenderData->renderPass = RP_NORMAL;
 
 
@@ -630,6 +659,27 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // BLUR_SHADER_MSAA
+    defines.clear();
+    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
+    std::unordered_map<std::string, std::string> constants;
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[BLUR_SHADER_MSAA] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
+
+    // BLUR_SHADER
+    defines.clear();
+    defines.push_back("NOT_MULTISAMPLE");
+    constants.clear();
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[BLUR_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
+
+    // QUAD_SHADER
+    defines.clear();
+    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
+    constants.clear();
+    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+    _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag", defines, constants);
+
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
@@ -653,6 +703,66 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
 
     _isInitialized = true;
+}
+
+
+void Renderer::setAlphaToCoverage(bool isEnable)
+{
+    _alphaToCoverage = isEnable;
+}
+
+
+bool Renderer::isAlphaToCoverageEnable()
+{
+    return _alphaToCoverage;
+}
+
+
+void Renderer::setExposure(float exposure)
+{
+    _exposure = exposure;
+}
+
+
+float Renderer::getExposure()
+{
+    return _exposure;
+}
+
+
+void Renderer::setMsaaAntialiasing(bool isEnable)
+{
+    _msaaAntialiasing = isEnable;
+}
+
+
+bool Renderer::isMsaaAntialiasingEnable()
+{
+    return _msaaAntialiasing;
+}
+
+
+void Renderer::setMsaaAntialiasingLevel(int level)
+{
+    _msaaAntialiasingLevel = level;
+}
+
+
+int Renderer::getMsaaAntialiasingLevel()
+{
+    return _msaaAntialiasingLevel;
+}
+
+
+void Renderer::setBloom(bool isEnable)
+{
+    _bloom = isEnable;
+}
+
+
+bool Renderer::isBloomEnable()
+{
+    return _bloom;
 }
 
 
@@ -747,6 +857,75 @@ void Renderer::renderAll()
         else // RP_NORMAL
             renderScene(_renderDataList[i]);
     }
+
+
+    glDisable(GL_DEPTH_TEST);
+
+
+    // blur
+    if (_bloom)
+    {
+        bool isHorizontal = true;
+        bool isFirstIteration = true;
+        int amount = 10;
+        ShaderType shaderType;
+        for (unsigned int i = 0; i < amount; i++)
+        {
+            _blurFramebuffers[isHorizontal]->bind();
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if (isFirstIteration)
+                shaderType = BLUR_SHADER_MSAA;
+            else
+                shaderType = BLUR_SHADER;
+
+            _shaderList[shaderType]->enable();
+
+            _shaderList[shaderType]->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
+
+            RTexture* texture = isFirstIteration ? _mainRenderData->framebuffer->getTexture(1) : _blurFramebuffers[!isHorizontal]->getTexture(0);
+            _shaderList[shaderType]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
+
+
+            _quadVBO->bind();
+
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glDisableVertexAttribArray(0);
+
+
+            isHorizontal = !isHorizontal;
+            if (isFirstIteration)
+                isFirstIteration = false;
+        }
+    }
+
+
+
+    // render quad on screen
+    _defaultFramebuffer->bind();
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    _quadVBO->bind();
+
+    _shaderList[QUAD_SHADER]->enable();
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, t == 0 ? _mainRenderData->framebuffer->getTexture(0) : _blurFramebuffers[0]->getTexture(0));
+    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_BLOOM_TEXTURE, _blurFramebuffers[0]->getTexture(0));
+    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
+    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_BLOOM_RATIO, _bloom ? 1.0f : 0.0f);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
+
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+    glDisableVertexAttribArray(0);
+
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -1009,7 +1188,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL)
+            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }

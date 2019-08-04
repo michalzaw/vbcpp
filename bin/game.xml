@@ -12,6 +12,11 @@
 	<Configuration>
 		<Fullscreen>false</Fullscreen>
 		
+		<MsaaAntialiasing>true</MsaaAntialiasing>
+		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
+		
+		<Bloom>true</Bloom>
+		
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
 		

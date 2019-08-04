@@ -34,6 +34,10 @@ enum ShaderType
     MIRROR_ALPHA_TEST_MATERIAL,
     MIRROR_GLASS_MATERIAL,
 
+    BLUR_SHADER_MSAA,
+    BLUR_SHADER,
+    QUAD_SHADER,
+
     NUMBER_OF_SHADERS
 
 };
@@ -84,6 +88,10 @@ enum UniformName
     UNIFORM_DEBUG_VERTEX_INDEX_6,
     UNIFORM_DEBUG_VERTEX_INDEX_7,
     UNIFORM_DEBUG_VERTEX_INDEX_8,
+    UNIFORM_BLUR_IS_HORIZONTAL,
+    UNIFORM_BLOOM_TEXTURE,
+    UNIFORM_BLOOM_RATIO,
+    UNIFORM_TONEMAPPING_EXPOSURE,
 
     NUMBER_OF_UNIFORMS
 };
@@ -153,6 +161,10 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
             _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
+            _uniformsNames[UNIFORM_BLUR_IS_HORIZONTAL] = "isHorizontal";
+            _uniformsNames[UNIFORM_BLOOM_TEXTURE] = "BloomTexture";
+            _uniformsNames[UNIFORM_BLOOM_RATIO] = "BloomRatio";
+            _uniformsNames[UNIFORM_TONEMAPPING_EXPOSURE] = "exposure";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

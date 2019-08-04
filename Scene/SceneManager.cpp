@@ -132,7 +132,7 @@ SceneObject* SceneManager::getSceneObject(std::string name)
 }
 
 
-void SceneManager::addSky(RTextureCubeMap* texture)
+void SceneManager::addSky(RTexture* texture)
 {
     if (_sky != NULL)
         removeSceneObject(_sky->getName());

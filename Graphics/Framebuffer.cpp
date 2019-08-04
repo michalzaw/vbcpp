@@ -1,5 +1,7 @@
 #include "Framebuffer.h"
 
+#include  "../Utils/Logger.h"
+
 
 Framebuffer::Framebuffer()
     : _fboId(0), _depthRenderbuffer(0), _isInitialized(false)
@@ -24,6 +26,44 @@ Framebuffer::~Framebuffer()
 }
 
 
+void Framebuffer::checkFramebufferStatus()
+{
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+    {
+        Logger::error("Incomplete FBO:");
+
+        switch (status)
+        {
+            case GL_FRAMEBUFFER_UNDEFINED:
+                Logger::error("FBO error: GL_FRAMEBUFFER_UNDEFINED");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                Logger::error("FBO error: GL_FRAMEBUFFER_UNSUPPORTED");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+                break;
+        }
+    }
+}
+
+
 void Framebuffer::init()
 {
     if (!_isInitialized)
@@ -43,23 +83,31 @@ void Framebuffer::bind()
 }
 
 
-void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height)
+void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
     bind();
 
     glGenRenderbuffers(1, &_depthRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-
+    if (!multisample)
+    {
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    }
+    else
+    {
+        glRenderbufferStorageMultisample(GL_RENDERBUFFER, samplesCount, GL_DEPTH_COMPONENT /*GL_DEPTH32F_STENCIL8*/, width, height);
+    }
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
+
+    checkFramebufferStatus();
 }
 
 
-void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned int height)
+void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
     bind();
 
-    RTexture2D* texture = new RTexture2D(format, glm::uvec2(width, height));
+    RTexture2D* texture = new RTexture2D(format, glm::uvec2(width, height), multisample, samplesCount);
     texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
     texture->setClampMode(TCM_CLAMP);
 
@@ -75,7 +123,7 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
         _fboBuffs.push_back(attachment);
     }
 
-    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture->_texID, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture->getTextureType(), texture->_texID, 0);
 
     _textures.push_back(texture);
 
@@ -87,6 +135,8 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     {
         glDrawBuffer(GL_NONE);
     }
+
+    checkFramebufferStatus();
 }
 
 
