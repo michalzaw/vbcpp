@@ -1,7 +1,7 @@
 #include "Editor/Editor.h"
 
 
-int main()
+int editorMain()
 {
     Editor editor;
     editor.run();

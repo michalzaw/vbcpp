@@ -29,6 +29,11 @@
 #include "Game/GameConfig.h"
 #include "Game/BusStopSystem.h"
 
+#include "EditorMain.h"
+
+
+#define RUN_EDITOR false
+
 
 // Definicje globalne
 CameraFPS* camFPS;
@@ -49,6 +54,8 @@ bool mirrorControl = false;
 int mirrorControlIndex = -1;
 
 bool cameraControll = true;
+
+bool runEditor = RUN_EDITOR;
 
 
 void onSceneObjectClick(SceneObject* sceneObject)
@@ -424,9 +431,34 @@ void readInput(GLFWwindow* window, double deltaTime)
 }
 
 
-// ### MAIN ###
-int main2()
+void catchArgs(int argc, char** argv)
 {
+	if (argc > 1)
+	{
+		Logger::info("Running with args:");
+		for (int i = 1; i < argc; ++i)
+		{
+			Logger::info(argv[i]);
+
+			if (strcmp(argv[i], "--editor") == 0)
+			{
+				runEditor = true;
+			}
+		}
+	}
+}
+
+
+// ### MAIN ###
+int main(int argc, char** argv)
+{
+	catchArgs(argc, argv);
+
+	if (runEditor)
+	{
+		return editorMain();
+	}
+
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");
