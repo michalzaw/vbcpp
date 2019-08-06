@@ -65,3 +65,10 @@ std::vector<std::string> FilesHelper::getDirectoriesList(std::string path)
 
     return directories;
 }
+
+std::string FilesHelper::getFileExtension(std::string fileName)
+{
+	auto lastDotPosition = fileName.find_last_of('.');
+
+	return fileName.substr(lastDotPosition + 1);
+}

@@ -116,7 +116,7 @@ vec4 specular;
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
-	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity * 0.05;
+	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
 	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 20;

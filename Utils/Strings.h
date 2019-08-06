@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <cstring>
+#include <vector>
 
 
 // Convert number to string
@@ -69,6 +70,9 @@ inline bool toBool(const char* String)
 
 
 std::string trim(const std::string& string);
+
+
+std::vector<std::string> split(const std::string& string, char delimiter);
 
 
 #endif // STRINGS_H_INCLUDED

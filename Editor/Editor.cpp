@@ -147,8 +147,6 @@ void Editor::clearScene()
 {
     _sceneManager->clearScene();
 
-    std::cout << "GraphicsManager: " << GraphicsManager::getInstance().getRenderObjects().size() << std::endl;
-
     _cameraObject = _sceneManager->addSceneObject("cam1");
     _camera = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     _cameraObject->addComponent(_camera);
@@ -157,18 +155,6 @@ void Editor::clearScene()
 
     GraphicsManager::getInstance().setCurrentCamera(_camera);
     _soundManager->setActiveCamera(_camera);
-
-    SceneObject* dirLight = _sceneManager->addSceneObject("light");
-    Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
-    dirLight->addComponent(lightComponent);
-    dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
-    dirLight->setPosition(glm::vec3(0,0,0));
-    lightComponent->setShadowMapping(false);
-
-    std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
-    _sceneManager->addSky(skyboxTexture);
-    GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
     _axisObject = _sceneManager->addSceneObject("axis");
     RStaticModel* axisModel = ResourceManager::getInstance().loadModel("axis.fbx", "");

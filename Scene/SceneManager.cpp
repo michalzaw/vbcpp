@@ -7,7 +7,10 @@
 using namespace tinyxml2;
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/XmlUtils.h"
 #include "../Graphics/LoadTerrainModel.h"
+
+#include "../Game/Directories.h"
 
 SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
     : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr), terrainModel(NULL)
@@ -256,6 +259,52 @@ void SceneManager::loadScene(std::string filename)
         grassObject->addComponent(grassComponent);
     }
 
+	XMLElement* lightElement = scnElement->FirstChildElement("Light");
+	if (lightElement == nullptr)
+	{
+		std::cout << "Light element not found!" << std::endl;
+	}
+	else
+	{
+		glm::vec3 rotation = XmlUtils::getAttributeVec3(lightElement, "rotation");
+		glm::vec3 color = XmlUtils::getAttributeVec3(lightElement, "color");
+		float ambientIntensity = atof(lightElement->Attribute("ambientIntensity"));
+		float diffuseIntensity = atof(lightElement->Attribute("diffuseIntensity"));
+
+		SceneObject* dirLightObject = addSceneObject("sun");
+		Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(color, ambientIntensity, diffuseIntensity);
+		dirLightObject->addComponent(lightComponent);
+		dirLightObject->setRotation(rotation);
+		dirLightObject->setPosition(glm::vec3(0, 0, 0));
+		lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
+	}
+
+	XMLElement* sklyElement = scnElement->FirstChildElement("Sky");
+	if (sklyElement == nullptr)
+	{
+		std::cout << "Sky element not found!" << std::endl;
+		return;
+	}
+	else
+	{
+		std::string skyboxFileNames = std::string(sklyElement->Attribute("texture"));
+		std::vector<std::string> skyboxFileNamesArray = split(skyboxFileNames, ',');
+		if (skyboxFileNamesArray.size() == 6)
+		{
+			for (int i = 0; i < skyboxFileNamesArray.size(); ++i)
+			{
+				skyboxFileNamesArray[i] = GameDirectories::SKYBOX + skyboxFileNamesArray[i];
+			}
+			
+			RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
+			addSky(skyboxTexture);
+			GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
+		}
+		else
+		{
+			std::cout << "Number of skybox files is invalid!" << std::endl;
+		}
+	}
 
     XMLElement* objects = scnElement->FirstChildElement("Objects");
 

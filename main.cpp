@@ -43,8 +43,6 @@ PhysicsManager* physMgr = NULL;
 SceneManager* sceneMgr = NULL;
 SoundManager* sndMgr = NULL;
 
-SceneObject* dirLight = NULL;
-
 Bus* bus = NULL;
 
 std::string winTitle = "Virtual Bus Core++";
@@ -84,6 +82,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	if (key == GLFW_KEY_H && action == GLFW_PRESS)
 	{
+		SceneObject* dirLight = sceneMgr->getSceneObject("sun");
 	    Light* l = dynamic_cast<Light*>(dirLight->getComponent(CT_LIGHT));
 
 	    if (l->getDiffiseIntenisty() > 0.05)
@@ -518,22 +517,6 @@ int main(int argc, char** argv)
     Camera->setPosition(10,7,-10);
     Camera->setPosition(0, 0, 0);
     GraphicsManager::getInstance().setCurrentCamera(camFPS);
-
-    // Light
-    dirLight = sceneMgr->addSceneObject("light");
-    Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
-    dirLight->addComponent(lightComponent);
-    //dirLight->setRotation(glm::vec3(-0.2f * PI, 0.35f * PI, 0));
-    dirLight->setRotation(glm::vec3(-0.646995, -1.71602, 0));
-    dirLight->setPosition(glm::vec3(0,0,0));
-    lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
-
-
-    std::string skyboxTextures[] = {"Skybox/rt.bmp", "Skybox/lt.bmp", "Skybox/up.bmp", "Skybox/dn.bmp", "Skybox/ft.bmp", "Skybox/bk.bmp"};
-    RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures);
-    RTexture2D* t = ResourceManager::getInstance().loadTextureHDR("Skybox/HDR_029_Sky_Cloudy_Ref.hdr");
-    sceneMgr->addSky(t);
-    GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(ResourceManager::getInstance().loadTextureCubeMap(skyboxTextures));
 
 
     GUIManager* gui = new GUIManager;

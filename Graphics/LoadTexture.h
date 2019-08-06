@@ -14,7 +14,6 @@
 // Tworzenie tekstury wykonywane recznie, gdyz wbudowane funkcje SOILa powoduja crash na Windowsie
 //GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping = true);
 RTexture2D* loadTexture(const char* fileName, bool mipmaping = true, RTexture2D* oldTexture = NULL);
-RTexture2D* loadTextureHDR(const char* fileName, bool mipmaping = true, RTexture2D* oldTexture = NULL);
 
 // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
 RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, bool mipmaping = true, RTextureCubeMap* oldTexture = NULL);

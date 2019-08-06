@@ -2,6 +2,7 @@
 
 #include <stb_image.h>
 
+#include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 
 
@@ -41,14 +42,28 @@
 }*/
 
 
+const std::string HDR_FILE_EXTENSION = "hdr";
+
+
 RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTexture)
 {
-    Logger::info("Loading texture: " + std::string(fileName));
+	std::string fileNameStr(fileName);
+	bool hdrImage = FilesHelper::getFileExtension(fileNameStr) == HDR_FILE_EXTENSION;
 
-    stbi_set_flip_vertically_on_load(false);
+    Logger::info("Loading texture: " + fileNameStr);
+
+	if (hdrImage)
+		stbi_set_flip_vertically_on_load(true);
+	else
+		stbi_set_flip_vertically_on_load(false);
+
     int width, height, chanels;
-    //unsigned char* image = SOIL_load_image(fileName, &width, &height, &chanels, SOIL_LOAD_RGBA);
-    unsigned char* image = stbi_load(fileName, &width, &height, &chanels, STBI_rgb_alpha);
+	void* image;
+	if (hdrImage)
+		image = stbi_loadf(fileName, &width, &height, &chanels, 0);
+	else
+		image = stbi_load(fileName, &width, &height, &chanels, STBI_rgb_alpha);
+    
 
     if(image == NULL)
     {
@@ -59,70 +74,33 @@ RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTex
     RTexture2D* texture;
     if (oldTexture == NULL)
     {
-        texture = new RTexture2D(fileName, image, TF_RGBA, glm::uvec2(width, height));
+		if (hdrImage)
+			texture = new RTexture2D(fileName, static_cast<float*>(image), chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, glm::uvec2(width, height));
+		else
+			texture = new RTexture2D(fileName, static_cast<unsigned char*>(image), TF_RGBA, glm::uvec2(width, height));
+
+		if (mipmaping)
+		{
+			texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+		}
+		else
+		{
+			texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+		}
+
+		if (hdrImage)
+			texture->setClampMode(TCM_CLAMP_TO_EDGE);
+		else
+			texture->setClampMode(TCM_REPEAT);
     }
     else
     {
         texture = oldTexture;
-        texture->setTexSubImage(image, 0, 0, width, height);
+		if (hdrImage)
+			texture->setTexSubImage(static_cast<float*>(image), 0, 0, width, height);
+		else
+			texture->setTexSubImage(static_cast<unsigned char*>(image), 0, 0, width, height);
     }
-
-    if (mipmaping)
-    {
-        texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
-    }
-    else
-    {
-        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
-    }
-
-    texture->setClampMode(TCM_REPEAT);
-
-
-    //SOIL_free_image_data(image);
-    stbi_image_free(image);
-
-
-    return texture;
-}
-
-
-RTexture2D* loadTextureHDR(const char* fileName, bool mipmaping, RTexture2D* oldTexture)
-{
-    Logger::info("Loading texture HDR: " + std::string(fileName));
-
-    stbi_set_flip_vertically_on_load(true);
-    int width, height, chanels;
-    float *image = stbi_loadf(fileName, &width, &height, &chanels, 0);
-
-    if(image == NULL)
-    {
-        Logger::error("Failed to load texture: " + std::string(fileName));
-        return NULL;
-    }
-
-    RTexture2D* texture;
-    if (oldTexture == NULL)
-    {
-        texture = new RTexture2D(fileName, image, TF_RGB_16F, glm::uvec2(width, height));
-    }
-    else
-    {
-        texture = oldTexture;
-        texture->setTexSubImage(image, 0, 0, width, height);
-    }
-
-    if (mipmaping)
-    {
-        texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
-    }
-    else
-    {
-        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
-    }
-
-    texture->setClampMode(TCM_CLAMP_TO_EDGE);
-
 
     stbi_image_free(image);
 
@@ -133,17 +111,21 @@ RTexture2D* loadTextureHDR(const char* fileName, bool mipmaping, RTexture2D* old
 
 RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, bool mipmaping, RTextureCubeMap* oldTexture)
 {
+	bool hdrImage = FilesHelper::getFileExtension(filesNames[0]) == HDR_FILE_EXTENSION;
+
     Logger::info("Loading cube map");
 
     stbi_set_flip_vertically_on_load(false);
 
-    unsigned char* cubeMapFaces[6];
+    void* cubeMapFaces[6];
     int width, height, chanels;
 
     for (int i = 0; i < 6; ++i)
     {
-        //cubeMapFaces[i] = SOIL_load_image(filesNames[i].c_str(), &width, &height, 0, SOIL_LOAD_RGBA);
-        cubeMapFaces[i] = stbi_load(filesNames[i].c_str(), &width, &height, &chanels, STBI_rgb_alpha);
+		if (hdrImage)
+			cubeMapFaces[i] = stbi_loadf(filesNames[i].c_str(), &width, &height, &chanels, 0);
+		else
+			cubeMapFaces[i] = stbi_load(filesNames[i].c_str(), &width, &height, &chanels, STBI_rgb_alpha);
 
         Logger::info("Loading texture: " + filesNames[i]);
         if(cubeMapFaces[i] == NULL)
@@ -154,7 +136,10 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
 
         if (oldTexture != NULL)
         {
-            oldTexture->setTexSubImage(cubeMapFaces[i], (CubeMapFace)(CMF_POSITIVE_X + i), 0, 0, width, height);
+			if (hdrImage)
+				oldTexture->setTexSubImage((float*)cubeMapFaces[i], (CubeMapFace)(CMF_POSITIVE_X + i), 0, 0, width, height);
+			else
+				oldTexture->setTexSubImage((unsigned char*)cubeMapFaces[i], (CubeMapFace)(CMF_POSITIVE_X + i), 0, 0, width, height);
         }
     }
 
@@ -162,8 +147,13 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
         return NULL;
 
     RTextureCubeMap* texture;
-    if (oldTexture == NULL)
-        texture = new RTextureCubeMap(path, cubeMapFaces, TF_RGBA, width);
+	if (oldTexture == NULL)
+	{
+		if (hdrImage)
+			texture = new RTextureCubeMap(path, (float**)cubeMapFaces, chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, width);
+		else
+			texture = new RTextureCubeMap(path, (unsigned char**)cubeMapFaces, TF_RGBA, width);
+	}
     else
         texture = oldTexture;
 
@@ -181,7 +171,6 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
 
     for (int i = 0; i < 6; ++i)
     {
-        //SOIL_free_image_data(cubeMapFaces[i]);
         stbi_image_free(cubeMapFaces[i]);
     }
 

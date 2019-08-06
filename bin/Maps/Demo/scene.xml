@@ -10,6 +10,11 @@
 	
 	<Grass model="grass.fbx" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />
 	
+	<!-- rotation=(-0.2f * PI, 0.35f * PI, 0) -->
+	<Light rotation="-0.62831,1.09955,0" color="1.0,1.0,1.0" ambientIntensity="0.025" diffuseIntensity="0.5" />
+	
+	<Sky texture="rt.bmp,lt.bmp,up.bmp,dn.bmp,ft.bmp,bk.bmp" />
+	
 	<Objects>
 		<Object name="jezioro" position="185,2.8,0" rotation="0,0,0" />
 

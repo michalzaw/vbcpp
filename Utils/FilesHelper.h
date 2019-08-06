@@ -25,6 +25,8 @@ class FilesHelper
 
         static std::vector<std::string> getDirectoriesList(std::string path);
 
+		static std::string getFileExtension(std::string fileName);
+
 };
 
 

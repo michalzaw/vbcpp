@@ -27,8 +27,7 @@ class ResourceManager
 
         Resource* findResource(std::string path);
 
-        RTexture2D* loadTexture(std::string path);
-        RTexture2D* loadTextureHDR(std::string path, bool mipmapping = false);
+        RTexture2D* loadTexture(std::string path, bool mipmapping = true);
         // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
         RTextureCubeMap* loadTextureCubeMap(std::string* fileNames);
         void reloadTexture(RTexture2D* texture);
