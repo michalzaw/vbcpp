@@ -1,5 +1,6 @@
 set (SCENE_SOURCES
 	Scene/Component.cpp
+	Scene/SceneLoader.cpp
 	Scene/SceneManager.cpp
 	Scene/SceneObject.cpp
 	Scene/Skybox.cpp
@@ -8,6 +9,7 @@ set (SCENE_SOURCES
 set (SCENE_HEADERS 
 	Scene/ClickableObject.h
 	Scene/Component.h
+	Scene/SceneLoader.h
 	Scene/SceneManager.h
 	Scene/SceneObject.h
 	Scene/Skybox.h

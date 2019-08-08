@@ -2,9 +2,10 @@
 #include "SceneManager.h"
 
 
-SceneObject::SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent)
-    : _parent(parent),
-    _id(0), _name(name), _isActive(true),
+SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
+	: _parent(parent),
+	_id(0), _name(name), _isActive(true),
+	_objectDefinition(objectDefinition),
     _sceneManager(sceneManager),
     _rotationMode(RM_QUATERNION),
     _position(0.0f, 0.0f, 0.0f),

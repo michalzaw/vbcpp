@@ -7,6 +7,8 @@ set (UTILS_SOURCES
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
+	Utils/RObject.cpp
+	Utils/RObjectLoader.cpp
 	Utils/RStaticModel.cpp
 	Utils/RTexture.cpp
 	Utils/RTexture2D.cpp
@@ -29,6 +31,8 @@ set (UTILS_HEADERS
 	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h
+	Utils/RObject.h
+	Utils/RObjectLoader.h
 	Utils/RSound.h
 	Utils/RStaticModel.h
 	Utils/RTexture.h

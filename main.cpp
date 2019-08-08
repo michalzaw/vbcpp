@@ -12,6 +12,7 @@
 
 #include "Scene/SceneManager.h"
 #include "Scene/SoundManager.h"
+#include "Scene/SceneLoader.h"
 
 #include "Utils/ResourceManager.h"
 #include "Utils/Timer.h"
@@ -500,7 +501,10 @@ int main(int argc, char** argv)
 	BusLoader busLoader(sceneMgr, physMgr, sndMgr);
 	bus = busLoader.loadBus(GameConfig::getInstance().busModel);
 
-    sceneMgr->loadScene(GameConfig::getInstance().mapFile);
+	SceneLoader sceneLoader(sceneMgr);
+	sceneLoader.loadMap(GameConfig::getInstance().mapFile);
+
+    //sceneMgr->loadScene(GameConfig::getInstance().mapFile);
 
     bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
     bus->getSceneObject()->setRotation(degToRad(sceneMgr->getBusStart().rotation.x),
@@ -684,7 +688,7 @@ int main(int argc, char** argv)
         renderer.renderAll();
 
         // Render GUI
-        //renderer.renderGUI(gui->getGUIRenderList());
+        renderer.renderGUI(gui->getGUIRenderList());
 
         // Swap buffers and poll events
         win->swapBuffers();

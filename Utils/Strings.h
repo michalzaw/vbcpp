@@ -7,6 +7,8 @@
 #include <cstring>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 
 // Convert number to string
 template <typename TYPE>
@@ -14,6 +16,14 @@ std::string toString(TYPE Number)
 {
 	std::ostringstream Stream;
 	Stream << Number;
+	return Stream.str();
+}
+
+
+inline std::string vec3ToString(glm::vec3 vector)
+{
+	std::ostringstream Stream;
+	Stream << "[" << vector.x << ", " << vector.x << ", " << vector.x << "]";
 	return Stream.str();
 }
 

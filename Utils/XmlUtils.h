@@ -4,6 +4,9 @@
 
 #include "Helpers.hpp"
 
+#include "tinyxml2.h"
+using namespace tinyxml2;
+
 
 class XmlUtils
 {

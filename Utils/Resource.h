@@ -12,7 +12,8 @@ enum ResourceType
     RT_SHADER,
     RT_MODEL,
     RT_FONT,
-    RT_SOUND
+    RT_SOUND,
+	RT_OBJECT
 };
 
 class Resource

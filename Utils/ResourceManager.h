@@ -7,6 +7,8 @@
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
+#include "RObject.h"
+#include "RObjectLoader.h"
 
 #include <iostream>
 #include <list>
@@ -52,6 +54,8 @@ class ResourceManager
         RFont* loadFont(std::string path, int pixelSize = 32);
 
         RSound* loadSound(std::string path);
+
+		RObject* loadRObject(std::string fullPath);
 
     protected:
         resourcePtrList _resources;

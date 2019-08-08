@@ -10,6 +10,8 @@
 
 #include "../Graphics/RotationMode.h"
 
+#include "../Utils/RObject.h"
+
 
 class SceneManager;
 
@@ -25,6 +27,8 @@ class SceneObject
         std::string     _name;
         unsigned int    _id;
         bool            _isActive;
+
+		RObject*		_objectDefinition;
 
         SceneManager*   _sceneManager;
 
@@ -47,7 +51,7 @@ class SceneObject
         void calculateGlobalTransformMatrix() const;
 
     public:
-        SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent = NULL);
+        SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition = NULL, SceneObject* parent = NULL);
         ~SceneObject();
 
 

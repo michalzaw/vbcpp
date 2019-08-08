@@ -508,3 +508,28 @@ RSound* ResourceManager::loadSound(std::string path)
     else
         return 0;
 }
+
+
+RObject* ResourceManager::loadRObject(std::string fullPath)
+{
+
+	Resource* res = findResource(fullPath);
+	if (res != 0)
+	{
+		RObject* object = dynamic_cast<RObject*>(res);
+		return object;
+	}
+
+	std::unique_ptr<RObject> object(RObjectLoader::loadObject(fullPath));
+	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+
+	RObject* o = dynamic_cast<RObject*>(object.get());
+
+	if (o)
+	{
+		_resources.push_back(std::move(object));
+		return o;
+	}
+	else
+		return 0;
+}
