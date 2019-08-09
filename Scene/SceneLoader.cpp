@@ -186,11 +186,9 @@ void SceneLoader::loadObjects(XMLElement* sceneElement)
 		Logger::info("Position: " + vec3ToString(position));
 		Logger::info("Rotation: " + vec3ToString(rotation));
 
-		std::string dirPath = GameDirectories::OBJECTS + name + "/";
-		std::string fullPath = dirPath + OBJECT_FILE_NAME;
-		RObject* rObject = ResourceManager::getInstance().loadRObject(fullPath);
+		RObject* rObject = ResourceManager::getInstance().loadRObject(name);
 
-		SceneObject* sceneObject = createObject(rObject, dirPath, objectName, position, rotation);
+		SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, _sceneManager);
 
 		// Components properties defined per instance
 		XMLElement* componentElement = objectElement->FirstChildElement("Component");
@@ -217,125 +215,6 @@ void SceneLoader::loadObjects(XMLElement* sceneElement)
 
 		objectElement = objectElement->NextSiblingElement("Object");
 	}
-}
-
-
-SceneObject* SceneLoader::createObject(RObject* objectDefinition, std::string objectDirPath, std::string name, glm::vec3 position, glm::vec3 rotation)
-{
-	SceneObject* sceneObject = _sceneManager->addSceneObject(name, objectDefinition);
-	sceneObject->setPosition(position);
-	sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z));
-
-	RStaticModel* model = nullptr;
-
-	std::vector<std::unordered_map<std::string, std::string>>& components = objectDefinition->getComponents();
-
-	for (int i = 0; i < components.size(); ++i)
-	{
-		std::string componentType = components[i]["type"];
-
-		if (componentType == "render")
-		{
-			std::string modelFile = components[i]["model"];
-
-			std::string modelPath = objectDirPath + modelFile;
-
-			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath);
-			RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
-		}
-		else if (componentType == "physics")
-		{
-			std::string bodyType = components[i]["body"];
-
-			PhysicsManager* physicsManager = _sceneManager->getPhysicsManager();
-			PhysicalBody* physicalBody;
-			if (bodyType == "box")
-			{
-				int collidesWith = COL_TERRAIN | COL_BUS | COL_ENV;
-				float halfExtents = toFloat(components[i]["halfExtents"]);
-				float mass = toFloat(components[i]["mass"]);
-
-				physicalBody = physicsManager->createPhysicalBodyBox(btVector3(halfExtents, halfExtents, halfExtents), mass, COL_ENV, collidesWith);
-				sceneObject->addComponent(physicalBody);
-			}
-			else if (bodyType == "dynamic")
-			{
-				Logger::info("- Creating dynamic Convex Hull collision shape");
-
-				float mass = toFloat(components[i]["mass"]);
-				int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
-
-				PhysicalBodyConvexHull* physicalBody = physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass,
-					COL_ENV, collidesWith);
-
-				sceneObject->addComponent(physicalBody);
-			}
-			else if (bodyType == "static")
-			{
-				Logger::info("- Creating static Convex Hull collision shape");
-
-				int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
-
-				PhysicalBodyConvexHull* physicalBody = physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), 0,
-					COL_ENV, collidesWith);
-				//terrainMesh->setRestitution(0.9f);
-				//terrainMesh->getRigidBody()->setFriction(1.0f);
-				sceneObject->addComponent(physicalBody);
-			}
-			else if (bodyType == "bvh")
-			{
-				Logger::info("- Creating BVH Triangle Mesh collision shape");
-
-				int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
-
-				PhysicalBodyBvtTriangleMesh* physicalBody = physicsManager->createPhysicalBodyBvtTriangleMesh(model, COL_ENV, collidesWith);
-				//terrainMesh->setRestitution(0.9f);
-				//terrainMesh->getRigidBody()->setFriction(1.0f);
-				sceneObject->addComponent(physicalBody);
-			}
-		}
-		else if (componentType == "tree")
-		{
-			TreeComponent* component = new TreeComponent;
-			sceneObject->addComponent(component);
-		}
-		else if (componentType == "sound")
-		{
-			std::string soundFile = components[i]["file"];
-			bool looping = toBool(components[i]["looping"]);
-			float playDistance = toFloat(components[i]["playDistance"]);
-			float volume = toFloat(components[i]["volume"]);
-			glm::vec3 soundPosition = XMLstringToVec3(components[i]["position"].c_str());
-
-			std::string soundPath = objectDirPath + soundFile;
-
-			RSound * soundResource = ResourceManager::getInstance().loadSound(soundPath);
-			SoundComponent * sound = new SoundComponent(soundResource, EST_AMBIENT, looping);
-			_sceneManager->getSoundManager()->addSoundComponent(sound);
-
-			sound->setPlayDistance(playDistance);
-			sound->setGain(volume);
-			sound->setPosition(soundPosition);
-
-			sceneObject->addComponent(sound);
-		}
-		else if (componentType == "bus-stop")
-		{
-			BusStopComponent* component = BusStopSystem::getInstance().addBusStopComponent("Przystanek");
-			sceneObject->addComponent(component);
-		}
-		else if (componentType == "environmentCapture")
-		{
-			std::string textures = components[i]["textures"];
-			std::vector<std::string> t = split(textures, ',');
-
-			RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(&t[0]);
-			EnvironmentCaptureComponent* component = GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap);
-			sceneObject->addComponent(component);
-		}
-	}
-
-	return sceneObject;
 }
 
 

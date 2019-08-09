@@ -4,6 +4,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/CameraSettingsWindow.cpp
 	Editor/Windows/EditorWindow.cpp
 	Editor/Windows/NewDialogWindow.cpp
+	Editor/Windows/ObjectDefinitionsWindow.cpp
 	Editor/Windows/ObjectPropertiesWindow.cpp
 	Editor/Windows/OpenDialogWindow.cpp
 	Editor/Windows/SceneGraphWindow.cpp
@@ -11,11 +12,13 @@ set (EDITOR_SOURCES
 
 set (EDITOR_HEADERS 
 	Editor/Editor.h
+	Editor/EditorContext.h
 	Editor/EditorEvent.h
 	Editor/EditorGUI.h
 	Editor/Windows/CameraSettingsWindow.h
 	Editor/Windows/EditorWindow.h
 	Editor/Windows/NewDialogWindow.h
+	Editor/Windows/ObjectDefinitionsWindow.h
 	Editor/Windows/ObjectPropertiesWindow.h
 	Editor/Windows/OpenDialogWindow.h
 	Editor/Windows/SceneGraphWindow.h

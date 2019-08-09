@@ -2,7 +2,10 @@
 
 #include "../Bus/BusLoader.h"
 
+#include "../Game/Directories.h"
+
 #include "../Utils/RaycastingUtils.h"
+#include "../Utils/FilesHelper.h"
 
 
 std::list<Editor*> editorInstances;
@@ -83,7 +86,10 @@ Editor::Editor()
 
     initializeEngineSubsystems();
 
-    _editorGUI.reset(new EditorGUI(_window, _sceneManager));
+	_editorContext = std::make_shared<EditorContext>();
+	_editorContext->availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
+
+    _editorGUI.reset(new EditorGUI(_window, _sceneManager, _editorContext));
 
     editorInstances.push_back(this);
 }
@@ -256,6 +262,12 @@ void Editor::run()
 
                     _sceneManager->loadScene(event.params);
                     break;
+
+				case EET_ADD_OBJECT:
+					RObject* object = ResourceManager::getInstance().loadRObject(event.params);
+					RObjectLoader::createSceneObjectFromRObject(object, event.params, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
+
+					break;
             }
         }
 

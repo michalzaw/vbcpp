@@ -4,6 +4,7 @@
 #include "../Graphics/LoadShader.h"
 #include "../Graphics/StaticModelLoader.h"
 #include "../GUI/FontLoader.h"
+#include "../Game/Directories.h"
 
 
 static std::unique_ptr<ResourceManager> rsInstance;
@@ -510,17 +511,18 @@ RSound* ResourceManager::loadSound(std::string path)
 }
 
 
-RObject* ResourceManager::loadRObject(std::string fullPath)
+RObject* ResourceManager::loadRObject(std::string name)
 {
+	std::string dirPath = GameDirectories::OBJECTS + name + "/";
 
-	Resource* res = findResource(fullPath);
+	Resource* res = findResource(dirPath);
 	if (res != 0)
 	{
 		RObject* object = dynamic_cast<RObject*>(res);
 		return object;
 	}
 
-	std::unique_ptr<RObject> object(RObjectLoader::loadObject(fullPath));
+	std::unique_ptr<RObject> object(RObjectLoader::loadObject(dirPath));
 	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
 
 	RObject* o = dynamic_cast<RObject*>(object.get());

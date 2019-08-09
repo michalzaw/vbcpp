@@ -7,11 +7,13 @@
 #include "../ImGui/imgui_impl_opengl3.h"
 
 #include "EditorEvent.h"
+#include "EditorContext.h"
 #include "Windows/SceneGraphWindow.h"
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/NewDialogWindow.h"
 #include "Windows/OpenDialogWindow.h"
 #include "Windows/CameraSettingsWindow.h"
+#include "Windows/ObjectDefinitionsWindow.h"
 
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
@@ -28,6 +30,7 @@ class EditorGUI
 
         SceneObject* _selectedSceneObject;
 
+		std::shared_ptr<EditorContext> _editorContext;
         std::list<EditorEvent> _events;
 
         bool _styleDark;
@@ -37,6 +40,7 @@ class EditorGUI
         std::unique_ptr<NewDialogWindow> _newDialogWindow;
         std::unique_ptr<OpenDialogWindow> _openDialogWindow;
         std::unique_ptr<CameraSettingsWindow> _cameraSettingsWindow;
+		std::unique_ptr<ObjectDefinitionsWindow> _objectDefinitionsWindow;
 
         bool _showDemo;
 
@@ -44,10 +48,8 @@ class EditorGUI
 
         void drawMainMenu();
 
-        void inspectSceneObject(SceneObject* object = nullptr);
-
     public:
-        EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager);
+        EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager, std::shared_ptr<EditorContext> editorContext);
         ~EditorGUI();
 
         void setSelectedSceneObject(SceneObject* sceneObject);

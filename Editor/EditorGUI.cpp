@@ -3,8 +3,8 @@
 #include "../Graphics/Renderer.h"
 
 
-EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
-    : _window(window), _sceneManager(sceneManager),
+EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager, std::shared_ptr<EditorContext> editorContext)
+    : _window(window), _sceneManager(sceneManager), _editorContext(editorContext),
     _selectedSceneObject(nullptr),
     _styleDark(true),
     _showDemo(false)
@@ -16,6 +16,7 @@ EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager)
     _newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events, true));
     _openDialogWindow.reset(new OpenDialogWindow(_sceneManager, _selectedSceneObject, &_events));
     _cameraSettingsWindow.reset(new CameraSettingsWindow(_sceneManager, _selectedSceneObject));
+	_objectDefinitionsWindow.reset(new ObjectDefinitionsWindow(_sceneManager, _selectedSceneObject, _editorContext));
 }
 
 
@@ -95,6 +96,7 @@ void EditorGUI::draw()
     _newDialogWindow->draw();
     _openDialogWindow->draw();
     _cameraSettingsWindow->draw();
+	_objectDefinitionsWindow->draw();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -136,8 +138,18 @@ void EditorGUI::drawMainMenu()
         }
         if (ImGui::BeginMenu("Objects"))
         {
-            //if (ImGui::MenuItem("Add Scene Object...", NULL) ) { _showAddSceneObjectDialog = true; };
-            //if (ImGui::MenuItem("File IO Dialog...", NULL) ) { _showFileIODialog = true; };
+			if (ImGui::BeginMenu("Add Scene Object..."))
+			{
+				for (const std::string& object : _editorContext->availableObjects)
+				{
+					if (ImGui::MenuItem(object.c_str(), NULL))
+					{
+						_events.push_back(EditorEvent(EET_ADD_OBJECT, object));
+					}
+				}
+				ImGui::EndMenu();
+			}
+			ImGui::MenuItem("Available objects", NULL, _objectDefinitionsWindow->getOpenFlagPointer());
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

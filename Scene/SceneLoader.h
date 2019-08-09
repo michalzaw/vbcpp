@@ -24,7 +24,6 @@ class SceneLoader
 {
 	private:
 		static constexpr char* MAP_FILE_NAME = "scene.xml";
-		static constexpr char* OBJECT_FILE_NAME = "object.xml";
 
 		int _terrainCollidesWith;
 		int _roadCollidesWith;
@@ -40,8 +39,6 @@ class SceneLoader
 		bool loadSky(tinyxml2::XMLElement* sceneElement);
 		void loadObjects(tinyxml2::XMLElement* sceneElement);
 		void loadRoads(tinyxml2::XMLElement* sceneElement);
-
-		SceneObject* createObject(RObject* objectDefinition, std::string objectDirPath, std::string name, glm::vec3 position, glm::vec3 rotation);
 
 		void loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles);
 

@@ -8,7 +8,9 @@
 enum EditorEventType
 {
     EET_NEW_CLICK,
-    EET_OPEN_CLICK
+    EET_OPEN_CLICK,
+
+	EET_ADD_OBJECT
 };
 
 

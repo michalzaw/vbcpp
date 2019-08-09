@@ -5,14 +5,22 @@
 #include "RObject.h"
 
 
+#include <glm/glm.hpp>
+
+
 namespace tinyxml2
 {
 	class XMLElement;
 }
 
+class SceneManager;
+class SceneObject;
+
 
 class RObjectLoader
 {
+	static constexpr char* OBJECT_FILE_NAME = "object.xml";
+
 	private:
 		static void loadComponents(tinyxml2::XMLElement* objectElement, RObject* object);
 		static void loadRenderComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
@@ -23,7 +31,10 @@ class RObjectLoader
 		static void loadEnvironmentCaptureComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 	
 	public:
-		static RObject* loadObject(std::string fullPath);
+		static RObject* loadObject(std::string dirPath);
+
+		static SceneObject* createSceneObjectFromRObject(RObject* objectDefinition, std::string name,
+														 glm::vec3 position, glm::vec3 rotation, SceneManager* sceneManager);
 };
 
 

@@ -55,7 +55,7 @@ class ResourceManager
 
         RSound* loadSound(std::string path);
 
-		RObject* loadRObject(std::string fullPath);
+		RObject* loadRObject(std::string name);
 
     protected:
         resourcePtrList _resources;

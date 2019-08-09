@@ -4,6 +4,7 @@
 
 #include <memory>
 
+#include "EditorContext.h"
 #include "EditorGUI.h"
 
 #include "../Graphics/OGLDriver.h"
@@ -24,6 +25,7 @@ class Editor
         SoundManager* _soundManager;
         SceneManager* _sceneManager;
 
+		std::shared_ptr<EditorContext> _editorContext;
         std::unique_ptr<EditorGUI> _editorGUI;
 
         bool _cameraActive;
