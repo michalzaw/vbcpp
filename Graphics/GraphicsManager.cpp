@@ -76,9 +76,9 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-RoadObject* GraphicsManager::addRoadObject(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, SceneObject* owner)
+RoadObject* GraphicsManager::addRoadObject(RRoadProfile* roadProfile, std::vector<RoadSegment>& segments, SceneObject* owner)
 {
-	RoadObject* roadObject = new RoadObject(roadLanes, segments);
+	RoadObject* roadObject = new RoadObject(roadProfile, segments);
 
 	owner->addComponent(roadObject);
 

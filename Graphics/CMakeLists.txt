@@ -43,6 +43,8 @@ set (GRAPHICS_SOURCES
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp
 		Graphics/QuadTreeNode.h
+		Graphics/RRoadProfile.cpp
+		Graphics/RRoadProfile.h
 		Graphics/RShader.h
 		Graphics/Rect.h
 		Graphics/RenderData.cpp
@@ -51,6 +53,8 @@ set (GRAPHICS_SOURCES
 		Graphics/RenderObject.h
 		Graphics/RoadObject.cpp
 		Graphics/RoadObject.h
+		Graphics/RoadProfileLoader.cpp
+		Graphics/RoadProfileLoader.h
 		Graphics/Renderer.cpp
 		Graphics/Renderer.h
 		Graphics/Roads.cpp

@@ -72,7 +72,7 @@ class GraphicsManager
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
-		RoadObject*		addRoadObject(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, SceneObject* owner);
+		RoadObject*		addRoadObject(RRoadProfile* roadProfile, std::vector<RoadSegment>& segments, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);

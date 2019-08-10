@@ -3,8 +3,8 @@
 #include "../Utils/Logger.h"
 
 
-RoadObject::RoadObject(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments)
-	: _roadLanes(roadLanes), _segments(segments)
+RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<RoadSegment>& segments)
+	: _roadProfile(_roadProfile), _segments(segments)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -41,5 +41,5 @@ void RoadObject::buildModel()
 		delete _model;
 	}
 
-	setModel(createRoadModel(_roadLanes, _roadLanes.size(), _segments));
+	setModel(createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments));
 }

@@ -4,6 +4,8 @@
 #include "RTexture.h"
 #include "../Graphics/RShader.h"
 #include "../Graphics/Model.h"
+#include "../Graphics/RRoadProfile.h"
+#include "../Graphics/RoadProfileLoader.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -56,6 +58,8 @@ class ResourceManager
         RSound* loadSound(std::string path);
 
 		RObject* loadRObject(std::string name);
+
+		RRoadProfile* loadRoadProfile(std::string name);
 
     protected:
         resourcePtrList _resources;

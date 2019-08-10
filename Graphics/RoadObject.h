@@ -4,16 +4,17 @@
 
 #include "RenderObject.h"
 #include "Roads.h"
+#include "RRoadProfile.h"
 
 
 class RoadObject : public RenderObject
 {
 	private:
-		std::vector<RoadLane> _roadLanes;
+		RRoadProfile* _roadProfile;
 		std::vector<RoadSegment> _segments;
 
 	public:
-		RoadObject(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments);
+		RoadObject(RRoadProfile*_roadProfile, std::vector<RoadSegment>& segments);
 		virtual ~RoadObject();
 
 		void buildModel();

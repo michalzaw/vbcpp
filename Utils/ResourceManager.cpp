@@ -535,3 +535,29 @@ RObject* ResourceManager::loadRObject(std::string name)
 	else
 		return 0;
 }
+
+
+RRoadProfile* ResourceManager::loadRoadProfile(std::string name)
+{
+	std::string dirPath = GameDirectories::ROAD_PROFILES + name + "/";
+
+	Resource* res = findResource(dirPath);
+	if (res != 0)
+	{
+		RRoadProfile* object = dynamic_cast<RRoadProfile*>(res);
+		return object;
+	}
+
+	std::unique_ptr<RRoadProfile> object(RoadProfileLoader::loadRoadProfile(dirPath));
+	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+
+	RRoadProfile* o = dynamic_cast<RRoadProfile*>(object.get());
+
+	if (o)
+	{
+		_resources.push_back(std::move(object));
+		return o;
+	}
+	else
+		return 0;
+}

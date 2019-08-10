@@ -40,8 +40,6 @@ class SceneLoader
 		void loadObjects(tinyxml2::XMLElement* sceneElement);
 		void loadRoads(tinyxml2::XMLElement* sceneElement);
 
-		void loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles);
-
 	public:
 		SceneLoader(SceneManager* sceneManager);
 
