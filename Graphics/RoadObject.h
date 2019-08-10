@@ -19,6 +19,9 @@ class RoadObject : public RenderObject
 
 		void buildModel();
 
+		RRoadProfile* getRoadProfile();
+		std::vector<RoadSegment>& getSegments();
+
 };
 
 

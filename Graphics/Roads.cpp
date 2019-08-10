@@ -50,6 +50,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
             deltaAngle = -deltaAngle;
         }
 
+		float originalR = segments[k].r;
         bool is = segments[k].r < 0;
         segments[k].r = fabs(segments[k].r);
 
@@ -202,6 +203,8 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
 
 
         }
+
+		segments[k].r = originalR;
     }
 
 

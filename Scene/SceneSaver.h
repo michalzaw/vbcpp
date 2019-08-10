@@ -27,6 +27,9 @@ class SceneSaver
 
 		SceneManager* _sceneManager;
 
+		std::string getRelativePathToDir(std::string filePath, std::string dirPath);
+		std::string createSkyTextureAttribute(std::string path);
+
 	public:
 		SceneSaver(SceneManager* sceneManager);
 

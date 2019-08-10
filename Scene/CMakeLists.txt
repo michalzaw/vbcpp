@@ -13,7 +13,7 @@ set (SCENE_HEADERS
 	Scene/SceneLoader.h
 	Scene/SceneManager.h
 	Scene/SceneObject.h
-	Scene/SceneSaver.cpp
+	Scene/SceneSaver.h
 	Scene/Skybox.h
 	Scene/SoundComponent.h
 	Scene/SoundManager.h

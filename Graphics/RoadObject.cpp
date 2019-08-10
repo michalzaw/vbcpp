@@ -43,3 +43,15 @@ void RoadObject::buildModel()
 
 	setModel(createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments));
 }
+
+
+RRoadProfile* RoadObject::getRoadProfile()
+{
+	return _roadProfile;
+}
+
+
+std::vector<RoadSegment>& RoadObject::getSegments()
+{
+	return _segments;
+}
