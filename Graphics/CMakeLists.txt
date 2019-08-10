@@ -64,6 +64,8 @@ set (GRAPHICS_SOURCES
 		Graphics/ShadowMap.h
 		Graphics/StaticModelLoader.cpp
 		Graphics/StaticModelLoader.h
+		Graphics/Terrain.cpp
+		Graphics/Terrain.h
 		Graphics/Transform.cpp
 		Graphics/Transform.h
 		Graphics/TreeComponent.h

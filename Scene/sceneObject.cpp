@@ -46,6 +46,10 @@ SceneObject::~SceneObject()
 				GraphicsManager::getInstance().removeRoadObject(static_cast<RoadObject*>(*i));
 				break;
 
+			case CT_TERRAIN:
+				GraphicsManager::getInstance().removeTerrain(static_cast<Terrain*>(*i));
+				break;
+
             case CT_CAMERA:
                 //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
                 GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
@@ -253,6 +257,10 @@ void SceneObject::removeComponent(Component* component)
 
 				case CT_ROAD_OBJECT:
 					GraphicsManager::getInstance().removeRoadObject(static_cast<RoadObject*>(component));
+					break;
+
+				case CT_TERRAIN:
+					GraphicsManager::getInstance().removeTerrain(static_cast<Terrain*>(component));
 					break;
 
                 case CT_CAMERA:

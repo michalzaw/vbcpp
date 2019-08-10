@@ -19,7 +19,6 @@ class FilesHelper
                 return 1;
             }
 
-            fclose(file);
             return 0;
         }
 

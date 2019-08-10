@@ -59,15 +59,10 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	Logger::info("Heightmap: " + terrainHeightmap);
 	Logger::info("Material: " + materialName);
 
-	std::string heightmapFullPath = _dirPath + terrainHeightmap;
-	std::string materialFullPath = _dirPath + MaterialLoader::createMaterialFileName(terrainHeightmap);
-	RStaticModel* terrModel = TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, materialName, _dirPath, terrainMaxHeight);
-	_sceneManager->addModelToRemoveAfterClearScene(terrModel);
-
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
-	RenderObject* terrainObj = GraphicsManager::getInstance().addRenderObject(new RenderObject(terrModel), terrainObject);
+	Terrain* terrainObj = GraphicsManager::getInstance().addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, terrainObject);
 	terrainObj->setIsCastShadows(false);
-	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrModel, COL_TERRAIN, _terrainCollidesWith);
+	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);
 	terrainMesh->setRestitution(0.9f);
 	terrainMesh->getRigidBody()->setFriction(1.0f);
 	terrainObject->addComponent(terrainMesh);

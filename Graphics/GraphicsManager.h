@@ -10,6 +10,7 @@
 
 #include "RenderObject.h"
 #include "RoadObject.h"
+#include "Terrain.h"
 #include "RenderData.h"
 #include "Camera.h"
 //#include "OGLDriver.h"
@@ -73,6 +74,7 @@ class GraphicsManager
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
 		RoadObject*		addRoadObject(RRoadProfile* roadProfile, std::vector<RoadSegment>& segments, SceneObject* owner);
+		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);
@@ -88,6 +90,7 @@ class GraphicsManager
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
         void removeRenderObject(RenderObject* object);
 		void removeRoadObject(RoadObject* object);
+		void removeTerrain(Terrain* object);
         void removeGrassComponent(Grass* grass);
         void removeCamera(CameraStatic* camera);
         void removeLight(Light* light);

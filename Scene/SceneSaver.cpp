@@ -60,6 +60,15 @@ void SceneSaver::saveMap(std::string name)
 	XMLNode* rootNode = doc.NewElement("Scene");
 	doc.InsertEndChild(rootNode);
 
+	XMLElement* descriptionElement = doc.NewElement("Description");
+	descriptionElement->SetAttribute("author", "");
+	rootNode->InsertEndChild(descriptionElement);
+
+	XMLElement* startPositionElement = doc.NewElement("Start");
+	startPositionElement->SetAttribute("position", vec3ToString(_sceneManager->getBusStart().position).c_str());
+	startPositionElement->SetAttribute("rotation", vec3ToString(_sceneManager->getBusStart().rotation).c_str());
+	rootNode->InsertEndChild(startPositionElement);
+
 	XMLElement* objectsElement = doc.NewElement("Objects");
 	rootNode->InsertEndChild(objectsElement);
 
@@ -120,6 +129,18 @@ void SceneSaver::saveMap(std::string name)
 			}
 
 			roadsElement->InsertEndChild(roadElement);
+		}
+		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+		{
+			XMLElement* terrainElement = doc.NewElement("Terrain");
+
+			Terrain* terrainComponent = static_cast<Terrain*>(sceneObject->getComponent(CT_TERRAIN));
+
+			terrainElement->SetAttribute("heightmap", terrainComponent->getHeightmapFileName().c_str());
+			terrainElement->SetAttribute("material", terrainComponent->getMaterialName().c_str());
+			terrainElement->SetAttribute("maxHeight", terrainComponent->getMaxHeight());
+
+			rootNode->InsertFirstChild(terrainElement);
 		}
 		else if (sceneObject->getName() == "sky")
 		{
