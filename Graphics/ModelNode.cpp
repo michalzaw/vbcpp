@@ -4,7 +4,7 @@
 ModelNode::ModelNode(StaticModelNode* staticModelNode, ModelNode* parent)
 {
     _name = staticModelNode->name;
-    _staticModelNode = staticModelNode;
+	_aabb = &(staticModelNode->aabb);
     _transformNode = staticModelNode->transform;
 
     _meshes = staticModelNode->meshes;
@@ -41,9 +41,9 @@ std::string ModelNode::getName()
 }
 
 
-StaticModelNode* ModelNode::getStaticModelNode()
+AABB* ModelNode::getAABB()
 {
-    return _staticModelNode;
+	return _aabb;
 }
 
 

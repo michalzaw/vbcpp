@@ -2,7 +2,7 @@
 
 
 // Current stable
-RStaticModel* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vector<RoadSegment> segments)
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, std::vector<RoadSegment>& segments)
 {
     std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
     std::vector<unsigned int>* lanesIndicesArray = new std::vector<unsigned int>[lanesCount];

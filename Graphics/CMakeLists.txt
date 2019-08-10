@@ -49,6 +49,8 @@ set (GRAPHICS_SOURCES
 		Graphics/RenderData.h
 		Graphics/RenderObject.cpp
 		Graphics/RenderObject.h
+		Graphics/RoadObject.cpp
+		Graphics/RoadObject.h
 		Graphics/Renderer.cpp
 		Graphics/Renderer.h
 		Graphics/Roads.cpp

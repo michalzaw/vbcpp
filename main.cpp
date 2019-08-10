@@ -200,10 +200,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
 {
-    AABB& aabb = modelNode->getStaticModelNode()->aabb;
+    AABB* aabb = modelNode->getAABB();
     glm::mat4 modelMatrix = parentTransform * modelNode->getTransformMatrix();
     float distance;
-    if (isRayIntersectOBB(rayStart, rayDir, aabb, modelMatrix, distance))
+    if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
     {
         glm::vec4 rayStartLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayStart.x, rayStart.y, rayStart.z, 1.0f);
         glm::vec4 rayDirLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayDir.x, rayDir.y, rayDir.z, 0.0f);

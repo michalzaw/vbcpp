@@ -76,6 +76,17 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
+RoadObject* GraphicsManager::addRoadObject(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, SceneObject* owner)
+{
+	RoadObject* roadObject = new RoadObject(roadLanes, segments);
+
+	owner->addComponent(roadObject);
+
+	_renderObjects.push_back(roadObject);
+
+	return roadObject;
+}
+
 Grass* GraphicsManager::addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
 {
     Grass* grass = new Grass(model, terrainHeightmap, grassDensityTexture);
@@ -189,6 +200,12 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
             return;
         }
     }
+}
+
+
+void GraphicsManager::removeRoadObject(RoadObject* object)
+{
+	removeRenderObject(object);
 }
 
 void GraphicsManager::removeGrassComponent(Grass* grass)

@@ -12,7 +12,7 @@ class ModelNode
     private:
         std::string _name;
 
-        StaticModelNode* _staticModelNode;
+		AABB* _aabb;
 
         Transform _transformNode;
         Transform _transform;
@@ -31,7 +31,7 @@ class ModelNode
         ~ModelNode();
 
         std::string getName();
-        StaticModelNode* getStaticModelNode();
+		AABB* getAABB();
         Transform& getTransformNode();
         Transform& getTransform();
         glm::mat4& getTransformMatrix();

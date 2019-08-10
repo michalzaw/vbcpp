@@ -5,6 +5,7 @@
 RenderObject::RenderObject(RStaticModel* model)
     : Component(CT_RENDER_OBJECT),
     _model(NULL),
+	_modelRootNode(NULL),
     _materials(NULL),
     _isCastShadows(true),
     _isCalculatedAABB(false)

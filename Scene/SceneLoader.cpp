@@ -269,15 +269,15 @@ void SceneLoader::loadRoads(XMLElement* sceneElement)
 		//std::cout << profiles[profileName].size() << std::endl;
 		//std::cout << segments.size() << std::endl;
 		// create road
-		RStaticModel * roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
-		_sceneManager->addModelToRemoveAfterClearScene(roadModel);
+		//RStaticModel * roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
+		//_sceneManager->addModelToRemoveAfterClearScene(roadModel);
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(roadModel), roadSceneObject);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(profiles[profileName], segments, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
-		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadModel, COL_TERRAIN, _roadCollidesWith);
+		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
 		roadMesh->getRigidBody()->setFriction(1.0f);
 		//terrainMesh->getRigidBody()->setFriction(1.5f);
