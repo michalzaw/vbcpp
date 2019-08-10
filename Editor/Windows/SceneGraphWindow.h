@@ -8,12 +8,16 @@
 class SceneGraphWindow : public EditorWindow
 {
     private:
+		bool _centerGraph;
+
         virtual void drawWindow() override;
 
         void inspectSceneObject(SceneObject* object);
 
     public:
         SceneGraphWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject);
+
+		void centerGraphView();
 };
 
 

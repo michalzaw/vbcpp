@@ -49,6 +49,8 @@ void EditorGUI::initializeImGui()
 void EditorGUI::setSelectedSceneObject(SceneObject* sceneObject)
 {
     _selectedSceneObject = sceneObject;
+
+	_sceneGraphWindow->centerGraphView();
 }
 
 
@@ -112,7 +114,7 @@ void EditorGUI::drawMainMenu()
             if ( ImGui::MenuItem("New", "CTRL+N") ) { _newDialogWindow->open(); }
             ImGui::Separator();
             if ( ImGui::MenuItem("Open", "CTRL+O") ) { _openDialogWindow->open(); }
-            if ( ImGui::MenuItem("Save", "CTRL+S") ) {}
+            if ( ImGui::MenuItem("Save", "CTRL+S") ) { _events.push_back(EditorEvent(EET_SAVE_CLICK, _editorContext->currentMapInfo.name));}
             if ( ImGui::MenuItem("Save as...", "CTRL+SHIFT+S") ) {}
             ImGui::Separator();
             if ( ImGui::MenuItem("Exit") ) {}

@@ -4,6 +4,9 @@
 
 #include "../Game/Directories.h"
 
+#include "../Scene/SceneLoader.h"
+#include "../Scene/SceneSaver.h"
+
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
 
@@ -249,6 +252,9 @@ void Editor::run()
         {
             EditorEvent event = _editorGUI->getNextEvent();
 
+			SceneLoader sceneLoader(_sceneManager);
+			SceneSaver sceneSaver(_sceneManager);
+
             switch (event.type)
             {
                 case EET_NEW_CLICK:
@@ -260,8 +266,13 @@ void Editor::run()
                     clearScene();
                     _editorGUI->setSelectedSceneObject(nullptr);
 
-                    _sceneManager->loadScene(event.params);
+					sceneLoader.loadMap(event.params);
+					_editorContext->currentMapInfo.name = event.params;
                     break;
+
+				case EET_SAVE_CLICK:
+					sceneSaver.saveMap(event.params);
+					break;
 
 				case EET_ADD_OBJECT:
 					RObject* object = ResourceManager::getInstance().loadRObject(event.params);

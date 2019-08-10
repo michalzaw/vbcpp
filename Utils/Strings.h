@@ -23,7 +23,7 @@ std::string toString(TYPE Number)
 inline std::string vec3ToString(glm::vec3 vector)
 {
 	std::ostringstream Stream;
-	Stream << "[" << vector.x << ", " << vector.x << ", " << vector.x << "]";
+	Stream << vector.x << "," << vector.y << "," << vector.z;
 	return Stream.str();
 }
 

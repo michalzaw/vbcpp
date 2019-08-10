@@ -22,6 +22,9 @@ class RObject : public Resource
 
 		std::vector<std::unordered_map<std::string, std::string>>& getComponents();
 
+		std::string getAuthor();
+		std::string getName();
+		std::string getComment();
 };
 
 

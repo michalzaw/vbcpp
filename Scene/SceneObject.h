@@ -75,6 +75,8 @@ class SceneObject
         unsigned int    getId();
         bool            isActive();
 
+		RObject* getObjectDefinition() { return _objectDefinition; }
+
         Component*      getComponent(unsigned int index);
         Component*      getComponent(ComponentType type);
 

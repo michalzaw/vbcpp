@@ -13,3 +13,21 @@ std::vector<std::unordered_map<std::string, std::string>>& RObject::getComponent
 {
 	return _components;
 }
+
+
+std::string RObject::getAuthor()
+{
+	return _author;
+}
+
+
+std::string RObject::getName()
+{
+	return _name;
+}
+
+
+std::string RObject::getComment()
+{
+	return _comment;
+}

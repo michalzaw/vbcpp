@@ -6,9 +6,17 @@
 #include <vector>
 
 
+struct MapInfo
+{
+	std::string name;
+};
+
+
 struct EditorContext
 {
 	std::vector<std::string> availableObjects;
+
+	MapInfo currentMapInfo;
 };
 
 

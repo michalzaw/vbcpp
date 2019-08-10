@@ -2,7 +2,8 @@
 
 
 SceneGraphWindow::SceneGraphWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject)
-    : EditorWindow(sceneManager, selectedSceneObject)
+    : EditorWindow(sceneManager, selectedSceneObject),
+	_centerGraph(false)
 {
 
 }
@@ -36,8 +37,14 @@ void SceneGraphWindow::inspectSceneObject(SceneObject* object)
 
     if (object->getChildren().empty())
         node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
-    if (object == _selectedSceneObject)
-        node_flags = node_flags | ImGuiTreeNodeFlags_Selected;
+	if (object == _selectedSceneObject)
+		node_flags = node_flags | ImGuiTreeNodeFlags_Selected;
+
+	if (object == _selectedSceneObject && _centerGraph)
+	{
+		_centerGraph = false;
+		ImGui::SetScrollHereY();
+	}
 
     ImGui::PushID(object);
     bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)object, node_flags, object->getName().c_str());
@@ -60,4 +67,10 @@ void SceneGraphWindow::inspectSceneObject(SceneObject* object)
         ImGui::TreePop();
     }
     ImGui::PopID();
+}
+
+
+void SceneGraphWindow::centerGraphView()
+{
+	_centerGraph = true;
 }
