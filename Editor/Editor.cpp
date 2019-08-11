@@ -157,7 +157,7 @@ void Editor::clearScene()
 {
     _sceneManager->clearScene();
 
-    _cameraObject = _sceneManager->addSceneObject("cam1");
+    _cameraObject = _sceneManager->addSceneObject("editor#cam1");
     _camera = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     _cameraObject->addComponent(_camera);
     _camera->setRotationSpeed(0.01f);
@@ -166,7 +166,7 @@ void Editor::clearScene()
     GraphicsManager::getInstance().setCurrentCamera(_camera);
     _soundManager->setActiveCamera(_camera);
 
-    _axisObject = _sceneManager->addSceneObject("axis");
+    _axisObject = _sceneManager->addSceneObject("editor#axis");
     RStaticModel* axisModel = ResourceManager::getInstance().loadModel("axis.fbx", "");
     axisModel->getMaterial(0)->shader = EDITOR_AXIS_SHADER;
     RenderObject* axisRenderObject = new RenderObject(axisModel);

@@ -312,6 +312,12 @@ void SceneObject::removeComponent(Component* component)
 }
 
 
+void SceneObject::setName(std::string name)
+{
+	_name = name;
+}
+
+
 void SceneObject::setIsActive(bool is)
 {
     _isActive = is;
@@ -361,6 +367,12 @@ bool SceneObject::isActive()
         return _parent->isActive() && _isActive;
 
     return _isActive;
+}
+
+
+RObject* SceneObject::getObjectDefinition()
+{
+	return _objectDefinition;
 }
 
 

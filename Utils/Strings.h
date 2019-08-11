@@ -84,5 +84,7 @@ std::string trim(const std::string& string);
 
 std::vector<std::string> split(const std::string& string, char delimiter);
 
+bool startsWith(std::string string, std::string start);
+
 
 #endif // STRINGS_H_INCLUDED

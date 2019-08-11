@@ -69,13 +69,14 @@ class SceneObject
         void removeComponent(Component* component);
 
 
+		void			setName(std::string name);
         void            setIsActive(bool is);
 
         std::string     getName();
         unsigned int    getId();
         bool            isActive();
 
-		RObject* getObjectDefinition() { return _objectDefinition; }
+		RObject*		getObjectDefinition();
 
         Component*      getComponent(unsigned int index);
         Component*      getComponent(ComponentType type);

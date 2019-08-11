@@ -30,3 +30,9 @@ std::vector<std::string> split(const std::string& string, char delimiter)
 
 	return result;
 }
+
+
+bool startsWith(std::string string, std::string start)
+{
+	return string.rfind(start, 0) == 0;
+}

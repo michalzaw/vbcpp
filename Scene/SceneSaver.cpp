@@ -107,6 +107,10 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	XMLElement* objectElement = doc.NewElement("Object");
 
 	objectElement->SetAttribute("name", objectDefinition->getName().c_str());
+
+	if (objectDefinition->getName() != sceneObject->getName())
+		objectElement->SetAttribute("id", sceneObject->getName().c_str());
+
 	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
 	glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
 		radToDeg(sceneObject->getRotation().y),

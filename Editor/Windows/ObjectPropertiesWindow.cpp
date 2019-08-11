@@ -30,10 +30,9 @@ void ObjectPropertiesWindow::drawWindow()
 
             buffer[sizeof buffer - 1] = '\0';
 
-            if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer),
-                                    ImGuiInputTextFlags_EnterReturnsTrue ) )
+            if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
             {
-                //_selectedSceneObject->setName(std::string(buffer));
+                _selectedSceneObject->setName(std::string(buffer));
             }
 
             ImGui::Separator();

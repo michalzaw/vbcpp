@@ -33,6 +33,9 @@ void SceneGraphWindow::drawWindow()
 
 void SceneGraphWindow::inspectSceneObject(SceneObject* object)
 {
+	if (startsWith(object->getName(), "editor#"))
+		return;
+
     ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
     if (object->getChildren().empty())
