@@ -9,6 +9,7 @@
 struct MapInfo
 {
 	std::string name;
+	std::string author;
 };
 
 

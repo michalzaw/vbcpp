@@ -297,6 +297,12 @@ void SceneLoader::loadMap(std::string name)
 		return;
 	}
 
+	XMLElement* descriptionElement = scnElement->FirstChildElement("Description");
+	if (descriptionElement != nullptr)
+	{
+		_sceneDescription.author = descriptionElement->Attribute("author");
+	}
+
 	Logger::info("Load map: " + name);
 
 	// todo: load description
@@ -309,4 +315,10 @@ void SceneLoader::loadMap(std::string name)
 		return;
 	loadObjects(scnElement);
 	loadRoads(scnElement);
+}
+
+
+SceneDescription& SceneLoader::getLoadedSceneDescription()
+{
+	return _sceneDescription;
 }

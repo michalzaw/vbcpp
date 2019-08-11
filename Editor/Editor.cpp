@@ -268,10 +268,11 @@ void Editor::run()
 
 					sceneLoader.loadMap(event.params);
 					_editorContext->currentMapInfo.name = event.params;
+					_editorContext->currentMapInfo.author = sceneLoader.getLoadedSceneDescription().author;
                     break;
 
 				case EET_SAVE_CLICK:
-					sceneSaver.saveMap(event.params);
+					sceneSaver.saveMap(event.params, SceneDescription(_editorContext->currentMapInfo.author));
 					break;
 
 				case EET_ADD_OBJECT:

@@ -20,6 +20,18 @@ class RObject;
 class SceneObject;
 
 
+struct SceneDescription
+{
+	std::string author;
+
+	SceneDescription() {}
+	SceneDescription(const std::string& author)
+	{
+		this->author = author;
+	}
+};
+
+
 class SceneLoader
 {
 	private:
@@ -31,6 +43,8 @@ class SceneLoader
 		SceneManager* _sceneManager;
 
 		std::string _dirPath;
+
+		SceneDescription _sceneDescription;
 
 		void loadStartPosition(tinyxml2::XMLElement* sceneElement);
 		bool loadTerrain(tinyxml2::XMLElement* sceneElement);
@@ -44,6 +58,8 @@ class SceneLoader
 		SceneLoader(SceneManager* sceneManager);
 
 		void loadMap(std::string name);
+
+		SceneDescription& getLoadedSceneDescription();
 
 };
 
