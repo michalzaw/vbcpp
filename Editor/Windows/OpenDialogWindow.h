@@ -11,6 +11,8 @@ class OpenDialogWindow : public EditorWindow
         std::vector<std::string> _availableMapsNames;
         int _listBoxMapSelectedItem;
 
+		bool _openModalDialog;
+
         virtual void drawWindow() override;
 
     public:

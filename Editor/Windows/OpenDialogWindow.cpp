@@ -7,15 +7,24 @@
 
 OpenDialogWindow::OpenDialogWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events),
-    _listBoxMapSelectedItem(0)
+    _listBoxMapSelectedItem(0), _openModalDialog(isOpen)
 {
-
+	if (isOpen)
+	{
+		open();
+	}
 }
 
 
 void OpenDialogWindow::drawWindow()
 {
-    if (ImGui::Begin("Open map", &_isOpen))
+	if (_openModalDialog)
+	{
+		ImGui::OpenPopup("Open map");
+		_openModalDialog = false;
+	}
+
+	if (ImGui::BeginPopupModal("Open map", NULL, ImGuiWindowFlags_AlwaysAutoResize))
     {
         std::vector<const char*> availableMapsNamesCstr;
         for (int i = 0; i < _availableMapsNames.size(); ++i)
@@ -25,17 +34,26 @@ void OpenDialogWindow::drawWindow()
 
         ImGui::ListBox("Map", &_listBoxMapSelectedItem, &availableMapsNamesCstr[0], availableMapsNamesCstr.size(), 4);
 
-        if (ImGui::Button("Open"))
+        if (ImGui::Button("Open", ImVec2(120, 0)))
         {
             std::string mapName = (_availableMapsNames[_listBoxMapSelectedItem]);
             mapName = trim(mapName);
 
             _events->push_back(EditorEvent(EET_OPEN_CLICK, mapName));
 
-            _isOpen = false;
+			_isOpen = false;
+			ImGui::CloseCurrentPopup();
         }
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel", ImVec2(120, 0)))
+		{
+			_isOpen = false;
+			ImGui::CloseCurrentPopup();
+		}
     }
-    ImGui::End();
+    ImGui::EndPopup();
 }
 
 
@@ -47,4 +65,5 @@ void OpenDialogWindow::open()
     _availableMapsNames = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
 
     _isOpen = true;
+	_openModalDialog = true;
 }
