@@ -102,12 +102,11 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 }
 
 
-void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject)
+void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	//objectElement->SetAttribute("name", objectDefinition->getName().c_str());
-	objectElement->SetAttribute("name", sceneObject->getName().c_str());
+	objectElement->SetAttribute("name", objectDefinition->getName().c_str());
 	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
 	glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
 		radToDeg(sceneObject->getRotation().y),
@@ -204,7 +203,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		RObject* objectDefinition = sceneObject->getObjectDefinition();
 		if (objectDefinition != nullptr)
 		{
-			saveObject(objectsElement, doc, sceneObject);
+			saveObject(objectsElement, doc, sceneObject, objectDefinition);
 		}
 		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
 		{

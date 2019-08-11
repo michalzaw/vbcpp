@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Domek" comment="Test object" />
+	<Description author="test" name="domek" comment="Test object" />
 
 	<Components>
 	

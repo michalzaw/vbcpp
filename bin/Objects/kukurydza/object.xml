@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Kukurydza" comment="Rzad kukurydzy" />
+	<Description author="test" name="kukurydza" comment="Rzad kukurydzy" />
 
 	<Components>
 	

@@ -12,7 +12,7 @@ EditorGUI::EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager,
     initializeImGui();
 
     _sceneGraphWindow.reset(new SceneGraphWindow(_sceneManager, _selectedSceneObject));
-    _objectPropertiesWindow.reset(new ObjectPropertiesWindow(_sceneManager, _selectedSceneObject));
+    _objectPropertiesWindow.reset(new ObjectPropertiesWindow(_sceneManager, _selectedSceneObject, &_events));
     _newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events, true));
     _openDialogWindow.reset(new OpenDialogWindow(_sceneManager, _selectedSceneObject, &_events));
     _cameraSettingsWindow.reset(new CameraSettingsWindow(_sceneManager, _selectedSceneObject));

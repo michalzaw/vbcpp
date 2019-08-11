@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="mmiki26" name="Blok" comment="Blok mieszkalny" />
+	<Description author="mmiki26" name="blok" comment="Blok mieszkalny" />
 
 	<Components>
 	

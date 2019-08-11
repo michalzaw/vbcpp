@@ -34,9 +34,14 @@ class Editor
 
         SceneObject* _axisObject;
 
+		bool _addObjectMode;
+		RObject* _objectToAdd;
+
         bool createWindow();
         void initializeEngineSubsystems();
         void clearScene();
+
+		bool calculateMousePositionInWorldspaceUsingBulletRaycasting(glm::vec3 rayStart, glm::vec3 rayEnd, glm::vec3& position);
 
     public:
         Editor();

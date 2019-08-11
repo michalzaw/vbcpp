@@ -11,7 +11,7 @@ class ObjectPropertiesWindow : public EditorWindow
         virtual void drawWindow() override;
 
     public:
-        ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, bool isOpen = true);
+        ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen = true);
 
 };
 

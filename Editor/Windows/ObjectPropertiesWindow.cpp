@@ -1,8 +1,8 @@
 #include "ObjectPropertiesWindow.h"
 
 
-ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, bool isOpen)
-    : EditorWindow(sceneManager, selectedSceneObject, isOpen)
+ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
+    : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
 {
 
 }
@@ -213,6 +213,13 @@ void ObjectPropertiesWindow::drawWindow()
                     }
                 }
             }*/
+
+			ImGui::Separator();
+
+			if (ImGui::Button("Delete"))
+			{
+				_events->push_back(EditorEvent(EET_SELECTED_OBJECT_DELETE_CLICK));
+			}
         }
     }
     ImGui::End();

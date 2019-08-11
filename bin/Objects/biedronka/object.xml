@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Biedronka" comment="Supermarket Biedronka" />
+	<Description author="test" name="biedronka" comment="Supermarket Biedronka" />
 
 	<Components>
 		<Component type="render" model="biedronka_vb.fbx" scale="7,7,7" />

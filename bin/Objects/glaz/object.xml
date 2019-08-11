@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="fr0zi" name="Głaz" comment="Wielki głaz" />
+	<Description author="fr0zi" name="glaz" comment="Wielki głaz" />
 
 	<Components>
 	

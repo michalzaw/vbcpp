@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Chatka" comment="Wiejska chatka drewniana" />
+	<Description author="test" name="chatka" comment="Wiejska chatka drewniana" />
 
 	<Components>
 		<Component type="render" model="chatka.fbx" scale="1,1,1" />

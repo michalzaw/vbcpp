@@ -80,7 +80,8 @@ void editorFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 
 
 Editor::Editor()
-    : _cameraActive(false)
+    : _cameraActive(false),
+	_addObjectMode(false), _objectToAdd(nullptr)
 {
     if (!createWindow())
     {
@@ -174,6 +175,30 @@ void Editor::clearScene()
     // ---------------------------------------------------
 	/*BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
     Bus* bus = busLoader.loadBus("h9_raycast");*/
+}
+
+
+bool Editor::calculateMousePositionInWorldspaceUsingBulletRaycasting(glm::vec3 rayStart, glm::vec3 rayDir, glm::vec3& position)
+{
+	glm::vec3 rayEnd = rayStart + (rayDir * 1000);
+	btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStart.x, rayStart.y, rayStart.z),
+		btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
+
+	rayCallback.m_collisionFilterMask = COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL;
+	rayCallback.m_collisionFilterGroup = COL_ENV;
+
+	_sceneManager->getPhysicsManager()->getDynamicsWorld()->rayTest(btVector3(rayStart.x, rayStart.y, rayStart.z),
+		btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
+		rayCallback);
+
+	if (rayCallback.hasHit())
+	{
+		position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+
+		return true;
+	}
+
+	return false;
 }
 
 
@@ -276,8 +301,14 @@ void Editor::run()
 					break;
 
 				case EET_ADD_OBJECT:
-					RObject* object = ResourceManager::getInstance().loadRObject(event.params);
-					RObjectLoader::createSceneObjectFromRObject(object, event.params, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
+					_addObjectMode = true;
+					_objectToAdd = ResourceManager::getInstance().loadRObject(event.params);
+
+					break;
+
+				case EET_SELECTED_OBJECT_DELETE_CLICK:
+					_sceneManager->removeSceneObject(_editorGUI->getSelectedSceneObject());
+					_editorGUI->setSelectedSceneObject(nullptr);
 
 					break;
             }
@@ -353,42 +384,60 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
 
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
     {
-        double xpos, ypos;
-        glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
-        ypos = _window->getHeight() - ypos;
+		double xpos, ypos;
+		glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
+		ypos = _window->getHeight() - ypos;
 
-        glm::vec3 rayStart;
-        glm::vec3 rayDir;
-        calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+		glm::vec3 rayStart;
+		glm::vec3 rayDir;
+		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
-        // collision with render objects
-        SceneObject* selectedObject = nullptr;
-        float d = std::numeric_limits<float>::max();
+		if (_addObjectMode)
+		{
+			glm::vec3 hitPosition;
+			if (calculateMousePositionInWorldspaceUsingBulletRaycasting(rayStart, rayDir, hitPosition))
+			{
+				SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 
-        std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
-        for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
-        {
-            RenderObject* renderObject = *i;
-            AABB* aabb = renderObject->getModel()->getAABB();
-            glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
-            float distance;
-            if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
-            {
-                if (distance > 0.0f && distance < d)
-                {
-                    selectedObject = renderObject->getSceneObject();
-                    d = distance;
-                }
-            }
-        }
+				_editorGUI->setSelectedSceneObject(newObject);
+			}
+		}
+		else
+		{
+			// collision with render objects
+			SceneObject* selectedObject = nullptr;
+			float d = std::numeric_limits<float>::max();
 
-        _editorGUI->setSelectedSceneObject(selectedObject);
+			std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+			for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+			{
+				RenderObject* renderObject = *i;
+				AABB* aabb = renderObject->getModel()->getAABB();
+				glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+				float distance;
+				if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+				{
+					if (distance > 0.0f && distance < d)
+					{
+						selectedObject = renderObject->getSceneObject();
+						d = distance;
+					}
+				}
+			}
+
+			_editorGUI->setSelectedSceneObject(selectedObject);
+		}
     }
 }
 
 
 void Editor::keyCallback(int key, int scancode, int action, int mods)
 {
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	{
+		if (_addObjectMode)
+			_addObjectMode = false;
+	}
 
 }
 

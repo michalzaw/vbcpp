@@ -41,7 +41,7 @@ class SceneSaver
 		void saveGrass(tinyxml2::XMLElement* grassElement, SceneObject* sceneObject);
 		void saveSunLight(tinyxml2::XMLElement* sunElement, SceneObject* sceneObject);
 		void saveSky(tinyxml2::XMLElement* skyElement, SceneObject* sceneObject);
-		void saveObject(tinyxml2::XMLElement* objectsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
+		void saveObject(tinyxml2::XMLElement* objectsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition);
 		void saveRoad(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
 
 	public:
