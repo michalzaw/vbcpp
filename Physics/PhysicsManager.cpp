@@ -267,6 +267,12 @@ PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVe
 
 void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
 {
+	std::vector<Constraint*>& constraints = physicalBody->getConstraints();
+	while (constraints.size() != 0)
+	{
+		removeConstraint(*(constraints.begin() + constraints.size() - 1));
+	}
+
 	btRigidBody* rigidBody = physicalBody->getRigidBody();
 	if (rigidBody != nullptr)
 	{
@@ -338,5 +344,7 @@ void PhysicsManager::removeConstraint(Constraint* c)
     _dynamicsWorld->removeConstraint(c->getBulletConstraint());
 
     _constraints.remove(c);
+
+	delete c;
 }
 
