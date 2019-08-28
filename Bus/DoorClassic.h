@@ -10,19 +10,22 @@
 class DoorClassic : public Door
 {
     public:
-        DoorClassic(RStaticModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hingeBusToArm, ConstraintHinge* hingeArmToDoor,
+        DoorClassic(SceneObject* doorSceneObject, SceneObject* armSceneObject, ConstraintHinge* hingeBusToArm, ConstraintHinge* hingeArmToDoor,
                     SoundComponent* openDoor, SoundComponent* closeDoor, float velocity, RotationDir rotationDir = ERD_CW, char group = 1);
 
         virtual ~DoorClassic();
 
-        ConstraintHinge* getConstraintBusToArm();
-        ConstraintHinge* getConstraintArmToDoor();
+		void removeObjectsAndConstraint(SceneManager* sceneManager) override;
 
         void open() override;
         void close() override;
         void setLoose() override;
 
+		ConstraintHinge* getConstraintBusToArm();
+		ConstraintHinge* getConstraintArmToDoor();
+
     protected:
+		SceneObject*			_armSceneObject;
         ConstraintHinge*        _hingeBusToArm;
         ConstraintHinge*        _hingeArmToDoor;
         RotationDir             _rotationDir;

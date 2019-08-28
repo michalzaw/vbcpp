@@ -617,7 +617,7 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 
     doorHinge->getBulletConstraint()->setLimit(-1.5,0);
 
-    Door* d = new DoorSimple(doorModel, doorBody, doorHinge, openSoundComp, closeSoundComp, group);
+    Door* d = new DoorSimple(doorObj, doorHinge, openSoundComp, closeSoundComp, group);
     d->close();
     _bus->_doors.push_back(d);
 }
@@ -660,9 +660,10 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(arm->getCollisionMesh(), arm->getCollisionMeshSize(), armMass, COL_DOOR, _doorCollidesWith);
     armObj->addComponent(armBody);
 
-    ConstraintHinge* busArmHinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
+	// constraint1
+    ConstraintHinge* busToArm1Hinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, armBody, armPivotA, armPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
-    busArmHinge->getBulletConstraint()->setLimit(arm1limits.x,arm1limits.y);
+	busToArm1Hinge->getBulletConstraint()->setLimit(arm1limits.x,arm1limits.y);
 
     // arm 2
 
@@ -690,7 +691,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     PhysicalBodyConvexHull* arm2Body = _pMgr->createPhysicalBodyConvexHull(arm2->getCollisionMesh(), arm2->getCollisionMeshSize(), arm2Mass, COL_DOOR, collidesWith);
     arm2Obj->addComponent(arm2Body);
 
-    _pMgr->createConstraintHinge(busModule.rayCastVehicle, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
+    ConstraintHinge* busToArm2Hinge = _pMgr->createConstraintHinge(busModule.rayCastVehicle, arm2Body, arm2PivotA, arm2PivotB, btVector3(0,1,0), btVector3(0,1,0));
 
     // door model
 
@@ -706,20 +707,20 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
     doorObj->addComponent(doorBody);
 
-    ConstraintHinge* armDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
+    ConstraintHinge* arm1ToDoorHinge = _pMgr->createConstraintHinge(armBody, doorBody, doorPivotA, doorPivotB, btVector3(0,1,0), btVector3(0,1,0));
 
     if (rotDir == "CCW")
-        armDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
+		arm1ToDoorHinge->getBulletConstraint()->setLimit(-1.9,0.0);
     else
-        armDoorHinge->getBulletConstraint()->setLimit(0.0,1.9);
+		arm1ToDoorHinge->getBulletConstraint()->setLimit(0.0,1.9);
 
     btVector3 pivotC = XMLstringToBtVec3(doorElement->Attribute("pivotC"));
     btVector3 pivotD = XMLstringToBtVec3(doorElement->Attribute("pivotD"));
 
-    _pMgr->createConstraintHinge(arm2Body, doorBody, pivotC, pivotD, btVector3(0,1,0), btVector3(0,1,0));
+	ConstraintHinge* arm2ToDoorHinge = _pMgr->createConstraintHinge(arm2Body, doorBody, pivotC, pivotD, btVector3(0,1,0), btVector3(0,1,0));
 
 
-    Door* d = new DoorSE(0, 0, arm, armBody, busArmHinge, 0, openSoundComp, closeSoundComp, rdir, group);
+	Door* d = new DoorSE(doorObj, armObj, arm2Obj, busToArm1Hinge, busToArm2Hinge, arm1ToDoorHinge, arm2ToDoorHinge, openSoundComp, closeSoundComp, rdir, group);
     d->close();
     _bus->_doors.push_back(d);
 }
@@ -829,7 +830,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
         hingeArmToDoor->getBulletConstraint()->setLimit(0, 3.14);
     }
 
-    Door* d = new DoorClassic(doorModel, doorBody, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, velocity, rotationDirection, group);
+    Door* d = new DoorClassic(doorObj, armObject, hingeBusToArm, hingeArmToDoor, openSoundComp, closeSoundComp, velocity, rotationDirection, group);
     d->close();
     _bus->_doors.push_back(d);
 }

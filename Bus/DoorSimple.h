@@ -2,47 +2,26 @@
 #define DOORSIMPLE_H_INCLUDED
 
 #include "Door.h"
+
 #include "../Physics/ConstraintHinge.hpp"
 
-class DoorSimple : virtual public Door
+class DoorSimple : public Door
 {
     public:
-        DoorSimple(RStaticModel* model, PhysicalBodyConvexHull* body, ConstraintHinge* hinge, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
-        : Door(model, body, openDoor, closeDoor, group), _hinge(hinge)
-        {
-        }
+		DoorSimple(SceneObject* doorSceneObject, ConstraintHinge* hinge, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1);
 
-        virtual ~DoorSimple()
-        {
-        }
+		virtual ~DoorSimple();
 
-        ConstraintHinge* getConstraint() { return _hinge; }
+		void removeObjectsAndConstraint(SceneManager* sceneManager) override;
 
-        void open() override
-        {
-            //_doorOpenSound->play();
-            _hinge->getBulletConstraint()->enableAngularMotor(true, -2.1f, 0.15f);
-            _state = EDS_OPENING;
+		void open() override;
+		void close() override;
+		void setLoose() override;
 
-            Door::open();
-        }
-
-        void close() override
-        {
-            //_doorCloseSound->play();
-            _hinge->getBulletConstraint()->enableAngularMotor(true, 2.1f, 0.15f);
-            _state = EDS_CLOSING;
-
-            Door::close();
-        }
-
-        void setLoose() override
-        {
-            _hinge->getBulletConstraint()->enableAngularMotor(false, 0.0f, 0.0f);
-        }
+		ConstraintHinge* getConstraint() { return _hingeConstraint; }
 
     protected:
-        ConstraintHinge*         _hinge;
+        ConstraintHinge*         _hingeConstraint;
 };
 
 

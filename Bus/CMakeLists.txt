@@ -3,7 +3,10 @@ set (BUS_SOURCES
 	Bus/BusLoader.cpp
 	Bus/BusRaycast.cpp
 	Bus/Desktop.cpp
+	Bus/Door.cpp
 	Bus/DoorClassic.cpp
+	Bus/DoorSE.cpp
+	Bus/DoorSimple.cpp
 )
 
 set (BUS_HEADERS

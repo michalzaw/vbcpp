@@ -22,39 +22,41 @@ enum RotationDir
 class Door
 {
     public:
-        Door(RStaticModel* model, PhysicalBodyConvexHull* body, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1)
-        : _group(group), _doorModel(model), _doorBody(body), _state(EDS_CLOSING), _collidesWith(COL_TERRAIN), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
-        {
-        }
+		Door(SceneObject* doorSceneObject, SoundComponent* openDoor, SoundComponent* closeDoor, char group = 1);
 
-        virtual ~Door()
-        {
-        }
+		virtual ~Door();
 
-        virtual void open() { _doorOpenSound->play(); }
-        virtual void close() { _doorCloseSound->play(); }
+		virtual void removeObjectsAndConstraint(SceneManager* sceneManager);
+
+        virtual void open()
+		{
+			_state = EDS_OPENING;
+			_doorOpenSound->play();
+		}
+
+        virtual void close()
+		{
+			_state = EDS_CLOSING;
+			_doorCloseSound->play();
+		}
+
         virtual void setLoose() = 0;
-
 
         void playOpenSound() { _doorOpenSound->play(); }
         void playCloseSound() { _doorCloseSound->play(); }
-
-        PhysicalBodyConvexHull* getDoorBody() { return _doorBody; }
-
-        const RStaticModel* getDoorModel() const { return _doorModel; }
 
         char getGroup() { return _group; }
 
         DoorState getState() { return _state; }
 
-        protected:
-            char                     _group;
-            RStaticModel*            _doorModel;
-            PhysicalBodyConvexHull*  _doorBody;
-            DoorState                _state;
-            int                      _collidesWith;
-            SoundComponent*          _doorOpenSound;
-            SoundComponent*          _doorCloseSound;
+		SceneObject* getSceneObject() { return _doorSceneObject; }
+
+	protected:
+        char                     _group;
+        DoorState                _state;
+		SceneObject*			 _doorSceneObject;
+        SoundComponent*          _doorOpenSound;
+        SoundComponent*          _doorCloseSound;
 };
 
 

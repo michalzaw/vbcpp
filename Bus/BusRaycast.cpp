@@ -31,25 +31,25 @@ BusRaycast::~BusRaycast()
 
     SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
 
+	for (BusRayCastWheel* wheel : _wheels)
+	{
+		sceneManager->removeSceneObject(wheel->wheel->getSceneObject());
+		delete wheel;
+	}
+
+	for (Door* door : _doors)
+	{
+		delete door;
+	}
+
+	if (_desktop != NULL)
+	{
+		delete _desktop;
+	}
+
     for (BusRayCastModule& module : _modules)
     {
         sceneManager->removeSceneObject(module.sceneObject);
-    }
-
-    for (BusRayCastWheel* wheel : _wheels)
-    {
-        sceneManager->removeSceneObject(wheel->wheel->getSceneObject());
-        delete wheel;
-    }
-
-    for (Door* door : _doors)
-    {
-        delete door;
-    }
-
-    if (_desktop != NULL)
-    {
-        delete _desktop;
     }
 }
 
