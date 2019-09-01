@@ -13,6 +13,7 @@
 #include "TreeComponent.h"
 #include "PostProcessingEffect.h"
 #include "PostProcessingBloom.h"
+#include "PostProcessingToneMapping.h"
 
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
@@ -68,6 +69,11 @@ class Renderer
         float _dayNightRatio;
 
 		std::vector<PostProcessingEffect*> _postProcessingEffectsStack;
+
+
+		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
+		void removePostProcessingEffect(PostProcessingType type);
+		PostProcessingEffect* findEffect(PostProcessingType type);
 
         void prepareLightsData();
 

@@ -9,9 +9,21 @@
 #include "Framebuffer.h"
 
 
+enum PostProcessingType
+{
+	PPT_MSAA,
+	PPT_BLOOM,
+	PPT_TONE_MAPPING,
+
+	POST_PROCESSING_EFFECTS_COUNT
+};
+
+
 class PostProcessingEffect
 {
 	private:
+		PostProcessingType _type;
+
 		void draw();
 
 	protected:
@@ -26,9 +38,12 @@ class PostProcessingEffect
 		virtual void setParamUniforms();
 
 	public:
-		PostProcessingEffect(VBO* quadVbo, RShader* shader);
+		PostProcessingEffect(PostProcessingType type, VBO* quadVbo, RShader* shader);
+		virtual ~PostProcessingEffect() = default;
 
 		void addAdditionalInput(RTexture* texture);
+
+		PostProcessingType getType();
 
 		void run(RTexture* mainInputTexture, Framebuffer* outputFramebuffer);
 

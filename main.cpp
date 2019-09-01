@@ -194,7 +194,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     }
     if (key == GLFW_KEY_8 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
     {
-        Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
+        //Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
+		Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
     }
 }
 

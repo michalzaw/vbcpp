@@ -1,8 +1,8 @@
 #include "PostProcessingEffect.h"
 
 
-PostProcessingEffect::PostProcessingEffect(VBO* quadVbo, RShader* shader)
-	: _quadVbo(quadVbo), _shader(shader),
+PostProcessingEffect::PostProcessingEffect(PostProcessingType type, VBO* quadVbo, RShader* shader)
+	: _type(type), _quadVbo(quadVbo), _shader(shader),
 	_mainInputTexture(nullptr), _outputFramebuffer(nullptr)
 {
 
@@ -29,6 +29,9 @@ void PostProcessingEffect::draw()
 	_quadVbo->bind();
 
 	_shader->enable();
+
+	setParamUniforms();
+
 	_shader->bindTexture(UNIFORM_POSTPROCESS_TEXTURE_1, _mainInputTexture);
 
 	for (int i = 0; i < _additionalInputTextures.size(); ++i)
@@ -48,6 +51,12 @@ void PostProcessingEffect::draw()
 void PostProcessingEffect::addAdditionalInput(RTexture* texture)
 {
 	_additionalInputTextures.push_back(texture);
+}
+
+
+PostProcessingType PostProcessingEffect::getType()
+{
+	return _type;
 }
 
 

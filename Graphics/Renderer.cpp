@@ -44,6 +44,15 @@ Renderer::~Renderer()
     OGLDriver::getInstance().deleteFramebuffer(_mainRenderData->framebuffer);
 
     delete _mainRenderData;
+
+	for (int i = 0; i < _postProcessingEffectsStack.size(); ++i)
+	{
+		delete _postProcessingEffectsStack[i];
+	}
+
+	OGLDriver::getInstance().deleteVBO(_quadVBO);
+	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[0]);
+	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[1]);
 }
 
 
@@ -59,6 +68,50 @@ Renderer& Renderer::getInstance()
 bool compareByShader(const RenderListElement& a, const RenderListElement& b)
 {
     return a.material->shader < b.material->shader;
+}
+
+
+void Renderer::addPostProcessingEffect(PostProcessingEffect* postProcessingEffect)
+{
+	for (std::vector<PostProcessingEffect*>::iterator i = _postProcessingEffectsStack.begin(); i != _postProcessingEffectsStack.end(); ++i)
+	{
+		if (postProcessingEffect->getType() < (*i)->getType())
+		{
+			_postProcessingEffectsStack.insert(i, postProcessingEffect);
+			return;
+		}
+	}
+
+	_postProcessingEffectsStack.push_back(postProcessingEffect);
+}
+
+
+void Renderer::removePostProcessingEffect(PostProcessingType type)
+{
+	for (std::vector<PostProcessingEffect*>::iterator i = _postProcessingEffectsStack.begin(); i != _postProcessingEffectsStack.end(); ++i)
+	{
+		if (type == (*i)->getType())
+		{
+			delete *i;
+			_postProcessingEffectsStack.erase(i);
+
+			break;
+		}
+	}
+}
+
+
+PostProcessingEffect* Renderer::findEffect(PostProcessingType type)
+{
+	for (int i = 0; i < _postProcessingEffectsStack.size(); ++i)
+	{
+		if (_postProcessingEffectsStack[i]->getType() == type)
+		{
+			return _postProcessingEffectsStack[i];
+		}
+	}
+
+	return NULL;
 }
 
 
@@ -580,16 +633,27 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	std::unordered_map<std::string, std::string> constants;
 
 
-	constants["samplesCount"] = toString(_msaaAntialiasingLevel);
-	PostProcessingEffect* postProcessingMsaa = new PostProcessingEffect(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingMsaa.frag", defines, constants));
-	PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
-	PostProcessingEffect* postProcessingToneMapping = new PostProcessingEffect(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag"));
+	// msaa
+	if (_msaaAntialiasing)
+	{
+		constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+		PostProcessingEffect* postProcessingMsaa = new PostProcessingEffect(PPT_MSAA, _quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingMsaa.frag", defines, constants));
+		//_postProcessingEffectsStack.push_back(postProcessingMsaa);
+		addPostProcessingEffect(postProcessingMsaa);
+	}
 
-	_postProcessingEffectsStack.push_back(postProcessingMsaa);
-	_postProcessingEffectsStack.push_back(postProcessingBloom);
-	_postProcessingEffectsStack.push_back(postProcessingToneMapping);
+	// bloom
+	if (_bloom)
+	{
+		PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
+		addPostProcessingEffect(postProcessingBloom);
+	}
 
-
+	// tone mapping
+	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag"));
+	postProcessingToneMapping->setExposure(_exposure);
+	//_postProcessingEffectsStack.push_back(postProcessingToneMapping);
+	addPostProcessingEffect(postProcessingToneMapping);
 
 
     _shaderList.resize(NUMBER_OF_SHADERS);
@@ -751,6 +815,12 @@ bool Renderer::isAlphaToCoverageEnable()
 
 void Renderer::setExposure(float exposure)
 {
+	if (_isInitialized)
+	{
+		PostProcessingToneMapping* toneMappingEffect = static_cast<PostProcessingToneMapping*>(findEffect(PPT_TONE_MAPPING));
+		toneMappingEffect->setExposure(exposure);
+	}
+
     _exposure = exposure;
 }
 
@@ -787,6 +857,19 @@ int Renderer::getMsaaAntialiasingLevel()
 
 void Renderer::setBloom(bool isEnable)
 {
+	if (_isInitialized)
+	{
+		if (isEnable && findEffect(PPT_BLOOM) == NULL)
+		{
+			PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
+			addPostProcessingEffect(postProcessingBloom);
+		}
+		else if (!isEnable)
+		{
+			removePostProcessingEffect(PPT_BLOOM);
+		}
+	}
+
     _bloom = isEnable;
 }
 

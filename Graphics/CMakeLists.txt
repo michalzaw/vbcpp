@@ -42,6 +42,7 @@ set (GRAPHICS_SOURCES
 		Graphics/PostProcessingBloom.h
 		Graphics/PostProcessingEffect.cpp
 		Graphics/PostProcessingEffect.h
+		Graphics/PostProcessingToneMapping.h
 		Graphics/Prefab.h
 		Graphics/QuadTree.cpp
 		Graphics/QuadTree.h

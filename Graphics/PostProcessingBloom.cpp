@@ -7,7 +7,7 @@
 
 PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, RShader* shader, float screenWidth, float screenHeight, RTexture* brightnessTexture,
 										 bool mssaaAntialiasingEnabled, int msaaAntialiasingLevel)
-	: PostProcessingEffect(quadVbo, shader),
+	: PostProcessingEffect(PPT_BLOOM, quadVbo, shader),
 	_brightnessTexture(brightnessTexture)
 {
 	std::vector<std::string> defines;
@@ -37,6 +37,13 @@ PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, RShader* shader, float sc
 	}
 
 	addAdditionalInput(_blurFramebuffers[0]->getTexture(0));
+}
+
+
+PostProcessingBloom::~PostProcessingBloom()
+{
+	OGLDriver::getInstance().deleteFramebuffer(_blurFramebuffers[0]);
+	OGLDriver::getInstance().deleteFramebuffer(_blurFramebuffers[1]);
 }
 
 
