@@ -38,6 +38,10 @@ set (GRAPHICS_SOURCES
 		Graphics/NVMeshMender/NVMeshMender.h
 		Graphics/OGLDriver.cpp
 		Graphics/OGLDriver.h
+		Graphics/PostProcessingBloom.cpp
+		Graphics/PostProcessingBloom.h
+		Graphics/PostProcessingEffect.cpp
+		Graphics/PostProcessingEffect.h
 		Graphics/Prefab.h
 		Graphics/QuadTree.cpp
 		Graphics/QuadTree.h

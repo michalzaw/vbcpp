@@ -551,13 +551,21 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
-    for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 2; ++i)
+	{
+		_postProcessingFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
+		_postProcessingFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth, _screenHeight, false);
+		_postProcessingFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
+		_postProcessingFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+	}
+
+    /*for (int i = 0; i < 2; ++i)
     {
         _blurFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
         _blurFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth / 10.0f, _screenHeight / 10.0f, false);
         _blurFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
         _blurFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth / 10.0f, _screenHeight / 10.0f));
-    }
+    }*/
 
 
     _mainRenderData = new RenderData;
@@ -566,8 +574,25 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _mainRenderData->renderPass = RP_NORMAL;
 
 
+
+
+	std::vector<std::string> defines;
+	std::unordered_map<std::string, std::string> constants;
+
+
+	constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+	PostProcessingEffect* postProcessingMsaa = new PostProcessingEffect(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingMsaa.frag", defines, constants));
+	PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
+	PostProcessingEffect* postProcessingToneMapping = new PostProcessingEffect(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag"));
+
+	_postProcessingEffectsStack.push_back(postProcessingMsaa);
+	_postProcessingEffectsStack.push_back(postProcessingBloom);
+	_postProcessingEffectsStack.push_back(postProcessingToneMapping);
+
+
+
+
     _shaderList.resize(NUMBER_OF_SHADERS);
-    std::vector<std::string> defines;
 
     // Load shaders
     // SOLID_MATERIAL
@@ -666,7 +691,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // BLUR_SHADER_MSAA
     defines.clear();
     defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
-    std::unordered_map<std::string, std::string> constants;
+	constants.clear();
     constants["samplesCount"] = toString(_msaaAntialiasingLevel);
     _shaderList[BLUR_SHADER_MSAA] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
 
@@ -884,8 +909,13 @@ void Renderer::renderAll()
     glDisable(GL_DEPTH_TEST);
 
 
+
+
+
+
+
     // blur
-    if (_bloom)
+    /*if (_bloom)
     {
         bool isHorizontal = true;
         bool isFirstIteration = true;
@@ -929,6 +959,7 @@ void Renderer::renderAll()
 
     // render quad on screen
     _defaultFramebuffer->bind();
+	//_postProcessingFramebuffers[1]->bind();
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _quadVBO->bind();
@@ -944,7 +975,25 @@ void Renderer::renderAll()
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(0);*/
+
+
+
+	for (int i = 0; i < _postProcessingEffectsStack.size(); ++i)
+	{
+		RTexture* input;
+		if (i == 0)
+			input = _mainRenderData->framebuffer->getTexture(0);
+			//input = _postProcessingFramebuffers[1]->getTexture(0);
+		else
+			input = _postProcessingFramebuffers[(i - 1) % 2]->getTexture(0);
+
+		Framebuffer * output = _postProcessingFramebuffers[i % 2];
+		if (i == _postProcessingEffectsStack.size() - 1)
+			output = _defaultFramebuffer;
+
+		_postProcessingEffectsStack[i]->run(input, output);
+	}
 
 
     glEnable(GL_DEPTH_TEST);

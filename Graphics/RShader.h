@@ -93,6 +93,10 @@ enum UniformName
     UNIFORM_BLOOM_TEXTURE,
     UNIFORM_BLOOM_RATIO,
     UNIFORM_TONEMAPPING_EXPOSURE,
+	UNIFORM_POSTPROCESS_TEXTURE_1,
+	UNIFORM_POSTPROCESS_TEXTURE_2,
+	UNIFORM_POSTPROCESS_TEXTURE_3,
+	UNIFORM_POSTPROCESS_TEXTURE_4,
 
     NUMBER_OF_UNIFORMS
 };
@@ -166,6 +170,10 @@ class RShader : virtual public Resource
             _uniformsNames[UNIFORM_BLOOM_TEXTURE] = "BloomTexture";
             _uniformsNames[UNIFORM_BLOOM_RATIO] = "BloomRatio";
             _uniformsNames[UNIFORM_TONEMAPPING_EXPOSURE] = "exposure";
+			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_1] = "texture1";
+			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_2] = "texture2";
+			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_3] = "texture3";
+			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_4] = "texture4";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

@@ -11,6 +11,8 @@
 #include "RShader.h"
 #include "GraphicsManager.h"
 #include "TreeComponent.h"
+#include "PostProcessingEffect.h"
+#include "PostProcessingBloom.h"
 
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
@@ -38,7 +40,8 @@ class Renderer
         int _msaaAntialiasingLevel;
         Framebuffer* _defaultFramebuffer;
         VBO* _quadVBO;
-        Framebuffer* _blurFramebuffers[2];
+		Framebuffer* _postProcessingFramebuffers[2];
+        //Framebuffer* _blurFramebuffers[2];
         bool _bloom;
 
         //OGLDriver* _OGLDriver;
@@ -63,6 +66,8 @@ class Renderer
         bool _renderObjectsOBB;
 
         float _dayNightRatio;
+
+		std::vector<PostProcessingEffect*> _postProcessingEffectsStack;
 
         void prepareLightsData();
 
