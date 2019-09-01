@@ -5,11 +5,14 @@
 #include "../Utils/ResourceManager.h"
 
 
-PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, RShader* shader, float screenWidth, float screenHeight, RTexture* brightnessTexture,
+PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, float screenWidth, float screenHeight, RTexture* brightnessTexture,
 										 bool mssaaAntialiasingEnabled, int msaaAntialiasingLevel)
-	: PostProcessingEffect(PPT_BLOOM, quadVbo, shader),
+	: PostProcessingEffect(PPT_BLOOM, quadVbo),
 	_brightnessTexture(brightnessTexture)
 {
+	_shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag");
+
+
 	std::vector<std::string> defines;
 	std::unordered_map<std::string, std::string> constants;
 

@@ -39,11 +39,10 @@ class Renderer
 
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
-        Framebuffer* _defaultFramebuffer;
-        VBO* _quadVBO;
-		Framebuffer* _postProcessingFramebuffers[2];
-        //Framebuffer* _blurFramebuffers[2];
+
         bool _bloom;
+
+		Framebuffer* _defaultFramebuffer;
 
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
@@ -68,12 +67,21 @@ class Renderer
 
         float _dayNightRatio;
 
+		// post processing
 		std::vector<PostProcessingEffect*> _postProcessingEffectsStack;
+		VBO* _quadVBO;
+		Framebuffer* _postProcessingFramebuffers[2];
 
 
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
 		PostProcessingEffect* findEffect(PostProcessingType type);
+
+		PostProcessingBloom* createBloomPostProcessing();
+
+		void createFramebuffersForPostProcessing();
+		void initPostProcessingEffectsStack();
+
 
         void prepareLightsData();
 

@@ -4,6 +4,8 @@
 
 #include "PostProcessingEffect.h"
 
+#include "../Utils/ResourceManager.h"
+
 
 class PostProcessingToneMapping : public PostProcessingEffect
 {
@@ -17,11 +19,11 @@ class PostProcessingToneMapping : public PostProcessingEffect
 		}
 
 	public:
-		PostProcessingToneMapping(VBO* quadVbo, RShader* shader)
-			: PostProcessingEffect(PPT_TONE_MAPPING, quadVbo, shader),
+		PostProcessingToneMapping(VBO* quadVbo)
+			: PostProcessingEffect(PPT_TONE_MAPPING, quadVbo),
 			_exposure(1.87022f)
 		{
-
+			_shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag");
 		}
 
 		void setExposure(float exposure)

@@ -19,7 +19,7 @@ class PostProcessingBloom : public PostProcessingEffect
 		void setParamUniforms() override;
 
 	public:
-		PostProcessingBloom(VBO* quadVbo, RShader* shader, float screenWidth, float screenHeight, RTexture* brightnessTexture,
+		PostProcessingBloom(VBO* quadVbo, float screenWidth, float screenHeight, RTexture* brightnessTexture,
 							bool mssaaAntialiasingEnabled = true, int msaaAntialiasingLevel = 4);
 		~PostProcessingBloom();
 

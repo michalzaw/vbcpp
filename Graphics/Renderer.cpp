@@ -115,6 +115,53 @@ PostProcessingEffect* Renderer::findEffect(PostProcessingType type)
 }
 
 
+PostProcessingBloom* Renderer::createBloomPostProcessing()
+{
+	return new PostProcessingBloom(_quadVBO, _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
+}
+
+
+void Renderer::createFramebuffersForPostProcessing()
+{
+	for (int i = 0; i < 2; ++i)
+	{
+		_postProcessingFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
+		_postProcessingFramebuffers[i]->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, false);
+		_postProcessingFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
+		_postProcessingFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+	}
+}
+
+
+void Renderer::initPostProcessingEffectsStack()
+{
+	// msaa
+	if (_msaaAntialiasing)
+	{
+		std::vector<std::string> defines;
+		std::unordered_map<std::string, std::string> constants;
+		constants["samplesCount"] = toString(_msaaAntialiasingLevel);
+
+		RShader* shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingMsaa.frag", defines, constants);
+
+		PostProcessingEffect* postProcessingMsaa = new PostProcessingEffect(PPT_MSAA, _quadVBO, shader);
+		addPostProcessingEffect(postProcessingMsaa);
+	}
+
+	// bloom
+	if (_bloom)
+	{
+		PostProcessingBloom* postProcessingBloom = createBloomPostProcessing();
+		addPostProcessingEffect(postProcessingBloom);
+	}
+
+	// tone mapping
+	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO);
+	postProcessingToneMapping->setExposure(_exposure);
+	addPostProcessingEffect(postProcessingToneMapping);
+}
+
+
 void Renderer::prepareLightsData()
 {
     GraphicsManager& graphicsManager = GraphicsManager::getInstance();
@@ -604,59 +651,21 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
-	for (int i = 0; i < 2; ++i)
-	{
-		_postProcessingFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
-		_postProcessingFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth, _screenHeight, false);
-		_postProcessingFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
-		_postProcessingFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
-	}
-
-    /*for (int i = 0; i < 2; ++i)
-    {
-        _blurFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
-        _blurFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth / 10.0f, _screenHeight / 10.0f, false);
-        _blurFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
-        _blurFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth / 10.0f, _screenHeight / 10.0f));
-    }*/
-
-
     _mainRenderData = new RenderData;
     _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
     _mainRenderData->framebuffer = framebuffer;
     _mainRenderData->renderPass = RP_NORMAL;
 
 
-
-
-	std::vector<std::string> defines;
-	std::unordered_map<std::string, std::string> constants;
-
-
-	// msaa
-	if (_msaaAntialiasing)
-	{
-		constants["samplesCount"] = toString(_msaaAntialiasingLevel);
-		PostProcessingEffect* postProcessingMsaa = new PostProcessingEffect(PPT_MSAA, _quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingMsaa.frag", defines, constants));
-		//_postProcessingEffectsStack.push_back(postProcessingMsaa);
-		addPostProcessingEffect(postProcessingMsaa);
-	}
-
-	// bloom
-	if (_bloom)
-	{
-		PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
-		addPostProcessingEffect(postProcessingBloom);
-	}
-
-	// tone mapping
-	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag"));
-	postProcessingToneMapping->setExposure(_exposure);
-	//_postProcessingEffectsStack.push_back(postProcessingToneMapping);
-	addPostProcessingEffect(postProcessingToneMapping);
+	// Post processing effects initialize
+	createFramebuffersForPostProcessing();
+	initPostProcessingEffectsStack();
 
 
     _shaderList.resize(NUMBER_OF_SHADERS);
+
+	std::vector<std::string> defines;
+	std::unordered_map<std::string, std::string> constants;
 
     // Load shaders
     // SOLID_MATERIAL
@@ -861,7 +870,7 @@ void Renderer::setBloom(bool isEnable)
 	{
 		if (isEnable && findEffect(PPT_BLOOM) == NULL)
 		{
-			PostProcessingBloom* postProcessingBloom = new PostProcessingBloom(_quadVBO, ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"), _screenWidth, _screenHeight, _mainRenderData->framebuffer->getTexture(1), _msaaAntialiasing, _msaaAntialiasingLevel);
+			PostProcessingBloom* postProcessingBloom = createBloomPostProcessing();
 			addPostProcessingEffect(postProcessingBloom);
 		}
 		else if (!isEnable)
@@ -992,82 +1001,11 @@ void Renderer::renderAll()
     glDisable(GL_DEPTH_TEST);
 
 
-
-
-
-
-
-    // blur
-    /*if (_bloom)
-    {
-        bool isHorizontal = true;
-        bool isFirstIteration = true;
-        int amount = 10;
-        ShaderType shaderType;
-        for (unsigned int i = 0; i < amount; i++)
-        {
-            _blurFramebuffers[isHorizontal]->bind();
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            if (isFirstIteration)
-                shaderType = BLUR_SHADER_MSAA;
-            else
-                shaderType = BLUR_SHADER;
-
-            _shaderList[shaderType]->enable();
-
-            _shaderList[shaderType]->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
-
-            RTexture* texture = isFirstIteration ? _mainRenderData->framebuffer->getTexture(1) : _blurFramebuffers[!isHorizontal]->getTexture(0);
-            _shaderList[shaderType]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
-
-
-            _quadVBO->bind();
-
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-            glDisableVertexAttribArray(0);
-
-
-            isHorizontal = !isHorizontal;
-            if (isFirstIteration)
-                isFirstIteration = false;
-        }
-    }
-
-
-
-    // render quad on screen
-    _defaultFramebuffer->bind();
-	//_postProcessingFramebuffers[1]->bind();
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    _quadVBO->bind();
-
-    _shaderList[QUAD_SHADER]->enable();
-    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_DIFFUSE_TEXTURE, t == 0 ? _mainRenderData->framebuffer->getTexture(0) : _blurFramebuffers[0]->getTexture(0));
-    _shaderList[QUAD_SHADER]->bindTexture(UNIFORM_BLOOM_TEXTURE, _blurFramebuffers[0]->getTexture(0));
-    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
-    _shaderList[QUAD_SHADER]->setUniform(UNIFORM_BLOOM_RATIO, _bloom ? 1.0f : 0.0f);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void*)0);
-
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-    glDisableVertexAttribArray(0);*/
-
-
-
 	for (int i = 0; i < _postProcessingEffectsStack.size(); ++i)
 	{
 		RTexture* input;
 		if (i == 0)
 			input = _mainRenderData->framebuffer->getTexture(0);
-			//input = _postProcessingFramebuffers[1]->getTexture(0);
 		else
 			input = _postProcessingFramebuffers[(i - 1) % 2]->getTexture(0);
 

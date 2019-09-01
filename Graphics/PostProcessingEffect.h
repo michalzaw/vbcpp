@@ -38,7 +38,7 @@ class PostProcessingEffect
 		virtual void setParamUniforms();
 
 	public:
-		PostProcessingEffect(PostProcessingType type, VBO* quadVbo, RShader* shader);
+		PostProcessingEffect(PostProcessingType type, VBO* quadVbo, RShader* shader = nullptr);
 		virtual ~PostProcessingEffect() = default;
 
 		void addAdditionalInput(RTexture* texture);
