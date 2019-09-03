@@ -21,6 +21,7 @@ enum ShaderType
     GRASS_MATERIAL,
     SKY_MATERIAL,
     GLASS_MATERIAL,
+	PBR_MATERIAL,
 
     GUI_IMAGE_SHADER,
     GUI_LABEL_SHADER,
@@ -93,6 +94,11 @@ enum UniformName
 	UNIFORM_POSTPROCESS_TEXTURE_2,
 	UNIFORM_POSTPROCESS_TEXTURE_3,
 	UNIFORM_POSTPROCESS_TEXTURE_4,
+
+	UNIFORM_ALBEDO_TEXTURE,
+	UNIFORM_METALIC_TEXTURE,
+	UNIFORM_ROUGHNESS_TEXTURE,
+	UNIFORM_AO_TEXTURE,
 
     NUMBER_OF_UNIFORMS
 };
@@ -170,6 +176,11 @@ class RShader : virtual public Resource
 			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_2] = "texture2";
 			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_3] = "texture3";
 			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_4] = "texture4";
+
+			_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
+			_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
+			_uniformsNames[UNIFORM_ROUGHNESS_TEXTURE] = "RoughnessTexture";
+			_uniformsNames[UNIFORM_AO_TEXTURE] = "AoTexture";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

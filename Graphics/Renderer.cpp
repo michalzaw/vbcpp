@@ -781,6 +781,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+	// PBR_MATERIAL
+	defines.clear();
+	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag");
+
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
@@ -795,6 +799,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
     _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
+	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
 
 
     // Create UBO for lights
@@ -1409,6 +1414,15 @@ void Renderer::renderScene(RenderData* renderData)
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, material->diffuseTexture);
+
+		if (material->diffuseTexture != NULL)
+			shader->bindTexture(UNIFORM_ALBEDO_TEXTURE, material->diffuseTexture);
+		if (material->metalicTexture != NULL)
+			shader->bindTexture(UNIFORM_METALIC_TEXTURE, material->metalicTexture);
+		if (material->roughnessTexture != NULL)
+			shader->bindTexture(UNIFORM_ROUGHNESS_TEXTURE, material->roughnessTexture);
+		if (material->aoTexture != NULL)
+			shader->bindTexture(UNIFORM_AO_TEXTURE, material->aoTexture);
 
 
 
