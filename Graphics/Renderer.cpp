@@ -781,27 +781,6 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
-    // BLUR_SHADER_MSAA
-    defines.clear();
-    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
-	constants.clear();
-    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
-    _shaderList[BLUR_SHADER_MSAA] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
-
-    // BLUR_SHADER
-    defines.clear();
-    defines.push_back("NOT_MULTISAMPLE");
-    constants.clear();
-    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
-    _shaderList[BLUR_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/blur.frag", defines, constants);
-
-    // QUAD_SHADER
-    defines.clear();
-    defines.push_back(_msaaAntialiasing ? "MULTISAMPLE" : "NOT_MULTISAMPLE");
-    constants.clear();
-    constants["samplesCount"] = toString(_msaaAntialiasingLevel);
-    _shaderList[QUAD_SHADER] = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/quad.frag", defines, constants);
-
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 

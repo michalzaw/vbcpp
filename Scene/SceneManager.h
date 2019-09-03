@@ -32,11 +32,6 @@ class SceneManager
 
         BusStart    _busStart;
 
-		// list for road and terrain model
-		// todo: roads and terrain should be loaded in ResourceManager
-		// todo: remove (probably usused)
-        std::list<RStaticModel*> modelsToRemoveAfterClearScene;
-
     public:
         SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
@@ -61,31 +56,12 @@ class SceneManager
             _sceneObjects.clear();
 
             GraphicsManager::getInstance().clearQuadTree();
-
-            for (std::list<RStaticModel*>::iterator i = modelsToRemoveAfterClearScene.begin(); i != modelsToRemoveAfterClearScene.end(); ++i)
-            {
-                delete *i;
-            }
-
-			modelsToRemoveAfterClearScene.clear();
         }
 
         SceneObject*    getSceneObject(std::string name);
         std::list<SceneObject*>& getSceneObjects();
 
-
-        void loadScene(std::string filename);
-
-        SceneObject* loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0));
-        void loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles);
-
         BusStart& getBusStart() { return _busStart; }
-
-		void addModelToRemoveAfterClearScene(RStaticModel* model)
-		{
-			modelsToRemoveAfterClearScene.push_back(model);
-		}
-
 
 };
 

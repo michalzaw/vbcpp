@@ -7,6 +7,8 @@ uniform sampler2D texture1;
 out vec4 Color;
 
 uniform float exposure;
+//float exposure = 0.05f;
+//float exposure = 2.0f;
 
 vec3 toneMap(vec3 hdrColor)
 {
