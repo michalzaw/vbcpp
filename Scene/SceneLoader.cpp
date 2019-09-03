@@ -150,8 +150,11 @@ bool SceneLoader::loadSky(XMLElement* sceneElement)
 			skyboxFileNamesArray[i] = GameDirectories::SKYBOX + skyboxFileNamesArray[i];
 		}
 
+		SceneObject* skySceneObject = _sceneManager->addSceneObject("sky");
+
 		RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
-		_sceneManager->addSky(skyboxTexture);
+		Sky* skyComponent = GraphicsManager::getInstance().addSky(skyboxTexture, skySceneObject);
+
 		GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
 
 		return true;

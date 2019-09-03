@@ -19,6 +19,7 @@
 #include "Grass.h"
 #include "EnvironmentCaptureComponent.h"
 #include "MirrorComponent.h"
+#include "Sky.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -45,6 +46,8 @@ class GraphicsManager
         std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
         std::vector<MirrorComponent*> _mirrorComponents;
         std::list<ClickableObject*> _clickableObjects;
+
+		Sky*						_sky;
 
         QuadTree* _quadTree;
 
@@ -85,6 +88,7 @@ class GraphicsManager
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
         MirrorComponent*addMirrorComponent(std::string name);
         ClickableObject*addClickableObject();
+		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -97,6 +101,7 @@ class GraphicsManager
         void removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component);
         void removeMirrorComponent(MirrorComponent* mirrorComponent);
         void removeClickableObject(ClickableObject* clickableObject);
+		void removeSky(Sky* sky);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -113,6 +118,8 @@ class GraphicsManager
 
 
         std::list<RenderObject*>& getRenderObjects();
+
+		Sky* getSky();
 
 
         EnvironmentCaptureComponent* getGlobalEnvironmentCaptureComponent();

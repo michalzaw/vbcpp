@@ -67,6 +67,7 @@ set (GRAPHICS_SOURCES
 		Graphics/RotationMode.h
 		Graphics/ShadowMap.cpp
 		Graphics/ShadowMap.h
+		Graphics/Sky.h
 		Graphics/StaticModelLoader.cpp
 		Graphics/StaticModelLoader.h
 		Graphics/Terrain.cpp

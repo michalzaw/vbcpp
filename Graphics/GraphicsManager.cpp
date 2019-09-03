@@ -9,7 +9,7 @@ static std::unique_ptr<GraphicsManager> gmInstance;
 
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f),
-    _globalEnvironmentCaptureComponent(NULL)
+    _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
 {
     //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
 }
@@ -51,6 +51,11 @@ GraphicsManager::~GraphicsManager()
     {
         delete *i;
     }
+
+	if (_sky != NULL)
+	{
+		delete _sky;
+	}
 
     //delete _quadTree;
 }
@@ -198,6 +203,21 @@ ClickableObject* GraphicsManager::addClickableObject()
 }
 
 
+Sky* GraphicsManager::addSky(RTexture* texture, SceneObject* owner)
+{
+	if (_sky != NULL)
+	{
+		return NULL;
+	}
+
+	_sky = new Sky(texture);
+
+	owner->addComponent(_sky);
+
+	return _sky;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -321,6 +341,16 @@ void GraphicsManager::removeClickableObject(ClickableObject* clickableObject)
 }
 
 
+void GraphicsManager::removeSky(Sky* sky)
+{
+	if (sky != _sky)
+		return;
+	
+	delete _sky;
+	_sky = NULL;
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -373,6 +403,12 @@ float GraphicsManager::getWindValue()
 std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 {
     return _renderObjects;
+}
+
+
+Sky* GraphicsManager::getSky()
+{
+	return _sky;
 }
 
 

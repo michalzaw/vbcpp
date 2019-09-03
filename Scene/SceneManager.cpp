@@ -13,7 +13,7 @@ using namespace tinyxml2;
 #include "../Game/Directories.h"
 
 SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _sky(NULL), _physicsManager(pMgr), _soundManager(sndMgr)
+    : _physicsManager(pMgr), _soundManager(sndMgr)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";
@@ -138,16 +138,6 @@ SceneObject* SceneManager::getSceneObject(std::string name)
 std::list<SceneObject*>& SceneManager::getSceneObjects()
 {
     return _sceneObjects;
-}
-
-
-void SceneManager::addSky(RTexture* texture)
-{
-    if (_sky != NULL)
-        removeSceneObject(_sky->getName());
-
-    _sky = new Skybox(texture, this);
-    _sceneObjects.push_back(_sky);
 }
 
 
@@ -297,7 +287,7 @@ void SceneManager::loadScene(std::string filename)
 			}
 			
 			RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
-			addSky(skyboxTexture);
+			//addSky(skyboxTexture);
 			GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
 		}
 		else

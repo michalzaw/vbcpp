@@ -4,7 +4,6 @@ set (SCENE_SOURCES
 	Scene/SceneManager.cpp
 	Scene/SceneObject.cpp
 	Scene/SceneSaver.cpp
-	Scene/Skybox.cpp
 )
 
 set (SCENE_HEADERS 
@@ -14,7 +13,6 @@ set (SCENE_HEADERS
 	Scene/SceneManager.h
 	Scene/SceneObject.h
 	Scene/SceneSaver.h
-	Scene/Skybox.h
 	Scene/SoundComponent.h
 	Scene/SoundManager.h
 )

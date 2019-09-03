@@ -484,6 +484,26 @@ void Renderer::prepareRenderData()
         addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList);
     }
 
+
+	RenderObject* sky = graphicsManager.getSky();
+	if (sky != NULL)
+	{
+		for (int j = 0; j < _renderDataList.size(); ++j)
+		{
+			RenderPass renderPass = _renderDataList[j]->renderPass;
+			if (renderPass != RP_SHADOWS)
+			{
+				tempRenderElement.type = RET_SINGLE;
+				tempRenderElement.model = sky->getModel();
+				tempRenderElement.object = sky->getSceneObject();
+				tempRenderElement.renderObject = sky;
+
+				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
+				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass);
+			}
+		}
+	}
+
     _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
 }
 

@@ -13,6 +13,8 @@ using namespace tinyxml2;
 
 #include "../Scene/SceneManager.h"
 
+#include "../Utils/ResourceManager.h"
+
 
 void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 {

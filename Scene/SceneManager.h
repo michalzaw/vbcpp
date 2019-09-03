@@ -11,7 +11,6 @@
 #include "../Physics/PhysicsManager.hpp"
 #include "SoundManager.h"
 #include "SceneObject.h"
-#include "Skybox.h"
 
 #include "../Game/BusStopSystem.h"
 
@@ -31,12 +30,11 @@ class SceneManager
 
         std::list<SceneObject*> _sceneObjects;
 
-        Skybox* _sky;
-
         BusStart    _busStart;
 
 		// list for road and terrain model
 		// todo: roads and terrain should be loaded in ResourceManager
+		// todo: remove (probably usused)
         std::list<RStaticModel*> modelsToRemoveAfterClearScene;
 
     public:
@@ -62,7 +60,6 @@ class SceneManager
 
             _sceneObjects.clear();
 
-            _sky = NULL;
             GraphicsManager::getInstance().clearQuadTree();
 
             for (std::list<RStaticModel*>::iterator i = modelsToRemoveAfterClearScene.begin(); i != modelsToRemoveAfterClearScene.end(); ++i)
@@ -75,9 +72,6 @@ class SceneManager
 
         SceneObject*    getSceneObject(std::string name);
         std::list<SceneObject*>& getSceneObjects();
-
-        void addSky(RTexture* texture);
-
 
 
         void loadScene(std::string filename);

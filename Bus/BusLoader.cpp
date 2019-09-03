@@ -3,6 +3,7 @@
 #include "../Game/Directories.h"
 
 #include "../Utils/Logger.h"
+#include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
 #include "../Utils/tinyxml2.h"

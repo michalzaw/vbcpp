@@ -12,7 +12,7 @@ out vec3 TexCoord;
 
 void main()
 {
-	gl_Position = MVP * vec4(VertexPosition + CameraPosition, 1.0f);
+	gl_Position = (MVP * vec4(VertexPosition + CameraPosition, 1.0f)).xyww;
 
 	TexCoord = normalize(VertexPosition);
 }
