@@ -11,6 +11,9 @@ uniform sampler2D NormalmapTexture;
 uniform sampler2D MetalicTexture;
 uniform sampler2D RoughnessTexture;
 uniform sampler2D AoTexture;
+uniform samplerCube IrradianceMap;
+uniform samplerCube SpecularIrradianceMap;
+uniform sampler2D brdfLUT;
 uniform vec3 CameraPosition;
 vec3 lightPosition = vec3(0, 0, 10);
 
@@ -57,6 +60,11 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
 	return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
 }
+
+vec3 fresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness)
+{
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosTheta, 5.0);
+} 
 
 
 void main()
@@ -115,6 +123,32 @@ void main()
 	vec3 L0 = (kd * albedo / PI + specular) * radiance * cosTheta;
 	
 	
-	vec3 ambient = vec3(0.03) * albedo * ao;
+	
+	
+	//vec3 ambient = vec3(0.03) * albedo * ao;
+	vec3 f = fresnelSchlickRoughness(max(dot(normal, viewDir), 0.0f), f0, roughness);
+	
+	vec3 ambient_kS = f;
+	vec3 ambient_kD = vec3(1.0f) - ambient_kS;
+	ambient_kD *= 1.0f - metalic;
+	vec3 irradiance = texture(IrradianceMap, normal).rgb;
+	vec3 diffuse = irradiance * albedo;
+	
+
+
+	
+	vec3 r = reflect(-viewDir, normal);
+	
+	vec3 prefilteredColor = texture(SpecularIrradianceMap, r).rgb;
+	const float MAX_REFLECTION_DOT = 4.0f;
+	vec2 envBRDF = textureLod(brdfLUT, vec2(max(dot(normal, viewDir), 0.0f), 1 - roughness), roughness * MAX_REFLECTION_DOT).rg;
+	vec3 ambient_specular = prefilteredColor * (f * envBRDF.x + envBRDF.y);
+	
+	
+	
+	vec3 ambient = (ambient_kD * diffuse + ambient_specular) * ao;// * 0.25;
+	
+	
+	
 	Color = ambient + L0;
 }

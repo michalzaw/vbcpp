@@ -99,6 +99,9 @@ enum UniformName
 	UNIFORM_METALIC_TEXTURE,
 	UNIFORM_ROUGHNESS_TEXTURE,
 	UNIFORM_AO_TEXTURE,
+	UNIFORM_IRRADIANCE_MAP,
+	UNIFORM_SPECULAR_IRRADIANCE_MAP,
+	UNIFORM_BRDF_LUT,
 
     NUMBER_OF_UNIFORMS
 };
@@ -181,6 +184,9 @@ class RShader : virtual public Resource
 			_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
 			_uniformsNames[UNIFORM_ROUGHNESS_TEXTURE] = "RoughnessTexture";
 			_uniformsNames[UNIFORM_AO_TEXTURE] = "AoTexture";
+			_uniformsNames[UNIFORM_IRRADIANCE_MAP] = "IrradianceMap";
+			_uniformsNames[UNIFORM_SPECULAR_IRRADIANCE_MAP] = "SpecularIrradianceMap";
+			_uniformsNames[UNIFORM_BRDF_LUT] = "brdfLUT";
 
             for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
             {

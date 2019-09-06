@@ -73,6 +73,9 @@ class Renderer
 		Framebuffer* _postProcessingFramebuffers[2];
 
 
+		RTexture2D* _brdfLutTexture;
+
+
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
 		PostProcessingEffect* findEffect(PostProcessingType type);

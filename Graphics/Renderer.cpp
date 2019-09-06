@@ -30,6 +30,8 @@ Renderer::Renderer()
     };
     _quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
     _quadVBO->addVertexData(quadVertices, 4 * 2);
+
+	_brdfLutTexture = ResourceManager::getInstance().loadTexture("brdfLut.png");
 }
 
 Renderer::~Renderer()
@@ -1423,6 +1425,13 @@ void Renderer::renderScene(RenderData* renderData)
 			shader->bindTexture(UNIFORM_ROUGHNESS_TEXTURE, material->roughnessTexture);
 		if (material->aoTexture != NULL)
 			shader->bindTexture(UNIFORM_AO_TEXTURE, material->aoTexture);
+
+		if (material->shader == PBR_MATERIAL)
+		{
+			shader->bindTexture(UNIFORM_IRRADIANCE_MAP, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			shader->bindTexture(UNIFORM_SPECULAR_IRRADIANCE_MAP, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+			shader->bindTexture(UNIFORM_BRDF_LUT, _brdfLutTexture);
+		}
 
 
 
