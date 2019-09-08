@@ -41,72 +41,6 @@ enum ShaderType
 };
 
 
-enum UniformName
-{
-    UNIFORM_MVP,
-    UNIFORM_VP,
-    UNIFORM_MODEL_MATRIX,
-    UNIFORM_NORMAL_MATRIX,
-    UNIFORM_DIFFUSE_TEXTURE,
-    UNIFORM_NOTMALMAP_TEXTURE,
-    UNIFORM_ALPHA_TEXTURE,
-    UNIFORM_ENVIRONMENTMAP_TEXTURE,
-    UNIFORM_ENVIRONMENTMAP_2_TEXTURE,
-    UNIFORM_ENVIRONMENTMAP_MATRIX,
-    UNIFORM_ENVIRONMENTMAP_2_MATRIX,
-    UNIFORM_GLASS_TEXTURE,
-    UNIFORM_MATERIAL_AMBIENT_COLOR,
-    UNIFORM_MATERIAL_DIFFUSE_COLOR,
-    UNIFORM_MATERIAL_SPECULAR_COLOR,
-    UNIFORM_MATERIAL_EMISSIVE_COLOR,
-    UNIFORM_MATERIAL_SPECULAR_POWER,
-    UNIFORM_MATERIAL_TRANSPARENCY,
-    UNIFORM_CAMERA_POSITION,
-    UNIFORM_LIGHT_SPACE_MATRIX_1,
-    UNIFORM_LIGHT_SPACE_MATRIX_2,
-    UNIFORM_LIGHT_SPACE_MATRIX_3,
-    UNIFORM_SHADOW_MAP_1,
-    UNIFORM_SHADOW_MAP_2,
-    UNIFORM_SHADOW_MAP_3,
-    UNIFORM_GRASS_COLOR,
-    UNIFORM_HEIGHTMAP,
-    UNIFORM_GRASS_DENSITY,
-    UNIFORM_GRASS_MIN,
-    UNIFORM_GRASS_WIDTH,
-    UNIFORM_WIND_DIRECTION,
-    UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX,
-    UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX,
-    UNIFORM_GUI_COLOR,
-    UNIFORM_DAY_NIGHT_RATIO,
-    UNIFORM_DEBUG_VERTEX_INDEX_1,
-    UNIFORM_DEBUG_VERTEX_INDEX_2,
-    UNIFORM_DEBUG_VERTEX_INDEX_3,
-    UNIFORM_DEBUG_VERTEX_INDEX_4,
-    UNIFORM_DEBUG_VERTEX_INDEX_5,
-    UNIFORM_DEBUG_VERTEX_INDEX_6,
-    UNIFORM_DEBUG_VERTEX_INDEX_7,
-    UNIFORM_DEBUG_VERTEX_INDEX_8,
-    UNIFORM_BLUR_IS_HORIZONTAL,
-    UNIFORM_BLOOM_TEXTURE,
-    UNIFORM_BLOOM_RATIO,
-    UNIFORM_TONEMAPPING_EXPOSURE,
-	UNIFORM_POSTPROCESS_TEXTURE_1,
-	UNIFORM_POSTPROCESS_TEXTURE_2,
-	UNIFORM_POSTPROCESS_TEXTURE_3,
-	UNIFORM_POSTPROCESS_TEXTURE_4,
-
-	UNIFORM_ALBEDO_TEXTURE,
-	UNIFORM_METALIC_TEXTURE,
-	UNIFORM_ROUGHNESS_TEXTURE,
-	UNIFORM_AO_TEXTURE,
-	UNIFORM_IRRADIANCE_MAP,
-	UNIFORM_SPECULAR_IRRADIANCE_MAP,
-	UNIFORM_BRDF_LUT,
-
-    NUMBER_OF_UNIFORMS
-};
-
-
 class RShader : virtual public Resource
 {
     friend class ResourceManager;
@@ -114,9 +48,6 @@ class RShader : virtual public Resource
     private:
         GLuint _shaderID;
         int _textureLocation;
-
-        const char* _uniformsNames[NUMBER_OF_UNIFORMS];
-        GLint _uniformsLocations[NUMBER_OF_UNIFORMS];
 
         void setNewShader(GLuint newId)
         {
@@ -128,71 +59,6 @@ class RShader : virtual public Resource
         RShader(std::string path, GLuint id)
             : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0)
         {
-            _uniformsNames[UNIFORM_MVP] = "MVP";
-            _uniformsNames[UNIFORM_VP] = "VP";
-            _uniformsNames[UNIFORM_MODEL_MATRIX] = "ModelMatrix";
-            _uniformsNames[UNIFORM_NORMAL_MATRIX] = "NormalMatrix";
-            _uniformsNames[UNIFORM_DIFFUSE_TEXTURE] = "Texture";
-            _uniformsNames[UNIFORM_NOTMALMAP_TEXTURE] = "NormalmapTexture";
-            _uniformsNames[UNIFORM_ALPHA_TEXTURE] = "AlphaTexture";
-            _uniformsNames[UNIFORM_ENVIRONMENTMAP_TEXTURE] = "environmentMap";
-            _uniformsNames[UNIFORM_ENVIRONMENTMAP_2_TEXTURE] = "environmentMap2";
-            _uniformsNames[UNIFORM_ENVIRONMENTMAP_MATRIX] = "environmentMap1Rotation";
-            _uniformsNames[UNIFORM_ENVIRONMENTMAP_2_MATRIX] = "environmentMap2Rotation";
-            _uniformsNames[UNIFORM_GLASS_TEXTURE] = "glassTexture";
-            _uniformsNames[UNIFORM_MATERIAL_AMBIENT_COLOR] = "matAmbient";
-            _uniformsNames[UNIFORM_MATERIAL_DIFFUSE_COLOR] = "matDiffuse";
-            _uniformsNames[UNIFORM_MATERIAL_SPECULAR_COLOR] = "matSpecular";
-            _uniformsNames[UNIFORM_MATERIAL_EMISSIVE_COLOR] = "matEmissive";
-            _uniformsNames[UNIFORM_MATERIAL_SPECULAR_POWER] = "SpecularPower";
-            _uniformsNames[UNIFORM_MATERIAL_TRANSPARENCY] = "Transparency";
-            _uniformsNames[UNIFORM_CAMERA_POSITION] = "CameraPosition";
-            _uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_1] = "LightSpaceMatrix[0]";
-            _uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_2] = "LightSpaceMatrix[1]";
-            _uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_3] = "LightSpaceMatrix[2]";
-            _uniformsNames[UNIFORM_SHADOW_MAP_1] = "ShadowMap[0]";
-            _uniformsNames[UNIFORM_SHADOW_MAP_2] = "ShadowMap[1]";
-            _uniformsNames[UNIFORM_SHADOW_MAP_3] = "ShadowMap[2]";
-            _uniformsNames[UNIFORM_GRASS_COLOR] = "grassColor";
-            _uniformsNames[UNIFORM_HEIGHTMAP] = "heightmap";
-            _uniformsNames[UNIFORM_GRASS_DENSITY] = "grassDensity";
-            _uniformsNames[UNIFORM_GRASS_MIN] = "min";
-            _uniformsNames[UNIFORM_GRASS_WIDTH] = "width";
-            _uniformsNames[UNIFORM_WIND_DIRECTION] = "d";
-            _uniformsNames[UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX] = "VerticesTransformMatrix";
-            _uniformsNames[UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX] = "TexCoordTransformMatrix";
-            _uniformsNames[UNIFORM_GUI_COLOR] = "color";
-            _uniformsNames[UNIFORM_DAY_NIGHT_RATIO] = "dayNightRatio";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_1] = "indices[0]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_2] = "indices[1]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_3] = "indices[2]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_4] = "indices[3]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_5] = "indices[4]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
-            _uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
-            _uniformsNames[UNIFORM_BLUR_IS_HORIZONTAL] = "isHorizontal";
-            _uniformsNames[UNIFORM_BLOOM_TEXTURE] = "BloomTexture";
-            _uniformsNames[UNIFORM_BLOOM_RATIO] = "BloomRatio";
-            _uniformsNames[UNIFORM_TONEMAPPING_EXPOSURE] = "exposure";
-			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_1] = "texture1";
-			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_2] = "texture2";
-			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_3] = "texture3";
-			_uniformsNames[UNIFORM_POSTPROCESS_TEXTURE_4] = "texture4";
-
-			_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
-			_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
-			_uniformsNames[UNIFORM_ROUGHNESS_TEXTURE] = "RoughnessTexture";
-			_uniformsNames[UNIFORM_AO_TEXTURE] = "AoTexture";
-			_uniformsNames[UNIFORM_IRRADIANCE_MAP] = "IrradianceMap";
-			_uniformsNames[UNIFORM_SPECULAR_IRRADIANCE_MAP] = "SpecularIrradianceMap";
-			_uniformsNames[UNIFORM_BRDF_LUT] = "brdfLUT";
-
-            for (int i = 0; i < NUMBER_OF_UNIFORMS; ++i)
-            {
-                _uniformsLocations[i] = glGetUniformLocation(_shaderID, _uniformsNames[i]);
-            }
-
             std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n";
         }
 
@@ -218,42 +84,47 @@ class RShader : virtual public Resource
             _textureLocation = 0;
         }
 
-        inline void setUniform(UniformName uniform, int* values, int count = 1)
-		{ glUniform1iv(_uniformsLocations[uniform], count, values); }
-		inline void setUniform(UniformName uniform, float* values, int count = 1)
-		{ glUniform1fv(_uniformsLocations[uniform], count, values); }
-		inline void setUniform(UniformName uniform, int value)
-		{ glUniform1i(_uniformsLocations[uniform], value); }
-		inline void setUniform(UniformName uniform, float value)
-		{ glUniform1f(_uniformsLocations[uniform], value); }
-		inline void setUniform(UniformName uniform, glm::vec2* vectors, int count = 1)
-		{ glUniform2fv(_uniformsLocations[uniform], count, (GLfloat*)vectors); }
-		inline void setUniform(UniformName uniform, glm::vec3* vectors, int count = 1)
-		{ glUniform3fv(_uniformsLocations[uniform], count, (GLfloat*)vectors); }
-		inline void setUniform(UniformName uniform, glm::vec4* vectors, int count = 1)
-		{ glUniform4fv(_uniformsLocations[uniform], count, (GLfloat*)vectors); }
-		inline void setUniform(UniformName uniform, glm::vec2 vector)
-		{ glUniform2f(_uniformsLocations[uniform], vector.x, vector.y); }
-		inline void setUniform(UniformName uniform, glm::vec3 vector)
-		{ glUniform3f(_uniformsLocations[uniform], vector.x, vector.y, vector.z); }
-		inline void setUniform(UniformName uniform, glm::vec4 vector)
-		{ glUniform4f(_uniformsLocations[uniform], vector.x, vector.y, vector.z, vector.w); }
-		inline void setUniform(UniformName uniform, glm::mat3* matrices, int count = 1)
-		{ glUniformMatrix4fv(_uniformsLocations[uniform], count, GL_FALSE, (GLfloat*)matrices); }
-		inline void setUniform(UniformName uniform, glm::mat4* matrices, int count = 1)
-		{ glUniformMatrix3fv(_uniformsLocations[uniform], count, GL_FALSE, (GLfloat*)matrices); }
-		inline void setUniform(UniformName uniform, glm::mat3 matrix)
-		{ glUniformMatrix3fv(_uniformsLocations[uniform], 1, GL_FALSE, &matrix[0][0]); }
-		inline void setUniform(UniformName uniform, glm::mat4 matrix)
-		{ glUniformMatrix4fv(_uniformsLocations[uniform], 1, GL_FALSE, &matrix[0][0]); }
+        inline void setUniform(GLint location, int* values, int count = 1)
+		{ glUniform1iv(location, count, values); }
+		inline void setUniform(GLint location, float* values, int count = 1)
+		{ glUniform1fv(location, count, values); }
+		inline void setUniform(GLint location, int value)
+		{ glUniform1i(location, value); }
+		inline void setUniform(GLint location, float value)
+		{ glUniform1f(location, value); }
+		inline void setUniform(GLint location, glm::vec2* vectors, int count = 1)
+		{ glUniform2fv(location, count, (GLfloat*)vectors); }
+		inline void setUniform(GLint location, glm::vec3* vectors, int count = 1)
+		{ glUniform3fv(location, count, (GLfloat*)vectors); }
+		inline void setUniform(GLint location, glm::vec4* vectors, int count = 1)
+		{ glUniform4fv(location, count, (GLfloat*)vectors); }
+		inline void setUniform(GLint location, glm::vec2 vector)
+		{ glUniform2f(location, vector.x, vector.y); }
+		inline void setUniform(GLint location, glm::vec3 vector)
+		{ glUniform3f(location, vector.x, vector.y, vector.z); }
+		inline void setUniform(GLint location, glm::vec4 vector)
+		{ glUniform4f(location, vector.x, vector.y, vector.z, vector.w); }
+		inline void setUniform(GLint location, glm::mat3* matrices, int count = 1)
+		{ glUniformMatrix4fv(location, count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(GLint location, glm::mat4* matrices, int count = 1)
+		{ glUniformMatrix3fv(location, count, GL_FALSE, (GLfloat*)matrices); }
+		inline void setUniform(GLint location, glm::mat3 matrix)
+		{ glUniformMatrix3fv(location, 1, GL_FALSE, &matrix[0][0]); }
+		inline void setUniform(GLint location, glm::mat4 matrix)
+		{ glUniformMatrix4fv(location, 1, GL_FALSE, &matrix[0][0]); }
 
 
-        inline void bindTexture(UniformName uniform, RTexture* texture)
+        inline void bindTexture(GLint location, RTexture* texture)
         {
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
             texture->bind();
-            setUniform(uniform, _textureLocation++);
+            setUniform(location, _textureLocation++);
         }
+
+		inline GLint getUniformLocation(const char* name)
+		{
+			return glGetUniformLocation(_shaderID, name);
+		}
 
         inline void getUniformOffset(const char** names, unsigned int count, int* offsets)
         {

@@ -10,12 +10,14 @@
 class PostProcessingToneMapping : public PostProcessingEffect
 {
 	private:
+		GLint _exposureUniformLocation;
+
 		float _exposure;
 
 	protected:
 		void setParamUniforms() override
 		{
-			_shader->setUniform(UNIFORM_TONEMAPPING_EXPOSURE, _exposure);
+			_shader->setUniform(_exposureUniformLocation, _exposure);
 		}
 
 	public:
@@ -23,7 +25,9 @@ class PostProcessingToneMapping : public PostProcessingEffect
 			: PostProcessingEffect(PPT_TONE_MAPPING, quadVbo),
 			_exposure(1.87022f)
 		{
-			_shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag");
+			setShader(ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag"));
+
+			_exposureUniformLocation = _shader->getUniformLocation("exposure");
 		}
 
 		void setExposure(float exposure)
