@@ -9,6 +9,7 @@
 #include "Rect.h"
 
 #include "../Utils/RTexture2D.h"
+#include "../Utils/RTextureCubeMap.h"
 
 
 class Framebuffer
@@ -34,9 +35,11 @@ class Framebuffer
 
         void init();
         void bind();
+		void bindCubeMapFaceToRender(CubeMapFace face, int textureIndex = 0);
 
         void addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
         void addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
+		void addCubeMapTexture(TextureFormat format, unsigned int size);
 
         int getTexturesCount();
         RTexture* getTexture(int index = 0);

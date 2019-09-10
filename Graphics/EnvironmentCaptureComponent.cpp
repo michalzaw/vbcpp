@@ -1,34 +1,116 @@
 #include "EnvironmentCaptureComponent.h"
 
+#include "OGLDriver.h"
+#include "Framebuffer.h"
+#include "Prefab.h"
+#include "RShader.h"
 
 #include "../Scene/SceneObject.h"
+
+#include "../Utils/ResourceManager.h"
 
 
 EnvironmentCaptureComponent::EnvironmentCaptureComponent()
     : Component(CT_ENVIRONMENT_CAPTURE_COMPONENT),
-    _environmentMap(NULL), _irradianceMap(NULL),
-    _rotationMatrix(1.0f)
+    _environmentMap(NULL), _irradianceMap(NULL), _specularIrradianceMap(NULL),
+    _rotationMatrix(1.0f),
+	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
 {
-
+	initIrradianceFramebufferAndShader();
 }
 
 
 EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap, RTextureCubeMap* specularIrradianceMap)
     : Component(CT_ENVIRONMENT_CAPTURE_COMPONENT),
     _environmentMap(environmentMap), _irradianceMap(irradianceMap), _specularIrradianceMap(specularIrradianceMap),
-    _rotationMatrix(1.0f)
+    _rotationMatrix(1.0f),
+	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
 {
 	if (_irradianceMap == NULL)
 		_irradianceMap = _environmentMap;
 
 	if (_specularIrradianceMap == NULL)
 		_specularIrradianceMap = _environmentMap;
+
+	initIrradianceFramebufferAndShader();
+	generateIrradianceMap();
 }
 
 
 EnvironmentCaptureComponent::~EnvironmentCaptureComponent()
 {
+	if (_irradianceFramebuffer != NULL)
+	{
+		OGLDriver::getInstance().deleteFramebuffer(_irradianceFramebuffer);
+	}
 
+	if (_cube != NULL)
+	{
+		delete _cube;
+	}
+}
+
+
+void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
+{
+	_irradianceFramebuffer = OGLDriver::getInstance().createFramebuffer();
+	_irradianceFramebuffer->addCubeMapTexture(TF_RGB_16F, 32);
+	_irradianceFramebuffer->setViewport(UintRect(0, 0, 32, 32));
+
+	_irradianceShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/irradiance.frag");
+
+	_cube = new Cube(1, Material());
+	_cube->init();
+}
+
+
+void EnvironmentCaptureComponent::generateIrradianceMap()
+{
+
+	glm::mat4 projectionMatrix = glm::perspective(degToRad(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 viewMatrices[] =
+	{
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, -1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
+	};
+
+	glDisable(GL_CULL_FACE);
+
+	_irradianceShader->enable();
+	_irradianceShader->setUniform(_irradianceShader->getUniformLocation("projectionMatrix"), projectionMatrix);
+	_irradianceShader->bindTexture(_irradianceShader->getUniformLocation("Texture"), _environmentMap);
+
+	_irradianceFramebuffer->bind();
+
+	for (int i = 0; i < 6; ++i)
+	{
+		_irradianceShader->setUniform(_irradianceShader->getUniformLocation("viewMatrix"), viewMatrices[i]);
+
+		_irradianceFramebuffer->bindCubeMapFaceToRender((CubeMapFace)(CMF_POSITIVE_X + i));
+
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+		StaticModelMesh* cubeMesh = _cube->getModelRootNode()->getMesh(0);
+		cubeMesh->vbo->bind();
+		cubeMesh->ibo->bind();
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+		glDrawElements(GL_TRIANGLES,
+			cubeMesh->indicesCount,
+			GL_UNSIGNED_INT,
+			(void*)(cubeMesh->firstVertex * sizeof(unsigned int)));
+
+		glDisableVertexAttribArray(0);
+	}
+
+	glEnable(GL_CULL_FACE);
 }
 
 
@@ -40,7 +122,10 @@ RTextureCubeMap* EnvironmentCaptureComponent::getEnvironmentMap()
 
 RTextureCubeMap* EnvironmentCaptureComponent::getIrradianceMap()
 {
-	return _irradianceMap;
+	if (a)
+		return _irradianceMap;
+	else
+		return static_cast<RTextureCubeMap*>(_irradianceFramebuffer->getTexture(0));
 }
 
 

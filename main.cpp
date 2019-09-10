@@ -197,6 +197,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
 		Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
     }
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+	}
 }
 
 void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))

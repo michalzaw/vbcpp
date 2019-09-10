@@ -83,6 +83,14 @@ void Framebuffer::bind()
 }
 
 
+void Framebuffer::bindCubeMapFaceToRender(CubeMapFace face, int textureIndex)
+{
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, face, _textures[textureIndex]->_texID, 0);
+
+	glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+}
+
+
 void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
     bind();
@@ -137,6 +145,22 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     }
 
     checkFramebufferStatus();
+}
+
+
+void Framebuffer::addCubeMapTexture(TextureFormat format, unsigned int size)
+{
+	bind();
+
+	RTextureCubeMap* texture = new RTextureCubeMap(format, size);
+	texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+	texture->setClampMode(TCM_CLAMP_TO_EDGE);
+
+	_textures.push_back(texture);
+
+	_fboBuffs.push_back(GL_COLOR_ATTACHMENT0);
+
+	checkFramebufferStatus();
 }
 
 

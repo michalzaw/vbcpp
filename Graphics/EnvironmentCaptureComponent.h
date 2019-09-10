@@ -7,6 +7,11 @@
 #include "../Utils/RTextureCubeMap.h"
 
 
+class Framebuffer;
+class RShader;
+class Cube;
+
+
 class EnvironmentCaptureComponent : public Component
 {
     private:
@@ -14,6 +19,14 @@ class EnvironmentCaptureComponent : public Component
 		RTextureCubeMap* _irradianceMap;
 		RTextureCubeMap* _specularIrradianceMap;
         glm::mat4 _rotationMatrix;
+
+		Framebuffer* _irradianceFramebuffer;
+		RShader* _irradianceShader;
+		Cube* _cube;
+
+
+		void initIrradianceFramebufferAndShader();
+		void generateIrradianceMap();
 
     public:
         EnvironmentCaptureComponent();
@@ -26,6 +39,8 @@ class EnvironmentCaptureComponent : public Component
         glm::mat4 getRotationMatrix();
 
         virtual void changedTransform();
+
+		bool a;
 
 };
 
