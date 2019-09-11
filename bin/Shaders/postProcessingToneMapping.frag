@@ -10,11 +10,25 @@ uniform float exposure;
 //float exposure = 0.05f;
 //float exposure = 2.0f;
 
-vec3 toneMap(vec3 hdrColor)
+vec3 toneMap1(vec3 hdrColor)
 {
 	//return hdrColor / (hdrColor + vec3(1.0f));
 	
 	return vec3(1.0f) - exp(-hdrColor * exposure);
+}
+
+
+vec3 toneMap(vec3 x)
+{
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.370013;//0.14f;
+	//0.336375
+	//e = exposure;
+	//e = 0.336375;
+    return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0, 1);
 }
 
 

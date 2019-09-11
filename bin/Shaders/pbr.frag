@@ -86,18 +86,19 @@ void main()
 	vec3 albedo = pow(texture(AlbedoTexture, TexCoord).rgb, vec3(2.2));//vec3(1.00, 0.0, 0.0);//
 	float metalic = texture(MetalicTexture, TexCoord).r;//1.0f;
 	float roughness = texture(RoughnessTexture, TexCoord).r;//a;//0.1f;
-	float ao = 1.0f;//texture(AoTexture, TexCoord).r;//1.0f;
+	float ao = texture(AoTexture, TexCoord).r;//1.0f;
 	
 	
 	// Radiancja
 	//vec3 lightColor = vec3(23.47, 21.31, 20.79);
-	vec3 lightColor = vec3(150.0f, 150.0f, 150.0f);
-	//vec3 lightDir = -normalize(vec3(1, -0.5, 0.5));
-	vec3 lightDir = normalize(lightPosition - Position);
+	//vec3 lightColor = vec3(150.0f, 150.0f, 150.0f);
+	vec3 lightColor = vec3(4.0f, 4.0f, 4.0f);
+	vec3 lightDir = -normalize(vec3(1, -0.5, 0.5));
+	//vec3 lightDir = normalize(lightPosition - Position);
 	float cosTheta = max(dot(normal, lightDir), 0.0f);
 	//float attenuation = 1.0f;	// no attenuation - dir light
 	float distance = length(lightPosition - Position);
-    float attenuation = 1.0 / (distance * distance);
+    float attenuation = 1.0;// / (distance * distance);
 	vec3 radiance = lightColor * attenuation;
 	
 	
@@ -139,9 +140,9 @@ void main()
 	
 	vec3 r = reflect(-viewDir, normal);
 	
-	vec3 prefilteredColor = texture(SpecularIrradianceMap, r).rgb;
 	const float MAX_REFLECTION_DOT = 4.0f;
-	vec2 envBRDF = textureLod(brdfLUT, vec2(max(dot(normal, viewDir), 0.0f), 1 - roughness), roughness * MAX_REFLECTION_DOT).rg;
+	vec3 prefilteredColor = textureLod(SpecularIrradianceMap, r, roughness * MAX_REFLECTION_DOT).rgb;
+	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, viewDir), 0.0f), 1 - roughness)).rg;
 	vec3 ambient_specular = prefilteredColor * (f * envBRDF.x + envBRDF.y);
 	
 	

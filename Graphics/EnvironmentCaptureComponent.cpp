@@ -34,6 +34,7 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* enviro
 
 	initIrradianceFramebufferAndShader();
 	generateIrradianceMap();
+	generatePrefilteredEnvMap();
 }
 
 
@@ -42,6 +43,11 @@ EnvironmentCaptureComponent::~EnvironmentCaptureComponent()
 	if (_irradianceFramebuffer != NULL)
 	{
 		OGLDriver::getInstance().deleteFramebuffer(_irradianceFramebuffer);
+	}
+
+	if (_prefilterEnvMapFramebuffer != NULL)
+	{
+		OGLDriver::getInstance().deleteFramebuffer(_prefilterEnvMapFramebuffer);
 	}
 
 	if (_cube != NULL)
@@ -58,6 +64,14 @@ void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
 	_irradianceFramebuffer->setViewport(UintRect(0, 0, 32, 32));
 
 	_irradianceShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/irradiance.frag");
+
+
+	_prefilterEnvMapFramebuffer = OGLDriver::getInstance().createFramebuffer();
+	_prefilterEnvMapFramebuffer->addCubeMapTexture(TF_RGBA_16F, 128, true);
+	_prefilterEnvMapFramebuffer->setViewport(UintRect(0, 0, 128, 128));
+
+	_prefilterEnvMapShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/prefilterEnvironment.frag");
+
 
 	_cube = new Cube(1, Material());
 	_cube->init();
@@ -114,6 +128,68 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 }
 
 
+void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
+{
+	const unsigned int MAX_MIPMAP_LEVELS = 5;
+
+	glm::mat4 projectionMatrix = glm::perspective(degToRad(90.0f), 1.0f, 0.1f, 10.0f);
+	glm::mat4 viewMatrices[] =
+	{
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 1.0f, -1.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)),
+		glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f))
+	};
+
+	glDisable(GL_CULL_FACE);
+
+	_prefilterEnvMapShader->enable();
+	_prefilterEnvMapShader->setUniform(_prefilterEnvMapShader->getUniformLocation("projectionMatrix"), projectionMatrix);
+	_prefilterEnvMapShader->bindTexture(_prefilterEnvMapShader->getUniformLocation("Texture"), _environmentMap);
+
+	_prefilterEnvMapFramebuffer->bind();
+
+	for (int mipmap = 0; mipmap < MAX_MIPMAP_LEVELS; ++mipmap)
+	{
+		unsigned int mipWidth = 128 * std::pow(0.5, mipmap);
+		unsigned int mipHeight = 128 * std::pow(0.5, mipmap);
+
+		_prefilterEnvMapFramebuffer->setViewport(UintRect(0, 0, mipWidth, mipHeight));
+
+		float roughness = (float)mipmap / float(MAX_MIPMAP_LEVELS - 1);
+		_prefilterEnvMapShader->setUniform(_prefilterEnvMapShader->getUniformLocation("roughness"), roughness);
+
+		for (int i = 0; i < 6; ++i)
+		{
+			_prefilterEnvMapShader->setUniform(_prefilterEnvMapShader->getUniformLocation("viewMatrix"), viewMatrices[i]);
+
+			_prefilterEnvMapFramebuffer->bindCubeMapFaceToRender((CubeMapFace)(CMF_POSITIVE_X + i), 0, mipmap);
+
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+			StaticModelMesh * cubeMesh = _cube->getModelRootNode()->getMesh(0);
+			cubeMesh->vbo->bind();
+			cubeMesh->ibo->bind();
+
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+
+			glDrawElements(GL_TRIANGLES,
+				cubeMesh->indicesCount,
+				GL_UNSIGNED_INT,
+				(void*)(cubeMesh->firstVertex * sizeof(unsigned int)));
+
+			glDisableVertexAttribArray(0);
+		}
+	}
+
+	glEnable(GL_CULL_FACE);
+}
+
+
 RTextureCubeMap* EnvironmentCaptureComponent::getEnvironmentMap()
 {
     return _environmentMap;
@@ -131,7 +207,8 @@ RTextureCubeMap* EnvironmentCaptureComponent::getIrradianceMap()
 
 RTextureCubeMap* EnvironmentCaptureComponent::getSpecularIrradianceMap()
 {
-	return _specularIrradianceMap;
+	//return _specularIrradianceMap;
+	return static_cast<RTextureCubeMap*>(_prefilterEnvMapFramebuffer->getTexture(0));
 }
 
 

@@ -24,9 +24,14 @@ class EnvironmentCaptureComponent : public Component
 		RShader* _irradianceShader;
 		Cube* _cube;
 
+		Framebuffer* _prefilterEnvMapFramebuffer;
+		RShader* _prefilterEnvMapShader;
+
 
 		void initIrradianceFramebufferAndShader();
 		void generateIrradianceMap();
+
+		void generatePrefilteredEnvMap();
 
     public:
         EnvironmentCaptureComponent();

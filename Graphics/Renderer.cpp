@@ -1499,6 +1499,11 @@ void Renderer::renderScene(RenderData* renderData)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SPECULAR_IRRADIANCE_MAP], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_BRDF_LUT], _brdfLutTexture);
 		}
+		if (material->shader == SKY_MATERIAL)
+		{
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+		}
 
 
 

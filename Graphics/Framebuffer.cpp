@@ -83,9 +83,9 @@ void Framebuffer::bind()
 }
 
 
-void Framebuffer::bindCubeMapFaceToRender(CubeMapFace face, int textureIndex)
+void Framebuffer::bindCubeMapFaceToRender(CubeMapFace face, int textureIndex, int mipmapLevel)
 {
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, face, _textures[textureIndex]->_texID, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, face, _textures[textureIndex]->_texID, mipmapLevel);
 
 	glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
 }
@@ -148,12 +148,12 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
 }
 
 
-void Framebuffer::addCubeMapTexture(TextureFormat format, unsigned int size)
+void Framebuffer::addCubeMapTexture(TextureFormat format, unsigned int size, bool mipmaping)
 {
 	bind();
 
 	RTextureCubeMap* texture = new RTextureCubeMap(format, size);
-	texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+	texture->setFiltering(mipmaping ? TFM_TRILINEAR : TFM_LINEAR, TFM_LINEAR);
 	texture->setClampMode(TCM_CLAMP_TO_EDGE);
 
 	_textures.push_back(texture);
