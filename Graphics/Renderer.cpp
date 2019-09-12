@@ -849,7 +849,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
 	// PBR_MATERIAL
 	defines.clear();
-	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag");
+	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
 
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];

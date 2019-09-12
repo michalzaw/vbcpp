@@ -11,13 +11,74 @@ uniform sampler2D NormalmapTexture;
 uniform sampler2D MetalicTexture;
 uniform sampler2D RoughnessTexture;
 uniform sampler2D AoTexture;
+
 uniform samplerCube IrradianceMap;
 uniform samplerCube SpecularIrradianceMap;
 uniform sampler2D brdfLUT;
+
 uniform vec3 CameraPosition;
-vec3 lightPosition = vec3(0, 0, 10);
 
 out vec3 Color;
+
+
+// Lights
+struct Light
+{
+	vec3 Color;
+	float AmbientIntensity;
+	float DiffuseIntensity;
+};
+
+struct DirectionalLight
+{
+	Light Base;
+	vec3 Direction;
+};
+
+struct Attenuation
+{
+	float constant;
+	float linear;
+	float exp;
+};
+
+struct PointLight
+{
+	Light Base;
+	vec3 Position;
+	Attenuation Attenuation;
+};
+
+struct SpotLight
+{
+	PointLight Base;
+	vec3 Direction;
+	float CutoffCos;
+};
+
+const int MAX_DIR_COUNT = 1;
+const int MAX_POINT_COUNT = 8;
+const int MAX_SPOT_COUNT = 8;
+
+uniform LightsBlock
+{
+	DirectionalLight 	DirLights[MAX_DIR_COUNT];
+	PointLight 			PointLights[MAX_POINT_COUNT];
+	SpotLight 			SpotLights[MAX_SPOT_COUNT];
+	int DirCount;
+	int PointCount;
+	int SpotCount;
+} Lights;
+
+
+// Shadows
+const int CASCADES_COUNT = 3;
+const float CascadeEndClipSpace[CASCADES_COUNT] = float[CASCADES_COUNT](25.0f, 100.0f, 500.0f);
+const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005f);
+
+in vec4 PositionLightSpace[CASCADES_COUNT];
+in float ClipSpacePositionZ;
+uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 
 
 const float PI = 3.14159265359;
@@ -89,24 +150,44 @@ void main()
 	float ao = texture(AoTexture, TexCoord).r;//1.0f;
 	
 	
-	// Radiancja
-	//vec3 lightColor = vec3(23.47, 21.31, 20.79);
-	//vec3 lightColor = vec3(150.0f, 150.0f, 150.0f);
-	vec3 lightColor = vec3(4.0f, 4.0f, 4.0f);
-	vec3 lightDir = -normalize(vec3(1, -0.5, 0.5));
-	//vec3 lightDir = normalize(lightPosition - Position);
-	float cosTheta = max(dot(normal, lightDir), 0.0f);
-	//float attenuation = 1.0f;	// no attenuation - dir light
-	float distance = length(lightPosition - Position);
-    float attenuation = 1.0;// / (distance * distance);
-	vec3 radiance = lightColor * attenuation;
+	vec3 f0 = vec3(0.04f);
+	f0 = mix(f0, albedo, metalic);
 	
+	
+	vec3 L0 = vec3(0.0f, 0.0f, 0.0f);
+	// Radiancja
+	for (int i = 0; i < Lights.DirCount; ++i)
+	{
+		vec3 lightColor = Lights.DirLights[i].Base.Color * Lights.DirLights[i].Base.DiffuseIntensity * 8;
+		vec3 lightDir = -normalize(Lights.DirLights[i].Direction);
+		
+		float cosTheta = max(dot(normal, lightDir), 0.0f);
+		
+		float attenuation = 1.0f;
+#ifdef SHADOWMAPPING
+		int cascadeIndex = 0;
+		for (int i = 0; i < CASCADES_COUNT; ++i)
+		{
+			if (ClipSpacePositionZ <= CascadeEndClipSpace[i])
+			{
+				cascadeIndex = i;
+				break;
+			}
+		}
+
+		vec3 Coords = PositionLightSpace[cascadeIndex].xyz / PositionLightSpace[cascadeIndex].w;
+		Coords = Coords * 0.5f + 0.5f;
+
+		float CurrentDepth = Coords.z;
+
+		Coords.z -= bias[cascadeIndex];//0.0005f;//
+		attenuation = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+#endif
+		vec3 radiance = lightColor * attenuation;
 	
 	// Specular
 	vec3 h = normalize(viewDir + lightDir);
 	
-	vec3 f0 = vec3(0.04f);
-	f0 = mix(f0, albedo, metalic);
 	vec3 F = fresnelSchlick(max(dot(h, viewDir), 0.0f), f0); // wedlug tutoriala zamiast normal powinno byc h, ale wtedy nie wyglada to jak efekt fresnela
 	
 	float NDF = DistributionGGX(normal, h, roughness);
@@ -121,9 +202,8 @@ void main()
 	
 	
 	// L0
-	vec3 L0 = (kd * albedo / PI + specular) * radiance * cosTheta;
-	
-	
+	L0 += (kd * albedo / PI + specular) * radiance * cosTheta;
+	}
 	
 	
 	//vec3 ambient = vec3(0.03) * albedo * ao;

@@ -1,4 +1,5 @@
 #version 330 core
+const int CASCADES_COUNT = 3;
 
 layout (location = 0) in vec3 VertexPosition;
 layout (location = 1) in vec2 UV;
@@ -9,6 +10,7 @@ layout (location = 4) in vec3 VertexBitangent;
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
+uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
 
 uniform vec3 CameraPosition;
 
@@ -17,6 +19,9 @@ out vec3 n;
 out vec3 Position;
 out vec3 TangentWorldspace;
 out vec3 BitangentWorldspace;
+
+out vec4 PositionLightSpace[CASCADES_COUNT];
+out float ClipSpacePositionZ;
 
 void main()
 {
@@ -29,4 +34,11 @@ void main()
 	n = NM * VertexNormal;
 	TangentWorldspace = NM * VertexTangent;
 	BitangentWorldspace = NM * VertexBitangent;
+	
+	for (int i = 0; i < 3; ++i)
+	{
+		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
+	}
+	
+	ClipSpacePositionZ = gl_Position.z;
 }

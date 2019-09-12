@@ -59,6 +59,8 @@ EnvironmentCaptureComponent::~EnvironmentCaptureComponent()
 
 void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
 {
+	_environmentMap->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+
 	_irradianceFramebuffer = OGLDriver::getInstance().createFramebuffer();
 	_irradianceFramebuffer->addCubeMapTexture(TF_RGB_16F, 32);
 	_irradianceFramebuffer->setViewport(UintRect(0, 0, 32, 32));

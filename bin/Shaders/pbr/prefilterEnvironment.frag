@@ -11,6 +11,20 @@ out vec4 color;
 const float PI = 3.14159265359;
 
 
+float DistributionGGX(vec3 N, vec3 H, float a)
+{
+	float a2     = a*a * a * a; // było a * a
+	float NdotH  = max(dot(N, H), 0.0);
+	float NdotH2 = NdotH*NdotH;
+
+	float nom    = a2;
+	float denom  = (NdotH2 * (a2 - 1.0) + 1.0);
+	denom        = PI * denom * denom;
+
+	return nom / denom;
+}
+
+
 float radicalInverseVdc(uint bits)
 {
 	bits = (bits << 16u) | (bits >> 16u);
@@ -68,7 +82,18 @@ void main()
 		float ndotl = max(dot(normal, l), 0.0f);
 		if (ndotl > 0.0f)
 		{
-			prefilteredColor += texture(Texture, l).rgb * ndotl;
+			float d = DistributionGGX(normal, h, roughness);
+			float NdotH = max(dot(normal, h), 0.0f);
+			float HdotV = max(dot(h,v), 0.0f);
+			float pdf = d * NdotH / (4 * HdotV) + 0.0001;
+			
+			float RESOLUTION = 768.0f;
+			float texel = 4.0f * PI / (6.0f * RESOLUTION * RESOLUTION);
+			float sample = 1.0f / (float(SAMPLE_COUNT) * pdf + 0.0001);
+			
+			float mipLevel = roughness == 0.0f ? 0.0f : 0.5f * log2(sample / texel);
+			
+			prefilteredColor += textureLod(Texture, l, mipLevel).rgb * ndotl;
 			totalWeight += ndotl;
 		}
 	}
