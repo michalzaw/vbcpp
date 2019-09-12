@@ -63,14 +63,12 @@ void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
 
 	_irradianceFramebuffer = OGLDriver::getInstance().createFramebuffer();
 	_irradianceFramebuffer->addCubeMapTexture(TF_RGB_16F, 32);
-	_irradianceFramebuffer->setViewport(UintRect(0, 0, 32, 32));
 
 	_irradianceShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/irradiance.frag");
 
 
 	_prefilterEnvMapFramebuffer = OGLDriver::getInstance().createFramebuffer();
 	_prefilterEnvMapFramebuffer->addCubeMapTexture(TF_RGBA_16F, 128, true);
-	_prefilterEnvMapFramebuffer->setViewport(UintRect(0, 0, 128, 128));
 
 	_prefilterEnvMapShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/prefilterEnvironment.frag");
 

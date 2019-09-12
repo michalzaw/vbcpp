@@ -4,7 +4,7 @@
 
 
 Framebuffer::Framebuffer()
-    : _fboId(0), _depthRenderbuffer(0), _isInitialized(false)
+    : _fboId(0), _depthRenderbuffer(0), _isInitialized(false), _viewport(0, 0, 0, 0)
 {
 
 }
@@ -145,6 +145,11 @@ void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned 
     }
 
     checkFramebufferStatus();
+
+	if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
+	{
+		setViewport(UintRect(0, 0, width, height));
+	}
 }
 
 
@@ -161,6 +166,11 @@ void Framebuffer::addCubeMapTexture(TextureFormat format, unsigned int size, boo
 	_fboBuffs.push_back(GL_COLOR_ATTACHMENT0);
 
 	checkFramebufferStatus();
+
+	if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
+	{
+		setViewport(UintRect(0, 0, size, size));
+	}
 }
 
 
