@@ -9,7 +9,7 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
-    _alphaToCoverage(true), _exposure(0.05f),
+    _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
     _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
     _isShadowMappingEnable(false), _shadowMap(NULL),
@@ -158,7 +158,7 @@ void Renderer::initPostProcessingEffectsStack()
 	}
 
 	// tone mapping
-	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO);
+	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO, _toneMappingType);
 	postProcessingToneMapping->setExposure(_exposure);
 	addPostProcessingEffect(postProcessingToneMapping);
 }
@@ -911,6 +911,24 @@ void Renderer::setExposure(float exposure)
 float Renderer::getExposure()
 {
     return _exposure;
+}
+
+
+void Renderer::setToneMappingType(ToneMappingType type)
+{
+	if (_isInitialized)
+	{
+		PostProcessingToneMapping* toneMappingEffect = static_cast<PostProcessingToneMapping*>(findEffect(PPT_TONE_MAPPING));
+		toneMappingEffect->setToneMappingType(type);
+	}
+
+	_toneMappingType = type;
+}
+
+
+ToneMappingType Renderer::getToneMappingType()
+{
+	return _toneMappingType;
 }
 
 

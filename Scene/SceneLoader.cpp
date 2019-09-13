@@ -155,42 +155,7 @@ bool SceneLoader::loadSky(XMLElement* sceneElement)
 		RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
 		Sky* skyComponent = GraphicsManager::getInstance().addSky(skyboxTexture, skySceneObject);
 
-		/*std::string names[] = {
-			GameDirectories::SKYBOX + "output_iem_posx.hdr",
-			GameDirectories::SKYBOX + "output_iem_negx.hdr",
-			GameDirectories::SKYBOX + "output_iem_posy.hdr",
-			GameDirectories::SKYBOX + "output_iem_negy.hdr",
-			GameDirectories::SKYBOX + "output_iem_posz.hdr",
-			GameDirectories::SKYBOX + "output_iem_negz.hdr"
-		};*/
-		std::string names[] = {
-			GameDirectories::SKYBOX + "irradiance/output_skybox_posx.hdr",
-			GameDirectories::SKYBOX + "irradiance/output_skybox_negx.hdr",
-			GameDirectories::SKYBOX + "irradiance/output_skybox_posy.hdr",
-			GameDirectories::SKYBOX + "irradiance/output_skybox_negy.hdr",
-			GameDirectories::SKYBOX + "irradiance/output_skybox_posz.hdr",
-			GameDirectories::SKYBOX + "irradiance/output_skybox_negz.hdr",
-		};
-		/*std::string specularIrradianecNames[] = {
-			GameDirectories::SKYBOX + "specular/specularIbl_posx.hdr",
-			GameDirectories::SKYBOX + "specular/specularIbl_negx.hdr",
-			GameDirectories::SKYBOX + "specular/specularIbl_posy.hdr",
-			GameDirectories::SKYBOX + "specular/specularIbl_negy.hdr",
-			GameDirectories::SKYBOX + "specular/specularIbl_posz.hdr",
-			GameDirectories::SKYBOX + "specular/specularIbl_negz.hdr",
-		};*/
-		std::string specularIrradianecNames[] = {
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_posx.hdr",
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_negx.hdr",
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_posy.hdr",
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_negy.hdr",
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_posz.hdr",
-			GameDirectories::SKYBOX + "specularFromCMFT/output_pmrem_negz.hdr",
-		};
-		RTextureCubeMap* irradianceMap = ResourceManager::getInstance().loadTextureCubeMap(names);
-		RTextureCubeMap* specularIrradianceMap = ResourceManager::getInstance().loadTextureCubeMap(specularIrradianecNames);
-
-		GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture, irradianceMap, specularIrradianceMap);
+		GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
 
 		return true;
 	}

@@ -94,6 +94,7 @@ class Renderer
         bool _alphaToCoverage;
 
         float _exposure;
+		ToneMappingType _toneMappingType;
 
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
@@ -180,6 +181,8 @@ class Renderer
         bool isAlphaToCoverageEnable();
         void setExposure(float exposure);
         float getExposure();
+		void setToneMappingType(ToneMappingType type);
+		ToneMappingType getToneMappingType();
         void setMsaaAntialiasing(bool isEnable);
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);

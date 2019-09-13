@@ -67,6 +67,10 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     isGrassEnable = toBool(configElement->GetText());
                 }
+				else if (strcmp(ename, "PbrSupport") == 0)
+				{
+					pbrSupport = toBool(configElement->GetText());
+				}
             }
         }
     }

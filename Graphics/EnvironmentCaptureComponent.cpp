@@ -5,6 +5,8 @@
 #include "Prefab.h"
 #include "RShader.h"
 
+#include "../Game/GameConfig.h"
+
 #include "../Scene/SceneObject.h"
 
 #include "../Utils/ResourceManager.h"
@@ -16,7 +18,10 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent()
     _rotationMatrix(1.0f),
 	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
 {
-	initIrradianceFramebufferAndShader();
+	if (GameConfig::getInstance().pbrSupport)
+	{
+		initIrradianceFramebufferAndShader();
+	}
 }
 
 
@@ -26,15 +31,23 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* enviro
     _rotationMatrix(1.0f),
 	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
 {
+
+	if (GameConfig::getInstance().pbrSupport)
+	{
+		initIrradianceFramebufferAndShader();
+		
+		if (_irradianceMap == NULL)
+			generateIrradianceMap();
+		
+		if (_specularIrradianceMap == NULL)
+			generatePrefilteredEnvMap();
+	}
+
 	if (_irradianceMap == NULL)
 		_irradianceMap = _environmentMap;
 
 	if (_specularIrradianceMap == NULL)
 		_specularIrradianceMap = _environmentMap;
-
-	initIrradianceFramebufferAndShader();
-	generateIrradianceMap();
-	generatePrefilteredEnvMap();
 }
 
 
@@ -125,6 +138,8 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 	}
 
 	glEnable(GL_CULL_FACE);
+
+	_irradianceMap = static_cast<RTextureCubeMap*>(_irradianceFramebuffer->getTexture(0));
 }
 
 
@@ -187,6 +202,8 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 	}
 
 	glEnable(GL_CULL_FACE);
+
+	_specularIrradianceMap = static_cast<RTextureCubeMap*>(_prefilterEnvMapFramebuffer->getTexture(0));
 }
 
 
@@ -198,17 +215,13 @@ RTextureCubeMap* EnvironmentCaptureComponent::getEnvironmentMap()
 
 RTextureCubeMap* EnvironmentCaptureComponent::getIrradianceMap()
 {
-	if (a)
-		return _irradianceMap;
-	else
-		return static_cast<RTextureCubeMap*>(_irradianceFramebuffer->getTexture(0));
+	return _irradianceMap;
 }
 
 
 RTextureCubeMap* EnvironmentCaptureComponent::getSpecularIrradianceMap()
 {
-	//return _specularIrradianceMap;
-	return static_cast<RTextureCubeMap*>(_prefilterEnvMapFramebuffer->getTexture(0));
+	return _specularIrradianceMap;
 }
 
 

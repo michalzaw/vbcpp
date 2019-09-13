@@ -496,6 +496,7 @@ int main(int argc, char** argv)
     renderer.setDayNightRatio(1.0f);
     renderer.setAlphaToCoverage(true);
     renderer.setExposure(1.87022f);
+	renderer.setToneMappingType(TMT_ACES);
     renderer.t = 0;
 
 

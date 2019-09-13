@@ -46,6 +46,8 @@ class GameConfig
         bool isBloomEnabled;
         bool isGrassEnable;
 
+		bool pbrSupport;
+
 };
 
 
