@@ -17,6 +17,8 @@
 #include <memory>
 #include <sstream>
 
+#define DEVELOPMENT_RESOURCES
+
 typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
 
@@ -61,11 +63,16 @@ class ResourceManager
 
 		RRoadProfile* loadRoadProfile(std::string name);
 
+		void setAlternativeResourcePath(std::string path);
+		std::string getAlternativeResourcePath();
+
     protected:
         resourcePtrList _resources;
 
     private:
         ResourceManager();
+
+		std::string _alternativeResourcePath;
 };
 
 #endif // RESOURCEMANAGER_H_INCLUDED

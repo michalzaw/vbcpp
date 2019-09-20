@@ -31,6 +31,7 @@ class GameConfig
         }
 
         void loadGameConfig(const char* filename);
+		void loadDevelopmentConfig(const char* filename);
 
         int windowWidth;
         int windowHeight;
@@ -47,6 +48,8 @@ class GameConfig
         bool isGrassEnable;
 
 		bool pbrSupport;
+
+		std::string alternativeResourcesPath;
 
 };
 

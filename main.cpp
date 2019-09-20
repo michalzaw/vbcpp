@@ -467,6 +467,11 @@ int main(int argc, char** argv)
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");
+	#ifdef DEVELOPMENT_RESOURCES
+	GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
+	ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
+	#endif // DEVELOPMENT_RESOURCES
+
 
     win = new Window;
     win->createWindow(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, 10, 40, GameConfig::getInstance().isFullscreen);
@@ -522,7 +527,7 @@ int main(int argc, char** argv)
     camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     camFPS->setRotationSpeed(0.001f);
-    camFPS->setMoveSpeed(50.0f);
+    camFPS->setMoveSpeed(5.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(10,7,-10);
     Camera->setPosition(0, 0, 0);

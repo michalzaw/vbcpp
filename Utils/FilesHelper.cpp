@@ -10,6 +10,31 @@
 #include "Logger.h"
 
 
+bool FilesHelper::isDirectoryExists(std::string dirPath)
+{
+	#ifdef WIN32
+	DWORD type = GetFileAttributesA(dirPath.c_str());
+	if (type == INVALID_FILE_ATTRIBUTES)
+	{
+		return false;
+	}
+	if (type & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		return true;
+	}
+	return false;
+	#else
+	DIR* dir = opendir(dirPath.c_str());
+	if (dir)
+	{
+		closedir(dir);
+		return true;
+	}
+	return false;
+	#endif
+}
+
+
 std::vector<std::string> FilesHelper::getDirectoriesList(std::string path)
 {
     std::vector<std::string> directories;

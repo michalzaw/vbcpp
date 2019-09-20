@@ -283,6 +283,12 @@ void SceneLoader::loadRoads(XMLElement* sceneElement)
 void SceneLoader::loadMap(std::string name)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(_dirPath))
+		_dirPath = ResourceManager::getInstance().getAlternativeResourcePath() + _dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
 	XMLDocument doc;
