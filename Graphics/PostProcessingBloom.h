@@ -15,6 +15,9 @@ class PostProcessingBloom : public PostProcessingEffect
 
 		RTexture* _brightnessTexture;
 
+		GLint _isHorizontalUniformLocation;
+		GLint _textureBlurUniformLocation;
+
 		void process() override;
 		void setParamUniforms() override;
 

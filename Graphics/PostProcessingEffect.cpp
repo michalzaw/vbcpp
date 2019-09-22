@@ -9,6 +9,17 @@ PostProcessingEffect::PostProcessingEffect(PostProcessingType type, VBO* quadVbo
 }
 
 
+void PostProcessingEffect::setShader(RShader* shader)
+{
+	_shader = shader;
+
+	_textureUniformLocations[0] = _shader->getUniformLocation("texture1");
+	_textureUniformLocations[1] = _shader->getUniformLocation("texture2");
+	_textureUniformLocations[2] = _shader->getUniformLocation("texture3");
+	_textureUniformLocations[3] = _shader->getUniformLocation("texture4");
+}
+
+
 void PostProcessingEffect::process()
 {
 
@@ -32,11 +43,11 @@ void PostProcessingEffect::draw()
 
 	setParamUniforms();
 
-	_shader->bindTexture(UNIFORM_POSTPROCESS_TEXTURE_1, _mainInputTexture);
+	_shader->bindTexture(_textureUniformLocations[0], _mainInputTexture);
 
 	for (int i = 0; i < _additionalInputTextures.size(); ++i)
 	{
-		_shader->bindTexture((UniformName)(UNIFORM_POSTPROCESS_TEXTURE_2 + i), _additionalInputTextures[i]);
+		_shader->bindTexture(_textureUniformLocations[1 + i], _additionalInputTextures[i]);
 	}
 
 	glEnableVertexAttribArray(0);

@@ -34,6 +34,10 @@ class PostProcessingEffect
 		Framebuffer* _outputFramebuffer;
 		std::vector<RTexture*> _additionalInputTextures;
 
+		GLint _textureUniformLocations[4];
+
+		void setShader(RShader* shader);
+
 		virtual void process();
 		virtual void setParamUniforms();
 

@@ -197,6 +197,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
 		Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
     }
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+	}
 }
 
 void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
@@ -463,6 +467,11 @@ int main(int argc, char** argv)
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");
+	#ifdef DEVELOPMENT_RESOURCES
+	GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
+	ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
+	#endif // DEVELOPMENT_RESOURCES
+
 
     win = new Window;
     win->createWindow(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, 10, 40, GameConfig::getInstance().isFullscreen);
@@ -492,6 +501,7 @@ int main(int argc, char** argv)
     renderer.setDayNightRatio(1.0f);
     renderer.setAlphaToCoverage(true);
     renderer.setExposure(1.87022f);
+	renderer.setToneMappingType(TMT_ACES);
     renderer.t = 0;
 
 
@@ -517,7 +527,7 @@ int main(int argc, char** argv)
     camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     camFPS->setRotationSpeed(0.001f);
-    camFPS->setMoveSpeed(50.0f);
+    camFPS->setMoveSpeed(5.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(10,7,-10);
     Camera->setPosition(0, 0, 0);

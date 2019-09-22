@@ -31,6 +31,7 @@ class GameConfig
         }
 
         void loadGameConfig(const char* filename);
+		void loadDevelopmentConfig(const char* filename);
 
         int windowWidth;
         int windowHeight;
@@ -45,6 +46,10 @@ class GameConfig
         int shadowmapSize;
         bool isBloomEnabled;
         bool isGrassEnable;
+
+		bool pbrSupport;
+
+		std::string alternativeResourcesPath;
 
 };
 

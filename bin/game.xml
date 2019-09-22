@@ -21,5 +21,7 @@
         <ShadowmapSize>2048</ShadowmapSize>
 		
 		<Grass>true</Grass>
+		
+		<PbrSupport>true</PbrSupport>
     </Configuration>
 </Game>

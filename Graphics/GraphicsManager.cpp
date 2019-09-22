@@ -163,9 +163,9 @@ Light* GraphicsManager::addSpotLight(glm::vec3 color, float ambientIntensity, fl
 }
 
 
-EnvironmentCaptureComponent* GraphicsManager::addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap)
+EnvironmentCaptureComponent* GraphicsManager::addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap, RTextureCubeMap* specularIrradianceMap)
 {
-    EnvironmentCaptureComponent* component = new EnvironmentCaptureComponent(environmentMap);
+    EnvironmentCaptureComponent* component = new EnvironmentCaptureComponent(environmentMap, irradianceMap, specularIrradianceMap);
 
     _environmentCaptureComponents.push_back(component);
 
@@ -173,9 +173,9 @@ EnvironmentCaptureComponent* GraphicsManager::addEnvironmentCaptureComponent(RTe
 }
 
 
-EnvironmentCaptureComponent* GraphicsManager::addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap)
+EnvironmentCaptureComponent* GraphicsManager::addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap, RTextureCubeMap* specularIrradianceMap)
 {
-    _globalEnvironmentCaptureComponent = addEnvironmentCaptureComponent(environmentMap);
+    _globalEnvironmentCaptureComponent = addEnvironmentCaptureComponent(environmentMap, irradianceMap, specularIrradianceMap);
 
     return _globalEnvironmentCaptureComponent;
 }

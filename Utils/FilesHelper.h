@@ -22,6 +22,8 @@ class FilesHelper
             return 0;
         }
 
+		static bool isDirectoryExists(std::string dirPath);
+
         static std::vector<std::string> getDirectoriesList(std::string path);
 
 		static std::string getFileExtension(std::string fileName);

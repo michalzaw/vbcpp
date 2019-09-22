@@ -2,6 +2,7 @@
 
 #include "../Game/Directories.h"
 
+#include "..//Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
@@ -22,6 +23,11 @@ BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager,
 Bus* BusLoader::loadBus(const std::string& busName)
 {
     std::string configFileName = GameDirectories::BUSES + busName + "/" + BUS_CONFIG_FILENAME;
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(configFileName))
+		configFileName = ResourceManager::getInstance().getAlternativeResourcePath() + configFileName;
+#endif // DEVELOPMENT_RESOURCES
 
     XMLDocument doc;
     doc.LoadFile(configFileName.c_str());

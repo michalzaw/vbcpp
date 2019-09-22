@@ -1,5 +1,6 @@
 #include "ResourceManager.h"
 
+#include "FilesHelper.h"
 #include "../Graphics/LoadTexture.h"
 #include "../Graphics/LoadShader.h"
 #include "../Graphics/StaticModelLoader.h"
@@ -12,6 +13,8 @@ static std::unique_ptr<ResourceManager> rsInstance;
 ResourceManager::ResourceManager()
 {
     std::cout << "ResourceManager: Konstruktor\n";
+
+	_alternativeResourcePath = "";
 }
 
 
@@ -46,6 +49,21 @@ Resource* ResourceManager::findResource(std::string path)
         }
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	path = _alternativeResourcePath + path;
+
+	for (it = _resources.begin(); it != _resources.end(); ++it)
+	{
+		if ((*it)->getPath() == path)
+		{
+			std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
+			std::unique_ptr<Resource>& res = *it;
+
+			return res.get();
+		}
+	}
+#endif // DEVELOPMENT_RESOURCES
+
     return 0;
 }
 
@@ -61,6 +79,11 @@ RTexture2D* ResourceManager::loadTexture(std::string path, bool mipmapping)
     }
 
     // Zasob nie istnieje
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
     int width, height;
     //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
     RTexture2D* texture = ::loadTexture(path.c_str(), mipmapping);
@@ -110,6 +133,13 @@ RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
     }
 
     // Zasob nie istnieje
+#ifdef DEVELOPMENT_RESOURCES
+	for (int i = 0; i < 6; ++i)
+	{
+		if (!FilesHelper::isFileExists(fileNames[i]))
+			fileNames[i] = _alternativeResourcePath + fileNames[i];
+	}
+#endif // DEVELOPMENT_RESOURCES
     RTextureCubeMap* texture = ::loadTextureCubeMap(fileNames, path.c_str(), true);
 
     if ( texture )
@@ -258,6 +288,13 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(vertexPath))
+		vertexPath = _alternativeResourcePath + vertexPath;
+	if (!FilesHelper::isFileExists(fragmPath))
+		fragmPath = _alternativeResourcePath + fragmPath;
+#endif // DEVELOPMENT_RESOURCES
+
     std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
 
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
@@ -333,6 +370,10 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
         return model;
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
 
     StaticModelLoader loader;
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath) );
@@ -365,6 +406,10 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
         return model;
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
 
     StaticModelLoader loader;
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath, nodesToSkipNames) );
@@ -393,6 +438,10 @@ RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, 
         return model;
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
 
     StaticModelLoader loader;
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodeToLoadName, loadedNodeTransformInModel) );
@@ -418,6 +467,11 @@ void ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::str
 
     StaticModelLoader loader;
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
     for (int i = 0; i < nodesToLoadNames.size(); ++i)
     {
         RStaticModel* model = loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodesToLoadNames[i], loadedNodesTransformsInModel[i]);
@@ -437,6 +491,10 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
         return model;
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
 
     StaticModelLoader loader;
     std::unique_ptr<RStaticModel> model( loader.loadModel(path, texturePath) );
@@ -462,6 +520,11 @@ RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
         RFont* font = dynamic_cast<RFont*>(res);
         return font;
     }
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
 
     FontLoader loader;
 
@@ -496,6 +559,11 @@ RSound* ResourceManager::loadSound(std::string path)
         return sound;
     }
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(path))
+		path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
     std::unique_ptr<RSound> sound( ::loadSound(path.c_str()) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << sound.get()->getPath() << std::endl;
 
@@ -521,6 +589,11 @@ RObject* ResourceManager::loadRObject(std::string name)
 		RObject* object = dynamic_cast<RObject*>(res);
 		return object;
 	}
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(dirPath))
+		dirPath = _alternativeResourcePath + dirPath;
+#endif // DEVELOPMENT_RESOURCES
 
 	std::unique_ptr<RObject> object(RObjectLoader::loadObject(dirPath));
 	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
@@ -548,6 +621,11 @@ RRoadProfile* ResourceManager::loadRoadProfile(std::string name)
 		return object;
 	}
 
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(dirPath))
+		dirPath = _alternativeResourcePath + dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
 	std::unique_ptr<RRoadProfile> object(RoadProfileLoader::loadRoadProfile(dirPath));
 	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
 
@@ -560,4 +638,16 @@ RRoadProfile* ResourceManager::loadRoadProfile(std::string name)
 	}
 	else
 		return 0;
+}
+
+
+void ResourceManager::setAlternativeResourcePath(std::string path)
+{
+	_alternativeResourcePath = path;
+}
+
+
+std::string ResourceManager::getAlternativeResourcePath()
+{
+	return _alternativeResourcePath;
 }

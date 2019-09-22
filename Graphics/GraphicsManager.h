@@ -84,8 +84,8 @@ class GraphicsManager
         Light*          addDirectionalLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity);
         Light*          addPointLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, LightAttenuation attenuation = LightAttenuation());
         Light*          addSpotLight(glm::vec3 color, float ambientIntensity, float diffuseIntensity, float cutoff, LightAttenuation attenuation = LightAttenuation());
-        EnvironmentCaptureComponent* addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
-        EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap);
+        EnvironmentCaptureComponent* addEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
+        EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
         MirrorComponent*addMirrorComponent(std::string name);
         ClickableObject*addClickableObject();
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist

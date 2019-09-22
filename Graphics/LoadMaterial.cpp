@@ -105,7 +105,9 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
 
-
+	sMaterial.metalicTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+	sMaterial.roughnessTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+	sMaterial.aoTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
     // glass texture - okresla ktora czesc szyby jest zewnetrzna - bialy, wewnetrzna - czarny. Wykorzystywane np w autobusie.
     const char* c = materialElement->Attribute("glass_texture");
     if (c != NULL)
@@ -123,6 +125,57 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         if(texStr != "")
             sMaterial.glassTexture = ResourceManager::getInstance().loadTexture(texturePath);
     }
+
+	const char* c1 = materialElement->Attribute("metallic_texture");
+	if (c1 != NULL)
+	{
+		texStr = std::string(c1);
+
+		std::cout << "MetalicTexture: " << texStr << std::endl;
+
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
+
+		texturePath = texPath + texStr;
+
+
+		if (texStr != "")
+			sMaterial.metalicTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
+
+	const char* c2 = materialElement->Attribute("roughness_texture");
+	if (c2 != NULL)
+	{
+		texStr = std::string(c2);
+
+		std::cout << "RoughnessTexture: " << texStr << std::endl;
+
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
+
+		texturePath = texPath + texStr;
+
+
+		if (texStr != "")
+			sMaterial.roughnessTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
+
+	const char* c3 = materialElement->Attribute("ao_texture");
+	if (c3 != NULL)
+	{
+		texStr = std::string(c3);
+
+		std::cout << "AoTexture: " << texStr << std::endl;
+
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
+
+		texturePath = texPath + texStr;
+
+
+		if (texStr != "")
+			sMaterial.aoTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
 
     // reflection texture - global lub local, 1 dla czesci zewnetrznej, 2 dla czesci wewnetrznej szyby
     const char* reflectionTexture1 = materialElement->Attribute("reflection_texture_1");
@@ -171,6 +224,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
         sMaterial.shader = CAR_PAINT_MATERIAL;
     else if (strcmp(type, "mirror") == 0)
         sMaterial.shader = MIRROR_MATERIAL;
+	else if (strcmp(type, "pbr") == 0)
+		sMaterial.shader = PBR_MATERIAL;
 
 
     if (sMaterial.shader == GLASS_MATERIAL && sMaterial.glassTexture == NULL)

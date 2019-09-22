@@ -7,15 +7,36 @@ uniform sampler2D texture1;
 out vec4 Color;
 
 uniform float exposure;
-//float exposure = 0.05f;
-//float exposure = 2.0f;
 
+
+#ifdef REINHARD
 vec3 toneMap(vec3 hdrColor)
 {
-	//return hdrColor / (hdrColor + vec3(1.0f));
-	
+	return hdrColor / (hdrColor + vec3(1.0f));
+}
+#endif
+
+#ifdef CLASSIC
+vec3 toneMap(vec3 hdrColor)
+{
 	return vec3(1.0f) - exp(-hdrColor * exposure);
 }
+#endif
+
+#ifdef ACES
+vec3 toneMap(vec3 x)
+{
+    float a = 2.51f;
+    float b = 0.03f;
+    float c = 2.43f;
+    float d = 0.59f;
+    float e = 0.370013;//0.14f;
+	//0.336375
+	//e = exposure;
+	//e = 0.336375;
+    return clamp((x*(a*x+b))/(x*(c*x+d)+e), 0, 1);
+}
+#endif
 
 
 void main()
