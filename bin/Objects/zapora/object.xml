@@ -6,7 +6,7 @@
 
 	<Components>
 	
-		<Component type="render" model="zapora.fbx" />
+		<Component type="render" model="zapora.fbx" dynamic="true" />
 	
 		<Component type="physics" mass="25" body="dynamic" />
 	</Components>

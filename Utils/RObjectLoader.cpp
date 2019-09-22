@@ -69,6 +69,8 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["model"] = componentElement->Attribute("model");
+
+	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
 }
 
 
@@ -208,6 +210,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath);
 			RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
+			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
 		}
 		else if (componentType == "physics")
 		{
