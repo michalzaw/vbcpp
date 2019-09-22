@@ -289,8 +289,10 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
     // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
 
 #ifdef DEVELOPMENT_RESOURCES
-	if (!FilesHelper::isFileExists(path))
-		path = _alternativeResourcePath + path;
+	if (!FilesHelper::isFileExists(vertexPath))
+		vertexPath = _alternativeResourcePath + vertexPath;
+	if (!FilesHelper::isFileExists(fragmPath))
+		fragmPath = _alternativeResourcePath + fragmPath;
 #endif // DEVELOPMENT_RESOURCES
 
     std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
