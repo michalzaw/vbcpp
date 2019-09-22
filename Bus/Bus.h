@@ -62,6 +62,8 @@ class Bus : public RefCounter
         virtual void brakeOff() = 0;
         virtual void toggleHandbrake() = 0;
 
+		virtual bool getHandbrakeState() = 0;
+
         virtual Gearbox* getGearbox() = 0;
         virtual Engine* getEngine() = 0;
         virtual void startEngine() = 0;
