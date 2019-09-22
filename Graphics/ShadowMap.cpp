@@ -20,8 +20,8 @@ void ShadowMap::updateTextureSizeFromConfig()
     int size = GameConfig::getInstance().shadowmapSize;
 
     _shadowmapSize[0] = size;
-    _shadowmapSize[1] = size / 2;
-    _shadowmapSize[2] = size / 4;
+	_shadowmapSize[1] = 16384;//size / 2;
+	//_shadowmapSize[2] = size / 4;
 }
 
 

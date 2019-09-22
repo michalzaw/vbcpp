@@ -112,6 +112,7 @@ class Renderer
 
         std::vector<RenderData*> _renderDataList;
         std::vector<RenderData*> _renderDataListForShadowmapping;
+		std::vector<RenderData*> _renderDataListForStaticShadowmapping;
         RenderData*              _mainRenderData;
 
         unsigned int _screenWidth;
@@ -158,6 +159,7 @@ class Renderer
         void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList,
                                                  glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
         void prepareRenderData();
+		void prepareRenderDataForStaticShadowmaps();
 
 
         bool isObjectInCamera(RenderObject* object, CameraStatic* camera);
@@ -204,6 +206,8 @@ class Renderer
 
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
+
+		void bakeStaticShadows();
 
         void renderAll();
         void renderDepth(RenderData* renderData);

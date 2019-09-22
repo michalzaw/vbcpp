@@ -8,7 +8,7 @@ layout (location = 3) in vec3 VertexTangent;
 layout (location = 4) in vec3 VertexBitangent;
 #endif
 
-const int CASCADES_COUNT = 3;
+const int CASCADES_COUNT = 2;
 
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
@@ -41,7 +41,7 @@ void main()
 	TangentWorldspace = NM * VertexTangent;
 	BitangentWorldspace = NM * VertexBitangent;
 #endif
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < CASCADES_COUNT; ++i)
 	{
 		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
 	}

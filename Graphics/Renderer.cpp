@@ -1,6 +1,8 @@
 #include "Renderer.h"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger.h"
+#include "../Utils/Timer.h"
 
 
 static std::unique_ptr<Renderer> rendererInstance;
@@ -392,7 +394,7 @@ void Renderer::prepareLightsData()
     {
         float cascadeEnd[4] = {0.1, 25.0f, 100.0f, 500.0f };
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < ShadowMap::CASCADE_COUNT - 1; ++i)
         {
             CameraStatic* cameraForShadowMap = _shadowMap->getCameraForShadowMap(i);
             CameraStatic* currentCamera = graphicsManager.getCurrentCamera();
@@ -574,6 +576,47 @@ void Renderer::prepareRenderData()
 }
 
 
+void Renderer::prepareRenderDataForStaticShadowmaps()
+{
+	GraphicsManager& graphicsManager = GraphicsManager::getInstance();
+
+	for (int i = 0; i < _renderDataListForStaticShadowmapping.size(); ++i)
+	{
+		_renderDataListForStaticShadowmapping[i]->renderList.clear();
+		_renderDataListForStaticShadowmapping[i]->MVMatrix = _renderDataListForStaticShadowmapping[i]->camera->getProjectionMatrix() * _renderDataListForStaticShadowmapping[i]->camera->getViewMatrix();
+	}
+
+	RenderListElement tempRenderElement;
+
+	for (std::list<RenderObject*>::iterator i = graphicsManager._renderObjects.begin(); i != graphicsManager._renderObjects.end(); ++i)
+	{
+		RenderObject* object = *i;
+
+		if (!(*i)->isActive())
+			continue;
+
+		for (int j = 0; j < _renderDataListForStaticShadowmapping.size(); ++j)
+		{
+			RenderPass renderPass = _renderDataListForStaticShadowmapping[j]->renderPass;
+			bool isCastShadows = object->isCastShadows();
+			bool isStaticObject = !object->isDynamicObject();
+
+			if (renderPass == RP_SHADOWS && isCastShadows && isStaticObject &&
+				isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera))
+			{
+				tempRenderElement.type = RET_SINGLE;
+				tempRenderElement.model = object->getModel();
+				tempRenderElement.object = object->getSceneObject();
+				tempRenderElement.renderObject = object;
+
+				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
+				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataListForStaticShadowmapping[j]->renderList, renderPass);
+			}
+		}
+	}
+}
+
+
 bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
 {
     if (camera->getProjctionType() == CPT_ORTHOGRAPHIC)
@@ -687,7 +730,7 @@ bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
 
 void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
 {
-    for (int i = 0; i < shadowMap->CASCADE_COUNT; ++i)
+    for (int i = 0; i < shadowMap->CASCADE_COUNT - 1; ++i)
     {
         RenderData* renderData = new RenderData;
         renderData->camera = shadowMap->getCameraForShadowMap(i);
@@ -695,12 +738,19 @@ void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
         renderData->renderPass = RP_SHADOWS;
         _renderDataListForShadowmapping.insert(_renderDataListForShadowmapping.begin(), renderData);
     }
+
+	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
+	RenderData* renderData = new RenderData;
+	renderData->camera = shadowMap->getCameraForShadowMap(staticShadowmapIndex);
+	renderData->framebuffer = shadowMap->getShadowMap(staticShadowmapIndex);
+	renderData->renderPass = RP_SHADOWS;
+	_renderDataListForStaticShadowmapping.insert(_renderDataListForStaticShadowmapping.begin(), renderData);
 }
 
 
 void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 {
-    for (int i = 0; i < shadowMap->CASCADE_COUNT; ++i)
+    for (int i = 0; i < shadowMap->CASCADE_COUNT - 1; ++i)
     {
         for (std::vector<RenderData*>::iterator j = _renderDataListForShadowmapping.begin(); j != _renderDataListForShadowmapping.end(); ++j)
         {
@@ -714,6 +764,19 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
             }
         }
     }
+
+	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
+	for (std::vector<RenderData*>::iterator i = _renderDataListForStaticShadowmapping.begin(); i != _renderDataListForStaticShadowmapping.end(); ++i)
+	{
+		if (shadowMap->getShadowMap(staticShadowmapIndex) == (*i)->framebuffer)
+		{
+			RenderData* renderData = (*i);
+			_renderDataListForStaticShadowmapping.erase(i);
+			delete renderData;
+
+			break;
+		}
+	}
 }
 
 
@@ -1074,6 +1137,27 @@ void Renderer::toogleRenderOBBFlag()
 }
 
 
+void Renderer::bakeStaticShadows()
+{
+	Logger::info("Static shadows baking: start" + toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));
+	Timer timer;
+	timer.start();
+
+	prepareRenderDataForStaticShadowmaps();
+
+	for (int i = 0; i < _renderDataListForStaticShadowmapping.size(); ++i)
+	{
+		//if (_renderDataListForStaticShadowmapping[i]->renderPass == RP_SHADOWS)
+		{
+			renderDepth(_renderDataListForStaticShadowmapping[i]);
+		}
+	}
+
+	double time = timer.stop();
+	Logger::info("Static shadows baking: end. Time: " + toString(time));
+}
+
+
 void Renderer::renderAll()
 {
     prepareLightsData();
@@ -1329,10 +1413,10 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 // UBO
 void Renderer::renderScene(RenderData* renderData)
 {
-    glm::mat4 lightSpaceMatrix[3];
+    glm::mat4 lightSpaceMatrix[ShadowMap::CASCADE_COUNT];
     if (_isShadowMappingEnable)
     {
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < _shadowMap->CASCADE_COUNT; ++j)
         {
             lightSpaceMatrix[j] = _shadowMap->getCameraForShadowMap(j)->getProjectionMatrix() * _shadowMap->getCameraForShadowMap(j)->getViewMatrix();
         }
@@ -1473,8 +1557,8 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_1], _shadowMap->getShadowMap(0)->getTexture(0));
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_2], lightSpaceMatrix[1]);
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_2], _shadowMap->getShadowMap(1)->getTexture(0));
-            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_3], lightSpaceMatrix[2]);
-            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_3], _shadowMap->getShadowMap(2)->getTexture(0));
+            //shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_3], lightSpaceMatrix[2]);
+            //shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_3], _shadowMap->getShadowMap(2)->getTexture(0));
         }
 
         mesh->vbo->bind();

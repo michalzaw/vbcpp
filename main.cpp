@@ -535,6 +535,9 @@ int main(int argc, char** argv)
     GraphicsManager::getInstance().setCurrentCamera(camFPS);
 
 
+	renderer.bakeStaticShadows();
+
+
     GUIManager* gui = new GUIManager;
     //Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
     //img->setPosition(0, GameConfig::getInstance().windowHeight - img->getTexture()->getSize().y / 2.0f);

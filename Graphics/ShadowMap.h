@@ -12,7 +12,7 @@
 class ShadowMap
 {
     public:
-        static const int CASCADE_COUNT = 3;
+        static const int CASCADE_COUNT = 2;
 
     private:
         int _shadowmapSize[CASCADE_COUNT];
