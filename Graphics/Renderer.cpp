@@ -186,6 +186,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_MATERIAL_EMISSIVE_COLOR] = "matEmissive";
 	_uniformsNames[UNIFORM_MATERIAL_SPECULAR_POWER] = "SpecularPower";
 	_uniformsNames[UNIFORM_MATERIAL_TRANSPARENCY] = "Transparency";
+	_uniformsNames[UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA] = "fixDisappearanceAlphaRatio";
 	_uniformsNames[UNIFORM_CAMERA_POSITION] = "CameraPosition";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_1] = "LightSpaceMatrix[0]";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_2] = "LightSpaceMatrix[1]";
@@ -1246,6 +1247,8 @@ void Renderer::renderDepth(RenderData* renderData)
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
 
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
+
+			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
         }
 
         mesh->ibo->bind();
@@ -1371,6 +1374,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_SPECULAR_COLOR], material->specularColor);
 
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
+		shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
 
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_CAMERA_POSITION], camera->getPosition());
@@ -1545,6 +1549,7 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor);
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_CAMERA_POSITION], camera->getPosition());

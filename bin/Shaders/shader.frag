@@ -83,6 +83,7 @@ uniform vec4 matDiffuse;
 uniform vec4 matSpecular;
 uniform vec4 matEmissive;
 uniform float Transparency;
+uniform float fixDisappearanceAlphaRatio;
 uniform sampler2D Texture;
 uniform float SpecularPower;
 #ifdef NORMALMAPPING
@@ -327,7 +328,9 @@ float isGrass = 0.0f;
 	
 #ifdef ALPHA_TEST
 	float _Cutoff = 0.3f;
-	FragmentColor.a = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
+	float newAlpha = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
+	
+	FragmentColor.a = mix(FragmentColor.a, newAlpha, fixDisappearanceAlphaRatio);
 #endif
 
 

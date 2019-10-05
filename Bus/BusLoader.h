@@ -43,6 +43,8 @@ class BusLoader
         std::string _busPath;
         std::string _texturePath;
 
+		bool _normalsSmoothing;
+
         std::unique_ptr<Gearbox> _gearbox;
         std::unique_ptr<Engine> _engine;
 

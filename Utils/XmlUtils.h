@@ -72,8 +72,11 @@ class XmlUtils
 
 		static bool getAttributeBoolOptional(XMLElement* xmlElement, const char* attributeName, bool defaultValue = false)
 		{
-			const char* value = xmlElement->Attribute(attributeName);
-			return strcmp(value, "true") == 0;
+			const char* cValue = xmlElement->Attribute(attributeName);
+			if (cValue != NULL)
+				return strcmp(cValue, "true") == 0;
+			else
+				return defaultValue;
 		}
 
         static glm::vec2 getAttributeVec2Optional(XMLElement* xmlElement, const char* attributeName, glm::vec2 defaultValue = glm::vec2(0, 0))

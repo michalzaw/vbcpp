@@ -361,7 +361,7 @@ void ResourceManager::reloadAllShaders()
 }
 
 
-RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath)
+RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath, bool normalsSmoothing)
 {
     Resource* res = findResource(path);
     if (res != 0)
@@ -375,7 +375,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 		path = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
-    StaticModelLoader loader;
+    StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
@@ -391,7 +391,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 }
 
 
-RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames)
+RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames, bool normalsSmoothing)
 {
     std::string pathForResourceManager = path + "-";
     for (int i = 0; i < nodesToSkipNames.size(); ++i)
@@ -411,7 +411,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 		path = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
-    StaticModelLoader loader;
+    StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath, nodesToSkipNames) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
@@ -427,7 +427,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 }
 
 
-RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel)
+RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel, bool normalsSmoothing)
 {
     std::string pathForResourceManager = path + "+" + nodeToLoadName;
 
@@ -443,7 +443,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, 
 		path = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
-    StaticModelLoader loader;
+    StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodeToLoadName, loadedNodeTransformInModel) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
@@ -460,12 +460,13 @@ RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, 
 
 
 void ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames,
-                                                      std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes)
+                                                      std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes,
+													  bool normalsSmoothing)
 {
     loadedNodesTransformsInModel.resize(nodesToLoadNames.size());
     loadedNodes.resize(nodesToLoadNames.size());
 
-    StaticModelLoader loader;
+    StaticModelLoader loader(normalsSmoothing);
 
 #ifdef DEVELOPMENT_RESOURCES
 	if (!FilesHelper::isFileExists(path))
@@ -482,7 +483,7 @@ void ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::str
 }
 
 
-RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePath)
+RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePath, bool normalsSmoothing)
 {
     Resource* res = findResource(path);
     if (res != 0)
@@ -496,7 +497,7 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 		path = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
-    StaticModelLoader loader;
+    StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModel(path, texturePath) );
     std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
 
