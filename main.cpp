@@ -453,13 +453,14 @@ void catchArgs(int argc, char** argv)
 // ### MAIN ###
 int main(int argc, char** argv)
 {
+	/*
 	catchArgs(argc, argv);
 
 	if (runEditor)
 	{
 		return editorMain();
 	}
-
+	*/
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");

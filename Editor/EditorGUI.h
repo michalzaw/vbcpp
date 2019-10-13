@@ -1,6 +1,7 @@
 #ifndef EDITORGUI_H_INCLUDED
 #define EDITORGUI_H_INCLUDED
 
+#include <queue>
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
@@ -30,7 +31,7 @@ class EditorGUI
 
         SceneObject* _selectedSceneObject;
 
-		std::shared_ptr<EditorContext> _editorContext;
+		//std::shared_ptr<EditorContext> _editorContext;
         std::list<EditorEvent> _events;
 
         bool _styleDark;
@@ -48,8 +49,14 @@ class EditorGUI
 
         void drawMainMenu();
 
+		void showObjectProperties();
+		void showObjectNameEdit();
+		void showObjectTransformEdit();
+
+		void ShowTransformGizmo(CameraStatic* camera, SceneObject* obj);
+
     public:
-        EditorGUI(std::shared_ptr<Window> window, SceneManager* sceneManager, std::shared_ptr<EditorContext> editorContext);
+        EditorGUI(Window* window, SceneManager* sceneManager/*, std::shared_ptr<EditorContext> editorContext*/);
         ~EditorGUI();
 
         void setSelectedSceneObject(SceneObject* sceneObject);
@@ -61,7 +68,6 @@ class EditorGUI
         bool GUIhasFocus();
 
         void draw();
-
 };
 
 

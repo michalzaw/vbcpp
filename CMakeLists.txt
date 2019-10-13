@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.6)
 project(VBCPP)
 
 set(BIN_NAME vbcpp)
+set(EDITOR_BIN_NAME editor)
 
 set(CMAKE_CXX_STANDARD 11)
 
@@ -12,6 +13,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
 #set default value of assimp options
 set(ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF CACHE BOOL "ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT")
 set(ASSIMP_BUILD_FBX_IMPORTER ON CACHE BOOL "ASSIMP_BUILD_FBX_IMPORTER")
+
+#set default options for freealut
+set(BUILD_EXAMPLES OFF CACHE BOOL "BUILD_EXAMPLES" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "BUILD_TESTS" FORCE)
 
 # set variables for freealut
 set(OPENAL_INCLUDE_DIR ../openal-soft/include)
@@ -59,13 +64,13 @@ SET_TARGET_PROPERTIES(native-tools PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(OpenAL PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(openal-info PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(alut PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(hello_world PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(playfile PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(test_errorstuff PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(test_fileloader PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(test_memoryloader PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(test_version PROPERTIES FOLDER "Libs/alut")
-SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(hello_world PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(playfile PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(test_errorstuff PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(test_fileloader PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(test_memoryloader PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(test_version PROPERTIES FOLDER "Libs/alut")
+#SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
 
 add_subdirectory(Bus)
 source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
@@ -99,11 +104,17 @@ source_group("Window" FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
 set (SOURCES 
     main.cpp
-	EditorMain.h
+	#EditorMain.h
+	#EditorMain.cpp
+)
+
+set (EDITOR_MAIN
 	EditorMain.cpp
 )
 
 source_group("VBCPP_MAIN_GROUP" FILES ${SOURCES})
+
+source_group("EDITOR_MAIN" FILES ${EDITOR_MAIN})
 
 find_library(glew glew32 PATHS lib)
 include_directories (libs/glew/include)
@@ -158,10 +169,51 @@ add_executable(${BIN_NAME}
                     ${SOURCES}
 )
 
+add_executable(${EDITOR_BIN_NAME}
+                    ${BUS_SOURCES}
+                    ${BUS_HEADERS}
+                    ${EDITOR_SOURCES}
+                    ${EDITOR_HEADERS}
+                    ${GAME_SOURCES}
+                    ${GAME_HEADERS}
+                    ${GRAPHICS_SOURCES} 
+                    ${GRAPHICS_HEADERS}
+                    ${IMGUI_SOURCES}
+                    ${IMGUI_HEADERS}
+                    ${GUI_SOURCES}
+                    ${GUI_HEADERS}
+                    ${PHYSICS_SOURCES}
+                    ${PHYSICS_HEADERS}
+                    ${SCENE_SOURCES}
+                    ${SCENE_HEADERS}
+                    ${UTILS_SOURCES}
+                    ${UTILS_HEADERS}
+                    ${WINDOW_SOURCES}
+                    ${WINDOW_HEADERS}
+                    ${EDITOR_MAIN}
+)
+
 set_target_properties (${BIN_NAME} PROPERTIES VS_STARTUP_PROJECT ${BIN_NAME})
+set_target_properties (${BIN_NAME} PROPERTIES DEBUG_POSTFIX "_Debug")
+
 #output dir for executable files
 set_target_properties(${BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 #VS working dir
 set_target_properties(${BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
 target_link_libraries(${BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+
+#set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+#set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+set_target_properties (${EDITOR_BIN_NAME} PROPERTIES DEBUG_POSTFIX "_Debug")
+
+#output dir for executable files
+set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+#VS working dir
+set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+
+
+
+#EDITOR_BIN_NAME

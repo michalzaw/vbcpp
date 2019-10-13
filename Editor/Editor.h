@@ -19,13 +19,13 @@
 class Editor
 {
     private:
-        std::shared_ptr<Window> _window;
+        std::unique_ptr<Window> _window;
 
         PhysicsManager* _physicsManager;
         SoundManager* _soundManager;
         SceneManager* _sceneManager;
 
-		std::shared_ptr<EditorContext> _editorContext;
+		//std::shared_ptr<EditorContext> _editorContext;
         std::unique_ptr<EditorGUI> _editorGUI;
 
         bool _cameraActive;
@@ -47,18 +47,21 @@ class Editor
         Editor();
         ~Editor();
 
-        std::shared_ptr<Window> getWindow();
+        Window* getWindow();
 
         void run();
 
         void processInput(double deltaTime);
 
-        void mouseButtonCallback(int button, int action, int mods);
-        void keyCallback(int key, int scancode, int action, int mods);
-        void charCallback(unsigned int c);
-        void changeWindowSizeCallback(int width, int height);
-        void changeFramebufferSizeCallback(int width, int height);
+		void mouseButtonCallback(int button, int action, int mods);
 
+		void keyCallback(int key, int scancode, int action, int mods);
+
+		void charCallback(unsigned int c);
+
+		void changeWindowSizeCallback(int width, int height);
+
+		void changeFramebufferSizeCallback(int width, int height);
 };
 
 

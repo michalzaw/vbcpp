@@ -1,6 +1,6 @@
 #include "Editor.h"
 
-#include "../Bus/BusLoader.h"
+//#include "../Bus/BusLoader.h"
 
 #include "../Game/Directories.h"
 
@@ -10,72 +10,77 @@
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
 
+//std::list<Editor*> editorInstances;
 
-std::list<Editor*> editorInstances;
-
+Editor* editorInstance = nullptr;
 
 void editorMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
-    for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
-    {
-        if ((*i)->getWindow()->getWindow() == window)
-        {
-            (*i)->mouseButtonCallback(button, action, mods);
-            break;
-        }
-    }
+    //for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
+    //{
+    //    if ((*i)->getWindow()->getWindow() == window)
+    //    {
+    //        (*i)->mouseButtonCallback(button, action, mods);
+    //        break;
+    //    }
+    //}
+	editorInstance->mouseButtonCallback(button, action, mods);
 }
 
 
 void editorKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
-    {
-        if ((*i)->getWindow()->getWindow() == window)
-        {
-            (*i)->keyCallback(key, scancode, action, mods);
-            break;
-        }
-    }
+    //for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
+    //{
+    //    if ((*i)->getWindow()->getWindow() == window)
+    //    {
+    //        (*i)->keyCallback(key, scancode, action, mods);
+    //        break;
+    //    }
+    //}
+	editorInstance->keyCallback(key, scancode, action, mods);
 }
 
 
 void editorCharCallback(GLFWwindow* window, unsigned int c)
 {
-    for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
-    {
-        if ((*i)->getWindow()->getWindow() == window)
-        {
-            (*i)->charCallback(c);
-            break;
-        }
-    }
+    //for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
+    //{
+    //    if ((*i)->getWindow()->getWindow() == window)
+    //    {
+    //        (*i)->charCallback(c);
+    //        break;
+    //    }
+    //}
+	editorInstance->charCallback(c);
 }
 
 
 void editorChangeWindowSizeCallback(GLFWwindow* window, int width, int height)
 {
-    for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
-    {
-        if ((*i)->getWindow()->getWindow() == window)
-        {
-            (*i)->changeWindowSizeCallback(width, height);
-            break;
-        }
-    }
+    //for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
+    //{
+    //    if ((*i)->getWindow()->getWindow() == window)
+    //    {
+    //        (*i)->changeWindowSizeCallback(width, height);
+    //        break;
+    //    }
+    //}
+	editorInstance->changeWindowSizeCallback(width, height);
 }
 
 
 void editorFramebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
-    for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
-    {
-        if ((*i)->getWindow()->getWindow() == window)
-        {
-            (*i)->changeFramebufferSizeCallback(width, height);
-            break;
-        }
-    }
+    //for (std::list<Editor*>::iterator i = editorInstances.begin(); i != editorInstances.end(); ++i)
+    //{
+    //    if ((*i)->getWindow()->getWindow() == window)
+    //    {
+    //        (*i)->changeFramebufferSizeCallback(width, height);
+    //        break;
+    //    }
+    //}
+	editorInstance->changeFramebufferSizeCallback(width, height);
 }
 
 
@@ -90,12 +95,13 @@ Editor::Editor()
 
     initializeEngineSubsystems();
 
-	_editorContext = std::make_shared<EditorContext>();
-	_editorContext->availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
+	//_editorContext = std::make_shared<EditorContext>();
+	//_editorContext->availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
 
-    _editorGUI.reset(new EditorGUI(_window, _sceneManager, _editorContext));
+    _editorGUI.reset(new EditorGUI(_window.get(), _sceneManager));
 
-    editorInstances.push_back(this);
+    //editorInstances.push_back(this);
+	editorInstance = this;
 }
 
 
@@ -107,20 +113,21 @@ Editor::~Editor()
     _physicsManager->drop();
     delete _sceneManager;
 
-    editorInstances.remove(this);
+	_window.release();
+    //editorInstances.remove(this);
 }
 
 
 bool Editor::createWindow()
 {
-    _window = std::make_shared<Window>();
-    if (!_window->createWindow(1024, 768, 10, 40, false, true))
+    _window = std::make_unique<Window>();
+    if (!_window->createWindow(1400, 900, 10, 40, false, true))
     {
         return false;
     }
     _window->setWindowTitle("vbcpp - editor");
 
-    glfwSetMouseButtonCallback(_window->getWindow(), editorMouseButtonCallback);
+    glfwSetMouseButtonCallback(_window->getWindow(), editorMouseButtonCallback /*editorMouseButtonCallback*/);
     glfwSetKeyCallback(_window->getWindow(), editorKeyCallback);
     glfwSetCharCallback(_window->getWindow(), editorCharCallback);
     glfwSetWindowSizeCallback(_window->getWindow(), editorChangeWindowSizeCallback);
@@ -166,12 +173,14 @@ void Editor::clearScene()
     GraphicsManager::getInstance().setCurrentCamera(_camera);
     _soundManager->setActiveCamera(_camera);
 
-    _axisObject = _sceneManager->addSceneObject("editor#axis");
+	// Gizmo powinno byæ niezale¿nym obiektem i w³asnoœci¹ edytora, nie obiektem sceny
+    /*
+	_axisObject = _sceneManager->addSceneObject("editor#axis");
     RStaticModel* axisModel = ResourceManager::getInstance().loadModel("axis.fbx", "");
     axisModel->getMaterial(0)->shader = EDITOR_AXIS_SHADER;
     RenderObject* axisRenderObject = new RenderObject(axisModel);
     GraphicsManager::getInstance().addRenderObject(axisRenderObject, _axisObject);
-
+	*/
     // ---------------------------------------------------
 	/*BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
     Bus* bus = busLoader.loadBus("h9_raycast");*/
@@ -202,9 +211,9 @@ bool Editor::calculateMousePositionInWorldspaceUsingBulletRaycasting(glm::vec3 r
 }
 
 
-std::shared_ptr<Window> Editor::getWindow()
+Window* Editor::getWindow()
 {
-    return _window;
+    return _window.get();
 }
 
 
@@ -292,12 +301,12 @@ void Editor::run()
                     _editorGUI->setSelectedSceneObject(nullptr);
 
 					sceneLoader.loadMap(event.params);
-					_editorContext->currentMapInfo.name = event.params;
-					_editorContext->currentMapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+					//_editorContext->currentMapInfo.name = event.params;
+					//_editorContext->currentMapInfo.author = sceneLoader.getLoadedSceneDescription().author;
                     break;
 
 				case EET_SAVE_CLICK:
-					sceneSaver.saveMap(event.params, SceneDescription(_editorContext->currentMapInfo.author));
+					//sceneSaver.saveMap(event.params, SceneDescription(_editorContext->currentMapInfo.author));
 					break;
 
 				case EET_ADD_OBJECT:
@@ -320,10 +329,10 @@ void Editor::run()
         {
             accumulator -= TIME_STEP;
 
-            if (_editorGUI->getSelectedSceneObject() != nullptr)
-            {
-                _axisObject->setPosition(_editorGUI->getSelectedSceneObject()->getPosition());
-            }
+            //if (_editorGUI->getSelectedSceneObject() != nullptr)
+            //{
+            //    _axisObject->setPosition(_editorGUI->getSelectedSceneObject()->getPosition());
+            //}
         }
 
 
@@ -399,7 +408,7 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
 			{
 				SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 
-				_editorGUI->setSelectedSceneObject(newObject);
+				//_editorGUI->setSelectedSceneObject(newObject);
 			}
 		}
 		else
@@ -425,7 +434,7 @@ void Editor::mouseButtonCallback(int button, int action, int mods)
 				}
 			}
 
-			_editorGUI->setSelectedSceneObject(selectedObject);
+			//_editorGUI->setSelectedSceneObject(selectedObject);
 		}
     }
 }
@@ -461,3 +470,6 @@ void Editor::changeFramebufferSizeCallback(int width, int height)
     Renderer::getInstance().setWindowDimensions(width, height);
 
 }
+
+
+

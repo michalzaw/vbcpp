@@ -10,6 +10,7 @@ ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, Scene
 
 void ObjectPropertiesWindow::drawWindow()
 {
+	/*
     glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
 
     ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
@@ -185,7 +186,7 @@ void ObjectPropertiesWindow::drawWindow()
                 }
 
             }
-
+			*/
             /*if (_selectedObject->getRenderComponent() )
             {
                 if (ImGui::CollapsingHeader("Render Component"))
@@ -213,13 +214,13 @@ void ObjectPropertiesWindow::drawWindow()
                 }
             }*/
 
-			ImGui::Separator();
+			//ImGui::Separator();
 
-			if (ImGui::Button("Delete"))
+			/*if (ImGui::Button("Delete"))
 			{
 				_events->push_back(EditorEvent(EET_SELECTED_OBJECT_DELETE_CLICK));
-			}
-        }
-    }
-    ImGui::End();
+			}*/
+        //}
+    //}
+    //ImGui::End();
 }

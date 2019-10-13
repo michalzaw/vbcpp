@@ -1,10 +1,10 @@
 #include "Editor/Editor.h"
 
-
-int editorMain()
+int main()
 {
-    Editor editor;
-    editor.run();
+	Editor editor;
 
-    return 0;
+	editor.run();
+
+	return 0;
 }
