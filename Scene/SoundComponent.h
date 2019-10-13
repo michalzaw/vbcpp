@@ -34,7 +34,7 @@ class SoundComponent : virtual public Component
 {
     public:
         SoundComponent(RSound* sound, SoundType type, bool looping = false)
-        : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10.0f)
+        : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10)
         {
             alGenSources( 1, &_source );
 
@@ -61,7 +61,7 @@ class SoundComponent : virtual public Component
             alSourcef( _source, AL_GAIN, 1. );
             alSourcei( _source, AL_LOOPING, looping );
 
-            alSourcei( _source, AL_REFERENCE_DISTANCE, 1.0f); // 1.0f
+            alSourcei( _source, AL_REFERENCE_DISTANCE, 1); // 1.0f
             alSourcei( _source, AL_MAX_DISTANCE, _playDistance);  // 1000.0f
 
             if (_sound != NULL)
@@ -105,12 +105,12 @@ class SoundComponent : virtual public Component
                 return _soundPosition;
         }
 
-        const float getPlayDistance() const
+        const ALint getPlayDistance() const
         {
             return _playDistance;
         }
 
-        void setPlayDistance(const float distance)
+        void setPlayDistance(const ALint distance)
         {
             _playDistance = distance;
             alSourcei( _source, AL_MAX_DISTANCE, _playDistance);
@@ -171,7 +171,7 @@ class SoundComponent : virtual public Component
         glm::vec3   _soundPosition;
 
         SoundType   _type;
-        float       _playDistance;
+        ALint       _playDistance;
 };
 
 
