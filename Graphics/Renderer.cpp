@@ -1,6 +1,8 @@
 #include "Renderer.h"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger.h"
+#include "../Utils/Timer.h"
 
 
 static std::unique_ptr<Renderer> rendererInstance;
@@ -9,7 +11,7 @@ static std::unique_ptr<Renderer> rendererInstance;
 Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
-    _alphaToCoverage(true), _exposure(0.05f),
+    _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
     _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
     _isShadowMappingEnable(false), _shadowMap(NULL),
@@ -30,6 +32,8 @@ Renderer::Renderer()
     };
     _quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
     _quadVBO->addVertexData(quadVertices, 4 * 2);
+
+	_brdfLutTexture = ResourceManager::getInstance().loadTexture("brdfLut.png");
 }
 
 Renderer::~Renderer()
@@ -156,9 +160,73 @@ void Renderer::initPostProcessingEffectsStack()
 	}
 
 	// tone mapping
-	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO);
+	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO, _toneMappingType);
 	postProcessingToneMapping->setExposure(_exposure);
 	addPostProcessingEffect(postProcessingToneMapping);
+}
+
+
+void Renderer::initUniformLocations()
+{
+	_uniformsNames[UNIFORM_MVP] = "MVP";
+	_uniformsNames[UNIFORM_VP] = "VP";
+	_uniformsNames[UNIFORM_MODEL_MATRIX] = "ModelMatrix";
+	_uniformsNames[UNIFORM_NORMAL_MATRIX] = "NormalMatrix";
+	_uniformsNames[UNIFORM_DIFFUSE_TEXTURE] = "Texture";
+	_uniformsNames[UNIFORM_NOTMALMAP_TEXTURE] = "NormalmapTexture";
+	_uniformsNames[UNIFORM_ALPHA_TEXTURE] = "AlphaTexture";
+	_uniformsNames[UNIFORM_ENVIRONMENTMAP_TEXTURE] = "environmentMap";
+	_uniformsNames[UNIFORM_ENVIRONMENTMAP_2_TEXTURE] = "environmentMap2";
+	_uniformsNames[UNIFORM_ENVIRONMENTMAP_MATRIX] = "environmentMap1Rotation";
+	_uniformsNames[UNIFORM_ENVIRONMENTMAP_2_MATRIX] = "environmentMap2Rotation";
+	_uniformsNames[UNIFORM_GLASS_TEXTURE] = "glassTexture";
+	_uniformsNames[UNIFORM_MATERIAL_AMBIENT_COLOR] = "matAmbient";
+	_uniformsNames[UNIFORM_MATERIAL_DIFFUSE_COLOR] = "matDiffuse";
+	_uniformsNames[UNIFORM_MATERIAL_SPECULAR_COLOR] = "matSpecular";
+	_uniformsNames[UNIFORM_MATERIAL_EMISSIVE_COLOR] = "matEmissive";
+	_uniformsNames[UNIFORM_MATERIAL_SPECULAR_POWER] = "SpecularPower";
+	_uniformsNames[UNIFORM_MATERIAL_TRANSPARENCY] = "Transparency";
+	_uniformsNames[UNIFORM_CAMERA_POSITION] = "CameraPosition";
+	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_1] = "LightSpaceMatrix[0]";
+	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_2] = "LightSpaceMatrix[1]";
+	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_3] = "LightSpaceMatrix[2]";
+	_uniformsNames[UNIFORM_SHADOW_MAP_1] = "ShadowMap[0]";
+	_uniformsNames[UNIFORM_SHADOW_MAP_2] = "ShadowMap[1]";
+	_uniformsNames[UNIFORM_SHADOW_MAP_3] = "ShadowMap[2]";
+	_uniformsNames[UNIFORM_GRASS_COLOR] = "grassColor";
+	_uniformsNames[UNIFORM_HEIGHTMAP] = "heightmap";
+	_uniformsNames[UNIFORM_GRASS_DENSITY] = "grassDensity";
+	_uniformsNames[UNIFORM_GRASS_MIN] = "min";
+	_uniformsNames[UNIFORM_GRASS_WIDTH] = "width";
+	_uniformsNames[UNIFORM_WIND_DIRECTION] = "d";
+	_uniformsNames[UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX] = "VerticesTransformMatrix";
+	_uniformsNames[UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX] = "TexCoordTransformMatrix";
+	_uniformsNames[UNIFORM_GUI_COLOR] = "color";
+	_uniformsNames[UNIFORM_DAY_NIGHT_RATIO] = "dayNightRatio";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_1] = "indices[0]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_2] = "indices[1]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_3] = "indices[2]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_4] = "indices[3]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_5] = "indices[4]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
+	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
+
+	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
+	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
+	_uniformsNames[UNIFORM_ROUGHNESS_TEXTURE] = "RoughnessTexture";
+	_uniformsNames[UNIFORM_AO_TEXTURE] = "AoTexture";
+	_uniformsNames[UNIFORM_IRRADIANCE_MAP] = "IrradianceMap";
+	_uniformsNames[UNIFORM_SPECULAR_IRRADIANCE_MAP] = "SpecularIrradianceMap";
+	_uniformsNames[UNIFORM_BRDF_LUT] = "brdfLUT";
+
+	for (int i = 0; i < NUMBER_OF_SHADERS; ++i)
+	{
+		for (int j = 0; j < NUMBER_OF_UNIFORMS; ++j)
+		{
+			_uniformsLocations[i][j] = _shaderList[i]->getUniformLocation(_uniformsNames[j]);
+		}
+	}
 }
 
 
@@ -326,7 +394,7 @@ void Renderer::prepareLightsData()
     {
         float cascadeEnd[4] = {0.1, 25.0f, 100.0f, 500.0f };
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < ShadowMap::CASCADE_COUNT - 1; ++i)
         {
             CameraStatic* cameraForShadowMap = _shadowMap->getCameraForShadowMap(i);
             CameraStatic* currentCamera = graphicsManager.getCurrentCamera();
@@ -508,6 +576,47 @@ void Renderer::prepareRenderData()
 }
 
 
+void Renderer::prepareRenderDataForStaticShadowmaps()
+{
+	GraphicsManager& graphicsManager = GraphicsManager::getInstance();
+
+	for (int i = 0; i < _renderDataListForStaticShadowmapping.size(); ++i)
+	{
+		_renderDataListForStaticShadowmapping[i]->renderList.clear();
+		_renderDataListForStaticShadowmapping[i]->MVMatrix = _renderDataListForStaticShadowmapping[i]->camera->getProjectionMatrix() * _renderDataListForStaticShadowmapping[i]->camera->getViewMatrix();
+	}
+
+	RenderListElement tempRenderElement;
+
+	for (std::list<RenderObject*>::iterator i = graphicsManager._renderObjects.begin(); i != graphicsManager._renderObjects.end(); ++i)
+	{
+		RenderObject* object = *i;
+
+		if (!(*i)->isActive())
+			continue;
+
+		for (int j = 0; j < _renderDataListForStaticShadowmapping.size(); ++j)
+		{
+			RenderPass renderPass = _renderDataListForStaticShadowmapping[j]->renderPass;
+			bool isCastShadows = object->isCastShadows();
+			bool isStaticObject = !object->isDynamicObject();
+
+			if (renderPass == RP_SHADOWS && isCastShadows && isStaticObject &&
+				isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera))
+			{
+				tempRenderElement.type = RET_SINGLE;
+				tempRenderElement.model = object->getModel();
+				tempRenderElement.object = object->getSceneObject();
+				tempRenderElement.renderObject = object;
+
+				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
+				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataListForStaticShadowmapping[j]->renderList, renderPass);
+			}
+		}
+	}
+}
+
+
 bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
 {
     if (camera->getProjctionType() == CPT_ORTHOGRAPHIC)
@@ -621,7 +730,7 @@ bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
 
 void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
 {
-    for (int i = 0; i < shadowMap->CASCADE_COUNT; ++i)
+    for (int i = 0; i < shadowMap->CASCADE_COUNT - 1; ++i)
     {
         RenderData* renderData = new RenderData;
         renderData->camera = shadowMap->getCameraForShadowMap(i);
@@ -629,12 +738,19 @@ void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
         renderData->renderPass = RP_SHADOWS;
         _renderDataListForShadowmapping.insert(_renderDataListForShadowmapping.begin(), renderData);
     }
+
+	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
+	RenderData* renderData = new RenderData;
+	renderData->camera = shadowMap->getCameraForShadowMap(staticShadowmapIndex);
+	renderData->framebuffer = shadowMap->getShadowMap(staticShadowmapIndex);
+	renderData->renderPass = RP_SHADOWS;
+	_renderDataListForStaticShadowmapping.insert(_renderDataListForStaticShadowmapping.begin(), renderData);
 }
 
 
 void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 {
-    for (int i = 0; i < shadowMap->CASCADE_COUNT; ++i)
+    for (int i = 0; i < shadowMap->CASCADE_COUNT - 1; ++i)
     {
         for (std::vector<RenderData*>::iterator j = _renderDataListForShadowmapping.begin(); j != _renderDataListForShadowmapping.end(); ++j)
         {
@@ -648,6 +764,19 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
             }
         }
     }
+
+	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
+	for (std::vector<RenderData*>::iterator i = _renderDataListForStaticShadowmapping.begin(); i != _renderDataListForStaticShadowmapping.end(); ++i)
+	{
+		if (shadowMap->getShadowMap(staticShadowmapIndex) == (*i)->framebuffer)
+		{
+			RenderData* renderData = (*i);
+			_renderDataListForStaticShadowmapping.erase(i);
+			delete renderData;
+
+			break;
+		}
+	}
 }
 
 
@@ -781,6 +910,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+	// PBR_MATERIAL
+	defines.clear();
+	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
+
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
@@ -795,6 +929,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
     _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
+	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
+
+
+	initUniformLocations();
 
 
     // Create UBO for lights
@@ -836,6 +974,24 @@ void Renderer::setExposure(float exposure)
 float Renderer::getExposure()
 {
     return _exposure;
+}
+
+
+void Renderer::setToneMappingType(ToneMappingType type)
+{
+	if (_isInitialized)
+	{
+		PostProcessingToneMapping* toneMappingEffect = static_cast<PostProcessingToneMapping*>(findEffect(PPT_TONE_MAPPING));
+		toneMappingEffect->setToneMappingType(type);
+	}
+
+	_toneMappingType = type;
+}
+
+
+ToneMappingType Renderer::getToneMappingType()
+{
+	return _toneMappingType;
 }
 
 
@@ -981,6 +1137,27 @@ void Renderer::toogleRenderOBBFlag()
 }
 
 
+void Renderer::bakeStaticShadows()
+{
+	Logger::info("Static shadows baking: start" + toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));
+	Timer timer;
+	timer.start();
+
+	prepareRenderDataForStaticShadowmaps();
+
+	for (int i = 0; i < _renderDataListForStaticShadowmapping.size(); ++i)
+	{
+		//if (_renderDataListForStaticShadowmapping[i]->renderPass == RP_SHADOWS)
+		{
+			renderDepth(_renderDataListForStaticShadowmapping[i]);
+		}
+	}
+
+	double time = timer.stop();
+	Logger::info("Static shadows baking: end. Time: " + toString(time));
+}
+
+
 void Renderer::renderAll()
 {
     prepareLightsData();
@@ -1056,7 +1233,7 @@ void Renderer::renderDepth(RenderData* renderData)
 
         glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
         glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
-        shader->setUniform(UNIFORM_MVP, MVP);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MVP], MVP);
 
         mesh->vbo->bind();
 
@@ -1068,7 +1245,7 @@ void Renderer::renderDepth(RenderData* renderData)
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
 
-            shader->bindTexture(UNIFORM_ALPHA_TEXTURE, material->diffuseTexture);
+            shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
         }
 
         mesh->ibo->bind();
@@ -1144,59 +1321,59 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         if (shaderType == MIRROR_GLASS_MATERIAL)
         {
             if (material->glassTexture != NULL)
-                shader->bindTexture(UNIFORM_GLASS_TEXTURE, material->glassTexture);
+                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_GLASS_TEXTURE], material->glassTexture);
 
 
             if (material->reflectionTexture1 == EMT_GLOBAL)
             {
-                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
                 Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
                 if (c != NULL)
                 {
-                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
-                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                    shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_TEXTURE], static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_MATRIX], static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
                 }
             }
 
             if (material->reflectionTexture2 == EMT_GLOBAL)
             {
-                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
                 Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
                 if (c != NULL)
                 {
-                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
-                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                    shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_MATRIX], static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
                 }
             }
         }
 
 
-        shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_DAY_NIGHT_RATIO], _dayNightRatio);
 
 
         glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
         glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->normalMatrix;
         glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
-        shader->setUniform(UNIFORM_MVP, MVP);
-        shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);
-        shader->setUniform(UNIFORM_NORMAL_MATRIX, normalMatrix);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MVP], MVP);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MODEL_MATRIX], modelMatrix);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_NORMAL_MATRIX], normalMatrix);
 
-        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
-        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, material->specularColor);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_AMBIENT_COLOR], material->ambientColor);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_DIFFUSE_COLOR], material->diffuseColor);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_SPECULAR_COLOR], material->specularColor);
 
-        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, material->transparency);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, material->shininess);
-        shader->setUniform(UNIFORM_CAMERA_POSITION, camera->getPosition());
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_CAMERA_POSITION], camera->getPosition());
 
 
         mesh->vbo->bind();
@@ -1212,7 +1389,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
 
         if (material->diffuseTexture != NULL)
-            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, material->diffuseTexture);
+            shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
 
 
         if (i->type != RET_GRASS)
@@ -1236,10 +1413,10 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 // UBO
 void Renderer::renderScene(RenderData* renderData)
 {
-    glm::mat4 lightSpaceMatrix[3];
+    glm::mat4 lightSpaceMatrix[ShadowMap::CASCADE_COUNT];
     if (_isShadowMappingEnable)
     {
-        for (int j = 0; j < 3; ++j)
+        for (int j = 0; j < _shadowMap->CASCADE_COUNT; ++j)
         {
             lightSpaceMatrix[j] = _shadowMap->getCameraForShadowMap(j)->getProjectionMatrix() * _shadowMap->getCameraForShadowMap(j)->getViewMatrix();
         }
@@ -1303,42 +1480,42 @@ void Renderer::renderScene(RenderData* renderData)
         if (material->shader == GLASS_MATERIAL || material->shader == CAR_PAINT_MATERIAL)
         {
             if (material->glassTexture != NULL)
-                shader->bindTexture(UNIFORM_GLASS_TEXTURE, material->glassTexture);
+                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GLASS_TEXTURE], material->glassTexture);
 
 
             if (material->reflectionTexture1 == EMT_GLOBAL)
             {
-                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
                 Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
                 if (c != NULL)
                 {
-                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
-                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                    shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_TEXTURE], static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_MATRIX], static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
                 }
             }
 
             if (material->reflectionTexture2 == EMT_GLOBAL)
             {
-                shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
                 Component* c = i->object->getComponent(CT_ENVIRONMENT_CAPTURE_COMPONENT);
                 if (c != NULL)
                 {
-                    shader->bindTexture(UNIFORM_ENVIRONMENTMAP_2_TEXTURE, static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
-                    shader->setUniform(UNIFORM_ENVIRONMENTMAP_2_MATRIX, static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
+                    shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], static_cast<EnvironmentCaptureComponent*>(c)->getEnvironmentMap());
+                    shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_MATRIX], static_cast<EnvironmentCaptureComponent*>(c)->getRotationMatrix());
                 }
             }
         }
 
 
-        shader->setUniform(UNIFORM_DAY_NIGHT_RATIO, _dayNightRatio);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_DAY_NIGHT_RATIO], _dayNightRatio);
 
 
         if (material->shader == TREE_MATERIAL)
@@ -1351,37 +1528,37 @@ void Renderer::renderScene(RenderData* renderData)
                 d = static_cast<TreeComponent*>(treeComponent)->getWindVector();
             }
 
-            shader->setUniform(UNIFORM_WIND_DIRECTION, d);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_WIND_DIRECTION], d);
         }
 
 
         glm::mat4 modelMatrix = i->object->getGlobalTransformMatrix() * i->transformMatrix;
         glm::mat4 normalMatrix = i->object->getGlobalNormalMatrix() * i->normalMatrix;
         glm::mat4 MVP = renderData->MVMatrix * modelMatrix;
-        shader->setUniform(UNIFORM_MVP, MVP);
-        shader->setUniform(UNIFORM_MODEL_MATRIX, modelMatrix);
-        shader->setUniform(UNIFORM_NORMAL_MATRIX, normalMatrix);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MVP], MVP);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MODEL_MATRIX], modelMatrix);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_NORMAL_MATRIX], normalMatrix);
 
-        shader->setUniform(UNIFORM_MATERIAL_AMBIENT_COLOR, material->ambientColor);
-        shader->setUniform(UNIFORM_MATERIAL_DIFFUSE_COLOR, material->diffuseColor);
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_COLOR, material->specularColor);
-        shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, material->emissiveColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_AMBIENT_COLOR], material->ambientColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_DIFFUSE_COLOR], material->diffuseColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_COLOR], material->specularColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor);
 
-        shader->setUniform(UNIFORM_MATERIAL_TRANSPARENCY, material->transparency);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 
-        shader->setUniform(UNIFORM_MATERIAL_SPECULAR_POWER, material->shininess);
-        shader->setUniform(UNIFORM_CAMERA_POSITION, camera->getPosition());
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_CAMERA_POSITION], camera->getPosition());
         //shader->setUniform("a", 1.0f);
 
 
         if (_isShadowMappingEnable)
         {
-            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_1, lightSpaceMatrix[0]);
-            shader->bindTexture(UNIFORM_SHADOW_MAP_1, _shadowMap->getShadowMap(0)->getTexture(0));
-            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_2, lightSpaceMatrix[1]);
-            shader->bindTexture(UNIFORM_SHADOW_MAP_2, _shadowMap->getShadowMap(1)->getTexture(0));
-            shader->setUniform(UNIFORM_LIGHT_SPACE_MATRIX_3, lightSpaceMatrix[2]);
-            shader->bindTexture(UNIFORM_SHADOW_MAP_3, _shadowMap->getShadowMap(2)->getTexture(0));
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_1], lightSpaceMatrix[0]);
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_1], _shadowMap->getShadowMap(0)->getTexture(0));
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_2], lightSpaceMatrix[1]);
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_2], _shadowMap->getShadowMap(1)->getTexture(0));
+            //shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_3], lightSpaceMatrix[2]);
+            //shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_3], _shadowMap->getShadowMap(2)->getTexture(0));
         }
 
         mesh->vbo->bind();
@@ -1404,11 +1581,32 @@ void Renderer::renderScene(RenderData* renderData)
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
 
-            shader->bindTexture(UNIFORM_NOTMALMAP_TEXTURE, material->normalmapTexture);
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
         }
 
         if (material->diffuseTexture != NULL)
-            shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, material->diffuseTexture);
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
+
+		if (material->diffuseTexture != NULL)
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ALBEDO_TEXTURE], material->diffuseTexture);
+		if (material->metalicTexture != NULL)
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_METALIC_TEXTURE], material->metalicTexture);
+		if (material->roughnessTexture != NULL)
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ROUGHNESS_TEXTURE], material->roughnessTexture);
+		if (material->aoTexture != NULL)
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_AO_TEXTURE], material->aoTexture);
+
+		if (material->shader == PBR_MATERIAL)
+		{
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_IRRADIANCE_MAP], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SPECULAR_IRRADIANCE_MAP], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_BRDF_LUT], _brdfLutTexture);
+		}
+		if (material->shader == SKY_MATERIAL)
+		{
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+		}
 
 
 
@@ -1421,7 +1619,7 @@ void Renderer::renderScene(RenderData* renderData)
         }
         else
         {
-            shader->setUniform(UNIFORM_VP, renderData->MVMatrix);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_VP], renderData->MVMatrix);
 
             glDisable(GL_CULL_FACE);
 
@@ -1437,11 +1635,11 @@ void Renderer::renderScene(RenderData* renderData)
             float a = width * height;
 
             Grass* grass = static_cast<Grass*>(i->renderObject);
-            shader->setUniform(UNIFORM_GRASS_COLOR, grass->getGrassColor());
-            shader->bindTexture(UNIFORM_HEIGHTMAP, grass->getTerrainHeightmap());
-            shader->bindTexture(UNIFORM_GRASS_DENSITY, grass->getGrassDensityTexture());
-            shader->setUniform(UNIFORM_GRASS_MIN, min);
-            shader->setUniform(UNIFORM_GRASS_WIDTH, (int)width);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_COLOR], grass->getGrassColor());
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_HEIGHTMAP], grass->getTerrainHeightmap());
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GRASS_DENSITY], grass->getGrassDensityTexture());
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_MIN], min);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIDTH], (int)width);
 
             glDrawElementsInstanced(model->getPrimitiveType(),
                                 mesh->indicesCount,
@@ -1641,17 +1839,18 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
 
     for (GUIRenderList::iterator i = renderList->begin(); i != renderList->end(); ++i)
     {
-        RShader* shader = _shaderList[i->getShaderType()];
+		ShaderType shaderType = i->getShaderType();
+        RShader* shader = _shaderList[shaderType];
         shader->enable();
 
-        shader->setUniform(UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX, projectionMatrix * i->getVerticesTransformMatrix());
-        shader->setUniform(UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX, i->getTexCoordTransformMatrix());
-        shader->setUniform(UNIFORM_GUI_COLOR, i->getColor());
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_GUI_VERTICES_TRANSFORM_MATRIX], projectionMatrix * i->getVerticesTransformMatrix());
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX], i->getTexCoordTransformMatrix());
+        shader->setUniform(_uniformsLocations[shaderType][UNIFORM_GUI_COLOR], i->getColor());
 
         i->getVBO()->bind();
 
 
-        shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, i->getTexture());
+        shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], i->getTexture());
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);

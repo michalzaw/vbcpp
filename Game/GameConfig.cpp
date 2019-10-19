@@ -67,9 +67,32 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     isGrassEnable = toBool(configElement->GetText());
                 }
+				else if (strcmp(ename, "PbrSupport") == 0)
+				{
+					pbrSupport = toBool(configElement->GetText());
+				}
             }
         }
     }
+}
+
+
+void GameConfig::loadDevelopmentConfig(const char* filename)
+{
+	XMLDocument doc;
+	doc.LoadFile(filename);
+
+	XMLElement* objElement = doc.FirstChildElement("DevSettings");
+
+	for (XMLElement* child = objElement->FirstChildElement(); child != NULL; child = child->NextSiblingElement())
+	{
+		const char* ename = child->Name();
+
+		if (strcmp(ename, "alternativeResourcesPath") == 0)
+		{
+			alternativeResourcesPath = std::string(child->GetText());
+		}
+	}
 }
 
 

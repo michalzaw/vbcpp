@@ -4,7 +4,7 @@ layout (location = 0) in vec3 VertexPosition;
 layout (location = 1) in vec2 VertexUV;
 layout (location = 2) in vec3 VertexNormal;
 
-const int CASCADES_COUNT = 3;
+const int CASCADES_COUNT = 2;
 
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
@@ -35,7 +35,7 @@ void main()
 	Normal = normalize(vec3(Normal.x, 0.0f, Normal.z));
 	//Normal = normalize(vec3(n.x, 0.0f, n.z));
 	//Normal = n;
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < CASCADES_COUNT; ++i)
 	{
 		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
 	}

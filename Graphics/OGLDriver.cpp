@@ -77,6 +77,8 @@ bool OGLDriver::initialize()
     _defaultFramebuffer = new Framebuffer();
     _defaultFramebuffer->_fboBuffs.push_back(GL_BACK_LEFT);
 
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
     return true;
 }
 

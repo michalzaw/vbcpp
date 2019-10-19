@@ -29,6 +29,7 @@
 
 #include "Game/GameConfig.h"
 #include "Game/BusStopSystem.h"
+#include "Game/Hud.h"
 
 #include "EditorMain.h"
 
@@ -197,6 +198,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         //Renderer::getInstance().t = (Renderer::getInstance().t + 1) % 2;
 		Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
     }
+	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	{
+		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+	}
 }
 
 void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f))
@@ -464,6 +469,11 @@ int main(int argc, char** argv)
     srand(static_cast<unsigned int>(time(NULL)));
 
     GameConfig::getInstance().loadGameConfig("game.xml");
+	#ifdef DEVELOPMENT_RESOURCES
+	GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
+	ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
+	#endif // DEVELOPMENT_RESOURCES
+
 
     win = new Window;
     win->createWindow(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, 10, 40, GameConfig::getInstance().isFullscreen);
@@ -493,6 +503,7 @@ int main(int argc, char** argv)
     renderer.setDayNightRatio(1.0f);
     renderer.setAlphaToCoverage(true);
     renderer.setExposure(1.87022f);
+	renderer.setToneMappingType(TMT_CLASSIC);
     renderer.t = 0;
 
 
@@ -518,20 +529,23 @@ int main(int argc, char** argv)
     camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     camFPS->setRotationSpeed(0.001f);
-    camFPS->setMoveSpeed(50.0f);
+    camFPS->setMoveSpeed(5.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(10,7,-10);
     Camera->setPosition(0, 0, 0);
     GraphicsManager::getInstance().setCurrentCamera(camFPS);
 
 
+	renderer.bakeStaticShadows();
+
+
     GUIManager* gui = new GUIManager;
-    Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
-    img->setPosition(0, GameConfig::getInstance().windowHeight - img->getTexture()->getSize().y / 2.0f);
-    img->setScale(0.3f, 0.3f);
+    //Image* img = gui->addImage(ResourceManager::getInstance().loadTexture("opengl_logo.png"));
+    //img->setPosition(0, GameConfig::getInstance().windowHeight - img->getTexture()->getSize().y / 2.0f);
+    //img->setScale(0.3f, 0.3f);
 
     RFont* font = ResourceManager::getInstance().loadFont("fonts/arial.ttf");
-    Label* label = gui->addLabel(font, winTitle);
+    /*Label* label = gui->addLabel(font, winTitle);
     label->setPosition(10, GameConfig::getInstance().windowHeight - 20);
     label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->scale(0.6f, 0.6f);
@@ -564,7 +578,7 @@ int main(int argc, char** argv)
     Label* labelTorque = gui->addLabel(font, "0");
     labelTorque->setPosition(10, 10);
     labelTorque->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelTorque->scale(0.6f, 0.6f);
+    labelTorque->scale(0.6f, 0.6f);*/
 
     Label* labelBusStop = gui->addLabel(font, "");
     labelBusStop->setPosition(450, 730);
@@ -576,7 +590,7 @@ int main(int argc, char** argv)
     labelBusStop2->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelBusStop2->scale(0.6f, 0.6f);
 
-    Label* labelPassengers = gui->addLabel(font, "Liczba pasazerow: " + toString(bus->getNumberOfPassengers()));
+    /*Label* labelPassengers = gui->addLabel(font, "Liczba pasazerow: " + toString(bus->getNumberOfPassengers()));
     labelPassengers->setPosition(10, 120);
     labelPassengers->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelPassengers->scale(0.6f, 0.6f);
@@ -584,7 +598,10 @@ int main(int argc, char** argv)
     Label* labelPassengersGettingOff = gui->addLabel(font, "Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
     labelPassengersGettingOff->setPosition(10, 105);
     labelPassengersGettingOff->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    labelPassengersGettingOff->scale(0.6f, 0.6f);
+    labelPassengersGettingOff->scale(0.6f, 0.6f);*/
+
+
+	Hud hud(gui, bus);
 
 
     sndMgr->setActiveCamera(camFPS);
@@ -664,12 +681,14 @@ int main(int argc, char** argv)
 
         sndMgr->update();
 
-        labelSpeed->setText("Speed: " + toString((int)bus->getBusSpeed()) + "km/h");
+		hud.update();
+
+        /*labelSpeed->setText("Speed: " + toString((int)bus->getBusSpeed()) + "km/h");
         labelEngineIsRunning->setText(bus->getEngine()->isRunning() ? "Engine on" : "Engine off");
         labelGearRatio->setText("Gear ratio: " + toString(bus->getGearbox()->currentRatio()));
         labelRPM->setText("RPM: " + toString(bus->getEngine()->getCurrentRPM()));
         labelThrottle->setText("Throttle: " + toString(bus->getEngine()->getThrottle()));
-        labelTorque->setText("Torque: " + toString(bus->getEngine()->getCurrentTorque()));
+        labelTorque->setText("Torque: " + toString(bus->getEngine()->getCurrentTorque()));*/
 
         BusStopSystem& busStopSystem = BusStopSystem::getInstance();
         if (busStopSystem.getCurrentBusStop() != NULL)
@@ -677,8 +696,8 @@ int main(int argc, char** argv)
             labelBusStop->setText(busStopSystem.getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem.getDistanceToCurrentBusStop()) + "m)");
             labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem.getCurrentBusStop()->getNumberOfPassengers()));
 
-            labelPassengers->setText("Liczba pasazerow w autobusie: " + toString(bus->getNumberOfPassengers()));
-            labelPassengersGettingOff->setText("Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
+            //labelPassengers->setText("Liczba pasazerow w autobusie: " + toString(bus->getNumberOfPassengers()));
+            //labelPassengersGettingOff->setText("Liczba pasazerow wysiadajacych: " + toString(bus->getNumberOfPassengersGettingOff()));
         }
         else
         {

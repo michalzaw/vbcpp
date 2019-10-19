@@ -2,12 +2,12 @@
 
 #include "GraphicsManager.h"
 
-RenderObject::RenderObject(RStaticModel* model)
+RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _model(NULL),
 	_modelRootNode(NULL),
     _materials(NULL),
-    _isCastShadows(true),
+    _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
     #ifdef _DEBUG_MODE
@@ -167,6 +167,18 @@ void RenderObject::setIsCastShadows(bool isCastShadows)
 bool RenderObject::isCastShadows()
 {
     return _isCastShadows;
+}
+
+
+void RenderObject::setIsDynamicObject(bool isDynamic)
+{
+	_isDynamicObject = isDynamic;
+}
+
+
+bool RenderObject::isDynamicObject()
+{
+	return _isDynamicObject;
 }
 
 

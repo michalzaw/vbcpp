@@ -70,6 +70,11 @@ class BusRaycast : public Bus
         virtual void brakeOff();
         virtual void toggleHandbrake();
 
+		virtual bool getHandbrakeState()
+		{
+			return _handbrake;
+		}
+
         virtual Gearbox* getGearbox();
         virtual Engine* getEngine();
         virtual void startEngine();

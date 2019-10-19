@@ -70,6 +70,11 @@ class BusConstraint : public Bus
         void brakeOff();
         void toggleHandbrake();
 
+		virtual bool getHandbrakeState()
+		{
+			return _handbrake;
+		}
+
         Gearbox* getGearbox() { if (_gearbox) return _gearbox.get(); else return 0; }
 
         Engine* getEngine() { if (_engine) return _engine.get(); else return 0; }

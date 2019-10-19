@@ -2,6 +2,7 @@ set (GAME_SOURCES
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
 	Game/GameConfig.cpp
+	Game/Hud.cpp
 )
 
 set (GAME_HEADERS 
@@ -9,6 +10,7 @@ set (GAME_HEADERS
 	Game/BusStopSystem.h
 	Game/Directories.h
 	Game/GameConfig.h
+	Game/Hud.h
     
 )
 

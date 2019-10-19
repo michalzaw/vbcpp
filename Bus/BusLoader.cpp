@@ -2,6 +2,7 @@
 
 #include "../Game/Directories.h"
 
+#include "..//Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
@@ -22,6 +23,11 @@ BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager,
 Bus* BusLoader::loadBus(const std::string& busName)
 {
     std::string configFileName = GameDirectories::BUSES + busName + "/" + BUS_CONFIG_FILENAME;
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(configFileName))
+		configFileName = ResourceManager::getInstance().getAlternativeResourcePath() + configFileName;
+#endif // DEVELOPMENT_RESOURCES
 
     XMLDocument doc;
     doc.LoadFile(configFileName.c_str());
@@ -117,7 +123,8 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         else
             busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, nodeToSkip);
 
-        GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
+        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
+		busRenderObject->setIsDynamicObject(true);
 
 
         // Tworzenie fizycznego obiektu karoserii
@@ -261,7 +268,8 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
 
         std::string modelPath = _busPath + wheelModel;
         RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath);
-        GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
+        RenderObject* wheelRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
+		wheelRenderObject->setIsDynamicObject(true);
 
 
         btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
@@ -358,7 +366,8 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath);
-        GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
+        RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
+		renderObject->setIsDynamicObject(true);
 
         busModule.sceneObject->addChild(steeringWheelObject);
 
@@ -395,6 +404,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath);
         _bus->_desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), desktopObject);
+		_bus->_desktopRenderObject->setIsDynamicObject(true);
 
 
         busModule.sceneObject->addChild(desktopObject);
@@ -609,7 +619,8 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
     btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
 
 
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+	doorRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
     doorObj->addComponent(doorBody);
@@ -654,7 +665,8 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string armPath = _busPath + armModel;
 
     RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath);
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+	armRenderObject->setIsDynamicObject(true);
 
     btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
@@ -684,7 +696,8 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string arm2Path = _busPath + arm2Model;
 
     RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath);
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+    RenderObject* arm2RenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+	arm2RenderObject->setIsDynamicObject(true);
 
     btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
 
@@ -701,7 +714,8 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     btVector3 doorPivotA = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
     btVector3 doorPivotB = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
 
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+	doorRenderObject->setIsDynamicObject(true);
 
     //btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -782,14 +796,16 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     armObject->setPosition(armPosition);
     armObject->setRotation(armRotation);
 
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel), armObject);
+    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel), armObject);
+	armRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, COL_NOTHING);
     armObject->addComponent(armBody);
 
 
     // door object
-    GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+	doorRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
     doorObj->addComponent(doorBody);

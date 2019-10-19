@@ -22,6 +22,7 @@ class RenderObject : public Component
         Material*     _materials;
 
         bool _isCastShadows;
+		bool _isDynamicObject;
 
         AABB _aabb;
         bool _isCalculatedAABB;
@@ -31,7 +32,7 @@ class RenderObject : public Component
         ModelNode* getModelNodeByName(std::string name, ModelNode* node);
 
     public:
-        RenderObject(RStaticModel* model = NULL);
+        RenderObject(RStaticModel* model = NULL, bool isDynamicObject = false);
         virtual ~RenderObject();
 
         void setModel(RStaticModel* model);
@@ -43,6 +44,8 @@ class RenderObject : public Component
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();
+		void setIsDynamicObject(bool isDynamic);
+		bool isDynamicObject();
 
         AABB* getAABB();
 

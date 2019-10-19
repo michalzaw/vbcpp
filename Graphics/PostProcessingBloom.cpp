@@ -10,7 +10,7 @@ PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, float screenWidth, float 
 	: PostProcessingEffect(PPT_BLOOM, quadVbo),
 	_brightnessTexture(brightnessTexture)
 {
-	_shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag");
+	setShader(ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingBloom.frag"));
 
 
 	std::vector<std::string> defines;
@@ -40,6 +40,9 @@ PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, float screenWidth, float 
 	}
 
 	addAdditionalInput(_blurFramebuffers[0]->getTexture(0));
+
+	_isHorizontalUniformLocation = _blurShader->getUniformLocation("isHorizontal");
+	_textureBlurUniformLocation = _blurShader->getUniformLocation("Texture");
 }
 
 
@@ -68,10 +71,10 @@ void PostProcessingBloom::process()
 
 		shader->enable();
 
-		shader->setUniform(UNIFORM_BLUR_IS_HORIZONTAL, isHorizontal);
+		shader->setUniform(_isHorizontalUniformLocation, isHorizontal);
 
 		RTexture* texture = isFirstIteration ? _brightnessTexture : _blurFramebuffers[!isHorizontal]->getTexture(0);
-		shader->bindTexture(UNIFORM_DIFFUSE_TEXTURE, texture);
+		shader->bindTexture(_textureBlurUniformLocation, texture);
 
 
 		_quadVbo->bind();
