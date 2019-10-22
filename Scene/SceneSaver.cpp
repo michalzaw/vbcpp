@@ -95,7 +95,7 @@ void SceneSaver::saveSunLight(XMLElement* sunElement, SceneObject* sceneObject)
 
 void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 {
-	RenderObject* renderObject = static_cast<RenderObject*>(sceneObject->getComponent(CT_RENDER_OBJECT));
+	RenderObject* renderObject = static_cast<RenderObject*>(sceneObject->getComponent(CT_SKY));
 
 	std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
 	skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
