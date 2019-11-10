@@ -72,7 +72,7 @@ void RDisplayFont::loadOneFont(std::string fileName, int index)
 			}
 		}
 
-		_fontSizes[index].charsWidth[i] = ceil(log2(maxNumberInRow));
+		_fontSizes[index].charsWidth[i] = floor(log2(maxNumberInRow)) + 1;
 
 	}
 
