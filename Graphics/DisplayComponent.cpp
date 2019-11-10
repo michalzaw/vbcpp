@@ -4,7 +4,7 @@
 
 #include "../Graphics/RenderObject.h"
 #include "../Graphics/Renderer.h"
-
+#include "RDisplayFont.h"
 
 DisplayComponent::DisplayComponent(int displayWidth, int displayHeight)
 	: Component(CT_DISPLAY),
@@ -36,7 +36,7 @@ DisplayComponent::~DisplayComponent()
 
 RTexture2D* DisplayComponent::generateMatrixTexture()
 {
-	const int HEIGHT = 16;
+	/*const int HEIGHT = 16;
 	int chars[48][HEIGHT];
 
 	std::ifstream fstream("matryca16.csv");
@@ -77,7 +77,10 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 		std::cout << maxNumberInRow << " " << charsWidth[i] << std::endl;
 		//system("pause");
 
-	}
+	}*/
+
+	RDisplayFont* font = new RDisplayFont("Displays/RG");
+	RDisplayFontSize* fontSize = font->getFontInSize(4);
 
 
 
@@ -113,15 +116,15 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 		}
 
 		int charWidth = 0;
-		for (int row = 0; row < HEIGHT; ++row)
+		for (int row = 0; row < fontSize->height; ++row)
 		{
-			for (int x = 0; x < charsWidth[charIndex]; ++x)
+			for (int x = 0; x < fontSize->charsWidth[charIndex]; ++x)
 			{
-				std::cout << text.size() << " " << HEIGHT << " " << charsWidth[charIndex] << std::endl;
+				std::cout << text.size() << " " << fontSize->height << " " << fontSize->charsWidth[charIndex] << std::endl;
 				//system("pause");
 
 				int b = 1 << x;
-				if (chars[charIndex][row] & b)
+				if (fontSize->chars[charIndex][row] & b)
 				{
 					int index = ((_displayHeight - (beginY + row) - 1) * _displayWidth + beginX + x) * 4;
 					//int index = (beginX + x) * _displayHeight + beginY + row;
@@ -136,7 +139,7 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 				}
 			}
 		}
-		beginX += charsWidth[charIndex] + 1;
+		beginX += fontSize->charsWidth[charIndex] + 1;
 	}
 
 

@@ -50,6 +50,8 @@ set (GRAPHICS_SOURCES
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp
 		Graphics/QuadTreeNode.h
+		Graphics/RDisplayFont.cpp
+		Graphics/RDisplayFont.h
 		Graphics/RRoadProfile.cpp
 		Graphics/RRoadProfile.h
 		Graphics/RShader.h
