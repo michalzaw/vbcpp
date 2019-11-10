@@ -29,6 +29,7 @@ enum ComponentType
     CT_CLICKABLE_OBJECT,
 
     CT_BUS_STOP,
+	CT_DISPLAY,
 
     COMPONENTS_TYPE_SIZE
 };

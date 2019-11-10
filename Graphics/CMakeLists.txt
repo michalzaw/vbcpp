@@ -6,6 +6,8 @@ set (GRAPHICS_SOURCES
 		Graphics/CameraFPS.hpp
 		Graphics/CameraStatic.cpp
 		Graphics/CameraStatic.hpp
+		Graphics/DisplayComponent.cpp
+		Graphics/DisplayComponent.h
 		Graphics/EnvironmentCaptureComponent.cpp
 		Graphics/EnvironmentCaptureComponent.h
 		Graphics/Framebuffer.cpp

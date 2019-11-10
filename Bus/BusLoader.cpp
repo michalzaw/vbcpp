@@ -2,12 +2,13 @@
 
 #include "../Game/Directories.h"
 
-#include "..//Utils/FilesHelper.h"
+#include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
 #include "../Utils/tinyxml2.h"
+#include "../Graphics/DisplayComponent.h"
 
 
 using namespace tinyxml2;
@@ -176,6 +177,25 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
     {
         _bus->_desktop = new Desktop(NULL);
     }
+
+	SceneObject* display1SceneObject = _sMgr->addSceneObject("display1");
+	Material material;
+	material.diffuseTexture = ResourceManager::getInstance().loadTexture("tab1.png");
+	material.shininess = 96;
+	Prefab* display1RenderObject = new PlanePrefab(glm::vec2(2, 0.3), material);
+	//Prefab* display1RenderObject = new Cube(5, material);
+	display1RenderObject->init();
+	display1RenderObject->setIsDynamicObject(true);
+	GraphicsManager::getInstance().addRenderObject(display1RenderObject, display1SceneObject);
+
+	_bus->_modules[0].sceneObject->addChild(display1SceneObject);
+
+	display1SceneObject->setPosition(0, 0.90, 5.75);//5.75
+	display1SceneObject->setRotation(degToRad(90), 0, 0);
+
+	DisplayComponent* displayComponent = new DisplayComponent(116, 16);
+	display1SceneObject->addComponent(displayComponent);
+	displayComponent->update(1.0f);
 
     return true;
 }
