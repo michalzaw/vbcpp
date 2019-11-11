@@ -1,5 +1,7 @@
 #include "RDisplayFont.h"
 
+#include "../Utils/Strings.h"
+
 
 RDisplayFont::RDisplayFont(std::string path)
 	: Resource(RT_DISPLAY_FONT, path), _availableSizes{ 5, 7, 9, 12, 16 }
@@ -83,4 +85,10 @@ void RDisplayFont::loadOneFont(std::string fileName, int index)
 RDisplayFontSize* RDisplayFont::getFontInSize(int sizeIndex)
 {
 	return &_fontSizes[sizeIndex];
+}
+
+
+int* RDisplayFont::getAvailableSizes()
+{
+	return _availableSizes;
 }

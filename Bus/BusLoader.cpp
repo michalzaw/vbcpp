@@ -190,10 +190,10 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
 	_bus->_modules[0].sceneObject->addChild(display1SceneObject);
 
-	display1SceneObject->setPosition(0, 0.90, 5.75);//5.75
+	display1SceneObject->setPosition(0, 0.95, 5.75);//5.75
 	display1SceneObject->setRotation(degToRad(90), 0, 0);
 
-	DisplayComponent* displayComponent = new DisplayComponent(116, 16);
+	DisplayComponent* displayComponent = new DisplayComponent(new RDisplayFont("Displays/RG"), 112, 16);
 	display1SceneObject->addComponent(displayComponent);
 	displayComponent->update(1.0f);
 

@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include "../Utils/Resource.h"
-#include "../Utils/Strings.h"
 
 
 struct RDisplayFontSize
@@ -18,8 +17,10 @@ struct RDisplayFontSize
 
 class RDisplayFont : public Resource
 {
-	private:
+	public:
 		static const int NUMBER_OF_SIZES = 5;
+
+	private:
 		static const int NUMBER_OF_CHARS = 48;
 		
 		int _availableSizes[NUMBER_OF_SIZES];
@@ -33,6 +34,8 @@ class RDisplayFont : public Resource
 		~RDisplayFont();
 
 		RDisplayFontSize* getFontInSize(int sizeIndex);
+
+		int* getAvailableSizes();
 
 };
 

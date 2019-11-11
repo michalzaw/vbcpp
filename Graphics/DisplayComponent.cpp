@@ -4,12 +4,18 @@
 
 #include "../Graphics/RenderObject.h"
 #include "../Graphics/Renderer.h"
-#include "RDisplayFont.h"
 
-DisplayComponent::DisplayComponent(int displayWidth, int displayHeight)
+
+DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
 	: Component(CT_DISPLAY),
-	_displayWidth(displayWidth), _displayHeight(displayHeight)
+	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight)
 {
+	_displayText.head = "0";
+	_displayText.headSize = 4;
+	_displayText.line1 = "katowice";
+	_displayText.line2 = "dworzec pkp";
+	_displayText.type = TWO_LINE;
+
 	//_matrixTexture = ResourceManager::getInstance().loadTexture("tab1.png");
 	_ledOnTexture = ResourceManager::getInstance().loadTexture("doron.bmp");
 	_ledOffTexture = ResourceManager::getInstance().loadTexture("doroff.bmp");
@@ -34,116 +40,172 @@ DisplayComponent::~DisplayComponent()
 }
 
 
+int DisplayComponent::getCharIndex(char c)
+{
+	if (c >= '0' && c <= '9')
+	{
+		return (int)(c - '0');
+	}
+	else
+	{
+		return (int)(c - 'a') + 10;
+	}
+}
+
+
 RTexture2D* DisplayComponent::generateMatrixTexture()
 {
-	/*const int HEIGHT = 16;
-	int chars[48][HEIGHT];
-
-	std::ifstream fstream("matryca16.csv");
-
-	std::string line;
-	int charIndex = 0;
-	while (std::getline(fstream, line))
-	{
-		std::string cell;
-
-		std::stringstream lineStream(line);
-
-		int i = 0;
-		while (std::getline(lineStream, cell, ';'))
-		{
-			chars[charIndex][i] = toInt(cell);
-			++i;
-		}
-
-		++charIndex;
-	}
-
-	int charsWidth[48];
-	for (int i = 0; i < 47; ++i)
-	{
-		int maxNumberInRow = 0;
-		for (int j = 0; j < HEIGHT; ++j)
-		{
-			if (chars[i][j] > maxNumberInRow)
-			{
-				maxNumberInRow = chars[i][j];
-			}
-
-			std::cout << chars[i][j] << " ";
-		}
-
-		charsWidth[i] = ceil(log2(maxNumberInRow));
-		std::cout << maxNumberInRow << " " << charsWidth[i] << std::endl;
-		//system("pause");
-
-	}*/
-
-	RDisplayFont* font = new RDisplayFont("Displays/RG");
-	RDisplayFontSize* fontSize = font->getFontInSize(4);
-
-
-
-
-	std::string text = "101bis plac mlynarz";
-
-	int beginX = 0;
-	int beginY = 0;
-
 	unsigned char* data = new unsigned char[_displayWidth * _displayHeight * 4];
 	for (int i = 0; i < _displayWidth * _displayHeight * 4; ++i)
 	{
 		data[i] = 0;
 	}
 
-	//for (int i = 40; i < 48; ++i)
+	/*--------------------------------------------------------
+	//std::string text = "101bis plac mlynarz";
+	std::string text = "0 katowice dworzec";
+	addTextToMatrixTexture(data, 0, 0, text, 4);
+	--------------------------------------------------------*/
+
+	int headSize = 0;
+	int line1Size = 0;
+	int line2Size = 0;
+	calculateTextsSize(headSize, line1Size, line2Size);
+
+	int beginX = 0;
+	int beginY = 0;
+
+	// head
+	addTextToMatrixTexture(data, beginX, beginY, _displayText.head, headSize);
+
+	int headEnd = beginX;
+
+	// line1 and line2
+	if (_displayText.type != ONLY_HEAD)
+	{
+		int textWidth = calculateTextWidth(_displayText.line1, line1Size);
+		if (textWidth <= _displayWidth - headEnd)
+		{
+			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
+		}
+
+		addTextToMatrixTexture(data, beginX, beginY, _displayText.line1, line1Size);
+	}
+
+	if (_displayText.type == TWO_LINE || _displayText.type == TWO_LINE_FIRST_BIG || _displayText.type == TWO_LINE_SECOND_BIG)
+	{
+		int textWidth = calculateTextWidth(_displayText.line2, line2Size);
+		if (textWidth <= _displayWidth - headEnd)
+		{
+			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
+		}
+
+		beginY += _font->getAvailableSizes()[line1Size] + 1;
+		addTextToMatrixTexture(data, beginX, beginY, _displayText.line2, line2Size);
+	}
+	
+
+	return new RTexture2D("", data, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
+}
+
+
+void DisplayComponent::addTextToMatrixTexture(unsigned char* data, int& beginX, int& beginY, const std::string& text, int sizeIndex)
+{
+	RDisplayFontSize* fontSize = _font->getFontInSize(sizeIndex);
+
 	for (int i = 0; i < text.size(); ++i)
 	{
-		int charIndex = 0;
 
 		if (text[i] == ' ')
 		{
 			beginX += 2;
 			continue;
 		}
-		else if (text[i] >= '0' && text[i] <= '9')
-		{
-			charIndex = (int)(text[i] - '0');
-		}
-		else
-		{
-			charIndex = (int)(text[i] - 'a') + 10;//i;//
-		}
 
+		int charIndex = getCharIndex(text[i]);
+		
 		int charWidth = 0;
 		for (int row = 0; row < fontSize->height; ++row)
 		{
 			for (int x = 0; x < fontSize->charsWidth[charIndex]; ++x)
 			{
-				std::cout << text.size() << " " << fontSize->height << " " << fontSize->charsWidth[charIndex] << std::endl;
-				//system("pause");
-
 				int b = 1 << x;
 				if (fontSize->chars[charIndex][row] & b)
 				{
 					int index = ((_displayHeight - (beginY + row) - 1) * _displayWidth + beginX + x) * 4;
-					//int index = (beginX + x) * _displayHeight + beginY + row;
 					data[index] = 255;
 					data[index + 1] = 255;
 					data[index + 2] = 255;
 					data[index + 3] = 255;
 				}
-				//else
-				{
-
-				}
 			}
 		}
 		beginX += fontSize->charsWidth[charIndex] + 1;
 	}
+}
 
 
-	return new RTexture2D("", data, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
+void DisplayComponent::calculateTextsSize(int& headSize, int& line1Size, int& line2Size)
+{
+	for (int i = RDisplayFont::NUMBER_OF_SIZES - 1; i >= 0; --i)
+	{
+		if (_font->getAvailableSizes()[i] <= _displayHeight)
+		{
+			headSize = i;
+			break;
+		}
+	}
+
+	if (_displayText.type == ONE_LINE)
+	{
+		line1Size = headSize;
+	}
+	else if (_displayText.type == TWO_LINE)
+	{
+		int s = (_displayHeight - 1) / 2;
+
+		for (int i = RDisplayFont::NUMBER_OF_SIZES - 1; i >= 0; --i)
+		{
+			if (_font->getAvailableSizes()[i] <= s)
+			{
+				line1Size = line2Size = i;
+				break;
+			}
+		}
+	}
+	else if (_displayText.type == TWO_LINE_FIRST_BIG)
+	{
+		line1Size = 1;
+		line2Size = 0;
+	}
+	else if (_displayText.type == TWO_LINE_SECOND_BIG)
+	{
+		line1Size = 0;
+		line2Size = 1;
+	}
+}
+
+
+int DisplayComponent::calculateTextWidth(const std::string& text, int sizeIndex)
+{
+	int width = 0;
+
+	RDisplayFontSize* fontSize = _font->getFontInSize(sizeIndex);
+
+	for (int i = 0; i < text.size(); ++i)
+	{
+		if (text[i] == ' ')
+		{
+			width += 2;
+			continue;
+		}
+
+		int charIndex = getCharIndex(text[i]);
+
+		width += fontSize->charsWidth[charIndex] + 1;
+	}
+
+	return width;
 }
 
 
