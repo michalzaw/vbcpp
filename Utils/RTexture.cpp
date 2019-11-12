@@ -26,14 +26,6 @@ RTexture::~RTexture()
 }
 
 
-void RTexture::generateMipmap()
-{
-    glGenerateMipmap(_textureType);
-
-    _isGenerateMipmap = true;
-}
-
-
 void RTexture::setFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter)
 {
     bind();
@@ -91,4 +83,14 @@ glm::uvec2 RTexture::getSize()
 TextureType RTexture::getTextureType()
 {
     return _textureType;
+}
+
+
+void RTexture::generateMipmap()
+{
+	bind();
+
+	glGenerateMipmap(_textureType);
+
+	_isGenerateMipmap = true;
 }

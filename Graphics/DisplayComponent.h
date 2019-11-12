@@ -35,6 +35,8 @@ struct DisplayText
 class DisplayComponent : public Component
 {
 	private:
+		unsigned char* _matrixTextureData;
+
 		RTexture2D* _matrixTexture;
 		RTexture2D* _ledOnTexture;
 		RTexture2D* _ledOffTexture;
@@ -55,11 +57,12 @@ class DisplayComponent : public Component
 		int getCharIndex(char c);
 
 		void generateTexture();
-		RTexture2D* generateMatrixTexture();
+		void generateMatrixTexture();
 		void addTextToMatrixTexture(unsigned char* data, int& beginX, int& beginY, const std::string& text, int sizeIndex);
 		void calculateTextsSize(int& headSize, int& line1Size, int& line2Size);
 		int calculateTextWidth(const std::string& text, int sizeIndex);
 
+		void setText(DisplayText& text);
 		void setText(std::string text);
 		std::string getText();
 

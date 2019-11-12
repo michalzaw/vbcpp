@@ -10,18 +10,23 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	: Component(CT_DISPLAY),
 	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight)
 {
-	_displayText.head = "0";
+	/*_displayText.head = "0";
 	_displayText.headSize = 4;
 	_displayText.line1 = "katowice";
 	_displayText.line2 = "dworzec pkp";
-	_displayText.type = TWO_LINE;
+	_displayText.type = TWO_LINE;*/
 
 	//_matrixTexture = ResourceManager::getInstance().loadTexture("tab1.png");
+	_matrixTextureData = new unsigned char[_displayWidth * _displayHeight * 4];
+	for (int i = 0; i < _displayWidth * _displayHeight * 4; ++i)
+	{
+		_matrixTextureData[i] = 0;
+	}
+	_matrixTexture = new RTexture2D("", _matrixTextureData, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
+	_matrixTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
+
 	_ledOnTexture = ResourceManager::getInstance().loadTexture("doron.bmp");
 	_ledOffTexture = ResourceManager::getInstance().loadTexture("doroff.bmp");
-	_matrixTexture = generateMatrixTexture();
-
-	_matrixTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
 
 	int ledWidth = _ledOnTexture->getSize().x;
 	int ledHeight = _ledOnTexture->getSize().y;
@@ -29,14 +34,14 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	_displayRenderTexture = OGLDriver::getInstance().createFramebuffer();
 	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * ledWidth, _displayHeight * ledHeight);
 	_displayRenderTexture->setViewport(UintRect(0, 0, _displayWidth * ledWidth, _displayHeight * ledHeight));
-
-	generateTexture();
+	_displayRenderTexture->getTexture(0)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
 }
 
 
 DisplayComponent::~DisplayComponent()
 {
-
+	delete[] _matrixTextureData;
+	delete _matrixTexture;
 }
 
 
@@ -53,12 +58,11 @@ int DisplayComponent::getCharIndex(char c)
 }
 
 
-RTexture2D* DisplayComponent::generateMatrixTexture()
+void DisplayComponent::generateMatrixTexture()
 {
-	unsigned char* data = new unsigned char[_displayWidth * _displayHeight * 4];
 	for (int i = 0; i < _displayWidth * _displayHeight * 4; ++i)
 	{
-		data[i] = 0;
+		_matrixTextureData[i] = 0;
 	}
 
 	/*--------------------------------------------------------
@@ -76,7 +80,7 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 	int beginY = 0;
 
 	// head
-	addTextToMatrixTexture(data, beginX, beginY, _displayText.head, headSize);
+	addTextToMatrixTexture(_matrixTextureData, beginX, beginY, _displayText.head, headSize);
 
 	int headEnd = beginX;
 
@@ -89,7 +93,7 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
 		}
 
-		addTextToMatrixTexture(data, beginX, beginY, _displayText.line1, line1Size);
+		addTextToMatrixTexture(_matrixTextureData, beginX, beginY, _displayText.line1, line1Size);
 	}
 
 	if (_displayText.type == TWO_LINE || _displayText.type == TWO_LINE_FIRST_BIG || _displayText.type == TWO_LINE_SECOND_BIG)
@@ -101,11 +105,10 @@ RTexture2D* DisplayComponent::generateMatrixTexture()
 		}
 
 		beginY += _font->getAvailableSizes()[line1Size] + 1;
-		addTextToMatrixTexture(data, beginX, beginY, _displayText.line2, line2Size);
+		addTextToMatrixTexture(_matrixTextureData, beginX, beginY, _displayText.line2, line2Size);
 	}
 	
-
-	return new RTexture2D("", data, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
+	_matrixTexture->setTexSubImage(_matrixTextureData, 0, 0, _displayWidth, _displayHeight);
 }
 
 
@@ -175,13 +178,13 @@ void DisplayComponent::calculateTextsSize(int& headSize, int& line1Size, int& li
 	}
 	else if (_displayText.type == TWO_LINE_FIRST_BIG)
 	{
-		line1Size = 1;
+		line1Size = 2;
 		line2Size = 0;
 	}
 	else if (_displayText.type == TWO_LINE_SECOND_BIG)
 	{
 		line1Size = 0;
-		line2Size = 1;
+		line2Size = 2;
 	}
 }
 
@@ -247,7 +250,19 @@ void DisplayComponent::generateTexture()
 	glDisableVertexAttribArray(0);
 
 
-	_displayRenderTexture->getTexture(0)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+	OGLDriver::getInstance().getDefaultFramebuffer()->bind();
+
+	_displayRenderTexture->getTexture(0)->generateMipmap();
+}
+
+
+void DisplayComponent::setText(DisplayText& text)
+{
+	_displayText = text;
+
+	generateMatrixTexture();
+
+	generateTexture();
 }
 
 

@@ -21,6 +21,11 @@ BusRaycast::BusRaycast()
     _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
+	_displayText.head = "0";
+	_displayText.headSize = 4;
+	_displayText.line1 = "katowice";
+	_displayText.line2 = "dworzec pkp";
+	_displayText.type = TWO_LINE;
 
 }
 
@@ -365,6 +370,21 @@ MirrorComponent* BusRaycast::getMirror(int index)
 int BusRaycast::getMirrorsCount()
 {
     return _mirrors.size();
+}
+
+
+DisplayText& BusRaycast::getDisplayText()
+{
+	return _displayText;
+}
+
+
+void BusRaycast::updateDisplays()
+{
+	for (int i = 0; i < _displays.size(); ++i)
+	{
+		_displays[i]->setText(_displayText);
+	}
 }
 
 

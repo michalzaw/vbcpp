@@ -195,7 +195,10 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
 	DisplayComponent* displayComponent = new DisplayComponent(new RDisplayFont("Displays/RG"), 112, 16);
 	display1SceneObject->addComponent(displayComponent);
+	displayComponent->setText(_bus->_displayText);
 	displayComponent->update(1.0f);
+
+	_bus->_displays.push_back(displayComponent);
 
     return true;
 }

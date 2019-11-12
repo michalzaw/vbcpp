@@ -83,6 +83,8 @@ class RTexture : public Resource
             glBindTexture(_textureType, _texID);
         }
 
+		void generateMipmap();
+
     protected:
         GLuint      _texID;
         TextureType _textureType;
@@ -91,8 +93,6 @@ class RTexture : public Resource
         glm::uvec2  _size;
 
         bool        _isGenerateMipmap;
-
-        void generateMipmap();
 
 };
 
