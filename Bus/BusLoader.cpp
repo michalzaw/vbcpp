@@ -159,6 +159,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         loadDoors(moduleElement, busModule);
         loadEnvironmentCaptureComponents(moduleElement, busModule);
         loadMirrors(moduleElement, busModule);
+		loadDisplays(moduleElement, busModule);
 
         _bus->_modules.push_back(busModule);
 
@@ -177,28 +178,6 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
     {
         _bus->_desktop = new Desktop(NULL);
     }
-
-	SceneObject* display1SceneObject = _sMgr->addSceneObject("display1");
-	Material material;
-	material.diffuseTexture = ResourceManager::getInstance().loadTexture("tab1.png");
-	material.shininess = 96;
-	Prefab* display1RenderObject = new PlanePrefab(glm::vec2(2, 0.3), material);
-	//Prefab* display1RenderObject = new Cube(5, material);
-	display1RenderObject->init();
-	display1RenderObject->setIsDynamicObject(true);
-	GraphicsManager::getInstance().addRenderObject(display1RenderObject, display1SceneObject);
-
-	_bus->_modules[0].sceneObject->addChild(display1SceneObject);
-
-	display1SceneObject->setPosition(0, 0.95, 5.75);//5.75
-	display1SceneObject->setRotation(degToRad(90), 0, 0);
-
-	DisplayComponent* displayComponent = new DisplayComponent(new RDisplayFont("Displays/RG"), 112, 16);
-	display1SceneObject->addComponent(displayComponent);
-	displayComponent->setText(_bus->_displayText);
-	displayComponent->update(1.0f);
-
-	_bus->_displays.push_back(displayComponent);
 
     return true;
 }
@@ -927,6 +906,47 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 
         mirrorElement = mirrorElement->NextSiblingElement("Mirror");
     }
+}
+
+
+void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule)
+{
+	XMLElement* displayElement = moduleElement->FirstChildElement("Display");
+	while (displayElement != nullptr)
+	{
+		Logger::info("XML: Display component data");
+
+		std::string name(displayElement->Attribute("name"));
+		glm::vec3 position = XMLstringToVec3(displayElement->Attribute("position"));
+		glm::vec3 rotation = XMLstringToVec3(displayElement->Attribute("rotation"));
+		float width = (float)atof(displayElement->Attribute("width"));
+		float height = (float)atof(displayElement->Attribute("height"));
+		int widthInPoints = (int)atoi(displayElement->Attribute("widthInPoints"));;
+		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
+		std::string fontName = std::string(displayElement->Attribute("font"));
+
+		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
+		displaySceneObject->setPosition(position);
+		displaySceneObject->setRotation(rotation);
+		busModule.sceneObject->addChild(displaySceneObject);
+
+		Material material;
+		material.shininess = 96;
+		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+		displayRenderObject->init();
+		displayRenderObject->setIsDynamicObject(true);
+		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
+
+		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
+		DisplayComponent* displayComponent = new DisplayComponent(displayFont, widthInPoints, heightInPoints);
+		displaySceneObject->addComponent(displayComponent);
+		displayComponent->setText(_bus->_displayText);
+		displayComponent->update(1.0f);
+
+		_bus->_displays.push_back(displayComponent);
+
+		displayElement = displayElement->NextSiblingElement("Display");
+	}
 }
 
 

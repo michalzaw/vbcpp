@@ -642,6 +642,37 @@ RRoadProfile* ResourceManager::loadRoadProfile(std::string name)
 }
 
 
+RDisplayFont* ResourceManager::loadDisplayFont(std::string name)
+{
+	std::string dirPath = GameDirectories::DISPLAYS + name + "/";
+
+	Resource* res = findResource(dirPath);
+	if (res != 0)
+	{
+		RDisplayFont* object = dynamic_cast<RDisplayFont*>(res);
+		return object;
+	}
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(dirPath))
+		dirPath = _alternativeResourcePath + dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
+	std::unique_ptr<RDisplayFont> object(new RDisplayFont(dirPath));
+	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+
+	RDisplayFont* o = dynamic_cast<RDisplayFont*>(object.get());
+
+	if (o)
+	{
+		_resources.push_back(std::move(object));
+		return o;
+	}
+	else
+		return 0;
+}
+
+
 void ResourceManager::setAlternativeResourcePath(std::string path)
 {
 	_alternativeResourcePath = path;

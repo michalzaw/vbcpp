@@ -20,7 +20,7 @@ RDisplayFont::RDisplayFont(std::string path)
 
 	for (int i = 0; i < NUMBER_OF_SIZES; ++i)
 	{
-		std::string fileName = path + "/" + toString(_availableSizes[i]) + ".csv";
+		std::string fileName = path + toString(_availableSizes[i]) + ".csv";
 		loadOneFont(fileName, i);
 	}
 }
