@@ -5,6 +5,7 @@
 #include <string>
 
 #include "RDisplayFont.h"
+#include "RShader.h"
 
 #include "../Scene/Component.h"
 
@@ -34,6 +35,8 @@ struct DisplayText
 class DisplayComponent : public Component
 {
 	private:
+		RShader* _tabGeneratorShader;
+
 		unsigned char* _matrixTextureData;
 
 		RTexture2D* _matrixTexture;
@@ -64,7 +67,7 @@ class DisplayComponent : public Component
 		void setText(DisplayText& text);
 		DisplayText& getText();
 
-		void update(float deltaTime);
+		void init();
 
 };
 

@@ -938,10 +938,10 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
 
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
-		DisplayComponent* displayComponent = new DisplayComponent(displayFont, widthInPoints, heightInPoints);
+		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints);
 		displaySceneObject->addComponent(displayComponent);
 		displayComponent->setText(_bus->_displayText);
-		displayComponent->update(1.0f);
+		displayComponent->init();
 
 		_bus->_displays.push_back(displayComponent);
 

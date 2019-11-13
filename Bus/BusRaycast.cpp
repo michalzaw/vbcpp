@@ -46,6 +46,11 @@ BusRaycast::~BusRaycast()
 		delete door;
 	}
 
+	for (DisplayComponent* display : _displays)
+	{
+		sceneManager->removeSceneObject(display->getSceneObject());
+	}
+
 	if (_desktop != NULL)
 	{
 		delete _desktop;

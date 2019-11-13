@@ -1138,6 +1138,12 @@ void Renderer::toogleRenderOBBFlag()
 }
 
 
+VBO* Renderer::getQuadVbo()
+{
+	return _quadVBO;
+}
+
+
 void Renderer::bakeStaticShadows()
 {
 	Logger::info("Static shadows baking: start" + toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));

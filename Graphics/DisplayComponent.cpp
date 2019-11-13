@@ -10,6 +10,8 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	: Component(CT_DISPLAY),
 	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight)
 {
+	_tabGeneratorShader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/tabGenerator.frag");
+
 	_matrixTextureData = new unsigned char[_displayWidth * _displayHeight * 4];
 	for (int i = 0; i < _displayWidth * _displayHeight * 4; ++i)
 	{
@@ -230,34 +232,18 @@ int DisplayComponent::calculateTextWidth(const std::string& text, int sizeIndex)
 
 void DisplayComponent::generateTexture()
 {
-	float quadVertices[] =
-	{
-		-1.0f, -1.0f,
-		1.0f, -1.0f,
-		-1.0f, 1.0f,
-		1.0f, 1.0f
-	};
-	VBO* quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
-	quadVBO->addVertexData(quadVertices, 4 * 2);
-
-	RShader* shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/tabGenerator.frag");
-
-
-
 	_displayRenderTexture->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	VBO* quadVBO = Renderer::getInstance().getQuadVbo();
 	quadVBO->bind();
 
-	shader->enable();
-
-
-	shader->bindTexture(shader->getUniformLocation("matrixTexture"), _matrixTexture);
-	shader->bindTexture(shader->getUniformLocation("ledOnTexture"), _ledOnTexture);
-	shader->bindTexture(shader->getUniformLocation("ledOffTexture"), _ledOffTexture);
-	shader->setUniform(shader->getUniformLocation("displayWidth"), _displayWidth);
-	shader->setUniform(shader->getUniformLocation("displayHeight"), _displayHeight);
-
+	_tabGeneratorShader->enable();
+	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("matrixTexture"), _matrixTexture);
+	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("ledOnTexture"), _ledOnTexture);
+	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("ledOffTexture"), _ledOffTexture);
+	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("displayWidth"), _displayWidth);
+	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("displayHeight"), _displayHeight);
 
 
 	glEnableVertexAttribArray(0);
@@ -269,6 +255,7 @@ void DisplayComponent::generateTexture()
 
 
 	OGLDriver::getInstance().getDefaultFramebuffer()->bind();
+
 
 	_displayRenderTexture->getTexture(0)->generateMipmap();
 }
@@ -290,7 +277,7 @@ DisplayText& DisplayComponent::getText()
 }
 
 
-void DisplayComponent::update(float deltaTime)
+void DisplayComponent::init()
 {
 	RenderObject* renderObject = static_cast<RenderObject*>(_object->getComponent(CT_RENDER_OBJECT));
 

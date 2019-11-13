@@ -208,6 +208,8 @@ class Renderer
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
 
+		VBO* getQuadVbo();
+
 		void bakeStaticShadows();
 
         void renderAll();

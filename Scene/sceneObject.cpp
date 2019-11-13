@@ -93,6 +93,10 @@ SceneObject::~SceneObject()
 				GraphicsManager::getInstance().removeSky(static_cast<Sky*>(*i));
 				break;
 
+			case CT_DISPLAY:
+				GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+				break;
+
         }
 
         /* ------------------------------------- */
@@ -308,6 +312,10 @@ void SceneObject::removeComponent(Component* component)
 
 				case CT_SKY:
 					GraphicsManager::getInstance().removeSky(static_cast<Sky*>(*i));
+					break;
+
+				case CT_DISPLAY:
+					GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
 					break;
 
             }

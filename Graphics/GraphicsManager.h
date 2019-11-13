@@ -20,6 +20,7 @@
 #include "EnvironmentCaptureComponent.h"
 #include "MirrorComponent.h"
 #include "Sky.h"
+#include "DisplayComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -46,6 +47,7 @@ class GraphicsManager
         std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
         std::vector<MirrorComponent*> _mirrorComponents;
         std::list<ClickableObject*> _clickableObjects;
+		std::list<DisplayComponent*>_displayComponents;
 
 		Sky*						_sky;
 
@@ -88,6 +90,7 @@ class GraphicsManager
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
         MirrorComponent*addMirrorComponent(std::string name);
         ClickableObject*addClickableObject();
+		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 
 
@@ -101,6 +104,7 @@ class GraphicsManager
         void removeEnvironmetnCaptureComponent(EnvironmentCaptureComponent* component);
         void removeMirrorComponent(MirrorComponent* mirrorComponent);
         void removeClickableObject(ClickableObject* clickableObject);
+		void removeDisplayComponent(DisplayComponent* displayComponent);
 		void removeSky(Sky* sky);
 
 
