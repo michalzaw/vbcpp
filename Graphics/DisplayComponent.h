@@ -27,7 +27,6 @@ struct DisplayText
 	std::string line1;
 	std::string line2;
 
-	int headSize;
 	DisplayTextType type;
 };
 
@@ -47,24 +46,23 @@ class DisplayComponent : public Component
 
 		DisplayText _displayText;
 
-		std::string _text;
 		Framebuffer* _displayRenderTexture;
-
-	public:
-		DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
-		~DisplayComponent();
 
 		int getCharIndex(char c);
 
-		void generateTexture();
 		void generateMatrixTexture();
 		void addTextToMatrixTexture(unsigned char* data, int& beginX, int& beginY, const std::string& text, int sizeIndex);
 		void calculateTextsSize(int& headSize, int& line1Size, int& line2Size);
 		int calculateTextWidth(const std::string& text, int sizeIndex);
 
+		void generateTexture();
+
+	public:
+		DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
+		~DisplayComponent();
+
 		void setText(DisplayText& text);
-		void setText(std::string text);
-		std::string getText();
+		DisplayText& getText();
 
 		void update(float deltaTime);
 

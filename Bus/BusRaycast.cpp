@@ -22,7 +22,6 @@ BusRaycast::BusRaycast()
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
 	_displayText.head = "0";
-	_displayText.headSize = 4;
 	_displayText.line1 = "katowice";
 	_displayText.line2 = "dworzec pkp";
 	_displayText.type = TWO_LINE;

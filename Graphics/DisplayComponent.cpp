@@ -10,13 +10,6 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	: Component(CT_DISPLAY),
 	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight)
 {
-	/*_displayText.head = "0";
-	_displayText.headSize = 4;
-	_displayText.line1 = "katowice";
-	_displayText.line2 = "dworzec pkp";
-	_displayText.type = TWO_LINE;*/
-
-	//_matrixTexture = ResourceManager::getInstance().loadTexture("tab1.png");
 	_matrixTextureData = new unsigned char[_displayWidth * _displayHeight * 4];
 	for (int i = 0; i < _displayWidth * _displayHeight * 4; ++i)
 	{
@@ -28,12 +21,12 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	_ledOnTexture = ResourceManager::getInstance().loadTexture("doron.bmp");
 	_ledOffTexture = ResourceManager::getInstance().loadTexture("doroff.bmp");
 
-	int ledWidth = _ledOnTexture->getSize().x;
-	int ledHeight = _ledOnTexture->getSize().y;
+	int pointWidth = _ledOnTexture->getSize().x;
+	int pointHeight = _ledOnTexture->getSize().y;
 
 	_displayRenderTexture = OGLDriver::getInstance().createFramebuffer();
-	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * ledWidth, _displayHeight * ledHeight);
-	_displayRenderTexture->setViewport(UintRect(0, 0, _displayWidth * ledWidth, _displayHeight * ledHeight));
+	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
+	_displayRenderTexture->setViewport(UintRect(0, 0, _displayWidth * pointWidth, _displayHeight * pointHeight));
 	_displayRenderTexture->getTexture(0)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
 }
 
@@ -51,9 +44,25 @@ int DisplayComponent::getCharIndex(char c)
 	{
 		return (int)(c - '0');
 	}
-	else
+	else if (c >= 'a' && c <= 'z')
 	{
 		return (int)(c - 'a') + 10;
+	}
+	else if (c == '-')
+	{
+		return 36;
+	}
+	else if (c == '.')
+	{
+		return 37;
+	}
+	else if (c == '"')
+	{
+		return 38;
+	}
+	else
+	{
+		return 37;
 	}
 }
 
@@ -64,12 +73,6 @@ void DisplayComponent::generateMatrixTexture()
 	{
 		_matrixTextureData[i] = 0;
 	}
-
-	/*--------------------------------------------------------
-	//std::string text = "101bis plac mlynarz";
-	std::string text = "0 katowice dworzec";
-	addTextToMatrixTexture(data, 0, 0, text, 4);
-	--------------------------------------------------------*/
 
 	int headSize = 0;
 	int line1Size = 0;
@@ -92,6 +95,10 @@ void DisplayComponent::generateMatrixTexture()
 		{
 			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
 		}
+		else
+		{
+			beginX = headEnd;
+		}
 
 		addTextToMatrixTexture(_matrixTextureData, beginX, beginY, _displayText.line1, line1Size);
 	}
@@ -102,6 +109,10 @@ void DisplayComponent::generateMatrixTexture()
 		if (textWidth <= _displayWidth - headEnd)
 		{
 			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
+		}
+		else
+		{
+			beginX = headEnd;
 		}
 
 		beginY += _font->getAvailableSizes()[line1Size] + 1;
@@ -135,11 +146,16 @@ void DisplayComponent::addTextToMatrixTexture(unsigned char* data, int& beginX, 
 				int b = 1 << x;
 				if (fontSize->chars[charIndex][row] & b)
 				{
-					int index = ((_displayHeight - (beginY + row) - 1) * _displayWidth + beginX + x) * 4;
-					data[index] = 255;
-					data[index + 1] = 255;
-					data[index + 2] = 255;
-					data[index + 3] = 255;
+					int pointX = beginX + x;
+					int pointY = (_displayHeight - (beginY + row) - 1);
+					if (pointX < _displayWidth && pointY < _displayHeight)
+					{
+						int index = (pointY * _displayWidth + pointX) * 4;
+						data[index] = 255;
+						data[index + 1] = 255;
+						data[index + 2] = 255;
+						data[index + 3] = 255;
+					}
 				}
 			}
 		}
@@ -239,6 +255,8 @@ void DisplayComponent::generateTexture()
 	shader->bindTexture(shader->getUniformLocation("matrixTexture"), _matrixTexture);
 	shader->bindTexture(shader->getUniformLocation("ledOnTexture"), _ledOnTexture);
 	shader->bindTexture(shader->getUniformLocation("ledOffTexture"), _ledOffTexture);
+	shader->setUniform(shader->getUniformLocation("displayWidth"), _displayWidth);
+	shader->setUniform(shader->getUniformLocation("displayHeight"), _displayHeight);
 
 
 
@@ -266,15 +284,9 @@ void DisplayComponent::setText(DisplayText& text)
 }
 
 
-void DisplayComponent::setText(std::string text)
+DisplayText& DisplayComponent::getText()
 {
-	_text = text;
-}
-
-
-std::string DisplayComponent::getText()
-{
-	return _text;
+	return _displayText;
 }
 
 
