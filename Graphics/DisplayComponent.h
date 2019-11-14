@@ -40,8 +40,9 @@ class DisplayComponent : public Component
 		unsigned char* _matrixTextureData;
 
 		RTexture2D* _matrixTexture;
-		RTexture2D* _ledOnTexture;
 		RTexture2D* _ledOffTexture;
+
+		glm::vec3 _emissiveColor;
 
 		RDisplayFont* _font;
 		int _displayWidth;

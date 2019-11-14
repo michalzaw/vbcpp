@@ -21,6 +21,11 @@ class XmlUtils
             return (float)atof(xmlElement->Attribute(attributeName));
         }
 
+		static int getAttributeInt(XMLElement* xmlElement, const char* attributeName)
+		{
+			return (int)atoi(xmlElement->Attribute(attributeName));
+		}
+
         static bool getAttributeBool(XMLElement* xmlElement, const char* attributeName)
         {
             const char* value = xmlElement->Attribute(attributeName);
@@ -69,6 +74,15 @@ class XmlUtils
             else
                 return defaultValue;
         }
+
+		static int getAttributeIntOptional(XMLElement* xmlElement, const char* attributeName, int defaultValue = 0)
+		{
+			const char* cValue = xmlElement->Attribute(attributeName);
+			if (cValue != NULL)
+				return (int)atoi(cValue);
+			else
+				return defaultValue;
+		}
 
 		static bool getAttributeBoolOptional(XMLElement* xmlElement, const char* attributeName, bool defaultValue = false)
 		{

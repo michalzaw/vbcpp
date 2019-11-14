@@ -179,6 +179,8 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         _bus->_desktop = new Desktop(NULL);
     }
 
+	_bus->updateDisplays();
+
     return true;
 }
 
@@ -924,6 +926,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		int widthInPoints = (int)atoi(displayElement->Attribute("widthInPoints"));;
 		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
 		std::string fontName = std::string(displayElement->Attribute("font"));
+		int type = XmlUtils::getAttributeIntOptional(displayElement, "type");
 
 		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
 		displaySceneObject->setPosition(position);
@@ -932,6 +935,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 
 		Material material;
 		material.shininess = 96;
+		material.shader = SOLID_EMISSIVE_MATERIAL;
 		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
 		displayRenderObject->init();
 		displayRenderObject->setIsDynamicObject(true);
@@ -940,10 +944,9 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
 		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints);
 		displaySceneObject->addComponent(displayComponent);
-		displayComponent->setText(_bus->_displayText);
 		displayComponent->init();
 
-		_bus->_displays.push_back(displayComponent);
+		_bus->_displays.push_back(std::make_pair(displayComponent, static_cast<BusDisplayType>(type)));
 
 		displayElement = displayElement->NextSiblingElement("Display");
 	}

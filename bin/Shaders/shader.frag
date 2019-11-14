@@ -104,6 +104,9 @@ uniform mat4 environmentMap2Rotation;
 uniform sampler2D glassTexture;
 uniform float dayNightRatio;
 #endif
+#ifdef EMISSIVE
+uniform sampler2D emissiveTexture;
+#endif
 
 uniform vec3 CameraPosition;
 
@@ -325,6 +328,9 @@ float isGrass = 0.0f;
 #endif
 
 	FragmentColor += matEmissive * textureColor;
+#ifdef EMISSIVE
+	FragmentColor += texture2D(emissiveTexture, TexCoord);
+#endif
 	
 #ifdef ALPHA_TEST
 	float _Cutoff = 0.3f;

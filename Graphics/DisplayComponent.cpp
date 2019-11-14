@@ -8,7 +8,7 @@
 
 DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
 	: Component(CT_DISPLAY),
-	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight)
+	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight), _emissiveColor(1.92, 0.536, 0.044)//2 * vec3(1, 0.4, 0.1) * vec3(0.96, 0.67, 0.22);
 {
 	_tabGeneratorShader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/tabGenerator.frag");
 
@@ -20,16 +20,17 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	_matrixTexture = new RTexture2D("", _matrixTextureData, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
 	_matrixTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
 
-	_ledOnTexture = ResourceManager::getInstance().loadTexture("doron.bmp");
 	_ledOffTexture = ResourceManager::getInstance().loadTexture("doroff.bmp");
 
-	int pointWidth = _ledOnTexture->getSize().x;
-	int pointHeight = _ledOnTexture->getSize().y;
+	int pointWidth = _ledOffTexture->getSize().x;
+	int pointHeight = _ledOffTexture->getSize().y;
 
 	_displayRenderTexture = OGLDriver::getInstance().createFramebuffer();
 	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
+	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
 	_displayRenderTexture->setViewport(UintRect(0, 0, _displayWidth * pointWidth, _displayHeight * pointHeight));
 	_displayRenderTexture->getTexture(0)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+	_displayRenderTexture->getTexture(1)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
 }
 
 
@@ -93,6 +94,12 @@ void DisplayComponent::generateMatrixTexture()
 	if (_displayText.type != ONLY_HEAD)
 	{
 		int textWidth = calculateTextWidth(_displayText.line1, line1Size);
+		if (textWidth > _displayWidth - headEnd && line1Size > 1)
+		{
+			line1Size -= 1;
+			textWidth = calculateTextWidth(_displayText.line1, line1Size);
+		}
+
 		if (textWidth <= _displayWidth - headEnd)
 		{
 			beginX = headEnd + (_displayWidth - headEnd) / 2 - textWidth / 2;
@@ -240,10 +247,11 @@ void DisplayComponent::generateTexture()
 
 	_tabGeneratorShader->enable();
 	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("matrixTexture"), _matrixTexture);
-	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("ledOnTexture"), _ledOnTexture);
 	_tabGeneratorShader->bindTexture(_tabGeneratorShader->getUniformLocation("ledOffTexture"), _ledOffTexture);
 	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("displayWidth"), _displayWidth);
 	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("displayHeight"), _displayHeight);
+	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("pointSize"), (int)_ledOffTexture->getSize().x);
+	_tabGeneratorShader->setUniform(_tabGeneratorShader->getUniformLocation("emissiveColor"), _emissiveColor);
 
 
 	glEnableVertexAttribArray(0);
@@ -258,6 +266,7 @@ void DisplayComponent::generateTexture()
 
 
 	_displayRenderTexture->getTexture(0)->generateMipmap();
+	_displayRenderTexture->getTexture(1)->generateMipmap();
 }
 
 
@@ -281,5 +290,6 @@ void DisplayComponent::init()
 {
 	RenderObject* renderObject = static_cast<RenderObject*>(_object->getComponent(CT_RENDER_OBJECT));
 
-	renderObject->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(0);
+	renderObject->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(1);
+	renderObject->getMaterial(0)->emissiveTexture = _displayRenderTexture->getTexture(0);
 }

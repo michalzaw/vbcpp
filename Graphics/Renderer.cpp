@@ -212,6 +212,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_6] = "indices[5]";
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
+	_uniformsNames[UNIFORM_EMISSIVE_TEXTURE] = "emissiveTexture";
 
 	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
 	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
@@ -832,6 +833,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+	// SOLID_EMISSIVE_MATERIAL
+	defines.clear();
+	defines.push_back("SOLID");
+	defines.push_back("EMISSIVE");
+	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[SOLID_EMISSIVE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // CAR_PAINT_MATERIAL
     defines.clear();
@@ -1606,6 +1614,8 @@ void Renderer::renderScene(RenderData* renderData)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ROUGHNESS_TEXTURE], material->roughnessTexture);
 		if (material->aoTexture != NULL)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_AO_TEXTURE], material->aoTexture);
+		if (material->emissiveTexture != NULL)
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
 		if (material->shader == PBR_MATERIAL)
 		{

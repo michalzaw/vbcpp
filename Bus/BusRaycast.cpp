@@ -46,9 +46,9 @@ BusRaycast::~BusRaycast()
 		delete door;
 	}
 
-	for (DisplayComponent* display : _displays)
+	for (std::pair<DisplayComponent*, BusDisplayType>& display : _displays)
 	{
-		sceneManager->removeSceneObject(display->getSceneObject());
+		sceneManager->removeSceneObject(display.first->getSceneObject());
 	}
 
 	if (_desktop != NULL)
@@ -387,7 +387,19 @@ void BusRaycast::updateDisplays()
 {
 	for (int i = 0; i < _displays.size(); ++i)
 	{
-		_displays[i]->setText(_displayText);
+		BusDisplayType type = _displays[i].second;
+		if (type == BDT_LINE_AND_DIRECTION)
+		{
+			_displays[i].first->setText(_displayText);
+		}
+		else
+		{
+			DisplayText text;
+			text.line1 = _displayText.head;
+			text.type = ONE_LINE;
+
+			_displays[i].first->setText(text);
+		}
 	}
 }
 

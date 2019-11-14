@@ -38,6 +38,13 @@ struct BusRayCastWheel
 };
 
 
+enum BusDisplayType
+{
+	BDT_LINE_AND_DIRECTION,
+	BDT_LINE
+};
+
+
 class BusRaycast : public Bus
 {
     friend class BusLoader;
@@ -127,7 +134,7 @@ class BusRaycast : public Bus
         std::vector<MirrorComponent*> _mirrors;
 
 		DisplayText _displayText;
-		std::vector<DisplayComponent*> _displays;
+		std::vector<std::pair<DisplayComponent*, BusDisplayType>> _displays;
 
         Desktop* _desktop;
         RenderObject* _desktopRenderObject;

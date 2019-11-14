@@ -106,13 +106,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	    if (l->getDiffiseIntenisty() > 0.05)
         {
-            l->setAmbientIntensity(0.05);
+            l->setAmbientIntensity(0.0025);
             l->setDiffuseIntensity(0.0);
             Renderer::getInstance().setDayNightRatio(-1.0f);
         }
         else
         {
-            l->setAmbientIntensity(0.5);
+            l->setAmbientIntensity(0.025);
             l->setDiffuseIntensity(0.5);
             Renderer::getInstance().setDayNightRatio(1.0f);
         }
