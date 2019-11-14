@@ -43,6 +43,8 @@ DisplayComponent::~DisplayComponent()
 
 int DisplayComponent::getCharIndex(char c)
 {
+	c = tolower(c);
+
 	if (c >= '0' && c <= '9')
 	{
 		return (int)(c - '0');
