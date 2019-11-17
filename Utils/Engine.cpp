@@ -8,10 +8,12 @@ using namespace tinyxml2;
 
 #include <iostream>
 
+#include "Math.h"
+
 
 Engine::Engine(std::string filename)
 : _isRunning(false),
-_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f)
+_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(3.45f)
 {
     loadData(filename);
 
@@ -43,15 +45,15 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 {
     if (_isRunning)
     {
-        float rpm = (wheelAngularVelocity * abs(gearRatio) * 5.45f * 60.0f) / 3.14f;
+        float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / PI;
         //if (_currentRPM < _torqueCurve[0].rpm)
         //    _currentRPM = static_cast<float>(_torqueCurve[0].rpm);
-        if (rpm > _torqueCurve[0].rpm &&  rpm < _maxRPM)
+        if (rpm > _torqueCurve[0].rpm)
             _currentRPM = rpm;
         else if (rpm < _torqueCurve[0].rpm)
             _currentRPM = _torqueCurve[0].rpm;
-        else if (rpm > _maxRPM)
-            _currentRPM = _maxRPM;
+        //else if (rpm > _maxRPM)
+        //    _currentRPM = _maxRPM;
 
         //printf("RPM: %.4f\n", rpm);
     }
@@ -150,7 +152,7 @@ void Engine::calculateTorqueLine()
 	{
 		_curveParams[i].a = ( static_cast<float>(_torqueCurve[i+1].torque) - static_cast<float>(_torqueCurve[i].torque) ) / ( static_cast<float>(_torqueCurve[i+1].rpm) - static_cast<float>(_torqueCurve[i].rpm) );
 		//printf("Torque a parameter: %3.2f\n", _curveParams[i].a );
-		_curveParams[i].b = (float)_torqueCurve[i].torque - ( _curveParams[i].a * (float)_torqueCurve[i].rpm );
+		_curveParams[i].b = (float)_torqueCurve[i+1].torque - ( _curveParams[i].a * (float)_torqueCurve[i+1].rpm );
 		//printf("Torque b parameter: %3.2f\n", _curveParams[i].b );
 	}
 }
@@ -162,24 +164,25 @@ void Engine::update(float dt)
     {
         if (_throttle > 0)
         {
+			// wykomentowanie tych dwoch lini nie ma wplywu na zachowanie silnika, tak jak by byly nie potrzebne
             if (_currentRPM < _maxRPM)
                 _currentRPM += 1000 * _throttle * dt;
-            else
-                _currentRPM = _maxRPM;
+            //else
+            //    _currentRPM = _maxRPM;
         }
         else
         {
             if (_currentRPM > _torqueCurve[0].rpm)
                 _currentRPM -= 1000 * dt;
-            else
-                _currentRPM = _torqueCurve[0].rpm;
+           // else
+            //    _currentRPM = _torqueCurve[0].rpm;
         }
     }
 
 
     //_currentRPM = (wheelAngularVelocity * abs(gearRatio) * 5.45f * 60.0f) / 3.14f;
 
-    _currentTorque = getMaxTorque();
+    _currentTorque = getMaxTorque() * _throttle;
 }
 
 
@@ -196,6 +199,11 @@ float Engine::getMaxTorque()
 			if ( (_currentRPM >= _torqueCurve[i].rpm) && (_currentRPM <= _torqueCurve[i+1].rpm) )
 				maxTorque = (_curveParams[i].a * _currentRPM + _curveParams[i].b);
 		}
+	}
+
+	if (_currentRPM > _maxRPM)
+	{
+		maxTorque = 0;
 	}
 
 	return maxTorque; // Value must be decreased since it's to big

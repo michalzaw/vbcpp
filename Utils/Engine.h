@@ -46,6 +46,8 @@ class Engine
 
         float getCurrentTorque() { return _currentTorque; }
 
+		float getDifferentialRatio() { return _differentialRatio; }
+
         std::string getSoundFilename() { return _sound; }
 
         float getSoundVolume() { return _volume; }
@@ -60,6 +62,8 @@ class Engine
         float   _currentRPM;
         float   _currentTorque;
         float   _maxRPM;
+
+		float _differentialRatio;
 
         std::string _sound;
         float       _volume;

@@ -438,7 +438,8 @@ void BusRaycast::update(float deltaTime)
 
             if ( wheel->powered )
             {
-                wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * 0.32f);;
+                //wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * 0.32f);;
+				wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * _engine->getDifferentialRatio() * 0.7f * 0.1f);; // * 0.1f because, the bus mass is 10 x smaller than than real mass
             }
         }
     }
