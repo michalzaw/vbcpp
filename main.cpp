@@ -195,6 +195,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 		showImGui = !showImGui;
 	}
 
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+	{
+		bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
+		bus->getSceneObject()->setRotation(degToRad(sceneMgr->getBusStart().rotation.x),
+			degToRad(sceneMgr->getBusStart().rotation.y),
+			degToRad(sceneMgr->getBusStart().rotation.z));
+	}
+
     // debug
     if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
     {
