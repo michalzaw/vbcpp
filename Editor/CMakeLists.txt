@@ -8,6 +8,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/ObjectPropertiesWindow.cpp
 	Editor/Windows/OpenDialogWindow.cpp
 	Editor/Windows/SceneGraphWindow.cpp
+	Editor/Windows/RoadTools.cpp
 )
 
 set (EDITOR_HEADERS 
@@ -22,6 +23,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/ObjectPropertiesWindow.h
 	Editor/Windows/OpenDialogWindow.h
 	Editor/Windows/SceneGraphWindow.h
+	Editor/Windows/RoadTools.h
 )
 
 set (EDITOR_SOURCES ${EDITOR_SOURCES} PARENT_SCOPE)

@@ -20,5 +20,12 @@ class SceneGraphWindow : public EditorWindow
 		void centerGraphView();
 };
 
+namespace vbEditor
+{
+	void SceneGraphWindow(std::list<SceneObject*> sceneRoot);
+
+	void inspectSceneObject(SceneObject* object);
+}
+
 
 #endif // SCENEGRAPHWINDOW_H_INCLUDED

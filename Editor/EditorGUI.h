@@ -36,12 +36,12 @@ class EditorGUI
 
         bool _styleDark;
 
-        std::unique_ptr<SceneGraphWindow> _sceneGraphWindow;
-        std::unique_ptr<ObjectPropertiesWindow> _objectPropertiesWindow;
-        std::unique_ptr<NewDialogWindow> _newDialogWindow;
-        std::unique_ptr<OpenDialogWindow> _openDialogWindow;
-        std::unique_ptr<CameraSettingsWindow> _cameraSettingsWindow;
-		std::unique_ptr<ObjectDefinitionsWindow> _objectDefinitionsWindow;
+        //std::unique_ptr<SceneGraphWindow> _sceneGraphWindow;
+        //std::unique_ptr<ObjectPropertiesWindow> _objectPropertiesWindow;
+        //std::unique_ptr<NewDialogWindow> _newDialogWindow;
+        //std::unique_ptr<OpenDialogWindow> _openDialogWindow;
+        //std::unique_ptr<CameraSettingsWindow> _cameraSettingsWindow;
+		//std::unique_ptr<ObjectDefinitionsWindow> _objectDefinitionsWindow;
 
         bool _showDemo;
 
@@ -49,9 +49,9 @@ class EditorGUI
 
         void drawMainMenu();
 
-		void showObjectProperties();
-		void showObjectNameEdit();
-		void showObjectTransformEdit();
+		//void showObjectProperties();
+		//void showObjectNameEdit();
+		//void showObjectTransformEdit();
 
 		void ShowTransformGizmo(CameraStatic* camera, SceneObject* obj);
 

@@ -14,8 +14,8 @@
 	<Sky texture="rt.bmp,lt.bmp,up.bmp,dn.bmp,ft.bmp,bk.bmp" />
 	
 	<Objects>
-		<Object name="crate" position="-10,3,-10" rotation="0,45,0" />
-		<Object name="crate" position="10,3,-10" rotation="0,0,0" />
+		<!--<Object name="crate" position="-10,3,-10" rotation="0,45,0" />
+		<Object name="crate" position="10,3,-10" rotation="0,0,0" /> -->
 		<Object name="domek" position="20,0,20" rotation="0,0,0" />
 		<Object name="domek" position="20,0,40" rotation="0,0,0" />
 		<Object name="domek" position="20,0,60" rotation="0,0,0" />
@@ -31,8 +31,8 @@
 		<Object name="iglak" position="-13.3,3.5,10.5" rotation="0,0,0" />
 		<Object name="zapora" position="25,1,10" rotation="0,-10,0" />
 		<Object name="blok" position="-20,0,50" rotation="0,90,0" />
-		<Object name="fontanna" position="10,0.5,10" rotation="0,0,0" />
-		<Object name="brama" position="10,0,0" rotation="0,0,0" />
+		<!--Object name="fontanna" position="10,0.5,10" rotation="0,0,0" />
+		<Object name="brama" position="10,0,0" rotation="0,0,0" /> -->
 	</Objects>
 	
 	<Roads>

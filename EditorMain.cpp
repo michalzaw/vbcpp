@@ -2,9 +2,16 @@
 
 int main()
 {
-	Editor editor;
+	//Editor editor;
 
-	editor.run();
+	//editor.run();
+
+	vbEditor::createWindow();
+	vbEditor::initializeEngineSubsystems();
+
+	vbEditor::run();
+
+	vbEditor::shutDown();
 
 	return 0;
 }

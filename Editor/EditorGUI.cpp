@@ -17,11 +17,11 @@ EditorGUI::EditorGUI(Window* window, SceneManager* sceneManager/*, std::shared_p
 {
     initializeImGui();
 
-    _sceneGraphWindow.reset(new SceneGraphWindow(_sceneManager, _selectedSceneObject));
-    _objectPropertiesWindow.reset(new ObjectPropertiesWindow(_sceneManager, _selectedSceneObject, &_events));
-    _newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events));
-    _openDialogWindow.reset(new OpenDialogWindow(_sceneManager, _selectedSceneObject, &_events, true));
-    _cameraSettingsWindow.reset(new CameraSettingsWindow(_sceneManager, _selectedSceneObject));
+    //_sceneGraphWindow.reset(new SceneGraphWindow(_sceneManager, _selectedSceneObject));
+    //_objectPropertiesWindow.reset(new ObjectPropertiesWindow(_sceneManager, _selectedSceneObject, &_events));
+    //_newDialogWindow.reset(new NewDialogWindow(_sceneManager, _selectedSceneObject, &_events));
+    //_openDialogWindow.reset(new OpenDialogWindow(_sceneManager, _selectedSceneObject, &_events, true));
+    //_cameraSettingsWindow.reset(new CameraSettingsWindow(_sceneManager, _selectedSceneObject));
 	//_objectDefinitionsWindow.reset(new ObjectDefinitionsWindow(_sceneManager, _selectedSceneObject, _editorContext));
 }
 
@@ -56,7 +56,7 @@ void EditorGUI::setSelectedSceneObject(SceneObject* sceneObject)
 {
     _selectedSceneObject = sceneObject;
 
-	_sceneGraphWindow->centerGraphView();
+	//_sceneGraphWindow->centerGraphView();
 }
 
 
@@ -111,13 +111,13 @@ void EditorGUI::draw()
     if (_showDemo)
         ImGui::ShowTestWindow();
 
-	showObjectProperties();
+	//showObjectProperties();
 
-    _sceneGraphWindow->draw();
+    //_sceneGraphWindow->draw();
     //_objectPropertiesWindow->draw();
-    _newDialogWindow->draw();
-    _openDialogWindow->draw();
-    _cameraSettingsWindow->draw();
+    //_newDialogWindow->draw();
+    //_openDialogWindow->draw();
+    //_cameraSettingsWindow->draw();
 	//_objectDefinitionsWindow->draw();
 
     ImGui::Render();
@@ -131,9 +131,9 @@ void EditorGUI::drawMainMenu()
     {
         if ( ImGui::BeginMenu("File") )
         {
-            if ( ImGui::MenuItem("New", "CTRL+N") ) { _newDialogWindow->open(); }
-            ImGui::Separator();
-            if ( ImGui::MenuItem("Open", "CTRL+O") ) { _openDialogWindow->open(); }
+            //if ( ImGui::MenuItem("New", "CTRL+N") ) { _newDialogWindow->open(); }
+            //ImGui::Separator();
+            //if ( ImGui::MenuItem("Open", "CTRL+O") ) { _openDialogWindow->open(); }
             //if ( ImGui::MenuItem("Save", "CTRL+S") ) { _events.push_back(EditorEvent(EET_SAVE_CLICK, _editorContext->currentMapInfo.name));}
             if ( ImGui::MenuItem("Save as...", "CTRL+SHIFT+S") ) {}
             ImGui::Separator();
@@ -152,8 +152,8 @@ void EditorGUI::drawMainMenu()
         }
         if (ImGui::BeginMenu("Windows"))
         {
-            ImGui::MenuItem("Object Properties", NULL, _objectPropertiesWindow->getOpenFlagPointer());
-            ImGui::MenuItem("Camera Settings", NULL, _cameraSettingsWindow->getOpenFlagPointer());
+            //ImGui::MenuItem("Object Properties", NULL, _objectPropertiesWindow->getOpenFlagPointer());
+            //ImGui::MenuItem("Camera Settings", NULL, _cameraSettingsWindow->getOpenFlagPointer());
             ImGui::MenuItem("Demo", NULL, &_showDemo);
             //ImGui::MenuItem("Test", NULL, &_showTestWindow);
             ImGui::EndMenu();
@@ -174,13 +174,13 @@ void EditorGUI::drawMainMenu()
 				*/
 				ImGui::EndMenu();
 			}
-			ImGui::MenuItem("Available objects", NULL, _objectDefinitionsWindow->getOpenFlagPointer());
+			//ImGui::MenuItem("Available objects", NULL, _objectDefinitionsWindow->getOpenFlagPointer());
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();
     }
 }
-
+/*
 void EditorGUI::showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -212,27 +212,27 @@ void EditorGUI::showObjectProperties()
 				{
 					Material* material = renderComponent->getMaterial(0);
 					ImGui::Text("Material name: %s", material->name.c_str());
-						/*
-					if (_selectedObject->getRenderComponent()->getMesh())
-					{
-						//ImGui::Text("Mesh");
-						unsigned int vertexCount = _selectedObject->getRenderComponent()->getMesh()->getVertexCount();
-						ImGui::Text("Vertex count: %d", vertexCount);
-					}
-
-					if (_selectedObject->getRenderComponent()->getTexture())
-					{
-						ImGui::Text("Texture image: %s",
-							_selectedObject->getRenderComponent()->getTexture()->getImage()->getName().c_str());
-
-						ImTextureID texture =
-							reinterpret_cast<void*>(_selectedObject->getRenderComponent()->getTexture()->getID());
-
-						ImVec2 textureSize = ImVec2(128.0f, 128.0f);
-						ImGui::Image(texture, textureSize, ImVec2(0, 0), ImVec2(1, 1),
-							ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128)
-						);
-						*/
+						
+//					if (_selectedObject->getRenderComponent()->getMesh())
+//					{
+//						//ImGui::Text("Mesh");
+//						unsigned int vertexCount = _selectedObject->getRenderComponent()->getMesh()->getVertexCount();
+//						ImGui::Text("Vertex count: %d", vertexCount);
+//					}
+//
+//					if (_selectedObject->getRenderComponent()->getTexture())
+//					{
+//						ImGui::Text("Texture image: %s",
+//							_selectedObject->getRenderComponent()->getTexture()->getImage()->getName().c_str());
+//
+//						ImTextureID texture =
+//							reinterpret_cast<void*>(_selectedObject->getRenderComponent()->getTexture()->getID());
+//
+//						ImVec2 textureSize = ImVec2(128.0f, 128.0f);
+//						ImGui::Image(texture, textureSize, ImVec2(0, 0), ImVec2(1, 1),
+//							ImColor(255, 255, 255, 255), ImColor(255, 255, 255, 128)
+//						);
+						
 				}
 			}
 
@@ -283,7 +283,7 @@ void EditorGUI::showObjectTransformEdit()
 
 	//ImGuizmo::DrawCube(glm::value_ptr(cam->getViewMatrix()), glm::value_ptr(cam->getProjectionMatrix()), glm::value_ptr(_selectedSceneObject->getGlobalTransformMatrix()));
 }
-
+*/
 void EditorGUI::ShowTransformGizmo(CameraStatic* camera, SceneObject* obj)
 {
 	

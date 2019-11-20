@@ -15,7 +15,7 @@
 
 #include "../Window/Window.h"
 
-
+/*
 class Editor
 {
     private:
@@ -63,6 +63,26 @@ class Editor
 
 		void changeFramebufferSizeCallback(int width, int height);
 };
+*/
 
+namespace vbEditor
+{
+	bool createWindow();
+	void initializeEngineSubsystems();
+	void clearScene();
+	void shutDown();
+
+	void drawMainMenu();
+	void ShowTransformGizmo();
+
+	bool getGUIhasFocus();
+
+	void renderGUI();
+
+	void run();
+
+	void loadMapData();
+
+} // namespace
 
 #endif // EDITOR_H_INCLUDED

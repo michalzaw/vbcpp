@@ -15,5 +15,8 @@ class ObjectPropertiesWindow : public EditorWindow
 
 };
 
+void showObjectProperties();
+void showObjectNameEdit();
+void showObjectTransformEdit();
 
 #endif // OBJECTPROPERTIESWINDOW_H_INCLUDED

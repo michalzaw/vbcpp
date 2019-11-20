@@ -1,69 +1,45 @@
 #include "OpenDialogWindow.h"
 
-#include "../../Game/Directories.h"
+#include "../../ImGui/imgui.h"
+#include "../../ImGui/imgui_impl_glfw.h"
+#include "../../ImGui/imgui_impl_opengl3.h"
 
-#include "../../Utils/FilesHelper.h"
 
 
-OpenDialogWindow::OpenDialogWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
-    : EditorWindow(sceneManager, selectedSceneObject, isOpen, events),
-    _listBoxMapSelectedItem(0), _openModalDialog(isOpen)
+bool openMapDialog(const std::vector<std::string>& items, int& current_item)
 {
-	if (isOpen)
-	{
-		open();
-	}
-}
+	bool closeWindow = false;
 
+	int items_count = items.size();
+	std::vector<const char*> map_list;
 
-void OpenDialogWindow::drawWindow()
-{
-	if (_openModalDialog)
+	for (int i = 0; i < items.size(); ++i)
 	{
-		ImGui::OpenPopup("Open map");
-		_openModalDialog = false;
+		map_list.push_back(items[i].c_str());
 	}
+
+	ImGui::OpenPopup("Open map");
 
 	if (ImGui::BeginPopupModal("Open map", NULL, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        std::vector<const char*> availableMapsNamesCstr;
-        for (int i = 0; i < _availableMapsNames.size(); ++i)
-        {
-            availableMapsNamesCstr.push_back(_availableMapsNames[i].c_str());
-        }
+	{
+		ImGui::ListBox("Map", &current_item, map_list.data(), items_count, 5);
 
-        ImGui::ListBox("Map", &_listBoxMapSelectedItem, &availableMapsNamesCstr[0], availableMapsNamesCstr.size(), 4);
-
-        if (ImGui::Button("Open", ImVec2(120, 0)))
-        {
-            std::string mapName = (_availableMapsNames[_listBoxMapSelectedItem]);
-            mapName = trim(mapName);
-
-            _events->push_back(EditorEvent(EET_OPEN_CLICK, mapName));
-
-			_isOpen = false;
+		if (ImGui::Button("Open", ImVec2(120, 0)))
+		{
+			closeWindow = true;
 			ImGui::CloseCurrentPopup();
-        }
+		}
 
 		ImGui::SameLine();
 
 		if (ImGui::Button("Cancel", ImVec2(120, 0)))
 		{
-			_isOpen = false;
+			//_isOpen = false;
+			closeWindow = true;
 			ImGui::CloseCurrentPopup();
 		}
-    }
-    ImGui::EndPopup();
-}
+	}
+	ImGui::EndPopup();
 
-
-void OpenDialogWindow::open()
-{
-    _selectedSceneObject = 0;
-
-    _availableMapsNames.clear();
-    _availableMapsNames = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
-
-    _isOpen = true;
-	_openModalDialog = true;
+	return closeWindow;
 }

@@ -1,5 +1,9 @@
 #include "ObjectPropertiesWindow.h"
 
+#include "../../ImGui/imGizmo.h"
+#include "glm/gtc/type_ptr.hpp"
+
+#include "RoadTools.h"
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
@@ -223,4 +227,137 @@ void ObjectPropertiesWindow::drawWindow()
         //}
     //}
     //ImGui::End();
+}
+
+namespace vbEditor
+{
+	extern SceneObject* _selectedSceneObject;
+}
+
+void showObjectProperties()
+{
+	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
+
+	ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
+	ImGui::SetNextWindowSizeConstraints(ImVec2(100, mainWindowSize.y - 18), ImVec2(500, mainWindowSize.y - 18));
+
+	bool isOpened = true;
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+	if (ImGui::Begin("Object Properties", &isOpened, windowFlags))
+	{
+		ImVec2 windowSize = ImGui::GetWindowSize();
+		ImGui::SetWindowPos(ImVec2(mainWindowSize.x - windowSize.x, 18));
+
+		if (vbEditor::_selectedSceneObject)
+		{
+			showObjectNameEdit();
+
+			ImGui::Separator();
+
+			showObjectTransformEdit();
+
+			ImGui::Separator();
+
+			RenderObject* renderComponent = dynamic_cast<RenderObject*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDER_OBJECT));
+			if (renderComponent)
+			{
+				if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					Material* material = renderComponent->getMaterial(0);
+					ImGui::Text("Material name: %s", material->name.c_str());
+				}
+			}
+
+			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
+			if (physicsComponent)
+			{
+				if (ImGui::CollapsingHeader("Physics Component", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+
+				}
+			}
+
+			RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+			if (roadComponent)
+			{
+				if (ImGui::CollapsingHeader("Road", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					// left
+					static float actualWinSize = Renderer::getInstance().getWindowDimensions().x;
+					static int selected = 0;
+					ImGui::BeginChild("left pane", ImVec2((ImGui::GetWindowSize().x * (0.4f)), 90), true);
+
+					ImVec2 range = ImVec2(0.0f, 0.0f);
+
+					RRoadProfile* profile = roadComponent->getRoadProfile();
+					std::vector<RoadLane> lanes = profile->getRoadLanes();
+
+					for (int i = 0; i < lanes.size(); i++)
+					{
+						char label[128];
+						sprintf(label, "%d: %s##%d", i, lanes[i].material.name.c_str(), i);
+						//sprintf(label, "MyObject %d", i);
+						if (ImGui::Selectable(label, selected == i))
+							selected = i;
+					}
+					ImGui::EndChild();
+					ImGui::SameLine();
+
+					//std::string pos = std::string("X: ");
+					ImGui::Text("X: %f, Y: %f", lanes[selected].r1, lanes[selected].r2);
+					//ImGui::LabelText(pos.c_str());
+
+					//static float values[4] = { 0.0, 1.0, 0.0, -1.0 };
+					
+					static std::vector<ImVec2> values = { ImVec2(-5.0f, -5.0f), ImVec2(0.0f, 0.0f) }; //, ImVec2(0.0f, 0.0f), ImVec2(0.5f, 0.5f)};
+				
+					static int values_offset = 0;
+					static double refresh_time = 0.0;
+					/*
+						static float phase = 0.0f;
+						values[values_offset] = cosf(phase);
+						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
+						phase += 0.10f*values_offset;
+						refresh_time += 1.0f / 60.0f;
+					*/
+					
+					//ImGui::PlotLines("Lines", values, IM_ARRAYSIZE(values), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0, 100));
+
+					ImGui::RoadProfileGraph("Profile", values, -5.0f, 5.0f, ImVec2(150, 150));
+				}
+			}
+		}
+	}
+	ImGui::End();
+}
+
+
+void showObjectNameEdit()
+{
+	char buffer[50];
+
+	strncpy(buffer, vbEditor::_selectedSceneObject->getName().c_str(), sizeof buffer);
+
+	buffer[sizeof buffer - 1] = '\0';
+
+	if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		vbEditor::_selectedSceneObject->setName(std::string(buffer));
+	}
+}
+
+
+void showObjectTransformEdit()
+{
+	ImGui::Text("Transformation");
+
+	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+
+	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getGlobalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
+
+	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
+	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
+	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
+
+	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getGlobalTransformMatrix()));
 }

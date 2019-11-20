@@ -10,9 +10,19 @@
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
 
+#include "../ImGui/imgui.h"
+#include "../ImGui/imgui_impl_glfw.h"
+#include "../ImGui/imgui_impl_opengl3.h"
+#include "../ImGui/imGizmo.h"
+#include "glm/gtc/type_ptr.hpp"
+
+#include "Windows/OpenDialogWindow.h"
+#include "Windows/SceneGraphWindow.h"
+#include "Windows/ObjectPropertiesWindow.h"
+
 //std::list<Editor*> editorInstances;
 
-Editor* editorInstance = nullptr;
+//Editor* editorInstance = nullptr;
 
 void editorMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
@@ -24,7 +34,7 @@ void editorMouseButtonCallback(GLFWwindow* window, int button, int action, int m
     //        break;
     //    }
     //}
-	editorInstance->mouseButtonCallback(button, action, mods);
+	//editorInstance->mouseButtonCallback(button, action, mods);
 }
 
 
@@ -38,7 +48,7 @@ void editorKeyCallback(GLFWwindow* window, int key, int scancode, int action, in
     //        break;
     //    }
     //}
-	editorInstance->keyCallback(key, scancode, action, mods);
+	//editorInstance->keyCallback(key, scancode, action, mods);
 }
 
 
@@ -52,7 +62,7 @@ void editorCharCallback(GLFWwindow* window, unsigned int c)
     //        break;
     //    }
     //}
-	editorInstance->charCallback(c);
+	//editorInstance->charCallback(c);
 }
 
 
@@ -66,7 +76,7 @@ void editorChangeWindowSizeCallback(GLFWwindow* window, int width, int height)
     //        break;
     //    }
     //}
-	editorInstance->changeWindowSizeCallback(width, height);
+	//editorInstance->changeWindowSizeCallback(width, height);
 }
 
 
@@ -80,10 +90,10 @@ void editorFramebufferSizeCallback(GLFWwindow* window, int width, int height)
     //        break;
     //    }
     //}
-	editorInstance->changeFramebufferSizeCallback(width, height);
+	//editorInstance->changeFramebufferSizeCallback(width, height);
 }
 
-
+/*
 Editor::Editor()
     : _cameraActive(false),
 	_addObjectMode(false), _objectToAdd(nullptr)
@@ -127,7 +137,7 @@ bool Editor::createWindow()
     }
     _window->setWindowTitle("vbcpp - editor");
 
-    glfwSetMouseButtonCallback(_window->getWindow(), editorMouseButtonCallback /*editorMouseButtonCallback*/);
+    glfwSetMouseButtonCallback(_window->getWindow(), editorMouseButtonCallback);
     glfwSetKeyCallback(_window->getWindow(), editorKeyCallback);
     glfwSetCharCallback(_window->getWindow(), editorCharCallback);
     glfwSetWindowSizeCallback(_window->getWindow(), editorChangeWindowSizeCallback);
@@ -173,17 +183,6 @@ void Editor::clearScene()
     GraphicsManager::getInstance().setCurrentCamera(_camera);
     _soundManager->setActiveCamera(_camera);
 
-	// Gizmo powinno byæ niezale¿nym obiektem i w³asnoœci¹ edytora, nie obiektem sceny
-    /*
-	_axisObject = _sceneManager->addSceneObject("editor#axis");
-    RStaticModel* axisModel = ResourceManager::getInstance().loadModel("axis.fbx", "");
-    axisModel->getMaterial(0)->shader = EDITOR_AXIS_SHADER;
-    RenderObject* axisRenderObject = new RenderObject(axisModel);
-    GraphicsManager::getInstance().addRenderObject(axisRenderObject, _axisObject);
-	*/
-    // ---------------------------------------------------
-	/*BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
-    Bus* bus = busLoader.loadBus("h9_raycast");*/
 }
 
 
@@ -464,12 +463,396 @@ void Editor::changeWindowSizeCallback(int width, int height)
 }
 
 
-void Editor::changeFramebufferSizeCallback(int width, int height)
+
+
+*/
+
+namespace vbEditor
 {
-    // TODO: change size all render targets in Renderer
-    Renderer::getInstance().setWindowDimensions(width, height);
+	Window window;
+	PhysicsManager* _physicsManager = nullptr;
+	SoundManager* _soundManager = nullptr;
+	SceneManager* _sceneManager = nullptr;
 
-}
+	CameraFPS* _camera = nullptr;
+	SceneObject* _cameraObject = nullptr;
+	SceneObject* _selectedSceneObject = nullptr;
+
+	static bool _showDemoWindow = false;
+	static bool _showOpenDialogWindow = true;
+	static bool _isCameraActive = false;
+	static bool _showObjectPropertyEditor = true;
+
+	std::vector<std::string> _availableMaps;// { "Demo", "Demo2", "Coœtam jeszcze" };
+
+	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	{
+		if (getGUIhasFocus())
+		{
+			return;
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+		{
+			_isCameraActive = true;
+		}
+
+		if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+		{
+			_isCameraActive = false;
+		}
+
+		
+	}
+
+	void processInput(double deltaTime)
+	{
+	
+		if (glfwGetKey(window.getWindow(), GLFW_KEY_W) == GLFW_PRESS)
+		{
+			_camera->moveForward(deltaTime);
+		}
+
+		if (glfwGetKey(window.getWindow(), GLFW_KEY_S) == GLFW_PRESS)
+		{
+			_camera->moveBackward(deltaTime);
+		}
+
+		if (glfwGetKey(window.getWindow(), GLFW_KEY_D) == GLFW_PRESS)
+		{
+			_camera->strafeRight(deltaTime);
+		}
+
+		if (glfwGetKey(window.getWindow(), GLFW_KEY_A) == GLFW_PRESS)
+		{
+			_camera->strafeLeft(deltaTime);
+		}
+	}
+
+	void changeFramebufferSizeCallback(GLFWwindow* window, int width, int height)
+	{
+		// TODO: change size all render targets in Renderer
+		Renderer::getInstance().setWindowDimensions(width, height);
+
+	}
+
+	bool createWindow()
+	{
+		if (!window.createWindow(1400, 900, 10, 40, false, true))
+		{
+			return false;
+		}
+		window.setWindowTitle("vbcpp - editor");
+
+		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
+		glfwSetKeyCallback(window.getWindow(), editorKeyCallback);
+		glfwSetCharCallback(window.getWindow(), editorCharCallback);
+		glfwSetWindowSizeCallback(window.getWindow(), editorChangeWindowSizeCallback);
+		glfwSetFramebufferSizeCallback(window.getWindow(), changeFramebufferSizeCallback);
+
+		ImGui::CreateContext();
+
+		ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), true);
+		ImGui_ImplOpenGL3_Init("#version 130");
+
+		ImGuiIO& io = ImGui::GetIO();
+		io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
+		io.Fonts->AddFontDefault();
+
+		return true;
+	}
+
+	void initializeEngineSubsystems()
+	{
+		OGLDriver::getInstance().initialize();
+
+		Renderer& renderer = Renderer::getInstance();
+		renderer.setMsaaAntialiasing(true);
+		renderer.setMsaaAntialiasingLevel(4);
+		renderer.setBloom(false);
+		renderer.setIsShadowMappingEnable(false);
+		renderer.init(window.getWidth(), window.getHeight());
+		renderer.setDayNightRatio(1.0f);
+		renderer.setAlphaToCoverage(true);
+		renderer.setExposure(1.87022f);
+		renderer.t = 0;
+
+		_physicsManager = new PhysicsManager;
+		_soundManager = new SoundManager;
+		_sceneManager = new SceneManager(_physicsManager, _soundManager);
+
+		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
+		_camera = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
+		_cameraObject->addComponent(_camera);
+		_camera->setRotationSpeed(0.01f);
+		_camera->setMoveSpeed(8.0f);
+
+		GraphicsManager::getInstance().setCurrentCamera(_camera);
+		_soundManager->setActiveCamera(_camera);
+
+		_availableMaps = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
+
+		_showOpenDialogWindow = true;
+	}
+
+	void clearScene()
+	{
+
+	}
+
+	void renderGUI()
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGuizmo::BeginFrame();
+
+		drawMainMenu();
+
+		if (_showDemoWindow)
+			ImGui::ShowTestWindow();
+
+		static int currentSelection = 0;
+		if (_showOpenDialogWindow)
+			if (openMapDialog(_availableMaps, currentSelection))
+			{
+				_showOpenDialogWindow = false;
+				SceneLoader sceneLoader(_sceneManager);
+				sceneLoader.loadMap(_availableMaps[currentSelection]);
+			}
+
+		if (_showObjectPropertyEditor)
+		{
+			SceneGraphWindow(_sceneManager->getSceneObjects());
+			showObjectProperties();
+		}
+
+		if (_selectedSceneObject)
+			ShowTransformGizmo();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
+
+	void run()
+	{
+		Renderer& renderer = Renderer::getInstance();
+
+		double lastXPos, lastYPos;
+		double xPos, yPos;
+
+		// Time calculation variables
+		double deltaTime = 0.0;
+		double accumulator = 0.0;
+
+		const double TIME_STEP = 1 / 60.0f;
+		const double MAX_ACCUMULATED_TIME = 1.0;
+
+		double timePhysicsCurr;
+		double timePhysicsPrev;
+		timePhysicsPrev = timePhysicsCurr = glfwGetTime();
+
+		//how long ago FPS counter was updated
+		double lastFPSupdate = timePhysicsCurr;
+
+		int nbFrames = 0;
+
+		while (window.isOpened())
+		{
+			// Time
+			nbFrames++;
+
+			timePhysicsCurr = glfwGetTime();
+			deltaTime = timePhysicsCurr - timePhysicsPrev;
+			timePhysicsPrev = timePhysicsCurr;
+
+			deltaTime = std::max(0.0, deltaTime);
+			accumulator += deltaTime;
+			accumulator = clamp(accumulator, 0.0, MAX_ACCUMULATED_TIME);
+
+			if (timePhysicsCurr - lastFPSupdate >= 1.0f)
+			{
+				nbFrames = 0;
+				lastFPSupdate += 1.0f;
+			}
+
+			
+			// input
+			if (!getGUIhasFocus())
+			{
+			processInput(deltaTime);
+				
+
+				glfwGetCursorPos(window.getWindow(), &xPos, &yPos);
+
+				if (_isCameraActive)
+				{
+					double dx = (xPos - lastXPos);
+					double dy = (yPos - lastYPos);
+
+					if (_camera)
+						_cameraObject->rotate(static_cast<float>(-dy * _camera->getRotationSpeed()),
+												static_cast<float>(-dx * _camera->getRotationSpeed()), 
+													0.0f);
+				}
+
+				lastXPos = xPos;
+				lastYPos = yPos;
+			}
+			
+
+			// fixed update
+			while (accumulator > TIME_STEP)
+			{
+				accumulator -= TIME_STEP;
+
+			}
 
 
+			// rendering
+			renderer.renderAll();
+			renderGUI();
 
+			window.swapBuffers();
+			window.updateEvents();
+		}
+	}
+
+	void shutDown()
+	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+
+	}
+
+	bool getGUIhasFocus()
+	{
+		return (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard);
+	}                    
+
+	void drawMainMenu()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Open map...", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
+				ImGui::Separator();
+				ImGui::MenuItem("Exit");
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Windows"))
+			{
+				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
+	}
+
+	void loadMapData()
+	{
+
+	}
+
+	void ShowTransformGizmo()
+	{
+
+		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
+		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+		if (ImGui::IsKeyPressed(69)) // E key
+			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		if (ImGui::IsKeyPressed(82)) // R key
+			mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		if (ImGui::IsKeyPressed(84)) // T key
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+			mCurrentGizmoOperation = ImGuizmo::ROTATE;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		/*
+		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+
+		glm::mat4 objMat = glm::mat4(1.);
+		ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(obj->getGlobalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
+		ImGui::InputFloat3("Tr", matrixTranslation, 3);
+		ImGui::InputFloat3("Rt", matrixRotation, 3);
+		ImGui::InputFloat3("Sc", matrixScale, 3);
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(obj->getGlobalTransformMatrix()));
+		*/
+		/*
+		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+		{
+			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+				mCurrentGizmoMode = ImGuizmo::LOCAL;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+				mCurrentGizmoMode = ImGuizmo::WORLD;
+		}
+		*/
+
+		static bool useSnap(false);
+
+		if (ImGui::IsKeyPressed(80))
+			useSnap = !useSnap;
+		ImGui::Checkbox("", &useSnap);
+
+		ImGui::SameLine();
+
+		//vec_t snap;
+		static float snap[3] = { 1.f, 1.f, 1.f };
+		static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
+		static float boundsSnap[] = { 0.1f, 0.1f, 0.1f };
+
+		static bool boundSizing = false;
+		static bool boundSizingSnap = false;
+
+		switch (mCurrentGizmoOperation)
+		{
+		case ImGuizmo::TRANSLATE:
+			//snap = config.mSnapTranslation;
+			ImGui::InputFloat3("Snap", &snap[0]);
+			break;
+		case ImGuizmo::ROTATE:
+			//snap = config.mSnapRotation;
+			ImGui::InputFloat("Angle Snap", &snap[0]);
+			break;
+		case ImGuizmo::SCALE:
+			//snap = config.mSnapScale;
+			ImGui::InputFloat("Scale Snap", &snap[0]);
+			break;
+		}
+
+		ImGui::Checkbox("Bound Sizing", &boundSizing);
+		if (boundSizing)
+		{
+			ImGui::PushID(3);
+			ImGui::Checkbox("", &boundSizingSnap);
+			ImGui::SameLine();
+			ImGui::InputFloat3("Snap", boundsSnap);
+			ImGui::PopID();
+		}
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+			mCurrentGizmoOperation, mCurrentGizmoMode,
+			glm::value_ptr(_selectedSceneObject->getGlobalTransformMatrix()),
+			NULL,
+			useSnap ? &snap[0] : NULL,
+			boundSizing ? bounds : NULL,
+			boundSizingSnap ? boundsSnap : NULL
+		);
+	}
+
+} // namespace

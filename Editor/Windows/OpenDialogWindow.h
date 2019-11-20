@@ -1,26 +1,9 @@
 #ifndef OPENDIALOGWINDOW_H_INCLUDED
 #define OPENDIALOGWINDOW_H_INCLUDED
 
+#include <vector>
 
-#include "EditorWindow.h"
-
-
-class OpenDialogWindow : public EditorWindow
-{
-    private:
-        std::vector<std::string> _availableMapsNames;
-        int _listBoxMapSelectedItem;
-
-		bool _openModalDialog;
-
-        virtual void drawWindow() override;
-
-    public:
-        OpenDialogWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen = false);
-
-        void open();
-
-};
+bool openMapDialog(const std::vector<std::string>& items, int& current_item);
 
 
 #endif // OPENDIALOGWINDOW_H_INCLUDED
