@@ -886,6 +886,11 @@ void BusLoader::loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusR
 void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule)
 {
     XMLElement* mirrorElement = moduleElement->FirstChildElement("Mirror");
+	if (!GameConfig::getInstance().isMirrorsEnabled)
+	{
+		return;
+	}
+
     while (mirrorElement != nullptr)
     {
         Logger::info("XML: Mirror component data");
@@ -894,9 +899,10 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
         glm::vec3 position = XMLstringToVec3(mirrorElement->Attribute("position"));
         glm::vec3 rotation = XMLstringToVec3(mirrorElement->Attribute("rotation"));
         glm::vec3 normal = XMLstringToVec3(mirrorElement->Attribute("normal"));
+		float renderingDistance = GameConfig::getInstance().mirrorRenderingDistance;
 
         SceneObject* mirrorObject = _sMgr->addSceneObject(name);
-        MirrorComponent* mirrorComponent = GraphicsManager::getInstance().addMirrorComponent(name);
+        MirrorComponent* mirrorComponent = GraphicsManager::getInstance().addMirrorComponent(name, renderingDistance);
         mirrorComponent->setNormalVector(normal);
 
         mirrorObject->addComponent(mirrorComponent);

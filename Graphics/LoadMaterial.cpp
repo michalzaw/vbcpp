@@ -1,5 +1,7 @@
 #include "LoadMaterial.h"
 
+#include "../Game/GameConfig.h"
+
 #include "../Utils/XmlUtils.h"
 
 
@@ -236,6 +238,12 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     {
         sMaterial.glassTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
     }
+
+	if (sMaterial.shader == MIRROR_MATERIAL && !GameConfig::getInstance().isMirrorsEnabled)
+	{
+		sMaterial.shader = SOLID_MATERIAL;
+		sMaterial.diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+	}
 
 
     return sMaterial;

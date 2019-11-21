@@ -83,6 +83,7 @@ void SceneLoader::loadGrass(XMLElement* sceneElement)
 		std::string grassModelFileName(grassElement->Attribute("model"));
 		std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
 		std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+		float renderingDistance = GameConfig::getInstance().grassRenderingDistance;
 
 		std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
 		if (FilesHelper::isFileExists(_dirPath + terrainHeightNormalMapFileName))
@@ -103,6 +104,7 @@ void SceneLoader::loadGrass(XMLElement* sceneElement)
 
 		SceneObject * grassObject = _sceneManager->addSceneObject("grass");
 		Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
+		grassComponent->setRenderingDistance(renderingDistance);
 		grassObject->addComponent(grassComponent);
 	}
 }

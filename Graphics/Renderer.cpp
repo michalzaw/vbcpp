@@ -1644,8 +1644,11 @@ void Renderer::renderScene(RenderData* renderData)
 
             glDisable(GL_CULL_FACE);
 
+			Grass* grass = static_cast<Grass*>(i->renderObject);
+			float renderingDistance = grass->getRenderingDistance();
+
             Frustum frustum(glm::perspective(camera->getViewAngle(), (float)camera->getWindowWidth() / (float)camera->getWindowHeight(),
-                                     camera->getNearValue(), 30.0f) * camera->getViewMatrix());
+                                     camera->getNearValue(), renderingDistance) * camera->getViewMatrix());
             AABB* aabb = frustum.getAABB();
             glm::vec3 min = aabb->getMinCoords();
             min = glm::vec3((float)((int)(min.x / 0.5)) * 0.5, (float)min.y, (float)((int)(min.z / 0.5)) * 0.5);
@@ -1655,7 +1658,6 @@ void Renderer::renderScene(RenderData* renderData)
             float height = (max.z - min.z) / 0.5;
             float a = width * height;
 
-            Grass* grass = static_cast<Grass*>(i->renderObject);
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_COLOR], grass->getGrassColor());
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_HEIGHTMAP], grass->getTerrainHeightmap());
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GRASS_DENSITY], grass->getGrassDensityTexture());
