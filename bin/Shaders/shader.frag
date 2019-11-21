@@ -120,10 +120,10 @@ vec4 specular;
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
-	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
+	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity * 4;
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
-	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 20;
+	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 2;// * 20;
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
@@ -204,7 +204,8 @@ void main()
 	
 float isGrass = 0.0f;
 #ifdef GRASS
-	textureColor = textureColor * grassColor;
+	float c = (textureColor.r + textureColor.g + textureColor.b) / 3.0f;
+	textureColor = diffuse = vec4(c, c, c, textureColor.a) * grassColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
@@ -214,6 +215,9 @@ float isGrass = 0.0f;
 	float miFactor = 0;
 	float normalFactor = 1;
 #ifdef ALPHA_TEST
+	ambient /= 4.0f;
+	//diffuse /= 2.0f;
+
 	if (textureColor.a < 0.1f)
 		discard;
 	
@@ -345,7 +349,7 @@ float isGrass = 0.0f;
 
 	float brightness = dot(FragmentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	if (brightness > 0.1f)
-		BrightnessColor = vec4(FragmentColor.rgb, 1.0f);
+		BrightnessColor = vec4(FragmentColor.rgb, FragmentColor.a);
 	else
-		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }

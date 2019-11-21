@@ -4,7 +4,8 @@
 Grass::Grass(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
     : RenderObject(model),
     _terrainHeightmap(terrainHeightmap), _grassDensityTexture(grassDensityTexture),
-    _grassColor(1.0f, 1.0f, 1.0f, 1.0f)
+    //_grassColor(0.388f, 0.78f, 0.0f, 1.0f),
+	_grassColor(0.5f, 1.0f, 0.0f, 1.0f)
 {
     _type = CT_GRASS;
 }
