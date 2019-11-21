@@ -620,8 +620,8 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 {
     btVector3 busPivot = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
     btVector3 doorPivot = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
-    btVector3 axisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisA", btVector3(0, 1, 0));
-    btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
+	btVector3 axisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisA", btVector3(0, 1, 0));
+	btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
 
 
     RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
