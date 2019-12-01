@@ -551,6 +551,19 @@ void drawGrassColorWindow()
 }
 
 
+void drawColorWindow()
+{
+	if (ImGui::Begin("Tree colors"))
+	{
+		ImGui::ColorEdit3("Color1##1", (float*)& Renderer::getInstance().color1, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color2##2", (float*)& Renderer::getInstance().color2, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color3##3", (float*)& Renderer::getInstance().color3, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color4##4", (float*)& Renderer::getInstance().color4, ImGuiColorEditFlags_NoOptions);
+	}
+	ImGui::End();
+}
+
+
 void drawImGui()
 {
 	if (showImGui)
@@ -561,6 +574,7 @@ void drawImGui()
 
 		drawLineAndDirectionWindow();
 		drawGrassColorWindow();
+		drawColorWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

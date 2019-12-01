@@ -84,6 +84,11 @@ enum UniformName
 	UNIFORM_SPECULAR_IRRADIANCE_MAP,
 	UNIFORM_BRDF_LUT,
 
+	UNIFORM_COLOR_1,
+	UNIFORM_COLOR_2,
+	UNIFORM_COLOR_3,
+	UNIFORM_COLOR_4,
+
 	NUMBER_OF_UNIFORMS
 };
 
@@ -172,6 +177,10 @@ class Renderer
         Renderer();
 
     public:
+		glm::vec3 color1;
+		glm::vec3 color2;
+		glm::vec3 color3;
+		glm::vec3 color4;
         int t;
         ~Renderer();
 

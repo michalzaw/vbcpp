@@ -212,26 +212,28 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 
     const char* type = materialElement->Attribute("type");
 
-    if (strcmp(type, "normalmapping") == 0)
-        sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
-    else if (strcmp(type, "solid") == 0)
-        sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
-    else if (strcmp(type, "no_texture") == 0)
-        sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
-    else if (strcmp(type, "tree") == 0)
-        sMaterial.shader = TREE_MATERIAL;
-    else if (strcmp(type, "alpha_test") == 0)
-        sMaterial.shader = ALPHA_TEST_MATERIAL;
-    else if (strcmp(type, "glass") == 0)
-        sMaterial.shader = GLASS_MATERIAL;
-    else if (strcmp(type, "grass") == 0)
-        sMaterial.shader = GRASS_MATERIAL;
-    else if (strcmp(type, "car_paint") == 0)
-        sMaterial.shader = CAR_PAINT_MATERIAL;
-    else if (strcmp(type, "mirror") == 0)
-        sMaterial.shader = MIRROR_MATERIAL;
+	if (strcmp(type, "normalmapping") == 0)
+		sMaterial.shader = NORMALMAPPING_MATERIAL; //_OGLDriver->GetShader(NORMALMAPPING_MATERIAL);
+	else if (strcmp(type, "solid") == 0)
+		sMaterial.shader = SOLID_MATERIAL; //_OGLDriver->GetShader(SOLID_MATERIAL);
+	else if (strcmp(type, "no_texture") == 0)
+		sMaterial.shader = NOTEXTURE_MATERIAL; //_OGLDriver->GetShader(NOTEXTURE_MATERIAL);
+	else if (strcmp(type, "tree") == 0)
+		sMaterial.shader = TREE_MATERIAL;
+	else if (strcmp(type, "alpha_test") == 0)
+		sMaterial.shader = ALPHA_TEST_MATERIAL;
+	else if (strcmp(type, "glass") == 0)
+		sMaterial.shader = GLASS_MATERIAL;
+	else if (strcmp(type, "grass") == 0)
+		sMaterial.shader = GRASS_MATERIAL;
+	else if (strcmp(type, "car_paint") == 0)
+		sMaterial.shader = CAR_PAINT_MATERIAL;
+	else if (strcmp(type, "mirror") == 0)
+		sMaterial.shader = MIRROR_MATERIAL;
 	else if (strcmp(type, "pbr") == 0)
 		sMaterial.shader = PBR_MATERIAL;
+	else if (strcmp(type, "new_tree") == 0)
+		sMaterial.shader = NEW_TREE_MATERIAL;
 
 
     if (sMaterial.shader == GLASS_MATERIAL && sMaterial.glassTexture == NULL)
