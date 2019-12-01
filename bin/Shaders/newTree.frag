@@ -100,7 +100,7 @@ uniform vec3 color4;
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
-	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity / 16;// dla aces / 2, dla classic / 16
+	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;// dla aces / 2, dla classic / 16
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
 	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 2;// * 20;
@@ -179,8 +179,8 @@ void main()
 	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
 	
 	
-	ambient = textureColor;
-	diffuse = textureColor;
+	ambient = matAmbient * textureColor;
+	diffuse = matDiffuse * textureColor;
 	specular = matSpecular * textureColor;
 	
 	if (textureColor.a < 0.2f)
