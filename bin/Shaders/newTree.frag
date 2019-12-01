@@ -103,7 +103,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity / 16;// dla aces / 2, dla classic / 16
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
-	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor * 2;// * 2;// * 20;
+	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 2;// * 20;
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
