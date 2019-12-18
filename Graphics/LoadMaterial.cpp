@@ -1,5 +1,7 @@
 #include "LoadMaterial.h"
 
+#include "../Utils/XmlUtils.h"
+
 
 // XML MATERIAL FILE DEFINITIONS
 const char* XML_MATERIAL_ROOT = "Materials";
@@ -73,6 +75,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     sMaterial.specularColor = XMLstringToVec4(materialElement->Attribute("specular"));
 
     sMaterial.shininess = (float)atof(materialElement->Attribute("shininess"));
+
+	sMaterial.fixDisappearanceAlpha = (float)XmlUtils::getAttributeBoolOptional(materialElement, "fixDisappearanceAlpha");
 
     sMaterial.offset = XMLstringToVec2(materialElement->Attribute("offset"));
     sMaterial.scale = XMLstringToVec2(materialElement->Attribute("scale"));

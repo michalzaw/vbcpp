@@ -105,7 +105,7 @@ void SceneSaver::saveSunLight(XMLElement* sunElement, SceneObject* sceneObject)
 
 void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 {
-	RenderObject* renderObject = static_cast<RenderObject*>(sceneObject->getComponent(CT_RENDER_OBJECT));
+	RenderObject* renderObject = static_cast<RenderObject*>(sceneObject->getComponent(CT_SKY));
 
 	if (renderObject)
 	{

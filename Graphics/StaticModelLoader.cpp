@@ -6,8 +6,8 @@
 using namespace tinyxml2;
 
 
-StaticModelLoader::StaticModelLoader()
-    : _assimpScene(NULL)
+StaticModelLoader::StaticModelLoader(bool normalsSmoothing)
+    : _normalsSmoothing(normalsSmoothing), _assimpScene(NULL)
 {
     _materialLoader = new MaterialLoader;
 }
@@ -168,10 +168,13 @@ void StaticModelLoader::getMeshMenderVertexFromAssimpMesh(const aiMesh* assimpMe
 
 void StaticModelLoader::runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices)
 {
-    std::vector<unsigned int> temp;
-    MeshMender mender;
-    mender.Mend(vertices, indices, temp, 0.7f, 0.7f, 0.7f, 1.0f,
-                MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+	if (_normalsSmoothing)
+	{
+		std::vector<unsigned int> temp;
+		MeshMender mender;
+		mender.Mend(vertices, indices, temp, 0.7f, 0.7f, 0.7f, 1.0f,
+			MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+	}
 }
 
 

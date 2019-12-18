@@ -21,6 +21,10 @@ BusRaycast::BusRaycast()
     _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
+	_displayText.head = "0";
+	_displayText.line1 = "katowice";
+	_displayText.line2 = "dworzec pkp";
+	_displayText.type = TWO_LINE;
 
 }
 
@@ -40,6 +44,11 @@ BusRaycast::~BusRaycast()
 	for (Door* door : _doors)
 	{
 		delete door;
+	}
+
+	for (std::pair<DisplayComponent*, BusDisplayType>& display : _displays)
+	{
+		sceneManager->removeSceneObject(display.first->getSceneObject());
 	}
 
 	if (_desktop != NULL)
@@ -365,6 +374,33 @@ MirrorComponent* BusRaycast::getMirror(int index)
 int BusRaycast::getMirrorsCount()
 {
     return _mirrors.size();
+}
+
+
+DisplayText& BusRaycast::getDisplayText()
+{
+	return _displayText;
+}
+
+
+void BusRaycast::updateDisplays()
+{
+	for (int i = 0; i < _displays.size(); ++i)
+	{
+		BusDisplayType type = _displays[i].second;
+		if (type == BDT_LINE_AND_DIRECTION)
+		{
+			_displays[i].first->setText(_displayText);
+		}
+		else
+		{
+			DisplayText text;
+			text.line1 = _displayText.head;
+			text.type = ONE_LINE;
+
+			_displays[i].first->setText(text);
+		}
+	}
 }
 
 

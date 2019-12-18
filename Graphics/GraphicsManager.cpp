@@ -52,6 +52,11 @@ GraphicsManager::~GraphicsManager()
         delete *i;
     }
 
+	for (std::list<DisplayComponent*>::iterator i = _displayComponents.begin(); i != _displayComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
 	if (_sky != NULL)
 	{
 		delete _sky;
@@ -203,6 +208,16 @@ ClickableObject* GraphicsManager::addClickableObject()
 }
 
 
+DisplayComponent* GraphicsManager::addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
+{
+	DisplayComponent* displayComponent = new DisplayComponent(font, displayWidth, displayHeight);
+
+	_displayComponents.push_back(displayComponent);
+
+	return displayComponent;
+}
+
+
 Sky* GraphicsManager::addSky(RTexture* texture, SceneObject* owner)
 {
 	if (_sky != NULL)
@@ -338,6 +353,22 @@ void GraphicsManager::removeClickableObject(ClickableObject* clickableObject)
             return;
         }
     }
+}
+
+
+void GraphicsManager::removeDisplayComponent(DisplayComponent* displayComponent)
+{
+	for (std::list<DisplayComponent*>::iterator i = _displayComponents.begin(); i != _displayComponents.end(); ++i)
+	{
+		if (*i == displayComponent)
+		{
+			i = _displayComponents.erase(i);
+
+			delete displayComponent;
+
+			return;
+		}
+	}
 }
 
 

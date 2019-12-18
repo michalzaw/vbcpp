@@ -38,6 +38,13 @@ struct BusRayCastWheel
 };
 
 
+enum BusDisplayType
+{
+	BDT_LINE_AND_DIRECTION,
+	BDT_LINE
+};
+
+
 class BusRaycast : public Bus
 {
     friend class BusLoader;
@@ -87,6 +94,9 @@ class BusRaycast : public Bus
         virtual MirrorComponent* getMirror(int index);
         virtual int getMirrorsCount();
 
+		virtual DisplayText& getDisplayText();
+		virtual void updateDisplays();
+
         virtual SceneObject* getDesktopObject();
 
         virtual float getBusSpeed();
@@ -122,6 +132,9 @@ class BusRaycast : public Bus
         DoorList        _doors;
 
         std::vector<MirrorComponent*> _mirrors;
+
+		DisplayText _displayText;
+		std::vector<std::pair<DisplayComponent*, BusDisplayType>> _displays;
 
         Desktop* _desktop;
         RenderObject* _desktopRenderObject;

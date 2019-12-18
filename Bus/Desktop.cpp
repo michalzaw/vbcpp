@@ -122,6 +122,8 @@ void Desktop::setButtonState(DesktopButtonType type, unsigned int state)
 void Desktop::clickButton(DesktopButtonType type)
 {
     DesktopButton& button = getButton(type);
+	if (button.modelNode == NULL)
+		return;
 
     button.currentState = (button.currentState + 1) % button.statesCount;
 }

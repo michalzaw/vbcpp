@@ -6,6 +6,7 @@
 #include "../Graphics/Model.h"
 #include "../Graphics/RRoadProfile.h"
 #include "../Graphics/RoadProfileLoader.h"
+#include "../Graphics/RDisplayFont.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -48,12 +49,14 @@ class ResourceManager
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 
-        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath /*, OGLDriver* driver */);
-        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames);
-        RStaticModel* loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel);
+        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath, bool normalsSmoothing = true /*, OGLDriver* driver */);
+        RStaticModel* loadModelWithHierarchy(std::string path, std::string texturePath, std::vector<std::string> nodesToSkipNames, bool normalsSmoothing = true);
+        RStaticModel* loadModelWithHierarchyOnlyNode(std::string path, std::string texturePath, std::string nodeToLoadName, Transform& loadedNodeTransformInModel,
+													 bool normalsSmoothing = true);
         void loadModelWithHierarchyOnlyNodes(std::string path, std::string texturePath, std::vector<std::string> nodesToLoadNames,
-                                             std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes);
-        RStaticModel* loadModel(std::string path, std::string texturePath);
+                                             std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes,
+											 bool normalsSmoothing = true);
+        RStaticModel* loadModel(std::string path, std::string texturePath, bool normalsSmoothing = true);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 
@@ -62,6 +65,8 @@ class ResourceManager
 		RObject* loadRObject(std::string name);
 
 		RRoadProfile* loadRoadProfile(std::string name);
+
+		RDisplayFont* loadDisplayFont(std::string name);
 
 		void setAlternativeResourcePath(std::string path);
 		std::string getAlternativeResourcePath();

@@ -27,6 +27,8 @@ class StaticModelLoader
 
         static const unsigned int IMPORT_FLAGS_FOR_LOADING_WITHOUT_HIERARCHY = IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY | aiProcess_PreTransformVertices;
 
+		bool _normalsSmoothing;
+
         Assimp::Importer _assimpImporter;
         const aiScene* _assimpScene;
 
@@ -56,7 +58,7 @@ class StaticModelLoader
         StaticModelNode* createModelNode(aiNode* node, glm::mat4 parentTransform = glm::mat4(1.0f), StaticModelNode* parent = NULL);
 
     public:
-        StaticModelLoader();
+        StaticModelLoader(bool normalsSmoothing = true);
 		~StaticModelLoader()
 		{
 			delete _materialLoader;

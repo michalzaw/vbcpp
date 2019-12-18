@@ -8,108 +8,49 @@
 using namespace tinyxml2;
 
 
-class XmlUtils
+namespace XmlUtils
 {
-    public:
-        static std::string getAttributeString(XMLElement* xmlElement, const char* attributeName)
-        {
-            return std::string(xmlElement->Attribute(attributeName));
-        }
+std::string getAttributeString(XMLElement* xmlElement, const char* attributeName);
 
-        static float getAttributeFloat(XMLElement* xmlElement, const char* attributeName)
-        {
-            return (float)atof(xmlElement->Attribute(attributeName));
-        }
 
-        static bool getAttributeBool(XMLElement* xmlElement, const char* attributeName)
-        {
-            const char* value = xmlElement->Attribute(attributeName);
-            return strcmp(value, "true") == 0;
-        }
+float getAttributeFloat(XMLElement* xmlElement, const char* attributeName);
 
-        static glm::vec2 getAttributeVec2(XMLElement* xmlElement, const char* attributeName)
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            return XMLstringToVec2(cValue);
 
-        }
-        static glm::vec3 getAttributeVec3(XMLElement* xmlElement, const char* attributeName)
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            return XMLstringToVec3(cValue);
+int getAttributeInt(XMLElement* xmlElement, const char* attributeName);
 
-        }
-        static glm::vec4 getAttributeVec4(XMLElement* xmlElement, const char* attributeName)
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            return XMLstringToVec4(cValue);
 
-        }
-        static btVector3 getAttributeBtVector3(XMLElement* xmlElement, const char* attributeName)
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            return XMLstringToBtVec3(cValue);
+bool getAttributeBool(XMLElement* xmlElement, const char* attributeName);
+ 
 
-        }
+glm::vec2 getAttributeVec2(XMLElement* xmlElement, const char* attributeName);
 
-        static std::string getAttributeStringOptional(XMLElement* xmlElement, const char* attributeName, std::string defaultValue = "")
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return std::string(cValue);
-            else
-                return defaultValue;
-        }
+glm::vec3 getAttributeVec3(XMLElement* xmlElement, const char* attributeName);
 
-        static float getAttributeFloatOptional(XMLElement* xmlElement, const char* attributeName, float defaultValue = 0.0f)
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return (float)atof(cValue);
-            else
-                return defaultValue;
-        }
+glm::vec4 getAttributeVec4(XMLElement* xmlElement, const char* attributeName);
 
-		static bool getAttributeBoolOptional(XMLElement* xmlElement, const char* attributeName, bool defaultValue = false)
-		{
-			const char* value = xmlElement->Attribute(attributeName);
-			return strcmp(value, "true") == 0;
-		}
+btVector3 getAttributeBtVector3(XMLElement* xmlElement, const char* attributeName);
 
-        static glm::vec2 getAttributeVec2Optional(XMLElement* xmlElement, const char* attributeName, glm::vec2 defaultValue = glm::vec2(0, 0))
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return XMLstringToVec2(cValue);
-            else
-                return defaultValue;
-        }
-        static glm::vec3 getAttributeVec3Optional(XMLElement* xmlElement, const char* attributeName, glm::vec3 defaultValue = glm::vec3(0, 0, 0))
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return XMLstringToVec3(cValue);
-            else
-                return defaultValue;
-        }
-        static glm::vec4 getAttributeVec4Optional(XMLElement* xmlElement, const char* attributeName, glm::vec4 defaultValue = glm::vec4(0, 0, 0, 0))
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return XMLstringToVec4(cValue);
-            else
-                return defaultValue;
-        }
-        static btVector3 getAttributeBtVector3Optional(XMLElement* xmlElement, const char* attributeName, btVector3 defaultValue = btVector3(0, 0, 0))
-        {
-            const char* cValue = xmlElement->Attribute(attributeName);
-            if (cValue != NULL)
-                return XMLstringToBtVec3(cValue);
-            else
-                return defaultValue;
-        }
 
-};
+std::string getAttributeStringOptional(XMLElement* xmlElement, const char* attributeName, std::string defaultValue = "");
+
+
+float getAttributeFloatOptional(XMLElement* xmlElement, const char* attributeName, float defaultValue = 0.0f);
+
+
+int getAttributeIntOptional(XMLElement* xmlElement, const char* attributeName, int defaultValue = 0);
+
+
+bool getAttributeBoolOptional(XMLElement* xmlElement, const char* attributeName, bool defaultValue = false);
+
+
+glm::vec2 getAttributeVec2Optional(XMLElement* xmlElement, const char* attributeName, glm::vec2 defaultValue = glm::vec2(0, 0));
+
+glm::vec3 getAttributeVec3Optional(XMLElement* xmlElement, const char* attributeName, glm::vec3 defaultValue = glm::vec3(0, 0, 0));
+
+glm::vec4 getAttributeVec4Optional(XMLElement* xmlElement, const char* attributeName, glm::vec4 defaultValue = glm::vec4(0, 0, 0, 0));
+
+btVector3 getAttributeBtVector3Optional(XMLElement* xmlElement, const char* attributeName, btVector3 defaultValue = btVector3(0, 0, 0));
+} // namespace
 
 
 #endif // XMLUTILS_H_INCLUDED

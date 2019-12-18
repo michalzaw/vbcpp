@@ -33,8 +33,18 @@
 
 #include "EditorMain.h"
 
+#define DRAW_IMGUI true
+#ifdef DRAW_IMGUI
+#include "ImGui/imgui.h"
+#include "ImGui/imgui_impl_glfw.h"
+#include "ImGui/imgui_impl_opengl3.h"
+#endif // DRAW_IMGUI
+
 
 #define RUN_EDITOR false
+
+
+bool showImGui = false;
 
 
 // Definicje globalne
@@ -66,6 +76,13 @@ void onSceneObjectClick(SceneObject* sceneObject)
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+	#ifdef DRAW_IMGUI
+	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
+	{
+		return;
+	}
+	#endif // DRAW_IMGUI
+
     if (key == GLFW_KEY_O && action == GLFW_PRESS)
         cameraControll = !cameraControll;
 
@@ -89,13 +106,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 	    if (l->getDiffiseIntenisty() > 0.05)
         {
-            l->setAmbientIntensity(0.05);
+            l->setAmbientIntensity(0.0025);
             l->setDiffuseIntensity(0.0);
             Renderer::getInstance().setDayNightRatio(-1.0f);
         }
         else
         {
-            l->setAmbientIntensity(0.5);
+            l->setAmbientIntensity(0.025);
             l->setDiffuseIntensity(0.5);
             Renderer::getInstance().setDayNightRatio(1.0f);
         }
@@ -171,6 +188,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             mirrorControlIndex = -1;
         }
     }
+
+	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
+	{
+		showImGui = !showImGui;
+	}
 
     // debug
     if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey( window, GLFW_KEY_LEFT_CONTROL ) == GLFW_PRESS)
@@ -300,6 +322,13 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 // Bufforowane przetwarzanie zdarzeń
 void readInput(GLFWwindow* window, double deltaTime)
 {
+	#ifdef DRAW_IMGUI
+	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
+	{
+		return;
+	}
+	#endif // DRAW_IMGUI
+
 	if (glfwGetKey( window, GLFW_KEY_W ) == GLFW_PRESS)
 	{
 		camFPS->moveForward(deltaTime);
@@ -437,6 +466,90 @@ void readInput(GLFWwindow* window, double deltaTime)
 }
 
 
+void initializeImGui()
+{
+	ImGui::CreateContext();
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(win->getWindow(), true);
+	ImGui_ImplOpenGL3_Init("#version 130");
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
+	io.Fonts->AddFontDefault();
+}
+
+
+void destroyImGuiContext()
+{
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+}
+
+
+void drawLineAndDirectionWindow()
+{
+	if (ImGui::Begin("Line and direction"))
+	{
+		char lineBuffer[1024];
+		char direction1Buffer[1024];
+		char direction2Buffer[1024];
+
+		strncpy(lineBuffer, bus->getDisplayText().head.c_str(), sizeof lineBuffer);
+		strncpy(direction1Buffer, bus->getDisplayText().line1.c_str(), sizeof direction1Buffer);
+		strncpy(direction2Buffer, bus->getDisplayText().line2.c_str(), sizeof direction2Buffer);
+
+		lineBuffer[sizeof lineBuffer - 1] = '\0';
+		direction1Buffer[sizeof direction1Buffer - 1] = '\0';
+		direction2Buffer[sizeof direction2Buffer - 1] = '\0';
+
+		if (ImGui::InputText("Line", lineBuffer, IM_ARRAYSIZE(lineBuffer)))
+		{
+			bus->getDisplayText().head = lineBuffer;
+		}
+		if (ImGui::InputText("Direction line 1", direction1Buffer, IM_ARRAYSIZE(direction1Buffer)))
+		{
+			bus->getDisplayText().line1 = direction1Buffer;
+		}
+		if (ImGui::InputText("Direction line 2", direction2Buffer, IM_ARRAYSIZE(direction2Buffer)))
+		{
+			bus->getDisplayText().line2 = direction2Buffer;
+		}
+
+		int e = bus->getDisplayText().type;
+		ImGui::RadioButton("one line", &e, 1);
+		ImGui::RadioButton("two lines", &e, 2);
+		ImGui::RadioButton("two lines, first big", &e, 3);
+		ImGui::RadioButton("two lines, second big", &e, 4);
+		bus->getDisplayText().type = (DisplayTextType)e;
+
+		if (ImGui::Button("Ok", ImVec2(120, 0)))
+		{
+			bus->updateDisplays();
+		}
+	}
+	ImGui::End();
+}
+
+
+void drawImGui()
+{
+	if (showImGui)
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		drawLineAndDirectionWindow();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
+}
+
+
 void catchArgs(int argc, char** argv)
 {
 	if (argc > 1)
@@ -482,6 +595,10 @@ int main(int argc, char** argv)
     // Callbacki do obslugi zdarzen
     glfwSetKeyCallback(win->getWindow(), key_callback);
     glfwSetMouseButtonCallback(win->getWindow(), mouse_button_callback);
+
+	#ifdef DRAW_IMGUI
+	initializeImGui();
+	#endif // DRAW_IMGUI
 
     //glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -711,6 +828,11 @@ int main(int argc, char** argv)
         // Render GUI
         renderer.renderGUI(gui->getGUIRenderList());
 
+		// ImGUI
+		#ifdef DRAW_IMGUI
+		drawImGui();
+		#endif // DRAW_IMGUI
+
         // Swap buffers and poll events
         win->swapBuffers();
         win->updateEvents();
@@ -728,6 +850,10 @@ int main(int argc, char** argv)
     sndMgr->drop();
     physMgr->drop();
     delete sceneMgr;
+
+	#ifdef DRAW_IMGUI
+	destroyImGuiContext();
+	#endif // DRAW_IMGUI
 
     delete win;
 

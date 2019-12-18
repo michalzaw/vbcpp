@@ -71,6 +71,7 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["model"] = componentElement->Attribute("model");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
+	object->getComponents()[componentIndex]["normalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "normalsSmoothing", "true");
 }
 
 
@@ -208,7 +209,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			std::string modelPath = objectDirPath + modelFile;
 
-			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath);
+			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath, toBool(components[i]["normalsSmoothing"]));
 			RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
 			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
 		}

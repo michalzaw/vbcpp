@@ -831,6 +831,18 @@ int BusConstraint::getMirrorsCount()
 }
 
 
+DisplayText& BusConstraint::getDisplayText()
+{
+	return DisplayText();
+}
+
+
+void BusConstraint::updateDisplays()
+{
+
+}
+
+
 SceneObject* BusConstraint::getDesktopObject()
 {
     return NULL;

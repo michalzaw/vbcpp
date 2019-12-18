@@ -2,12 +2,13 @@
 
 #include "../Game/Directories.h"
 
-#include "..//Utils/FilesHelper.h"
+#include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
 #include "../Utils/tinyxml2.h"
+#include "../Graphics/DisplayComponent.h"
 
 
 using namespace tinyxml2;
@@ -43,6 +44,7 @@ Bus* BusLoader::loadBus(const std::string& busName)
     _objName = busElement->Attribute("name");
     std::string textureFolder(busElement->Attribute("textures"));
     std::string busType = XmlUtils::getAttributeStringOptional(busElement, "type", "raycast");
+	_normalsSmoothing = XmlUtils::getAttributeBoolOptional(busElement, "normalsSmoothing", true);
 
     _busPath = GameDirectories::BUSES + busName + "/";
     _texturePath = _busPath + textureFolder + "/";
@@ -119,9 +121,9 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
         RStaticModel* busModel;
         if (nodeToSkip.empty())
-            busModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath);
+            busModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         else
-            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, nodeToSkip);
+            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, nodeToSkip, _normalsSmoothing);
 
         RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
 		busRenderObject->setIsDynamicObject(true);
@@ -157,6 +159,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         loadDoors(moduleElement, busModule);
         loadEnvironmentCaptureComponents(moduleElement, busModule);
         loadMirrors(moduleElement, busModule);
+		loadDisplays(moduleElement, busModule);
 
         _bus->_modules.push_back(busModule);
 
@@ -175,6 +178,8 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
     {
         _bus->_desktop = new Desktop(NULL);
     }
+
+	_bus->updateDisplays();
 
     return true;
 }
@@ -203,7 +208,7 @@ void BusLoader::loadModelNodes(XMLElement* moduleElement, std::string modelPath,
         std::vector<Transform> loadedNodesTransformsInModel;
         std::vector<RStaticModel*> loadedNodes;
 
-        ResourceManager::getInstance().loadModelWithHierarchyOnlyNodes(modelPath, texturePath, modelNodesNames, loadedNodesTransformsInModel, loadedNodes);
+        ResourceManager::getInstance().loadModelWithHierarchyOnlyNodes(modelPath, texturePath, modelNodesNames, loadedNodesTransformsInModel, loadedNodes, _normalsSmoothing);
 
         for (int i = 0; i < modelNodesNames.size(); ++i)
         {
@@ -267,7 +272,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         wheelObj->addChild(wheelSubObjectForModel);
 
         std::string modelPath = _busPath + wheelModel;
-        RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath);
+        RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         RenderObject* wheelRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
 		wheelRenderObject->setIsDynamicObject(true);
 
@@ -365,7 +370,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
         steeringWheelObject->setScale(scale);
 
         std::string modelPath = _busPath + modelFile;
-        RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath);
+        RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
 		renderObject->setIsDynamicObject(true);
 
@@ -402,7 +407,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         desktopObject->addComponent(_bus->_desktopClickableObject);
 
         std::string modelPath = _busPath + modelFile;
-        RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath);
+        RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
         _bus->_desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), desktopObject);
 		_bus->_desktopRenderObject->setIsDynamicObject(true);
 
@@ -546,7 +551,7 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
         {
             std::string doorModelPath = _busPath + doorModelName;
 
-            doorModel = ResourceManager::getInstance().loadModel(doorModelPath, _texturePath);
+            doorModel = ResourceManager::getInstance().loadModel(doorModelPath, _texturePath, _normalsSmoothing);
 
             doorPosition = XmlUtils::getAttributeVec3(doorElement, "position");
             doorRotation = XmlUtils::getAttributeVec3Optional(doorElement, "rotation");
@@ -615,8 +620,8 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 {
     btVector3 busPivot = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
     btVector3 doorPivot = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
-    btVector3 axisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisA", btVector3(0, 1, 0));
-    btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
+	btVector3 axisA = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisA", btVector3(0, 1, 0));
+	btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
 
 
     RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
@@ -664,7 +669,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 
     std::string armPath = _busPath + armModel;
 
-    RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath);
+    RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath, _normalsSmoothing);
     RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
 	armRenderObject->setIsDynamicObject(true);
 
@@ -695,7 +700,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 
     std::string arm2Path = _busPath + arm2Model;
 
-    RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath);
+    RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath, _normalsSmoothing);
     RenderObject* arm2RenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
 	arm2RenderObject->setIsDynamicObject(true);
 
@@ -777,7 +782,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     {
         std::string armModelPath = _busPath + armModelName;
 
-        armModel = ResourceManager::getInstance().loadModel(armModelPath, _texturePath);
+        armModel = ResourceManager::getInstance().loadModel(armModelPath, _texturePath, _normalsSmoothing);
 
         armPosition = XmlUtils::getAttributeVec3(doorElement, "armPosition");
         armRotation = XmlUtils::getAttributeVec3(doorElement, "armRotation");
@@ -903,6 +908,48 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 
         mirrorElement = mirrorElement->NextSiblingElement("Mirror");
     }
+}
+
+
+void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule)
+{
+	XMLElement* displayElement = moduleElement->FirstChildElement("Display");
+	while (displayElement != nullptr)
+	{
+		Logger::info("XML: Display component data");
+
+		std::string name(displayElement->Attribute("name"));
+		glm::vec3 position = XMLstringToVec3(displayElement->Attribute("position"));
+		glm::vec3 rotation = XMLstringToVec3(displayElement->Attribute("rotation"));
+		float width = (float)atof(displayElement->Attribute("width"));
+		float height = (float)atof(displayElement->Attribute("height"));
+		int widthInPoints = (int)atoi(displayElement->Attribute("widthInPoints"));;
+		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
+		std::string fontName = std::string(displayElement->Attribute("font"));
+		int type = XmlUtils::getAttributeIntOptional(displayElement, "type");
+
+		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
+		displaySceneObject->setPosition(position);
+		displaySceneObject->setRotation(rotation);
+		busModule.sceneObject->addChild(displaySceneObject);
+
+		Material material;
+		material.shininess = 96;
+		material.shader = SOLID_EMISSIVE_MATERIAL;
+		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+		displayRenderObject->init();
+		displayRenderObject->setIsDynamicObject(true);
+		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
+
+		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
+		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints);
+		displaySceneObject->addComponent(displayComponent);
+		displayComponent->init();
+
+		_bus->_displays.push_back(std::make_pair(displayComponent, static_cast<BusDisplayType>(type)));
+
+		displayElement = displayElement->NextSiblingElement("Display");
+	}
 }
 
 

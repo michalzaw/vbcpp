@@ -6,6 +6,8 @@ set (GRAPHICS_SOURCES
 		Graphics/CameraFPS.hpp
 		Graphics/CameraStatic.cpp
 		Graphics/CameraStatic.hpp
+		Graphics/DisplayComponent.cpp
+		Graphics/DisplayComponent.h
 		Graphics/EnvironmentCaptureComponent.cpp
 		Graphics/EnvironmentCaptureComponent.h
 		Graphics/Framebuffer.cpp
@@ -48,6 +50,8 @@ set (GRAPHICS_SOURCES
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp
 		Graphics/QuadTreeNode.h
+		Graphics/RDisplayFont.cpp
+		Graphics/RDisplayFont.h
 		Graphics/RRoadProfile.cpp
 		Graphics/RRoadProfile.h
 		Graphics/RShader.h

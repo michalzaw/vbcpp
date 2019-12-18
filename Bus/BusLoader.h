@@ -43,6 +43,8 @@ class BusLoader
         std::string _busPath;
         std::string _texturePath;
 
+		bool _normalsSmoothing;
+
         std::unique_ptr<Gearbox> _gearbox;
         std::unique_ptr<Engine> _engine;
 
@@ -66,6 +68,7 @@ class BusLoader
         void loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
+		void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);
 
         void loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,

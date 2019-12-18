@@ -83,6 +83,7 @@ uniform vec4 matDiffuse;
 uniform vec4 matSpecular;
 uniform vec4 matEmissive;
 uniform float Transparency;
+uniform float fixDisappearanceAlphaRatio;
 uniform sampler2D Texture;
 uniform float SpecularPower;
 #ifdef NORMALMAPPING
@@ -102,6 +103,9 @@ uniform mat4 environmentMap2Rotation;
 #ifdef GLASS
 uniform sampler2D glassTexture;
 uniform float dayNightRatio;
+#endif
+#ifdef EMISSIVE
+uniform sampler2D emissiveTexture;
 #endif
 
 uniform vec3 CameraPosition;
@@ -324,10 +328,15 @@ float isGrass = 0.0f;
 #endif
 
 	FragmentColor += matEmissive * textureColor;
+#ifdef EMISSIVE
+	FragmentColor += texture2D(emissiveTexture, TexCoord);
+#endif
 	
 #ifdef ALPHA_TEST
 	float _Cutoff = 0.3f;
-	FragmentColor.a = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
+	float newAlpha = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
+	
+	FragmentColor.a = mix(FragmentColor.a, newAlpha, fixDisappearanceAlphaRatio);
 #endif
 
 

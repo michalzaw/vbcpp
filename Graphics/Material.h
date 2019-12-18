@@ -24,9 +24,9 @@ class Material
 {
     public:
         Material()
-        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL),
+        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL), emissiveTexture(NULL),
 		reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
-        shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0) {}
+        shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0), fixDisappearanceAlpha(0.0) {}
         virtual ~Material()
         { }
 
@@ -44,12 +44,15 @@ class Material
 	RTexture* metalicTexture;
 	RTexture* roughnessTexture;
 	RTexture* aoTexture;
+	RTexture* emissiveTexture;
 
     EnvironmentMapType reflectionTexture1;
     EnvironmentMapType reflectionTexture2;
 
     float shininess;
     float transparency;
+
+	float fixDisappearanceAlpha;
 
     glm::vec2 offset;
     glm::vec2 scale;
