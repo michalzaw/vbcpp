@@ -9,6 +9,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/OpenDialogWindow.cpp
 	Editor/Windows/SceneGraphWindow.cpp
 	Editor/Windows/RoadTools.cpp
+	Editor/Windows/MapInfoWindow.cpp
 )
 
 set (EDITOR_HEADERS 
@@ -24,6 +25,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/OpenDialogWindow.h
 	Editor/Windows/SceneGraphWindow.h
 	Editor/Windows/RoadTools.h
+	Editor/Windows/MapInfoWindow.h
 )
 
 set (EDITOR_SOURCES ${EDITOR_SOURCES} PARENT_SCOPE)

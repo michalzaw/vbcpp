@@ -3,7 +3,7 @@
 
 #include <vector>
 
-bool openMapDialog(const std::vector<std::string>& items, int& current_item);
+bool openMapDialog(std::string title, std::string buttonTitle, std::vector<std::string>& items, int& current_item);
 
 
 #endif // OPENDIALOGWINDOW_H_INCLUDED

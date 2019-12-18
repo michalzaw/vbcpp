@@ -6,6 +6,7 @@ set (IMGUI_SOURCES
 	ImGui/imgui_impl_opengl3.cpp
 	ImGui/imgui_widgets.cpp
 	ImGui/imGizmo.cpp
+	ImGui/imRoadTools.cpp
 )
 
 set (IMGUI_HEADERS 
@@ -18,6 +19,7 @@ set (IMGUI_HEADERS
 	ImGui/imstb_textedit.h
 	ImGui/imstb_truetype.h
 	ImGui/imGizmo.h
+	ImGui/imRoadTools.h
 )
 
 set (IMGUI_SOURCES ${IMGUI_SOURCES} PARENT_SCOPE)

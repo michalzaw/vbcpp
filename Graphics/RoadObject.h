@@ -21,6 +21,7 @@ class RoadObject : public RenderObject
 
 		RRoadProfile* getRoadProfile();
 		std::vector<RoadSegment>& getSegments();
+		void setSegments(std::vector<RoadSegment> segments);
 
 };
 

@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Game>
-	<Resolution x="1024" y="768" />
+	<Resolution x="1920" y="1080" />
 
 
 	<Map name="Demo" />

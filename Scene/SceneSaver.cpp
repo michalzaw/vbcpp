@@ -65,11 +65,15 @@ void SceneSaver::saveTerrain(XMLElement* terrainElement, XMLElement* grassElemen
 {
 	Terrain* terrainComponent = static_cast<Terrain*>(sceneObject->getComponent(CT_TERRAIN));
 
-	terrainElement->SetAttribute("heightmap", terrainComponent->getHeightmapFileName().c_str());
-	terrainElement->SetAttribute("material", terrainComponent->getMaterialName().c_str());
-	terrainElement->SetAttribute("maxHeight", terrainComponent->getMaxHeight());
+	if (terrainComponent)
+	{
+		terrainElement->SetAttribute("heightmap", terrainComponent->getHeightmapFileName().c_str());
+		terrainElement->SetAttribute("material", terrainComponent->getMaterialName().c_str());
+		terrainElement->SetAttribute("maxHeight", terrainComponent->getMaxHeight());
 
-	grassElement->SetAttribute("terrain_heightmap", terrainComponent->getHeightmapFileName().c_str());
+		if (grassElement)
+			grassElement->SetAttribute("terrain_heightmap", terrainComponent->getHeightmapFileName().c_str());
+	}
 }
 
 
@@ -77,8 +81,11 @@ void SceneSaver::saveGrass(XMLElement* grassElement, SceneObject* sceneObject)
 {
 	Grass* grassComponent = static_cast<Grass*>(sceneObject->getComponent(CT_GRASS));
 
-	grassElement->SetAttribute("model", getRelativePathToDir(grassComponent->getModel()->getPath(), _dirPath + "grass/").c_str());
-	grassElement->SetAttribute("density_texture", getRelativePathToDir(grassComponent->getGrassDensityTexture()->getPath(), _dirPath).c_str());
+	if (grassComponent)
+	{
+		grassElement->SetAttribute("model", getRelativePathToDir(grassComponent->getModel()->getPath(), _dirPath + "grass/").c_str());
+		grassElement->SetAttribute("density_texture", getRelativePathToDir(grassComponent->getGrassDensityTexture()->getPath(), _dirPath).c_str());
+	}
 }
 
 
@@ -86,10 +93,13 @@ void SceneSaver::saveSunLight(XMLElement* sunElement, SceneObject* sceneObject)
 {
 	Light* light = static_cast<Light*>(sceneObject->getComponent(CT_LIGHT));
 
-	sunElement->SetAttribute("rotation", vec3ToString(sceneObject->getRotation()).c_str());
-	sunElement->SetAttribute("color", vec3ToString(light->getColor()).c_str());
-	sunElement->SetAttribute("ambientIntensity", light->getAmbientIntensity());
-	sunElement->SetAttribute("diffuseIntensity", light->getDiffiseIntenisty());
+	if (light)
+	{
+		sunElement->SetAttribute("rotation", vec3ToString(sceneObject->getRotation()).c_str());
+		sunElement->SetAttribute("color", vec3ToString(light->getColor()).c_str());
+		sunElement->SetAttribute("ambientIntensity", light->getAmbientIntensity());
+		sunElement->SetAttribute("diffuseIntensity", light->getDiffiseIntenisty());
+	}
 }
 
 
@@ -97,8 +107,11 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 {
 	RenderObject* renderObject = static_cast<RenderObject*>(sceneObject->getComponent(CT_RENDER_OBJECT));
 
-	std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
-	skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
+	if (renderObject)
+	{
+		std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
+		skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
+	}
 }
 
 
@@ -106,19 +119,22 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	objectElement->SetAttribute("name", objectDefinition->getName().c_str());
+	if (objectElement)
+	{
+		objectElement->SetAttribute("name", objectDefinition->getName().c_str());
 
-	if (objectDefinition->getName() != sceneObject->getName())
-		objectElement->SetAttribute("id", sceneObject->getName().c_str());
+		if (objectDefinition->getName() != sceneObject->getName())
+			objectElement->SetAttribute("id", sceneObject->getName().c_str());
 
-	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
-	glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
-		radToDeg(sceneObject->getRotation().y),
-		radToDeg(sceneObject->getRotation().z));
-	objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
+		objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
+		glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
+			radToDeg(sceneObject->getRotation().y),
+			radToDeg(sceneObject->getRotation().z));
+		objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
+	}
 
 	BusStopComponent* busStopComponent = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
-	if (busStopComponent != nullptr)
+	if (busStopComponent)
 	{
 		XMLElement* componentElement = doc.NewElement("Component");
 
@@ -139,26 +155,30 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 	XMLElement* roadElement = doc.NewElement("Road");
 
 	RoadObject* roadObject = static_cast<RoadObject*>(sceneObject->getComponent(CT_ROAD_OBJECT));
-	RRoadProfile* profile = roadObject->getRoadProfile();
-
-	roadElement->SetAttribute("name", sceneObject->getName().c_str());
-	roadElement->SetAttribute("profile", profile->getName().c_str());
-
-	for (const RoadSegment& segment : roadObject->getSegments())
+	
+	if (roadObject)
 	{
-		XMLElement* segmentElement = doc.NewElement("Segment");
+		RRoadProfile* profile = roadObject->getRoadProfile();
 
-		segmentElement->SetAttribute("type", segment.type == RST_LINE ? "line" : "arc");
-		segmentElement->SetAttribute("radius", segment.r);
-		segmentElement->SetAttribute("beginPoint", vec3ToString(segment.begin).c_str());
-		segmentElement->SetAttribute("endPoint", vec3ToString(segment.end).c_str());
-		segmentElement->SetAttribute("points", segment.pointsCount);
-		segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+		roadElement->SetAttribute("name", sceneObject->getName().c_str());
+		roadElement->SetAttribute("profile", profile->getName().c_str());
 
-		roadElement->InsertEndChild(segmentElement);
+		for (const RoadSegment& segment : roadObject->getSegments())
+		{
+			XMLElement* segmentElement = doc.NewElement("Segment");
+
+			segmentElement->SetAttribute("type", segment.type == RST_LINE ? "line" : "arc");
+			segmentElement->SetAttribute("radius", segment.r);
+			segmentElement->SetAttribute("beginPoint", vec3ToString(segment.begin).c_str());
+			segmentElement->SetAttribute("endPoint", vec3ToString(segment.end).c_str());
+			segmentElement->SetAttribute("points", segment.pointsCount);
+			segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+
+			roadElement->InsertEndChild(segmentElement);
+		}
+
+		roadsElement->InsertEndChild(roadElement);
 	}
-
-	roadsElement->InsertEndChild(roadElement);
 }
 
 
@@ -166,6 +186,8 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
+
+	printf("Map path: %s\n", fullPath.c_str());
 
 	XMLDocument doc;
 
@@ -184,8 +206,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	XMLElement* startPositionElement = doc.NewElement("Start");
 	rootNode->InsertEndChild(startPositionElement);
 
-	XMLElement* grassElement = doc.NewElement("Grass");
-	rootNode->InsertEndChild(grassElement);
+	XMLElement* grassElement = nullptr;
 
 	XMLElement* sunElement = doc.NewElement("Light");
 	rootNode->InsertEndChild(sunElement);
@@ -215,7 +236,13 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		}
 		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
 		{
-			saveGrass(grassElement, sceneObject);
+			grassElement = doc.NewElement("Grass");
+
+			if (grassElement)
+			{
+				rootNode->InsertEndChild(grassElement);
+				saveGrass(grassElement, sceneObject);
+			}
 		}
 		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
 		{
@@ -231,5 +258,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		}
 	}
 
-	doc.SaveFile(fullPath.c_str());
+	XMLError err = doc.SaveFile(fullPath.c_str());
+
+	printf("Error code: %d\n", err);
 }

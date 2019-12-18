@@ -6,6 +6,12 @@
 #endif
 #include "../../ImGui/imgui_internal.h"
 
+namespace vbEditor
+{
+	extern SceneObject* _selectedSceneObject;
+	extern CameraFPS* _camera;
+}
+
 void ImGui::RoadProfileGraph(const char* label, std::vector<ImVec2>& values, float scale_min, float scale_max, ImVec2 frame_size)
 {
 	ImGuiWindow* window = GetCurrentWindow();
@@ -89,6 +95,7 @@ void ImGui::RoadProfileGraph(const char* label, std::vector<ImVec2>& values, flo
 	//window->DrawList->AddCircleFilled(pos0, 3.0f, ImGuiCol_PlotLines);
 
 	//window->DrawList->AddLine(tp0, tp1, color);
+
 }
 
 void ImGui::DrawRoadShape(std::vector<RoadSegment>& segments)
@@ -96,5 +103,7 @@ void ImGui::DrawRoadShape(std::vector<RoadSegment>& segments)
 	ImGuiWindow* window = GetCurrentWindow();
 	if (window->SkipItems)
 		return;
+
+
 
 }

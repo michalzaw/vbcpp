@@ -114,6 +114,8 @@ class SceneObject
         glm::mat4& getGlobalTransformMatrix() const;
         glm::mat4& getGlobalNormalMatrix() const;
 
+		void updateFromLocalMatrix();
+
 		glm::vec3 getGlobalPosition()
 		{
 			return transformLocalPointToGlobal(glm::vec3(0.0f, 0.0f, 0.0f));

@@ -55,3 +55,8 @@ std::vector<RoadSegment>& RoadObject::getSegments()
 {
 	return _segments;
 }
+
+void RoadObject::setSegments(std::vector<RoadSegment> segments)
+{
+	_segments = segments;
+}

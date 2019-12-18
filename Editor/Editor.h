@@ -74,6 +74,8 @@ namespace vbEditor
 
 	void drawMainMenu();
 	void ShowTransformGizmo();
+	void showRoadTools();
+	void addSceneObject();
 
 	bool getGUIhasFocus();
 
@@ -82,6 +84,7 @@ namespace vbEditor
 	void run();
 
 	void loadMapData();
+	void saveMapData();
 
 } // namespace
 

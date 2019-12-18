@@ -11,7 +11,6 @@ SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* 
     _position(0.0f, 0.0f, 0.0f),
     _rotation(0.0f, 0.0f, 0.0f),
     _scale(1.0f, 1.0f, 1.0f)
-    //_transform(this), _globalTransform(this), _transformIsChanged(true)
 {
     if (_parent != NULL)
     {
@@ -34,11 +33,9 @@ SceneObject::~SceneObject()
 
     for (std::vector<Component*>:: iterator i = _components.begin(); i != _components.end(); ++i)
     {
-        /* USUWANIE Z POSZCZEGOLNYCH PODSYSTEMOW */
         switch ((*i)->getType())
         {
             case CT_RENDER_OBJECT:
-                //_sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
                 GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(*i));
                 break;
 
@@ -51,18 +48,15 @@ SceneObject::~SceneObject()
 				break;
 
             case CT_CAMERA:
-                //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
                 GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
                 break;
 
             case CT_LIGHT:
-                //_sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
                 GraphicsManager::getInstance().removeLight(static_cast<Light*>(*i));
                 break;
 
             case CT_PHYSICAL_BODY:
                 _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
-                //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                 break;
 
             case CT_TREE_COMPONENT:
@@ -94,8 +88,6 @@ SceneObject::~SceneObject()
 				break;
 
         }
-
-        /* ------------------------------------- */
     }
 }
 
@@ -186,8 +178,6 @@ void SceneObject::addChild(SceneObject* child)
 
     child->removeParent();
     child->_parent = this;
-
-    //child->setIsActive(_isActive);
 }
 
 
@@ -251,11 +241,9 @@ void SceneObject::removeComponent(Component* component)
         {
             i = _components.erase(i);
 
-            /* USUWANIE Z POSZCZEGOLNYCH PODSYSTEMOW */
-            switch (component->getType())
+			switch (component->getType())
             {
                 case CT_RENDER_OBJECT:
-                    //_sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
                     GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(component));
                     break;
 
@@ -268,18 +256,15 @@ void SceneObject::removeComponent(Component* component)
 					break;
 
                 case CT_CAMERA:
-                    //_sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
                     GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(component));
                     break;
 
                 case CT_LIGHT:
-                    //_sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
                     GraphicsManager::getInstance().removeLight(static_cast<Light*>(component));
                     break;
 
                 case CT_PHYSICAL_BODY:
                     _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
-                    //PhysicsManager::getInstance().removePhysicalBody(static_cast<PhysicalBody*>(*i));
                     break;
 
                 case CT_TREE_COMPONENT:
@@ -312,8 +297,6 @@ void SceneObject::removeComponent(Component* component)
 
             }
 
-            /* ------------------------------------- */
-
             return;
         }
     }
@@ -329,11 +312,6 @@ void SceneObject::setName(std::string name)
 void SceneObject::setIsActive(bool is)
 {
     _isActive = is;
-
-    /*for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
-    {
-        (*i)->setIsActive(_isActive);
-    }*/
 }
 
 
@@ -588,4 +566,19 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     }
 
     return _globalNormalMatrix;
+}
+
+void SceneObject::updateFromLocalMatrix()
+{
+	glm::vec3 scale;
+	glm::quat rotation;
+	glm::vec3 translation;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(_localTransformMatrix, scale, rotation, translation, skew, perspective);
+
+	setPosition(translation);
+	setRotationQuaternion(glm::conjugate(rotation));
+	setScale(scale);
+	changedTransform();
 }

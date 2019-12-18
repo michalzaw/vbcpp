@@ -3,6 +3,12 @@
 #include "../../ImGui/imGizmo.h"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "../../ImGui/imgui.h"
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+#include "../../ImGui/imgui_internal.h"
+
 #include "RoadTools.h"
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
@@ -232,6 +238,7 @@ void ObjectPropertiesWindow::drawWindow()
 namespace vbEditor
 {
 	extern SceneObject* _selectedSceneObject;
+	extern CameraFPS* _camera;
 }
 
 void showObjectProperties()
@@ -240,6 +247,8 @@ void showObjectProperties()
 
 	ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
 	ImGui::SetNextWindowSizeConstraints(ImVec2(100, mainWindowSize.y - 18), ImVec2(500, mainWindowSize.y - 18));
+
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
 
 	bool isOpened = true;
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
@@ -324,6 +333,35 @@ void showObjectProperties()
 					//ImGui::PlotLines("Lines", values, IM_ARRAYSIZE(values), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0, 100));
 
 					ImGui::RoadProfileGraph("Profile", values, -5.0f, 5.0f, ImVec2(150, 150));
+
+					std::vector<RoadSegment> segments = roadComponent->getSegments();
+					RoadSegment segment = segments[0];
+					//segment.begin = glm::vec3(0.0f, 0.0, 0.0f);
+
+					glm::vec3 pos = segment.begin;
+					ImGui::Text("Road Pos: %f, %f, %f", pos.x, pos.y, pos.z);
+
+					//ImColor color(ImGui::GetStyle().Colors[ImGuiCol_PlotLines]);
+
+					//glm::vec4 transPos = vbEditor::_camera->getProjectionMatrix() * vbEditor::_camera->getViewMatrix() * vbEditor::_selectedSceneObject->getGlobalTransformMatrix() * glm::vec4(pos, 1.0);
+
+					//window->DrawList->AddCircleFilled(ImVec2(transPos.x, transPos.y), 14.0f, color);
+
+					if (ImGui::Button("Update road"))
+					{
+						RoadSegment seg;
+						seg.begin = glm::vec3(50, 20, 100);
+						seg.end = segment.end;
+						seg.interpolation = segment.interpolation;
+						seg.pointsCount = segment.pointsCount;
+						seg.r = segment.r;
+						seg.type = segment.type;
+						segments[0] = seg;
+
+						roadComponent->setSegments(segments);
+
+						roadComponent->buildModel();
+					}
 				}
 			}
 		}
@@ -353,11 +391,13 @@ void showObjectTransformEdit()
 
 	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
 
-	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getGlobalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
+	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
 
 	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
 	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
 	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
 
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getGlobalTransformMatrix()));
+	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()));
+
+	vbEditor::_selectedSceneObject->updateFromLocalMatrix();
 }

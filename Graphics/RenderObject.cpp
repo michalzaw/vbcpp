@@ -88,7 +88,7 @@ void RenderObject::setModel(RStaticModel* model)
 
     if (_materials)
     {
-        delete[] _materials;
+        //delete[] _materials;
     }
 
     _materials = new Material[_model->getMaterialsCount()];

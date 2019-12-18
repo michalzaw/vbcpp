@@ -2,9 +2,9 @@
 #define NEWDIALOGWINDOW_H_INCLUDED
 
 
-#include "EditorWindow.h"
+//#include "EditorWindow.h"
 
-
+/*
 class NewDialogWindow : public EditorWindow
 {
     private:
@@ -19,6 +19,9 @@ class NewDialogWindow : public EditorWindow
         void open();
 
 };
+*/
+
+bool NewDialogWindow();
 
 
 #endif // NEWDIALOGWINDOW_H_INCLUDED

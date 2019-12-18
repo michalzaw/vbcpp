@@ -71,18 +71,28 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 }
 
 
-void SceneLoader::loadGrass(XMLElement* sceneElement)
+void SceneLoader::loadGrass(XMLElement* grassElement)
 {
-	XMLElement* grassElement = sceneElement->FirstChildElement("Grass");
-	if (grassElement == nullptr)
+	//XMLElement* grassElement = grassElement->FirstChildElement("Grass");
+	/*if (grassElement == nullptr)
 	{
 		Logger::warning("Grass element not found!");
-	}
-	else if (GameConfig::getInstance().isGrassEnable)
+	}*/
+
+
+	if (GameConfig::getInstance().isGrassEnable)
 	{
-		std::string grassModelFileName(grassElement->Attribute("model"));
-		std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
-		std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+		std::string grassModelFileName;
+		if (grassElement->Attribute("model"))
+			grassModelFileName = grassElement->Attribute("model");
+	
+		std::string terrainHeightmapForGrassFileName;
+		if (grassElement->Attribute("terrain_heightmap"))
+			terrainHeightmapForGrassFileName = grassElement->Attribute("terrain_heightmap");
+
+		std::string grassDensityTextureFileName;
+		if (grassElement->Attribute("density_texture"))
+			std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
 
 		std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
 		if (FilesHelper::isFileExists(_dirPath + terrainHeightNormalMapFileName))
@@ -95,32 +105,41 @@ void SceneLoader::loadGrass(XMLElement* sceneElement)
 		Logger::info("heightmap: " + terrainHeightmapForGrassFileName);
 		Logger::info("density texture: " + grassDensityTextureFileName);
 
-		RStaticModel* grassModel = ResourceManager::getInstance().loadModel(_dirPath + "grass/" + grassModelFileName, _dirPath + "grass/");
-		RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName);
-		RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName);
-		heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
-		heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
+		RStaticModel* grassModel = nullptr;
+	
+		if (!grassModelFileName.empty())
+			grassModel = ResourceManager::getInstance().loadModel(_dirPath + "grass/" + grassModelFileName, _dirPath + "grass/");
 
-		SceneObject * grassObject = _sceneManager->addSceneObject("grass");
-		Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
-		grassObject->addComponent(grassComponent);
+		if (grassModel)
+		{
+			RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName);
+			RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName);
+			heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
+			heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
+
+			SceneObject * grassObject = _sceneManager->addSceneObject("grass");
+			Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
+			grassObject->addComponent(grassComponent);
+		}
 	}
+	else
+		Logger::warning("Grass element not found!");
 }
 
 
-void SceneLoader::loadSunLight(XMLElement* sceneElement)
+void SceneLoader::loadSunLight(XMLElement* sunElement)
 {
-	XMLElement* lightElement = sceneElement->FirstChildElement("Light");
-	if (lightElement == nullptr)
-	{
-		Logger::warning("Light element not found!");
-	}
-	else
-	{
-		glm::vec3 rotation = XmlUtils::getAttributeVec3(lightElement, "rotation");
-		glm::vec3 color = XmlUtils::getAttributeVec3(lightElement, "color");
-		float ambientIntensity = atof(lightElement->Attribute("ambientIntensity"));
-		float diffuseIntensity = atof(lightElement->Attribute("diffuseIntensity"));
+	//XMLElement* lightElement = sceneElement->FirstChildElement("Light");
+	//if (lightElement == nullptr)
+	//{
+	//	Logger::warning("Light element not found!");
+	//}
+	//else
+	//{
+		glm::vec3 rotation = XmlUtils::getAttributeVec3(sunElement, "rotation");
+		glm::vec3 color = XmlUtils::getAttributeVec3(sunElement, "color");
+		float ambientIntensity = atof(sunElement->Attribute("ambientIntensity"));
+		float diffuseIntensity = atof(sunElement->Attribute("diffuseIntensity"));
 
 		SceneObject* dirLightObject = _sceneManager->addSceneObject("sun");
 		Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(color, ambientIntensity, diffuseIntensity);
@@ -128,50 +147,106 @@ void SceneLoader::loadSunLight(XMLElement* sceneElement)
 		dirLightObject->setRotation(rotation);
 		dirLightObject->setPosition(glm::vec3(0, 0, 0));
 		lightComponent->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
-	}
+	//}
 }
 
 
-bool SceneLoader::loadSky(XMLElement* sceneElement)
+void SceneLoader::loadSky(XMLElement* skyElement)
 {
-	XMLElement* sklyElement = sceneElement->FirstChildElement("Sky");
-	if (sklyElement == nullptr)
-	{
-		Logger::error("Sky element not found!");
-		return false;
-	}
+	//XMLElement* skyElement = sceneElement->FirstChildElement("Sky");
+	//if (skyElement)
+	//{
+		std::string skyboxFileNames;
 
-	std::string skyboxFileNames = std::string(sklyElement->Attribute("texture"));
-	std::vector<std::string> skyboxFileNamesArray = split(skyboxFileNames, ',');
-	if (skyboxFileNamesArray.size() == 6)
-	{
-		for (int i = 0; i < skyboxFileNamesArray.size(); ++i)
+		if (skyElement->Attribute("texture"))
+			skyboxFileNames = std::string(skyElement->Attribute("texture"));
+
+		std::vector<std::string> skyboxFileNamesArray;
+		if (!skyboxFileNames.empty())
+			skyboxFileNamesArray = split(skyboxFileNames, ',');
+
+		if (skyboxFileNamesArray.size() == 6)
 		{
-			skyboxFileNamesArray[i] = GameDirectories::SKYBOX + skyboxFileNamesArray[i];
+			for (int i = 0; i < skyboxFileNamesArray.size(); ++i)
+			{
+				skyboxFileNamesArray[i] = GameDirectories::SKYBOX + skyboxFileNamesArray[i];
+			}
+
+			SceneObject* skySceneObject = _sceneManager->addSceneObject("sky");
+
+			RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
+			Sky* skyComponent = GraphicsManager::getInstance().addSky(skyboxTexture, skySceneObject);
+
+			GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
+
+		}
+		else
+			Logger::error("Number of skybox files is invalid!");
+	//}
+	//else
+	//{
+	//	Logger::error("Sky element not found!");
+	//	return false;
+	//}
+}
+
+
+void SceneLoader::loadObjects(XMLElement* objectsElement)
+{
+	XMLElement* objectElement = objectsElement->FirstChildElement("Object");
+	if (objectElement)
+		loadObject(objectElement);
+
+	//XMLElement* objects = sceneElement->FirstChildElement("Objects");
+
+	//XMLElement* objectElement = objectsElement->FirstChildElement("Object");
+	/*
+	while (objectElement != nullptr)
+	{
+		std::string name(objectElement->Attribute("name"));
+		std::string objectName = XmlUtils::getAttributeStringOptional(objectElement, "id", name);
+		glm::vec3 position = XmlUtils::getAttributeVec3(objectElement, "position");
+		glm::vec3 rotation = XmlUtils::getAttributeVec3(objectElement, "rotation");
+
+		Logger::info("==> SCENE OBJECT");
+		Logger::info("Name: " + name);
+		Logger::info("Position: " + vec3ToString(position));
+		Logger::info("Rotation: " + vec3ToString(rotation));
+
+		RObject* rObject = ResourceManager::getInstance().loadRObject(name);
+
+		SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, _sceneManager);
+
+		// Components properties defined per instance
+		XMLElement* componentElement = objectElement->FirstChildElement("Component");
+		while (componentElement != nullptr)
+		{
+			std::string componentType = componentElement->Attribute("type");
+			std::cout << "Component: " << componentType << std::endl;
+
+			if (componentType == "bus-stop")
+			{
+				std::string busStopName = componentElement->Attribute("busStopName");
+				int busStopId = atoi(componentElement->Attribute("id"));
+				std::string announcementFileName = componentElement->Attribute("announcement");
+
+				BusStopComponent* component = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
+				component->setName(busStopName);
+				component->setId(busStopId);
+				component->setAnnouncementFileName(announcementFileName);
+			}
+
+			componentElement = componentElement->NextSiblingElement("Component");
 		}
 
-		SceneObject* skySceneObject = _sceneManager->addSceneObject("sky");
 
-		RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
-		Sky* skyComponent = GraphicsManager::getInstance().addSky(skyboxTexture, skySceneObject);
-
-		GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
-
-		return true;
+		objectElement = objectElement->NextSiblingElement("Object");
 	}
-	else
-	{
-		Logger::error("Number of skybox files is invalid!");
-		return false;
-	}
+	*/
 }
 
-
-void SceneLoader::loadObjects(XMLElement* sceneElement)
+void SceneLoader::loadObject(XMLElement* objectElement)
 {
-	XMLElement* objects = sceneElement->FirstChildElement("Objects");
-
-	XMLElement* objectElement = objects->FirstChildElement("Object");
 	while (objectElement != nullptr)
 	{
 		std::string name(objectElement->Attribute("name"));
@@ -215,13 +290,78 @@ void SceneLoader::loadObjects(XMLElement* sceneElement)
 	}
 }
 
-
-void SceneLoader::loadRoads(XMLElement* sceneElement)
+void SceneLoader::loadRoads(XMLElement* roadsElement)
 {
-	XMLElement* roads = sceneElement->FirstChildElement("Roads");
+	//XMLElement* roads = sceneElement->FirstChildElement("Roads");
 
-	XMLElement* roadElement = roads->FirstChildElement("Road");
+	XMLElement* roadElement = roadsElement->FirstChildElement("Road");
+
+	if (roadElement)
+		loadRoad(roadElement);
+
+	/*
 	while (roadElement != nullptr)
+	{
+		std::string name = roadElement->Attribute("name");
+		std::string profileName = roadElement->Attribute("profile");
+
+		Logger::info("*** ROAD ***");
+		Logger::info("profile name: " + profileName);
+
+		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+
+		std::vector<RoadSegment> segments;
+
+		XMLElement* segmentElement = roadElement->FirstChildElement("Segment");
+		while (segmentElement != nullptr)
+		{
+			RoadSegment segment;
+
+			const char* type = segmentElement->Attribute("type");
+			if (strcmp(type, "arc") == 0)
+				segment.type = RST_ARC;
+			else if (strcmp(type, "line"))
+				segment.type = RST_LINE;
+			segment.r = toFloat(segmentElement->Attribute("radius"));
+			segment.begin = XMLstringToVec3(segmentElement->Attribute("beginPoint"));
+			segment.end = XMLstringToVec3(segmentElement->Attribute("endPoint"));
+			segment.pointsCount = toInt(segmentElement->Attribute("points"));
+			const char* interpolation = segmentElement->Attribute("interpolation");
+			if (strcmp(interpolation, "lin") == 0)
+				segment.interpolation = RI_LIN;
+			else if (strcmp(interpolation, "cos") == 0)
+				segment.interpolation = RI_COS;
+
+			segments.push_back(segment);
+
+			segmentElement = segmentElement->NextSiblingElement("Segment");
+		}
+		//std::cout << profiles[profileName].size() << std::endl;
+		//std::cout << segments.size() << std::endl;
+		// create road
+		//RStaticModel * roadModel = createRoadModel(profiles[profileName], profiles[profileName].size(), segments);
+		//_sceneManager->addModelToRemoveAfterClearScene(roadModel);
+		//RModel* roadModel2 = new RModel("", roadModel);
+		//RStaticModel* roadModel2 = new RStaticModel;
+		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, segments, roadSceneObject);
+		roadRenderObject->setIsCastShadows(false);
+		//roadSceneObject->addComponent(roadRenderObject);
+		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
+		roadMesh->setRestitution(0.9f);
+		roadMesh->getRigidBody()->setFriction(1.0f);
+		//terrainMesh->getRigidBody()->setFriction(1.5f);
+		roadSceneObject->addComponent(roadMesh);
+
+		roadElement = roadElement->NextSiblingElement("Road");
+	}
+	*/
+}
+
+void SceneLoader::loadRoad(XMLElement* roadElement)
+{
+	while (roadElement)
 	{
 		std::string name = roadElement->Attribute("name");
 		std::string profileName = roadElement->Attribute("profile");
@@ -318,12 +458,26 @@ void SceneLoader::loadMap(std::string name)
 	loadStartPosition(scnElement);
 	if (!loadTerrain(scnElement))
 		return;
-	loadGrass(scnElement);
-	loadSunLight(scnElement);
-	if (!loadSky(scnElement))
-		return;
-	loadObjects(scnElement);
-	loadRoads(scnElement);
+
+	XMLElement* grassElement = scnElement->FirstChildElement("Grass");
+	if (grassElement)
+		loadGrass(grassElement);
+
+	XMLElement* sunElement = scnElement->FirstChildElement("Light");
+	if (sunElement)
+		loadSunLight(sunElement);
+
+	XMLElement* skyElement = scnElement->FirstChildElement("Sky");
+	if (skyElement)
+		loadSky(skyElement);
+
+	XMLElement* objectsElement = scnElement->FirstChildElement("Objects");
+	if (objectsElement)
+		loadObjects(objectsElement);
+	
+	XMLElement* roadsElement = scnElement->FirstChildElement("Roads");
+	if (roadsElement)
+		loadRoads(roadsElement);
 }
 
 

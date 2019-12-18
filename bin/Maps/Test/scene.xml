@@ -1,58 +1,41 @@
-<?xml version="1.0"?>
-<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
-
+<?xml version="1.0" encoding="UTF-8"?>
 <Scene>
-	<Description author="" />
-	
-	<Terrain heightmap="test_terrain.bmp" material="terrain" />
-	
-	<Start position="0,4,12" rotation="0,0,0" />
-	
-	<!-- rotation=(-0.2f * PI, 0.35f * PI, 0) -->
-	<Light rotation="-0.62831,1.09955,0" color="1.0,1.0,1.0" ambientIntensity="0.025" diffuseIntensity="0.5" />
-	
-	<Sky texture="rt.bmp,lt.bmp,up.bmp,dn.bmp,ft.bmp,bk.bmp" />
-	
-	<Objects>
-		<!--<Object name="crate" position="-10,3,-10" rotation="0,45,0" />
-		<Object name="crate" position="10,3,-10" rotation="0,0,0" /> -->
-		<Object name="domek" position="20,0,20" rotation="0,0,0" />
-		<Object name="domek" position="20,0,40" rotation="0,0,0" />
-		<Object name="domek" position="20,0,60" rotation="0,0,0" />
-		<Object name="iglak" position="-10,3.5,-6.5" rotation="0,0,0" />
-		<Object name="iglak" position="-9,3.5,-3" rotation="0,0,0" />
-		<Object name="iglak" position="-11,3.5,1" rotation="0,0,0" />
-		<Object name="iglak" position="-10.5,3.5,4.5" rotation="0,0,0" />
-		<Object name="iglak" position="-8.5,3.5,9" rotation="0,0,0" />
-		<Object name="iglak" position="-15,3.5,-5.1" rotation="0,0,0" />
-		<Object name="iglak" position="-16.6,3.5,-2.4" rotation="0,0,0" />
-		<Object name="iglak" position="-15.5,3.5,1.8" rotation="0,0,0" />
-		<Object name="iglak" position="-14.7.5,3.5,6.2" rotation="0,0,0" />
-		<Object name="iglak" position="-13.3,3.5,10.5" rotation="0,0,0" />
-		<Object name="zapora" position="25,1,10" rotation="0,-10,0" />
-		<Object name="blok" position="-20,0,50" rotation="0,90,0" />
-		<!--Object name="fontanna" position="10,0.5,10" rotation="0,0,0" />
-		<Object name="brama" position="10,0,0" rotation="0,0,0" /> -->
-	</Objects>
-	
-	<Roads>
-		<Road name="road1" profile="profile1">
-			<Segment type="line" radius="0" beginPoint="0,0,100" endPoint="0,0,-10" points="60" interpolation="lin" />
-			<Segment type="arc" radius="55" beginPoint="0,0,-10" endPoint="60,5,-65" points="60" interpolation="cos" />
-		</Road>
-		
-		<Road name="road2" profile="profile1">
-			<Segment type="line" radius="0" beginPoint="-80,0,5.0" endPoint="-100,5,30" points="60" interpolation="cos" />
-			<Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80.0" points="60" interpolation="cos" />
-		</Road>
-		
-		<Road name="pavement1" profile="pavement">
-			<Segment type="line" radius="0" beginPoint="5,0,30" endPoint="40,0,30" points="60" interpolation="lin" />
-		</Road>
-		
-		<Road name="pavement2" profile="pavement">
-			<Segment type="line" radius="0" beginPoint="5,0,50" endPoint="40,0,50" points="60" interpolation="lin" />
-		</Road>
-	</Roads>
-	
+    <Description author="TestUser"/>
+    <Terrain heightmap="test_terrain.bmp" material="terrain" maxHeight="20"/>
+    <Start position="0,4,12" rotation="0,0,0"/>
+    <Light rotation="-0.62831,1.09955,0" color="1,1,1" ambientIntensity="0.025" diffuseIntensity="0.5"/>
+    <Sky/>
+    <Objects>
+        <Object name="domek" id="domek01" position="16.4838,0,20" rotation="0,-0,0"/>
+        <Object name="domek" position="20,0,40" rotation="0,-0,0"/>
+        <Object name="domek" position="20,0,60" rotation="0,0,0"/>
+        <Object name="iglak" position="-10,3.5,-6.5" rotation="0,0,0"/>
+        <Object name="iglak" position="-9,3.5,-3" rotation="0,0,0"/>
+        <Object name="iglak" position="-11,3.5,1" rotation="0,0,0"/>
+        <Object name="iglak" position="-10.5,3.5,4.5" rotation="0,0,0"/>
+        <Object name="iglak" position="-8.5,3.5,9" rotation="0,0,0"/>
+        <Object name="iglak" position="-15,3.5,-5.1" rotation="0,0,0"/>
+        <Object name="iglak" position="-16.6,3.5,-2.4" rotation="0,0,0"/>
+        <Object name="iglak" position="-15.5,3.5,1.8" rotation="0,0,0"/>
+        <Object name="iglak" position="-14.7,3.5,6.2" rotation="0,0,0"/>
+        <Object name="iglak" position="-13.3,3.5,10.5" rotation="0,0,0"/>
+        <Object name="zapora" position="7.19476,0.947708,10.3112" rotation="0.0581136,73.109,0.0486425"/>
+        <Object name="blok" position="-20,0,50" rotation="-179.998,84.5959,-179.998"/>
+    </Objects>
+    <Roads>
+        <Road name="road1" profile="profile1">
+            <Segment type="line" radius="0" beginPoint="0,0,100" endPoint="0,0,-10" points="60" interpolation="lin"/>
+            <Segment type="arc" radius="55" beginPoint="0,0,-10" endPoint="60,5,-65" points="60" interpolation="cos"/>
+        </Road>
+        <Road name="road2" profile="profile1">
+            <Segment type="line" radius="0" beginPoint="-80,0,5" endPoint="-100,5,30" points="60" interpolation="cos"/>
+            <Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80" points="60" interpolation="cos"/>
+        </Road>
+        <Road name="pavement1" profile="pavement">
+            <Segment type="line" radius="0" beginPoint="5,0,30" endPoint="40,0,30" points="60" interpolation="lin"/>
+        </Road>
+        <Road name="pavement2" profile="pavement">
+            <Segment type="line" radius="0" beginPoint="5,0,50" endPoint="40,0,50" points="60" interpolation="lin"/>
+        </Road>
+    </Roads>
 </Scene>

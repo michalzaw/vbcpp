@@ -4,7 +4,7 @@
 
 #include "EditorWindow.h"
 
-
+/*
 class CameraSettingsWindow : public EditorWindow
 {
     private:
@@ -14,6 +14,7 @@ class CameraSettingsWindow : public EditorWindow
         CameraSettingsWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, bool isOpen = false);
 
 };
-
+*/
+void CameraSettingsWindow(CameraFPS* camera);
 
 #endif // CAMERASETTINGSWINDOW_H_INCLUDED

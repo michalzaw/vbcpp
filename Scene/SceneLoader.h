@@ -46,13 +46,15 @@ class SceneLoader
 
 		SceneDescription _sceneDescription;
 
-		void loadStartPosition(tinyxml2::XMLElement* sceneElement);
-		bool loadTerrain(tinyxml2::XMLElement* sceneElement);
-		void loadGrass(tinyxml2::XMLElement* sceneElement);
-		void loadSunLight(tinyxml2::XMLElement* sceneElement);
-		bool loadSky(tinyxml2::XMLElement* sceneElement);
-		void loadObjects(tinyxml2::XMLElement* sceneElement);
-		void loadRoads(tinyxml2::XMLElement* sceneElement);
+		void loadStartPosition(tinyxml2::XMLElement* );
+		bool loadTerrain(tinyxml2::XMLElement* );
+		void loadGrass(tinyxml2::XMLElement* );
+		void loadSunLight(tinyxml2::XMLElement* );
+		void loadSky(tinyxml2::XMLElement* );
+		void loadObjects(tinyxml2::XMLElement* );
+		void loadObject(tinyxml2::XMLElement* );
+		void loadRoads(tinyxml2::XMLElement* );
+		void loadRoad(tinyxml2::XMLElement*);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);

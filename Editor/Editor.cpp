@@ -14,11 +14,14 @@
 #include "../ImGui/imgui_impl_glfw.h"
 #include "../ImGui/imgui_impl_opengl3.h"
 #include "../ImGui/imGizmo.h"
+#include "../ImGui/imRoadTools.h"
 #include "glm/gtc/type_ptr.hpp"
 
+#include "EditorContext.h"
 #include "Windows/OpenDialogWindow.h"
 #include "Windows/SceneGraphWindow.h"
 #include "Windows/ObjectPropertiesWindow.h"
+#include "Windows/MapInfoWindow.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -482,8 +485,19 @@ namespace vbEditor
 	static bool _showOpenDialogWindow = true;
 	static bool _isCameraActive = false;
 	static bool _showObjectPropertyEditor = true;
+	static bool _showRoadTools = true;
+	static bool _showCameraSettingsWindow = false;
+	static bool _showMapInfoWindow = false;
+	static bool _saveMap = false;
+	static bool _addSceneObject = false;
+
+
+	std::string windowTitle = "VBCPP - World Editor";
 
 	std::vector<std::string> _availableMaps;// { "Demo", "Demo2", "Coœtam jeszcze" };
+	std::vector<std::string> _availableObjects;
+
+	MapInfo mapInfo = {"Unknown", "Unknown"};
 
 	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 	{
@@ -542,7 +556,7 @@ namespace vbEditor
 		{
 			return false;
 		}
-		window.setWindowTitle("vbcpp - editor");
+		window.setWindowTitle(windowTitle);
 
 		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
 		glfwSetKeyCallback(window.getWindow(), editorKeyCallback);
@@ -591,6 +605,7 @@ namespace vbEditor
 		_soundManager->setActiveCamera(_camera);
 
 		_availableMaps = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
+		_availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
 
 		_showOpenDialogWindow = true;
 	}
@@ -600,6 +615,44 @@ namespace vbEditor
 
 	}
 
+	void drawMainMenu()
+	{
+		if (ImGui::BeginMainMenuBar())
+		{
+			if (ImGui::BeginMenu("File"))
+			{
+				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Open map...", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Save", NULL, &_saveMap);
+				//ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
+				ImGui::Separator();
+				ImGui::MenuItem("Exit");
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Map"))
+			{
+				ImGui::MenuItem("Map Description", NULL, &_showMapInfoWindow);
+				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Settings"))
+			{
+				ImGui::MenuItem("Camera Settings", NULL, &_showCameraSettingsWindow);
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Windows"))
+			{
+				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
+				ImGui::EndMenu();
+			}
+
+			ImGui::EndMainMenuBar();
+		}
+	}
+
 	void renderGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
@@ -607,6 +660,7 @@ namespace vbEditor
 		ImGui::NewFrame();
 
 		ImGuizmo::BeginFrame();
+		ImRoadTools::BeginFrame();
 
 		drawMainMenu();
 
@@ -615,12 +669,62 @@ namespace vbEditor
 
 		static int currentSelection = 0;
 		if (_showOpenDialogWindow)
-			if (openMapDialog(_availableMaps, currentSelection))
+		{
+			if (openMapDialog("Open map...", "Open", _availableMaps, currentSelection))
 			{
 				_showOpenDialogWindow = false;
 				SceneLoader sceneLoader(_sceneManager);
 				sceneLoader.loadMap(_availableMaps[currentSelection]);
+
+				mapInfo.name = _availableMaps[currentSelection];
+				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 			}
+		}
+
+		static int currentObjectSelection = 0;
+		if (_addSceneObject)
+		{
+			if (openMapDialog("Add Scene Object...", "Add", _availableObjects, currentObjectSelection))
+			{
+				_addSceneObject = false;
+
+				std::string objName = _availableObjects[currentObjectSelection];
+
+				RObject* rObject = ResourceManager::getInstance().loadRObject(objName);
+				SceneObject* sceneObject = 
+						RObjectLoader::createSceneObjectFromRObject(rObject, objName, 
+																	glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f, 0.0f, 0.0f),
+																	_sceneManager);
+			}
+		}
+
+		if (_saveMap)
+		{
+			//printf("Saving map\n");
+			SceneSaver sceneSaver(_sceneManager);
+			sceneSaver.saveMap(mapInfo.name, SceneDescription(mapInfo.author));
+			_saveMap = false;
+		}
+
+		if (_showMapInfoWindow)
+		{
+			static MapInfo outputData;
+			outputData.name = mapInfo.name;
+			outputData.author = mapInfo.author;
+			if (MapInfoWindow(outputData, std::string("Update")))
+			{
+				mapInfo.name = outputData.name;
+				mapInfo.author = outputData.author;
+				_showMapInfoWindow = false;
+			}
+		}
+
+		if (_showCameraSettingsWindow)
+		{
+			CameraFPS* cameraFPS = dynamic_cast<CameraFPS*>(GraphicsManager::getInstance().getCurrentCamera());
+			if(cameraFPS)
+				CameraSettingsWindow(cameraFPS);
+		}
 
 		if (_showObjectPropertyEditor)
 		{
@@ -629,7 +733,18 @@ namespace vbEditor
 		}
 
 		if (_selectedSceneObject)
+		{
 			ShowTransformGizmo();
+
+			if (_showRoadTools)
+			{
+				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+
+				if (roadComponent)
+					showRoadTools();
+			}
+		}
+
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -673,6 +788,12 @@ namespace vbEditor
 
 			if (timePhysicsCurr - lastFPSupdate >= 1.0f)
 			{
+				std::string sTiming = toString(nbFrames);
+
+				// Append the FPS value to the window title details
+				std::string newWindowTitle = windowTitle + " | FPS: " + sTiming;
+				window.setWindowTitle(newWindowTitle);
+
 				nbFrames = 0;
 				lastFPSupdate += 1.0f;
 			}
@@ -732,31 +853,12 @@ namespace vbEditor
 		return (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard);
 	}                    
 
-	void drawMainMenu()
+	void loadMapData()
 	{
-		if (ImGui::BeginMainMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
-				ImGui::MenuItem("Open map...", NULL, &_showDemoWindow);
-				ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
-				ImGui::Separator();
-				ImGui::MenuItem("Exit");
-				ImGui::EndMenu();
-			}
 
-			if (ImGui::BeginMenu("Windows"))
-			{
-				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMainMenuBar();
-		}
 	}
 
-	void loadMapData()
+	void saveMapData()
 	{
 
 	}
@@ -765,13 +867,16 @@ namespace vbEditor
 	{
 
 		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+		//static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
+		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
+		/*
 		if (ImGui::IsKeyPressed(69)) // E key
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		if (ImGui::IsKeyPressed(82)) // R key
 			mCurrentGizmoOperation = ImGuizmo::ROTATE;
 		if (ImGui::IsKeyPressed(84)) // T key
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
+		*/
 		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGui::SameLine();
@@ -847,12 +952,29 @@ namespace vbEditor
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
-			glm::value_ptr(_selectedSceneObject->getGlobalTransformMatrix()),
+			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
 			NULL,
 			useSnap ? &snap[0] : NULL,
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
 		);
+	}
+
+	void showRoadTools()
+	{
+		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImRoadTools::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		ImRoadTools::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
+			roadComponent->getSegments()
+		);
+	}
+
+	void addSceneObject()
+	{
+
 	}
 
 } // namespace

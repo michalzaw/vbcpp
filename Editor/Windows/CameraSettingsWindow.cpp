@@ -1,7 +1,7 @@
 #include "CameraSettingsWindow.h"
 
 
-
+/*
 CameraSettingsWindow::CameraSettingsWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen)
 {
@@ -30,4 +30,21 @@ void CameraSettingsWindow::drawWindow()
         }
     }
     ImGui::End();
+}
+*/
+void CameraSettingsWindow(CameraFPS* camera)
+{
+	if (camera)
+	{
+		float movementSpeed = camera->getMoveSpeed();
+		float rotationSpeed = camera->getRotationSpeed();
+
+		ImGui::DragFloat("Movement speed", &movementSpeed, 0.01f, 0.0f, 20.0f);
+
+		// Rotation
+		ImGui::DragFloat("Rotation speed", &rotationSpeed, 0.01f, 0.0f, 1.0f);
+
+		camera->setMoveSpeed(movementSpeed);
+		camera->setRotationSpeed(rotationSpeed);
+	}
 }
