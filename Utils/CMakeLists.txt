@@ -18,6 +18,7 @@ set (UTILS_SOURCES
 	Utils/stb_image.cpp
 	Utils/Strings.cpp
 	Utils/tinyxml2.cpp
+	Utils/XmlUtils.cpp
 )
 
 set (UTILS_HEADERS
