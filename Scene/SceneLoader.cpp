@@ -92,7 +92,7 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 
 		std::string grassDensityTextureFileName;
 		if (grassElement->Attribute("density_texture"))
-			std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+			grassDensityTextureFileName = grassElement->Attribute("density_texture");
 
 		std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
 		if (FilesHelper::isFileExists(_dirPath + terrainHeightNormalMapFileName))
