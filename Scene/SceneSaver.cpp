@@ -71,8 +71,7 @@ void SceneSaver::saveTerrain(XMLElement* terrainElement, XMLElement* grassElemen
 		terrainElement->SetAttribute("material", terrainComponent->getMaterialName().c_str());
 		terrainElement->SetAttribute("maxHeight", terrainComponent->getMaxHeight());
 
-		if (grassElement)
-			grassElement->SetAttribute("terrain_heightmap", terrainComponent->getHeightmapFileName().c_str());
+		grassElement->SetAttribute("terrain_heightmap", terrainComponent->getHeightmapFileName().c_str());
 	}
 }
 
@@ -206,7 +205,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	XMLElement* startPositionElement = doc.NewElement("Start");
 	rootNode->InsertEndChild(startPositionElement);
 
-	XMLElement* grassElement = nullptr;
+	XMLElement* grassElement = doc.NewElement("Grass");
 
 	XMLElement* sunElement = doc.NewElement("Light");
 	rootNode->InsertEndChild(sunElement);
@@ -236,11 +235,9 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		}
 		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
 		{
-			grassElement = doc.NewElement("Grass");
-
 			if (grassElement)
 			{
-				rootNode->InsertEndChild(grassElement);
+				rootNode->InsertAfterChild(startPositionElement, grassElement);
 				saveGrass(grassElement, sceneObject);
 			}
 		}
