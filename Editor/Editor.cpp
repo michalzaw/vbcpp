@@ -578,6 +578,11 @@ namespace vbEditor
 
 	void initializeEngineSubsystems()
 	{
+//#ifdef DEVELOPMENT_RESOURCES
+		GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
+		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
+//#endif // DEVELOPMENT_RESOURCES
+
 		OGLDriver::getInstance().initialize();
 
 		Renderer& renderer = Renderer::getInstance();
@@ -606,6 +611,11 @@ namespace vbEditor
 
 		_availableMaps = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
 		_availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
+
+		std::vector<std::string> availableMapsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::MAPS);
+		std::vector<std::string> availableObjectsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::OBJECTS);
+		_availableMaps.insert(_availableMaps.end(), availableMapsDev.begin(), availableMapsDev.end());
+		_availableObjects.insert(_availableObjects.end(), availableObjectsDev.begin(), availableObjectsDev.end());
 
 		_showOpenDialogWindow = true;
 	}

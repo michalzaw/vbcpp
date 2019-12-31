@@ -256,8 +256,13 @@ void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm:
 // Callback dla pojedynczych zdarzeń - przyciski myszy
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
-        cameraControll = !cameraControll;
+	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
+	{
+		cameraControll = !cameraControll;
+		glfwSetCursorPos(win->getWindow(), win->getWidth() / 2, win->getHeight() / 2);
+
+		glfwSetInputMode(win->getWindow(), GLFW_CURSOR, cameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
 
     if (action == GLFW_RELEASE)
     {
@@ -600,7 +605,7 @@ int main(int argc, char** argv)
 	initializeImGui();
 	#endif // DRAW_IMGUI
 
-    //glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(win->getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Inicjalizujemy potrzebne rzeczy
     OGLDriver::getInstance().initialize();
