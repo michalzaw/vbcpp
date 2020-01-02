@@ -9,7 +9,12 @@ using namespace tinyxml2;
 #include <iostream>
 
 #include "Math.h"
+#include "FilesHelper.h"
+#include "ResourceManager.h"
+#include "Logger.h"
 #include "XmlUtils.h"
+
+#include "../Game/Directories.h"
 
 
 Engine::Engine(std::string filename)
@@ -82,17 +87,27 @@ void Engine::throttleDown()
 
 void Engine::loadData(std::string filename)
 {
-    std::string fullPath = "Parts/" + filename + ".xml";
+    std::string fullPath = GameDirectories::BUS_PARTS + filename + ".xml";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(fullPath))
+		fullPath = ResourceManager::getInstance().getAlternativeResourcePath() + fullPath;
+#endif // DEVELOPMENT_RESOURCES
 
     XMLDocument doc;
-    doc.LoadFile( fullPath.c_str() );
+    doc.LoadFile(fullPath.c_str());
 
     // Search for main element - Engine
     XMLElement* engElement = doc.FirstChildElement("Engine");
-    if (engElement == nullptr) std::cout << "Engine element not found! Is it correct engine file?" << std::endl;
+	if (engElement == nullptr)
+	{
+		Logger::error("Engine element not found!Is it correct engine file ? ");
+		return;
+	}
 
     XMLElement* engDesc = engElement->FirstChildElement("Description");
-    if (engDesc == nullptr) std::cout << "Description element not found" << std::endl;
+	if (engDesc == nullptr)
+		Logger::warning("Description element not found");
 
     // Load file description
     std::string author(engDesc->Attribute("author"));
@@ -100,13 +115,14 @@ void Engine::loadData(std::string filename)
     std::string comment(engDesc->Attribute("comment"));
 
     XMLElement* engSound = engElement->FirstChildElement("Sound");
-	_soundFilename = "Parts/" + std::string(engSound->Attribute("file"));
+
+	_soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
 
 	_soundRpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
     _volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
 
-	_startSoundFilename = "Parts/" + XmlUtils::getAttributeStringOptional(engSound, "startFile");
-	_stopSoundFilename = "Parts/" + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
+	_startSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "startFile");
+	_stopSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
 
     std::cout << "Engine sound: " << _soundFilename << std::endl;
     std::cout << "Engine volume: " << _volume << std::endl;
@@ -136,9 +152,6 @@ void Engine::loadData(std::string filename)
     std::cout << "Comment: " << comment << std::endl;
 
     std::cout << "Point count: " << _torqueCurve.size() << std::endl;
-
-    //for (unsigned char i = 0; i < _torqueCurve.size(); i++)
-    //    std::cout << "Point " << i << ": " << _torqueCurve[i].rpm << " - " << _torqueCurve[i].torque << std::endl;
 }
 
 
