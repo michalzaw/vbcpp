@@ -9,10 +9,11 @@ using namespace tinyxml2;
 #include <iostream>
 
 #include "Math.h"
+#include "XmlUtils.h"
 
 
 Engine::Engine(std::string filename)
-: _isRunning(false),
+: _state(ES_OFF),
 _throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(3.45f)
 {
     loadData(filename);
@@ -27,23 +28,24 @@ Engine::~Engine()
 }
 
 
-void Engine::turnOn()
+void Engine::setState(EngineState state)
 {
-    _isRunning = true;
-    _currentRPM = _torqueCurve[0].rpm;
-}
+    _state = state;
 
-
-void Engine::turnOff()
-{
-    _isRunning = false;
-    _currentRPM = 0.0f;
+	if (_state == ES_RUN)
+	{
+		_currentRPM = _torqueCurve[0].rpm;
+	}
+	else if (_state == ES_OFF || _state == ES_STOPPING)
+	{
+		_currentRPM = 0.0f;
+	}
 }
 
 
 void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 {
-    if (_isRunning)
+    if (isRunning())
     {
         float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / PI;
         //if (_currentRPM < _torqueCurve[0].rpm)
@@ -98,16 +100,15 @@ void Engine::loadData(std::string filename)
     std::string comment(engDesc->Attribute("comment"));
 
     XMLElement* engSound = engElement->FirstChildElement("Sound");
-    _sound = "Parts/" + std::string(engSound->Attribute("file"));
+	_soundFilename = "Parts/" + std::string(engSound->Attribute("file"));
 
-    const char* cVolume = engSound->Attribute("volume");
+	_soundRpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
+    _volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
 
-    if (cVolume != nullptr)
-        _volume = atof(cVolume);
-    else
-        _volume = 0.9f;
+	_startSoundFilename = "Parts/" + XmlUtils::getAttributeStringOptional(engSound, "startFile");
+	_stopSoundFilename = "Parts/" + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
 
-    std::cout << "Engine sound: " << _sound << std::endl;
+    std::cout << "Engine sound: " << _soundFilename << std::endl;
     std::cout << "Engine volume: " << _volume << std::endl;
 
     XMLElement* pointList = engElement->FirstChildElement("Points");
@@ -160,7 +161,7 @@ void Engine::calculateTorqueLine()
 
 void Engine::update(float dt)
 {
-    if (_isRunning)
+    if (isRunning())
     {
         if (_throttle > 0)
         {

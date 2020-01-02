@@ -296,11 +296,16 @@ void BusRaycast::startEngine()
 {
     if (_engine)
     {
-        _engine->turnOn();
-
-        //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
-        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
-        sndC->play();
+		if (_engineStartSoundSource != nullptr)
+		{
+			_engineStartSoundSource->play();
+			_engine->setState(ES_STARTING);
+		}
+		else
+		{
+			_engineSoundSource->play();
+			_engine->setState(ES_RUN);
+		}
     }
 }
 
@@ -309,10 +314,17 @@ void BusRaycast::stopEngine()
 {
     if (_engine)
     {
-        _engine->turnOff();
+		_engineSoundSource->stop();
 
-        SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
-        sndC->stop();
+		if (_engineStopSoundSource != nullptr)
+		{
+			_engineStopSoundSource->play();
+			_engine->setState(ES_STOPPING);
+		}
+		else
+		{
+			_engine->setState(ES_OFF);
+		}
     }
 }
 
@@ -422,8 +434,17 @@ void BusRaycast::update(float deltaTime)
 
     _engine->update(deltaTime);
 
-    SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
-    sndC->setPitch(_engine->getCurrentRPM() / 1000);
+	if (_engine->getState() == ES_STARTING && _engineStartSoundSource->getState() == AL_STOPPED)
+	{
+		_engine->setState(ES_RUN);
+		_engineSoundSource->play();
+	}
+	else if (_engine->getState() == ES_STOPPING && _engineStopSoundSource->getState() == AL_STOPPED)
+	{
+		_engine->setState(ES_OFF);
+	}
+
+	_engineSoundSource->setPitch(_engine->getCurrentRPM() / _engine->getSoundRpm());
 
     btScalar wheelAngularVelocity = 0.0f;
 

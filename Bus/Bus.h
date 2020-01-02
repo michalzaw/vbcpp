@@ -36,12 +36,20 @@ class Bus : public RefCounter
         unsigned int _numberOfPassengers;
         unsigned int _numberOfPassengersGettingOff;
         SoundComponent* _announcementSource;
+		SoundComponent* _engineSoundSource;
+		SoundComponent* _engineStartSoundSource;
+		SoundComponent* _engineStopSoundSource;
 
     public:
         Bus()
         {
             _numberOfPassengers = 0;
             _numberOfPassengersGettingOff = 0;
+
+			_announcementSource = nullptr;
+			_engineSoundSource = nullptr;
+			_engineStartSoundSource = nullptr;
+			_engineStopSoundSource = nullptr;
         }
 
         virtual SceneObject* getSceneObject() = 0;
@@ -110,6 +118,21 @@ class Bus : public RefCounter
         {
             return _announcementSource;
         }
+
+		SoundComponent* getEngineSoundSource()
+		{
+			return _engineSoundSource;
+		}
+
+		SoundComponent* getEngineStartSoundSource()
+		{
+			return _engineStartSoundSource;
+		}
+
+		SoundComponent* getEngineStopSoundSource()
+		{
+			return _engineStopSoundSource;
+		}
 
 };
 
