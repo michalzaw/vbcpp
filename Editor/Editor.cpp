@@ -479,8 +479,8 @@ namespace vbEditor
 	};
 
 	Window window;
-	int _windowWidth = 1400;
-	int _windowHeight = 900;
+	int _windowWidth = 1024;
+	int _windowHeight = 768;
 
 	PhysicsManager* _physicsManager = nullptr;
 	SoundManager* _soundManager = nullptr;
@@ -640,11 +640,17 @@ namespace vbEditor
 		}
 	}
 
-	void changeFramebufferSizeCallback(GLFWwindow* window, int width, int height)
+	void changeFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height)
 	{
-		// TODO: change size all render targets in Renderer
 		Renderer::getInstance().setWindowDimensions(width, height);
+		window.setWindowSize(width, height);
 
+	}
+
+	void changeWindowSizeCallback(GLFWwindow* window, int width, int height)
+	{
+		if (_camera)
+			_camera->setWindowDimensions(width, height);
 	}
 
 	bool createWindow()
@@ -658,7 +664,7 @@ namespace vbEditor
 		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
 		glfwSetKeyCallback(window.getWindow(), keyCallback);
 		glfwSetCharCallback(window.getWindow(), editorCharCallback);
-		glfwSetWindowSizeCallback(window.getWindow(), editorChangeWindowSizeCallback);
+		glfwSetWindowSizeCallback(window.getWindow(), changeWindowSizeCallback);
 		glfwSetFramebufferSizeCallback(window.getWindow(), changeFramebufferSizeCallback);
 
 		ImGui::CreateContext();
@@ -989,6 +995,12 @@ namespace vbEditor
 		if (ImGui::IsKeyPressed(84)) // T key
 			mCurrentGizmoOperation = ImGuizmo::SCALE;
 		*/
+		if (ImGui::RadioButton("Global", mCurrentGizmoMode == ImGuizmo::WORLD))
+			mCurrentGizmoMode = ImGuizmo::WORLD;
+		ImGui::SameLine();
+		if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+			mCurrentGizmoMode = ImGuizmo::LOCAL;
+
 		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
 			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
 		ImGui::SameLine();

@@ -152,6 +152,9 @@ class Renderer
 		void initPostProcessingEffectsStack();
 
 
+		void recreateAllFramebuffers();
+
+
 		void initUniformLocations();
 
 

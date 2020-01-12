@@ -166,6 +166,25 @@ void Renderer::initPostProcessingEffectsStack()
 }
 
 
+void Renderer::recreateAllFramebuffers()
+{
+	OGLDriver::getInstance().deleteFramebuffer(_mainRenderData->framebuffer);
+	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[0]);
+	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[1]);
+
+	Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
+	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+	framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+	framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+	framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+	_mainRenderData->framebuffer = framebuffer;
+
+	createFramebuffersForPostProcessing();
+}
+
+
 void Renderer::initUniformLocations()
 {
 	_uniformsNames[UNIFORM_MVP] = "MVP";
@@ -1156,6 +1175,8 @@ void Renderer::setWindowDimensions(unsigned int screenWidth, unsigned int screen
 
     Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
     defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+
+	recreateAllFramebuffers();
 }
 
 
