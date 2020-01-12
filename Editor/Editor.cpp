@@ -856,6 +856,11 @@ namespace vbEditor
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
 
+		_physicsManager->stop();
+
+		_soundManager->drop();
+		_physicsManager->drop();
+		delete _sceneManager;
 	}
 
 	bool getGUIhasFocus()
