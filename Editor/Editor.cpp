@@ -472,7 +472,16 @@ void Editor::changeWindowSizeCallback(int width, int height)
 
 namespace vbEditor
 {
+	enum ClickMode
+	{
+		CM_PICK_OBJECT,
+		CM_ADD_OBJECT
+	};
+
 	Window window;
+	int _windowWidth = 1400;
+	int _windowHeight = 900;
+
 	PhysicsManager* _physicsManager = nullptr;
 	SoundManager* _soundManager = nullptr;
 	SceneManager* _sceneManager = nullptr;
@@ -499,7 +508,34 @@ namespace vbEditor
 
 	MapInfo mapInfo = {"Unknown", "Unknown"};
 
-	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+	ClickMode _clickMode = CM_PICK_OBJECT;
+	RObject* _objectToAdd = nullptr;
+
+	// TODO: move to separate file
+	bool calculateMousePositionInWorldspaceUsingBulletRaycasting(glm::vec3 rayStart, glm::vec3 rayDir, glm::vec3& position)
+	{
+		glm::vec3 rayEnd = rayStart + (rayDir * 1000);
+		btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStart.x, rayStart.y, rayStart.z),
+			btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
+
+		rayCallback.m_collisionFilterMask = COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL;
+		rayCallback.m_collisionFilterGroup = COL_ENV;
+
+		_sceneManager->getPhysicsManager()->getDynamicsWorld()->rayTest(btVector3(rayStart.x, rayStart.y, rayStart.z),
+			btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
+			rayCallback);
+
+		if (rayCallback.hasHit())
+		{
+			position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+
+			return true;
+		}
+
+		return false;
+	}
+
+	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
 	{
 		if (getGUIhasFocus())
 		{
@@ -516,7 +552,68 @@ namespace vbEditor
 			_isCameraActive = false;
 		}
 
-		
+		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+		{
+			double xpos, ypos;
+			glfwGetCursorPos(glfwWindow, &xpos, &ypos);
+			ypos = window.getHeight() - ypos;
+
+			glm::vec3 rayStart;
+			glm::vec3 rayDir;
+			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+			if (_clickMode == CM_ADD_OBJECT)
+			{
+				glm::vec3 hitPosition;
+				if (calculateMousePositionInWorldspaceUsingBulletRaycasting(rayStart, rayDir, hitPosition))
+				{
+					SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
+
+					_selectedSceneObject = newObject;
+				}
+			}
+			else if (_clickMode == CM_PICK_OBJECT)
+			{
+				// collision with render objects
+				SceneObject* selectedObject = nullptr;
+				float d = std::numeric_limits<float>::max();
+
+				std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+				{
+					RenderObject* renderObject = *i;
+					AABB* aabb = renderObject->getModel()->getAABB();
+					glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+					float distance;
+					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+					{
+						if (distance > 0.0f && distance < d)
+						{
+							selectedObject = renderObject->getSceneObject();
+							d = distance;
+						}
+					}
+				}
+
+				_selectedSceneObject = selectedObject;
+			}
+		}
+	}
+
+	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+	{
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+		{
+			if (_clickMode == CM_ADD_OBJECT)
+			{
+				_clickMode = CM_PICK_OBJECT;
+			}
+			std::cout << "AA\n";
+			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+			glfwSetCursor(window, cursor);
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+
 	}
 
 	void processInput(double deltaTime)
@@ -552,14 +649,14 @@ namespace vbEditor
 
 	bool createWindow()
 	{
-		if (!window.createWindow(1400, 900, 10, 40, false, true))
+		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true))
 		{
 			return false;
 		}
 		window.setWindowTitle(windowTitle);
 
 		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
-		glfwSetKeyCallback(window.getWindow(), editorKeyCallback);
+		glfwSetKeyCallback(window.getWindow(), keyCallback);
 		glfwSetCharCallback(window.getWindow(), editorCharCallback);
 		glfwSetWindowSizeCallback(window.getWindow(), editorChangeWindowSizeCallback);
 		glfwSetFramebufferSizeCallback(window.getWindow(), changeFramebufferSizeCallback);
@@ -601,7 +698,7 @@ namespace vbEditor
 		_sceneManager = new SceneManager(_physicsManager, _soundManager);
 
 		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
-		_camera = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
+		_camera = GraphicsManager::getInstance().addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
 		_camera->setMoveSpeed(8.0f);
@@ -672,6 +769,9 @@ namespace vbEditor
 		ImGuizmo::BeginFrame();
 		ImRoadTools::BeginFrame();
 
+		if (_clickMode == CM_ADD_OBJECT)
+			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
 		drawMainMenu();
 
 		if (_showDemoWindow)
@@ -699,12 +799,9 @@ namespace vbEditor
 				_addSceneObject = false;
 
 				std::string objName = _availableObjects[currentObjectSelection];
-
-				RObject* rObject = ResourceManager::getInstance().loadRObject(objName);
-				SceneObject* sceneObject = 
-						RObjectLoader::createSceneObjectFromRObject(rObject, objName, 
-																	glm::vec3(0.0f,0.0f,0.0f), glm::vec3(0.0f, 0.0f, 0.0f),
-																	_sceneManager);
+				
+				_clickMode = CM_ADD_OBJECT;
+				_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
 			}
 		}
 
