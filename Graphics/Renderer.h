@@ -122,6 +122,8 @@ class Renderer
 
         bool _isShadowMappingEnable;
         ShadowMap* _shadowMap;      // Cienie wspierane tylko dla jednego swiatla keirunkowego
+		float _shadowCameraFrustumDiagonal;
+		bool _shadowCameraFrustumDiagonalIsCalculated;
 
         // Data for debug rendering
         VBO* _aabbVbo;

@@ -14,7 +14,7 @@ Renderer::Renderer()
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
     _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
-    _isShadowMappingEnable(false), _shadowMap(NULL),
+    _isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
     _renderObjectsAAABB(true), _renderObjectsOBB(false)
 {
@@ -396,18 +396,49 @@ void Renderer::prepareLightsData()
     {
         float cascadeEnd[4] = {0.1, 25.0f, 100.0f, 500.0f };
 
-        for (int i = 0; i < ShadowMap::CASCADE_COUNT - 1; ++i)
-        {
-            CameraStatic* cameraForShadowMap = _shadowMap->getCameraForShadowMap(i);
-            CameraStatic* currentCamera = graphicsManager.getCurrentCamera();
+		for (int i = 0; i < ShadowMap::CASCADE_COUNT - 1; ++i)
+		{
+			CameraStatic* cameraForShadowMap = _shadowMap->getCameraForShadowMap(i);
+			CameraStatic* currentCamera = graphicsManager.getCurrentCamera();
 
-            Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
-                                             cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
+			Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
+				cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
 
-            frustum.applyTransform(cameraForShadowMap->getViewMatrix());
-            AABB* frustumAabb = frustum.getAABB();
-            glm::vec3 min = frustumAabb->getMinCoords();
-            glm::vec3 max = frustumAabb->getMaxCoords();
+			frustum.applyTransform(cameraForShadowMap->getViewMatrix());
+			AABB* frustumAabb = frustum.getAABB();
+			glm::vec3 min = frustumAabb->getMinCoords();
+			glm::vec3 max = frustumAabb->getMaxCoords();
+
+			// shadows stabilizations
+
+			if (!_shadowCameraFrustumDiagonalIsCalculated) {
+				_shadowCameraFrustumDiagonal = glm::length(frustum.getPoints()[FP_NEAR_LEFT_BOTTOM] - frustum.getPoints()[FP_FAR_RIGHT_TOP]);
+				_shadowCameraFrustumDiagonalIsCalculated = true;
+			}
+			glm::vec3 offset = (glm::vec3(_shadowCameraFrustumDiagonal) - (max - min)) * vec3(0.5f);
+			offset.z = 0.0f;
+
+			max += offset;
+			min -= offset;
+
+			float worldUnitsPerTexel = _shadowCameraFrustumDiagonal / _shadowMap->getShadowMap(i)->getTexture(0)->getSize().x;
+			glm::vec3 worldUnitsPerTexelVector = glm::vec3(worldUnitsPerTexel, worldUnitsPerTexel, 0.0f);
+
+			min.x /= worldUnitsPerTexel;
+			min.x = floor(min.x);
+			min.x *= worldUnitsPerTexel;
+
+			min.y /= worldUnitsPerTexel;
+			min.y = floor(min.y);
+			min.y *= worldUnitsPerTexel;
+
+			max.x /= worldUnitsPerTexel;
+			max.x = floor(max.x);
+			max.x *= worldUnitsPerTexel;
+
+			max.y /= worldUnitsPerTexel;
+			max.y = floor(max.y);
+			max.y *= worldUnitsPerTexel;
 
             cameraForShadowMap->setOrthoProjectionParams(min.x, max.x, min.y, max.y, -max.z - 100.0f, -min.z);
         }
