@@ -21,6 +21,10 @@
         <ShadowmapSize>2048</ShadowmapSize>
 		
 		<Grass>true</Grass>
+		<GrassRenderingDistance>30.0</GrassRenderingDistance>
+		
+		<Mirrors>true</Mirrors>
+		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
 		
 		<PbrSupport>true</PbrSupport>
     </Configuration>

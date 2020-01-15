@@ -16,7 +16,8 @@ Renderer::Renderer()
     _bloom(false),
     _isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
-    _renderObjectsAAABB(true), _renderObjectsOBB(false)
+    _renderObjectsAAABB(true), _renderObjectsOBB(false),
+	color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 {
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
@@ -240,6 +241,11 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_IRRADIANCE_MAP] = "IrradianceMap";
 	_uniformsNames[UNIFORM_SPECULAR_IRRADIANCE_MAP] = "SpecularIrradianceMap";
 	_uniformsNames[UNIFORM_BRDF_LUT] = "brdfLUT";
+
+	_uniformsNames[UNIFORM_COLOR_1] = "color1";
+	_uniformsNames[UNIFORM_COLOR_2] = "color2";
+	_uniformsNames[UNIFORM_COLOR_3] = "color3";
+	_uniformsNames[UNIFORM_COLOR_4] = "color4";
 
 	for (int i = 0; i < NUMBER_OF_SHADERS; ++i)
 	{
@@ -974,6 +980,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
 
+	// NEW_TREE_MATERIAL
+	defines.clear();
+	defines.push_back("NORMALMAPPING");
+	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
+
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
@@ -1281,7 +1293,7 @@ void Renderer::renderDepth(RenderData* renderData)
         Material* material = i->material;
 
         ShaderType shaderType;
-        bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL;
+        bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL;
         if (isAlphaTest)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
         else
@@ -1513,7 +1525,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL)
+            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1526,7 +1538,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL) && _alphaToCoverage)
+            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1681,7 +1693,10 @@ void Renderer::renderScene(RenderData* renderData)
 			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 		}
 
-
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_1], color1);
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_2], color2);
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_3], color3);
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
         if (i->type != RET_GRASS)
         {
@@ -1696,8 +1711,11 @@ void Renderer::renderScene(RenderData* renderData)
 
             glDisable(GL_CULL_FACE);
 
+			Grass* grass = static_cast<Grass*>(i->renderObject);
+			float renderingDistance = grass->getRenderingDistance();
+
             Frustum frustum(glm::perspective(camera->getViewAngle(), (float)camera->getWindowWidth() / (float)camera->getWindowHeight(),
-                                     camera->getNearValue(), 30.0f) * camera->getViewMatrix());
+                                     camera->getNearValue(), renderingDistance) * camera->getViewMatrix());
             AABB* aabb = frustum.getAABB();
             glm::vec3 min = aabb->getMinCoords();
             min = glm::vec3((float)((int)(min.x / 0.5)) * 0.5, (float)min.y, (float)((int)(min.z / 0.5)) * 0.5);
@@ -1707,7 +1725,6 @@ void Renderer::renderScene(RenderData* renderData)
             float height = (max.z - min.z) / 0.5;
             float a = width * height;
 
-            Grass* grass = static_cast<Grass*>(i->renderObject);
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_COLOR], grass->getGrassColor());
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_HEIGHTMAP], grass->getTerrainHeightmap());
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GRASS_DENSITY], grass->getGrassDensityTexture());

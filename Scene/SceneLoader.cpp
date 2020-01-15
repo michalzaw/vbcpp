@@ -82,17 +82,10 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 
 	if (GameConfig::getInstance().isGrassEnable)
 	{
-		std::string grassModelFileName;
-		if (grassElement->Attribute("model"))
-			grassModelFileName = grassElement->Attribute("model");
-	
-		std::string terrainHeightmapForGrassFileName;
-		if (grassElement->Attribute("terrain_heightmap"))
-			terrainHeightmapForGrassFileName = grassElement->Attribute("terrain_heightmap");
-
-		std::string grassDensityTextureFileName;
-		if (grassElement->Attribute("density_texture"))
-			grassDensityTextureFileName = grassElement->Attribute("density_texture");
+		std::string grassModelFileName(grassElement->Attribute("model"));
+		std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
+		std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+		float renderingDistance = GameConfig::getInstance().grassRenderingDistance;
 
 		std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
 		if (FilesHelper::isFileExists(_dirPath + terrainHeightNormalMapFileName))
@@ -105,22 +98,17 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 		Logger::info("heightmap: " + terrainHeightmapForGrassFileName);
 		Logger::info("density texture: " + grassDensityTextureFileName);
 
-		RStaticModel* grassModel = nullptr;
-	
-		if (!grassModelFileName.empty())
-			grassModel = ResourceManager::getInstance().loadModel(_dirPath + "grass/" + grassModelFileName, _dirPath + "grass/");
+		RStaticModel* grassModel = ResourceManager::getInstance().loadModel(_dirPath + "grass/" + grassModelFileName, _dirPath + "grass/");
 
-		if (grassModel)
-		{
-			RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName);
-			RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName);
-			heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
-			heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
+		RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName);
+		RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName);
+		heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
+		heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
 
-			SceneObject * grassObject = _sceneManager->addSceneObject("grass");
-			Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
-			grassObject->addComponent(grassComponent);
-		}
+		SceneObject * grassObject = _sceneManager->addSceneObject("grass");
+		Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
+		grassComponent->setRenderingDistance(renderingDistance);
+		grassObject->addComponent(grassComponent);
 	}
 	else
 		Logger::warning("Grass element not found!");

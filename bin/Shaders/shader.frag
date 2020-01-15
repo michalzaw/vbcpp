@@ -120,10 +120,10 @@ vec4 specular;
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 {
-	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;
+	vec4 AmbientColor = vec4(l.Color, 1.0f) * l.AmbientIntensity;// * 4; // dla aces * 4 a powinno być / 2, dla classic / 16
 	
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
-	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 20;
+	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 2;// * 20;
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
 	vec3 LightReflect = normalize(reflect(dir, normal));
@@ -204,22 +204,27 @@ void main()
 	
 float isGrass = 0.0f;
 #ifdef GRASS
-	textureColor = textureColor * grassColor;
+	float c = (textureColor.r + textureColor.g + textureColor.b) / 3.0f;
+	textureColor = diffuse = vec4(c, c, c, textureColor.a) * grassColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
 	//	discard;
 	isGrass = 1.0f;
 #endif
-	
+	float miFactor = 0;
+	float normalFactor = 1;
 #ifdef ALPHA_TEST
+	ambient /= 4.0f;
+	//diffuse /= 2.0f;
+
 	if (textureColor.a < 0.1f)
 		discard;
 	
 	vec3 eyeToFramgent = normalize(Position - CameraPosition);
 	vec3 lightDir = Lights.DirLights[0].Direction;
 	
-	float miFactor = max(dot(-lightDir, eyeToFramgent), 0.0f);
+	miFactor = max(dot(-lightDir, eyeToFramgent), 0.0f);
 	
 	miFactor = mix(miFactor, 0, isGrass);
 	
@@ -229,7 +234,7 @@ float isGrass = 0.0f;
 	
 	float DiffuseFactor = dot(normal, -lightDir);
 	//if (miFactor > 0.0f)
-	float normalFactor = mix(1, -1, miFactor);
+	normalFactor = mix(1, -1, miFactor);
 		normal = normalFactor * normal;
 #endif
 
@@ -260,6 +265,7 @@ float isGrass = 0.0f;
 
 		Coords.z -= bias[cascadeIndex];//0.0005f;//
 		Ratio = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+		if (normalFactor >= 0)
 		Ratio = Ratio * 0.8f + 0.2f;
 		/*float Ratio = 1.0f;
 		//vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
@@ -333,7 +339,7 @@ float isGrass = 0.0f;
 #endif
 	
 #ifdef ALPHA_TEST
-	float _Cutoff = 0.3f;
+	float _Cutoff = 0.2f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3
 	float newAlpha = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
 	
 	FragmentColor.a = mix(FragmentColor.a, newAlpha, fixDisappearanceAlphaRatio);
@@ -343,7 +349,7 @@ float isGrass = 0.0f;
 
 	float brightness = dot(FragmentColor.rgb, vec3(0.2126, 0.7152, 0.0722));
 	if (brightness > 0.1f)
-		BrightnessColor = vec4(FragmentColor.rgb, 1.0f);
+		BrightnessColor = vec4(FragmentColor.rgb, FragmentColor.a);
 	else
-		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 }

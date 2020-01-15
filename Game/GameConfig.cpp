@@ -67,6 +67,18 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     isGrassEnable = toBool(configElement->GetText());
                 }
+				else if (strcmp(ename, "GrassRenderingDistance") == 0)
+				{
+					grassRenderingDistance = toFloat(configElement->GetText());
+				}
+				else if (strcmp(ename, "Mirrors") == 0)
+				{
+					isMirrorsEnabled = toBool(configElement->GetText());
+				}
+				else if (strcmp(ename, "MirrorRenderingDistance") == 0)
+				{
+					mirrorRenderingDistance = toFloat(configElement->GetText());
+				}
 				else if (strcmp(ename, "PbrSupport") == 0)
 				{
 					pbrSupport = toBool(configElement->GetText());

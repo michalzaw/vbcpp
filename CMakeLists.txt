@@ -135,7 +135,8 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/libs/assimp-4.0.1/include)
 find_library(freetype PATHS lib)
 include_directories (libs/freetype/include)
 
-include_directories (libs/glm/include)
+include_directories (libs/gli/external/glm)
+include_directories (libs/gli)
 
 find_library(OpenAL PATHS lib)
 include_directories (libs/openal-soft/include)

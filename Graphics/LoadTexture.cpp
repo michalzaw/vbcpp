@@ -5,52 +5,149 @@
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 
+#include <gli/texture2d.hpp>
+#include <gli/load.hpp>
+#include <gli/generate_mipmaps.hpp>
 
-/*GLuint loadTexture(const char* fileName, int* width, int* height, bool mipmaping)
+
+// only for 2d textures
+RTexture2D* loadDdsTexture(char const* filename)
 {
-    GLuint texId = 0;
-    glGenTextures(1, &texId);
-    glBindTexture(GL_TEXTURE_2D, texId);
+	gli::texture Texture = gli::load(filename);
+	if (Texture.empty())
+		return 0;
 
+	gli::gl GL(gli::gl::PROFILE_GL33);
+	gli::gl::format const Format = GL.translate(Texture.format(), Texture.swizzles());
+	GLenum Target = GL.translate(Texture.target());
 
-    //int width, height;
-    unsigned char* image = SOIL_load_image(fileName, width, height, 0, SOIL_LOAD_RGBA);
+	GLuint TextureName = 0;
+	glGenTextures(1, &TextureName);
+	glBindTexture(Target, TextureName);
+	glTexParameteri(Target, GL_TEXTURE_BASE_LEVEL, 0);
+	glTexParameteri(Target, GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(Texture.levels() - 1));
+	glTexParameteri(Target, GL_TEXTURE_SWIZZLE_R, Format.Swizzles[0]);
+	glTexParameteri(Target, GL_TEXTURE_SWIZZLE_G, Format.Swizzles[1]);
+	glTexParameteri(Target, GL_TEXTURE_SWIZZLE_B, Format.Swizzles[2]);
+	glTexParameteri(Target, GL_TEXTURE_SWIZZLE_A, Format.Swizzles[3]);
 
-    std::cout << "Loading texture: " << fileName << std::endl;
-    std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
+	glm::tvec3<GLsizei> const Extent(Texture.extent());
+	GLsizei const FaceTotal = static_cast<GLsizei>(Texture.layers() * Texture.faces());
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, *width, *height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-    if (mipmaping)
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    }
-    else
-    {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    }
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	switch (Texture.target())
+	{
+	case gli::TARGET_1D:
+		glTexStorage1D(
+			Target, static_cast<GLint>(Texture.levels()), Format.Internal, Extent.x);
+		break;
+	case gli::TARGET_1D_ARRAY:
+	case gli::TARGET_2D:
+	case gli::TARGET_CUBE:
+		glTexStorage2D(
+			Target, static_cast<GLint>(Texture.levels()), Format.Internal,
+			Extent.x, Texture.target() == gli::TARGET_2D ? Extent.y : FaceTotal);
+		break;
+	case gli::TARGET_2D_ARRAY:
+	case gli::TARGET_3D:
+	case gli::TARGET_CUBE_ARRAY:
+		glTexStorage3D(
+			Target, static_cast<GLint>(Texture.levels()), Format.Internal,
+			Extent.x, Extent.y,
+			Texture.target() == gli::TARGET_3D ? Extent.z : FaceTotal);
+		break;
+	default:
+		assert(0);
+		break;
+	}
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	for (std::size_t Layer = 0; Layer < Texture.layers(); ++Layer)
+		for (std::size_t Face = 0; Face < Texture.faces(); ++Face)
+			for (std::size_t Level = 0; Level < Texture.levels(); ++Level)
+			{
+				GLsizei const LayerGL = static_cast<GLsizei>(Layer);
+				glm::tvec3<GLsizei> Extent(Texture.extent(Level));
+				Target = gli::is_target_cube(Texture.target())
+					? static_cast<GLenum>(GL_TEXTURE_CUBE_MAP_POSITIVE_X + Face)
+					: Target;
 
-
-    SOIL_free_image_data(image);
-
-
-    return texId;
-}*/
+				switch (Texture.target())
+				{
+				case gli::TARGET_1D:
+					if (gli::is_compressed(Texture.format()))
+						glCompressedTexSubImage1D(
+							Target, static_cast<GLint>(Level), 0, Extent.x,
+							Format.Internal, static_cast<GLsizei>(Texture.size(Level)),
+							Texture.data(Layer, Face, Level));
+					else
+						glTexSubImage1D(
+							Target, static_cast<GLint>(Level), 0, Extent.x,
+							Format.External, Format.Type,
+							Texture.data(Layer, Face, Level));
+					break;
+				case gli::TARGET_1D_ARRAY:
+				case gli::TARGET_2D:
+				case gli::TARGET_CUBE:
+					if (gli::is_compressed(Texture.format()))
+						glCompressedTexSubImage2D(
+							Target, static_cast<GLint>(Level),
+							0, 0,
+							Extent.x,
+							Texture.target() == gli::TARGET_1D_ARRAY ? LayerGL : Extent.y,
+							Format.Internal, static_cast<GLsizei>(Texture.size(Level)),
+							Texture.data(Layer, Face, Level));
+					else
+						glTexSubImage2D(
+							Target, static_cast<GLint>(Level),
+							0, 0,
+							Extent.x,
+							Texture.target() == gli::TARGET_1D_ARRAY ? LayerGL : Extent.y,
+							Format.External, Format.Type,
+							Texture.data(Layer, Face, Level));
+					break;
+				case gli::TARGET_2D_ARRAY:
+				case gli::TARGET_3D:
+				case gli::TARGET_CUBE_ARRAY:
+					if (gli::is_compressed(Texture.format()))
+						glCompressedTexSubImage3D(
+							Target, static_cast<GLint>(Level),
+							0, 0, 0,
+							Extent.x, Extent.y,
+							Texture.target() == gli::TARGET_3D ? Extent.z : LayerGL,
+							Format.Internal, static_cast<GLsizei>(Texture.size(Level)),
+							Texture.data(Layer, Face, Level));
+					else
+						glTexSubImage3D(
+							Target, static_cast<GLint>(Level),
+							0, 0, 0,
+							Extent.x, Extent.y,
+							Texture.target() == gli::TARGET_3D ? Extent.z : LayerGL,
+							Format.External, Format.Type,
+							Texture.data(Layer, Face, Level));
+					break;
+				default: assert(0); break;
+				}
+			}
+	return new RTexture2D(filename, TextureName, glm::uvec2(0, 0), TFM_TRILINEAR, TFM_LINEAR);
+;
+}
 
 
 const std::string HDR_FILE_EXTENSION = "hdr";
+const std::string DDS_FILE_EXTENSION = "dds";
 
 
 RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTexture)
 {
 	std::string fileNameStr(fileName);
-	bool hdrImage = FilesHelper::getFileExtension(fileNameStr) == HDR_FILE_EXTENSION;
+	std::string extension = FilesHelper::getFileExtension(fileNameStr);
+	bool hdrImage = extension == HDR_FILE_EXTENSION;
 
-    Logger::info("Loading texture: " + fileNameStr);
+	Logger::info("Loading texture: " + fileNameStr);
+
+	if (extension == DDS_FILE_EXTENSION)
+	{
+		return loadDdsTexture(fileName);
+	}
 
 	if (hdrImage)
 		stbi_set_flip_vertically_on_load(true);

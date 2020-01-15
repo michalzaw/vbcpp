@@ -12,17 +12,19 @@ class MirrorComponent : public CameraStatic
         Framebuffer* _framebuffer;
         glm::vec3    _normalVector;
 
+		float _renderingDistance;
+
     public:
-        MirrorComponent(std::string name)
+        MirrorComponent(std::string name, float renderingDistance)
             : CameraStatic(CPT_PERSPECTIVE),
-            _name(name)
+            _name(name), _renderingDistance(renderingDistance)
         {
             _type = CT_MIRROR;
 
             setWindowDimensions(256, 512);
             setViewAngle(degToRad(50.0f));
             setNearValue(0.1);
-            setFarValue(1000.0f);
+            setFarValue(_renderingDistance);
 
             _framebuffer = OGLDriver::getInstance().createFramebuffer();
             _framebuffer->addDepthRenderbuffer(256, 512);

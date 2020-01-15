@@ -47,6 +47,17 @@ RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMul
 }
 
 
+RTexture2D::RTexture2D(string path, GLuint textureId, glm::uvec2 size, TextureFilterMode minFilter, TextureFilterMode magFilter)
+	: RTexture(path, TT_2D, TF_RGBA, size)
+{
+
+	_texID = textureId;
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+}
+
+
 RTexture2D::~RTexture2D()
 {
 

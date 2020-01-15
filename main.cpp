@@ -539,6 +539,36 @@ void drawLineAndDirectionWindow()
 }
 
 
+void drawGrassColorWindow()
+{
+	if (ImGui::Begin("Grass color"))
+	{
+		SceneObject* grassObject = sceneMgr->getSceneObject("grass");
+		Grass* grass = static_cast<Grass*>(grassObject->getComponent(CT_GRASS));
+		glm::vec4 color = grass->getGrassColor();
+
+		ImGui::Text("Color widget:");
+		ImGui::ColorEdit3("MyColor##1", (float*)& color, ImGuiColorEditFlags_NoOptions);
+
+		grass->setGrassColor(color);
+	}
+	ImGui::End();
+}
+
+
+void drawColorWindow()
+{
+	if (ImGui::Begin("Tree colors"))
+	{
+		ImGui::ColorEdit3("Color1##1", (float*)& Renderer::getInstance().color1, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color2##2", (float*)& Renderer::getInstance().color2, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color3##3", (float*)& Renderer::getInstance().color3, ImGuiColorEditFlags_NoOptions);
+		ImGui::ColorEdit3("Color4##4", (float*)& Renderer::getInstance().color4, ImGuiColorEditFlags_NoOptions);
+	}
+	ImGui::End();
+}
+
+
 void drawImGui()
 {
 	if (showImGui)
@@ -548,6 +578,8 @@ void drawImGui()
 		ImGui::NewFrame();
 
 		drawLineAndDirectionWindow();
+		drawGrassColorWindow();
+		drawColorWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -651,7 +683,7 @@ int main(int argc, char** argv)
     camFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000);
     Camera->addComponent(camFPS);
     camFPS->setRotationSpeed(0.001f);
-    camFPS->setMoveSpeed(5.0f);
+    camFPS->setMoveSpeed(50.0f);
     Camera->setRotation(0,degToRad(-90), 0);
     Camera->setPosition(10,7,-10);
     Camera->setPosition(0, 0, 0);
