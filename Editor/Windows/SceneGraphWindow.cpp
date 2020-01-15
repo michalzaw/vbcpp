@@ -87,6 +87,7 @@ namespace vbEditor {
 
 	static int selectionMask = -1;
 	int nodeNumber, nodeClicked = -1;
+	bool _centerGraph = false;
 
 
 	void SceneGraphWindow(std::list<SceneObject*> sceneRoot)
@@ -129,11 +130,16 @@ namespace vbEditor {
 			node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
 
 
-		if (nodeNumber == selectionMask)
+		if (object == _selectedSceneObject)
 		{
 			node_flags |= ImGuiTreeNodeFlags_Selected;
-		}
 
+			if (_centerGraph)
+			{
+				_centerGraph = false;
+				ImGui::SetScrollHereY();
+			}
+		}
 
 		//ImGui::PushID(object);
 		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)object, node_flags, object->getName().c_str());
@@ -162,6 +168,11 @@ namespace vbEditor {
 		//ImGui::PopID();
 
 		nodeNumber++;
+	}
+
+	void centerGraphView()
+	{
+		_centerGraph = true;
 	}
 
 } // namespace

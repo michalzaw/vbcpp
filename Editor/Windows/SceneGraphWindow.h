@@ -25,6 +25,8 @@ namespace vbEditor
 	void SceneGraphWindow(std::list<SceneObject*> sceneRoot);
 
 	void inspectSceneObject(SceneObject* object);
+
+	void centerGraphView();
 }
 
 

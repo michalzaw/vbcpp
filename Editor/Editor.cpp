@@ -535,6 +535,12 @@ namespace vbEditor
 		return false;
 	}
 
+	void setSelectedSceneObject(SceneObject* object)
+	{
+		_selectedSceneObject = object;
+		centerGraphView();
+	}
+
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
 	{
 		if (getGUIhasFocus())
@@ -569,7 +575,7 @@ namespace vbEditor
 				{
 					SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 
-					_selectedSceneObject = newObject;
+					setSelectedSceneObject(newObject);
 				}
 			}
 			else if (_clickMode == CM_PICK_OBJECT)
@@ -595,7 +601,7 @@ namespace vbEditor
 					}
 				}
 
-				_selectedSceneObject = selectedObject;
+				setSelectedSceneObject(selectedObject);
 			}
 		}
 	}
