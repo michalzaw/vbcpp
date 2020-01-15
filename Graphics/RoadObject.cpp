@@ -30,10 +30,10 @@ void RoadObject::buildModel()
 		delete _modelRootNode;
 	}
 
-	/*if (_materials)
+	if (_materials)
 	{
 		delete[] _materials;
-	}*/
+	}
 
 	// delete generated RStaticModel
 	if (_model != nullptr)

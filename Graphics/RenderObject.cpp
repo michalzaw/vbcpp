@@ -86,11 +86,6 @@ void RenderObject::setModel(RStaticModel* model)
 
     _modelRootNode = new ModelNode(_model->getRootNode());
 
-    if (_materials)
-    {
-        //delete[] _materials;
-    }
-
     _materials = new Material[_model->getMaterialsCount()];
     for (int i = 0; i < _model->getMaterialsCount(); ++i)
     {

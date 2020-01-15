@@ -4,7 +4,7 @@
     <Terrain heightmap="test_terrain.bmp" material="terrain" maxHeight="20"/>
     <Start position="0,4,12" rotation="0,0,0"/>
     <Light rotation="-0.62831,1.09955,0" color="1,1,1" ambientIntensity="0.025" diffuseIntensity="0.5"/>
-    <Sky/>
+	<Sky texture="rt.bmp,lt.bmp,up.bmp,dn.bmp,ft.bmp,bk.bmp" />
     <Objects>
         <Object name="domek" id="domek01" position="16.4838,0,20" rotation="0,-0,0"/>
         <Object name="domek" position="20,0,40" rotation="0,-0,0"/>
