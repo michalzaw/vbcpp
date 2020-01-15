@@ -772,7 +772,7 @@ void BusConstraint::startEngine()
 {
     if (_engine)
     {
-        _engine->turnOn();
+        _engine->setState(ES_RUN);
 
         //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));
@@ -785,7 +785,7 @@ void BusConstraint::stopEngine()
 {
     if (_engine)
     {
-        _engine->turnOff();
+        _engine->setState(ES_OFF);
 
         //SoundComponent* sndC = dynamic_cast<SoundComponent*>(_sceneObject->getComponent(CT_SOUND));
         SoundComponent* sndC = dynamic_cast<SoundComponent*>(_modules[0].sceneObject->getComponent(CT_SOUND));

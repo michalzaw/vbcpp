@@ -10,6 +10,7 @@ namespace GameDirectories
 	const std::string DISPLAYS = "Displays/";
     const std::string MAPS = "Maps/";
 	const std::string OBJECTS = "Objects/";
+	const std::string BUS_PARTS = "Parts/";
 	const std::string ROAD_PROFILES = "RoadProfiles/";
 	const std::string SKYBOX = "Skybox/";
 }

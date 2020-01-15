@@ -1,5 +1,6 @@
 #include <iostream>
 #include <ctime>
+#include <iomanip>
 
 #include "Window/Window.h"
 
@@ -192,6 +193,14 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
 	{
 		showImGui = !showImGui;
+	}
+
+	if (key == GLFW_KEY_R && action == GLFW_PRESS)
+	{
+		bus->getSceneObject()->setPosition(sceneMgr->getBusStart().position);
+		bus->getSceneObject()->setRotation(degToRad(sceneMgr->getBusStart().rotation.x),
+			degToRad(sceneMgr->getBusStart().rotation.y),
+			degToRad(sceneMgr->getBusStart().rotation.z));
 	}
 
     // debug
@@ -479,10 +488,6 @@ void initializeImGui()
 
 	ImGui_ImplGlfw_InitForOpenGL(win->getWindow(), true);
 	ImGui_ImplOpenGL3_Init("#version 130");
-
-	ImGuiIO& io = ImGui::GetIO();
-	io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
-	io.Fonts->AddFontDefault();
 }
 
 
@@ -744,6 +749,11 @@ int main(int argc, char** argv)
     labelBusStop2->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
     labelBusStop2->scale(0.6f, 0.6f);
 
+	Label* labelStats = gui->addLabel(font, "");
+	labelStats->setPosition(200, 10);
+	labelStats->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	labelStats->setScale(0.4f, 0.4f);
+
     /*Label* labelPassengers = gui->addLabel(font, "Liczba pasazerow: " + toString(bus->getNumberOfPassengers()));
     labelPassengers->setPosition(10, 120);
     labelPassengers->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -777,7 +787,7 @@ int main(int argc, char** argv)
     double xpos, ypos;
 
     int nbFrames = 0;
-
+	int fps = 0;
     physMgr->play();
     sndMgr->setMute(false);
 
@@ -805,6 +815,8 @@ int main(int argc, char** argv)
 			std::string newWindowTitle = winTitle + " | FPS: " + sTiming;
 			win->setWindowTitle(newWindowTitle);
 			//label->setText(newWindowTitle);
+
+			fps = nbFrames;
 
             nbFrames = 0;
             lastFPSupdate += 1.0f;
@@ -843,6 +855,15 @@ int main(int argc, char** argv)
         labelRPM->setText("RPM: " + toString(bus->getEngine()->getCurrentRPM()));
         labelThrottle->setText("Throttle: " + toString(bus->getEngine()->getThrottle()));
         labelTorque->setText("Torque: " + toString(bus->getEngine()->getCurrentTorque()));*/
+		std::stringstream stream;
+		stream << std::fixed << std::setprecision(3) << bus->getEngine()->getThrottle();
+		std::string throttleStr = stream.str();
+
+		std::stringstream stream2;
+		stream2 << std::fixed << std::setprecision(3) << bus->getEngine()->getCurrentTorque();
+		std::string torqueStr = stream2.str();
+
+		labelStats->setText("Throttle: " + throttleStr + " Torque: " + torqueStr + " FPS: " + toString(fps));
 
         BusStopSystem& busStopSystem = BusStopSystem::getInstance();
         if (busStopSystem.getCurrentBusStop() != NULL)

@@ -132,6 +132,14 @@ class SoundComponent : virtual public Component
                 alSourceStop(_source);
         }
 
+		ALenum getState()
+		{
+			ALenum state;
+			alGetSourcei(_source, AL_SOURCE_STATE, &state);
+
+			return state;
+		}
+
 
         SoundType getSoundType()
         {

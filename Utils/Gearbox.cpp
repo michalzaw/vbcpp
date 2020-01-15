@@ -8,6 +8,11 @@ using namespace tinyxml2;
 
 #include <iostream>
 
+#include "ResourceManager.h"
+#include "FilesHelper.h"
+
+#include "../Game/Directories.h"
+
 Gearbox::Gearbox(std::string filename)
 : _currentGear(1) // position in gear vector container; 1 - neutral
 {
@@ -43,7 +48,12 @@ void Gearbox::setNeutral()
 
 void Gearbox::loadData(std::string filename)
 {
-    std::string fullPath = "Parts/" + filename + ".xml";
+    std::string fullPath = GameDirectories::BUS_PARTS + filename + ".xml";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isFileExists(fullPath))
+		fullPath = ResourceManager::getInstance().getAlternativeResourcePath() + fullPath;
+#endif // DEVELOPMENT_RESOURCES
 
     XMLDocument doc;
     doc.LoadFile( fullPath.c_str() );

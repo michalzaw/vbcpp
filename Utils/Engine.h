@@ -21,14 +21,22 @@ struct params
 };
 
 
+enum EngineState
+{
+	ES_OFF,
+	ES_STARTING,
+	ES_RUN,
+	ES_STOPPING
+};
+
+
 class Engine
 {
     public:
         Engine(const std::string filename);
         virtual ~Engine();
 
-        void turnOn();
-        void turnOff();
+		void setState(EngineState state);
 
         float getThrottle() { return _throttle; }
 
@@ -36,7 +44,9 @@ class Engine
 
         void setRPM(float wheelAngularVelocity, float gearRatio);
 
-        bool isRunning() { return _isRunning; }
+        bool isRunning() { return _state == ES_RUN; }
+
+		EngineState getState() { return _state; }
 
         void setThrottle(float throttle) { _throttle = throttle; }
 
@@ -46,23 +56,36 @@ class Engine
 
         float getCurrentTorque() { return _currentTorque; }
 
-        std::string getSoundFilename() { return _sound; }
+		float getDifferentialRatio() { return _differentialRatio; }
+
+        std::string getSoundFilename() { return _soundFilename; }
+
+		float getSoundRpm() { return _soundRpm; }
 
         float getSoundVolume() { return _volume; }
+
+		std::string getStartSoundFilename() { return _startSoundFilename; }
+
+		std::string getStopSoundFilename() { return _stopSoundFilename; }
 
         void update(float dt);
 
 
     protected:
-        bool _isRunning;
+        EngineState _state;
 
         float   _throttle;
         float   _currentRPM;
         float   _currentTorque;
         float   _maxRPM;
 
-        std::string _sound;
+		float _differentialRatio;
+
+        std::string _soundFilename;
+		float		_soundRpm;
         float       _volume;
+		std::string _startSoundFilename;
+		std::string _stopSoundFilename;
 
         std::vector<point>  _torqueCurve;
         std::vector<params> _curveParams;
