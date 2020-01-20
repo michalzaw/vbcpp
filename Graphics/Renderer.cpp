@@ -437,7 +437,8 @@ void Renderer::prepareLightsData()
 			// shadows stabilizations
 
 			if (!_shadowCameraFrustumDiagonalIsCalculated) {
-				_shadowCameraFrustumDiagonal = glm::length(frustum.getPoints()[FP_NEAR_LEFT_BOTTOM] - frustum.getPoints()[FP_FAR_RIGHT_TOP]);
+				_shadowCameraFrustumDiagonal = std::max(glm::length(frustum.getPoints()[FP_FAR_LEFT_BOTTOM] - frustum.getPoints()[FP_FAR_RIGHT_TOP]),
+					glm::length(frustum.getPoints()[FP_NEAR_LEFT_BOTTOM] - frustum.getPoints()[FP_FAR_RIGHT_TOP]));
 				_shadowCameraFrustumDiagonalIsCalculated = true;
 			}
 			glm::vec3 offset = (glm::vec3(_shadowCameraFrustumDiagonal) - (max - min)) * vec3(0.5f);
