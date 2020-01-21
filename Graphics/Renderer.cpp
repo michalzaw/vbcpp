@@ -1782,11 +1782,11 @@ void Renderer::renderScene(RenderData* renderData)
             vertices[6] = glm::vec3(max.x, max.y, min.z);
             vertices[7] = glm::vec3(max.x, max.y, max.z);
 
-            shader->setUniform(UNIFORM_MVP, _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
-            shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, glm::vec4(0.5f, 0.0f, 0.0f, 1.0f));
+            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MVP], _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
+            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MATERIAL_EMISSIVE_COLOR], glm::vec4(0.5f, 0.0f, 0.0f, 1.0f));
 
             for (int i = 0; i < 8; ++i)
-                shader->setUniform((UniformName)(UNIFORM_DEBUG_VERTEX_INDEX_1 + i), vertices[i]);
+                shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_DEBUG_VERTEX_INDEX_1 + i], vertices[i]);
 
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
@@ -1815,11 +1815,11 @@ void Renderer::renderScene(RenderData* renderData)
             vertices[6] = glm::vec3(max.x, max.y, min.z);
             vertices[7] = glm::vec3(max.x, max.y, max.z);
 
-            shader->setUniform(UNIFORM_MVP, _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix() * renderObject->getSceneObject()->getGlobalTransformMatrix());
-            shader->setUniform(UNIFORM_MATERIAL_EMISSIVE_COLOR, glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
+            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MVP], _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix() * renderObject->getSceneObject()->getGlobalTransformMatrix());
+            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MATERIAL_EMISSIVE_COLOR], glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
 
             for (int i = 0; i < 8; ++i)
-                shader->setUniform((UniformName)(UNIFORM_DEBUG_VERTEX_INDEX_1 + i), vertices[i]);
+                shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_DEBUG_VERTEX_INDEX_1 + i], vertices[i]);
 
             glEnableVertexAttribArray(0);
             glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, (void*)0);
