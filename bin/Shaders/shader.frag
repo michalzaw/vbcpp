@@ -205,7 +205,8 @@ void main()
 float isGrass = 0.0f;
 #ifdef GRASS
 	float c = (textureColor.r + textureColor.g + textureColor.b) / 3.0f;
-	textureColor = diffuse = vec4(c, c, c, textureColor.a) * grassColor;
+	//textureColor = diffuse = vec4(c, c, c, textureColor.a) * grassColor;
+	textureColor = diffuse = textureColor * grassColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)

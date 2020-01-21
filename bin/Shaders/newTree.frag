@@ -157,7 +157,7 @@ void main()
 					normalize(BitangentWorldspace),
 					normal);
 	
-	//normal = normalize(TBN * n);
+	normal = normalize(TBN * n);
 #endif
 	
 	/*vec2 tex_offset = 1.0 / textureSize(Texture, 0);
