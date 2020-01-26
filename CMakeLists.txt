@@ -90,6 +90,9 @@ source_group("GUI" FILES ${GUI_SOURCES} ${GUI_HEADERS})
 add_subdirectory(ImGui)
 source_group("ImGui" FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 
+add_subdirectory(ImGuiInterface)
+source_group("ImGuiInterface" FILES ${IMGUI_INTERFACE_SOURCES} ${IMGUI_INTERFACE_HEADERS})
+
 add_subdirectory(Physics)
 source_group("Physics" FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
 
@@ -159,6 +162,8 @@ add_executable(${BIN_NAME}
                     ${GRAPHICS_HEADERS}
                     ${IMGUI_SOURCES}
                     ${IMGUI_HEADERS}
+                    ${IMGUI_INTERFACE_SOURCES}
+                    ${IMGUI_INTERFACE_HEADERS}
                     ${GUI_SOURCES}
                     ${GUI_HEADERS}
                     ${PHYSICS_SOURCES}

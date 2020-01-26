@@ -8,9 +8,14 @@
 
 #include "GUI/GUIManager.h"
 
+#include "ImGuiInterface/ImGuiInterface.h"
+
 #include "Scene/SceneManager.h"
 
 #include "Window/Window.h"
+
+
+#define DRAW_IMGUI
 
 
 enum GameState
@@ -33,7 +38,10 @@ class Game
 		SoundManager* _soundManager;
 		SceneManager* _sceneManager;
 		GUIManager* _gui;
+		ImGuiInterface* _imGuiInterface;
 
+		double _lastFPSupdate;
+		int _numberOfFrames;
 		int _fps;
 
 		std::vector<Bus*> _buses;
@@ -55,6 +63,7 @@ class Game
 		void initGui();
 		void startGame();
 
+		void updateFpsCounter(double timePhysicsCurr);
 		void fixedStepUpdate(double deltaTime);
 
 		void readInput(double deltaTime);

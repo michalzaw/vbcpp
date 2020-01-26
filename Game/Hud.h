@@ -40,13 +40,13 @@ class Hud
 		Bus* _bus;
 
 		std::string getGearAsString(int gear);
-		std::string createStatsString();
+		std::string createStatsString(int fps);
 
 	public:
 		Hud(GUIManager* gui, Bus* bus);
 		~Hud();
 
-		void update();
+		void update(int fps);
 		
 };
 

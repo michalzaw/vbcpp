@@ -108,7 +108,7 @@ std::string Hud::getGearAsString(int gear)
 		return toString(gear - 1);
 }
 
-std::string Hud::createStatsString()
+std::string Hud::createStatsString(int fps)
 {
 	std::stringstream stream;
 	stream << std::fixed << std::setprecision(3) << _bus->getEngine()->getThrottle();
@@ -118,11 +118,11 @@ std::string Hud::createStatsString()
 	stream2 << std::fixed << std::setprecision(3) << _bus->getEngine()->getCurrentTorque();
 	std::string torqueStr = stream2.str();
 
-	return "Throttle: " + throttleStr + " Torque: " + torqueStr + " FPS: ";// +toString(fps);
+	return "Throttle: " + throttleStr + " Torque: " + torqueStr + " FPS: " +toString(fps);
 }
 
 
-void Hud::update()
+void Hud::update(int fps)
 {
 	_labelSpeed->setText(toString((int)_bus->getBusSpeed()));
 	_labelrpm->setText(toString((int)_bus->getEngine()->getCurrentRPM()));
@@ -156,5 +156,5 @@ void Hud::update()
 		_labelBusStop2->setText("");
 	}
 
-	_labelStats->setText(createStatsString());
+	_labelStats->setText(createStatsString(fps));
 }

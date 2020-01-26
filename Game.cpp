@@ -34,10 +34,11 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 Game::Game()
 	: _state(GS_LOADING),
 	_window(nullptr),
-	_physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr),
+	_physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
 	_fps(0),
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
+	_hud(nullptr),
 	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1)
 {
 	instance = this;
@@ -98,6 +99,10 @@ void Game::initializeEngineSystems()
 	GraphicsManager::getInstance().setWindVelocity(0.6f);
 
 	_gui = new GUIManager;
+
+#ifdef DRAW_IMGUI
+	_imGuiInterface = new ImGuiInterface(_window, _sceneManager, &_buses);
+#endif // DRAW_IMGUI
 }
 
 
@@ -167,7 +172,6 @@ void Game::initialize()
 
 	loadGameConfig();
 	createWindow();
-	// inicjalizacja imgui
 	initializeEngineSystems();
 	initScene();
 
@@ -176,6 +180,22 @@ void Game::initialize()
 	initGui();
 
 	startGame();
+}
+
+
+void Game::updateFpsCounter(double timePhysicsCurr)
+{
+	++_numberOfFrames;
+
+	if (timePhysicsCurr - _lastFPSupdate >= 1.0)
+	{
+		_fps = _numberOfFrames;
+		_numberOfFrames = 0;
+		_lastFPSupdate += 1.0f;
+
+		std::string newWindowTitle = std::string(WINDOW_TITLE) + " | FPS: " + toString(_fps);
+		_window->setWindowTitle(newWindowTitle);
+	}
 }
 
 
@@ -201,8 +221,6 @@ void Game::run()
 
 	while (_window->isOpened())
 	{
-		//++numberOfFrames;
-
 		timePhysicsCurr = glfwGetTime();
 		double deltaTime = timePhysicsCurr - timePhysicsPrev;
 		timePhysicsPrev = timePhysicsCurr;
@@ -210,6 +228,8 @@ void Game::run()
 		deltaTime = std::max(0.0, deltaTime);
 		accumulator += deltaTime;
 		accumulator = clamp(accumulator, 0.0, MAX_ACCUMULATED_TIME);
+
+		updateFpsCounter(timePhysicsCurr);
 
 		if (_state == GS_GAME)
 		{
@@ -224,10 +244,14 @@ void Game::run()
 
 			_soundManager->update();
 
-			_hud->update();
+			_hud->update(_fps);
 
 			Renderer::getInstance().renderAll();
 		}
+
+#ifdef DRAW_IMGUI
+		_imGuiInterface->draw();
+#endif // DRAW_IMGUI
 
 		// Render GUI
 		Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
@@ -259,7 +283,7 @@ void Game::terminate()
 	delete _sceneManager;
 
 #ifdef DRAW_IMGUI
-	destroyImGuiContext();
+	delete _imGuiInterface;
 #endif // DRAW_IMGUI
 
 	delete _window;
@@ -561,6 +585,11 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
 		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+	}
+
+	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
+	{
+		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
 	}
 }
 
