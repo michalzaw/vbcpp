@@ -443,6 +443,10 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 	{
 		return;
 	}
+	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
+	{
+		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
+	}
 #endif // DRAW_IMGUI
 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -585,11 +589,6 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
 		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
-	}
-
-	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
-	{
-		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
 	}
 }
 
