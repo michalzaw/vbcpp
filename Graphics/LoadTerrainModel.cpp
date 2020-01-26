@@ -134,7 +134,7 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
 
 // Mesh mender
 //Model* loadTerrainModel(const char* heightmapFilename, Material& material, float maxHeight)
-RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight)
+RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight, bool is16bit)
 {
     MaterialLoader matLoader;
     matLoader.openFile(materialFileName.c_str());
@@ -144,7 +144,16 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     const float cellSize = 1.0f;
 
     int width, height, chanels;
-    unsigned char* heightmapData = stbi_load(heightmapFilename, &width, &height, &chanels, STBI_rgb_alpha);
+	unsigned short* heightmapData16 = NULL;
+	unsigned char* heightmapData = NULL;
+	if (is16bit)
+	{
+		heightmapData16 = stbi_load_16(heightmapFilename, &width, &height, &chanels, STBI_default);
+	}
+	else
+	{
+		heightmapData = stbi_load(heightmapFilename, &width, &height, &chanels, STBI_default);
+	}
 
     glm::vec3 startPosition(static_cast<float>(width - 1) / -2.0f, 0.0f, static_cast<float>(height - 1) / 2.0f);
     glm::vec3 vertexPosition = startPosition;
@@ -161,8 +170,17 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
         for (int x = 0; x < width; ++x)
         {
-            int color = static_cast<int>(heightmapData[((height - z - 1) * width + x) * 4]);
-            vertexPosition.y = static_cast<float>(color) / 255.0f * maxHeight;
+			int color;
+			if (is16bit)
+			{
+				color = static_cast<int>(heightmapData16[((height - z - 1) * width + x) * chanels]);
+				vertexPosition.y = static_cast<float>(color) / 65025.0f * maxHeight;
+			}
+			else
+			{
+				color = static_cast<int>(heightmapData[((height - z - 1) * width + x) * chanels]);
+				vertexPosition.y = static_cast<float>(color) / 255.0f * maxHeight;
+			}
 
 
             if (vertexPosition.y < min)
@@ -252,18 +270,27 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
 
     // Save height and normals into new tga file (r - height; g, b, a - normal)
+	unsigned char* heightmapDataWithNormals = new unsigned char[width * height * 4];
     for (int z = 0; z < height; ++z)
     {
         for (int x = 0; x < width; ++x)
         {
-            heightmapData[((height - z - 1) * width + x) * 4 + 1] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.x * 0.5f + 0.5f) * 255);
-            heightmapData[((height - z - 1) * width + x) * 4 + 2] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.y * 0.5f + 0.5f) * 255);
-            heightmapData[((height - z - 1) * width + x) * 4 + 3] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.z * 0.5f + 0.5f) * 255);
+			if (is16bit)
+			{
+				heightmapDataWithNormals[((height - z - 1) * width + x) * 4] = static_cast<unsigned char>(heightmapData16[((height - z - 1) * width + x) * chanels] / 65025.0f * 255);
+			}
+			else
+			{
+				heightmapDataWithNormals[((height - z - 1) * width + x) * 4] = heightmapData[((height - z - 1) * width + x) * chanels];
+			}
+			heightmapDataWithNormals[((height - z - 1) * width + x) * 4 + 1] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.x * 0.5f + 0.5f) * 255);
+			heightmapDataWithNormals[((height - z - 1) * width + x) * 4 + 2] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.y * 0.5f + 0.5f) * 255);
+			heightmapDataWithNormals[((height - z - 1) * width + x) * 4 + 3] = static_cast<unsigned char>((terrainVertices[z * width + x].normal.z * 0.5f + 0.5f) * 255);
         }
     }
 
     stbi_flip_vertically_on_write(0);
-    stbi_write_tga(createTerrainHeightAndNormalMapFileName(heightmapFilename).c_str(), width, height, STBI_rgb_alpha, heightmapData);
+    stbi_write_tga(createTerrainHeightAndNormalMapFileName(heightmapFilename).c_str(), width, height, STBI_rgb_alpha, heightmapDataWithNormals);
 
 
     std::vector<MeshMender::Vertex> v;
@@ -325,20 +352,27 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, indicesSize);
 
 
-    stbi_image_free(heightmapData);
+	if (heightmapData != NULL)
+	{
+		stbi_image_free(heightmapData);
+	}
+	if (heightmapData16 != NULL)
+	{
+		stbi_image_free(heightmapData16);
+	}
 
 
     return model;
 }
 
 
-RStaticModel* TerrainLoader::loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight)
+RStaticModel* TerrainLoader::loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight, bool is16bit)
 {
     std::string terFileName = createTerFileName(heightmapFilename);
 
     if (!FilesHelper::isFileExists(terFileName))
     {
-        RStaticModel* model = loadTerrainFromHeightmap(heightmapFilename, materialFileName, materialName, texturePath, maxHeight);
+        RStaticModel* model = loadTerrainFromHeightmap(heightmapFilename, materialFileName, materialName, texturePath, maxHeight, is16bit);
 
         saveTerFile(terFileName.c_str(), model);
 

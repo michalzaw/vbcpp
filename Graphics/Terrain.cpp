@@ -3,7 +3,7 @@
 #include "LoadTerrainModel.h"
 
 
-Terrain::Terrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight)
+Terrain::Terrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture)
 	: _heightmapFileName(heightmapFileName), _materialName(materialName), _maxHeight(maxHeight)
 {
 	_type = CT_TERRAIN;
@@ -11,7 +11,7 @@ Terrain::Terrain(std::string heightmapFileName, std::string dirPath, std::string
 	std::string heightmapFullPath = dirPath + _heightmapFileName;
 	std::string materialFullPath = dirPath + MaterialLoader::createMaterialFileName(_heightmapFileName);
 
-	setModel(TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, _materialName, dirPath, _maxHeight));
+	setModel(TerrainLoader::loadTerrainModel(heightmapFullPath.c_str(), materialFullPath, _materialName, dirPath, _maxHeight, is16bitTexture));
 }
 
 

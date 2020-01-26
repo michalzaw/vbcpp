@@ -79,7 +79,7 @@ class GraphicsManager
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
 		RoadObject*		addRoadObject(RRoadProfile* roadProfile, std::vector<RoadSegment>& segments, SceneObject* owner);
-		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, SceneObject* owner);
+		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
         CameraFPS*      addCameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue);

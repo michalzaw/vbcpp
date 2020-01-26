@@ -54,13 +54,14 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	std::string terrainHeightmap(terrElement->Attribute("heightmap"));
 	std::string materialName(terrElement->Attribute("material"));
 	float terrainMaxHeight = XmlUtils::getAttributeFloatOptional(terrElement, "maxHeight", 20.0f);
+	bool is16bitTexture = XmlUtils::getAttributeBoolOptional(terrElement, "is16bitTexture");
 
 	Logger::info("*** TERRAIN DATA ***");
 	Logger::info("Heightmap: " + terrainHeightmap);
 	Logger::info("Material: " + materialName);
 
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
-	Terrain* terrainObj = GraphicsManager::getInstance().addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, terrainObject);
+	Terrain* terrainObj = GraphicsManager::getInstance().addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
 	terrainObj->setIsCastShadows(false);
 	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);
 	terrainMesh->setRestitution(0.9f);

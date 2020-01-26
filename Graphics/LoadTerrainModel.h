@@ -29,10 +29,10 @@ class TerrainLoader
         static void saveTerFile(const char* fileName, RStaticModel* model);
         static RStaticModel* loadTerFile(const char* fileName, std::string materialFileName, std::string texturePath);
 
-        static RStaticModel* loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
+        static RStaticModel* loadTerrainFromHeightmap(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight, bool is16bit);
 
     public:
-        static RStaticModel* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight);
+        static RStaticModel* loadTerrainModel(const char* heightmapFilename, std::string materialFileName, std::string materialName, std::string texturePath, float maxHeight, bool is16bit = false);
 
         static std::string createTerrainHeightAndNormalMapFileName(std::string heightmapFilename);
 

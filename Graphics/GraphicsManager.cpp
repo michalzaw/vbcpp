@@ -97,9 +97,9 @@ RoadObject* GraphicsManager::addRoadObject(RRoadProfile* roadProfile, std::vecto
 	return roadObject;
 }
 
-Terrain* GraphicsManager::addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, SceneObject* owner)
+Terrain* GraphicsManager::addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture, SceneObject* owner)
 {
-	Terrain* terrain = new Terrain(heightmapFileName, dirPath, materialName, maxHeight);
+	Terrain* terrain = new Terrain(heightmapFileName, dirPath, materialName, maxHeight, is16bitTexture);
 
 	owner->addComponent(terrain);
 

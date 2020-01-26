@@ -13,7 +13,7 @@ class Terrain : public RenderObject
 		float _maxHeight;
 
 	public:
-		Terrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight);
+		Terrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture);
 		virtual ~Terrain();
 
 		std::string getHeightmapFileName();
