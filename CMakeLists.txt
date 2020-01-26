@@ -104,6 +104,8 @@ source_group("Window" FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
 set (SOURCES 
     main.cpp
+	Game.h
+	Game.cpp
 	#EditorMain.h
 	#EditorMain.cpp
 )

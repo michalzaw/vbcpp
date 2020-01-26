@@ -1,10 +1,12 @@
 #include "Hud.h"
 
+#include <iomanip>
+
 #include "../Bus/Bus.h"
+#include "../Game/BusStopSystem.h"
 
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
-
 
 
 Hud::Hud(GUIManager* gui, Bus* bus)
@@ -71,6 +73,21 @@ Hud::Hud(GUIManager* gui, Bus* bus)
 
 		_imagesDoorOpened.push_back(imageDoor);
 	}
+
+	_labelBusStop = gui->addLabel(font, "");
+	_labelBusStop->setPosition(GameConfig::getInstance().windowWidth / 2.0f - 100, GameConfig::getInstance().windowHeight - 50);
+	_labelBusStop->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	_labelBusStop->scale(0.6f, 0.6f);
+
+	_labelBusStop2 = gui->addLabel(font, "");
+	_labelBusStop2->setPosition(GameConfig::getInstance().windowWidth / 2.0f - 100, GameConfig::getInstance().windowHeight - 80);
+	_labelBusStop2->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	_labelBusStop2->scale(0.6f, 0.6f);
+
+	_labelStats = gui->addLabel(font, "");
+	_labelStats->setPosition(200, 10);
+	_labelStats->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	_labelStats->setScale(0.4f, 0.4f);
 }
 
 
@@ -89,6 +106,19 @@ std::string Hud::getGearAsString(int gear)
 		return "N";
 	else
 		return toString(gear - 1);
+}
+
+std::string Hud::createStatsString()
+{
+	std::stringstream stream;
+	stream << std::fixed << std::setprecision(3) << _bus->getEngine()->getThrottle();
+	std::string throttleStr = stream.str();
+
+	std::stringstream stream2;
+	stream2 << std::fixed << std::setprecision(3) << _bus->getEngine()->getCurrentTorque();
+	std::string torqueStr = stream2.str();
+
+	return "Throttle: " + throttleStr + " Torque: " + torqueStr + " FPS: ";// +toString(fps);
 }
 
 
@@ -112,4 +142,19 @@ void Hud::update()
 		_imagesDoorClosed[i]->setIsActive(_bus->getDoor(i)->getState() == EDS_CLOSING);
 		_imagesDoorOpened[i]->setIsActive(_bus->getDoor(i)->getState() == EDS_OPENING);
 	}
+
+
+	BusStopSystem& busStopSystem = BusStopSystem::getInstance();
+	if (busStopSystem.getCurrentBusStop() != NULL)
+	{
+		_labelBusStop->setText(busStopSystem.getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem.getDistanceToCurrentBusStop()) + "m)");
+		_labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem.getCurrentBusStop()->getNumberOfPassengers()));
+	}
+	else
+	{
+		_labelBusStop->setText("");
+		_labelBusStop2->setText("");
+	}
+
+	_labelStats->setText(createStatsString());
 }

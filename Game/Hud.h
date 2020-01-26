@@ -31,9 +31,16 @@ class Hud
 		std::vector<Image*> _imagesDoorClosed;
 		std::vector<Image*> _imagesDoorOpened;
 
+
+		Label* _labelBusStop;
+		Label* _labelBusStop2;
+		Label* _labelStats;
+
+
 		Bus* _bus;
 
 		std::string getGearAsString(int gear);
+		std::string createStatsString();
 
 	public:
 		Hud(GUIManager* gui, Bus* bus);

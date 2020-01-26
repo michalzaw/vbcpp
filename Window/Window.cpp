@@ -70,6 +70,12 @@ void Window::setWindowSize(int w, int h)
 }
 
 
+void Window::setCursorMode(int mode)
+{
+	glfwSetInputMode(_win, GLFW_CURSOR, mode);
+}
+
+
 // Swap buffers
 void Window::swapBuffers()
 {

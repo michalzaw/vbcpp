@@ -26,6 +26,8 @@ class Window
         void setWindowTitle(string title);
         void setWindowSize(int w, int h);
 
+		void setCursorMode(int mode);
+
         void swapBuffers();
         void updateEvents();
         bool isOpened();
