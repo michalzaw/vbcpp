@@ -585,8 +585,11 @@ void SceneObject::updateFromLocalMatrix()
 	glm::vec4 perspective;
 	glm::decompose(_localTransformMatrix, scale, rotation, translation, skew, perspective);
 
+	glm::vec3 rotationEulerAngles = glm::eulerAngles(rotation);
+	rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
+
 	setPosition(translation);
-	setRotationQuaternion(glm::conjugate(rotation));
+	setRotation(rotationEulerAngles);
 	setScale(scale);
 	changedTransform();
 }
