@@ -109,10 +109,10 @@ void Game::initializeEngineSystems()
 void Game::initScene()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cam1");
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 10000);
+	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(500.0f);
+	cameraFPS->setMoveSpeed(50.0f);
 	cameraObject->setRotation(0, degToRad(-90), 0);
 	cameraObject->setPosition(10, 7, -10);
 	cameraObject->setPosition(0, 0, 0);
