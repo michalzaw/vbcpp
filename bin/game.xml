@@ -20,7 +20,7 @@
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
 		
-		<Grass>true</Grass>
+		<Grass>false</Grass>
 		<GrassRenderingDistance>30.0</GrassRenderingDistance>
 		
 		<Mirrors>true</Mirrors>
