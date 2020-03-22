@@ -178,8 +178,8 @@ void Renderer::recreateAllFramebuffers()
 	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-	framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
-	framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+	//framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+	//framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 	_mainRenderData->framebuffer = framebuffer;
 
@@ -856,8 +856,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-    framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
-    framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    //framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
     _mainRenderData = new RenderData;

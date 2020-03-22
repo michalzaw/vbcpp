@@ -46,7 +46,7 @@ void RTexture::setClampMode(TextureClampMode mode)
 
     glTexParameteri(_textureType, GL_TEXTURE_WRAP_S, mode);
     glTexParameteri(_textureType, GL_TEXTURE_WRAP_T, mode);
-    glTexParameteri(_textureType, GL_TEXTURE_WRAP_R, mode);
+    //glTexParameteri(_textureType, GL_TEXTURE_WRAP_R, mode);
 }
 
 
