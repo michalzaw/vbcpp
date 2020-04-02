@@ -11,6 +11,7 @@
 	
 	<Configuration>
 		<Fullscreen>false</Fullscreen>
+		<VerticalSync>false</VerticalSync>
 		
 		<MsaaAntialiasing>true</MsaaAntialiasing>
 		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>

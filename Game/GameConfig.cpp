@@ -43,6 +43,10 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     isFullscreen = toBool(configElement->GetText());
                 }
+				if (strcmp(ename, "VerticalSync") == 0)
+				{
+					verticalSync = toBool(configElement->GetText());
+				}
                 else if (strcmp(ename,"MsaaAntialiasing") == 0)
                 {
                     msaaAntialiasing = toBool(configElement->GetText());

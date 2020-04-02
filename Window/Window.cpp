@@ -14,13 +14,14 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool isResizable)
+bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool verticalSync, bool isResizable)
 {
     _width = w;
     _height = h;
     _xPos = posx;
     _yPos = posy;
     _isFullscreen = isFullscreen;
+	_verticalSyncEnabled = verticalSync;
 
     if ( !glfwInit() )
     {
@@ -47,8 +48,13 @@ bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, b
 	glfwMakeContextCurrent(_win);
 	glfwSetWindowPos(_win, _xPos, _yPos);
 
-    if (!initGLEW())
-        return false;
+	if (!_verticalSyncEnabled)
+	{
+		glfwSwapInterval(0);
+	}
+
+    //if (!initGLEW())
+    //    return false;
 
 
     return true;

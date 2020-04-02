@@ -17,7 +17,8 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isFullscreen(false), msaaAntialiasing(false), msaaAntialiasingLevel(8), isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024), isBloomEnabled(true),
+            isFullscreen(false), verticalSync(false), msaaAntialiasing(false), msaaAntialiasingLevel(8), isBloomEnabled(true),
+			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f), textureCompression(false),
 			pbrSupport(false)
         {}
@@ -42,6 +43,7 @@ class GameConfig
         std::string busModel;
 
         bool isFullscreen;
+		bool verticalSync;
         bool msaaAntialiasing;
         int msaaAntialiasingLevel;
         bool isShadowmappingEnable;
