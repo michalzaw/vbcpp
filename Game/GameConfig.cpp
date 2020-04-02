@@ -47,6 +47,10 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					verticalSync = toBool(configElement->GetText());
 				}
+				else if (strcmp(ename, "HdrQuality") == 0)
+				{
+					hdrQuality = toInt(configElement->GetText());
+				}
                 else if (strcmp(ename,"MsaaAntialiasing") == 0)
                 {
                     msaaAntialiasing = toBool(configElement->GetText());

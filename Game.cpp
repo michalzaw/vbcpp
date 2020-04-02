@@ -83,6 +83,7 @@ void Game::initializeEngineSystems()
 	_sceneManager = new SceneManager(_physicsManager, _soundManager);
 
 	Renderer& renderer = Renderer::getInstance();
+	renderer.setFramebufferTextureFormat(gameConfig.hdrQuality == 32 ? TF_RGBA_32F : TF_RGBA_16F);
 	renderer.setMsaaAntialiasing(gameConfig.msaaAntialiasing);
 	renderer.setMsaaAntialiasingLevel(gameConfig.msaaAntialiasingLevel);
 	renderer.setBloom(gameConfig.isBloomEnabled);

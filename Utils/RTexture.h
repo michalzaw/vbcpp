@@ -77,6 +77,7 @@ class RTexture : public Resource
         glm::uvec2 getSize();
 
         TextureType getTextureType();
+		TextureFormat getInternalFormat();
 
 		bool isCompressed();
 

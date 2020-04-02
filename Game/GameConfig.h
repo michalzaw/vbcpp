@@ -17,7 +17,7 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isFullscreen(false), verticalSync(false), msaaAntialiasing(false), msaaAntialiasingLevel(8), isBloomEnabled(true),
+            isFullscreen(false), verticalSync(false), hdrQuality(16), msaaAntialiasing(false), msaaAntialiasingLevel(8), isBloomEnabled(true),
 			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			textureCompression(false), anisotropicFiltering(false), anisotropySamples(4.0f),
@@ -45,6 +45,7 @@ class GameConfig
 
         bool isFullscreen;
 		bool verticalSync;
+		int hdrQuality;
         bool msaaAntialiasing;
         int msaaAntialiasingLevel;
         bool isShadowmappingEnable;

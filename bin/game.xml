@@ -13,6 +13,7 @@
 		<Fullscreen>false</Fullscreen>
 		<VerticalSync>false</VerticalSync>
 		
+		<HdrQuality>16</HdrQuality>
 		<MsaaAntialiasing>true</MsaaAntialiasing>
 		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
 		

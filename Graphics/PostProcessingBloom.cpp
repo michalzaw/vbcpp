@@ -34,7 +34,7 @@ PostProcessingBloom::PostProcessingBloom(VBO* quadVbo, float screenWidth, float 
 	for (int i = 0; i < 2; ++i)
 	{
 		_blurFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
-		_blurFramebuffers[i]->addTexture(TF_RGBA_32F, screenWidth / 10.0f, screenHeight / 10.0f, false);
+		_blurFramebuffers[i]->addTexture(brightnessTexture->getInternalFormat(), screenWidth / 10.0f, screenHeight / 10.0f, false);
 		_blurFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
 		_blurFramebuffers[i]->setViewport(UintRect(0, 0, screenWidth / 10.0f, screenHeight / 10.0f));
 	}

@@ -93,6 +93,12 @@ TextureType RTexture::getTextureType()
 }
 
 
+TextureFormat RTexture::getInternalFormat()
+{
+	return _internalFormat;
+}
+
+
 bool RTexture::isCompressed()
 {
 	return _compressed;

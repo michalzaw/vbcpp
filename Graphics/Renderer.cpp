@@ -12,7 +12,7 @@ Renderer::Renderer()
     : _isInitialized(false),
     _screenWidth(0), _screenHeight(0),
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
-    _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
+	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
@@ -132,7 +132,7 @@ void Renderer::createFramebuffersForPostProcessing()
 	for (int i = 0; i < 2; ++i)
 	{
 		_postProcessingFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
-		_postProcessingFramebuffers[i]->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, false);
+		_postProcessingFramebuffers[i]->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, false);
 		_postProcessingFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
 		_postProcessingFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 	}
@@ -176,8 +176,8 @@ void Renderer::recreateAllFramebuffers()
 
 	Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
 	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-	framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	//framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	//framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
@@ -854,8 +854,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
-    framebuffer->addTexture(TF_RGBA_32F, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     //framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
@@ -1066,6 +1066,18 @@ void Renderer::setToneMappingType(ToneMappingType type)
 ToneMappingType Renderer::getToneMappingType()
 {
 	return _toneMappingType;
+}
+
+
+void Renderer::setFramebufferTextureFormat(TextureFormat format)
+{
+	_framebufferTextureFormat = format;
+}
+
+
+TextureFormat Renderer::getFramebufferTextureFormat()
+{
+	return _framebufferTextureFormat;
 }
 
 

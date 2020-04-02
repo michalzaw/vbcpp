@@ -103,6 +103,7 @@ class Renderer
         float _exposure;
 		ToneMappingType _toneMappingType;
 
+		TextureFormat _framebufferTextureFormat;
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
 
@@ -201,6 +202,8 @@ class Renderer
         float getExposure();
 		void setToneMappingType(ToneMappingType type);
 		ToneMappingType getToneMappingType();
+		void setFramebufferTextureFormat(TextureFormat format);
+		TextureFormat getFramebufferTextureFormat();
         void setMsaaAntialiasing(bool isEnable);
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);
