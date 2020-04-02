@@ -3,11 +3,12 @@
 #include <iostream>
 
 
-RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size)
+RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool compressed)
     : Resource(RT_TEXTURE, path),
     _textureType(type),
     _internalFormat(internalFormat),
     _size(size),
+	_compressed(compressed),
     _isGenerateMipmap(false)
 {
     _format = _internalFormat;
@@ -83,6 +84,12 @@ glm::uvec2 RTexture::getSize()
 TextureType RTexture::getTextureType()
 {
     return _textureType;
+}
+
+
+bool RTexture::isCompressed()
+{
+	return _compressed;
 }
 
 

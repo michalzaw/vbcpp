@@ -26,6 +26,8 @@
 		
 		<Mirrors>true</Mirrors>
 		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
+
+		<TextureCompression>true</TextureCompression>
 		
 		<PbrSupport>true</PbrSupport>
     </Configuration>

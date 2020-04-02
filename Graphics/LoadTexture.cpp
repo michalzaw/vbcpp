@@ -136,7 +136,7 @@ const std::string HDR_FILE_EXTENSION = "hdr";
 const std::string DDS_FILE_EXTENSION = "dds";
 
 
-RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTexture)
+RTexture2D* loadTexture(const char* fileName, bool useCompression, bool mipmaping, RTexture2D* oldTexture)
 {
 	std::string fileNameStr(fileName);
 	std::string extension = FilesHelper::getFileExtension(fileNameStr);
@@ -172,9 +172,9 @@ RTexture2D* loadTexture(const char* fileName, bool mipmaping, RTexture2D* oldTex
     if (oldTexture == NULL)
     {
 		if (hdrImage)
-			texture = new RTexture2D(fileName, static_cast<float*>(image), chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, glm::uvec2(width, height));
+			texture = new RTexture2D(fileName, static_cast<float*>(image), chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, glm::uvec2(width, height), useCompression);
 		else
-			texture = new RTexture2D(fileName, static_cast<unsigned char*>(image), TF_RGBA, glm::uvec2(width, height));
+			texture = new RTexture2D(fileName, static_cast<unsigned char*>(image), TF_RGBA, glm::uvec2(width, height), useCompression);
 
 		if (mipmaping)
 		{

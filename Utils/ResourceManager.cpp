@@ -6,6 +6,7 @@
 #include "../Graphics/StaticModelLoader.h"
 #include "../GUI/FontLoader.h"
 #include "../Game/Directories.h"
+#include "../Game/GameConfig.h"
 
 
 static std::unique_ptr<ResourceManager> rsInstance;
@@ -86,7 +87,8 @@ RTexture2D* ResourceManager::loadTexture(std::string path, bool mipmapping)
 
     int width, height;
     //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
-    RTexture2D* texture = ::loadTexture(path.c_str(), mipmapping);
+	bool textureCompression = GameConfig::getInstance().textureCompression;
+    RTexture2D* texture = ::loadTexture(path.c_str(), textureCompression, mipmapping);
 
     if ( texture )
     {
@@ -173,7 +175,7 @@ RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
 
 void ResourceManager::reloadTexture(RTexture2D* texture)
 {
-    ::loadTexture(texture->getPath().c_str(), true, texture);
+	::loadTexture(texture->getPath().c_str(), texture->isCompressed(), true, texture);
 }
 
 
@@ -231,7 +233,8 @@ RTexture2D* ResourceManager::loadDefaultWhiteTexture()
 
     // Zasob nie istnieje
     glm::uvec2 size(2, 2);
-    RTexture2D* texture = RTexture2D::createWhiteTexture(DEFAULT_WHITE_TEXTURE_NAME, size);
+	bool textureCompression = GameConfig::getInstance().textureCompression;
+    RTexture2D* texture = RTexture2D::createWhiteTexture(DEFAULT_WHITE_TEXTURE_NAME, size, textureCompression);
 
     if ( texture )
     {
