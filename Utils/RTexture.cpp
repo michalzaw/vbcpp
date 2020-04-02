@@ -1,5 +1,7 @@
 #include "RTexture.h"
 
+#include "../Graphics/OGLDriver.h"
+
 #include <iostream>
 
 
@@ -55,7 +57,11 @@ void RTexture::setAnisotropyFiltering(bool isEnable, float anisotropy)
 {
     bind();
 
-    glTexParameterf(_textureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, isEnable ? anisotropy : 1.0f);
+	float anisotropySamples = OGLDriver::getInstance().getMaxAnisotropy();
+	if (anisotropy < anisotropySamples && anisotropy > 0.0f)
+		anisotropySamples = anisotropy;
+
+    glTexParameterf(_textureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, isEnable ? anisotropySamples : 1.0f);
 }
 
 

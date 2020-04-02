@@ -101,8 +101,8 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 
 		RStaticModel* grassModel = ResourceManager::getInstance().loadModel(_dirPath + "grass/" + grassModelFileName, _dirPath + "grass/");
 
-		RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName);
-		RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName);
+		RTexture2D * heightmapTextureForGrass = ResourceManager::getInstance().loadTexture(_dirPath + terrainHeightmapForGrassFileName, false);
+		RTexture2D * grassDensityTexture = ResourceManager::getInstance().loadTexture(_dirPath + grassDensityTextureFileName, false);
 		heightmapTextureForGrass->setClampMode(TCM_CLAMP_TO_EDGE);
 		heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
 

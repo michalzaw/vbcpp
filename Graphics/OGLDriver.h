@@ -42,6 +42,8 @@ class OGLDriver
 
         Framebuffer* _defaultFramebuffer;
 
+		float _maxAnisotropy;
+
         OGLDriver();
 
     public:
@@ -70,6 +72,8 @@ class OGLDriver
         UBO* getCurrentUBO();
 
         Framebuffer* getDefaultFramebuffer();
+
+		float getMaxAnisotropy();
 
         std::vector<VBO*>* vbos;
         std::vector<IBO*>* ibos;

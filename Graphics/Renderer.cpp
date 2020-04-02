@@ -35,7 +35,7 @@ Renderer::Renderer()
     _quadVBO = OGLDriver::getInstance().createVBO(4 * 2 * sizeof(float));
     _quadVBO->addVertexData(quadVertices, 4 * 2);
 
-	_brdfLutTexture = ResourceManager::getInstance().loadTexture("brdfLut.png");
+	_brdfLutTexture = ResourceManager::getInstance().loadTexture("brdfLut.png", false);
 }
 
 Renderer::~Renderer()

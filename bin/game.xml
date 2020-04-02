@@ -29,6 +29,8 @@
 		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
 
 		<TextureCompression>true</TextureCompression>
+		<AnisotropicFiltering>false</AnisotropicFiltering>
+		<AnisotropySamples>4</AnisotropySamples>
 		
 		<PbrSupport>true</PbrSupport>
     </Configuration>

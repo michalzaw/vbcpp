@@ -1,5 +1,8 @@
 #include "OGLDriver.h"
 
+#include "../Utils/Logger.h"
+#include "../Utils/Strings.h"
+
 
 static std::unique_ptr<OGLDriver> drvInstance;
 
@@ -78,6 +81,11 @@ bool OGLDriver::initialize()
     _defaultFramebuffer->_fboBuffs.push_back(GL_BACK_LEFT);
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	Logger::info("OpenGL initalized!");
+
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropy);
+	Logger::info("- maxAnisotropy: " + toString(_maxAnisotropy));
 
     return true;
 }
@@ -248,4 +256,10 @@ UBO* OGLDriver::getCurrentUBO()
 Framebuffer* OGLDriver::getDefaultFramebuffer()
 {
     return _defaultFramebuffer;
+}
+
+
+float OGLDriver::getMaxAnisotropy()
+{
+	return _maxAnisotropy;
 }

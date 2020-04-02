@@ -91,6 +91,14 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					textureCompression = toBool(configElement->GetText());
 				}
+				else if (strcmp(ename, "AnisotropicFiltering") == 0)
+				{
+					anisotropicFiltering = toBool(configElement->GetText());
+				}
+				else if (strcmp(ename, "AnisotropySamples") == 0)
+				{
+					anisotropySamples = toFloat(configElement->GetText());
+				}
 				else if (strcmp(ename, "PbrSupport") == 0)
 				{
 					pbrSupport = toBool(configElement->GetText());

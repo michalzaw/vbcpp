@@ -70,7 +70,7 @@ Resource* ResourceManager::findResource(std::string path)
 
 
 // Ładowanie tektur
-RTexture2D* ResourceManager::loadTexture(std::string path, bool mipmapping)
+RTexture2D* ResourceManager::loadTexture(std::string path, bool useCompression, bool mipmapping, bool useAnisotropicFiltering)
 {
     Resource* res = findResource(path);
     if (res != 0)
@@ -87,11 +87,16 @@ RTexture2D* ResourceManager::loadTexture(std::string path, bool mipmapping)
 
     int width, height;
     //GLuint tID = ::loadTexture(path.c_str(), &width, &height, true);
-	bool textureCompression = GameConfig::getInstance().textureCompression;
+	bool textureCompression = useCompression && GameConfig::getInstance().textureCompression;
     RTexture2D* texture = ::loadTexture(path.c_str(), textureCompression, mipmapping);
 
     if ( texture )
     {
+		bool anisotropic = useAnisotropicFiltering && GameConfig::getInstance().anisotropicFiltering;
+		float anisotropySamples = GameConfig::getInstance().anisotropySamples;
+		if (anisotropic)
+			texture->setAnisotropyFiltering(anisotropic, anisotropySamples);
+
         //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
         std::unique_ptr<RTexture> tex (texture);
         std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
