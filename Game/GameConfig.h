@@ -17,7 +17,7 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isFullscreen(false), msaaAntialiasing(false), msaaAntialiasingLevel(8), isShadowmappingEnable(true), shadowmapSize(1024), isBloomEnabled(true),
+            isFullscreen(false), msaaAntialiasing(false), msaaAntialiasingLevel(8), isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024), isBloomEnabled(true),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			pbrSupport(false)
         {}
@@ -46,6 +46,7 @@ class GameConfig
         int msaaAntialiasingLevel;
         bool isShadowmappingEnable;
         int shadowmapSize;
+		int staticShadowmapSize;
         bool isBloomEnabled;
         bool isGrassEnable;
 		float grassRenderingDistance;

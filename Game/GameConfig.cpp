@@ -59,6 +59,10 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     shadowmapSize = toInt(configElement->GetText());
                 }
+				else if (strcmp(ename, "StaticShadowmapSize") == 0)
+				{
+					staticShadowmapSize = toInt(configElement->GetText());
+				}
                 else if (strcmp(ename,"Bloom") == 0)
                 {
                     isBloomEnabled = toBool(configElement->GetText());

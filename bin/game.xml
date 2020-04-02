@@ -19,6 +19,7 @@
 		
 		<Shadowmapping>true</Shadowmapping>
         <ShadowmapSize>2048</ShadowmapSize>
+		<StaticShadowmapSize>2048</StaticShadowmapSize>
 		
 		<Grass>false</Grass>
 		<GrassRenderingDistance>30.0</GrassRenderingDistance>
