@@ -30,7 +30,7 @@ vec3 toneMap(vec3 x)
     float b = 0.03f;
     float c = 2.43f;
     float d = 0.59f;
-    float e = 0.370013;//0.14f;
+    float e = 0.14;//0.370013;
 	//0.336375
 	//e = exposure;
 	//e = 0.336375;
