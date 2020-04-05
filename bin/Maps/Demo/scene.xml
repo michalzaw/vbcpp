@@ -8,7 +8,7 @@
 	
 	<Start position="150,5,-151" rotation="0,-90,0" />
 	
-	<Grass model="grass.fbx" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />
+	<!--<Grass model="grass.fbx" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />-->
 	
 	<!-- rotation=(-0.2f * PI, 0.35f * PI, 0) -->
 	<Light rotation="-0.62831,1.09955,0" color="1.0,1.0,1.0" ambientIntensity="0.1" diffuseIntensity="1.0" />
@@ -469,7 +469,7 @@
 
 	
 	<Roads>
-		<Road name="road1" profile="profile1">
+		<Road name="road1" profile="Road1">
 			<Segment type="line" radius="0" beginPoint="200,0.1,-150" endPoint="-110,0.2,-150" points="20" interpolation="lin" />
 			<Segment type="line" radius="0" beginPoint="-110,0.2,-150" endPoint="-150,0.7,-150" points="20" interpolation="cos" />
 			<Segment type="arc" radius="-20" beginPoint="-150,0.7,-150" endPoint="-170,2.3,-130" points="30" interpolation="cos" />
@@ -489,7 +489,7 @@
 			<Segment type="line" radius="0" beginPoint="-150,1.7,130" endPoint="-90,5,130" points="10" interpolation="cos" />
 		</Road>
 		
-		<Road name="road1" profile="profile1">
+		<Road name="road1" profile="Road1">
 			<Segment type="line" radius="0" beginPoint="-90,5,130" endPoint="-70,5,130" points="10" interpolation="lin" />
 		</Road>
 		
@@ -497,7 +497,7 @@
 			<Segment type="arc" radius="50" beginPoint="-70,5,130" endPoint="-20,0.1,180" points="10" interpolation="cos" />		
 		</Road>
 		
-		<Road name="road3" profile="profile1">
+		<Road name="road3" profile="Road1">
 			<Segment type="arc" radius="-20" beginPoint="-20,0.1,180" endPoint="0,0.1,200" points="20" interpolation="cos" />
 			<Segment type="line" radius="0" beginPoint="0,0.1,200" endPoint="100,0.1,200" points="20" interpolation="lin" />
 			<Segment type="arc" radius="-40" beginPoint="100,0.1,200" endPoint="140,0.1,160" points="20" interpolation="lin" />
@@ -508,9 +508,9 @@
 			<Segment type="line" radius="0" beginPoint="140,3.3,10" endPoint="140,3.3,-40" points="20" interpolation="lin" />
 		</Road>
 		
-		<Road name="pavement1" profile="pavement">
+		<!--<Road name="pavement1" profile="pavement">
 			<Segment type="line" radius="0" beginPoint="-85,0.1,-27" endPoint="-110,0.1,-32" points="2" interpolation="lin" />
-		</Road>
+		</Road>-->
 	</Roads>
 	
 </Scene>

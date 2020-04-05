@@ -256,7 +256,7 @@ float isGrass = 0.0f;
 		//cascadeIndex = 0;
 		
 		// Shadows
-		float Ratio = 1.0f;
+		float Ratio = 0.0f;
 #ifdef SHADOWMAPPING
 		vec3 Coords = PositionLightSpace[cascadeIndex].xyz / PositionLightSpace[cascadeIndex].w;
 		Coords = Coords * 0.5f + 0.5f;
@@ -265,22 +265,22 @@ float isGrass = 0.0f;
 		float CurrentDepth = Coords.z;
 
 		Coords.z -= bias[cascadeIndex];//0.0005f;//
+
+		// only hardware 2x2 PCF
 		Ratio = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
-		if (normalFactor >= 0)
-		Ratio = Ratio * 0.8f + 0.2f;
-		/*float Ratio = 1.0f;
-		//vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
-		vec2 TexelSize = 1.0f / vec2(size[cascadeIndex], size[cascadeIndex]) / 2.0f;
-		for (int x = -2; x <= 2; ++x)
-		{
-			for (int y = -2; y <= 2; ++y)
-			{
-				float Depth = texture(ShadowMap[cascadeIndex], Coords.xy + vec2(x, y) * TexelSize).r;
-				Ratio += CurrentDepth - bias[cascadeIndex] > Depth ? 0.2f : 1.0f;
+
+		// 4x4 PCF
+		/*vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
+		for (float i = -1.5; i <= 1.5; ++i) {
+			for (float j = -1.5; j <= 1.5; ++j) {
+				Ratio += texture(ShadowMap[cascadeIndex], Coords + vec3(i * TexelSize.x, j * TexelSize.y, 0.0f));//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
 			}
 		}
 
-		Ratio /= 25.0f;*/
+		Ratio /= 16.0f;*/
+
+		if (normalFactor >= 0)
+		Ratio = Ratio * 0.8f + 0.2f;
 #endif
 	
 		LightsColor += CalculateLight(Lights.DirLights[i].Base, normal, Lights.DirLights[i].Direction, Ratio);

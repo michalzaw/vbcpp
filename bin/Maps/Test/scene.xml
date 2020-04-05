@@ -23,19 +23,19 @@
         <Object name="blok" position="-20,0,50" rotation="-179.998,84.5959,-179.998"/>
     </Objects>
     <Roads>
-        <Road name="road1" profile="profile1">
+        <Road name="road1" profile="Road1">
             <Segment type="line" radius="0" beginPoint="0,0,100" endPoint="0,0,-10" points="60" interpolation="lin"/>
             <Segment type="arc" radius="55" beginPoint="0,0,-10" endPoint="60,5,-65" points="60" interpolation="cos"/>
         </Road>
-        <Road name="road2" profile="profile1">
+        <Road name="road2" profile="Road1">
             <Segment type="line" radius="0" beginPoint="-80,0,5" endPoint="-100,5,30" points="60" interpolation="cos"/>
             <Segment type="line" radius="0" beginPoint="-100,5,30" endPoint="-140,5,80" points="60" interpolation="cos"/>
         </Road>
-        <Road name="pavement1" profile="pavement">
+        <!--<Road name="pavement1" profile="pavement">
             <Segment type="line" radius="0" beginPoint="5,0,30" endPoint="40,0,30" points="60" interpolation="lin"/>
         </Road>
         <Road name="pavement2" profile="pavement">
             <Segment type="line" radius="0" beginPoint="5,0,50" endPoint="40,0,50" points="60" interpolation="lin"/>
-        </Road>
+        </Road>-->
     </Roads>
 </Scene>
