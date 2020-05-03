@@ -21,12 +21,15 @@ void ColorsWindow::drawWindow()
 		ImGui::Text("Grass color");
 
 		SceneObject* grassObject = _sceneManager->getSceneObject("grass");
-		Grass* grass = static_cast<Grass*>(grassObject->getComponent(CT_GRASS));
-		glm::vec4 color = grass->getGrassColor();
+		if (grassObject != nullptr)
+		{
+			Grass* grass = static_cast<Grass*>(grassObject->getComponent(CT_GRASS));
+			glm::vec4 color = grass->getGrassColor();
 
-		ImGui::ColorEdit3("MyColor##1", (float*)& color, ImGuiColorEditFlags_NoOptions);
+			ImGui::ColorEdit3("MyColor##1", (float*)& color, ImGuiColorEditFlags_NoOptions);
 
-		grass->setGrassColor(color);
+			grass->setGrassColor(color);
+		}
 	}
 	ImGui::End();
 }
