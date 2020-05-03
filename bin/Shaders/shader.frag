@@ -256,8 +256,9 @@ float isGrass = 0.0f;
 		//cascadeIndex = 0;
 		
 		// Shadows
-		float Ratio = 0.0f;
+		float Ratio = 1.0f;
 #ifdef SHADOWMAPPING
+		Ratio = 0.0f;
 		vec3 Coords = PositionLightSpace[cascadeIndex].xyz / PositionLightSpace[cascadeIndex].w;
 		Coords = Coords * 0.5f + 0.5f;
 

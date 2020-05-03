@@ -1233,6 +1233,11 @@ VBO* Renderer::getQuadVbo()
 
 void Renderer::bakeStaticShadows()
 {
+	if (!_isShadowMappingEnable)
+	{
+		return;
+	}
+
 	Logger::info("Static shadows baking: start" + toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));
 	Timer timer;
 	timer.start();
