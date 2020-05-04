@@ -39,7 +39,7 @@ Game::Game()
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
 	_hud(nullptr),
-	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1)
+	_isCameraControll(false), _isMirrorControll(false), _mirrorControllIndex(-1)
 {
 	instance = this;
 }
@@ -113,7 +113,7 @@ void Game::initScene()
 	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(50.0f);
+	cameraFPS->setMoveSpeed(10.0f);
 	cameraObject->setRotation(0, degToRad(-90), 0);
 	cameraObject->setPosition(10, 7, -10);
 	cameraObject->setPosition(0, 0, 0);
@@ -146,6 +146,13 @@ void Game::loadScene()
 									   degToRad(_sceneManager->getBusStart().rotation.y),
 									   degToRad(_sceneManager->getBusStart().rotation.z));
 
+	CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));
+	camera->getSceneObject()->setRotation(degToRad(-5.0f),
+										  degToRad(60.0f),
+										  degToRad(0.0f));
+
+
 	Renderer::getInstance().bakeStaticShadows();
 }
 
@@ -163,7 +170,7 @@ void Game::startGame()
 	_physicsManager->play();
 	_soundManager->setMute(false);
 
-	_window->setCursorMode(GLFW_CURSOR_DISABLED);
+	glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
 }
 
 

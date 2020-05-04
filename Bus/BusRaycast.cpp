@@ -21,10 +21,10 @@ BusRaycast::BusRaycast()
     _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
-	_displayText.head = "0";
-	_displayText.line1 = "katowice";
-	_displayText.line2 = "dworzec pkp";
-	_displayText.type = TWO_LINE;
+	_displayText.head = "";
+	_displayText.line1 = "virtual bus";
+	_displayText.line2 = "";
+	_displayText.type = ONE_LINE;
 
 }
 
