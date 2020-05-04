@@ -78,7 +78,10 @@ void ImGuiInterface::draw()
 		drawMainMenu();
 
 		_busLineAndDirectionWindow->draw();
-		_colorsWindow->draw();
+		if (GameConfig::getInstance().developmentMode)
+		{
+			_colorsWindow->draw();
+		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

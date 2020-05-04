@@ -416,11 +416,11 @@ void Game::readInput(double deltaTime)
 		}
 	}
 
-	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS && GameConfig::getInstance().developmentMode)
 	{
 		Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() * 1.1f);
 	}
-	if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS && GameConfig::getInstance().developmentMode)
 	{
 		Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() / 1.1f);
 	}
@@ -493,6 +493,11 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		_activeBus->doorOpenClose(2);
 	}
 
+	else if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+	{
+		_activeBus->doorOpenClose(3);
+	}
+
 	else if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
 		if (_activeCamera->getSceneObject()->hasParent())
@@ -563,33 +568,36 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 	}
 
 	// debug
-	if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+	if (GameConfig::getInstance().developmentMode)
 	{
-		ResourceManager::getInstance().reloadAllShaders();
-	}
-	if (key == GLFW_KEY_2 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		ResourceManager::getInstance().reloadAllTextures();
-	}
-	if (key == GLFW_KEY_3 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		Renderer::getInstance().toogleRenderAABBFlag();
-	}
-	if (key == GLFW_KEY_4 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		Renderer::getInstance().toogleRenderOBBFlag();
-	}
-	if (key == GLFW_KEY_5 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
-	}
-	if (key == GLFW_KEY_8 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
-	}
-	if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-	{
-		GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			ResourceManager::getInstance().reloadAllShaders();
+		}
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			ResourceManager::getInstance().reloadAllTextures();
+		}
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			Renderer::getInstance().toogleRenderAABBFlag();
+		}
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			Renderer::getInstance().toogleRenderOBBFlag();
+		}
+		if (key == GLFW_KEY_5 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
+		}
+		if (key == GLFW_KEY_8 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
+		}
+		if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+		}
 	}
 }
 

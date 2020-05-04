@@ -12,7 +12,7 @@
 Hud::Hud(GUIManager* gui, Bus* bus)
 	: _gui(gui), _bus(bus)
 {
-	RFont* font = ResourceManager::getInstance().loadFont("C:/Windows/Fonts/ARLRDBD.ttf");
+	RFont* font = ResourceManager::getInstance().loadFont("Fonts/arial.ttf");
 
 	_hudImage = gui->addImage(ResourceManager::getInstance().loadTexture("Data/HUD/HUD.bmp"));
 	_hudImage->setPosition(0, 0);
