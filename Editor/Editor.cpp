@@ -687,10 +687,10 @@ namespace vbEditor
 
 	void initializeEngineSubsystems()
 	{
-//#ifdef DEVELOPMENT_RESOURCES
+#ifdef DEVELOPMENT_RESOURCES
 		GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
 		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
-//#endif // DEVELOPMENT_RESOURCES
+#endif // DEVELOPMENT_RESOURCES
 
 		OGLDriver::getInstance().initialize();
 
