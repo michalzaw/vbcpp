@@ -34,6 +34,7 @@ namespace RoadManipulator
 		float yMax = 0.f;
 		float displayRatio = 1.f;
 
+		bool isAnyPointModified = false;
 		int activePoint = -1;
 
 		std::vector<ImVec2> roadPoints;
@@ -71,6 +72,16 @@ namespace RoadManipulator
 		context.displayRatio = width / height;
 	}
 
+	int IsModified()
+	{
+		return context.isAnyPointModified;
+	}
+
+	int GetActiveSegment()
+	{
+		return context.activePoint;
+	}
+
 	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix)
 	{
 		context.viewMatrix = view;
@@ -80,6 +91,7 @@ namespace RoadManipulator
 		context.viewProjection = context.projectionMatrix * context.viewMatrix;
 		context.MVP = context.viewProjection * context.modelMatrix;
 
+		context.isAnyPointModified = false;
 		context.roadPoints.clear();
 	}
 

@@ -491,6 +491,7 @@ namespace vbEditor
 	CameraFPS* _camera = nullptr;
 	SceneObject* _cameraObject = nullptr;
 	SceneObject* _selectedSceneObject = nullptr;
+	int roadActiveSegment = 0;
 
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
@@ -1113,6 +1114,8 @@ namespace vbEditor
 			roadComponent->buildModel();
 			timer = 0.0f;
 		}
+
+		roadActiveSegment = RoadManipulator::GetActiveSegment();
 	}
 
 	void addSceneObject()

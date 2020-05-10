@@ -17,6 +17,9 @@ namespace RoadManipulator
 
 	void SetRect(float x, float y, float width, float height);
 
+	int IsModified();
+	int GetActiveSegment();
+
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix = 0);
 };
 

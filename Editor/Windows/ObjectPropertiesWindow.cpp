@@ -239,6 +239,8 @@ namespace vbEditor
 {
 	extern SceneObject* _selectedSceneObject;
 	extern CameraFPS* _camera;
+
+	extern int roadActiveSegment;
 }
 
 void showObjectProperties()
@@ -361,6 +363,29 @@ void showObjectProperties()
 						roadComponent->setSegments(segments);
 
 						roadComponent->buildModel();
+					}
+				}
+				if (ImGui::CollapsingHeader("Road segment", ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					if (vbEditor::roadActiveSegment >= 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
+					{
+						ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
+
+						int typeComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].type == RST_LINE ? 0 : 1;
+						const char* typeComboItems[] = { "line", "arc" };
+						ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems));
+						roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
+
+						int interpolationComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation == RI_LIN ? 0 : 1;
+						const char* interpolationComboItems[] = { "lin", "cos" };
+						ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems));
+						roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
+
+						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
+						ImGui::DragInt("Points count", points, 1.0f, 0.0f, 0.0f);
+
+						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
+						ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f);
 					}
 				}
 			}
