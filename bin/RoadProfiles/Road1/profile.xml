@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Profile>
-	<Description author="mich" name="profile1" comment="Test profile" />
+	<Description author="mich" name="Road1" comment="Test profile" />
 
 	<Lanes>
 		<Lane material="asfalt" x1="-3.5" x2="3.5" y1="0.05" y2="0.05" />

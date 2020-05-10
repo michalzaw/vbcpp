@@ -1104,6 +1104,15 @@ namespace vbEditor
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			roadComponent->getSegments());
+
+		static float timer = 0.0f;
+		timer += 1.0f / 60.0f;
+
+		if (timer >= 0.2f)
+		{
+			roadComponent->buildModel();
+			timer = 0.0f;
+		}
 	}
 
 	void addSceneObject()

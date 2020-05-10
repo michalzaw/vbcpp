@@ -144,6 +144,11 @@ namespace RoadManipulator
 
 				glm::vec3 newPosition = modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 				segments[i].begin = newPosition;
+
+				if (i > 0)
+				{
+					segments[i - 1].end = newPosition;
+				}
 			}
 
 			context.roadPoints.push_back(trans);
