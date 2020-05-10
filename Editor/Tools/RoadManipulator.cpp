@@ -27,6 +27,10 @@ namespace RoadManipulator
 		float xMax = 0.f;
 		float yMax = 0.f;
 		float displayRatio = 1.f;
+
+		int activePoint = -1;
+
+		std::vector<ImVec2> roadPoints;
 	};
 
 	static Context context;
@@ -69,6 +73,8 @@ namespace RoadManipulator
 
 		context.viewProjection = context.projectionMatrix * context.viewMatrix;
 		context.MVP = context.viewProjection * context.modelMatrix;
+
+		context.roadPoints.clear();
 	}
 
 	static ImVec2 transformToImGuiScreenSpace(glm::vec4 position)
@@ -81,6 +87,13 @@ namespace RoadManipulator
 		position.x += context.x;
 		position.y += context.y;
 		return ImVec2(position.x, position.y);
+	}
+
+	static bool CanActivate()
+	{
+		if (ImGui::IsMouseClicked(0) && !ImGui::IsAnyItemHovered() && !ImGui::IsAnyItemActive())
+			return true;
+		return false;
 	}
 
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
@@ -108,7 +121,19 @@ namespace RoadManipulator
 			}
 
 			drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
-			drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
+			if (context.activePoint == i)
+			{
+				drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
+			}
+
+			context.roadPoints.push_back(trans);
+
+			// click
+			if (glm::length(glm::vec2(io.MousePos.x - trans.x, io.MousePos.y - trans.y)) <= 10.0f &&
+				CanActivate())
+			{
+				context.activePoint = i;
+			}
 		}
 	}
 
