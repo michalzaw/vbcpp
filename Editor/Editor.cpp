@@ -856,15 +856,17 @@ namespace vbEditor
 
 		if (_selectedSceneObject)
 		{
-			ShowTransformGizmo();
+			//ShowTransformGizmo();
 
-			if (_showRoadTools)
-			{
+			//if (_showRoadTools)
+			//{
 				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 
 				if (roadComponent)
 					showRoadTools();
-			}
+				else
+					ShowTransformGizmo();
+			//}
 		}
 
 

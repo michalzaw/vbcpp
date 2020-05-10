@@ -1,10 +1,16 @@
 #include "RoadManipulator.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "../../ImGui/imgui.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 #include "../../ImGui/imgui_internal.h"
+
+#include "../../ImGui/imGizmo.h"
 
 #include "../../Graphics/Roads.h"
 
@@ -121,9 +127,23 @@ namespace RoadManipulator
 			}
 
 			drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
+			drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
 			if (context.activePoint == i)
 			{
-				drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
+				glm::mat4 modelMatrix = glm::translate(glm::vec3(segments[i].begin.x, segments[i].begin.y, segments[i].begin.z));
+
+				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+				ImGuizmo::Manipulate(glm::value_ptr(context.viewMatrix), glm::value_ptr(context.projectionMatrix),
+					ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
+					glm::value_ptr(modelMatrix),
+					NULL,
+					NULL,
+					NULL,
+					NULL
+				);
+
+				glm::vec3 newPosition = modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+				segments[i].begin = newPosition;
 			}
 
 			context.roadPoints.push_back(trans);
