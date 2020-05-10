@@ -1091,80 +1091,17 @@ namespace vbEditor
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
 		);
-
-
-		//BeginFrame();
-
-		/*glm::vec4 position(_selectedSceneObject->getGlobalPosition().x, _selectedSceneObject->getGlobalPosition().y, _selectedSceneObject->getGlobalPosition().z, 1.0f);
-		position = (_camera->getProjectionMatrix() * _camera->getViewMatrix()) * position;
-
-		position *= 0.5f / position.w;
-		position += glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
-		position.y = 1.f - position.y;
-		position.x *= _camera->getWindowWidth();
-		position.y *= _camera->getWindowHeight();
-		ImVec2 trans(position.x, position.y);*/
-
-		//ImVec2 trans(500, 500);
-
-		//std::cout << trans.x << ", " << trans.y << std::endl;
-
-		//drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
-		//drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
-
 	}
 
 	void showRoadTools()
 	{
 		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 
-		/*ImGuiIO& io = ImGui::GetIO();
-		ImRoadTools::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImRoadTools::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
-			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
-			roadComponent->getSegments()
-		);*/
-
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(), _selectedSceneObject->getLocalTransformMatrix(), roadComponent->getSegments());
-
-
-		/*BeginFrame();
-
-		for (unsigned int i = 0; i < roadComponent->getSegments().size(); ++i)
-		{
-			glm::vec4 position(roadComponent->getSegments()[i].begin.x, roadComponent->getSegments()[i].begin.y, roadComponent->getSegments()[i].begin.z, 1.0f);
-			position = (_camera->getProjectionMatrix() * _camera->getViewMatrix()) * position;
-
-			//std::cout << "Editor: " << position.z << ", w = " << position.w << std::endl;
-
-
-			std::cout << position.z << std::endl;
-			if (position.z < 0.001f)
-			{
-				continue;
-			}
-
-			position /= position.w;
-			position *= 0.5;
-
-			position += glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
-			position.y = 1.f - position.y;
-			position.x *= _camera->getWindowWidth();
-			position.y *= _camera->getWindowHeight();
-			ImVec2 trans(position.x, position.y);
-
-			if (trans.x <= 0.0f || trans.x >= _camera->getWindowWidth() || trans.y <= 0.0f || trans.y >= _camera->getWindowHeight())
-			{
-				continue;
-			}
-
-			//std::cout << trans.x << ", " << trans.y << ", " << position.z << std::endl;
-
-			drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
-			drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
-		}*/
+		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
+			_selectedSceneObject->getLocalTransformMatrix(),
+			roadComponent->getSegments());
 	}
 
 	void addSceneObject()

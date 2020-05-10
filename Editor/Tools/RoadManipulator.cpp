@@ -14,6 +14,12 @@ namespace RoadManipulator
 	{
 		ImDrawList* drawList;
 
+		glm::mat4 viewMatrix;
+		glm::mat4 projectionMatrix;
+		glm::mat4 modelMatrix;
+		glm::mat4 MVP;
+		glm::mat4 viewProjection;
+
 		float x = 0.f;
 		float y = 0.f;
 		float width = 0.f;
@@ -55,42 +61,51 @@ namespace RoadManipulator
 		context.displayRatio = width / height;
 	}
 
+	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix)
+	{
+		context.viewMatrix = view;
+		context.projectionMatrix = projection;
+		context.modelMatrix = matrix;
+
+		context.viewProjection = context.projectionMatrix * context.viewMatrix;
+		context.MVP = context.viewProjection * context.modelMatrix;
+	}
+
+	static ImVec2 transformToImGuiScreenSpace(glm::vec4 position)
+	{
+		position *= 0.5 / position.w;
+		position += glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
+		position.y = 1.f - position.y;
+		position.x *= context.width;
+		position.y *= context.height;
+		position.x += context.x;
+		position.y += context.y;
+		return ImVec2(position.x, position.y);
+	}
+
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
 	{
+		ComputeContext(view, projection, matrix);
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImDrawList* drawList = context.drawList;
 
 		for (unsigned int i = 0; i < segments.size(); ++i)
 		{
 			glm::vec4 position(segments[i].begin.x, segments[i].begin.y, segments[i].begin.z, 1.0f);
-			position = (projection * view) * position;
+			position = context.MVP * position;
 
-			//std::cout << "Editor: " << position.z << ", w = " << position.w << std::endl;
-
-
-			//std::cout << position.z << std::endl;
 			if (position.z < 0.001f)
 			{
 				continue;
 			}
 
-			position /= position.w;
-			position *= 0.5;
-
-			position += glm::vec4(0.5f, 0.5f, 0.0f, 0.0f);
-			position.y = 1.f - position.y;
-			position.x *= context.width;
-			position.y *= context.height;
-			position.x += context.x;
-			position.y += context.y;
-			ImVec2 trans(position.x, position.y);
+			ImVec2 trans = transformToImGuiScreenSpace(position);
 
 			if (trans.x <= 0.0f || trans.x >= context.width || trans.y <= 0.0f || trans.y >= context.height)
 			{
 				continue;
 			}
-
-			//std::cout << trans.x << ", " << trans.y << ", " << position.z << std::endl;
 
 			drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
 			drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
