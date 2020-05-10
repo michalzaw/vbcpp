@@ -102,62 +102,107 @@ namespace RoadManipulator
 		return false;
 	}
 
+	// return true - if the point is drawn
+	bool DrawPoint(glm::vec4 position, ImVec2& trans)
+	{
+		ImDrawList* drawList = context.drawList;
+
+		position = context.MVP * position;
+
+		if (position.z < 0.001f)
+		{
+			return false;
+		}
+
+		trans = transformToImGuiScreenSpace(position);
+
+		if (trans.x <= 0.0f || trans.x >= context.width || trans.y <= 0.0f || trans.y >= context.height)
+		{
+			return false;
+		}
+
+		//drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
+		//drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
+
+		//drawList->AddCircleFilled(trans, 10.0f, IM_COL32(255, 0, 0, 255));
+		drawList->AddCircleFilled(trans, 6.0f, IM_COL32(255, 255, 255, 255));
+
+		return true;
+	}
+
+	// return new point position
+	glm::vec3 HandleInputForPoint(glm::vec4 position, ImVec2& trans, int index)
+	{
+		glm::vec3 newPosition = glm::vec3(position);
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImDrawList* drawList = context.drawList;
+
+		// draw guizmo
+		if (context.activePoint == index)
+		{
+			glm::mat4 modelMatrix = glm::translate(glm::vec3(position));
+
+			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+			ImGuizmo::Manipulate(glm::value_ptr(context.viewMatrix), glm::value_ptr(context.projectionMatrix),
+				ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
+				glm::value_ptr(modelMatrix),
+				NULL,
+				NULL,
+				NULL,
+				NULL
+			);
+
+			newPosition = modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		}
+
+		float mouseToPointDistance = glm::length(glm::vec2(io.MousePos.x - trans.x, io.MousePos.y - trans.y));
+
+		// mouse is over point
+		if (mouseToPointDistance <= 6.0f)
+		{
+			drawList->AddCircleFilled(trans, 6.0f, 0x8A1080FF);
+		}
+
+		// click
+		if (mouseToPointDistance <= 6.0f && CanActivate())
+		{
+			context.activePoint = index;
+		}
+
+		return newPosition;
+	}
+
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
 	{
 		ComputeContext(view, projection, matrix);
 
 		ImGuiIO& io = ImGui::GetIO();
-		ImDrawList* drawList = context.drawList;
 
 		for (unsigned int i = 0; i < segments.size(); ++i)
 		{
 			glm::vec4 position(segments[i].begin.x, segments[i].begin.y, segments[i].begin.z, 1.0f);
-			position = context.MVP * position;
 
-			if (position.z < 0.001f)
+			ImVec2 trans;
+			DrawPoint(position, trans);
+
+			glm::vec3 newPosition = HandleInputForPoint(position, trans, i);
+			segments[i].begin = newPosition;
+			if (i > 0)
 			{
-				continue;
+				segments[i - 1].end = newPosition;
 			}
 
-			ImVec2 trans = transformToImGuiScreenSpace(position);
-
-			if (trans.x <= 0.0f || trans.x >= context.width || trans.y <= 0.0f || trans.y >= context.height)
+			// last segment - draw end point
+			if (i == segments.size() - 1)
 			{
-				continue;
-			}
+				glm::vec4 position(segments[i].end.x, segments[i].end.y, segments[i].end.z, 1.0f);
 
-			drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
-			drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
-			if (context.activePoint == i)
-			{
-				glm::mat4 modelMatrix = glm::translate(glm::vec3(segments[i].begin.x, segments[i].begin.y, segments[i].begin.z));
+				ImVec2 trans;
+				DrawPoint(position, trans);
 
-				ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-				ImGuizmo::Manipulate(glm::value_ptr(context.viewMatrix), glm::value_ptr(context.projectionMatrix),
-					ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
-					glm::value_ptr(modelMatrix),
-					NULL,
-					NULL,
-					NULL,
-					NULL
-				);
-
-				glm::vec3 newPosition = modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-				segments[i].begin = newPosition;
-
-				if (i > 0)
-				{
-					segments[i - 1].end = newPosition;
-				}
-			}
-
-			context.roadPoints.push_back(trans);
-
-			// click
-			if (glm::length(glm::vec2(io.MousePos.x - trans.x, io.MousePos.y - trans.y)) <= 10.0f &&
-				CanActivate())
-			{
-				context.activePoint = i;
+				glm::vec3 newPosition = HandleInputForPoint(position, trans, i + 1);
+				segments[i].end = newPosition;
 			}
 		}
 	}
