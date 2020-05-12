@@ -241,6 +241,7 @@ namespace vbEditor
 	extern CameraFPS* _camera;
 
 	extern int roadActiveSegment;
+	extern int roadActivePoint;
 }
 
 void showObjectProperties()
@@ -370,6 +371,25 @@ void showObjectProperties()
 					if (vbEditor::roadActiveSegment >= 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
 					{
 						ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
+
+						ImGui::Separator();
+
+						float* pointPosition;
+						if (vbEditor::roadActivePoint < roadComponent->getSegments().size())
+							pointPosition = glm::value_ptr(roadComponent->getSegments()[vbEditor::roadActivePoint].begin);
+						else
+							pointPosition = glm::value_ptr(roadComponent->getSegments()[vbEditor::roadActivePoint - 1].end);
+
+						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
+						{
+							if (vbEditor::roadActivePoint < roadComponent->getSegments().size() &&
+								vbEditor::roadActivePoint > 0)
+							{
+								roadComponent->getSegments()[vbEditor::roadActivePoint - 1].end = roadComponent->getSegments()[vbEditor::roadActivePoint].begin;
+							}
+						}
+
+						ImGui::Separator();
 
 						int typeComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].type == RST_LINE ? 0 : 1;
 						const char* typeComboItems[] = { "line", "arc" };

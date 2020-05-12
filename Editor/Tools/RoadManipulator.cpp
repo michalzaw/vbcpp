@@ -86,6 +86,11 @@ namespace RoadManipulator
 		return context.activeSegment;
 	}
 
+	int GetActivePoint()
+	{
+		return context.activePoint;
+	}
+
 	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix)
 	{
 		context.viewMatrix = view;

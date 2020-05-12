@@ -492,6 +492,7 @@ namespace vbEditor
 	SceneObject* _cameraObject = nullptr;
 	SceneObject* _selectedSceneObject = nullptr;
 	int roadActiveSegment = 0;
+	int roadActivePoint = 0;
 
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
@@ -1118,6 +1119,7 @@ namespace vbEditor
 		}
 
 		roadActiveSegment = RoadManipulator::GetActiveSegment();
+		roadActivePoint = RoadManipulator::GetActivePoint();
 	}
 
 	void addSceneObject()
