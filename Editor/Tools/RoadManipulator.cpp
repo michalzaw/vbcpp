@@ -40,8 +40,8 @@ namespace RoadManipulator
 		float displayRatio = 1.f;
 
 		bool isAnyPointModified = false;
-		int activePoint = -1;
-		int activeSegment = -1;
+		int activePoint = 0;
+		int activeSegment = 0;
 	};
 
 	static Context context;
@@ -205,7 +205,7 @@ namespace RoadManipulator
 				segments[context.activeSegment].r = -segments[context.activeSegment].r;
 			}
 		}
-		if (context.activeSegment < segments.size())
+		if (context.activeSegment < segments.size() - 1)
 		{
 			float beginToEndHalfDistance2 = glm::length(segments[context.activeSegment + 1].end - segments[context.activeSegment + 1].begin) / 2.0f;
 			if (abs(segments[context.activeSegment + 1].r) < beginToEndHalfDistance2)
