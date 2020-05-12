@@ -81,3 +81,22 @@ unsigned int IBO::addIndices(unsigned int* indices, unsigned int indicesCount)
 
     return -1;
 }
+
+
+unsigned int IBO::updateIndices(unsigned int* indices, unsigned int indicesCount, unsigned int offset)
+{
+	if (_iboId != 0 && ((offset + indicesCount) * sizeof(unsigned int)) <= _bufferSize)
+	{
+		bind();
+		glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, indicesCount * sizeof(unsigned int), indices);
+
+		if (indicesCount + offset > _indicesCount)
+		{
+			_indicesCount = indicesCount + offset;
+		}
+
+		return offset;
+	}
+
+	return -1;
+}

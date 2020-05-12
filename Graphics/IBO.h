@@ -24,6 +24,7 @@ class IBO
         //bool create(unsigned int* indices, unsigned int indicesCount);
 
         unsigned int addIndices(unsigned int* indices, unsigned int indicesCount);
+		unsigned int updateIndices(unsigned int* indices, unsigned int indicesCount, unsigned int offset = 0);
 
         inline void bind()
         {

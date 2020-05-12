@@ -26,6 +26,8 @@ struct StaticModelMesh
     unsigned int firstVertexInVbo;
     unsigned int materialIndex;
 
+	bool useSharedVboAndIbo;
+
     ~StaticModelMesh()
     {
         if (vertices)
@@ -38,44 +40,82 @@ struct StaticModelMesh
             delete[] indices;
         }
 
-        if (vbo)
-        {
-            //OGLDriver::getInstance().deleteVBO(vbo);
-        }
+		if (!useSharedVboAndIbo)
+		{
+			if (vbo)
+			{
+				OGLDriver::getInstance().deleteVBO(vbo);
+			}
 
-        if (ibo)
-        {
-            //OGLDriver::getInstance().deleteIBO(ibo);
-        }
+			if (ibo)
+			{
+				OGLDriver::getInstance().deleteIBO(ibo);
+			}
+		}
 
     }
 
     void setMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
-                     unsigned int materialIndex, ShaderType shaderType)
+                     unsigned int materialIndex, ShaderType shaderType,
+					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0)
     {
         this->vertices = vertices;
         this->verticesCount = verticesCount;
         this->indices = indices;
         this->indicesCount = indicesCount;
         this->firstVertex = 0;
+		this->firstVertexInVbo = 0;
         this->materialIndex = materialIndex;
+		this->useSharedVboAndIbo = useSharedVboAndIbo;
 
-        int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
-        int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
-        vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
-        ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
+		if (useSharedVboAndIbo)
+		{
+			int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
+			int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
+			vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
+			ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
 
-        firstVertexInVbo = vbo->getQuantumOfVertices();
-        for (unsigned int i = 0; i < this->indicesCount; ++i)
-        {
-            this->indices[i] += firstVertexInVbo;
-        }
+			firstVertexInVbo = vbo->getQuantumOfVertices();
+			for (unsigned int i = 0; i < this->indicesCount; ++i)
+			{
+				this->indices[i] += firstVertexInVbo;
+			}
 
-        this->firstVertex = ibo->getIndicesCount();
+			this->firstVertex = ibo->getIndicesCount();
+		}
+		else
+		{
+			vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex));
+			ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int));
+		}
 
         vbo->addVertexData(vertices, verticesCount);
         ibo->addIndices(indices, indicesCount);
     }
+
+	void updateMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount)
+	{
+		if (vertices)
+		{
+			delete[] this->vertices;
+		}
+
+		if (indices)
+		{
+			delete[] this->indices;
+		}
+
+		this->vertices = vertices;
+		this->verticesCount = verticesCount;
+		this->indices = indices;
+		this->indicesCount = indicesCount;
+
+		firstVertexInVbo = 0;
+		firstVertex = 0;
+
+		std::cout << vbo->updateVertexData(vertices, verticesCount) << std::endl;
+		std::cout << ibo->updateIndices(indices, indicesCount) << std::endl << std::endl;
+	}
 
 };
 
@@ -173,6 +213,9 @@ class RStaticModel : public Resource
         GLenum getPrimitiveType() {return _primitiveType;}
 
         AABB* getAABB();
+
+		void setNewCollisionMesh(glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
+		void recalculateAABB();
 
 };
 

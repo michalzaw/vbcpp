@@ -10,6 +10,13 @@
 using namespace tinyxml2;
 
 
+enum GameMode
+{
+	GM_GAME,
+	GM_EDITOR
+};
+
+
 class GameConfig
 {
     private:
@@ -21,7 +28,8 @@ class GameConfig
 			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			textureCompression(false), anisotropicFiltering(false), anisotropySamples(4.0f),
-			pbrSupport(false)
+			pbrSupport(false),
+			mode(GM_GAME)
         {}
         GameConfig(const GameConfig&) {}
 
@@ -36,6 +44,8 @@ class GameConfig
 
         void loadGameConfig(const char* filename);
 		void loadDevelopmentConfig(const char* filename);
+
+		GameMode mode;
 
         int windowWidth;
         int windowHeight;

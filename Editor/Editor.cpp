@@ -695,6 +695,8 @@ namespace vbEditor
 		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
 //#endif // DEVELOPMENT_RESOURCES
 
+		GameConfig::getInstance().mode = GM_EDITOR;
+
 		OGLDriver::getInstance().initialize();
 
 		Renderer& renderer = Renderer::getInstance();

@@ -25,23 +25,33 @@ RoadObject::~RoadObject()
 void RoadObject::buildModel()
 {
 	// delete objects in base class RenderObject
-	if (_modelRootNode)
-	{
-		delete _modelRootNode;
-	}
-
-	if (_materials)
-	{
-		delete[] _materials;
-	}
-
+	/*
 	// delete generated RStaticModel
 	if (_model != nullptr)
 	{
 		delete _model;
-	}
+	}*/
 
-	setModel(createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments));
+	RStaticModel* newModel;
+	if (_model == nullptr)
+	{
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments);
+	}
+	else
+	{
+		if (_modelRootNode)
+		{
+			delete _modelRootNode;
+		}
+
+		if (_materials)
+		{
+			delete[] _materials;
+		}
+
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments, _model);
+	}
+	setModel(newModel);
 }
 
 

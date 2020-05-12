@@ -69,6 +69,28 @@ class VBO
             return -1;
         }
 
+		template <typename VertexType>
+		unsigned int updateVertexData(VertexType* vertices, unsigned int quantumOfVertices, unsigned int offset = 0)
+		{
+			if (sizeof(VertexType) != _vertexSize)
+				return -1;
+
+			if (_vboId != 0 && ((offset + quantumOfVertices) * _vertexSize) <= _bufferSize)
+			{
+				bind();
+				glBufferSubData(GL_ARRAY_BUFFER, offset, quantumOfVertices * _vertexSize, vertices);
+
+				if (quantumOfVertices + offset > _quantumOfVertices)
+				{
+					_quantumOfVertices = quantumOfVertices + offset;
+				}
+
+				return offset;
+			}
+
+			return -1;
+		}
+
         inline void bind()
         {
             glBindBuffer(GL_ARRAY_BUFFER, _vboId);

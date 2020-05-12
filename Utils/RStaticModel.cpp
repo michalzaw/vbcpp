@@ -161,3 +161,21 @@ AABB* RStaticModel::getAABB()
 {
     return &_aabb;
 }
+
+
+void RStaticModel::setNewCollisionMesh(glm::vec3* collisionMesh, unsigned int collisionMeshSize)
+{
+	if (_collisionMesh)
+	{
+		delete[] _collisionMesh;
+	}
+
+	_collisionMesh = collisionMesh;
+	_collisionMeshSize = collisionMeshSize;
+}
+
+
+void RStaticModel::recalculateAABB()
+{
+	calculateAABB();
+}
