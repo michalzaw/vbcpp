@@ -22,6 +22,11 @@ T clamp(const T& what, const T& a, const T& b)
        return std::min(b, std::max(what, a));
 }
 
+template <typename T>
+int sign(T value) {
+	return (T(0) < value) - (value < T(0));
+}
+
 glm::vec2 XMLstringToVec2(const char* xmlstring);
 glm::vec3 XMLstringToVec3(const char* xmlstring);
 //<<<<<<< HEAD

@@ -1,5 +1,7 @@
 #include "RoadManipulator.h"
 
+#include <algorithm>
+
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -13,6 +15,9 @@
 #include "../../ImGui/imGizmo.h"
 
 #include "../../Graphics/Roads.h"
+
+#include "../../Utils/Helpers.hpp"
+
 
 namespace RoadManipulator
 {
@@ -36,8 +41,7 @@ namespace RoadManipulator
 
 		bool isAnyPointModified = false;
 		int activePoint = -1;
-
-		std::vector<ImVec2> roadPoints;
+		int activeSegment = -1;
 	};
 
 	static Context context;
@@ -79,7 +83,7 @@ namespace RoadManipulator
 
 	int GetActiveSegment()
 	{
-		return context.activePoint;
+		return context.activeSegment;
 	}
 
 	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix)
@@ -92,7 +96,6 @@ namespace RoadManipulator
 		context.MVP = context.viewProjection * context.modelMatrix;
 
 		context.isAnyPointModified = false;
-		context.roadPoints.clear();
 	}
 
 	static ImVec2 transformToImGuiScreenSpace(glm::vec4 position)
@@ -180,9 +183,36 @@ namespace RoadManipulator
 		if (mouseToPointDistance <= 6.0f && CanActivate())
 		{
 			context.activePoint = index;
+			context.activeSegment = std::max(index - 1, 0);
 		}
 
 		return newPosition;
+	}
+
+	void HandleMouseWheelInput(std::vector<RoadSegment>& segments)
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		segments[context.activeSegment].r += io.MouseWheel;
+
+		float beginToEndHalfDistance1 = glm::length(segments[context.activeSegment].end - segments[context.activeSegment].begin) / 2.0f;
+		if (abs(segments[context.activeSegment].r) < beginToEndHalfDistance1)
+		{
+			segments[context.activeSegment].r = beginToEndHalfDistance1 * sign(segments[context.activeSegment].r);
+
+			if (io.MouseWheel != 0.0f)
+			{
+				segments[context.activeSegment].r = -segments[context.activeSegment].r;
+			}
+		}
+		if (context.activeSegment < segments.size())
+		{
+			float beginToEndHalfDistance2 = glm::length(segments[context.activeSegment + 1].end - segments[context.activeSegment + 1].begin) / 2.0f;
+			if (abs(segments[context.activeSegment + 1].r) < beginToEndHalfDistance2)
+			{
+				segments[context.activeSegment + 1].r = (beginToEndHalfDistance2 * sign(segments[context.activeSegment + 1].r));
+			}
+		}
 	}
 
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
@@ -217,6 +247,8 @@ namespace RoadManipulator
 				segments[i].end = newPosition;
 			}
 		}
+
+		HandleMouseWheelInput(segments);
 	}
 
 };

@@ -718,7 +718,7 @@ namespace vbEditor
 		_camera = GraphicsManager::getInstance().addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
-		_camera->setMoveSpeed(8.0f);
+		_camera->setMoveSpeed(50.0f);
 
 		GraphicsManager::getInstance().setCurrentCamera(_camera);
 		_soundManager->setActiveCamera(_camera);

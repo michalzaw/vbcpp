@@ -113,8 +113,8 @@ struct StaticModelMesh
 		firstVertexInVbo = 0;
 		firstVertex = 0;
 
-		std::cout << vbo->updateVertexData(vertices, verticesCount) << std::endl;
-		std::cout << ibo->updateIndices(indices, indicesCount) << std::endl << std::endl;
+		vbo->updateVertexData(vertices, verticesCount);
+		ibo->updateIndices(indices, indicesCount);
 	}
 
 };

@@ -382,10 +382,17 @@ void showObjectProperties()
 						roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
 
 						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-						ImGui::DragInt("Points count", points, 1.0f, 0.0f, 0.0f);
+						ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f);
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
 						ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f);
+
+						// radius validation
+						float beginToEndHalfDistance = glm::length(roadComponent->getSegments()[vbEditor::roadActiveSegment].end - roadComponent->getSegments()[vbEditor::roadActiveSegment].begin) / 2.0f;
+						if (abs(roadComponent->getSegments()[vbEditor::roadActiveSegment].r) < beginToEndHalfDistance)
+						{
+							roadComponent->getSegments()[vbEditor::roadActiveSegment].r = beginToEndHalfDistance * sign(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
+						}
 					}
 				}
 			}
