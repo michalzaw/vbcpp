@@ -17,10 +17,12 @@ class RoadObject : public RenderObject
 		RoadObject(RRoadProfile*_roadProfile, std::vector<RoadSegment>& segments);
 		virtual ~RoadObject();
 
-		void buildModel();
+		void buildModel(bool reuseExistingModel = true);
 
 		RRoadProfile* getRoadProfile();
 		std::vector<RoadSegment>& getSegments();
+
+		void setRoadProfile(RRoadProfile* roadProfile);
 		void setSegments(std::vector<RoadSegment> segments);
 
 };

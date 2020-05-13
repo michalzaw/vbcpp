@@ -22,7 +22,7 @@ RoadObject::~RoadObject()
 }
 
 
-void RoadObject::buildModel()
+void RoadObject::buildModel(bool reuseExistingModel)
 {
 	// delete objects in base class RenderObject
 	/*
@@ -32,23 +32,32 @@ void RoadObject::buildModel()
 		delete _model;
 	}*/
 
+	if (_modelRootNode)
+	{
+		delete _modelRootNode;
+	}
+
+	if (_materials)
+	{
+		delete[] _materials;
+	}
+
 	RStaticModel* newModel;
 	if (_model == nullptr)
 	{
 		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments);
 	}
+	else if (!reuseExistingModel)
+	{
+		if (_model != nullptr)
+		{
+			delete _model;
+		}
+
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments);
+	}
 	else
 	{
-		if (_modelRootNode)
-		{
-			delete _modelRootNode;
-		}
-
-		if (_materials)
-		{
-			delete[] _materials;
-		}
-
 		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments, _model);
 	}
 	setModel(newModel);
@@ -65,6 +74,13 @@ std::vector<RoadSegment>& RoadObject::getSegments()
 {
 	return _segments;
 }
+
+
+void RoadObject::setRoadProfile(RRoadProfile* roadProfile)
+{
+	_roadProfile = roadProfile;
+}
+
 
 void RoadObject::setSegments(std::vector<RoadSegment> segments)
 {

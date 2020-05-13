@@ -242,6 +242,8 @@ namespace vbEditor
 
 	extern int roadActiveSegment;
 	extern int roadActivePoint;
+
+	extern std::vector<std::string> _availableRoadProfiles;
 }
 
 void showObjectProperties()
@@ -406,6 +408,21 @@ void showObjectProperties()
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
 						ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f);
+
+						ImGui::Separator();
+
+						static int roadProfilesCurrentItem = 0;
+						std::vector<const char*> roadProfilesComboItems;
+						for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
+						{
+							roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+						}
+						if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
+						{
+							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
+
+							roadComponent->buildModel(false);
+						}
 					}
 				}
 			}
