@@ -242,6 +242,7 @@ namespace vbEditor
 
 	extern int roadActiveSegment;
 	extern int roadActivePoint;
+	extern bool isRoadModified;
 
 	extern std::vector<std::string> _availableRoadProfiles;
 }
@@ -384,6 +385,7 @@ void showObjectProperties()
 
 						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
 						{
+							vbEditor::isRoadModified = true;
 							if (vbEditor::roadActivePoint < roadComponent->getSegments().size() &&
 								vbEditor::roadActivePoint > 0)
 							{
@@ -395,19 +397,31 @@ void showObjectProperties()
 
 						int typeComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].type == RST_LINE ? 0 : 1;
 						const char* typeComboItems[] = { "line", "arc" };
-						ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems));
-						roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
+						if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
+						{
+							vbEditor::isRoadModified = true;
+							roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
+						}
 
 						int interpolationComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation == RI_LIN ? 0 : 1;
 						const char* interpolationComboItems[] = { "lin", "cos" };
-						ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems));
-						roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
+						if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
+						{
+							vbEditor::isRoadModified = true;
+							roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
+						}
 
 						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-						ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f);
+						if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
+						{
+							vbEditor::isRoadModified = true;
+						}
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
-						ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f);
+						if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
+						{
+							vbEditor::isRoadModified = true;
+						}
 
 						ImGui::Separator();
 

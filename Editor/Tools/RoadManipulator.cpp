@@ -218,6 +218,11 @@ namespace RoadManipulator
 				segments[context.activeSegment + 1].r = (beginToEndHalfDistance2 * sign(segments[context.activeSegment + 1].r));
 			}
 		}
+
+		if (io.MouseWheel != 0.0f)
+		{
+			context.isAnyPointModified = true;
+		}
 	}
 
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
@@ -234,6 +239,12 @@ namespace RoadManipulator
 			DrawPoint(position, trans);
 
 			glm::vec3 newPosition = HandleInputForPoint(position, trans, i);
+
+			if (segments[i].begin != newPosition)
+			{
+				context.isAnyPointModified = true;
+			}
+
 			segments[i].begin = newPosition;
 			if (i > 0)
 			{

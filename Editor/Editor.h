@@ -75,6 +75,7 @@ namespace vbEditor
 	void drawMainMenu();
 	void ShowTransformGizmo();
 	void showRoadTools();
+	void updateRoads(float deltaTime);
 	void addSceneObject();
 
 	bool getGUIhasFocus();

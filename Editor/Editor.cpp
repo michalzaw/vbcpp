@@ -493,6 +493,8 @@ namespace vbEditor
 	SceneObject* _selectedSceneObject = nullptr;
 	int roadActiveSegment = 0;
 	int roadActivePoint = 0;
+	bool isRoadModified = false;
+	float roadModificationTimer = 0.0f;
 
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
@@ -960,6 +962,7 @@ namespace vbEditor
 			{
 				accumulator -= TIME_STEP;
 
+				updateRoads(TIME_STEP);
 			}
 
 
@@ -1113,17 +1116,33 @@ namespace vbEditor
 			_selectedSceneObject->getLocalTransformMatrix(),
 			roadComponent->getSegments());
 
-		static float timer = 0.0f;
-		timer += 1.0f / 60.0f;
-
-		if (timer >= 0.2f)
-		{
-			roadComponent->buildModel();
-			timer = 0.0f;
-		}
-
 		roadActiveSegment = RoadManipulator::GetActiveSegment();
 		roadActivePoint = RoadManipulator::GetActivePoint();
+		if (!isRoadModified)
+		{
+			isRoadModified = RoadManipulator::IsModified();
+		}
+	}
+
+	void updateRoads(float deltaTime)
+	{
+		if (_selectedSceneObject != nullptr)
+		{
+			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+
+			if (roadComponent != nullptr)
+			{
+				roadModificationTimer += deltaTime;
+
+				if (roadModificationTimer >= 0.2f && isRoadModified)
+				{
+					roadComponent->buildModel();
+
+					roadModificationTimer = 0.0f;
+					isRoadModified = false;
+				}
+			}
+		}
 	}
 
 	void addSceneObject()
