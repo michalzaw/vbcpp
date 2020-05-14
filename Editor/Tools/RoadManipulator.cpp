@@ -91,7 +91,7 @@ namespace RoadManipulator
 		return context.activePoint;
 	}
 
-	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix)
+	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments)
 	{
 		context.viewMatrix = view;
 		context.projectionMatrix = projection;
@@ -101,6 +101,15 @@ namespace RoadManipulator
 		context.MVP = context.viewProjection * context.modelMatrix;
 
 		context.isAnyPointModified = false;
+
+		if (context.activePoint > segments.size())
+		{
+			context.activePoint = 0;
+		}
+		if (context.activeSegment >= segments.size())
+		{
+			context.activeSegment = 0;
+		}
 	}
 
 	static ImVec2 transformToImGuiScreenSpace(glm::vec4 position)
@@ -227,7 +236,7 @@ namespace RoadManipulator
 
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
 	{
-		ComputeContext(view, projection, matrix);
+		ComputeContext(view, projection, matrix, segments);
 
 		ImGuiIO& io = ImGui::GetIO();
 
