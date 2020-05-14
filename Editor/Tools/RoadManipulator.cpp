@@ -260,6 +260,11 @@ namespace RoadManipulator
 				DrawPoint(position, trans);
 
 				glm::vec3 newPosition = HandleInputForPoint(position, trans, i + 1);
+
+				if (segments[i].end != newPosition)
+				{
+					context.isAnyPointModified = true;
+				}
 				segments[i].end = newPosition;
 			}
 		}
