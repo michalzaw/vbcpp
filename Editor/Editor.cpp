@@ -477,7 +477,8 @@ namespace vbEditor
 	enum ClickMode
 	{
 		CM_PICK_OBJECT,
-		CM_ADD_OBJECT
+		CM_ADD_OBJECT,
+		CM_ROAD_EDIT
 	};
 
 	Window window;
@@ -546,6 +547,15 @@ namespace vbEditor
 	{
 		_selectedSceneObject = object;
 		centerGraphView();
+
+		if (object != nullptr && object->getComponent(CT_ROAD_OBJECT) != nullptr)
+		{
+			_clickMode = CM_ROAD_EDIT;
+		}
+		else
+		{
+			_clickMode = CM_PICK_OBJECT;
+		}
 	}
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
@@ -585,7 +595,26 @@ namespace vbEditor
 					setSelectedSceneObject(newObject);
 				}
 			}
-			else if (_clickMode == CM_PICK_OBJECT)
+			else if (_clickMode == CM_ROAD_EDIT && glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+			{
+				glm::vec3 hitPosition;
+				if (calculateMousePositionInWorldspaceUsingBulletRaycasting(rayStart, rayDir, hitPosition))
+				{
+					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+					if (roadObject != nullptr)
+					{
+						RoadSegment& lastSegment = roadObject->getSegments()[roadObject->getSegments().size() - 1];
+
+						RoadSegment newSegment;
+						newSegment.begin = lastSegment.end;
+						newSegment.end = hitPosition;
+						roadObject->getSegments().push_back(newSegment);
+
+						isRoadModified = true;
+					}
+				}
+			}
+			else if (_clickMode == CM_PICK_OBJECT || _clickMode == CM_ROAD_EDIT)
 			{
 				// collision with render objects
 				SceneObject* selectedObject = nullptr;
@@ -621,7 +650,6 @@ namespace vbEditor
 			{
 				_clickMode = CM_PICK_OBJECT;
 			}
-			std::cout << "AA\n";
 			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
 			glfwSetCursor(window, cursor);
 			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
