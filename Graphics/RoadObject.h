@@ -25,6 +25,9 @@ class RoadObject : public RenderObject
 		void setRoadProfile(RRoadProfile* roadProfile);
 		void setSegments(std::vector<RoadSegment> segments);
 
+		void addPoint(glm::vec3 position);
+		void deletePoint(unsigned int index);
+
 };
 
 

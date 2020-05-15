@@ -237,6 +237,7 @@ void ObjectPropertiesWindow::drawWindow()
 
 namespace vbEditor
 {
+	extern SceneManager* _sceneManager;
 	extern SceneObject* _selectedSceneObject;
 	extern CameraFPS* _camera;
 
@@ -390,6 +391,24 @@ void showObjectProperties()
 								vbEditor::roadActivePoint > 0)
 							{
 								roadComponent->getSegments()[vbEditor::roadActivePoint - 1].end = roadComponent->getSegments()[vbEditor::roadActivePoint].begin;
+							}
+						}
+
+						if (ImGui::Button("Delete point"))
+						{
+							vbEditor::isRoadModified = true;
+							roadComponent->deletePoint(vbEditor::roadActivePoint);
+
+							if (vbEditor::roadActivePoint == roadComponent->getSegments().size() + 1)
+							{
+								--vbEditor::roadActivePoint;
+								--vbEditor::roadActiveSegment;
+							}
+
+							if (roadComponent->getSegments().size() == 0)
+							{
+								vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
+								vbEditor::_selectedSceneObject = nullptr;
 							}
 						}
 

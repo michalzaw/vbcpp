@@ -104,11 +104,11 @@ namespace RoadManipulator
 
 		if (context.activePoint > segments.size())
 		{
-			context.activePoint = 0;
+			context.activePoint = segments.size();
 		}
 		if (context.activeSegment >= segments.size())
 		{
-			context.activeSegment = 0;
+			context.activeSegment = segments.size() - 1;
 		}
 	}
 
