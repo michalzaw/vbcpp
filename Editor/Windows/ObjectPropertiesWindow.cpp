@@ -372,7 +372,7 @@ void showObjectProperties()
 				//}
 				if (ImGui::CollapsingHeader("Road segment", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					if (vbEditor::roadActiveSegment >= 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
+					if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
 					{
 						ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
 
@@ -390,13 +390,13 @@ void showObjectProperties()
 							vbEditor::isRoadModified = true;
 							roadComponent->deletePoint(vbEditor::roadActivePoint);
 
-							if (vbEditor::roadActivePoint == roadComponent->getSegments().size() + 1)
+							if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
 							{
 								--vbEditor::roadActivePoint;
 								--vbEditor::roadActiveSegment;
 							}
 
-							if (roadComponent->getSegments().size() == 0)
+							if (roadComponent->getPoints().size() == 0)
 							{
 								vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
 								vbEditor::_selectedSceneObject = nullptr;
@@ -405,47 +405,50 @@ void showObjectProperties()
 
 						ImGui::Separator();
 
-						int typeComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].type == RST_LINE ? 0 : 1;
-						const char* typeComboItems[] = { "line", "arc" };
-						if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
+						if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0)
 						{
-							vbEditor::isRoadModified = true;
-							roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
-						}
+							int typeComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].type == RST_LINE ? 0 : 1;
+							const char* typeComboItems[] = { "line", "arc" };
+							if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
+							{
+								vbEditor::isRoadModified = true;
+								roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
+							}
 
-						int interpolationComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation == RI_LIN ? 0 : 1;
-						const char* interpolationComboItems[] = { "lin", "cos" };
-						if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
-						{
-							vbEditor::isRoadModified = true;
-							roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
-						}
+							int interpolationComboCurrentItem = roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation == RI_LIN ? 0 : 1;
+							const char* interpolationComboItems[] = { "lin", "cos" };
+							if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
+							{
+								vbEditor::isRoadModified = true;
+								roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
+							}
 
-						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-						if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
-						{
-							vbEditor::isRoadModified = true;
-						}
+							int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
+							if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
+							{
+								vbEditor::isRoadModified = true;
+							}
 
-						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
-						if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
-						{
-							vbEditor::isRoadModified = true;
-						}
+							float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
+							if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
+							{
+								vbEditor::isRoadModified = true;
+							}
 
-						ImGui::Separator();
+							ImGui::Separator();
 
-						static int roadProfilesCurrentItem = 0;
-						std::vector<const char*> roadProfilesComboItems;
-						for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
-						{
-							roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
-						}
-						if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
-						{
-							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
+							static int roadProfilesCurrentItem = 0;
+							std::vector<const char*> roadProfilesComboItems;
+							for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
+							{
+								roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+							}
+							if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
+							{
+								roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
 
-							roadComponent->buildModel(false);
+								roadComponent->buildModel(false);
+							}
 						}
 					}
 				}

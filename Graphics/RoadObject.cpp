@@ -99,13 +99,17 @@ void RoadObject::setSegments(std::vector<RoadSegment> segments)
 void RoadObject::addPoint(glm::vec3 position)
 {
 	_points.push_back(position);
-	_segments.push_back(RoadSegment());
+
+	if (_points.size() > 1)
+	{
+		_segments.push_back(RoadSegment());
+	}
 }
 
 
 void RoadObject::deletePoint(unsigned int index)
 {
-	if (index > _points.size())
+	if (index >= _points.size())
 	{
 		return;
 	}
@@ -113,5 +117,9 @@ void RoadObject::deletePoint(unsigned int index)
 	_points.erase(_points.begin() + index);
 
 	unsigned int segmentIndex = std::max((int)index - 1, 0);
-	_segments.erase(_segments.begin() + segmentIndex);
+
+	if (segmentIndex < _segments.size())
+	{
+		_segments.erase(_segments.begin() + segmentIndex);
+	}
 }

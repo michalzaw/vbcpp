@@ -205,6 +205,9 @@ namespace RoadManipulator
 
 	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
+		if (segments.size() == 0)
+			return;
+
 		ImGuiIO& io = ImGui::GetIO();
 
 		segments[context.activeSegment].r += io.MouseWheel;
