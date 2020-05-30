@@ -80,7 +80,7 @@ struct RoadSegment
 };
 
 
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, std::vector<RoadSegment>& segments, RStaticModel* oldModel = NULL);
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, RStaticModel* oldModel = NULL);
 
 
 #endif // ROADS_H_INCLUDED

@@ -45,7 +45,7 @@ void RoadObject::buildModel(bool reuseExistingModel)
 	RStaticModel* newModel;
 	if (_model == nullptr)
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments);
 	}
 	else if (!reuseExistingModel)
 	{
@@ -54,11 +54,11 @@ void RoadObject::buildModel(bool reuseExistingModel)
 			delete _model;
 		}
 
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments);
 	}
 	else
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _roadProfile->getRoadLanes().size(), _segments, _model);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments, _model);
 	}
 	setModel(newModel);
 }

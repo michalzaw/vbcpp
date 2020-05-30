@@ -24,8 +24,10 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 
 
 // Current stable
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
 {
+	int lanesCount = roadLanes.size();
+
 	std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
 	std::vector<unsigned int>* lanesIndicesArray = new std::vector<unsigned int>[lanesCount];
 	float* t = new float[lanesCount];       // wsp. do obliczania texCoordow
@@ -34,10 +36,13 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
 	for (int k = 0; k < segments.size(); ++k)
 	{
 		// Calculate circle center
-		float x1 = segments[k].begin.x;
-		float x2 = segments[k].end.x;
-		float z1 = segments[k].begin.z;
-		float z2 = segments[k].end.z;
+		glm::vec3 segmentBegin = segments[k].begin;
+		glm::vec3 segmentEnd = segments[k].end;
+
+		float x1 = segmentBegin.x;
+		float x2 = segmentEnd.x;
+		float z1 = segmentBegin.z;
+		float z2 = segmentEnd.z;
 		float q = sqrt((x2 - x1) * (x2 - x1) + (z2 - z1) * (z2 - z1));
 		float x3 = (x1 + x2) / 2;
 		float z3 = (z1 + z2) / 2;
@@ -54,15 +59,15 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
 			center.y = z3 - sqrt(segments[k].r * segments[k].r - (q / 2) * (q / 2)) * (x2 - x1) / q;
 		}
 
-		float angle1 = atan2(segments[k].begin.z - center.y, segments[k].begin.x - center.x);
-		float angle2 = atan2(segments[k].end.z - center.y, segments[k].end.x - center.x);
+		float angle1 = atan2(segmentBegin.z - center.y, segmentBegin.x - center.x);
+		float angle2 = atan2(segmentEnd.z - center.y, segmentEnd.x - center.x);
 
 
 		int pointsCount = segments[k].pointsCount;
 		//float deltaAngle = fabs(angle2 - angle1) / (pointsCount - 1);
 		//float deltaAngle = (angle2 - angle1) / (pointsCount - 1);
-		float deltaAngle = asin(sqrt((segments[k].begin.x - segments[k].end.x) * (segments[k].begin.x - segments[k].end.x) +
-			(segments[k].begin.z - segments[k].end.z) * (segments[k].begin.z - segments[k].end.z)) / 2.0f /
+		float deltaAngle = asin(sqrt((segmentBegin.x - segmentEnd.x) * (segmentBegin.x - segmentEnd.x) +
+			(segmentBegin.z - segmentEnd.z) * (segmentBegin.z - segmentEnd.z)) / 2.0f /
 			fabs(segments[k].r)) * 2.0f / (pointsCount - 1);
 
 		if (segments[k].r < 0)
@@ -115,10 +120,10 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
 				}
 				else if (segments[k].type == RST_LINE)
 				{
-					point.x = segments[k].begin.x + (segments[k].end.x - segments[k].begin.x) * (j / static_cast<float>(pointsCount * 2 - 2));
-					point.y = segments[k].begin.z + (segments[k].end.z - segments[k].begin.z) * (j / static_cast<float>(pointsCount * 2 - 2));
+					point.x = segmentBegin.x + (segmentEnd.x - segmentBegin.x) * (j / static_cast<float>(pointsCount * 2 - 2));
+					point.y = segmentBegin.z + (segmentEnd.z - segmentBegin.z) * (j / static_cast<float>(pointsCount * 2 - 2));
 
-					glm::vec2 d = glm::normalize(glm::vec2(segments[k].end.x - segments[k].begin.x, segments[k].end.z - segments[k].begin.z));
+					glm::vec2 d = glm::normalize(glm::vec2(segmentEnd.x - segmentBegin.x, segmentEnd.z - segmentBegin.z));
 					v = glm::vec2(-d.y, d.x);
 					//std::cout << v.x << " " << v.y << std::endl;
 				}
@@ -132,9 +137,9 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, 
 
 				float y;
 				if (segments[k].interpolation == RI_LIN)
-					y = segments[k].begin.y + (segments[k].end.y - segments[k].begin.y) * (j / static_cast<float>(pointsCount * 2 - 2));
+					y = segmentBegin.y + (segmentEnd.y - segmentBegin.y) * (j / static_cast<float>(pointsCount * 2 - 2));
 				else if (segments[k].interpolation == RI_COS)
-					y = segments[k].begin.y + (segments[k].end.y - segments[k].begin.y) * ((-cosf((j / static_cast<float>(pointsCount * 2 - 1)) * PI) + 1) / 2.0f);
+					y = segmentBegin.y + (segmentEnd.y - segmentBegin.y) * ((-cosf((j / static_cast<float>(pointsCount * 2 - 1)) * PI) + 1) / 2.0f);
 
 				MeshMender::Vertex vertex1;
 				vertex1.pos = glm::vec3(p1.x, y + roadLanes[i].height1, p1.y);
