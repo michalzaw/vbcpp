@@ -1,10 +1,12 @@
 #include "RoadObject.h"
 
+#include <algorithm>
+
 #include "../Utils/Logger.h"
 
 
-RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<RoadSegment>& segments)
-	: _roadProfile(_roadProfile), _segments(segments)
+RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
+	: _roadProfile(_roadProfile), _points(points), _segments(segments)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -45,7 +47,7 @@ void RoadObject::buildModel(bool reuseExistingModel)
 	RStaticModel* newModel;
 	if (_model == nullptr)
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments);
 	}
 	else if (!reuseExistingModel)
 	{
@@ -54,11 +56,11 @@ void RoadObject::buildModel(bool reuseExistingModel)
 			delete _model;
 		}
 
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments);
 	}
 	else
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _segments, _model);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, _model);
 	}
 	setModel(newModel);
 }
@@ -67,6 +69,12 @@ void RoadObject::buildModel(bool reuseExistingModel)
 RRoadProfile* RoadObject::getRoadProfile()
 {
 	return _roadProfile;
+}
+
+
+std::vector<glm::vec3>& RoadObject::getPoints()
+{
+	return _points;
 }
 
 
@@ -90,28 +98,20 @@ void RoadObject::setSegments(std::vector<RoadSegment> segments)
 
 void RoadObject::addPoint(glm::vec3 position)
 {
-
+	_points.push_back(position);
+	_segments.push_back(RoadSegment());
 }
 
 
 void RoadObject::deletePoint(unsigned int index)
 {
-	if (index > _segments.size())
+	if (index > _points.size())
 	{
 		return;
 	}
 
-	if (index == 0)
-	{
-		_segments.erase(_segments.begin());
-	}
-	else if (index == _segments.size())
-	{
-		_segments.erase(_segments.end() - 1);
-	}
-	else
-	{
-		_segments[index - 1].end = _segments[index].end;
-		_segments.erase(_segments.begin() + index);
-	}
+	_points.erase(_points.begin() + index);
+
+	unsigned int segmentIndex = std::max((int)index - 1, 0);
+	_segments.erase(_segments.begin() + segmentIndex);
 }

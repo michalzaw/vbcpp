@@ -55,6 +55,7 @@ class SceneLoader
 		void loadObject(tinyxml2::XMLElement* );
 		void loadRoads(tinyxml2::XMLElement* );
 		void loadRoad(tinyxml2::XMLElement*);
+		void loadRoadV2(tinyxml2::XMLElement*);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);

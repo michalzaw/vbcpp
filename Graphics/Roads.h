@@ -68,19 +68,17 @@ struct RoadSegment
 {
     RoadSegmetType type;
     float r;
-    glm::vec3 begin;
-    glm::vec3 end;
     int pointsCount;
     RoadInterpolation interpolation;
 
     RoadSegment()
-        : type(RST_LINE), r(0), begin(0.0f, 0.0f, 0.0f), end(0.0f, 0.0f, 0.0f), pointsCount(10), interpolation(RI_LIN)
+        : type(RST_LINE), r(0), pointsCount(10), interpolation(RI_LIN)
     {}
 
 };
 
 
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, RStaticModel* oldModel = NULL);
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RStaticModel* oldModel = NULL);
 
 
 #endif // ROADS_H_INCLUDED

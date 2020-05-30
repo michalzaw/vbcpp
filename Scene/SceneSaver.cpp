@@ -162,14 +162,21 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 		roadElement->SetAttribute("name", sceneObject->getName().c_str());
 		roadElement->SetAttribute("profile", profile->getName().c_str());
 
+		for (const glm::vec3& point : roadObject->getPoints())
+		{
+			XMLElement* pointElement = doc.NewElement("Point");
+
+			pointElement->SetText(vec3ToString(point).c_str());
+
+			roadElement->InsertEndChild(pointElement);
+		}
+
 		for (const RoadSegment& segment : roadObject->getSegments())
 		{
 			XMLElement* segmentElement = doc.NewElement("Segment");
 
 			segmentElement->SetAttribute("type", segment.type == RST_LINE ? "line" : "arc");
 			segmentElement->SetAttribute("radius", segment.r);
-			segmentElement->SetAttribute("beginPoint", vec3ToString(segment.begin).c_str());
-			segmentElement->SetAttribute("endPoint", vec3ToString(segment.end).c_str());
 			segmentElement->SetAttribute("points", segment.pointsCount);
 			segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
 
@@ -217,6 +224,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	rootNode->InsertEndChild(objectsElement);
 
 	XMLElement* roadsElement = doc.NewElement("Roads");
+	roadsElement->SetAttribute("version", "2");
 	rootNode->InsertEndChild(roadsElement);
 	
 	saveDescription(descriptionElement, sceneDescription);

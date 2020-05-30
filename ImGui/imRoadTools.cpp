@@ -1941,7 +1941,7 @@ namespace ImRoadTools
 
 		for (unsigned int i = 0; i < segments.size(); ++i)
 		{
-			vec_t pos1 = { segments[i].begin.x, segments[i].begin.y , segments[i].begin.z, 1.0f };
+			/*vec_t pos1 = { segments[i].begin.x, segments[i].begin.y , segments[i].begin.z, 1.0f };
 			ImVec2 worldBound1 = worldToPos(pos1, gContext.mMVP);
 
 			drawList->AddCircleFilled(worldBound1, 10.0f, 0xFF000000);
@@ -1953,7 +1953,7 @@ namespace ImRoadTools
 			drawList->AddCircleFilled(worldBound2, 10.0f, 0xFF000000);
 			drawList->AddCircleFilled(worldBound2, 7.0f, 0xFFFFFF00);
 
-			drawList->AddLine(worldBound1, worldBound2, 0xFFFFFF00);
+			drawList->AddLine(worldBound1, worldBound2, 0xFFFFFF00);*/
 		}
 
 	}

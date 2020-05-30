@@ -11,15 +11,17 @@ class RoadObject : public RenderObject
 {
 	private:
 		RRoadProfile* _roadProfile;
+		std::vector<glm::vec3> _points;
 		std::vector<RoadSegment> _segments;
 
 	public:
-		RoadObject(RRoadProfile*_roadProfile, std::vector<RoadSegment>& segments);
+		RoadObject(RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments);
 		virtual ~RoadObject();
 
 		void buildModel(bool reuseExistingModel = true);
 
 		RRoadProfile* getRoadProfile();
+		std::vector<glm::vec3>& getPoints();
 		std::vector<RoadSegment>& getSegments();
 
 		void setRoadProfile(RRoadProfile* roadProfile);

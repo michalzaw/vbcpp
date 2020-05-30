@@ -2,6 +2,8 @@
 
 #include "../Game/GameConfig.h"
 
+#include "../Utils/Logger.h"
+
 
 glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
 {
@@ -24,8 +26,14 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 
 
 // Current stable
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
 {
+	if (points.size() != segments.size() + 1)
+	{
+		Logger::error("Invalid number of segments or number of points!");
+		return nullptr;
+	}
+
 	int lanesCount = roadLanes.size();
 
 	std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
@@ -36,8 +44,8 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<Road
 	for (int k = 0; k < segments.size(); ++k)
 	{
 		// Calculate circle center
-		glm::vec3 segmentBegin = segments[k].begin;
-		glm::vec3 segmentEnd = segments[k].end;
+		glm::vec3 segmentBegin = points[k];
+		glm::vec3 segmentEnd = points[k + 1];
 
 		float x1 = segmentBegin.x;
 		float x2 = segmentEnd.x;

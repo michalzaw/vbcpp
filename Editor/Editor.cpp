@@ -603,12 +603,7 @@ namespace vbEditor
 					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 					if (roadObject != nullptr)
 					{
-						RoadSegment& lastSegment = roadObject->getSegments()[roadObject->getSegments().size() - 1];
-
-						RoadSegment newSegment;
-						newSegment.begin = lastSegment.end;
-						newSegment.end = hitPosition;
-						roadObject->getSegments().push_back(newSegment);
+						roadObject->addPoint(hitPosition);
 
 						isRoadModified = true;
 					}
@@ -1142,6 +1137,7 @@ namespace vbEditor
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
+			roadComponent->getPoints(),
 			roadComponent->getSegments());
 
 		roadActiveSegment = RoadManipulator::GetActiveSegment();

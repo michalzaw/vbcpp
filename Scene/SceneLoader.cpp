@@ -283,10 +283,17 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 {
 	//XMLElement* roads = sceneElement->FirstChildElement("Roads");
 
+	int version = XmlUtils::getAttributeIntOptional(roadsElement, "version", 1);
+
 	XMLElement* roadElement = roadsElement->FirstChildElement("Road");
 
 	if (roadElement)
-		loadRoad(roadElement);
+	{
+		if (version == 1)
+			loadRoad(roadElement);
+		else if (version == 2)
+			loadRoadV2(roadElement);
+	}
 
 	/*
 	while (roadElement != nullptr)
@@ -361,7 +368,10 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
 
+		std::vector<glm::vec3> points;
 		std::vector<RoadSegment> segments;
+
+		glm::vec3 lastPoint;
 
 		XMLElement* segmentElement = roadElement->FirstChildElement("Segment");
 		while (segmentElement != nullptr)
@@ -374,8 +384,10 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 			else if (strcmp(type, "line"))
 				segment.type = RST_LINE;
 			segment.r = toFloat(segmentElement->Attribute("radius"));
-			segment.begin = XMLstringToVec3(segmentElement->Attribute("beginPoint"));
-			segment.end = XMLstringToVec3(segmentElement->Attribute("endPoint"));
+
+			points.push_back(XMLstringToVec3(segmentElement->Attribute("beginPoint")));
+			lastPoint = XMLstringToVec3(segmentElement->Attribute("endPoint"));
+
 			segment.pointsCount = toInt(segmentElement->Attribute("points"));
 			const char* interpolation = segmentElement->Attribute("interpolation");
 			if (strcmp(interpolation, "lin") == 0)
@@ -387,6 +399,9 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 
 			segmentElement = segmentElement->NextSiblingElement("Segment");
 		}
+		// add point from last segment
+		points.push_back(lastPoint);
+
 		//std::cout << profiles[profileName].size() << std::endl;
 		//std::cout << segments.size() << std::endl;
 		// create road
@@ -395,10 +410,74 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, segments, roadSceneObject);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
+		roadMesh->setRestitution(0.9f);
+		roadMesh->getRigidBody()->setFriction(1.0f);
+		//terrainMesh->getRigidBody()->setFriction(1.5f);
+		roadSceneObject->addComponent(roadMesh);
+
+		roadElement = roadElement->NextSiblingElement("Road");
+	}
+}
+
+void SceneLoader::loadRoadV2(XMLElement* roadElement)
+{
+	while (roadElement)
+	{
+		std::string name = roadElement->Attribute("name");
+		std::string profileName = roadElement->Attribute("profile");
+
+		Logger::info("*** ROAD ***");
+		Logger::info("profile name: " + profileName);
+
+		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+
+		std::vector<glm::vec3> points;
+		std::vector<RoadSegment> segments;
+
+
+		XMLElement* pointElement = roadElement->FirstChildElement("Point");
+		while (pointElement != nullptr)
+		{
+			points.push_back(XMLstringToVec3(pointElement->GetText()));
+
+			pointElement = pointElement->NextSiblingElement("Point");
+		}
+
+
+		XMLElement* segmentElement = roadElement->FirstChildElement("Segment");
+		while (segmentElement != nullptr)
+		{
+			RoadSegment segment;
+
+			const char* type = segmentElement->Attribute("type");
+			if (strcmp(type, "arc") == 0)
+				segment.type = RST_ARC;
+			else if (strcmp(type, "line"))
+				segment.type = RST_LINE;
+			segment.r = toFloat(segmentElement->Attribute("radius"));
+
+			segment.pointsCount = toInt(segmentElement->Attribute("points"));
+			const char* interpolation = segmentElement->Attribute("interpolation");
+			if (strcmp(interpolation, "lin") == 0)
+				segment.interpolation = RI_LIN;
+			else if (strcmp(interpolation, "cos") == 0)
+				segment.interpolation = RI_COS;
+
+			segments.push_back(segment);
+
+			segmentElement = segmentElement->NextSiblingElement("Segment");
+		}
+
+		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
+		RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, roadSceneObject);
+		roadRenderObject->setIsCastShadows(false);
+
+		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
 		roadMesh->getRigidBody()->setFriction(1.0f);
 		//terrainMesh->getRigidBody()->setFriction(1.5f);

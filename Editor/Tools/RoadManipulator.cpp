@@ -91,7 +91,7 @@ namespace RoadManipulator
 		return context.activePoint;
 	}
 
-	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments)
+	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
 		context.viewMatrix = view;
 		context.projectionMatrix = projection;
@@ -102,9 +102,9 @@ namespace RoadManipulator
 
 		context.isAnyPointModified = false;
 
-		if (context.activePoint > segments.size())
+		if (context.activePoint >= points.size())
 		{
-			context.activePoint = segments.size();
+			context.activePoint = points.size() - 1;
 		}
 		if (context.activeSegment >= segments.size())
 		{
@@ -203,13 +203,16 @@ namespace RoadManipulator
 		return newPosition;
 	}
 
-	void HandleMouseWheelInput(std::vector<RoadSegment>& segments)
+	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
 		ImGuiIO& io = ImGui::GetIO();
 
 		segments[context.activeSegment].r += io.MouseWheel;
 
-		float beginToEndHalfDistance1 = glm::length(segments[context.activeSegment].end - segments[context.activeSegment].begin) / 2.0f;
+		glm::vec3 segmentBegin = points[context.activeSegment];
+		glm::vec3 segmentEnd = points[context.activeSegment + 1];
+
+		float beginToEndHalfDistance1 = glm::length(segmentEnd - segmentBegin) / 2.0f;
 		if (abs(segments[context.activeSegment].r) < beginToEndHalfDistance1)
 		{
 			segments[context.activeSegment].r = beginToEndHalfDistance1 * sign(segments[context.activeSegment].r);
@@ -221,9 +224,15 @@ namespace RoadManipulator
 		}
 		if (context.activeSegment < segments.size() - 1)
 		{
-			float beginToEndHalfDistance2 = glm::length(segments[context.activeSegment + 1].end - segments[context.activeSegment + 1].begin) / 2.0f;
+			segmentBegin = points[context.activeSegment + 1];
+			segmentEnd = points[context.activeSegment + 2];
+
+			float beginToEndHalfDistance2 = glm::length(segmentEnd  - segmentBegin) / 2.0f;
 			if (abs(segments[context.activeSegment + 1].r) < beginToEndHalfDistance2)
 			{
+				int a = 1;
+				a = a + 1;
+
 				segments[context.activeSegment + 1].r = (beginToEndHalfDistance2 * sign(segments[context.activeSegment + 1].r));
 			}
 		}
@@ -234,51 +243,30 @@ namespace RoadManipulator
 		}
 	}
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<RoadSegment>& segments, float* deltaMatrix)
+	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, float* deltaMatrix)
 	{
-		ComputeContext(view, projection, matrix, segments);
+		ComputeContext(view, projection, matrix, points, segments);
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		for (unsigned int i = 0; i < segments.size(); ++i)
+		for (unsigned int i = 0; i < points.size(); ++i)
 		{
-			glm::vec4 position(segments[i].begin.x, segments[i].begin.y, segments[i].begin.z, 1.0f);
+			glm::vec4 position(points[i].x, points[i].y, points[i].z, 1.0f);
 
 			ImVec2 trans;
 			DrawPoint(position, trans);
 
 			glm::vec3 newPosition = HandleInputForPoint(position, trans, i);
 
-			if (segments[i].begin != newPosition)
+			if (points[i] != newPosition)
 			{
 				context.isAnyPointModified = true;
 			}
 
-			segments[i].begin = newPosition;
-			if (i > 0)
-			{
-				segments[i - 1].end = newPosition;
-			}
-
-			// last segment - draw end point
-			if (i == segments.size() - 1)
-			{
-				glm::vec4 position(segments[i].end.x, segments[i].end.y, segments[i].end.z, 1.0f);
-
-				ImVec2 trans;
-				DrawPoint(position, trans);
-
-				glm::vec3 newPosition = HandleInputForPoint(position, trans, i + 1);
-
-				if (segments[i].end != newPosition)
-				{
-					context.isAnyPointModified = true;
-				}
-				segments[i].end = newPosition;
-			}
+			points[i] = newPosition;
 		}
 
-		HandleMouseWheelInput(segments);
+		HandleMouseWheelInput(points, segments);
 	}
 
 };

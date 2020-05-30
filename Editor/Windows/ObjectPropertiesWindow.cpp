@@ -296,80 +296,80 @@ void showObjectProperties()
 			RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 			if (roadComponent)
 			{
-				if (ImGui::CollapsingHeader("Road", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					// left
-					static float actualWinSize = Renderer::getInstance().getWindowDimensions().x;
-					static int selected = 0;
-					ImGui::BeginChild("left pane", ImVec2((ImGui::GetWindowSize().x * (0.4f)), 90), true);
+				//if (ImGui::CollapsingHeader("Road", ImGuiTreeNodeFlags_DefaultOpen))
+				//{
+				//	// left
+				//	static float actualWinSize = Renderer::getInstance().getWindowDimensions().x;
+				//	static int selected = 0;
+				//	ImGui::BeginChild("left pane", ImVec2((ImGui::GetWindowSize().x * (0.4f)), 90), true);
 
-					ImVec2 range = ImVec2(0.0f, 0.0f);
+				//	ImVec2 range = ImVec2(0.0f, 0.0f);
 
-					RRoadProfile* profile = roadComponent->getRoadProfile();
-					std::vector<RoadLane> lanes = profile->getRoadLanes();
+				//	RRoadProfile* profile = roadComponent->getRoadProfile();
+				//	std::vector<RoadLane> lanes = profile->getRoadLanes();
 
-					for (int i = 0; i < lanes.size(); i++)
-					{
-						char label[128];
-						sprintf(label, "%d: %s##%d", i, lanes[i].material.name.c_str(), i);
-						//sprintf(label, "MyObject %d", i);
-						if (ImGui::Selectable(label, selected == i))
-							selected = i;
-					}
-					ImGui::EndChild();
-					ImGui::SameLine();
+				//	for (int i = 0; i < lanes.size(); i++)
+				//	{
+				//		char label[128];
+				//		sprintf(label, "%d: %s##%d", i, lanes[i].material.name.c_str(), i);
+				//		//sprintf(label, "MyObject %d", i);
+				//		if (ImGui::Selectable(label, selected == i))
+				//			selected = i;
+				//	}
+				//	ImGui::EndChild();
+				//	ImGui::SameLine();
 
-					//std::string pos = std::string("X: ");
-					ImGui::Text("X: %f, Y: %f", lanes[selected].r1, lanes[selected].r2);
-					//ImGui::LabelText(pos.c_str());
+				//	//std::string pos = std::string("X: ");
+				//	ImGui::Text("X: %f, Y: %f", lanes[selected].r1, lanes[selected].r2);
+				//	//ImGui::LabelText(pos.c_str());
 
-					//static float values[4] = { 0.0, 1.0, 0.0, -1.0 };
-					
-					static std::vector<ImVec2> values = { ImVec2(-5.0f, -5.0f), ImVec2(0.0f, 0.0f) }; //, ImVec2(0.0f, 0.0f), ImVec2(0.5f, 0.5f)};
-				
-					static int values_offset = 0;
-					static double refresh_time = 0.0;
-					/*
-						static float phase = 0.0f;
-						values[values_offset] = cosf(phase);
-						values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
-						phase += 0.10f*values_offset;
-						refresh_time += 1.0f / 60.0f;
-					*/
-					
-					//ImGui::PlotLines("Lines", values, IM_ARRAYSIZE(values), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0, 100));
+				//	//static float values[4] = { 0.0, 1.0, 0.0, -1.0 };
+				//	
+				//	static std::vector<ImVec2> values = { ImVec2(-5.0f, -5.0f), ImVec2(0.0f, 0.0f) }; //, ImVec2(0.0f, 0.0f), ImVec2(0.5f, 0.5f)};
+				//
+				//	static int values_offset = 0;
+				//	static double refresh_time = 0.0;
+				//	/*
+				//		static float phase = 0.0f;
+				//		values[values_offset] = cosf(phase);
+				//		values_offset = (values_offset + 1) % IM_ARRAYSIZE(values);
+				//		phase += 0.10f*values_offset;
+				//		refresh_time += 1.0f / 60.0f;
+				//	*/
+				//	
+				//	//ImGui::PlotLines("Lines", values, IM_ARRAYSIZE(values), values_offset, "avg 0.0", -1.0f, 1.0f, ImVec2(0, 100));
 
-					ImGui::RoadProfileGraph("Profile", values, -5.0f, 5.0f, ImVec2(150, 150));
+				//	ImGui::RoadProfileGraph("Profile", values, -5.0f, 5.0f, ImVec2(150, 150));
 
-					std::vector<RoadSegment> segments = roadComponent->getSegments();
-					RoadSegment segment = segments[0];
-					//segment.begin = glm::vec3(0.0f, 0.0, 0.0f);
+				//	std::vector<RoadSegment> segments = roadComponent->getSegments();
+				//	RoadSegment segment = segments[0];
+				//	//segment.begin = glm::vec3(0.0f, 0.0, 0.0f);
 
-					glm::vec3 pos = segment.begin;
-					ImGui::Text("Road Pos: %f, %f, %f", pos.x, pos.y, pos.z);
+				//	glm::vec3 pos = segment.begin;
+				//	ImGui::Text("Road Pos: %f, %f, %f", pos.x, pos.y, pos.z);
 
-					//ImColor color(ImGui::GetStyle().Colors[ImGuiCol_PlotLines]);
+				//	//ImColor color(ImGui::GetStyle().Colors[ImGuiCol_PlotLines]);
 
-					//glm::vec4 transPos = vbEditor::_camera->getProjectionMatrix() * vbEditor::_camera->getViewMatrix() * vbEditor::_selectedSceneObject->getGlobalTransformMatrix() * glm::vec4(pos, 1.0);
+				//	//glm::vec4 transPos = vbEditor::_camera->getProjectionMatrix() * vbEditor::_camera->getViewMatrix() * vbEditor::_selectedSceneObject->getGlobalTransformMatrix() * glm::vec4(pos, 1.0);
 
-					//window->DrawList->AddCircleFilled(ImVec2(transPos.x, transPos.y), 14.0f, color);
+				//	//window->DrawList->AddCircleFilled(ImVec2(transPos.x, transPos.y), 14.0f, color);
 
-					if (ImGui::Button("Update road"))
-					{
-						RoadSegment seg;
-						seg.begin = glm::vec3(50, 20, 100);
-						seg.end = segment.end;
-						seg.interpolation = segment.interpolation;
-						seg.pointsCount = segment.pointsCount;
-						seg.r = segment.r;
-						seg.type = segment.type;
-						segments[0] = seg;
+				//	if (ImGui::Button("Update road"))
+				//	{
+				//		RoadSegment seg;
+				//		seg.begin = glm::vec3(50, 20, 100);
+				//		seg.end = segment.end;
+				//		seg.interpolation = segment.interpolation;
+				//		seg.pointsCount = segment.pointsCount;
+				//		seg.r = segment.r;
+				//		seg.type = segment.type;
+				//		segments[0] = seg;
 
-						roadComponent->setSegments(segments);
+				//		roadComponent->setSegments(segments);
 
-						roadComponent->buildModel();
-					}
-				}
+				//		roadComponent->buildModel();
+				//	}
+				//}
 				if (ImGui::CollapsingHeader("Road segment", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					if (vbEditor::roadActiveSegment >= 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
@@ -378,20 +378,11 @@ void showObjectProperties()
 
 						ImGui::Separator();
 
-						float* pointPosition;
-						if (vbEditor::roadActivePoint < roadComponent->getSegments().size())
-							pointPosition = glm::value_ptr(roadComponent->getSegments()[vbEditor::roadActivePoint].begin);
-						else
-							pointPosition = glm::value_ptr(roadComponent->getSegments()[vbEditor::roadActivePoint - 1].end);
+						float* pointPosition = glm::value_ptr(roadComponent->getPoints()[vbEditor::roadActivePoint]);
 
 						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
 						{
 							vbEditor::isRoadModified = true;
-							if (vbEditor::roadActivePoint < roadComponent->getSegments().size() &&
-								vbEditor::roadActivePoint > 0)
-							{
-								roadComponent->getSegments()[vbEditor::roadActivePoint - 1].end = roadComponent->getSegments()[vbEditor::roadActivePoint].begin;
-							}
 						}
 
 						if (ImGui::Button("Delete point"))
