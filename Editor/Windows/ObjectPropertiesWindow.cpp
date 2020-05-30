@@ -439,11 +439,14 @@ void showObjectProperties()
 
 					ImGui::Separator();
 
-					static int roadProfilesCurrentItem = 0;
+					int roadProfilesCurrentItem = 0;
 					std::vector<const char*> roadProfilesComboItems;
 					for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
 					{
 						roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+
+						if (vbEditor::_availableRoadProfiles[i] == roadComponent->getRoadProfile()->getName())
+							roadProfilesCurrentItem = i;
 					}
 					if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
 					{
