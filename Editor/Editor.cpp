@@ -506,6 +506,7 @@ namespace vbEditor
 	static bool _showMapInfoWindow = false;
 	static bool _saveMap = false;
 	static bool _addSceneObject = false;
+	static bool _addRoadDialogWindow = false;
 
 
 	std::string windowTitle = "VBCPP - World Editor";
@@ -551,10 +552,6 @@ namespace vbEditor
 		if (object != nullptr && object->getComponent(CT_ROAD_OBJECT) != nullptr)
 		{
 			_clickMode = CM_ROAD_EDIT;
-		}
-		else
-		{
-			_clickMode = CM_PICK_OBJECT;
 		}
 	}
 
@@ -788,6 +785,8 @@ namespace vbEditor
 			{
 				ImGui::MenuItem("Map Description", NULL, &_showMapInfoWindow);
 				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
+				ImGui::Separator();
+				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::EndMenu();
 			}
 
@@ -850,6 +849,26 @@ namespace vbEditor
 				
 				_clickMode = CM_ADD_OBJECT;
 				_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
+			}
+		}
+
+		static int currenProfiletSelection = 0;
+		if (_addRoadDialogWindow)
+		{
+			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection))
+			{
+				_addRoadDialogWindow = false;
+
+				_clickMode = CM_ROAD_EDIT;
+
+				std::string profileName = _availableRoadProfiles[currenProfiletSelection];
+				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), roadSceneObject);
+				roadRenderObject->setIsCastShadows(false);
+
+				setSelectedSceneObject(roadSceneObject);
 			}
 		}
 

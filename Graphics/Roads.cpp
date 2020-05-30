@@ -28,12 +28,6 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 // Current stable
 RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
 {
-	if (points.size() != segments.size() + 1)
-	{
-		Logger::error("Invalid number of segments or number of points!");
-		return nullptr;
-	}
-
 	int lanesCount = roadLanes.size();
 
 	std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
