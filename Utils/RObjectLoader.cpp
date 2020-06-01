@@ -59,6 +59,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		{
 			loadEnvironmentCaptureComponent(componentElement, object, componentIndex);
 		}
+		else if (componentType == "crossroad")
+		{
+			loadCrossroadComponent(componentElement, object, componentIndex);
+		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
 	}
@@ -136,6 +140,23 @@ void RObjectLoader::loadBusStopComponent(tinyxml2::XMLElement* componentElement,
 void RObjectLoader::loadEnvironmentCaptureComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["textures"] = componentElement->Attribute("textures");
+}
+
+
+void RObjectLoader::loadCrossroadComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	int index = 0;
+
+	XMLElement* connectionPointElement = componentElement->FirstChildElement("ConnectionPoint");
+	while (connectionPointElement != nullptr)
+	{
+		object->getComponents()[componentIndex]["position#" + toString(index)] = connectionPointElement->Attribute("position");
+		object->getComponents()[componentIndex]["direction#" + toString(index)] = connectionPointElement->Attribute("direction");
+
+		++index;
+		connectionPointElement = connectionPointElement->NextSiblingElement("ConnectionPoint");
+	}
+	object->getComponents()[componentIndex]["pointsCount"] = toString(index);
 }
 
 
@@ -302,6 +323,20 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(&t[0]);
 			EnvironmentCaptureComponent* component = GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap);
 			sceneObject->addComponent(component);
+		}
+		else if (componentType == "crossroad")
+		{
+			int pointsCount = toInt(components[i]["pointsCount"]);
+			std::vector<CrossroadConnectionPoint> connectionPoints(pointsCount);
+
+			for (int j = 0; j < pointsCount; ++j)
+			{
+				connectionPoints[j].position = XMLstringToVec3(components[i]["position#" + toString(j)].c_str());
+				connectionPoints[j].direction = XMLstringToVec3(components[i]["direction#" + toString(j)].c_str());
+			}
+
+			CrossroadComponent* crossroad = GraphicsManager::getInstance().addCrossRoad(connectionPoints);
+			sceneObject->addComponent(crossroad);
 		}
 	}
 

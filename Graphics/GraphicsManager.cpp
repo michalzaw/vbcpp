@@ -233,6 +233,16 @@ Sky* GraphicsManager::addSky(RTexture* texture, SceneObject* owner)
 }
 
 
+CrossroadComponent* GraphicsManager::addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints)
+{
+	CrossroadComponent* crossroadComponent = new CrossroadComponent(connectionPoints);
+
+	_crossroadComponents.push_back(crossroadComponent);
+
+	return crossroadComponent;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -379,6 +389,22 @@ void GraphicsManager::removeSky(Sky* sky)
 	
 	delete _sky;
 	_sky = NULL;
+}
+
+
+void GraphicsManager::removeCrossroadComponent(CrossroadComponent* crossroadComponent)
+{
+	for (std::list<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
+	{
+		if (*i == crossroadComponent)
+		{
+			i = _crossroadComponents.erase(i);
+
+			delete crossroadComponent;
+
+			return;
+		}
+	}
 }
 
 

@@ -21,6 +21,7 @@
 #include "MirrorComponent.h"
 #include "Sky.h"
 #include "DisplayComponent.h"
+#include "CrossroadComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -48,6 +49,7 @@ class GraphicsManager
         std::vector<MirrorComponent*> _mirrorComponents;
         std::list<ClickableObject*> _clickableObjects;
 		std::list<DisplayComponent*>_displayComponents;
+		std::list<CrossroadComponent*> _crossroadComponents;
 
 		Sky*						_sky;
 
@@ -92,6 +94,7 @@ class GraphicsManager
         ClickableObject*addClickableObject();
 		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
+		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -106,6 +109,7 @@ class GraphicsManager
         void removeClickableObject(ClickableObject* clickableObject);
 		void removeDisplayComponent(DisplayComponent* displayComponent);
 		void removeSky(Sky* sky);
+		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
 
 
         void setCurrentCamera(CameraStatic* camera);

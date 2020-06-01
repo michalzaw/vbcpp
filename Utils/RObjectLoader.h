@@ -29,6 +29,7 @@ class RObjectLoader
 		static void loadSoundComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadBusStopComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadEnvironmentCaptureComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
+		static void loadCrossroadComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 	
 	public:
 		static RObject* loadObject(std::string dirPath);
