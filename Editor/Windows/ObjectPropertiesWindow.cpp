@@ -1,5 +1,7 @@
 #include "ObjectPropertiesWindow.h"
 
+#include <numeric>
+
 #include "../../ImGui/imGizmo.h"
 #include "glm/gtc/type_ptr.hpp"
 
@@ -454,6 +456,69 @@ void showObjectProperties()
 
 						roadComponent->buildModel(false);
 					}
+
+					ImGui::Separator();
+
+					//ImGui::Text("Connections");
+
+
+					std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+					CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
+
+					int crossroadCurrentItems[2] = { 0, 0 };
+					int connectionPointCurrentItems[2] = { roadComponent->getConnectionPoint(0).index, roadComponent->getConnectionPoint(1).index };
+
+					std::string crossroadsComboItems{};
+					crossroadsComboItems += " ";
+					crossroadsComboItems += '\0';
+
+					for (int i = 0; i < availableCrossroads.size(); ++i)
+					{
+						crossroadsComboItems += availableCrossroads[i]->getSceneObject()->getName() + '\0';
+
+						for (int j = 0; j < 2; ++j)
+						{
+							if (availableCrossroads[i] == connectedCrossroads[j])
+							{
+								crossroadCurrentItems[j] = i + 1;
+							}
+						}
+					}
+
+					for (int i = 0; i < 2; ++i)
+					{
+						ImGui::Text("Connection: %d", i);
+
+						ImGui::PushID(i);
+						if (ImGui::Combo("Crossroad", &crossroadCurrentItems[i], crossroadsComboItems.c_str()))
+						{
+							if (crossroadCurrentItems[i] == 0)
+							{
+								roadComponent->setConnectionPoint(i, nullptr);
+							}
+							else
+							{
+								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
+							}
+						}
+
+						if (connectedCrossroads[i] != nullptr)
+						{
+							std::string connectionPointComboItems{};
+							for (int j = 0; j < connectedCrossroads[i]->getConnectionsCount(); ++j)
+							{
+								connectionPointComboItems += toString(j) + '\0';
+							}
+
+							if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
+							{
+								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
+							}
+						}
+						ImGui::PopID();
+					}
+
+
 				}
 			}
 		}

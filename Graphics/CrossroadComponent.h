@@ -39,6 +39,24 @@ class CrossroadComponent : public Component
 
 		}
 
+		void connectRoad(int connectionPointIndex, RoadObject* roadObject)
+		{
+			if (connectionPointIndex >= _connectionPoints.size())
+				return;
+
+			_connectionPoints[connectionPointIndex].connectedRoad = roadObject;
+		}
+
+		int getConnectionsCount()
+		{
+			return _connectionPoints.size();
+		}
+
+		CrossroadConnectionPoint& getConnectionPoint(int index)
+		{
+			return _connectionPoints[index];
+		}
+
 };
 
 

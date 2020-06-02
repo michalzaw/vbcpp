@@ -49,7 +49,7 @@ class GraphicsManager
         std::vector<MirrorComponent*> _mirrorComponents;
         std::list<ClickableObject*> _clickableObjects;
 		std::list<DisplayComponent*>_displayComponents;
-		std::list<CrossroadComponent*> _crossroadComponents;
+		std::vector<CrossroadComponent*> _crossroadComponents;
 
 		Sky*						_sky;
 
@@ -126,6 +126,7 @@ class GraphicsManager
 
 
         std::list<RenderObject*>& getRenderObjects();
+		std::vector<CrossroadComponent*>& getCrossroadComponents();
 
 		Sky* getSky();
 

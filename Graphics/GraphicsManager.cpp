@@ -394,7 +394,7 @@ void GraphicsManager::removeSky(Sky* sky)
 
 void GraphicsManager::removeCrossroadComponent(CrossroadComponent* crossroadComponent)
 {
-	for (std::list<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
+	for (std::vector<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
 	{
 		if (*i == crossroadComponent)
 		{
@@ -460,6 +460,12 @@ float GraphicsManager::getWindValue()
 std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 {
     return _renderObjects;
+}
+
+
+std::vector<CrossroadComponent*>& GraphicsManager::getCrossroadComponents()
+{
+	return _crossroadComponents;
 }
 
 

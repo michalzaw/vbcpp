@@ -2,11 +2,15 @@
 
 #include <algorithm>
 
+#include "CrossroadComponent.h"
+
+#include "../Scene/SceneObject.h"
+
 #include "../Utils/Logger.h"
 
 
 RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
-	: _roadProfile(_roadProfile), _points(points), _segments(segments)
+	: _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -122,4 +126,29 @@ void RoadObject::deletePoint(unsigned int index)
 	{
 		_segments.erase(_segments.begin() + segmentIndex);
 	}
+}
+
+
+void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComponent, int indexInCrossroad)
+{
+	if (index >= 2)
+		return;
+
+	if (crossroadComponent != nullptr)
+	{
+		crossroadComponent->connectRoad(indexInCrossroad, this);
+	}
+	else if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		_connectionPoints[index].crossroadComponent->connectRoad(indexInCrossroad, nullptr);
+	}
+
+	_connectionPoints[index].crossroadComponent = crossroadComponent;
+	_connectionPoints[index].index = indexInCrossroad;
+}
+
+
+RoadConnectionPoint& RoadObject::getConnectionPoint(int index)
+{
+	return _connectionPoints[index];
 }
