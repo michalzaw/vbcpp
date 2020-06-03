@@ -67,6 +67,7 @@ class Editor
 
 namespace vbEditor
 {
+	void setSelectedSceneObject(SceneObject* object);
 	bool createWindow();
 	void initializeEngineSubsystems();
 	void clearScene();

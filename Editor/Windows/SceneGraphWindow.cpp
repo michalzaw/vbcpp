@@ -1,5 +1,7 @@
 #include "SceneGraphWindow.h"
 
+#include "../Editor.h"
+
 
 SceneGraphWindow::SceneGraphWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject)
     : EditorWindow(sceneManager, selectedSceneObject),
@@ -146,7 +148,8 @@ namespace vbEditor {
 
 		if (ImGui::IsItemClicked())
 		{
-			vbEditor::_selectedSceneObject = object;
+			vbEditor::setSelectedSceneObject(object);
+			_centerGraph = false;
 			nodeClicked = nodeNumber;
 		}
 
