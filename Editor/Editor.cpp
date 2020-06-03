@@ -496,6 +496,7 @@ namespace vbEditor
 	int roadActivePoint = 0;
 	bool isRoadModified = false;
 	float roadModificationTimer = 0.0f;
+	std::vector<RoadObject*> roadsToUpdate;
 
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
@@ -552,6 +553,28 @@ namespace vbEditor
 		if (object != nullptr && object->getComponent(CT_ROAD_OBJECT) != nullptr)
 		{
 			_clickMode = CM_ROAD_EDIT;
+		}
+
+		roadsToUpdate.clear();
+
+		if (_selectedSceneObject != nullptr)
+		{
+			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+			if (roadComponent != nullptr)
+			{
+				roadsToUpdate.push_back(roadComponent);
+			}
+
+			CrossroadComponent* crossroad = dynamic_cast<CrossroadComponent*>(_selectedSceneObject->getComponent(CT_CROSSROAD));
+			if (crossroad != nullptr)
+			{
+				std::set<RoadObject*> roadsToUpdateSet;
+				for (int i = 0; i < crossroad->getConnectionsCount(); ++i)
+				{
+					roadsToUpdateSet.insert(crossroad->getConnectionPoint(i).connectedRoads.begin(), crossroad->getConnectionPoint(i).connectedRoads.end());
+				}
+				roadsToUpdate.insert(roadsToUpdate.begin(), roadsToUpdateSet.begin(), roadsToUpdateSet.end());
+			}
 		}
 	}
 
@@ -787,6 +810,7 @@ namespace vbEditor
 				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
+				ImGui::MenuItem("Add new Crossroad..", NULL, &_addRoadDialogWindow);
 				ImGui::EndMenu();
 			}
 
@@ -1146,6 +1170,11 @@ namespace vbEditor
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
 		);
+
+		if (!isRoadModified && _selectedSceneObject->getComponent(CT_CROSSROAD) != nullptr)
+		{
+			isRoadModified = ImGuizmo::IsUsing();
+		}
 	}
 
 	void showRoadTools()
@@ -1169,22 +1198,19 @@ namespace vbEditor
 
 	void updateRoads(float deltaTime)
 	{
-		if (_selectedSceneObject != nullptr)
+		roadModificationTimer += deltaTime;
+
+		if (roadModificationTimer >= 0.2f && isRoadModified)
 		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-
-			if (roadComponent != nullptr)
+			for (int i = 0; i < roadsToUpdate.size(); ++i)
 			{
-				roadModificationTimer += deltaTime;
+				RoadObject* roadComponent = roadsToUpdate[i];
 
-				if (roadModificationTimer >= 0.2f && isRoadModified)
-				{
-					roadComponent->buildModel();
-
-					roadModificationTimer = 0.0f;
-					isRoadModified = false;
-				}
+				roadComponent->buildModel();
 			}
+
+			roadModificationTimer = 0.0f;
+			isRoadModified = false;
 		}
 	}
 

@@ -500,6 +500,8 @@ void showObjectProperties()
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 							}
+
+							vbEditor::isRoadModified = true;
 						}
 
 						if (connectedCrossroads[i] != nullptr)
@@ -513,6 +515,8 @@ void showObjectProperties()
 							if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
+
+								vbEditor::isRoadModified = true;
 							}
 						}
 						ImGui::PopID();

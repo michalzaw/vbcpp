@@ -15,11 +15,10 @@ struct CrossroadConnectionPoint
 {
 	glm::vec3 position;
 	glm::vec3 direction;
-	RoadObject* connectedRoad;
+	std::list<RoadObject*> connectedRoads;
 
 	CrossroadConnectionPoint()
-		: position(0.0f, 0.0f, 0.0f), direction(1.0f, 0.0f, 0.0f),
-		connectedRoad(nullptr)
+		: position(0.0f, 0.0f, 0.0f), direction(1.0f, 0.0f, 0.0f)
 	{
 
 	}
@@ -41,10 +40,27 @@ class CrossroadComponent : public Component
 
 		void connectRoad(int connectionPointIndex, RoadObject* roadObject)
 		{
-			if (connectionPointIndex >= _connectionPoints.size())
+			if (connectionPointIndex >= _connectionPoints.size() && roadObject != nullptr)
 				return;
 
-			_connectionPoints[connectionPointIndex].connectedRoad = roadObject;
+			_connectionPoints[connectionPointIndex].connectedRoads.push_back(roadObject);
+		}
+
+		void disconnectRoad(int connectionPointIndex, RoadObject* roadObject)
+		{
+			if (connectionPointIndex >= _connectionPoints.size() && roadObject != nullptr)
+				return;
+
+			for (std::list<RoadObject*>::iterator i = _connectionPoints[connectionPointIndex].connectedRoads.begin();
+				 i != _connectionPoints[connectionPointIndex].connectedRoads.end();
+				 ++i)
+			{
+				if ((*i) == roadObject)
+				{
+					i = _connectionPoints[connectionPointIndex].connectedRoads.erase(i);
+					break;
+				}
+			}
 		}
 
 		int getConnectionsCount()

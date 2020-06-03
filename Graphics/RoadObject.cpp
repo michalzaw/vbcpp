@@ -30,6 +30,27 @@ RoadObject::~RoadObject()
 
 void RoadObject::buildModel(bool reuseExistingModel)
 {
+	std::vector<RoadConnectionPointData*> connectionPointsData;
+	for (int i = 0; i < 2; ++i)
+	{
+		if (_connectionPoints[i].crossroadComponent != nullptr)
+		{
+			RoadConnectionPointData* data = new RoadConnectionPointData;
+
+			glm::vec3 pos = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).position;
+			data->position = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalPointToGlobal(pos);
+
+			glm::vec3 dir = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).direction;
+			data->direction = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalVectorToGlobal(dir);
+
+			connectionPointsData.push_back(data);
+		}
+		else
+		{
+			connectionPointsData.push_back(nullptr);
+		}
+	}
+
 	// delete objects in base class RenderObject
 	/*
 	// delete generated RStaticModel
@@ -51,7 +72,7 @@ void RoadObject::buildModel(bool reuseExistingModel)
 	RStaticModel* newModel;
 	if (_model == nullptr)
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData);
 	}
 	else if (!reuseExistingModel)
 	{
@@ -60,13 +81,19 @@ void RoadObject::buildModel(bool reuseExistingModel)
 			delete _model;
 		}
 
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData);
 	}
 	else
 	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, _model);
+		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _model);
 	}
 	setModel(newModel);
+
+	for (int i = 0; i < 2; ++i)
+	{
+		if (connectionPointsData[i] != nullptr)
+			delete connectionPointsData[i];
+	}
 }
 
 
@@ -134,13 +161,14 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 	if (index >= 2)
 		return;
 
+	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		_connectionPoints[index].crossroadComponent->disconnectRoad(_connectionPoints[index].index, this);
+	}
+
 	if (crossroadComponent != nullptr)
 	{
 		crossroadComponent->connectRoad(indexInCrossroad, this);
-	}
-	else if (_connectionPoints[index].crossroadComponent != nullptr)
-	{
-		_connectionPoints[index].crossroadComponent->connectRoad(indexInCrossroad, nullptr);
 	}
 
 	_connectionPoints[index].crossroadComponent = crossroadComponent;

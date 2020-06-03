@@ -5,6 +5,19 @@
 #include "../Utils/Logger.h"
 
 
+void modifyBeginAndEndPoints(std::vector<glm::vec3>& points, std::vector<RoadConnectionPointData*>& roadConnectionPoints)
+{
+	if (points.size() > 0 && roadConnectionPoints[0] != nullptr)
+	{
+		points[0] = roadConnectionPoints[0]->position;
+	}
+	if (points.size() > 1 && roadConnectionPoints[1] != nullptr)
+	{
+		points[points.size() - 1] = roadConnectionPoints[1]->position;
+	}
+}
+
+
 glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
 {
 	glm::vec3* collisionMesh = new glm::vec3[indicesCountInAllMeshes];
@@ -26,8 +39,10 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 
 
 // Current stable
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RStaticModel* oldModel)
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, std::vector<RoadConnectionPointData*>& roadConnectionPoints, RStaticModel* oldModel)
 {
+	modifyBeginAndEndPoints(points, roadConnectionPoints);
+
 	int lanesCount = roadLanes.size();
 
 	std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];

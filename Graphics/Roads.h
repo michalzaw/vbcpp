@@ -78,7 +78,14 @@ struct RoadSegment
 };
 
 
-RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RStaticModel* oldModel = NULL);
+struct RoadConnectionPointData
+{
+	glm::vec3 position;
+	glm::vec3 direction;
+};
+
+
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, std::vector<RoadConnectionPointData*>& roadConnectionPoints, RStaticModel* oldModel = NULL);
 
 
 #endif // ROADS_H_INCLUDED
