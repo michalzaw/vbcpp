@@ -156,7 +156,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 				if (segments[k].interpolation == RI_LIN)
 					y = segmentBegin.y + (segmentEnd.y - segmentBegin.y) * (j / static_cast<float>(pointsCount * 2 - 2));
 				else if (segments[k].interpolation == RI_COS)
-					y = segmentBegin.y + (segmentEnd.y - segmentBegin.y) * ((-cosf((j / static_cast<float>(pointsCount * 2 - 1)) * PI) + 1) / 2.0f);
+					y = segmentBegin.y + (segmentEnd.y - segmentBegin.y) * ((-cosf((j / static_cast<float>(pointsCount * 2 - 2)) * PI) + 1) / 2.0f);
 
 				MeshMender::Vertex vertex1;
 				vertex1.pos = glm::vec3(p1.x, y + roadLanes[i].height1, p1.y);
