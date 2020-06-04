@@ -404,7 +404,7 @@ void showObjectProperties()
 						}
 					}
 
-					if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0)
+					if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
 					{
 						ImGui::Separator();
 
