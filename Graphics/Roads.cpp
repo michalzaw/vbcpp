@@ -145,15 +145,15 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 					//std::cout << v.x << " " << v.y << std::endl;
 				}
 
-				// first point - if road is connected to crossroad
-				if (j == 0 && roadConnectionPoints[0] != nullptr)
+				// first point in first vertex - if road is connected to crossroad
+				if (k == 0 && j == 0 && roadConnectionPoints[0] != nullptr)
 				{
 					glm::vec2 crossroadDirection = glm::vec2(roadConnectionPoints[0]->direction.x, roadConnectionPoints[0]->direction.z);
 
 					v = glm::vec2(-crossroadDirection.y, crossroadDirection.x);
 				}
-				// last point - if road is connected to crossroad
-				if (j == pointsCount * 2 - 2 && roadConnectionPoints[1] != nullptr)
+				// last point in last segment - if road is connected to crossroad
+				if (k == segments.size() - 1 && j == pointsCount * 2 - 2 && roadConnectionPoints[1] != nullptr)
 				{
 					glm::vec2 crossroadDirection = -glm::vec2(roadConnectionPoints[1]->direction.x, roadConnectionPoints[1]->direction.z);
 
