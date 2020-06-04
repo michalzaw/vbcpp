@@ -259,7 +259,51 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 				lanesVerticesArray[i][i3].normal = glm::normalize(glm::vec3(lanesVerticesArray[i][i3].normal));
 			}
 
+			// Calculate normal for first and last point in lane - if road is connected to crossroad
+			if (k == 0 && roadConnectionPoints[0] != nullptr)
+			{
+				unsigned int i1 = verticesCountInLane + 0;
+				unsigned int i2 = verticesCountInLane + 0 + 1;
+				unsigned int i3 = verticesCountInLane + 0 + 3;
 
+				glm::vec3 v1 = lanesVerticesArray[i][i1].pos;
+				glm::vec3 v2 = lanesVerticesArray[i][i2].pos;
+				glm::vec3 v3 = lanesVerticesArray[i][i3].pos;
+
+				v3.y = v2.y;
+
+				glm::vec3 normal = glm::cross(v3 - v2, v1 - v2);
+				normal = glm::normalize(normal);
+
+				lanesVerticesArray[i][i1].normal = normal;
+				lanesVerticesArray[i][i2].normal = normal;
+
+				lanesVerticesArray[i][i1].normal = glm::normalize(glm::vec3(lanesVerticesArray[i][i1].normal));
+				lanesVerticesArray[i][i2].normal = glm::normalize(glm::vec3(lanesVerticesArray[i][i2].normal));
+			}
+			if (k == segments.size() - 1 && roadConnectionPoints[1] != nullptr)
+			{
+				// last quad
+				unsigned int firstVertex = lanesVerticesArray[i].size() - 4;
+				unsigned int i1 = firstVertex + 0;
+				unsigned int i2 = firstVertex + 0 + 3;
+				unsigned int i3 = firstVertex + 0 + 2;
+
+				glm::vec3 v1 = lanesVerticesArray[i][i1].pos;
+				glm::vec3 v2 = lanesVerticesArray[i][i2].pos;
+				glm::vec3 v3 = lanesVerticesArray[i][i3].pos;
+
+				v1.y = v3.y;
+
+				glm::vec3 normal = glm::cross(v3 - v2, v1 - v2);
+				normal = glm::normalize(normal);
+
+				lanesVerticesArray[i][i2].normal = normal;
+				lanesVerticesArray[i][i3].normal = normal;
+
+				lanesVerticesArray[i][i2].normal = glm::normalize(glm::vec3(lanesVerticesArray[i][i2].normal));
+				lanesVerticesArray[i][i3].normal = glm::normalize(glm::vec3(lanesVerticesArray[i][i3].normal));
+			}
 		}
 
 		segments[k].r = originalR;
@@ -274,7 +318,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 	{
 		MeshMender mender;
 		std::vector<unsigned int> temp;
-		mender.Mend(lanesVerticesArray[i], lanesIndicesArray[i], temp, 0.0, 0.7, 0.7, 1.0, MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+		mender.Mend(lanesVerticesArray[i], lanesIndicesArray[i], temp, 0.0, 0.7, 0.7, 1.0, MeshMender::DONT_CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
 
 		unsigned int verticesCount = lanesVerticesArray[i].size();
 		unsigned int indicesCount = lanesIndicesArray[i].size();
