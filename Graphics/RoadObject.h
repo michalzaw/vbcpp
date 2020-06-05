@@ -32,7 +32,7 @@ class RoadObject : public RenderObject
 		std::vector<RoadConnectionPoint> _connectionPoints;
 
 	public:
-		RoadObject(RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments);
+		RoadObject(RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate);
 		virtual ~RoadObject();
 
 		void buildModel(bool reuseExistingModel = true);

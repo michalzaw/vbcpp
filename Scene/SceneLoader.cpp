@@ -4,6 +4,7 @@
 
 #include "../Game/Directories.h"
 
+#include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
 
@@ -410,7 +411,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, roadSceneObject);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, true, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -474,8 +475,26 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 		}
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, roadSceneObject);
+		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, false, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
+
+
+		XMLElement* connectionElement = roadElement->FirstChildElement("Connection");
+		while (connectionElement != nullptr)
+		{
+			int type = XmlUtils::getAttributeInt(connectionElement, "type");
+			std::string crossroadName = std::string(connectionElement->Attribute("crossroadName"));
+			int index = XmlUtils::getAttributeInt(connectionElement, "index");
+
+			Logger::info("Load road connection point. Type: " + toString(type) + ", crossroad: " + crossroadName + ", index: " + toString(index));
+
+			CrossroadComponent* crossroadComponent = findCrossRoadComponentBySceneObjectName(crossroadName);
+			roadRenderObject->setConnectionPoint(type, crossroadComponent, index);
+
+			connectionElement = connectionElement->NextSiblingElement("Connection");
+		}
+
+		roadRenderObject->buildModel(false);
 
 		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
@@ -483,8 +502,33 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 		//terrainMesh->getRigidBody()->setFriction(1.5f);
 		roadSceneObject->addComponent(roadMesh);
 
+
 		roadElement = roadElement->NextSiblingElement("Road");
 	}
+}
+
+
+CrossroadComponent* SceneLoader::findCrossRoadComponentBySceneObjectName(std::string& name)
+{
+	SceneObject* crossroadSceneObject = _sceneManager->getSceneObject(name);
+	if (crossroadSceneObject != nullptr)
+	{
+		Component* crossroadComponent = crossroadSceneObject->getComponent(CT_CROSSROAD);
+		if (crossroadComponent != nullptr)
+		{
+			return dynamic_cast<CrossroadComponent*>(crossroadComponent);
+		}
+		else
+		{
+			Logger::error("Cannot find Crossroad component in object: " + name);
+		}
+	}
+	else
+	{
+		Logger::error("Cannot find object: " + name);
+	}
+
+	return nullptr;
 }
 
 

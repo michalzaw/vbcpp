@@ -18,6 +18,7 @@ class SceneManager;
 struct RoadLane;
 class RObject;
 class SceneObject;
+struct CrossroadComponent;
 
 
 struct SceneDescription
@@ -56,6 +57,8 @@ class SceneLoader
 		void loadRoads(tinyxml2::XMLElement* );
 		void loadRoad(tinyxml2::XMLElement*);
 		void loadRoadV2(tinyxml2::XMLElement*);
+
+		CrossroadComponent* findCrossRoadComponentBySceneObjectName(std::string& name);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);

@@ -183,6 +183,21 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 			roadElement->InsertEndChild(segmentElement);
 		}
 
+		for (int i = 0; i < 2; ++i)
+		{
+			RoadConnectionPoint& connectionPoint = roadObject->getConnectionPoint(i);
+			if (connectionPoint.crossroadComponent != nullptr)
+			{
+				XMLElement* connectionElement = doc.NewElement("Connection");
+				
+				connectionElement->SetAttribute("type", i);
+				connectionElement->SetAttribute("crossroadName", connectionPoint.crossroadComponent->getSceneObject()->getName().c_str());
+				connectionElement->SetAttribute("index", connectionPoint.index);
+
+				roadElement->InsertEndChild(connectionElement);
+			}
+		}
+
 		roadsElement->InsertEndChild(roadElement);
 	}
 }

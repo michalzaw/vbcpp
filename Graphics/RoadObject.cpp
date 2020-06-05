@@ -9,12 +9,13 @@
 #include "../Utils/Logger.h"
 
 
-RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
+RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
 	: _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2)
 {
 	_type = CT_ROAD_OBJECT;
-
-	buildModel();
+	
+	if (buildModelAfterCreate)
+		buildModel();
 }
 
 
