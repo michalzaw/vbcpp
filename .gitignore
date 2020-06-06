@@ -5,6 +5,22 @@ bin/vbcpp*
 *.layout
 *.depend
 *.save
+*.ter
+*_gen.*
 
 # DIRECTORIES
 obj
+doc
+
+
+#ImGui
+bin/imgui_log.txt
+bin/imgui.ini
+
+build*/
+*.ilk
+*.dll
+*.pdb
+*.exe
+
+bin/devSettings.xml

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Materials>
-    <Material type="solid" name="Bushbush.jpg" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="bush.jpg" normalmap_texture="bush_n.jpg" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="Bushbush.jpg" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="krzak.jpg" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
 </Materials>

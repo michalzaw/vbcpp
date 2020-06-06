@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="solid" name="03 - Default" ambient="0.588235,0.588235,0.588235,1" diffuse="0.588235,0.588235,0.588235,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="WHEELSID.BMP" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="07 - Default" ambient="0.588235,0.588235,0.588235,1" diffuse="0.588235,0.588235,0.588235,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="REIFEN.BMP" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="07 - Default.000" ambient="0.588235,0.588235,0.588235,1" diffuse="0.588235,0.588235,0.588235,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="REIFEN.BMP" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="solid" name="08 - Default" ambient="0.588235,0.588235,0.588235,1" diffuse="0.588235,0.588235,0.588235,1" specular="0.898039,0.898039,0.898039,1" diffuse_texture="WHEELB.BMP" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="no_texture" name="Material#46" ambient="1,1,1,1" diffuse="1,1,1,1" specular="1,1,1,1" diffuse_texture="" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+</Materials>

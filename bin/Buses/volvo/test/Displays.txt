@@ -1,0 +1,8 @@
+pix
+6
+112,16,vultron,0
+112,16,vultron,0
+100,16,piroskijelzo,1
+112,16,vultron,0
+28,12,vultron,2
+100,16,piroskijelzo,1

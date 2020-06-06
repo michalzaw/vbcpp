@@ -7,8 +7,9 @@
 #include <cstdlib>
 #include <sstream>
 #include <iostream>
+#include <vector>
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 template<typename T> void safe_delete(T*& a) {
   delete a;
@@ -32,6 +33,12 @@ glm::vec4 XMLstringToVec4(const char* xmlstring);
 btVector3 XMLstringToBtVec3(const char* xmlstring);
 
 inline int next_p2(int n) { int res = 1; while (res < n) res <<= 1; return res; }
+
+template <typename T>
+inline bool isVectorContains(std::vector<T>& vector, T& element)
+{
+    return std::find(vector.begin(), vector.end(), element) != vector.end();
+}
 
 
 #endif // HELPERS_HPP_INCLUDED

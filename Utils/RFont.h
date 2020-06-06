@@ -2,7 +2,7 @@
 #define RFONT_H_INCLUDED
 
 
-#include <freetype/ft2build.h>
+#include <ft2build.h>
 #include FT_FREETYPE_H
 //#include <freetype/freetype.h>
 

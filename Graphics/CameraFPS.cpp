@@ -4,9 +4,15 @@
 
 
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
-    : CameraStatic(width, height, viewAngle, nearValue, farValue),
+    //: CameraStatic(width, height, viewAngle, nearValue, farValue),
+    : CameraStatic(CPT_PERSPECTIVE),
 	_moveSpeed(3.0f), _rotateSpeed(0.0005f)//, _oldXpos(0), _oldYpos(0)
 {
+    setWindowDimensions(width, height);
+    setViewAngle(viewAngle);
+    setNearValue(nearValue);
+    setFarValue(farValue);
+
     //update();
 
 	//updateProjection();
@@ -155,6 +161,16 @@ void CameraFPS::setMoveSpeed(float speed)
 void CameraFPS::setRotationSpeed(float speed)
 {
 	_rotateSpeed = speed;
+}
+
+float CameraFPS::getMoveSpeed()
+{
+    return _moveSpeed;
+}
+
+float CameraFPS::getRotationSpeed()
+{
+    return _rotateSpeed;
 }
 
 /*void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)

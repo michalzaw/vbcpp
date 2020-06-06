@@ -58,7 +58,8 @@ PhysicsManager::~PhysicsManager()
         PhysicalBody* body = _physicalBodies[j];
 
         //removePhysicalBody(body);
-        _dynamicsWorld->removeRigidBody(body->getRigidBody());
+        if (body->getRigidBody() != NULL)
+            _dynamicsWorld->removeRigidBody(body->getRigidBody());
 
         delete body;
 	}
@@ -210,7 +211,7 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* 
     return b;
 }
 
-PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RModel* model, short collisionGroup, short collisionFilter)
+PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RStaticModel* model, short collisionGroup, short collisionFilter)
 {
     PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model);
 
@@ -225,12 +226,59 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(R
 btCompoundShape* PhysicsManager::createCompoundShape()
 {
     btCompoundShape* c = new btCompoundShape();
+
+	return c;
+}
+
+
+PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyRaycastVehicle* b = new PhysicalBodyRaycastVehicle(vertices, vertexCount, mass, this);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyRaycastVehicle* b = new PhysicalBodyRaycastVehicle(vertices, vertexCount, mass, this);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
+PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel)
+{
+    int index = vehicle->addWheel(connectionPoint, suspensionRestLength, radius, isFrontWheel);
+    PhysicalBodyWheel* b = new PhysicalBodyWheel(vehicle->getRayCastVehicle(), index);
+
+    _physicalBodies.push_back(b);
+
+    return b;
 }
 
 
 void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
 {
-    _dynamicsWorld->removeRigidBody(physicalBody->getRigidBody());
+	std::vector<Constraint*>& constraints = physicalBody->getConstraints();
+	while (constraints.size() != 0)
+	{
+		removeConstraint(*(constraints.begin() + constraints.size() - 1));
+	}
+
+	btRigidBody* rigidBody = physicalBody->getRigidBody();
+	if (rigidBody != nullptr)
+	{
+		_dynamicsWorld->removeRigidBody(rigidBody);
+		_dynamicsWorld->removeCollisionObject(rigidBody);
+	}
 
     _physicalBodies.remove(physicalBody);
 
@@ -269,6 +317,20 @@ ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, Ph
 }
 
 
+ConstraintBall* PhysicsManager::createConstraintBall(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB)
+{
+    ConstraintBall* c = new ConstraintBall(bodyA, bodyB, pivotA, pivotB);
+
+    std::cout << "Constraint created: " << c << std::endl;
+    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+
+    _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
+
+    _constraints.push_back(c);
+
+    return c;
+}
+
 void PhysicsManager::addConstraint(Constraint* c)
 {
     _dynamicsWorld->addConstraint(c->getBulletConstraint());
@@ -282,5 +344,7 @@ void PhysicsManager::removeConstraint(Constraint* c)
     _dynamicsWorld->removeConstraint(c->getBulletConstraint());
 
     _constraints.remove(c);
+
+	delete c;
 }
 

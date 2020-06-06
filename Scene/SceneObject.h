@@ -8,13 +8,9 @@
 
 #include "Component.h"
 
+#include "../Graphics/RotationMode.h"
 
-enum RotationMode
-{
-    RM_EULER_ANGLES,
-    RM_QUATERNION
-
-};
+#include "../Utils/RObject.h"
 
 
 class SceneManager;
@@ -31,6 +27,8 @@ class SceneObject
         std::string     _name;
         unsigned int    _id;
         bool            _isActive;
+
+		RObject*		_objectDefinition;
 
         SceneManager*   _sceneManager;
 
@@ -53,7 +51,7 @@ class SceneObject
         void calculateGlobalTransformMatrix() const;
 
     public:
-        SceneObject(std::string name, SceneManager* sceneManager, SceneObject* parent = NULL);
+        SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition = NULL, SceneObject* parent = NULL);
         ~SceneObject();
 
 
@@ -64,17 +62,21 @@ class SceneObject
         void addChild(SceneObject* child);
         bool removeChild(SceneObject* child);
         void removeAllChildren();
+        std::list<SceneObject*>& getChildren();
 
 
         void addComponent(Component* component);
         void removeComponent(Component* component);
 
 
+		void			setName(std::string name);
         void            setIsActive(bool is);
 
         std::string     getName();
         unsigned int    getId();
         bool            isActive();
+
+		RObject*		getObjectDefinition();
 
         Component*      getComponent(unsigned int index);
         Component*      getComponent(ComponentType type);
@@ -111,6 +113,13 @@ class SceneObject
         glm::mat4& getLocalNormalMatrix() const;
         glm::mat4& getGlobalTransformMatrix() const;
         glm::mat4& getGlobalNormalMatrix() const;
+
+		void updateFromLocalMatrix();
+
+		glm::vec3 getGlobalPosition()
+		{
+			return transformLocalPointToGlobal(glm::vec3(0.0f, 0.0f, 0.0f));
+		}
 
         glm::vec3 transformLocalPointToGlobal(glm::vec3 point)
         {

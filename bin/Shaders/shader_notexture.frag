@@ -143,6 +143,8 @@ void main()
 	//FragmentColor = texture2D(Texture, TexCoord) * LightsColor;
 	
 	FragmentColor = LightsColor * matDiffuse;
-	
+	FragmentColor.a = 1.0f;
+#ifdef TRANSPARENCY
 	FragmentColor.a = 1 - Transparency;
+#endif
 }

@@ -1,12 +1,8 @@
 #include "RenderData.h"
 
 
-RenderListElement::RenderListElement(RModel* model, Mesh* mesh, TransformMatrices matrices, float distance, SceneObject* object)
-    : _model(model), _mesh(mesh), _matrices(matrices), _distanceFromCamera(distance), _object(object)
-{
-
-}
-RenderListElement::~RenderListElement()
+RenderListElement::RenderListElement()
+    : type(RET_SINGLE), model(NULL), mesh(NULL), distanceFromCamera(0.0f), object(NULL), renderObject(NULL)
 {
 
 }

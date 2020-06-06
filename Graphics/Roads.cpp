@@ -2,16 +2,14 @@
 
 
 // Current stable
-Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vector<RoadSegment> segments)
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, std::vector<RoadSegment>& segments)
 {
     std::vector<MeshMender::Vertex>* lanesVerticesArray = new std::vector<MeshMender::Vertex>[lanesCount];
     std::vector<unsigned int>* lanesIndicesArray = new std::vector<unsigned int>[lanesCount];
-    Mesh* meshes = new Mesh[lanesCount];
+    StaticModelMesh* meshes = new StaticModelMesh[lanesCount];
+    Material* materials = new Material[lanesCount];
     float* t = new float[lanesCount];       // wsp. do obliczania texCoordow
     glm::vec3* lastPoints = new glm::vec3[lanesCount];
-
-    int verticesCount = 0;
-    int indicesCount = 0;
 
     for (int k = 0; k < segments.size(); ++k)
     {
@@ -52,6 +50,7 @@ Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vec
             deltaAngle = -deltaAngle;
         }
 
+		float originalR = segments[k].r;
         bool is = segments[k].r < 0;
         segments[k].r = fabs(segments[k].r);
 
@@ -204,59 +203,55 @@ Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vec
 
 
         }
+
+		segments[k].r = originalR;
     }
 
 
+    unsigned int indicesCountInAllMeshes = 0;
     for (int i = 0; i < lanesCount; ++i)
     {
         MeshMender mender;
         std::vector<unsigned int> temp;
         mender.Mend(lanesVerticesArray[i], lanesIndicesArray[i], temp, 0.0, 0.7, 0.7, 1.0, MeshMender::CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
 
+        unsigned int verticesCount = lanesVerticesArray[i].size();
+        unsigned int indicesCount = lanesIndicesArray[i].size();
+        indicesCountInAllMeshes += indicesCount;
 
-        meshes[i].material = roadLanes[i].material;
-        meshes[i].firstVertex = indicesCount;
-        meshes[i].quantumOfVertice = lanesIndicesArray[i].size();
+        Vertex* vertices = new Vertex[verticesCount];
+        unsigned int* indices = new unsigned int[indicesCount];
 
+        for (int j = 0; j < verticesCount; ++j)
+        {
+            vertices[j].position = lanesVerticesArray[i][j].pos;
+            vertices[j].texCoord = glm::vec2(lanesVerticesArray[i][j].s, lanesVerticesArray[i][j].t);
+            vertices[j].normal = lanesVerticesArray[i][j].normal;
+            vertices[j].tangent = lanesVerticesArray[i][j].tangent;
+            vertices[j].bitangent = lanesVerticesArray[i][j].binormal;
+        }
+        for (int j = 0; j < indicesCount; ++j)
+        {
+            indices[j] = lanesIndicesArray[i][j];
+        }
 
-        verticesCount += lanesVerticesArray[i].size();
-        indicesCount += lanesIndicesArray[i].size();
+        materials[i] = roadLanes[i].material;
+        meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, materials[i].shader);
     }
 
 
-
-
-
-
-
-    Vertex* vertices = new Vertex[verticesCount];
-    unsigned int* indices = new unsigned int[indicesCount];
-    glm::vec3* collisionMesh = new glm::vec3[indicesCount];
-
-    int vertCount = 0;
-    int indCount = 0;
+    glm::vec3* collisionMesh = new glm::vec3[indicesCountInAllMeshes];
+    int counter = 0;
     for (int i = 0; i < lanesCount; ++i)
     {
-        //memcpy(&vertices[vertCount], &lanesVerticesArray[i][0], lanesVerticesArray[i].size() * sizeof(lanesVerticesArray[i][0]));
-        //memcpy(&indices[indCount], &lanesIndicesArray[i][0], lanesIndicesArray[i].size() * sizeof(lanesIndicesArray[i][0]));
+        unsigned int indicesCount = lanesIndicesArray[i].size();
 
-        for (int j = 0; j < lanesVerticesArray[i].size(); ++j)
+        for (int j = 0; j < indicesCount; ++j)
         {
-            vertices[vertCount + j].position = lanesVerticesArray[i][j].pos;
-            vertices[vertCount + j].texCoord = glm::vec2(lanesVerticesArray[i][j].s, lanesVerticesArray[i][j].t);
-            vertices[vertCount + j].normal = lanesVerticesArray[i][j].normal;
-            vertices[vertCount + j].tangent = lanesVerticesArray[i][j].tangent;
-            vertices[vertCount + j].bitangent = lanesVerticesArray[i][j].binormal;
-        }
-        for (int j = 0; j < lanesIndicesArray[i].size(); ++j)
-        {
-            indices[indCount + j] = lanesIndicesArray[i][j] + vertCount;
-
-            collisionMesh[indCount + j] = vertices[indices[indCount + j]].position;
+            collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
         }
 
-        vertCount += lanesVerticesArray[i].size();
-        indCount += lanesIndicesArray[i].size();
+        counter += indicesCount;
     }
 
 
@@ -266,7 +261,13 @@ Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vec
     delete[] lastPoints;
 
 
-    Model* model = new Model(vertices, vertCount, indices, indCount, meshes, lanesCount, collisionMesh, indCount);
+    StaticModelNode* modelNode = new StaticModelNode;
+    modelNode->name = "road";
+    modelNode->meshes = meshes;
+    modelNode->meshesCount = lanesCount;
+    modelNode->parent = NULL;
+
+    RStaticModel* model = new RStaticModel("", modelNode, materials, lanesCount, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
 
     return model;
 }

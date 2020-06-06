@@ -1,7 +1,7 @@
 #ifndef RTEXTURE_H_INCLUDED
 #define RTEXTURE_H_INCLUDED
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 #include <glm/glm.hpp>
 
@@ -14,7 +14,9 @@ enum TextureType
     TT_2D   = GL_TEXTURE_2D,
     TT_3D   = GL_TEXTURE_3D,
     TT_CUBE = GL_TEXTURE_CUBE_MAP,
-    TT_RECT = GL_TEXTURE_RECTANGLE
+    TT_RECT = GL_TEXTURE_RECTANGLE,
+
+    TT_2D_MULTISAMPLE = GL_TEXTURE_2D_MULTISAMPLE
 
 };
 
@@ -23,6 +25,10 @@ enum TextureFormat
 {
     TF_RGB              = GL_RGB,
     TF_RGBA             = GL_RGBA,
+    TF_RGB_16F          = GL_RGB16F,
+    TF_RGB_32F          = GL_RGB32F,
+    TF_RGBA_16F         = GL_RGBA16F,
+    TF_RGBA_32F         = GL_RGBA32F,
     TF_DEPTH_COMPONENT  = GL_DEPTH_COMPONENT
 
 };
@@ -49,11 +55,13 @@ enum TextureClampMode
 
 class RTexture : public Resource
 {
+    friend class Framebuffer;
+
     public:
         //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
         //RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
         //RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
-        RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size);
+        RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool compressed = false);
         virtual ~RTexture();
 
         //GLuint getID() { return _texID; }
@@ -63,22 +71,32 @@ class RTexture : public Resource
 
         void setAnisotropyFiltering(bool isEnable, float anisotropy = 1.0f);
 
+        void setParameter(GLenum name, GLint value);
+        void setParameter(GLenum name, GLfloat value);
+
         glm::uvec2 getSize();
+
+        TextureType getTextureType();
+		TextureFormat getInternalFormat();
+
+		bool isCompressed();
 
         inline void bind()
         {
-            glBindTexture(_type, _texID);
+            glBindTexture(_textureType, _texID);
         }
+
+		void generateMipmap();
 
     protected:
         GLuint      _texID;
-        TextureType _type;
+        TextureType _textureType;
+        TextureFormat _internalFormat;
         TextureFormat _format;
         glm::uvec2  _size;
+		bool _compressed;
 
         bool        _isGenerateMipmap;
-
-        void generateMipmap();
 
 };
 

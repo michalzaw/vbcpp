@@ -20,7 +20,7 @@ class SoundManager : virtual public RefCounter
 {
     public:
         SoundManager()
-        : _camera(0), _device(0), _context(0)
+        : _camera(0), _device(0), _context(0), _mute(false)
         {
             std::cout << "SoundManager: Konstruktor\n";
             alutInit(NULL, NULL);
@@ -33,6 +33,10 @@ class SoundManager : virtual public RefCounter
             alListener3f( AL_VELOCITY, 0., 0., 0. );
             float orient[6] = { /*fwd:*/ 0., 0., -1., /*up:*/ 0., 1., 0. };
             alListenerfv( AL_ORIENTATION, orient );
+
+            alListenerf( AL_GAIN, 0.9f);
+
+            alDistanceModel(AL_LINEAR_DISTANCE_CLAMPED);
         }
 
         virtual ~SoundManager()
@@ -74,7 +78,7 @@ class SoundManager : virtual public RefCounter
 
                 glm::vec3 fwd = glm::cross(up, right);
 
-                alListenerf(AL_VELOCITY, 1.0f);
+                alListenerf(AL_METERS_PER_UNIT, 1.0f);
 
                 float orient[6] = { /*fwd:*/ fwd.x, fwd.y, fwd.z, /*up:*/ up.x, up.y, up.z };
                 alListenerfv( AL_ORIENTATION, orient );
@@ -84,8 +88,6 @@ class SoundManager : virtual public RefCounter
             for (std::list<SoundComponent*>::iterator i = _sounds.begin(); i != _sounds.end(); ++i)
             {
                 (*i)->update();
-
-
 
                 if ((*i)->getSoundType() == EST_AMBIENT)
                 {
@@ -101,7 +103,7 @@ class SoundManager : virtual public RefCounter
 
                     float distance = glm::distance(cameraPos, objPos);
 
-                    if (distance <= playDistance)
+                    if (distance <= playDistance && !_mute)
                         (*i)->play();
                     else
                         (*i)->stop();
@@ -109,17 +111,30 @@ class SoundManager : virtual public RefCounter
             }
         }
 
+        void setMute(const bool mute)
+        {
+            _mute = mute;
+
+            for (SoundComponent* sound : _sounds)
+            {
+                sound->setMute(_mute);
+            }
+        }
+
         SoundComponent* addSoundComponent(SoundComponent* soundcomp)
         {
             _sounds.push_back(soundcomp);
+            soundcomp->setMute(_mute);
 
             return soundcomp;
         }
 
     protected:
         CameraStatic*   _camera;
-        ALCdevice *_device;
-        ALCcontext *_context;
+        ALCdevice*      _device;
+        ALCcontext*     _context;
+
+        bool _mute;
 
         std::list<SoundComponent*>  _sounds;
 };

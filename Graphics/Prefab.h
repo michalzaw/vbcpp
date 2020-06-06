@@ -93,13 +93,18 @@ class Cube : public Prefab
             }
 
 
-            Mesh* meshes = new Mesh[1];
-            meshes[0].firstVertex = 0;
-            meshes[0].quantumOfVertice = 36;
-            meshes[0].material = _material;
+            StaticModelMesh* meshes = new StaticModelMesh[1];
+            Material* materials = new Material[1];
+            materials[0] = _material;
+            meshes[0].setMeshData(vertices, 24, indices, 36, 0, materials[0].shader);
 
+            StaticModelNode* modelNode = new StaticModelNode;
+            modelNode->name = "object";
+            modelNode->meshes = meshes;
+            modelNode->meshesCount = 1;
+            modelNode->parent = NULL;
 
-            _model = new RModel("", new Model(vertices, 24, indices, 36, meshes, 1));
+            setModel(new RStaticModel("", modelNode, materials, 1));
         }
 
     public:
@@ -108,6 +113,72 @@ class Cube : public Prefab
         {
 
         }
+};
+
+
+class PlanePrefab : public Prefab
+{
+	protected:
+		glm::vec2 _size;
+		Material _material;
+
+		virtual void generateModel()
+		{
+			glm::vec2 s = _size / 2.0f;
+
+			Vertex* vertices = new Vertex[4];
+
+			glm::vec3 positions[4] = {
+				glm::vec3(-s.x, 0, -s.y),
+				glm::vec3(-s.x, 0, s.y),
+				glm::vec3(s.x, 0, s.y),
+				glm::vec3(s.x, 0, -s.y)
+			};
+
+			glm::vec2 texCoords[4] = {
+				glm::vec2(0.0f, 1.0f),
+				glm::vec2(0.0f, 0.0f),
+				glm::vec2(1.0f, 0.0f),
+				glm::vec2(1.0f, 1.0f)
+			};
+
+			for (int i = 0; i < 4; ++i)
+			{
+				vertices[i].position = positions[i];
+				vertices[i].texCoord = texCoords[i];
+				vertices[i].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+			}
+
+
+			unsigned int ind[6] = { 0, 1, 2, 0, 2, 3 };
+
+			unsigned int* indices = new unsigned int[6];
+			for (int i = 0; i < 6; ++i)
+			{
+				indices[i] = ind[i];
+			}
+
+
+			StaticModelMesh* meshes = new StaticModelMesh[1];
+			Material* materials = new Material[1];
+			materials[0] = _material;
+			meshes[0].setMeshData(vertices, 4, indices, 6, 0, materials[0].shader);
+
+			StaticModelNode* modelNode = new StaticModelNode;
+			modelNode->name = "object";
+			modelNode->meshes = meshes;
+			modelNode->meshesCount = 1;
+			modelNode->parent = NULL;
+
+			setModel(new RStaticModel("", modelNode, materials, 1));
+		}
+
+	public:
+		PlanePrefab(glm::vec2 size, Material material)
+			: _size(size), _material(material)
+		{
+
+		}
 };
 
 

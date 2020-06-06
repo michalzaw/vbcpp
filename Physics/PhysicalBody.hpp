@@ -1,7 +1,7 @@
 #ifndef PHYSICALBODY_HPP_INCLUDED
 #define PHYSICALBODY_HPP_INCLUDED
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "../Scene/Component.h"
 #include "../Scene/SceneObject.h"
@@ -42,12 +42,29 @@ class PhysicalBody : public Component
             _constraints.push_back(c);
         }
 
+		void removeConstraint(Constraint* c)
+		{
+			for (std::vector<Constraint*>::iterator i = _constraints.begin(); i != _constraints.end(); ++i)
+			{
+				if (*i == c)
+				{
+					_constraints.erase(i);
+					break;
+				}
+			}
+		}
+
+		std::vector<Constraint*>& getConstraints()
+		{
+			return _constraints;
+		}
+
         void setDefaultPosition(btVector3 pos)
         {
             _position = pos;
         }
 
-        void update();
+        virtual void update();
 
 
         virtual void changedTransform();
@@ -66,6 +83,12 @@ class PhysicalBody : public Component
         bool _isUpdateTransformFromObject;
 
         virtual void updateBody() { }
+
+        virtual void onAttachedToScenObject()
+        {
+            if (_rigidBody)
+                _rigidBody->setUserPointer(_object);
+        }
 };
 
 #endif // PHYSICALBODY_HPP_INCLUDED

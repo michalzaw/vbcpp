@@ -4,7 +4,7 @@
 <Engine>
 	<Description author="Unknown" name="WSK Mielec" comment="WSK Mielec engine" />
 	
-	<Sound file="wskmielec.wav" />
+	<Sound file="wskmielec.wav" rpm="1000" volume="0.9f" />
 	
 	<Points count="4">
 		<Point rpm="900" torque="650" />

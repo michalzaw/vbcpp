@@ -19,7 +19,19 @@ enum ComponentType
     CT_LIGHT,
     CT_PHYSICAL_BODY,
     CT_TREE_COMPONENT,
-    CT_SOUND
+    CT_SOUND,
+    CT_GRASS,
+	CT_ROAD_OBJECT,
+	CT_TERRAIN,
+	CT_SKY,
+    CT_ENVIRONMENT_CAPTURE_COMPONENT,
+    CT_MIRROR,
+    CT_CLICKABLE_OBJECT,
+
+    CT_BUS_STOP,
+	CT_DISPLAY,
+
+    COMPONENTS_TYPE_SIZE
 };
 
 
@@ -32,6 +44,8 @@ class Component
 //        Transform* _objectTransform;
 
         bool _isActive;
+
+        virtual void onAttachedToScenObject() {}
 
     public:
         Component(ComponentType type);

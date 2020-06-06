@@ -4,17 +4,18 @@
 #include "../Utils/Helpers.hpp"
 #include "PhysicalBody.hpp"
 #include "../Graphics/Model.h"
-#include "../Utils/RModel.h"
+#include "../Utils/RStaticModel.h"
 
 class PhysicalBodyBvtTriangleMesh : public PhysicalBody
 {
     public:
-        PhysicalBodyBvtTriangleMesh(RModel* model);
+        PhysicalBodyBvtTriangleMesh(RStaticModel* model);
         virtual ~PhysicalBodyBvtTriangleMesh();
 
     private:
-        RModel*  _model;
+        RStaticModel*  _model;
 
+        void addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform);
         btTriangleMesh* buildTriangleMesh();
         void updateBody();
 };

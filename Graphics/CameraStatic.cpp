@@ -2,12 +2,30 @@
 
 #include "../Scene/SceneObject.h"
 
+#include <algorithm>
 
-CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
+
+/*CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
 	: Component(CT_CAMERA),
 	_projectionMatrix(1.0), _viewMatrix(1.0),
 	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
     _farValue(farValue), _nearValue(nearValue), _viewAngle(viewAngle), _windowWidth(width), _windowHeight(height)
+{
+    changedTransform();
+
+    _projectionMatrixIs = false;
+	//updateProjection();
+	//updateView();
+}*/
+
+
+CameraStatic::CameraStatic(CameraProjectionType projectionType)
+	: Component(CT_CAMERA),
+	_projectionType(projectionType),
+	_projectionMatrix(1.0), _viewMatrix(1.0),
+	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
+    _farValue(0.1f), _nearValue(1000.0f), _viewAngle(45.0f), _windowWidth(800), _windowHeight(600),
+    _left(-1.0f), _right(1.0f), _bottom(-1.0f), _top(1.0f)
 {
     changedTransform();
 
@@ -31,6 +49,12 @@ vec3 CameraStatic::transformToGlobal(glm::vec3 vector)
         //vec = _object->getParent()->getGlobalTransform()->getNormalMatrix() * vec;
 
     return glm::normalize(glm::vec3(vec.x, vec.y, vec.z));
+}
+
+
+CameraProjectionType CameraStatic::getProjctionType()
+{
+    return _projectionType;
 }
 
 
@@ -61,6 +85,42 @@ GLfloat	CameraStatic::getViewAngle()
 }
 
 
+GLint CameraStatic::getWindowWidth()
+{
+    return _windowWidth;
+}
+
+
+GLint CameraStatic::getWindowHeight()
+{
+    return _windowHeight;
+}
+
+
+GLfloat CameraStatic::getLeft()
+{
+    return _left;
+}
+
+
+GLfloat CameraStatic::getRight()
+{
+    return _right;
+}
+
+
+GLfloat CameraStatic::getBottom()
+{
+    return _bottom;
+}
+
+
+GLfloat CameraStatic::getTop()
+{
+    return _top;
+}
+
+
 glm::vec3 CameraStatic::getLookAtVector()
 {
     if (!_lookAtIs)
@@ -77,8 +137,9 @@ glm::vec3 CameraStatic::getUpVector()
 {
     if (!_upVectorIs)
     {
-        _upVector = transformToGlobal(getLocalUpVector());
+        //_upVector = transformToGlobal(getLocalUpVector());
 
+        _upVector = glm::cross(getRightVector(), getDirection());
         _upVectorIs = true;
     }
 
@@ -170,7 +231,11 @@ glm::mat4 CameraStatic::getProjectionMatrix()
 {
     if (!_projectionMatrixIs)
     {
-        _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+        if (_projectionType == CPT_PERSPECTIVE)
+            _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+
+        else
+            _projectionMatrix = glm::ortho(_left, _right, _bottom, _top, _nearValue, _farValue);
 
         _projectionMatrixIs = true;
     }
@@ -200,6 +265,7 @@ void CameraStatic::setFarValue(GLfloat value)
 	_farValue = value;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -208,6 +274,7 @@ void CameraStatic::setNearValue(GLfloat value)
 	_nearValue = value;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -216,6 +283,7 @@ void CameraStatic::setViewAngle(GLfloat angle)
 	_viewAngle = angle;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
 }
 
 
@@ -225,6 +293,114 @@ void CameraStatic::setWindowDimensions(GLint width, GLint height)
 	_windowHeight = height;
 
 	_projectionMatrixIs = false;//updateProjection();
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setLeft(GLfloat left)
+{
+    _left = left;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setRight(GLfloat right)
+{
+    _right = right;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setBottom(GLfloat bottom)
+{
+    _bottom = bottom;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setTop(GLfloat top)
+{
+    _top = top;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setOrthoProjectionParams(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far)
+{
+    _left = left;
+    _right = right;
+    _bottom = bottom;
+    _top = top;
+    _nearValue = near;
+    _farValue = far;
+
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+AABB* CameraStatic::getAABB()
+{
+    if (!_aabbIs)
+    {
+        if (CPT_PERSPECTIVE)
+        {
+            Frustum frustum(getProjectionMatrix() * getViewMatrix());
+            _aabb = *frustum.getAABB();
+        }
+        else // CPT_ORTHOGRAPHIC
+        {
+            glm::vec3 position = getPosition();
+
+            glm::mat4 inverseViewMatrix;
+            if (position.x == 0.0f && position.y == 0.0f && position.z == 0.0f)
+                // transpose(M) == inverse(M), because view matrix is orthogonal
+                inverseViewMatrix = glm::transpose(getViewMatrix());
+            else
+                inverseViewMatrix = glm::inverse(getViewMatrix());
+
+
+            glm::vec3 vertices[] = {
+                glm::vec3(_left, _bottom, -_farValue),
+                glm::vec3(_left, _bottom, -_nearValue),
+                glm::vec3(_left, _top, -_farValue),
+                glm::vec3(_left, _top, -_nearValue),
+                glm::vec3(_right, _bottom, -_farValue),
+                glm::vec3(_right, _bottom, -_nearValue),
+                glm::vec3(_right, _top, -_farValue),
+                glm::vec3(_right, _top, -_nearValue)
+            };
+
+            glm::vec3 min(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
+            glm::vec3 max(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
+
+            for (int j = 0; j < 8; ++j)
+            {
+                glm::vec4 v = inverseViewMatrix * glm::vec4(vertices[j].x, vertices[j].y, vertices[j].z, 1.0f);
+
+                min.x = std::min(min.x, v.x);
+                min.y = std::min(min.y, v.y);
+                min.z = std::min(min.z, v.z);
+                max.x = std::max(max.x, v.x);
+                max.y = std::max(max.y, v.y);
+                max.z = std::max(max.z, v.z);
+            }
+
+            _aabb.setSize(min, max);
+        }
+
+        _aabbIs = true;
+    }
+
+	return &_aabb;
 }
 
 

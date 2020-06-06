@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Materials>
     <Material type="no_texture" name="Collision" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="" normalmap_texture="" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
-    <Material type="normalmapping" name="Material.001" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="brick.jpg" normalmap_texture="brick_n.jpg" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="normalmapping" name="Material.001" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="brick_color.jpg" normalmap_texture="brick_normal.jpg" alpha_texture="" shininess="25.5" transparency="0" offset="0,0" scale="1,1"/>
 </Materials>

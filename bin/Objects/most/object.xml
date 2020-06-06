@@ -5,7 +5,7 @@
 	<Description author="test" name="most" comment="Most" />
 
 	<Components>
-		<Component type="render" model="most.3ds" scale="1.7,1,1" />
+		<Component type="render" model="most.fbx" scale="1.7,1,1" />
 		<Component type="physics" body="bvh" />
 	</Components>
 	

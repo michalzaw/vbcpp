@@ -1,15 +1,23 @@
 #include "RTexture.h"
 
+#include "../Graphics/OGLDriver.h"
+
 #include <iostream>
 
 
-RTexture::RTexture(std::string path, TextureType type, TextureFormat format, glm::uvec2 size)
-    : Resource(path),
-    _type(type),
-    _format(format),
+RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool compressed)
+    : Resource(RT_TEXTURE, path),
+    _textureType(type),
+    _internalFormat(internalFormat),
     _size(size),
+	_compressed(compressed),
     _isGenerateMipmap(false)
 {
+    _format = _internalFormat;
+    if (_format == TF_RGBA_16F || _format == TF_RGBA_32F)
+        _format = TF_RGBA;
+    if (_format == TF_RGB_16F || _format == TF_RGB_32F)
+        _format = TF_RGB;
 
 }
 
@@ -18,14 +26,6 @@ RTexture::~RTexture()
 {
     std::cout << "RTexture - Destruktor: " << _path << std::endl;
     glDeleteTextures(1, &_texID);
-}
-
-
-void RTexture::generateMipmap()
-{
-    glGenerateMipmap(_type);
-
-    _isGenerateMipmap = true;
 }
 
 
@@ -38,8 +38,8 @@ void RTexture::setFiltering(TextureFilterMode minFilter, TextureFilterMode magFi
         generateMipmap();
     }
 
-    glTexParameteri(_type, GL_TEXTURE_MIN_FILTER, minFilter);
-    glTexParameteri(_type, GL_TEXTURE_MAG_FILTER, magFilter);
+    glTexParameteri(_textureType, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(_textureType, GL_TEXTURE_MAG_FILTER, magFilter);
 }
 
 
@@ -47,9 +47,9 @@ void RTexture::setClampMode(TextureClampMode mode)
 {
     bind();
 
-    glTexParameteri(_type, GL_TEXTURE_WRAP_S, mode);
-    glTexParameteri(_type, GL_TEXTURE_WRAP_T, mode);
-    glTexParameteri(_type, GL_TEXTURE_WRAP_R, mode);
+    glTexParameteri(_textureType, GL_TEXTURE_WRAP_S, mode);
+    glTexParameteri(_textureType, GL_TEXTURE_WRAP_T, mode);
+    //glTexParameteri(_textureType, GL_TEXTURE_WRAP_R, mode);
 }
 
 
@@ -57,11 +57,59 @@ void RTexture::setAnisotropyFiltering(bool isEnable, float anisotropy)
 {
     bind();
 
-    glTexParameterf(_type, GL_TEXTURE_MAX_ANISOTROPY_EXT, isEnable ? anisotropy : 1.0f);
+	float anisotropySamples = OGLDriver::getInstance().getMaxAnisotropy();
+	if (anisotropy < anisotropySamples && anisotropy > 0.0f)
+		anisotropySamples = anisotropy;
+
+    glTexParameterf(_textureType, GL_TEXTURE_MAX_ANISOTROPY_EXT, isEnable ? anisotropySamples : 1.0f);
+}
+
+
+void RTexture::setParameter(GLenum name, GLint value)
+{
+    bind();
+
+    glTexParameteri(_textureType, name, value);
+}
+
+
+void RTexture::setParameter(GLenum name, GLfloat value)
+{
+    bind();
+
+    glTexParameterf(_textureType, name, value);
 }
 
 
 glm::uvec2 RTexture::getSize()
 {
     return _size;
+}
+
+
+TextureType RTexture::getTextureType()
+{
+    return _textureType;
+}
+
+
+TextureFormat RTexture::getInternalFormat()
+{
+	return _internalFormat;
+}
+
+
+bool RTexture::isCompressed()
+{
+	return _compressed;
+}
+
+
+void RTexture::generateMipmap()
+{
+	bind();
+
+	glGenerateMipmap(_textureType);
+
+	_isGenerateMipmap = true;
 }

@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Jezioro" comment="Test object" />
+	<Description author="test" name="jezioro" comment="Test object" />
 
 	<Components>
 	
-		<Component type="render" model="water.3ds" />
+		<Component type="render" model="water.fbx" />
 	</Components>
 	
 </Object>

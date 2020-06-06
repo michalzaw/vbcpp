@@ -6,12 +6,13 @@ layout (location = 2) in vec3 VertexNormal;
 
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
+uniform vec3 CameraPosition;
 
 out vec3 TexCoord;
 
 void main()
 {
-	gl_Position = MVP * vec4(VertexPosition, 1.0f);
+	gl_Position = (MVP * vec4(VertexPosition + CameraPosition, 1.0f)).xyww;
 
 	TexCoord = normalize(VertexPosition);
 }

@@ -5,8 +5,9 @@
 	<Description author="test" name="wiata" comment="Wiata przystanku" />
 
 	<Components>
-		<Component type="render" model="wiata2.3ds" />
+		<Component type="render" model="wiata2.fbx" />
 		<!-- <Component type="physics" mass="0" body="static" /> -->
+		<Component type="bus-stop" />
 	</Components>
 	
 </Object>

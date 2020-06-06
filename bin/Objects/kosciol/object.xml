@@ -2,15 +2,15 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Kosciol" comment="Test object" />
+	<Description author="test" name="kosciol" comment="Test object" />
 
 	<Components>
 	
-		<Component type="render" model="kosciol.3ds" />
+		<Component type="render" model="kosciol.fbx" />
 	
 		<Component type="physics" mass="0" body="static" />
 		
-		<Component type="sound" file="church_bells.wav" looping="true" playDistance="100" volume="1" />
+		<Component type="sound" file="church_bells.wav" looping="true" playDistance="100" volume="0.9f" position="2,8,0" />
 	</Components>
 	
 </Object>

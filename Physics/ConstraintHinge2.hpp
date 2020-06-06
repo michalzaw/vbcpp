@@ -1,7 +1,7 @@
 #ifndef CONSTRAINTHINGE2_HPP_INCLUDED
 #define CONSTRAINTHINGE2_HPP_INCLUDED
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "Constraint.hpp"
 #include "PhysicalBody.hpp"
@@ -22,7 +22,7 @@ class ConstraintHinge2 : public Constraint
         btVector3       _axisA;
         btVector3       _axisB;
 
-        void UpdateConstraint();
+        void updateConstraint();
 };
 
 

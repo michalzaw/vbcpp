@@ -1,5 +1,7 @@
 #include "Light.h"
 
+#include "GraphicsManager.h"
+#include "Renderer.h"
 #include "../Scene/SceneObject.h"
 
 
@@ -7,9 +9,9 @@ Light::Light(LightType type)
     : Component(CT_LIGHT),
     _lightType(type),
     _color(1.0f, 1.0f, 1.0f), _ambientIntensity(0.5f), _diffuseIntensity(1.0f),
-    _cutoff(0.0f), _cutoffCos(1.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f),
+    _isShadowMapping(false), _shadowMap(NULL)
 {
-
 
 }
 
@@ -18,16 +20,21 @@ Light::Light(LightType type, glm::vec3 color, float ambientIntensity, float diff
     : Component(CT_LIGHT),
     _lightType(type),
     _color(color), _ambientIntensity(ambientIntensity), _diffuseIntensity(diffuseIntensity),
-    _cutoff(0.0f), _cutoffCos(1.0f)
+    _cutoff(0.0f), _cutoffCos(1.0f),
+    _isShadowMapping(false), _shadowMap(NULL)
 {
-
 
 }
 
 
 Light::~Light()
 {
+    if (_shadowMap != NULL)
+    {
+        Renderer::getInstance().unregisterShadowMap(_shadowMap);
 
+        delete _shadowMap;
+    }
 }
 
 
@@ -68,6 +75,27 @@ void Light::setCutoff(float cutoff)
     _cutoff = cutoff;
 
     _cutoffCos = cosf(_cutoff);
+}
+
+
+void Light::setShadowMapping(bool isEnable)
+{
+    _isShadowMapping = isEnable;
+
+    if (_isShadowMapping && _shadowMap == NULL)
+    {
+        _shadowMap = new ShadowMap(_object);
+        _shadowMap->create();
+
+        Renderer::getInstance().registerShadowMap(_shadowMap);
+    }
+
+    if (!isShadowMapping() && _shadowMap != NULL)
+    {
+        Renderer::getInstance().unregisterShadowMap(_shadowMap);
+
+        delete _shadowMap;
+    }
 }
 
 
@@ -148,4 +176,16 @@ float Light::getCutoff()
 float Light::getCutoffCos()
 {
     return _cutoffCos;
+}
+
+
+bool Light::isShadowMapping()
+{
+    return _isShadowMapping;
+}
+
+
+ShadowMap* Light::getShadowMap()
+{
+    return _shadowMap;
 }

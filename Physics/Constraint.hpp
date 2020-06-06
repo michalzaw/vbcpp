@@ -1,7 +1,7 @@
 #ifndef CONSTRAINT_HPP_INCLUDED
 #define CONSTRAINT_HPP_INCLUDED
 
-#include <bullet/btBulletDynamicsCommon.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "PhysicalBody.hpp"
 

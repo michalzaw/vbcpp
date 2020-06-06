@@ -25,5 +25,8 @@ Constraint::Constraint(PhysicalBody* bodyA, PhysicalBody* bodyB)
 Constraint::~Constraint()
 {
     safe_delete<btTypedConstraint>(_constraint);
+
+	_bodyA->removeConstraint(this);
+	_bodyB->removeConstraint(this);
 }
 

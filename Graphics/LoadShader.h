@@ -5,8 +5,9 @@
 #include <vector>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 
 //GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName);
@@ -23,12 +24,16 @@ class ShaderLoader
 
         };
 
-        static bool loadShaderCode(const char* fileName, std::string& code, const std::vector<std::string>& defines);
+        static std::string replaceConstatnsInLine(std::string line, const std::unordered_map<std::string, std::string>& constants);
+
+        static bool loadShaderCode(const char* fileName, std::string& code, const std::vector<std::string>& defines,
+                                   const std::unordered_map<std::string, std::string>& constants);
         static GLuint compileShader(ShaderType type, std::string& code);
         static GLuint linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId);
 
     public:
-        static GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName, const std::vector<std::string>& defines = std::vector<std::string>());
+        static GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName, const std::vector<std::string>& defines = std::vector<std::string>(),
+                                 const std::unordered_map<std::string, std::string>& constants = std::unordered_map<std::string, std::string>());
 
 };
 

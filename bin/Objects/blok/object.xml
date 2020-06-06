@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="mmiki26" name="Blok" comment="Blok mieszkalny" />
+	<Description author="mmiki26" name="blok" comment="Blok mieszkalny" />
 
 	<Components>
 	
-		<Component type="render" model="blok_vb.3ds" />
+		<Component type="render" model="blok_vb.fbx" />
 	
 		<Component type="physics" mass="0" body="static" />
 	</Components>

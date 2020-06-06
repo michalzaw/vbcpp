@@ -6,6 +6,11 @@
 
 #include <glm/glm.hpp>
 
+#include "Framebuffer.h"
+#include "OGLDriver.h"
+#include "CameraStatic.hpp"
+#include "ShadowMap.h"
+
 #include "../Scene/Component.h"
 
 
@@ -44,6 +49,9 @@ class Light : public Component
         float _cutoff;          // Radians
         float _cutoffCos;
 
+        bool            _isShadowMapping;
+        ShadowMap*      _shadowMap;
+
     public:
         Light(LightType type);
         Light(LightType type, glm::vec3 color, float ambientIntensity, float diffuseIntensity);
@@ -55,6 +63,7 @@ class Light : public Component
         void setAttenuation(float constant, float linear, float exp);
         void setAttenuation(LightAttenuation attenuation);
         void setCutoff(float cutoff); // Kat w radianach
+        void setShadowMapping(bool isEnable);
 
         LightType           getLightType();
         glm::vec3           getColor();
@@ -65,6 +74,8 @@ class Light : public Component
         LightAttenuation&   getAttenuation();
         float               getCutoff();
         float               getCutoffCos();
+        bool                isShadowMapping();
+        ShadowMap*          getShadowMap();
 
 };
 

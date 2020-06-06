@@ -3,7 +3,7 @@
 #include <cstdio>
 
 Window::Window()
-: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window")
+: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _isFullscreen(false)
 {
     glfwSetErrorCallback(errorCallback);
 }
@@ -14,12 +14,14 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100)
+bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool verticalSync, bool isResizable)
 {
     _width = w;
     _height = h;
     _xPos = posx;
     _yPos = posy;
+    _isFullscreen = isFullscreen;
+	_verticalSyncEnabled = verticalSync;
 
     if ( !glfwInit() )
     {
@@ -29,15 +31,15 @@ bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 
     }
 
     // Set OpenGL characteristics
-    glfwWindowHint(GLFW_SAMPLES, 4); //4x antialiasing
+    //glfwWindowHint(GLFW_SAMPLES, 4); //4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glfwWindowHint( GLFW_RESIZABLE, GL_FALSE );
+	glfwWindowHint( GLFW_RESIZABLE, isResizable );
 
 	// Create window with given size and title
-	_win = glfwCreateWindow(_width, _height, _title.c_str(), NULL, NULL);
+	_win = glfwCreateWindow(_width, _height, _title.c_str(), _isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
 
 	if (!_win)
         return false;
@@ -46,8 +48,13 @@ bool Window::createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 
 	glfwMakeContextCurrent(_win);
 	glfwSetWindowPos(_win, _xPos, _yPos);
 
-    if (!initGLEW())
-        return false;
+	if (!_verticalSyncEnabled)
+	{
+		glfwSwapInterval(0);
+	}
+
+    //if (!initGLEW())
+    //    return false;
 
 
     return true;
@@ -66,6 +73,12 @@ void Window::setWindowSize(int w, int h)
 {
     _width = w; _height = h;
     glfwSetWindowSize(_win, _width, _height);
+}
+
+
+void Window::setCursorMode(int mode)
+{
+	glfwSetInputMode(_win, GLFW_CURSOR, mode);
 }
 
 

@@ -2,7 +2,7 @@
 #define WINDOW_H_INCLUDED
 
 // GLFW, GLEW
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 // Include GLU header with GLFW
 #define GLFW_INCLUDE_GLU
@@ -17,7 +17,7 @@ class Window
         Window();
         ~Window();
 
-        bool createWindow(int w, int h, int posx, int posy);
+        bool createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100, bool isFullscreen = false, bool verticalSync = false, bool isResizable = false);
         GLFWwindow* getWindow() { return _win; }
 
         int getHeight() { return _height; }
@@ -25,6 +25,8 @@ class Window
 
         void setWindowTitle(string title);
         void setWindowSize(int w, int h);
+
+		void setCursorMode(int mode);
 
         void swapBuffers();
         void updateEvents();
@@ -36,6 +38,8 @@ class Window
         int         _width, _height;
         int         _xPos, _yPos;
         string      _title;
+        bool        _isFullscreen;
+		bool		_verticalSyncEnabled;
 
         static void errorCallback(int error, const char* description);
         bool initGLEW();

@@ -1,6 +1,6 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
-PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RModel* model)
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
 : PhysicalBody(0),
 _model(model)
 {
@@ -15,32 +15,51 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
 }
 
 
-btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
+void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform)
 {
-    btTriangleMesh* triMesh = new btTriangleMesh(true, false);
-    btVector3 tmp_vertices[3];
-    unsigned int index, vertexCount;
+    glm::mat4 nodeTransform = parentTransform * staticModelNode->transform.getTransformMatrix();
 
-    if (_model)
+    for (int i = 0; i < staticModelNode->getMeshesCount(); ++i)
     {
-        unsigned int* indices = _model->getIndices();
-        Vertex* vertices = _model->getVertices();
+        StaticModelMesh* mesh = staticModelNode->getMesh(i);
 
-        vertexCount = _model->getQuantumOfVertices();
+        unsigned int* indices = mesh->indices;
+        Vertex* vertices = mesh->vertices;
 
-        for (unsigned int j = 0; j < _model->getIndicesSize(); j += 3)
+        unsigned int vertexCount = mesh->verticesCount;
+
+        for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
         {
+            btVector3 tmp_vertices[3];
+
             for (unsigned int k = 0; k < 3; k++)
             {
-                index = indices[j+k];
+                unsigned index = indices[j+k] - mesh->firstVertexInVbo;
 
                 if (index > vertexCount) continue;
 
-                tmp_vertices[k] = btVector3(vertices[index].position[0], vertices[index].position[1], vertices[index].position[2]);
+                glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
+                tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
             }
 
-            triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[3]);
+            triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
         }
+    }
+
+    for (int i = 0; i < staticModelNode->children.size(); ++i)
+    {
+        addModelNodeToTriangleMesh(triMesh, staticModelNode->children[i], nodeTransform);
+    }
+}
+
+
+btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
+{
+    btTriangleMesh* triMesh = new btTriangleMesh(true, false);
+
+    if (_model)
+    {
+        addModelNodeToTriangleMesh(triMesh, _model->getRootNode(), glm::mat4(1.0f));
     }
 
     if (!triMesh)

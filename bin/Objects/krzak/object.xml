@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="fr0zi" name="Krzak" comment="Żywopłot" />
+	<Description author="fr0zi" name="krzak" comment="Żywopłot" />
 
 	<Components>
 	
-		<Component type="render" model="bush.3ds" />
+		<Component type="render" model="bush.fbx" />
 	
 	</Components>
 	

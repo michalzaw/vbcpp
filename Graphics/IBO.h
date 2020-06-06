@@ -2,7 +2,7 @@
 #define IBO_H_INCLUDED
 
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 
 class IBO

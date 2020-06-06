@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="fr0zi" name="TerenZabudowany" comment="Znak Teren Zabudowany" />
+	<Description author="fr0zi" name="terenzab" comment="Znak Teren Zabudowany" />
 
 	<Components>
 	
-		<Component type="render" model="terenzab.3ds" />
+		<Component type="render" model="terenzab.fbx" />
 		<Component type="physics" body="static" />
 
 	</Components>

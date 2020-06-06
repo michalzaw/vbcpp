@@ -8,6 +8,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
 
+#include "AABB.h"
+#include "Frustum.h"
+
 #include "../Scene/Component.h"
 
 #include "../Utils/Math.h"
@@ -15,12 +18,23 @@
 using glm::vec3;
 using glm::mat4;
 
+
+enum CameraProjectionType
+{
+    CPT_PERSPECTIVE,
+    CPT_ORTHOGRAPHIC
+};
+
+
 class CameraStatic : public Component
 {
 	public:
-		CameraStatic(int width = 800, int height = 600, GLfloat viewAngle = 45.0f, GLfloat nearValue = 0.1f, GLfloat farValue = 1000.0f);
+		//CameraStatic(int width = 800, int height = 600, GLfloat viewAngle = 45.0f, GLfloat nearValue = 0.1f, GLfloat farValue = 1000.0f);
+        CameraStatic(CameraProjectionType projectionType);
 
 		virtual ~CameraStatic();
+
+		CameraProjectionType getProjctionType();
 
 		vec3 getPosition();
 		vec3 getLookAtVector();
@@ -34,6 +48,13 @@ class CameraStatic : public Component
 		GLfloat getNearValue();
 		GLfloat	getFarValue();
 		GLfloat getViewAngle();
+		GLint   getWindowWidth();
+		GLint   getWindowHeight();
+
+		GLfloat getLeft();
+		GLfloat getRight();
+		GLfloat getBottom();
+		GLfloat getTop();
 
 		mat4 getProjectionMatrix();
 		mat4 getViewMatrix();
@@ -42,6 +63,15 @@ class CameraStatic : public Component
 		void setNearValue(GLfloat value);
 		void setViewAngle(GLfloat angle);
 		void setWindowDimensions(GLint width, GLint height);
+
+		void setLeft(GLfloat left);
+		void setRight(GLfloat right);
+		void setBottom(GLfloat bottom);
+		void setTop(GLfloat top);
+
+		void setOrthoProjectionParams(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far);
+
+		AABB* getAABB();
 
 		virtual void changedTransform()
 		{
@@ -53,9 +83,12 @@ class CameraStatic : public Component
 		    _localUpVectorIs = false;
 		    _localDirectionIs = false;
 		    _localRightVectorIs = false;
+		    _aabbIs = false;
 		}
 
 	protected:
+	    CameraProjectionType _projectionType;
+
 		mat4	_projectionMatrix;         bool _projectionMatrixIs;
 		mat4	_viewMatrix;               bool _viewMatrixIs;
 
@@ -72,6 +105,13 @@ class CameraStatic : public Component
 		GLfloat		_viewAngle;
 		GLint		_windowWidth;
 		GLint		_windowHeight;
+
+		GLfloat     _left;
+		GLfloat     _right;
+		GLfloat     _bottom;
+		GLfloat     _top;
+
+		AABB        _aabb;                 bool _aabbIs;
 
 		vec3 transformToGlobal(glm::vec3 vector);
 

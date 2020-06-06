@@ -2,7 +2,7 @@
 #define VBO_H_INCLUDED
 
 
-#include <GLEW/glew.h>
+#include <GL/glew.h>
 
 #include "Vertex.h"
 
@@ -20,6 +20,7 @@ class VBO
         VBO(unsigned int size);
         ~VBO();
 
+        unsigned int getVertexSize();
         unsigned int getBufferSize();
         unsigned int getQuantumOfVertices();
 

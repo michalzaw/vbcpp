@@ -2,11 +2,37 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Game>
-	<Resolution x="1024" y="768" />
+	<Resolution x="1920" y="1080" />
 
 
 	<Map name="Demo" />
 	
-	<Bus model="i211" />
+	<Bus model="h9_raycast" />
+	
+	<Configuration>
+		<Fullscreen>false</Fullscreen>
+		<VerticalSync>false</VerticalSync>
+		
+		<HdrQuality>16</HdrQuality>
+		<MsaaAntialiasing>true</MsaaAntialiasing>
+		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
+		
+		<Bloom>true</Bloom>
+		
+		<Shadowmapping>true</Shadowmapping>
+        <ShadowmapSize>2048</ShadowmapSize>
+		<StaticShadowmapSize>2048</StaticShadowmapSize>
+		
+		<Grass>false</Grass>
+		<GrassRenderingDistance>30.0</GrassRenderingDistance>
+		
+		<Mirrors>true</Mirrors>
+		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
 
+		<TextureCompression>true</TextureCompression>
+		<AnisotropicFiltering>false</AnisotropicFiltering>
+		<AnisotropySamples>4</AnisotropySamples>
+		
+		<PbrSupport>true</PbrSupport>
+    </Configuration>
 </Game>

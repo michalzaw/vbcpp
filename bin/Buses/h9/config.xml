@@ -4,27 +4,27 @@
 <Gearbox model="gbx_ikarus260" />
 <Engine model="eng_wskmielec" />
 
-<Object name="bus"> 
-	<transform position="1,4,12" rotation="0,3.1415,0" scale="1,1,1" />
+<Bus type="constraint" name="autosan" textures="PKS"> 
+	<Module type="main" model="h9.3ds" mass="9.6" position="0,0,0" > <!-- mass in tons -->
 
-	<body model="h9.3ds" textures="PKS" mass="9.6" /> <!-- mass in tons -->
-
-	<wheel name="wheel1" side="right" steering="1" powered="0" model="fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="228.0" damping="0.00053" brakeForce="2.0"/>
-	<wheel name="wheel2" side="left" steering="1" powered="0" model="fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="228.0" damping="0.00053" brakeForce="2.0"/>
+		<Wheel name="wheel1" side="right" steering="1" powered="0" model="fwheel.3ds" mass="1" position="1.0,-1.1,2.6" radius="1" width="0.5" stiffness="228.0" damping="0.00053" brakeForce="2.0"/>
+		<Wheel name="wheel2" side="left" steering="1" powered="0" model="fwheel.3ds" mass="1" position="-1.0,-1.1,2.6" radius="1" width="0.5" stiffness="228.0" damping="0.00053" brakeForce="2.0"/>
 	
-	<wheel name="wheel3" side="right" steering="0" powered="1" model="rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="285.0" damping="0.00058" brakeForce="0.85" />
-	<wheel name="wheel4" side="left" steering="0" powered="1" model="rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="285.0" damping="0.00058" brakeForce="0.85" />
+		<Wheel name="wheel3" side="right" steering="0" powered="1" model="rwheel.3ds" mass="1" position="1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="285.0" damping="0.00058" brakeForce="0.85" />
+		<Wheel name="wheel4" side="left" steering="0" powered="1" model="rwheel.3ds" mass="1" position="-1.0,-1.1,-1.85" radius="1" width="0.5" stiffness="285.0" damping="0.00058" brakeForce="0.85" />
 	
-	<door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
-	<door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
+		<Door name="df1" group="1" type="s" model="df1.3ds" mass="0.5" position="-1.17,0.23,4.28" pivotA="-1.17,0.23,4.28" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
+		<Door name="dr1" group="2" type="s" model="dr1.3ds" mass="0.5" position="-1.17,0.25,-2.75" pivotA="-1.17,0.25,-2.75" pivotB="0.0,0.3,0.4" doorOpenSound="door_open.wav" doorCloseSound="door_close.wav" />
 	
-	<steering_wheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
-	<driver position="0.75,0.44,3.51"/>
-	<light position="0.0,1.12,-2.13" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
-	<light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
-	<light position="0.0,1.12,2.38" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+		<SteeringWheel model="steeringwheel.3ds" position="0.75,0.09,4.3" rotation="0,0,0" scale="0.8,0.8,0.8"/>
+		
+		<Light position="0.0,1.12,-2.13" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+		<Light position="0.0,1.12,0.1" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
+		<Light position="0.0,1.12,2.38" color="1,1,1" attenuation="1,0.1,0.01" ambientIntensity="0" diffuseIntensity="0.2"/>
 	
-	<headlights name="headlight0" position="0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
-	<headlights name="headlight1" position="-0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
+		<Headlights name="headlight0" position="0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
+		<Headlights name="headlight1" position="-0.96,-0.52,4.59" rotation="-0.12,0,0" color="1,1,1" attenuation="1.0,0.0014,0.000007" ambientIntensity="0.1" diffuseIntensity="0.4" cutoff="0.34"/>
+	</Module>
 	
-</Object>
+	<Driver position="0.75,0.44,3.51"/>
+</Bus>

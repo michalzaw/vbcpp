@@ -11,7 +11,8 @@
 #include "../Physics/PhysicsManager.hpp"
 #include "SoundManager.h"
 #include "SceneObject.h"
-#include "Skybox.h"
+
+#include "../Game/BusStopSystem.h"
 
 
 struct BusStart
@@ -29,8 +30,6 @@ class SceneManager
 
         std::list<SceneObject*> _sceneObjects;
 
-        Skybox* _sky;
-
         BusStart    _busStart;
 
     public:
@@ -39,25 +38,31 @@ class SceneManager
 
         //GraphicsManager*    getGraphicsManager();
         PhysicsManager*     getPhysicsManager() { return _physicsManager; };
+        SoundManager*       getSoundManager() { return _soundManager; };
 
 
-        SceneObject*    addSceneObject(std::string name);
-        void            removeSceneObject(SceneObject* object);
+        SceneObject*    addSceneObject(std::string name, RObject* objectDefinition = NULL);
+        void            removeSceneObject(SceneObject* object, bool removeChildren = true);
 
-        void            removeSceneObject(std::string name);
+        void            removeSceneObject(std::string name, bool removeChildren = true);
+
+        void clearScene()
+        {
+            for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+            {
+                delete *i;
+            }
+
+            _sceneObjects.clear();
+
+            GraphicsManager::getInstance().clearQuadTree();
+        }
 
         SceneObject*    getSceneObject(std::string name);
-
-        void addSky(RTextureCubeMap* texture);
-
-
-
-        void loadScene(std::string filename);
-
-        void loadObject(std::string name, glm::vec3 position = glm::vec3(0,0,0), glm::vec3 rotation = glm::vec3(0,0,0));
-        void loadRoadProfile(std::string name, std::map<std::string, std::vector<RoadLane>>* profiles);
+        std::list<SceneObject*>& getSceneObjects();
 
         BusStart& getBusStart() { return _busStart; }
+
 };
 
 

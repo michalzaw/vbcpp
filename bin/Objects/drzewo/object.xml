@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Drzewo" comment="Test object" />
+	<Description author="test" name="drzewo" comment="Test object" />
 
 	<Components>
 	
-		<Component type="render" model="drzewo.3ds" />
+		<Component type="render" model="drzewo.fbx" />
 		<Component type="tree" />
 	</Components>
 	

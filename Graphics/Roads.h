@@ -10,10 +10,10 @@
 #include <glm/glm.hpp>
 
 #include "Material.h"
-#include "Model.h"
 #include "NVMeshMender/NVMeshMender.h"
 
 #include "../Utils/Math.h"
+#include "../Utils/RStaticModel.h"
 
 
 /*struct RoadLane
@@ -80,7 +80,7 @@ struct RoadSegment
 };
 
 
-Model* createRoadModel(std::vector<RoadLane> roadLanes, int lanesCount, std::vector<RoadSegment> segments);
+RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, int lanesCount, std::vector<RoadSegment>& segments);
 
 
 #endif // ROADS_H_INCLUDED

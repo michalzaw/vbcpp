@@ -6,7 +6,10 @@
 #include <cstdio>
 
 #include "Model.h"
-#include "../Utils/RModel.h"
+#include "ModelNode.h"
+#include "AABB.h"
+
+#include "../Utils/RStaticModel.h"
 
 #include "../Scene/Component.h"
 
@@ -14,20 +17,39 @@
 class RenderObject : public Component
 {
     protected:
-        //Model* _model;
-        RModel* _model;
+        RStaticModel* _model;
+        ModelNode*    _modelRootNode;
+        Material*     _materials;
+
+        bool _isCastShadows;
+		bool _isDynamicObject;
+
+        AABB _aabb;
+        bool _isCalculatedAABB;
+
+        void calculateNewAABB();
+
+        ModelNode* getModelNodeByName(std::string name, ModelNode* node);
 
     public:
-        RenderObject(RModel* model = NULL);
+        RenderObject(RStaticModel* model = NULL, bool isDynamicObject = false);
         virtual ~RenderObject();
 
-        //void SetModel(Model* model);
+        void setModel(RStaticModel* model);
+        RStaticModel* getModel();
+        ModelNode* getModelRootNode();
+        ModelNode* getModelNodeByName(std::string name);
 
-        //Model* GetModel();
+        Material* getMaterial(unsigned int index);
 
-        void setModel(RModel* model);
+        void setIsCastShadows(bool isCastShadows);
+        bool isCastShadows();
+		void setIsDynamicObject(bool isDynamic);
+		bool isDynamicObject();
 
-        RModel* getModel();
+        AABB* getAABB();
+
+        virtual void changedTransform();
 
 };
 

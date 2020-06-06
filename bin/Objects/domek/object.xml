@@ -2,11 +2,11 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Object>
-	<Description author="test" name="Domek" comment="Test object" />
+	<Description author="test" name="domek" comment="Test object" />
 
 	<Components>
 	
-		<Component type="render" model="domek_vbcpp.3ds" />
+		<Component type="render" model="domek_vbcpp.fbx" />
 	
 		<Component type="physics" mass="0" body="static" />
 	</Components>

@@ -1,11 +1,17 @@
 #include "OGLDriver.h"
 
+#include "../Utils/Logger.h"
+#include "../Utils/Strings.h"
+
 
 static std::unique_ptr<OGLDriver> drvInstance;
 
 OGLDriver::OGLDriver()
 {
     //_defaultVAO = NULL;
+
+    vbos = new std::vector<VBO*>[23];
+    ibos = new std::vector<IBO*>[23];
 }
 
 
@@ -31,6 +37,16 @@ OGLDriver::~OGLDriver()
         delete _uboList[i];
     }
 
+    for (int i = 0; i < _framebufferList.size(); ++i)
+    {
+        delete _framebufferList[i];
+    }
+
+    delete _defaultFramebuffer;
+
+    delete[] vbos;
+    delete[] ibos;
+
 }
 
 
@@ -54,12 +70,22 @@ bool OGLDriver::initialize()
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    glDepthFunc(GL_LEQUAL);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
+
+    _defaultFramebuffer = new Framebuffer();
+    _defaultFramebuffer->_fboBuffs.push_back(GL_BACK_LEFT);
+
+	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+
+	Logger::info("OpenGL initalized!");
+
+	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropy);
+	Logger::info("- maxAnisotropy: " + toString(_maxAnisotropy));
 
     return true;
 }
@@ -114,6 +140,17 @@ UBO* OGLDriver::createUBO(unsigned int size)
     }
 
     return ubo;
+}
+
+
+Framebuffer* OGLDriver::createFramebuffer()
+{
+    Framebuffer* framebuffer = new Framebuffer;
+    framebuffer->init();
+
+    _framebufferList.push_back(framebuffer);
+
+    return framebuffer;
 }
 
 
@@ -177,6 +214,21 @@ void OGLDriver::deleteUBO(UBO* ubo)
 }
 
 
+void OGLDriver::deleteFramebuffer(Framebuffer* framebuffer)
+{
+    for (int i = 0; i < _framebufferList.size(); ++i)
+    {
+        if (_framebufferList[i] == framebuffer)
+        {
+            delete _framebufferList[i];
+            _framebufferList.erase(_framebufferList.begin() + i);
+
+            break;
+        }
+    }
+}
+
+
 VAO* OGLDriver::getCurrentVAO()
 {
     return _currentVAO;
@@ -198,4 +250,16 @@ IBO* OGLDriver::getCurrentIBO()
 UBO* OGLDriver::getCurrentUBO()
 {
     return _currentUBO;
+}
+
+
+Framebuffer* OGLDriver::getDefaultFramebuffer()
+{
+    return _defaultFramebuffer;
+}
+
+
+float OGLDriver::getMaxAnisotropy()
+{
+	return _maxAnisotropy;
 }
