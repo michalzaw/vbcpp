@@ -810,7 +810,6 @@ namespace vbEditor
 				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
-				ImGui::MenuItem("Add new Crossroad..", NULL, &_addRoadDialogWindow);
 				ImGui::EndMenu();
 			}
 

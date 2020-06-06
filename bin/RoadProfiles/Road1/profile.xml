@@ -6,9 +6,9 @@
 
 	<Lanes>
 		<Lane material="asfalt" x1="-3.5" x2="3.5" y1="0.05" y2="0.05" />
-		<Lane material="kostka" x1="3.5" x2="3.5" y1="0.05" y2="0.15" />
+		<Lane material="kostka2" x1="3.5" x2="3.5" y1="0.05" y2="0.15" />
 		<Lane material="kostka" x1="3.5" x2="5.5" y1="0.15" y2="0.15" />
-		<Lane material="kostka" x1="-3.5" x2="-3.5" y1="0.15" y2="0.05" />
+		<Lane material="kostka2" x1="-3.5" x2="-3.5" y1="0.15" y2="0.05" />
 		<Lane material="kostka" x1="-5.5" x2="-3.5" y1="0.15" y2="0.15" />
 	</Lanes>
 	
