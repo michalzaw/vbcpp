@@ -128,6 +128,10 @@ void GameConfig::loadDevelopmentConfig(const char* filename)
 		{
 			alternativeResourcesPath = std::string(child->GetText());
 		}
+		else if (strcmp(ename, "developmentMode") == 0)
+		{
+			developmentMode = toBool(child->GetText());
+		}
 	}
 }
 
