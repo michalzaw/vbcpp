@@ -569,7 +569,7 @@ void SceneLoader::loadMap(std::string name)
 	// todo: load description
 	loadStartPosition(scnElement);
 	if (!loadTerrain(scnElement))
-		return;
+		Logger::warning("Cannot find terrain element!");
 
 	XMLElement* grassElement = scnElement->FirstChildElement("Grass");
 	if (grassElement)
