@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Logger.h"
+#include "Strings.h"
 
 
 RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size, bool useCompression)
@@ -121,10 +122,24 @@ void RTexture2D::setTexSubImage(float* data, int offsetX, int offsetY, int width
 
 RTexture2D* RTexture2D::createWhiteTexture(string path, glm::uvec2 size, bool useCompression)
 {
-    unsigned char data[16] = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
-    RTexture2D* texture = new RTexture2D(path, data, TF_RGBA, size, useCompression);
-    texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
-    texture->setClampMode(TCM_REPEAT);
+    return createOneColorTexture(path, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), useCompression);
+}
 
-    return texture;
+
+RTexture2D* RTexture2D::createOneColorTexture(string name, glm::vec4 color, bool useCompression)
+{
+	glm::uvec4 c(static_cast<unsigned int>(color.r * 255.0f), static_cast<unsigned int>(color.g * 255.0f), static_cast<unsigned int>(color.b * 255.0f), static_cast<unsigned int>(color.a * 255.0f));
+
+	unsigned char data[16] = {
+		c.r, c.g, c.b, c.a,
+		c.r, c.g, c.b, c.a,
+		c.r, c.g, c.b, c.a,
+		c.r, c.g, c.b, c.a
+	};
+
+	RTexture2D* texture = new RTexture2D(name, data, TF_RGBA, glm::uvec2(2, 2), useCompression);
+	texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+	texture->setClampMode(TCM_REPEAT);
+
+	return texture;
 }

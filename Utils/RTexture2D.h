@@ -21,6 +21,7 @@ class RTexture2D : public RTexture
         void setTexSubImage(float* data, int offsetX, int offsetY, int width, int height);
 
         static RTexture2D* createWhiteTexture(string path, glm::uvec2 size, bool useCompression = false);
+		static RTexture2D* createOneColorTexture(string name, glm::vec4 color, bool useCompression = false);
 
 };
 

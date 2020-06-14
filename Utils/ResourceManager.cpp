@@ -270,6 +270,50 @@ RTexture2D* ResourceManager::loadDefaultWhiteTexture()
 }
 
 
+RTexture2D* ResourceManager::loadOneColorTexture(glm::vec4 color)
+{
+	std::string name = "texture(" + toString(color.r) + "," + toString(color.g) + "," + toString(color.b) + "," + toString(color.a) + ")";
+
+	Resource* res = findResource(name);
+	if (res != 0)
+	{
+		RTexture2D* tex = dynamic_cast<RTexture2D*>(res);
+		return tex;
+	}
+
+	// Zasob nie istnieje
+	bool textureCompression = GameConfig::getInstance().textureCompression;
+	RTexture2D* texture = RTexture2D::createOneColorTexture(name, color, textureCompression);
+
+	if (texture)
+	{
+		//std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
+		std::unique_ptr<RTexture> tex(texture);
+		std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << tex.get()->getPath() << std::endl;
+
+		// Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+		// Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
+		//GLuint texID = tex->getID();
+		_resources.push_back(std::move(tex));
+
+
+		// Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
+		// Musialem odwolac sie do utworzonej tekstury poprzez iterator do ostatniego elementu na liscie (nowa tekstura jest zawsze wrzucana na koniec listy)
+		std::list<std::unique_ptr<Resource>>::iterator it = _resources.end();
+		std::unique_ptr<Resource>& res = *(--it);
+
+		RTexture2D* t = dynamic_cast<RTexture2D*>(res.get());
+
+
+		//std::cout << "Texture ID: " << tID << std::endl;
+
+		return t;
+	}
+
+	return 0;
+}
+
+
 // Ładowanie shaderów
 RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines,
                                      const std::unordered_map<std::string, std::string>& constants)

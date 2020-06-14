@@ -78,6 +78,9 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 
     sMaterial.shininess = (float)atof(materialElement->Attribute("shininess"));
 
+	sMaterial.metalnessValue = XmlUtils::getAttributeFloatOptional(materialElement, "metalness", sMaterial.metalnessValue);
+	sMaterial.roughnessValue = XmlUtils::getAttributeFloatOptional(materialElement, "roughness", sMaterial.roughnessValue);
+
 	sMaterial.fixDisappearanceAlpha = (float)XmlUtils::getAttributeBoolOptional(materialElement, "fixDisappearanceAlpha");
 
     sMaterial.offset = XMLstringToVec2(materialElement->Attribute("offset"));
@@ -110,10 +113,6 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     if(texStr != "")
         sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
 
-
-	sMaterial.metalicTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
-	sMaterial.roughnessTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
-	sMaterial.aoTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
     // glass texture - okresla ktora czesc szyby jest zewnetrzna - bialy, wewnetrzna - czarny. Wykorzystywane np w autobusie.
     const char* c = materialElement->Attribute("glass_texture");
     if (c != NULL)
@@ -245,6 +244,32 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	{
 		sMaterial.shader = SOLID_MATERIAL;
 		sMaterial.diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+	}
+
+
+	// add missing pbr textures
+	if (sMaterial.shader == PBR_MATERIAL)
+	{
+		if (sMaterial.diffuseTexture == NULL)
+		{
+			sMaterial.diffuseTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1, 1, 1, 1));
+		}
+		if (sMaterial.normalmapTexture == NULL)
+		{
+			sMaterial.normalmapTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.5, 0.5, 1, 1));
+		}
+		if (sMaterial.metalicTexture == NULL)
+		{
+			sMaterial.metalicTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(sMaterial.metalnessValue, sMaterial.metalnessValue, sMaterial.metalnessValue, 1));
+		}
+		if (sMaterial.roughnessTexture == NULL)
+		{
+			sMaterial.roughnessTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(sMaterial.roughnessValue, sMaterial.roughnessValue, sMaterial.roughnessValue, 1));
+		}
+		if (sMaterial.aoTexture == NULL)
+		{
+			sMaterial.aoTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1, 1, 1, 1));
+		}
 	}
 
 
