@@ -774,12 +774,14 @@ namespace vbEditor
 		_availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
 		_availableRoadProfiles = FilesHelper::getDirectoriesList(GameDirectories::ROAD_PROFILES);
 
+#ifdef DEVELOPMENT_RESOURCES
 		std::vector<std::string> availableMapsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::MAPS);
 		std::vector<std::string> availableObjectsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::OBJECTS);
 		std::vector<std::string> availableRoadProfilesDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::ROAD_PROFILES);
 		_availableMaps.insert(_availableMaps.end(), availableMapsDev.begin(), availableMapsDev.end());
 		_availableObjects.insert(_availableObjects.end(), availableObjectsDev.begin(), availableObjectsDev.end());
 		_availableRoadProfiles.insert(_availableRoadProfiles.end(), availableRoadProfilesDev.begin(), availableRoadProfilesDev.end());
+#endif // DEVELOPMENT_RESOURCES
 
 		_showOpenDialogWindow = true;
 	}
