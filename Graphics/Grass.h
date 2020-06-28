@@ -13,6 +13,9 @@ class Grass : public RenderObject
         glm::vec4   _grassColor;
 		float		_renderingDistance;
 
+		std::vector<RTexture2D*> _additionalRandomGrassTextures;
+		std::vector<float> _additionalRandomGrassTexturesScale;
+
     public:
         Grass(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         ~Grass();
@@ -24,6 +27,9 @@ class Grass : public RenderObject
         RTexture2D* getGrassDensityTexture();
         glm::vec4   getGrassColor();
 		float		getRenderingDistance();
+
+		std::vector<RTexture2D*>& getAdditionalRandomGrassTextures();
+		std::vector<float>& getAdditionalRandomGrassTexturesScale();
 
 };
 

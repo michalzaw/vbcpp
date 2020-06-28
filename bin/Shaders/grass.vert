@@ -21,6 +21,8 @@ uniform sampler2D grassDensity;
 uniform vec3 min;
 uniform int width;
 float TERRAIN_MAX_HEIGHT = 20;
+uniform float tScale[7];
+uniform int grassTexturesCount;
 #endif
 
 out vec3 Position;
@@ -30,6 +32,8 @@ out vec3 Normal;
 out vec4 PositionLightSpace[CASCADES_COUNT];
 out float ClipSpacePositionZ;
 
+flat out int tIndex;
+
 int Random(int Seed, int Iterations)
 {
 	int Value = Seed;
@@ -38,6 +42,10 @@ int Random(int Seed, int Iterations)
 		Value = ((Value >> 7) ^ (Value << 9)) * 15485863;
 	}
 	return Value;
+}
+
+float rand(vec2 co){
+    return fract(sin(dot(co.xy ,vec2(12.9898,78.233))) * 43758.5453);
 }
 
 void main()
@@ -71,9 +79,17 @@ void main()
 	mat4 rotationMatrix = mat4(cosa, 0, -sina, 0,
 							   0, 1, 0, 0,
 							   sina, 0, cosa, 0,
+							   0, 0, 0, 1); 
+
+	tIndex = int(rand(vec2(Offset.x, Offset.z)) * 1000) % 100;
+	tIndex = clamp(tIndex, 0, grassTexturesCount - 1);
+
+	mat4 scaleMatrix = mat4(0.8, 0, 0, 0,
+							   0, tScale[tIndex], 0, 0,
+							   0, 0, 0.8, 0,
 							   0, 0, 0, 1);
 		
-	vec3 vertexPositionWithRotationAndOffset = (translationMatrix * rotationMatrix * ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	vec3 vertexPositionWithRotationAndOffset = (translationMatrix * rotationMatrix * scaleMatrix * ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
 	
 	float density = texture2D(grassDensity, vec2((Offset.x / 256.0f * 0.5f) + 0.5f, (Offset.z / 256.0f * 0.5f) + 0.5f)).r;
 	if (density < 0.2)

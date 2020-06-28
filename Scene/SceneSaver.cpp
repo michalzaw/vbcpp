@@ -76,7 +76,7 @@ void SceneSaver::saveTerrain(XMLElement* terrainElement, XMLElement* grassElemen
 }
 
 
-void SceneSaver::saveGrass(XMLElement* grassElement, SceneObject* sceneObject)
+void SceneSaver::saveGrass(XMLElement* grassElement, XMLDocument& doc, SceneObject* sceneObject)
 {
 	Grass* grassComponent = static_cast<Grass*>(sceneObject->getComponent(CT_GRASS));
 
@@ -84,6 +84,19 @@ void SceneSaver::saveGrass(XMLElement* grassElement, SceneObject* sceneObject)
 	{
 		grassElement->SetAttribute("model", getRelativePathToDir(grassComponent->getModel()->getPath(), _dirPath + "grass/").c_str());
 		grassElement->SetAttribute("density_texture", getRelativePathToDir(grassComponent->getGrassDensityTexture()->getPath(), _dirPath).c_str());
+		grassElement->SetAttribute("color", vec3ToString(glm::vec3(grassComponent->getGrassColor().x, grassComponent->getGrassColor().y, grassComponent->getGrassColor().z)).c_str());
+
+		std::vector<RTexture2D*>& grassTextures = grassComponent->getAdditionalRandomGrassTextures();
+		std::vector<float>& grassTexturesScale = grassComponent->getAdditionalRandomGrassTexturesScale();
+		for (int i = 0; i < grassTextures.size(); ++i)
+		{
+			XMLElement* textureElement = doc.NewElement("Texture");
+
+			textureElement->SetAttribute("path", getRelativePathToDir(grassTextures[i]->getPath(), _dirPath + "grass/").c_str());
+			textureElement->SetAttribute("scale", grassTexturesScale[i]);
+
+			grassElement->InsertEndChild(textureElement);
+		}
 	}
 }
 
@@ -261,7 +274,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 			if (grassElement)
 			{
 				rootNode->InsertAfterChild(startPositionElement, grassElement);
-				saveGrass(grassElement, sceneObject);
+				saveGrass(grassElement, doc, sceneObject);
 			}
 		}
 		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)

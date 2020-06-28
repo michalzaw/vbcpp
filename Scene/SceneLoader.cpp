@@ -87,6 +87,7 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 		std::string grassModelFileName(grassElement->Attribute("model"));
 		std::string terrainHeightmapForGrassFileName(grassElement->Attribute("terrain_heightmap"));
 		std::string grassDensityTextureFileName(grassElement->Attribute("density_texture"));
+		glm::vec3 grassColor = XmlUtils::getAttributeVec3Optional(grassElement, "color", glm::vec3(1.0f, 1.0f, 1.0f));
 		float renderingDistance = GameConfig::getInstance().grassRenderingDistance;
 
 		std::string terrainHeightNormalMapFileName = TerrainLoader::createTerrainHeightAndNormalMapFileName(terrainHeightmapForGrassFileName);
@@ -110,7 +111,21 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 		SceneObject * grassObject = _sceneManager->addSceneObject("grass");
 		Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
 		grassComponent->setRenderingDistance(renderingDistance);
+		grassComponent->setGrassColor(glm::vec4(grassColor.x, grassColor.y, grassColor.z, 1.0f));
 		grassObject->addComponent(grassComponent);
+
+
+		XMLElement* grassTextureElement = grassElement->FirstChildElement("Texture");
+		while (grassTextureElement != nullptr)
+		{
+			std::string textureName(grassTextureElement->Attribute("path"));
+			float scale = atof(grassTextureElement->Attribute("scale"));
+
+			grassComponent->getAdditionalRandomGrassTextures().push_back(ResourceManager::getInstance().loadTexture(_dirPath + "grass/" + textureName, false));
+			grassComponent->getAdditionalRandomGrassTexturesScale().push_back(scale);
+
+			grassTextureElement = grassTextureElement->NextSiblingElement("Texture");
+		}
 	}
 	else
 		Logger::warning("Grass element not found!");
