@@ -352,7 +352,7 @@ float isGrass = 0.0f;
 #endif
 	
 #ifdef ALPHA_TEST
-	float _Cutoff = 0.2f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3
+	float _Cutoff = 0.5f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3, w ostatniej wersji było 0.2, zmienione na potrzeby trawy. TODO: sterowac z meterialu
 	float newAlpha = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
 	
 	FragmentColor.a = mix(FragmentColor.a, newAlpha, fixDisappearanceAlphaRatio);

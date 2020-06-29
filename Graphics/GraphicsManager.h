@@ -61,6 +61,7 @@ class GraphicsManager
         float       _windVelocity;
         float       _windValue;
         glm::vec3   _windVector;
+		float		_windTimer;
 
         EnvironmentCaptureComponent* _globalEnvironmentCaptureComponent;
 
@@ -123,6 +124,7 @@ class GraphicsManager
         float       getWindVelocity();
         glm::vec3   getWindVector();
         float       getWindValue();
+		float		getWindTimer();
 
 
         std::list<RenderObject*>& getRenderObjects();

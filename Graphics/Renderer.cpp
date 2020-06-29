@@ -265,6 +265,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_7] = "tScale[6]";
 
 	_uniformsNames[UNIFORM_GRASS_TEXTURES_COUNT] = "grassTexturesCount";
+	_uniformsNames[UNIFORM_GRASS_WIND_TIMER] = "time";
 
 	for (int i = 0; i < NUMBER_OF_SHADERS; ++i)
 	{
@@ -1777,6 +1778,8 @@ void Renderer::renderScene(RenderData* renderData)
 				shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURE_SCALE_1 + i], grassTexturesScale[i]);
 			}
 			shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURES_COUNT], (int)grassTextures.size());
+
+			shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], GraphicsManager::getInstance().getWindTimer());
 
             glDrawElementsInstanced(model->getPrimitiveType(),
                                 mesh->indicesCount,
