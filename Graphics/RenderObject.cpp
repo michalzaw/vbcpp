@@ -6,7 +6,7 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _model(NULL),
 	_modelRootNode(NULL),
-    _materials(NULL),
+    _materials(NULL), _materialsCount(0),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
@@ -86,6 +86,7 @@ void RenderObject::setModel(RStaticModel* model)
 
     _modelRootNode = new ModelNode(_model->getRootNode());
 
+	_materialsCount = _model->getMaterialsCount();
     _materials = new Material[_model->getMaterialsCount()];
     for (int i = 0; i < _model->getMaterialsCount(); ++i)
     {
@@ -150,6 +151,12 @@ ModelNode* RenderObject::getModelNodeByName(std::string name)
 Material* RenderObject::getMaterial(unsigned int index)
 {
     return &_materials[index];
+}
+
+
+unsigned int RenderObject::getMaterialsCount()
+{
+	return _materialsCount;
 }
 
 

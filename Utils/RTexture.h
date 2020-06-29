@@ -64,7 +64,7 @@ class RTexture : public Resource
         RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool compressed = false);
         virtual ~RTexture();
 
-        //GLuint getID() { return _texID; }
+        GLuint getID() { return _texID; }
 
         void setFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void setClampMode(TextureClampMode mode);

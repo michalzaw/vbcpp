@@ -12,6 +12,7 @@
 #include "../../ImGui/imgui_internal.h"
 
 #include "RoadTools.h"
+#include "../../Utils/Logger.h"
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
@@ -248,6 +249,9 @@ namespace vbEditor
 	extern bool isRoadModified;
 
 	extern std::vector<std::string> _availableRoadProfiles;
+
+	extern bool _showMaterialEditorWindow;
+	extern Material* currentMaterial;
 }
 
 void showObjectProperties()
@@ -281,8 +285,31 @@ void showObjectProperties()
 			{
 				if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					Material* material = renderComponent->getMaterial(0);
-					ImGui::Text("Material name: %s", material->name.c_str());
+					//Material* material = renderComponent->getMaterial(0);
+					//ImGui::Text("Material name: %s", material->name.c_str());
+
+					ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+
+					for (int i = 0; i < renderComponent->getMaterialsCount(); ++i)
+					{
+						Material* material = renderComponent->getMaterial(i);
+
+						if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+						{
+							if (ImGui::IsMouseDoubleClicked(0))
+							{
+								Logger::info(material->name);
+								vbEditor::_showMaterialEditorWindow = true;
+								vbEditor::currentMaterial = material;
+							}
+						}
+
+						/*if (ImGui::TreeNodeEx((void*)(intptr_t)material, node_flags, material->name.c_str()))
+						{
+							ImGui::TreePop();
+						}*/
+						
+					}
 				}
 			}
 

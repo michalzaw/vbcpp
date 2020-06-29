@@ -24,6 +24,7 @@
 #include "Windows/SceneGraphWindow.h"
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
+#include "Windows/MaterialEditorWindow.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -508,6 +509,7 @@ namespace vbEditor
 	static bool _saveMap = false;
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
+	bool _showMaterialEditorWindow = false;
 
 
 	std::string windowTitle = "VBCPP - World Editor";
@@ -927,6 +929,14 @@ namespace vbEditor
 		{
 			SceneGraphWindow(_sceneManager->getSceneObjects());
 			showObjectProperties();
+		}
+
+		if (_showMaterialEditorWindow)
+		{
+			if (!materialEditorWindow())
+			{
+				_showMaterialEditorWindow = false;
+			}
 		}
 
 		if (_selectedSceneObject)
