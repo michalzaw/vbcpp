@@ -2,7 +2,7 @@
 
 
 RFont::RFont(std::string path)
-    : Resource(RT_FONT, path),
+    : Resource(RT_FONT_RESOURCE, path),
     _characterTexture(NULL), _vbo(NULL)
 {
 

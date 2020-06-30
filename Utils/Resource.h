@@ -11,7 +11,7 @@ enum ResourceType
     RT_TEXTURE,
     RT_SHADER,
     RT_MODEL,
-    RT_FONT,
+    RT_FONT_RESOURCE,
     RT_SOUND,
 	RT_OBJECT,
 	RT_ROAD_PROFILE,

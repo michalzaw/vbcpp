@@ -2,16 +2,21 @@
 
 #include <vector>
 
+#include <portable-file-dialogs.h>
+
 #include "../..//ImGui/imgui.h"
 
 #include "../../Graphics/Material.h"
 
+#include "../../Utils/Logger.h"
 #include "../../Utils/ResourceManager.h"
 
 
 namespace vbEditor
 {
 	Material* currentMaterial = nullptr;
+
+	RTexture* whiteTexture = nullptr;
 
 	void showMaterialNameEdit()
 	{
@@ -21,7 +26,7 @@ namespace vbEditor
 
 		buffer[sizeof buffer - 1] = '\0';
 
-		if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly))
 		{
 			currentMaterial->name = std::string(buffer);
 		}
@@ -65,16 +70,42 @@ namespace vbEditor
 
 	void showTextureEdit(RTexture*& texture, const char* name)
 	{
-		char buffer[1024];
+		if (whiteTexture == nullptr)
+		{
+			whiteTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+		}
+
+		char id[50];
+		sprintf(id, "texture#%s", name);
+
+		ImGui::PushID(id);
+
+		char buffer[1024] = { '\0' };
 
 		if (texture != nullptr)
 			strncpy(buffer, texture->getPath().c_str(), sizeof buffer);
 
 		buffer[sizeof buffer - 1] = '\0';
 
-		if (ImGui::InputText(name, buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		ImGui::Text(name);
+
+		if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly))
 		{
 			//currentMaterial->name = std::string(buffer);
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("..."))
+		{
+			std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+
+			if (result.size() == 1)
+			{
+				texture = ResourceManager::getInstance().loadTexture(result[0]);
+
+				Logger::info(result[0]);
+			}
 		}
 
 		if (texture != nullptr)
@@ -83,10 +114,10 @@ namespace vbEditor
 		}
 		else
 		{
-			RTexture* t = ResourceManager::getInstance().loadDefaultWhiteTexture();
-
-			ImGui::Image((ImTextureID)t->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
+			ImGui::Image((ImTextureID)whiteTexture->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
 		}
+
+		ImGui::PopID();
 	}
 
 	void showTexturesEdit()
