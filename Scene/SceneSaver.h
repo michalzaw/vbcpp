@@ -32,7 +32,6 @@ class SceneSaver
 		SceneManager* _sceneManager;
 		std::string _dirPath;
 
-		std::string getRelativePathToDir(std::string filePath, std::string dirPath);
 		std::string createSkyTextureAttribute(std::string path);
 
 		void saveDescription(tinyxml2::XMLElement* descriptionElement, const SceneDescription& sceneDescription);

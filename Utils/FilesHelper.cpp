@@ -1,5 +1,8 @@
 #include "FilesHelper.h"
 
+#include <algorithm>
+#include <fstream>
+
 #ifdef WIN32
 #include <windows.h>
 #else
@@ -91,9 +94,59 @@ std::vector<std::string> FilesHelper::getDirectoriesList(std::string path)
     return directories;
 }
 
+
+std::string FilesHelper::getFileNameFromPath(std::string path)
+{
+	auto lastSlashPosition = path.find_last_of("/\\");
+
+	return path.substr(lastSlashPosition + 1);
+}
+
+
 std::string FilesHelper::getFileExtension(std::string fileName)
 {
 	auto lastDotPosition = fileName.find_last_of('.');
 
 	return fileName.substr(lastDotPosition + 1);
+}
+
+
+std::string FilesHelper::getRelativePathToDir(std::string filePath, std::string dirPath)
+{
+	std::string dirPathFromFilePath = filePath.substr(0, dirPath.size());
+	if (dirPath != dirPathFromFilePath)
+		Logger::error("Invalid dirPath! Cannot find dirPath: " + dirPath + " in path: " + filePath);
+
+	return filePath.substr(dirPath.size());
+}
+
+
+std::string FilesHelper::getRelativePathToDirInGameDir(std::string filePath, std::string dirPath)
+{
+	std::replace(filePath.begin(), filePath.end(), '\\', '/');
+	std::replace(dirPath.begin(), dirPath.end(), '\\', '/');
+
+	std::size_t pos = filePath.rfind(dirPath);
+	if (pos != std::string::npos)
+		return filePath.substr(pos + dirPath.size());
+	else
+		return filePath;
+}
+
+bool FilesHelper::isInPathSubdir(std::string filePath, std::string dirPath)
+{
+	std::replace(filePath.begin(), filePath.end(), '\\', '/');
+	std::replace(dirPath.begin(), dirPath.end(), '\\', '/');
+
+	std::size_t pos = filePath.rfind(dirPath);
+	return pos != std::string::npos;
+}
+
+
+void FilesHelper::copyFile(std::string from, std::string to)
+{
+	std::ifstream sourceFile(from, std::ios::binary);
+	std::ofstream destinationFile(to, std::ios::binary);
+
+	destinationFile << sourceFile.rdbuf();
 }

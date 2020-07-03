@@ -251,8 +251,39 @@ namespace vbEditor
 	extern std::vector<std::string> _availableRoadProfiles;
 
 	extern bool _showMaterialEditorWindow;
-	extern Material* currentMaterial;
+	extern RenderObject* currentRenderObject;
+	extern RStaticModel* currentStaticModel;
+	extern unsigned int currentMaterialIndex;
 }
+
+
+void showRenderComponentDetails(RenderObject* renderComponent)
+{
+	if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Materials");
+
+		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+
+		for (int i = 0; i < renderComponent->getMaterialsCount(); ++i)
+		{
+			Material* material = renderComponent->getModel()->getMaterial(i);
+
+			if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+			{
+				if (ImGui::IsMouseDoubleClicked(0))
+				{
+					Logger::info(material->name);
+					vbEditor::_showMaterialEditorWindow = true;
+					vbEditor::currentRenderObject = renderComponent;
+					vbEditor::currentStaticModel = renderComponent->getModel();
+					vbEditor::currentMaterialIndex = i;
+				}
+			}
+		}
+	}
+}
+
 
 void showObjectProperties()
 {
@@ -283,34 +314,7 @@ void showObjectProperties()
 			RenderObject* renderComponent = dynamic_cast<RenderObject*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDER_OBJECT));
 			if (renderComponent)
 			{
-				if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-					//Material* material = renderComponent->getMaterial(0);
-					//ImGui::Text("Material name: %s", material->name.c_str());
-
-					ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
-
-					for (int i = 0; i < renderComponent->getMaterialsCount(); ++i)
-					{
-						Material* material = renderComponent->getMaterial(i);
-
-						if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
-						{
-							if (ImGui::IsMouseDoubleClicked(0))
-							{
-								Logger::info(material->name);
-								vbEditor::_showMaterialEditorWindow = true;
-								vbEditor::currentMaterial = material;
-							}
-						}
-
-						/*if (ImGui::TreeNodeEx((void*)(intptr_t)material, node_flags, material->name.c_str()))
-						{
-							ImGui::TreePop();
-						}*/
-						
-					}
-				}
+				showRenderComponentDetails(renderComponent);
 			}
 
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
@@ -320,6 +324,12 @@ void showObjectProperties()
 				{
 
 				}
+			}
+
+			Grass* grassComponent = dynamic_cast<Grass*>(vbEditor::_selectedSceneObject->getComponent(CT_GRASS));
+			if (grassComponent)
+			{
+				showRenderComponentDetails(grassComponent);
 			}
 
 			RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

@@ -46,7 +46,6 @@ class StaticModelLoader
         Transform _lastNodeTransform;
 
 
-        void saveMaterialsDataToXml(std::string fileName);
         void loadAllMaterials();
 
         void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);

@@ -7,16 +7,85 @@
 #include "../..//ImGui/imgui.h"
 
 #include "../../Graphics/Material.h"
+#include "../../Graphics/MaterialSaver.h"
+#include "../../Graphics/GraphicsManager.h"
+#include "../../Graphics/LoadMaterial.h"
 
+#include "../../Utils/FilesHelper.h"
 #include "../../Utils/Logger.h"
 #include "../../Utils/ResourceManager.h"
 
 
 namespace vbEditor
 {
+	RenderObject* currentRenderObject = nullptr;
+	RStaticModel* currentStaticModel = nullptr;
+	unsigned int currentMaterialIndex = 0;
+
 	Material* currentMaterial = nullptr;
+	Material originalMaterial;
 
 	RTexture* whiteTexture = nullptr;
+
+	bool isOpen = false;
+	bool isMaterialModified = false;
+
+	void reloadCurrentMaterialInAllObjects()
+	{
+		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+		for (RenderObject* renderObject : renderObjects)
+		{
+			if (renderObject->getModel() == currentStaticModel)
+			{
+				renderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+			}
+		}
+	}
+
+	void saveMaterial()
+	{
+		if (isMaterialModified)
+		{
+			reloadCurrentMaterialInAllObjects();
+
+			std::string modelFileName = currentRenderObject->getModel()->getPath();
+			std::string materialXmlFileName = MaterialLoader::createMaterialFileName(modelFileName);
+			std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
+
+			Logger::info("modelFileName: " + modelFileName);
+			Logger::info("materialXmlFileName: " + materialXmlFileName);
+			Logger::info("objectDirPath: " + objectDirPath);
+			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getMaterial(0), currentRenderObject->getMaterialsCount(), objectDirPath);
+
+			isMaterialModified = false;
+		}
+	}
+
+	void cancelChangesInMaterial()
+	{
+		if (isMaterialModified)
+		{
+			*currentMaterial = originalMaterial;
+			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+		}
+	}
+
+	void showButtons()
+	{
+		if (ImGui::Button("Save"))
+		{
+			saveMaterial();
+		}
+
+		ImGui::SameLine();
+
+		if (ImGui::Button("Cancel"))
+		{
+			cancelChangesInMaterial();
+
+			isOpen = false;
+		}
+	}
 
 	void showMaterialNameEdit()
 	{
@@ -52,9 +121,10 @@ namespace vbEditor
 			"GLASS_MATERIAL"
 		};
 
-		if (ImGui::Combo("Interpolation", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
+		if (ImGui::Combo("Material type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
 		{
 			currentMaterial->shader = (ShaderType) typeComboCurrentItem;
+			isMaterialModified = true;
 		}
 	}
 
@@ -62,10 +132,22 @@ namespace vbEditor
 	{
 		ImGui::Text("Colors");
 
-		ImGui::ColorEdit4("Ambient", (float*)& currentMaterial->ambientColor, ImGuiColorEditFlags_NoOptions);
-		ImGui::ColorEdit4("Diffuse", (float*)& currentMaterial->diffuseColor, ImGuiColorEditFlags_NoOptions);
-		ImGui::ColorEdit4("Specular", (float*)& currentMaterial->specularColor, ImGuiColorEditFlags_NoOptions);
-		ImGui::ColorEdit4("Emissive", (float*)& currentMaterial->emissiveColor, ImGuiColorEditFlags_NoOptions);
+		if (ImGui::ColorEdit4("Ambient", (float*)& currentMaterial->ambientColor, ImGuiColorEditFlags_NoOptions))
+		{
+			isMaterialModified = true;
+		}
+		if (ImGui::ColorEdit4("Diffuse", (float*)& currentMaterial->diffuseColor, ImGuiColorEditFlags_NoOptions))
+		{
+			isMaterialModified = true;
+		}
+		if (ImGui::ColorEdit4("Specular", (float*)& currentMaterial->specularColor, ImGuiColorEditFlags_NoOptions))
+		{
+			isMaterialModified = true;
+		}
+		if (ImGui::ColorEdit4("Emissive", (float*)& currentMaterial->emissiveColor, ImGuiColorEditFlags_NoOptions))
+		{
+			isMaterialModified = true;
+		}
 	}
 
 	void showTextureEdit(RTexture*& texture, const char* name)
@@ -80,43 +162,56 @@ namespace vbEditor
 
 		ImGui::PushID(id);
 
-		char buffer[1024] = { '\0' };
-
-		if (texture != nullptr)
-			strncpy(buffer, texture->getPath().c_str(), sizeof buffer);
-
-		buffer[sizeof buffer - 1] = '\0';
-
-		ImGui::Text(name);
-
-		if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly))
+		ImGuiTreeNodeFlags headerFlag = texture != nullptr && texture->getPath() != ".defaultTexture" ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None;
+		if (ImGui::CollapsingHeader(name, headerFlag))
 		{
-			//currentMaterial->name = std::string(buffer);
-		}
+			char buffer[1024] = { '\0' };
 
-		ImGui::SameLine();
+			if (texture != nullptr)
+				strncpy(buffer, texture->getPath().c_str(), sizeof buffer);
 
-		if (ImGui::Button("..."))
-		{
-			std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+			buffer[sizeof buffer - 1] = '\0';
 
-			if (result.size() == 1)
+			//ImGui::Text(name);
+
+			if (ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly))
 			{
-				texture = ResourceManager::getInstance().loadTexture(result[0]);
+				//currentMaterial->name = std::string(buffer);
+			}
 
-				Logger::info(result[0]);
+			ImGui::SameLine();
+
+			if (ImGui::Button("..."))
+			{
+				std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+
+				if (result.size() == 1)
+				{
+					Logger::info(result[0]);
+
+					std::string path = result[0];
+					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
+
+					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
+					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
+					{
+						FilesHelper::copyFile(path, newPath);
+					}
+					texture = ResourceManager::getInstance().loadTexture(newPath);
+
+					isMaterialModified = true;
+				}
+			}
+
+			if (texture != nullptr)
+			{
+				ImGui::Image((ImTextureID)texture->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
+			}
+			else
+			{
+				ImGui::Image((ImTextureID)whiteTexture->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
 			}
 		}
-
-		if (texture != nullptr)
-		{
-			ImGui::Image((ImTextureID)texture->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
-		}
-		else
-		{
-			ImGui::Image((ImTextureID)whiteTexture->getID(), ImVec2(128, 128), ImVec2(0, 0), ImVec2(1, 1), ImVec4(1.0f, 1.0f, 1.0f, 1.0f), ImVec4(1.0f, 1.0f, 1.0f, 0.5f));
-		}
-
 		ImGui::PopID();
 	}
 
@@ -138,24 +233,43 @@ namespace vbEditor
 		ImGui::Text("Parameters");
 
 		float* shininess = &(currentMaterial->shininess);
-		ImGui::DragFloat("Shininess", shininess, 0.01f, 0.0f, 0.0f);
+		if (ImGui::DragFloat("Shininess", shininess, 0.01f, 0.0f, 0.0f))
+		{
+			isMaterialModified = true;
+		}
 
 		float* transparency = &(currentMaterial->transparency);
-		ImGui::DragFloat("Transparency", transparency, 0.01f, 0.0f, 0.0f);
+		if (ImGui::DragFloat("Transparency", transparency, 0.01f, 0.0f, 0.0f))
+		{
+			isMaterialModified = true;
+		}
 
 		bool fixDisappearanceAlpha = (bool) currentMaterial->fixDisappearanceAlpha;
 		if (ImGui::Checkbox("Fix disappearance alpha", &fixDisappearanceAlpha))
 		{
 			currentMaterial->fixDisappearanceAlpha = fixDisappearanceAlpha ? 1.0f : 0.0f;
+			isMaterialModified = true;
 		}
 	}
 
 	bool materialEditorWindow()
 	{
-		bool isOpen = true;
+		if (currentMaterial == nullptr)
+		{
+			currentMaterial = currentStaticModel->getMaterial(currentMaterialIndex);
+			originalMaterial = *currentMaterial;
+		}
+
+		isOpen = true;
 
 		if (ImGui::Begin("Material editor", &isOpen))
 		{
+			ImGui::PushID(currentMaterial);
+
+			showButtons();
+
+			ImGui::Separator();
+
 			showMaterialNameEdit();
 			showShaderTypeCombo();
 
@@ -170,8 +284,21 @@ namespace vbEditor
 			ImGui::Separator();
 
 			showMaterialParamsEdit();
+
+			ImGui::PopID();
 		}
 		ImGui::End();
+
+		if (isMaterialModified)
+		{
+			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+		}
+
+		if (!isOpen)
+		{
+			cancelChangesInMaterial();
+			currentMaterial = nullptr;
+		}
 
 		return isOpen;
 	}

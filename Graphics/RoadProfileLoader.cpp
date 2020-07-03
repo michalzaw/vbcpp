@@ -4,6 +4,9 @@
 
 #include "../Utils/Logger.h"
 
+#include "../Utils/tinyxml2.h"
+using namespace tinyxml2;
+
 
 RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 {

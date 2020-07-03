@@ -41,6 +41,7 @@ class RenderObject : public Component
         ModelNode* getModelRootNode();
         ModelNode* getModelNodeByName(std::string name);
 
+		void updateLocalMaterialFromModel(unsigned int index);
         Material* getMaterial(unsigned int index);
 		unsigned int getMaterialsCount();
 

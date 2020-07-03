@@ -28,6 +28,14 @@ inline std::string vec3ToString(glm::vec3 vector)
 }
 
 
+inline std::string vec4ToString(glm::vec4 vector)
+{
+	std::ostringstream Stream;
+	Stream << vector.x << "," << vector.y << "," << vector.z << "," << vector.w;
+	return Stream.str();
+}
+
+
 // Convert string to int
 inline int toInt(std::string String)
 {

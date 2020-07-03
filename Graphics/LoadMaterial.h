@@ -4,12 +4,15 @@
 
 #include "Material.h"
 
-#include "../Utils/tinyxml2.h"
 #include "../Utils/Strings.h"
 #include "../Utils/Helpers.hpp"
 #include "../Utils/ResourceManager.h"
 
-using namespace tinyxml2;
+
+namespace tinyxml2
+{
+	class XMLDocument;
+}
 
 
 // XML MATERIAL FILE DEFINITIONS
@@ -23,7 +26,7 @@ extern std::string matFilenamePostfix;
 class MaterialLoader
 {
     private:
-        XMLDocument* _xmlFile;
+		tinyxml2::XMLDocument* _xmlFile;
 
     public:
         MaterialLoader();

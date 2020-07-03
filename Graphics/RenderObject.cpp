@@ -90,20 +90,7 @@ void RenderObject::setModel(RStaticModel* model)
     _materials = new Material[_model->getMaterialsCount()];
     for (int i = 0; i < _model->getMaterialsCount(); ++i)
     {
-        _materials[i] = *(_model->getMaterial(i));
-
-        if (_materials[i].shader == MIRROR_MATERIAL)
-        {
-            MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _materials[i].mirrorName);
-            if (mirrorComponent != NULL)
-            {
-                _materials[i].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
-            }
-            else
-            {
-                GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_materials[i]);
-            }
-        }
+		updateLocalMaterialFromModel(i);
     }
 }
 
@@ -145,6 +132,25 @@ ModelNode* RenderObject::getModelNodeByName(std::string name, ModelNode* node)
 ModelNode* RenderObject::getModelNodeByName(std::string name)
 {
     return getModelNodeByName(name, _modelRootNode);
+}
+
+
+void RenderObject::updateLocalMaterialFromModel(unsigned int index)
+{
+	_materials[index] = *(_model->getMaterial(index));
+
+	if (_materials[index].shader == MIRROR_MATERIAL)
+	{
+		MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _materials[index].mirrorName);
+		if (mirrorComponent != NULL)
+		{
+			_materials[index].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+		}
+		else
+		{
+			GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_materials[index]);
+		}
+	}
 }
 
 

@@ -4,6 +4,8 @@
 
 #include "../Utils/XmlUtils.h"
 
+#include "../Utils/tinyxml2.h"
+using namespace tinyxml2;
 
 // XML MATERIAL FILE DEFINITIONS
 const char* XML_MATERIAL_ROOT = "Materials";
@@ -84,31 +86,40 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     sMaterial.scale = XMLstringToVec2(materialElement->Attribute("scale"));
 
     // make Texture Name lowercase
-    std::string texStr = std::string(materialElement->Attribute("diffuse_texture"));
+	const char* diffuseTexturePath = materialElement->Attribute("diffuse_texture");
+	if (diffuseTexturePath != NULL)
+	{
+		std::string texStr = std::string(diffuseTexturePath);
 
-    for(unsigned int i = 0; i < texStr.size(); i++ )
-        texStr[i] = tolower(texStr[i]);
+		std::cout << "DiffuseTexture: " << texStr << std::endl;
 
-    std::string texturePath = texPath + texStr;
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
+
+		std::string texturePath = texPath + texStr;
 
 
-    if(texStr != "")
-        sMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(texturePath);
-
+		if (texStr != "")
+			sMaterial.diffuseTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
 
     // Normal mapa
-    texStr = std::string(materialElement->Attribute("normalmap_texture"));
+	const char* normalmapTexturePath = materialElement->Attribute("normalmap_texture");
+	if (normalmapTexturePath != NULL)
+	{
+		std::string texStr = std::string(normalmapTexturePath);
 
-    std::cout << "NormalMap: " << texStr << std::endl;
+		std::cout << "NormalMap: " << texStr << std::endl;
 
-    for(unsigned int i = 0; i < texStr.size(); i++ )
-        texStr[i] = tolower(texStr[i]);
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
 
-    texturePath = texPath + texStr;
+		std::string texturePath = texPath + texStr;
 
 
-    if(texStr != "")
-        sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
+		if (texStr != "")
+			sMaterial.normalmapTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
 
 
 	sMaterial.metalicTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
@@ -118,14 +129,14 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
     const char* c = materialElement->Attribute("glass_texture");
     if (c != NULL)
     {
-        texStr = std::string(c);
+		std::string texStr = std::string(c);
 
         std::cout << "GlassTexture: " << texStr << std::endl;
 
         for(unsigned int i = 0; i < texStr.size(); i++ )
             texStr[i] = tolower(texStr[i]);
 
-        texturePath = texPath + texStr;
+		std::string texturePath = texPath + texStr;
 
 
         if(texStr != "")
@@ -135,14 +146,14 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	const char* c1 = materialElement->Attribute("metallic_texture");
 	if (c1 != NULL)
 	{
-		texStr = std::string(c1);
+		std::string texStr = std::string(c1);
 
 		std::cout << "MetalicTexture: " << texStr << std::endl;
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
 
-		texturePath = texPath + texStr;
+		std::string texturePath = texPath + texStr;
 
 
 		if (texStr != "")
@@ -152,14 +163,14 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	const char* c2 = materialElement->Attribute("roughness_texture");
 	if (c2 != NULL)
 	{
-		texStr = std::string(c2);
+		std::string texStr = std::string(c2);
 
 		std::cout << "RoughnessTexture: " << texStr << std::endl;
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
 
-		texturePath = texPath + texStr;
+		std::string texturePath = texPath + texStr;
 
 
 		if (texStr != "")
@@ -169,14 +180,14 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	const char* c3 = materialElement->Attribute("ao_texture");
 	if (c3 != NULL)
 	{
-		texStr = std::string(c3);
+		std::string texStr = std::string(c3);
 
 		std::cout << "AoTexture: " << texStr << std::endl;
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
 
-		texturePath = texPath + texStr;
+		std::string texturePath = texPath + texStr;
 
 
 		if (texStr != "")

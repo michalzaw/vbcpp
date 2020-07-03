@@ -3,8 +3,8 @@
 #include <iostream>
 
 
-RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, TextureFormat internalFormat, unsigned int size)
-    : RTexture(path, TT_CUBE, internalFormat, glm::uvec2(size, size))
+RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, TextureFormat internalFormat, unsigned int size, bool fromFile)
+    : RTexture(path, TT_CUBE, internalFormat, glm::uvec2(size, size), fromFile)
 {
     std::cout << "RTextureCubeMap - Konstruktor: " << _path << std::endl;
 
@@ -19,8 +19,8 @@ RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, Texture
 }
 
 
-RTextureCubeMap::RTextureCubeMap(std::string path, float** data, TextureFormat internalFormat, unsigned int size)
-	: RTexture(path, TT_CUBE, internalFormat, glm::uvec2(size, size))
+RTextureCubeMap::RTextureCubeMap(std::string path, float** data, TextureFormat internalFormat, unsigned int size, bool fromFile)
+	: RTexture(path, TT_CUBE, internalFormat, glm::uvec2(size, size), fromFile)
 {
 	std::cout << "RTextureCubeMap - Konstruktor: " << _path << std::endl;
 
@@ -36,7 +36,7 @@ RTextureCubeMap::RTextureCubeMap(std::string path, float** data, TextureFormat i
 
 
 RTextureCubeMap::RTextureCubeMap(TextureFormat internalFormat, unsigned int size)
-    : RTexture("", TT_CUBE, internalFormat, glm::uvec2(size, size))
+    : RTexture("", TT_CUBE, internalFormat, glm::uvec2(size, size), false)
 {
     std::cout << "RTextureCubeMap - Konstruktor: " << _path << std::endl;
 

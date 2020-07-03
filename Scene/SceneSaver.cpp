@@ -9,6 +9,7 @@
 
 #include "../Graphics/RenderObject.h"
 
+#include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/Strings.h"
 
@@ -17,16 +18,6 @@ SceneSaver::SceneSaver(SceneManager* sceneManager)
 	: _sceneManager(sceneManager)
 {
 
-}
-
-
-std::string SceneSaver::getRelativePathToDir(std::string filePath, std::string dirPath)
-{
-	std::string dirPathFromFilePath = filePath.substr(0, dirPath.size());
-	if (dirPath != dirPathFromFilePath)
-		Logger::error("Scene saver: Invalid dirPath");
-
-	return filePath.substr(dirPath.size());
 }
 
 
@@ -40,9 +31,9 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 	if (textures.size() != 6)
 		Logger::error("Scene saver: Invalid skybox textures path");
 
-	std::string result = getRelativePathToDir(textures[0], GameDirectories::SKYBOX) + "," + getRelativePathToDir(textures[1], GameDirectories::SKYBOX) + "," +
-						 getRelativePathToDir(textures[2], GameDirectories::SKYBOX) + "," + getRelativePathToDir(textures[3], GameDirectories::SKYBOX) + "," +
-						 getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
+	std::string result = FilesHelper::getRelativePathToDir(textures[0], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[1], GameDirectories::SKYBOX) + "," +
+						 FilesHelper::getRelativePathToDir(textures[2], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[3], GameDirectories::SKYBOX) + "," +
+						 FilesHelper::getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
 
 	return result;
 }
@@ -82,8 +73,8 @@ void SceneSaver::saveGrass(XMLElement* grassElement, XMLDocument& doc, SceneObje
 
 	if (grassComponent)
 	{
-		grassElement->SetAttribute("model", getRelativePathToDir(grassComponent->getModel()->getPath(), _dirPath + "grass/").c_str());
-		grassElement->SetAttribute("density_texture", getRelativePathToDir(grassComponent->getGrassDensityTexture()->getPath(), _dirPath).c_str());
+		grassElement->SetAttribute("model", FilesHelper::getRelativePathToDir(grassComponent->getModel()->getPath(), _dirPath + "grass/").c_str());
+		grassElement->SetAttribute("density_texture", FilesHelper::getRelativePathToDir(grassComponent->getGrassDensityTexture()->getPath(), _dirPath).c_str());
 		grassElement->SetAttribute("color", vec3ToString(glm::vec3(grassComponent->getGrassColor().x, grassComponent->getGrassColor().y, grassComponent->getGrassColor().z)).c_str());
 
 		std::vector<RTexture2D*>& grassTextures = grassComponent->getAdditionalRandomGrassTextures();
@@ -92,7 +83,7 @@ void SceneSaver::saveGrass(XMLElement* grassElement, XMLDocument& doc, SceneObje
 		{
 			XMLElement* textureElement = doc.NewElement("Texture");
 
-			textureElement->SetAttribute("path", getRelativePathToDir(grassTextures[i]->getPath(), _dirPath + "grass/").c_str());
+			textureElement->SetAttribute("path", FilesHelper::getRelativePathToDir(grassTextures[i]->getPath(), _dirPath + "grass/").c_str());
 			textureElement->SetAttribute("scale", grassTexturesScale[i]);
 
 			grassElement->InsertEndChild(textureElement);

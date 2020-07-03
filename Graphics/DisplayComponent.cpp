@@ -17,7 +17,7 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	{
 		_matrixTextureData[i] = 0;
 	}
-	_matrixTexture = new RTexture2D("", _matrixTextureData, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight));
+	_matrixTexture = new RTexture2D("", _matrixTextureData, TF_RGBA, glm::uvec2(_displayWidth, _displayHeight), false);
 	_matrixTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
 
 	_ledOffTexture = ResourceManager::getInstance().loadTexture("doroff.bmp");
