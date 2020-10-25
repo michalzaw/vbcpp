@@ -21,5 +21,6 @@ We are using:
 - [Freetype 2.10.0](https://www.freetype.org/)
 - [Dear ImGui 1.72](https://github.com/ocornut/imgui)
 - [ImGuizmo 1.61](https://github.com/CedricGuillemet/ImGuizmo)
+- [Portable File Dialogs](https://github.com/samhocevar/portable-file-dialogs)
 
 For more information, please look at [Virtual Bus webpage](https://www.facebook.com/VirtualBus.info/).

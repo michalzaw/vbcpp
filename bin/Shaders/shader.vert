@@ -15,6 +15,8 @@ uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
 uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
 
+uniform float time;
+
 out vec3 Position;
 out vec2 TexCoord;
 out vec3 Normal;
@@ -27,9 +29,18 @@ out float ClipSpacePositionZ;
 
 void main()
 {
-	gl_Position = MVP * vec4(VertexPosition, 1.0f);
+	vec3 pos = VertexPosition;
+#ifdef TREE
+	//pos.x += ((2 * sin(4 * (pos.x + pos.y + pos.z + time))) + 1) * 0.05;
+	//pos.y += ((1 * sin(8 * (pos.x + pos.y + pos.z + time))) + 0.5) * 0.05;
+	//pos.z += ((1 * sin(8 * (pos.x + pos.y + pos.z + time))) + 0.5) * 0.05;
 
-	Position = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+	//pos += (0.065 * sin(2.650 * (pos.x + pos.y + pos.z + time))) * vec3(1, 0.35, 1);
+#endif
+
+	gl_Position = MVP * vec4(pos, 1.0f);
+
+	Position = (ModelMatrix * vec4(pos, 1.0f)).xyz;
 	TexCoord = VertexUV;
 
 //#ifdef SOLID
@@ -43,7 +54,7 @@ void main()
 #endif
 	for (int i = 0; i < CASCADES_COUNT; ++i)
 	{
-		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
+		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(pos, 1.0f);
 	}
 	
 	ClipSpacePositionZ = gl_Position.z;

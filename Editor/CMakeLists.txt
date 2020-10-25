@@ -10,6 +10,8 @@ set (EDITOR_SOURCES
 	Editor/Windows/SceneGraphWindow.cpp
 	Editor/Windows/RoadTools.cpp
 	Editor/Windows/MapInfoWindow.cpp
+	Editor/Windows/MaterialEditorWindow.cpp
+	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
 )
 
@@ -27,6 +29,8 @@ set (EDITOR_HEADERS
 	Editor/Windows/SceneGraphWindow.h
 	Editor/Windows/RoadTools.h
 	Editor/Windows/MapInfoWindow.h
+	Editor/Windows/MaterialEditorWindow.h
+	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
 )
 

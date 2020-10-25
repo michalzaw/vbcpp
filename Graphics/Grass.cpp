@@ -1,5 +1,7 @@
 #include "Grass.h"
 
+#include "../Utils/ResourceManager.h"
+
 
 Grass::Grass(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture)
     : RenderObject(model),
@@ -52,4 +54,16 @@ glm::vec4 Grass::getGrassColor()
 float Grass::getRenderingDistance()
 {
 	return _renderingDistance;
+}
+
+
+std::vector<RTexture2D*>& Grass::getAdditionalRandomGrassTextures()
+{
+	return _additionalRandomGrassTextures;
+}
+
+
+std::vector<float>& Grass::getAdditionalRandomGrassTexturesScale()
+{
+	return _additionalRandomGrassTexturesScale;
 }

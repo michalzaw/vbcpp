@@ -8,7 +8,7 @@
 static std::unique_ptr<GraphicsManager> gmInstance;
 
 GraphicsManager::GraphicsManager()
-    : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f),
+    : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f), _windTimer(0.0f),
     _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
 {
     //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
@@ -457,6 +457,12 @@ float GraphicsManager::getWindValue()
 }
 
 
+float GraphicsManager::getWindTimer()
+{
+	return _windTimer;
+}
+
+
 std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 {
     return _renderObjects;
@@ -533,6 +539,8 @@ void GraphicsManager::update(float deltaTime)
 {
     _windValue += _windVelocity * deltaTime;
     _windVector = _windDirection * sinf(_windValue);
+
+	_windTimer += deltaTime;
 
     for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
     {

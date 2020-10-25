@@ -32,6 +32,8 @@ set (GRAPHICS_SOURCES
 		Graphics/LoadTexture.cpp
 		Graphics/LoadTexture.h
 		Graphics/Material.h
+		Graphics/MaterialSaver.cpp
+		Graphics/MaterialSaver.h
 		Graphics/MirrorComponent.h
 		Graphics/Model.cpp
 		Graphics/Model.h

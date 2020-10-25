@@ -53,12 +53,12 @@ struct Plane
 
 enum FrustumPlane
 {
-    FP_LEFT,
-    FP_RIGHT,
-    FP_TOP,
-    FP_BOTTOM,
-    FP_NEAR,
-    FP_FAR
+    FP_LEFT_PLANE,
+    FP_RIGHT_PLANE,
+    FP_TOP_PLANE,
+    FP_BOTTOM_PLANE,
+    FP_NEAR_PLANE,
+    FP_FAR_PLANE
 
 };
 

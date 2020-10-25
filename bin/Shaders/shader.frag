@@ -112,6 +112,10 @@ uniform vec3 CameraPosition;
 
 uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 
+uniform sampler2D t[7];
+uniform int grassTexturesCount;
+flat in int tIndex;
+
 vec4 textureColor;
 vec4 ambient;
 vec4 diffuse;
@@ -206,7 +210,14 @@ float isGrass = 0.0f;
 #ifdef GRASS
 	float c = (textureColor.r + textureColor.g + textureColor.b) / 3.0f;
 	//textureColor = diffuse = vec4(c, c, c, textureColor.a) * grassColor;
+
+	textureColor = texture2D(t[tIndex], TexCoord);
+	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
+
+	if (tIndex == grassTexturesCount - 1)
 	textureColor = diffuse = ambient = textureColor * grassColor;
+	else
+	textureColor = diffuse = ambient = textureColor;
 	//vec4 noseValue = texture2D(NoiseTexture, TexCoord);
 	//float distanceToCamera = (ClipSpacePositionZ - 25) / 5.0f;
 	//if (distanceToCamera > 0 && texture2D(NoiseTexture, TexCoord).r <= distanceToCamera)
@@ -341,7 +352,7 @@ float isGrass = 0.0f;
 #endif
 	
 #ifdef ALPHA_TEST
-	float _Cutoff = 0.2f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3
+	float _Cutoff = 0.5f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3, w ostatniej wersji było 0.2, zmienione na potrzeby trawy. TODO: sterowac z meterialu
 	float newAlpha = (FragmentColor.a - _Cutoff) / max(fwidth(FragmentColor.a), 0.0001) + 0.5;
 	
 	FragmentColor.a = mix(FragmentColor.a, newAlpha, fixDisappearanceAlphaRatio);

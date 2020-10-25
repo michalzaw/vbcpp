@@ -5,8 +5,8 @@
 #include "Logger.h"
 
 
-RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size, bool useCompression)
-    : RTexture(path, TT_2D, internalFormat, size, useCompression)
+RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size, bool fromFile, bool useCompression)
+    : RTexture(path, TT_2D, internalFormat, size, fromFile, useCompression)
 {
     Logger::info("RTexture2D - Konstruktor: " + _path);
 
@@ -24,8 +24,8 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalF
 }
 
 
-RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, glm::uvec2 size, bool useCompression)
-    : RTexture(path, TT_2D, internalFormat, size, useCompression)
+RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, glm::uvec2 size, bool fromFile, bool useCompression)
+    : RTexture(path, TT_2D, internalFormat, size, fromFile, useCompression)
 {
 	Logger::info("RTexture2D - Konstruktor: " + _path);
 	 
@@ -44,7 +44,7 @@ RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, g
 
 
 RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMultisample, int samplesCount)
-    : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size, false)
+    : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size, false, false)
 {
 	Logger::info("RTexture2D - Konstruktor: " + _path);
 
@@ -59,8 +59,8 @@ RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMul
 }
 
 
-RTexture2D::RTexture2D(string path, GLuint textureId, glm::uvec2 size, TextureFilterMode minFilter, TextureFilterMode magFilter)
-	: RTexture(path, TT_2D, TF_RGBA, size, false)
+RTexture2D::RTexture2D(string path, GLuint textureId, glm::uvec2 size, TextureFilterMode minFilter, TextureFilterMode magFilter, bool fromFile)
+	: RTexture(path, TT_2D, TF_RGBA, size, fromFile, false)
 {
 
 	_texID = textureId;
@@ -122,7 +122,7 @@ void RTexture2D::setTexSubImage(float* data, int offsetX, int offsetY, int width
 RTexture2D* RTexture2D::createWhiteTexture(string path, glm::uvec2 size, bool useCompression)
 {
     unsigned char data[16] = { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
-    RTexture2D* texture = new RTexture2D(path, data, TF_RGBA, size, useCompression);
+    RTexture2D* texture = new RTexture2D(path, data, TF_RGBA, size, false, useCompression);
     texture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
     texture->setClampMode(TCM_REPEAT);
 

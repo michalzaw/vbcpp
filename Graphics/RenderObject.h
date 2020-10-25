@@ -20,6 +20,7 @@ class RenderObject : public Component
         RStaticModel* _model;
         ModelNode*    _modelRootNode;
         Material*     _materials;
+		unsigned int  _materialsCount;
 
         bool _isCastShadows;
 		bool _isDynamicObject;
@@ -40,7 +41,9 @@ class RenderObject : public Component
         ModelNode* getModelRootNode();
         ModelNode* getModelNodeByName(std::string name);
 
+		void updateLocalMaterialFromModel(unsigned int index);
         Material* getMaterial(unsigned int index);
+		unsigned int getMaterialsCount();
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();

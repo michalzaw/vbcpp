@@ -26,7 +26,14 @@ class FilesHelper
 
         static std::vector<std::string> getDirectoriesList(std::string path);
 
+		static std::string getFileNameFromPath(std::string path);
 		static std::string getFileExtension(std::string fileName);
+
+		static std::string getRelativePathToDir(std::string filePath, std::string dirPath);
+		static std::string getRelativePathToDirInGameDir(std::string filePath, std::string dirPath);
+		static bool isInPathSubdir(std::string filePath, std::string dirPath);
+
+		static void copyFile(std::string from, std::string to);
 
 };
 

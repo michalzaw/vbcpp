@@ -151,6 +151,8 @@ include_directories (libs/freealut/include)
 
 include_directories (libs/stb_image)
 
+include_directories (libs/PortableFileDialogs)
+
 add_executable(${BIN_NAME}
                     ${BUS_SOURCES}
                     ${BUS_HEADERS}

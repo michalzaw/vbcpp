@@ -61,10 +61,10 @@ class RTexture : public Resource
         //RTexture(string path, GLuint id, TextureType type, glm::uvec2 size);
         //RTexture(string path, unsigned char* data, TextureType type, TextureFormat format, glm::uvec2 size);
         //RTexture(TextureType type, TextureFormat format, glm::uvec2 size);
-        RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool compressed = false);
+        RTexture(std::string path, TextureType type, TextureFormat internalFormat, glm::uvec2 size, bool fromFile, bool compressed = false);
         virtual ~RTexture();
 
-        //GLuint getID() { return _texID; }
+        GLuint getID() { return _texID; }
 
         void setFiltering(TextureFilterMode minFilter, TextureFilterMode magFilter);
         void setClampMode(TextureClampMode mode);
@@ -80,6 +80,7 @@ class RTexture : public Resource
 		TextureFormat getInternalFormat();
 
 		bool isCompressed();
+		bool isLoadedFromFile();
 
         inline void bind()
         {
@@ -95,6 +96,7 @@ class RTexture : public Resource
         TextureFormat _format;
         glm::uvec2  _size;
 		bool _compressed;
+		bool _fromFile;
 
         bool        _isGenerateMipmap;
 

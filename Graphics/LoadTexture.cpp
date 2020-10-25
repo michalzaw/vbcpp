@@ -127,7 +127,7 @@ RTexture2D* loadDdsTexture(char const* filename)
 				default: assert(0); break;
 				}
 			}
-	return new RTexture2D(filename, TextureName, glm::uvec2(0, 0), TFM_TRILINEAR, TFM_LINEAR);
+	return new RTexture2D(filename, TextureName, glm::uvec2(0, 0), TFM_TRILINEAR, TFM_LINEAR, true);
 ;
 }
 
@@ -172,9 +172,9 @@ RTexture2D* loadTexture(const char* fileName, bool useCompression, bool mipmapin
     if (oldTexture == NULL)
     {
 		if (hdrImage)
-			texture = new RTexture2D(fileName, static_cast<float*>(image), chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, glm::uvec2(width, height), useCompression);
+			texture = new RTexture2D(fileName, static_cast<float*>(image), chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, glm::uvec2(width, height), true, useCompression);
 		else
-			texture = new RTexture2D(fileName, static_cast<unsigned char*>(image), TF_RGBA, glm::uvec2(width, height), useCompression);
+			texture = new RTexture2D(fileName, static_cast<unsigned char*>(image), TF_RGBA, glm::uvec2(width, height), true, useCompression);
 
 		if (mipmaping)
 		{
@@ -247,9 +247,9 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
 	if (oldTexture == NULL)
 	{
 		if (hdrImage)
-			texture = new RTextureCubeMap(path, (float**)cubeMapFaces, chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, width);
+			texture = new RTextureCubeMap(path, (float**)cubeMapFaces, chanels == 4 ? TF_RGBA_16F : TF_RGB_16F, width, true);
 		else
-			texture = new RTextureCubeMap(path, (unsigned char**)cubeMapFaces, TF_RGBA, width);
+			texture = new RTextureCubeMap(path, (unsigned char**)cubeMapFaces, TF_RGBA, width, true);
 	}
     else
         texture = oldTexture;

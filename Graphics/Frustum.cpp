@@ -101,14 +101,14 @@ void Frustum::normalizePlanes()
 
 void Frustum::calculatePoints()
 {
-    _points[FP_NEAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
-    _points[FP_NEAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
-    _points[FP_NEAR_LEFT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_LEFT], _planes[FP_TOP]);
-    _points[FP_NEAR_RIGHT_TOP] = intersectPlanes(_planes[FP_NEAR], _planes[FP_RIGHT], _planes[FP_TOP]);
-    _points[FP_FAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_BOTTOM]);
-    _points[FP_FAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_BOTTOM]);
-    _points[FP_FAR_LEFT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_LEFT], _planes[FP_TOP]);
-    _points[FP_FAR_RIGHT_TOP] = intersectPlanes(_planes[FP_FAR], _planes[FP_RIGHT], _planes[FP_TOP]);
+    _points[FP_NEAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_NEAR_PLANE], _planes[FP_LEFT_PLANE], _planes[FP_BOTTOM_PLANE]);
+    _points[FP_NEAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_NEAR_PLANE], _planes[FP_RIGHT_PLANE], _planes[FP_BOTTOM_PLANE]);
+    _points[FP_NEAR_LEFT_TOP] = intersectPlanes(_planes[FP_NEAR_PLANE], _planes[FP_LEFT_PLANE], _planes[FP_TOP_PLANE]);
+    _points[FP_NEAR_RIGHT_TOP] = intersectPlanes(_planes[FP_NEAR_PLANE], _planes[FP_RIGHT_PLANE], _planes[FP_TOP_PLANE]);
+    _points[FP_FAR_LEFT_BOTTOM] = intersectPlanes(_planes[FP_FAR_PLANE], _planes[FP_LEFT_PLANE], _planes[FP_BOTTOM_PLANE]);
+    _points[FP_FAR_RIGHT_BOTTOM] = intersectPlanes(_planes[FP_FAR_PLANE], _planes[FP_RIGHT_PLANE], _planes[FP_BOTTOM_PLANE]);
+    _points[FP_FAR_LEFT_TOP] = intersectPlanes(_planes[FP_FAR_PLANE], _planes[FP_LEFT_PLANE], _planes[FP_TOP_PLANE]);
+    _points[FP_FAR_RIGHT_TOP] = intersectPlanes(_planes[FP_FAR_PLANE], _planes[FP_RIGHT_PLANE], _planes[FP_TOP_PLANE]);
 }
 
 
@@ -116,12 +116,12 @@ void Frustum::set(glm::mat4 matrix)
 {
     _isCalculatedPoints = false;
 
-    _planes[FP_LEFT].set(matrix[0][3] + matrix[0][0], matrix[1][3] + matrix[1][0], matrix[2][3] + matrix[2][0], matrix[3][3] + matrix[3][0]);
-    _planes[FP_RIGHT].set(matrix[0][3] - matrix[0][0], matrix[1][3] - matrix[1][0], matrix[2][3] - matrix[2][0], matrix[3][3] - matrix[3][0]);
-    _planes[FP_TOP].set(matrix[0][3] - matrix[0][1], matrix[1][3] - matrix[1][1], matrix[2][3] - matrix[2][1], matrix[3][3] - matrix[3][1]);
-    _planes[FP_BOTTOM].set(matrix[0][3] + matrix[0][1], matrix[1][3] + matrix[1][1], matrix[2][3] + matrix[2][1], matrix[3][3] + matrix[3][1]);
-    _planes[FP_NEAR].set(matrix[0][3] + matrix[0][2], matrix[1][3] + matrix[1][2], matrix[2][3] + matrix[2][2], matrix[3][3] + matrix[3][2]);
-    _planes[FP_FAR].set(matrix[0][3] - matrix[0][2], matrix[1][3] - matrix[1][2], matrix[2][3] - matrix[2][2], matrix[3][3] - matrix[3][2]);
+    _planes[FP_LEFT_PLANE].set(matrix[0][3] + matrix[0][0], matrix[1][3] + matrix[1][0], matrix[2][3] + matrix[2][0], matrix[3][3] + matrix[3][0]);
+    _planes[FP_RIGHT_PLANE].set(matrix[0][3] - matrix[0][0], matrix[1][3] - matrix[1][0], matrix[2][3] - matrix[2][0], matrix[3][3] - matrix[3][0]);
+    _planes[FP_TOP_PLANE].set(matrix[0][3] - matrix[0][1], matrix[1][3] - matrix[1][1], matrix[2][3] - matrix[2][1], matrix[3][3] - matrix[3][1]);
+    _planes[FP_BOTTOM_PLANE].set(matrix[0][3] + matrix[0][1], matrix[1][3] + matrix[1][1], matrix[2][3] + matrix[2][1], matrix[3][3] + matrix[3][1]);
+    _planes[FP_NEAR_PLANE].set(matrix[0][3] + matrix[0][2], matrix[1][3] + matrix[1][2], matrix[2][3] + matrix[2][2], matrix[3][3] + matrix[3][2]);
+    _planes[FP_FAR_PLANE].set(matrix[0][3] - matrix[0][2], matrix[1][3] - matrix[1][2], matrix[2][3] - matrix[2][2], matrix[3][3] - matrix[3][2]);
 
 
     normalizePlanes();

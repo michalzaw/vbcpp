@@ -1,6 +1,7 @@
 #include "Editor.h"
 
 #include "Tools/RoadManipulator.h"
+#include "Tools/AxisTool.h"
 
 //#include "../Bus/BusLoader.h"
 
@@ -24,6 +25,7 @@
 #include "Windows/SceneGraphWindow.h"
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
+#include "Windows/MaterialEditorWindow.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -508,6 +510,7 @@ namespace vbEditor
 	static bool _saveMap = false;
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
+	bool _showMaterialEditorWindow = false;
 
 
 	std::string windowTitle = "VBCPP - World Editor";
@@ -840,6 +843,7 @@ namespace vbEditor
 		ImGuizmo::BeginFrame();
 		ImRoadTools::BeginFrame();
 		RoadManipulator::BeginFrame();
+		AxisTool::BeginFrame();
 
 		if (_clickMode == CM_ADD_OBJECT)
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -931,6 +935,14 @@ namespace vbEditor
 			showObjectProperties();
 		}
 
+		if (_showMaterialEditorWindow)
+		{
+			if (!materialEditorWindow())
+			{
+				_showMaterialEditorWindow = false;
+			}
+		}
+
 		if (_selectedSceneObject)
 		{
 			//ShowTransformGizmo();
@@ -945,6 +957,16 @@ namespace vbEditor
 					ShowTransformGizmo();
 			//}
 		}
+
+
+		glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), _camera->getDirection(), _camera->getUpVector());
+
+		float width = _camera->getWindowWidth() / 7.0f;
+		float height = _camera->getWindowHeight() / 7.0f;
+		float x = 150.0f;
+		float y = _camera->getWindowHeight() - height;
+		AxisTool::SetRect(x, y, width, height);
+		AxisTool::Show(viewMatrix, _camera->getProjectionMatrix(), _camera->getDirection());
 
 
 		ImGui::Render();

@@ -248,6 +248,25 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_COLOR_3] = "color3";
 	_uniformsNames[UNIFORM_COLOR_4] = "color4";
 
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_1] = "t[0]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_2] = "t[1]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_3] = "t[2]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_4] = "t[3]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_5] = "t[4]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_6] = "t[5]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_7] = "t[6]";
+
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_1] = "tScale[0]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_2] = "tScale[1]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_3] = "tScale[2]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_4] = "tScale[3]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_5] = "tScale[4]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_6] = "tScale[5]";
+	_uniformsNames[UNIFORM_GRASS_TEXTURE_SCALE_7] = "tScale[6]";
+
+	_uniformsNames[UNIFORM_GRASS_TEXTURES_COUNT] = "grassTexturesCount";
+	_uniformsNames[UNIFORM_GRASS_WIND_TIMER] = "time";
+
 	for (int i = 0; i < NUMBER_OF_SHADERS; ++i)
 	{
 		for (int j = 0; j < NUMBER_OF_UNIFORMS; ++j)
@@ -985,6 +1004,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	// NEW_TREE_MATERIAL
 	defines.clear();
 	defines.push_back("NORMALMAPPING");
+	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
@@ -1718,6 +1738,8 @@ void Renderer::renderScene(RenderData* renderData)
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_3], color3);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], GraphicsManager::getInstance().getWindTimer());
+
         if (i->type != RET_GRASS)
         {
             glDrawElements(model->getPrimitiveType(),
@@ -1750,6 +1772,15 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GRASS_DENSITY], grass->getGrassDensityTexture());
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_MIN], min);
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIDTH], (int)width);
+
+			std::vector<RTexture2D*>& grassTextures = grass->getAdditionalRandomGrassTextures();
+			std::vector<float>& grassTexturesScale = grass->getAdditionalRandomGrassTexturesScale();
+			for (int i = 0; i < grassTextures.size(); ++i)
+			{
+				shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURE_1 + i], grassTextures[i]);
+				shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURE_SCALE_1 + i], grassTexturesScale[i]);
+			}
+			shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURES_COUNT], (int)grassTextures.size());
 
             glDrawElementsInstanced(model->getPrimitiveType(),
                                 mesh->indicesCount,

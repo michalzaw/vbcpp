@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 
+#include "MaterialSaver.h"
+
 
 using namespace tinyxml2;
 
@@ -10,94 +12,6 @@ StaticModelLoader::StaticModelLoader(bool normalsSmoothing)
     : _normalsSmoothing(normalsSmoothing), _assimpScene(NULL)
 {
     _materialLoader = new MaterialLoader;
-}
-
-
-void StaticModelLoader::saveMaterialsDataToXml(std::string fileName)
-{
-    if (_assimpScene == NULL)
-        return;
-
-    XMLDocument doc;
-
-    XMLDeclaration* dec = doc.NewDeclaration();
-    doc.InsertFirstChild(dec);
-
-    XMLNode* root = doc.NewElement(XML_MATERIAL_ROOT);
-
-    for (int i = 0; i < _assimpScene->mNumMaterials; ++i)
-    {
-        const aiMaterial* material = _assimpScene->mMaterials[i];
-
-        aiColor4D ambientColor;
-        aiColor4D diffuseColor;
-        aiColor4D specularColor;
-        float opacity;
-        float shinines;
-        aiString diffuseTexturePath;
-        aiString normalmapPath;
-        aiString alphaTexturePath;
-
-        material->Get(AI_MATKEY_COLOR_AMBIENT, ambientColor);
-        material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
-        material->Get(AI_MATKEY_COLOR_SPECULAR, specularColor);
-        material->Get(AI_MATKEY_OPACITY, opacity);
-        material->Get(AI_MATKEY_SHININESS, shinines);
-
-        bool isDiffuseTextureExist = material->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseTexturePath, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS;
-        bool isNormalmapExist = material->GetTexture(aiTextureType_NORMALS, 0, &normalmapPath, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS;
-        bool isAlphaTextureExist = material->GetTexture(aiTextureType_OPACITY, 0, &alphaTexturePath, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS;
-
-        std::string type;
-        if (isDiffuseTextureExist && isNormalmapExist)
-            type = "normalmapping";
-        else if (isDiffuseTextureExist && !isNormalmapExist)
-            type = "solid";
-        else
-            type = "no_texture";
-
-        XMLElement* matElement = doc.NewElement(XML_MATERIAL_ELEMENT);
-
-        matElement->SetAttribute("type", type.c_str());
-
-        aiString materialName;
-        material->Get(AI_MATKEY_NAME, materialName);
-        matElement->SetAttribute("name", materialName.C_Str());
-
-        std::string ambientStr = toString(ambientColor.r) + "," + toString(ambientColor.g) + "," + toString(ambientColor.b) + "," + toString(ambientColor.a);
-        matElement->SetAttribute("ambient", ambientStr.c_str());
-
-        std::string diffuseStr = toString(diffuseColor.r) + "," + toString(diffuseColor.g) + "," + toString(diffuseColor.b) + "," + toString(diffuseColor.a);
-        matElement->SetAttribute("diffuse", diffuseStr.c_str());
-
-        std::string specularStr = toString(specularColor.r) + "," + toString(specularColor.g) + "," + toString(specularColor.b) + "," + toString(specularColor.a);
-        matElement->SetAttribute("specular", specularStr.c_str());
-
-        matElement->SetAttribute("diffuse_texture", diffuseTexturePath.C_Str());
-
-        matElement->SetAttribute("normalmap_texture", normalmapPath.C_Str());
-
-        matElement->SetAttribute("alpha_texture", alphaTexturePath.C_Str());
-
-        std::string shininessStr = toString(shinines);
-        matElement->SetAttribute("shininess", shininessStr.c_str());
-
-        std::string transparencyStr = toString(opacity);
-        std::cout << transparencyStr.c_str() << " " << opacity << std::endl;
-        matElement->SetAttribute("transparency", transparencyStr.c_str());
-
-        std::string offsetStr = "0,0";//toString(material->texture1_map.offset[0]) + "," + toString(material->texture1_map.offset[1]);
-        matElement->SetAttribute("offset", offsetStr.c_str());
-
-        std::string scaleStr = "1,1";//toString(material->texture1_map.scale[0]) + "," + toString(material->texture1_map.scale[1]);
-        matElement->SetAttribute("scale", scaleStr.c_str());
-
-        root->InsertEndChild(matElement);
-    }
-
-    doc.InsertEndChild(root);
-
-    doc.SaveFile(fileName.c_str());
 }
 
 
@@ -319,7 +233,7 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
     std::string materialXmlFileName = MaterialLoader::createMaterialFileName(fileName);
     if (!FilesHelper::isFileExists(materialXmlFileName))
     {
-        saveMaterialsDataToXml(materialXmlFileName);
+        MaterialSaver::saveMaterialsFromAssimpModel(materialXmlFileName, _assimpScene);
     }
 
 	_materialLoader->openFile(materialXmlFileName.c_str());
@@ -379,7 +293,7 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
     std::string materialXmlFileName = MaterialLoader::createMaterialFileName(fileName);
     if (!FilesHelper::isFileExists(materialXmlFileName))
     {
-        saveMaterialsDataToXml(materialXmlFileName);
+		MaterialSaver::saveMaterialsFromAssimpModel(materialXmlFileName, _assimpScene);
     }
 
 
