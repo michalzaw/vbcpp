@@ -1004,6 +1004,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	// NEW_TREE_MATERIAL
 	defines.clear();
 	defines.push_back("NORMALMAPPING");
+	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
@@ -1737,6 +1738,8 @@ void Renderer::renderScene(RenderData* renderData)
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_3], color3);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], GraphicsManager::getInstance().getWindTimer());
+
         if (i->type != RET_GRASS)
         {
             glDrawElements(model->getPrimitiveType(),
@@ -1778,8 +1781,6 @@ void Renderer::renderScene(RenderData* renderData)
 				shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURE_SCALE_1 + i], grassTexturesScale[i]);
 			}
 			shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_TEXTURES_COUNT], (int)grassTextures.size());
-
-			shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], GraphicsManager::getInstance().getWindTimer());
 
             glDrawElementsInstanced(model->getPrimitiveType(),
                                 mesh->indicesCount,
