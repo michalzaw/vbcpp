@@ -26,7 +26,8 @@ class Material
         Material()
         : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL), emissiveTexture(NULL),
 		reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
-        shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0), fixDisappearanceAlpha(0.0) {}
+        shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0), fixDisappearanceAlpha(0.0),
+		metalnessValue(0.1f), roughnessValue(0.9f){}
         virtual ~Material()
         { }
 
@@ -51,6 +52,9 @@ class Material
 
     float shininess;
     float transparency;
+
+	float metalnessValue;
+	float roughnessValue;
 
 	float fixDisappearanceAlpha;
 
