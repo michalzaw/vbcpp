@@ -185,7 +185,25 @@ void main()
 	
 	if (textureColor.a < 0.2f)
 		discard;
+	/*---------------------------------------------------------------*/
+	/*
+	Lepsza alfa z poprawianiem zanikania wraz z odleglosica. Aby dobrze wygladalo nalezy w materiale drzewa ustawic parametr ambient na 1,1,1,1 zamiast obecnego 0,0,0,1
+	float alpha = textureColor.a;
+	float _Cutoff = 0.3f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3, w ostatniej wersji było 0.2, zmienione na potrzeby trawy. TODO: sterowac z meterialu
+	float newAlpha = (alpha - _Cutoff) / max(fwidth(alpha), 0.0001) + 0.5;
 	
+	float distance = length(CameraPosition - Position);
+
+	alpha = mix(alpha, newAlpha, distance / 100.0f);
+	// mozna tez dac _Cutoff = 0.2 i wtedy distance / 200.0f, ale to sie trzeba zastanowic
+
+
+	if (alpha < 0.75f)
+		discard;
+
+	//FragmentColor.a = alpha;
+	*/
+	/*---------------------------------------------------------------*/
 	
 	
 	
