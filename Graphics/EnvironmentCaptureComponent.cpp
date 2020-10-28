@@ -145,7 +145,7 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 
 void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 {
-	const unsigned int MAX_MIPMAP_LEVELS = 5;
+	const unsigned int MAX_MIPMAP_LEVELS = 4;
 
 	glm::mat4 projectionMatrix = glm::perspective(degToRad(90.0f), 1.0f, 0.1f, 10.0f);
 	glm::mat4 viewMatrices[] =

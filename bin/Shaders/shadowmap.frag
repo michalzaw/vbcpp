@@ -11,7 +11,7 @@ out vec4 FragmentColor;
 void main()
 {
 #ifdef ALPHA_TEST
-	if (texture2D(AlphaTexture, uv).a < 0.1f)
+	if (texture2D(AlphaTexture, uv).a < 0.1f) // dla pbr_tree powinno byc 0.4
 		discard;
 #endif
 
