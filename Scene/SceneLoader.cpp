@@ -426,7 +426,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, true, roadSceneObject);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -490,7 +490,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 		}
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, false, roadSceneObject);
+		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, false, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 
 

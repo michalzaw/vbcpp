@@ -59,7 +59,8 @@ enum RoadInterpolation
 enum RoadSegmetType
 {
     RST_ARC,
-    RST_LINE
+    RST_LINE,
+	RST_BEZIER_CURVE
 
 };
 
@@ -72,7 +73,7 @@ struct RoadSegment
     RoadInterpolation interpolation;
 
     RoadSegment()
-        : type(RST_LINE), r(0), pointsCount(10), interpolation(RI_LIN)
+        : type(RST_LINE), r(0), pointsCount(50), interpolation(RI_LIN)
     {}
 
 };

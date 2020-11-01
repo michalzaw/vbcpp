@@ -40,6 +40,9 @@ namespace RoadManipulator
 		float displayRatio = 1.f;
 
 		bool isAnyPointModified = false;
+		int modifiedPointIndex = -1;
+		glm::vec3 modifiedPointNewPosition;
+
 		int activePoint = 0;
 		int activeSegment = 0;
 	};
@@ -79,6 +82,16 @@ namespace RoadManipulator
 	int IsModified()
 	{
 		return context.isAnyPointModified;
+	}
+
+	int GetModifiedPointIndex()
+	{
+		return context.modifiedPointIndex;
+	}
+
+	glm::vec3 GetModifiedPointNewPostion()
+	{
+		return context.modifiedPointNewPosition;
 	}
 
 	int GetActiveSegment()
@@ -264,9 +277,9 @@ namespace RoadManipulator
 			if (points[i] != newPosition)
 			{
 				context.isAnyPointModified = true;
+				context.modifiedPointIndex = i;
+				context.modifiedPointNewPosition = newPosition;
 			}
-
-			points[i] = newPosition;
 		}
 
 		HandleMouseWheelInput(points, segments);

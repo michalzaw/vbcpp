@@ -510,6 +510,7 @@ namespace vbEditor
 	static bool _saveMap = false;
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
+	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
 
 
@@ -815,6 +816,7 @@ namespace vbEditor
 				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
+				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
 				ImGui::EndMenu();
 			}
 
@@ -894,7 +896,27 @@ namespace vbEditor
 				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
 				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				roadRenderObject->setIsCastShadows(false);
+
+				setSelectedSceneObject(roadSceneObject);
+			}
+		}
+
+		static int currenProfiletSelection2 = 0;
+		if (_addRoad2DialogWindow)
+		{
+			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection2))
+			{
+				_addRoad2DialogWindow = false;
+
+				_clickMode = CM_ROAD_EDIT;
+
+				std::string profileName = _availableRoadProfiles[currenProfiletSelection2];
+				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 				roadRenderObject->setIsCastShadows(false);
 
 				setSelectedSceneObject(roadSceneObject);
@@ -1213,6 +1235,11 @@ namespace vbEditor
 
 		roadActiveSegment = RoadManipulator::GetActiveSegment();
 		roadActivePoint = RoadManipulator::GetActivePoint();
+		if (RoadManipulator::IsModified())
+		{
+			roadComponent->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+
 		if (!isRoadModified)
 		{
 			isRoadModified = RoadManipulator::IsModified();

@@ -18,6 +18,9 @@ namespace RoadManipulator
 	void SetRect(float x, float y, float width, float height);
 
 	int IsModified();
+	int GetModifiedPointIndex();
+	glm::vec3 GetModifiedPointNewPostion();
+
 	int GetActiveSegment();
 	int GetActivePoint();
 

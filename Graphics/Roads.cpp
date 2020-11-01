@@ -5,6 +5,46 @@
 #include "../Utils/Logger.h"
 
 
+float calculateBezierCurvePoint(float p1, float p2, float p3, float p4, float t)
+{
+	return (1 - t) * (1 - t) * (1 - t) * p1 +
+		3 * (1 - t) * (1 - t) * t * p2 +
+		3 * (1 - t) * t * t * p3 +
+		t * t * t * p4;
+}
+
+
+glm::vec3 calculateBezierCurvePoint(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, float t)
+{
+	return glm::vec3(
+		calculateBezierCurvePoint(p1.x, p2.x, p3.x, p4.x, t),
+		calculateBezierCurvePoint(p1.y, p2.y, p3.y, p4.y, t),
+		calculateBezierCurvePoint(p1.z, p2.z, p3.z, p4.z, t)
+	);
+}
+
+
+float calculateDerivativeOfBezierCurve(float p1, float p2, float p3, float p4, float t)
+{
+	return -3 * (1 - t) * (1 - t) * p1 +
+		3 * (1 - t) * (1 - t) * p2 -
+		6 * t * (1 - t) * p2 -
+		3 * t * t * p3 +
+		6 * t * (1 - t) * p3 +
+		3 * t * t * p4;
+}
+
+
+glm::vec3 calculateDerivativeOfBezierCurve(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, float t)
+{
+	return glm::vec3(
+		calculateDerivativeOfBezierCurve(p1.x, p2.x, p3.x, p4.x, t),
+		calculateDerivativeOfBezierCurve(p1.y, p2.y, p3.y, p4.y, t),
+		calculateDerivativeOfBezierCurve(p1.z, p2.z, p3.z, p4.z, t)
+	);
+}
+
+
 void modifyBeginAndEndPoints(std::vector<glm::vec3>& points, std::vector<RoadConnectionPointData*>& roadConnectionPoints)
 {
 	if (points.size() > 0 && roadConnectionPoints[0] != nullptr)
@@ -38,6 +78,19 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 }
 
 
+void generateBezierCurvePoints(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, unsigned int numberOfPoints, std::vector<glm::vec3>& points)
+{
+	points.reserve(numberOfPoints);
+
+	for (int i = 0; i < numberOfPoints; ++i)
+	{
+		float t = static_cast<float>(i) / static_cast<float>(numberOfPoints - 1);
+
+		points.push_back(calculateBezierCurvePoint(p1, p2, p3, p4, t));
+	}
+}
+
+
 // Current stable
 RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, std::vector<RoadConnectionPointData*>& roadConnectionPoints, RStaticModel* oldModel)
 {
@@ -55,6 +108,11 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 		// Calculate circle center
 		glm::vec3 segmentBegin = points[k];
 		glm::vec3 segmentEnd = points[k + 1];
+		if (segments[k].type == RST_BEZIER_CURVE)
+		{
+			segmentBegin = points[3 * k];
+			segmentEnd = points[3 * k + 3];
+		}
 
 		float x1 = segmentBegin.x;
 		float x2 = segmentEnd.x;
@@ -100,6 +158,14 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 		int indicesCountInLane = (pointsCount - 1) * 6;
 
 
+		std::vector<glm::vec3> bezierCurvePoints;
+		int bezierCurveBeginSegmentPoint = k * 3;
+		if (segments[k].type == RST_BEZIER_CURVE)
+		{
+			generateBezierCurvePoints(points[bezierCurveBeginSegmentPoint], points[bezierCurveBeginSegmentPoint + 1], points[bezierCurveBeginSegmentPoint + 2], points[bezierCurveBeginSegmentPoint + 3], pointsCount, bezierCurvePoints);
+		}
+
+
 		for (int i = 0; i < lanesCount; ++i)
 		{
 			float angle = angle1;
@@ -143,6 +209,22 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 					glm::vec2 d = glm::normalize(glm::vec2(segmentEnd.x - segmentBegin.x, segmentEnd.z - segmentBegin.z));
 					v = glm::vec2(-d.y, d.x);
 					//std::cout << v.x << " " << v.y << std::endl;
+				}
+				else if (segments[k].type == RST_BEZIER_CURVE)
+				{
+					point.x = bezierCurvePoints[j / 2].x;
+					point.y = bezierCurvePoints[j / 2].z;
+
+					if (j < pointsCount * 2 - 2)
+					{
+						glm::vec2 d = glm::normalize(glm::vec2(bezierCurvePoints[j / 2 + 1].x - bezierCurvePoints[j / 2].x, bezierCurvePoints[j / 2 + 1].z - bezierCurvePoints[j / 2].z));
+						v = glm::vec2(-d.y, d.x);
+					}
+					else
+					{
+						glm::vec2 d = glm::normalize(glm::vec2(bezierCurvePoints[j / 2].x - bezierCurvePoints[j / 2 - 1].x, bezierCurvePoints[j / 2].z - bezierCurvePoints[j / 2 - 1].z));
+						v = glm::vec2(-d.y, d.x);
+					}
 				}
 
 				// first point in first vertex - if road is connected to crossroad
