@@ -17,6 +17,7 @@
 #include "../../Graphics/Roads.h"
 
 #include "../../Utils/Helpers.hpp"
+#include "../../Utils/Collision.h"
 
 
 namespace RoadManipulator
@@ -265,20 +266,87 @@ namespace RoadManipulator
 
 		ImGuiIO& io = ImGui::GetIO();
 
+		std::vector<ImVec2> pointsTransformImGui(points.size());
+		std::vector<bool> pointsVisibility(points.size());
+
 		for (unsigned int i = 0; i < points.size(); ++i)
 		{
 			glm::vec4 position(points[i].x, points[i].y, points[i].z, 1.0f);
 
-			ImVec2 trans;
-			DrawPoint(position, trans);
+			pointsVisibility[i] = DrawPoint(position, pointsTransformImGui[i]);
 
-			glm::vec3 newPosition = HandleInputForPoint(position, trans, i);
+			glm::vec3 newPosition = HandleInputForPoint(position, pointsTransformImGui[i], i);
 
 			if (points[i] != newPosition)
 			{
 				context.isAnyPointModified = true;
 				context.modifiedPointIndex = i;
 				context.modifiedPointNewPosition = newPosition;
+			}
+		}
+
+		for (unsigned int i = 0; i < points.size(); ++i)
+		{
+			int p1 = i;
+			int p2 = i;
+			if (i % 3 == 1)
+			{
+				p2 = i - 1;
+			}
+			else if (i % 3 == 2)
+			{
+				p2 = i + 1;
+			}
+			else
+			{
+				continue;
+			}
+
+			bool pointInvisible = false;
+			if (!pointsVisibility[p1] && !pointsVisibility[p2])
+			{
+				continue;
+			}
+			else if (!pointsVisibility[p1])
+			{
+				pointInvisible = true;
+			}
+			else if (!pointsVisibility[p2])
+			{
+				pointInvisible = true;
+				std::swap(p1, p2);
+			}
+
+			ImVec2 point1 = pointsTransformImGui[p1];
+			ImVec2 point2 = pointsTransformImGui[p2];
+			/*if (pointInvisible)
+			{
+				//std::cout << "p1: " << points[p1].x << ", " << points[p1].y << ", " << points[p1].z << std::endl;
+				//std::cout << "p2: " << points[p2].x << ", " << points[p2].y << ", " << points[p2].z << std::endl;
+
+				glm::vec3 rayDirection = glm::normalize(points[p2] - points[p1]);
+				Plane plane;
+				plane.set(0, 0, 1, -0.001f);
+
+				float t;
+				float vd;
+				if (collisionRayToPlane(points[p1], rayDirection, plane, t, vd))
+				{
+					glm::vec3 newPoint1 = points[p1] + t * rayDirection;
+
+					glm::vec4 newPoint1Vec4 = context.MVP * glm::vec4(newPoint1.x, newPoint1.y, newPoint1.z, 1.0f);
+
+					std::cout << "p1: " << points[p1].x << ", " << points[p1].y << ", " << points[p1].z << std::endl;
+					std::cout << t << "     " << newPoint1Vec4.x << ", " << newPoint1Vec4.y << ", " << newPoint1Vec4.z << std::endl;
+
+					point1 = transformToImGuiScreenSpace(newPoint1Vec4);
+				}
+			}*/
+
+			if (!pointInvisible)
+			{
+				ImDrawList* drawList = context.drawList;
+				drawList->AddLine(point1, point2, 0xFFFFFFFF);
 			}
 		}
 

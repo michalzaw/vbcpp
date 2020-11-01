@@ -200,3 +200,17 @@ bool isRayIntersectOBB(glm::vec3 rayOrigin, glm::vec3 rayDirection, AABB& aabb, 
 
     return true;
 }
+
+
+bool collisionRayToPlane(const glm::vec3& rayOrigin, const glm::vec3& rayDirection, const Plane& plane, float& outT, float& outVD)
+{
+	outVD = plane.a * rayDirection.x + plane.b * rayDirection.y + plane.c * rayDirection.z;
+	if (outVD == 0.0f)
+	{
+		return false;
+	}
+
+	outT = -(plane.a * rayOrigin.x + plane.b * rayOrigin.y + plane.c * rayOrigin.z + plane.d) / outVD;
+
+	return true;
+}
