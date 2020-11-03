@@ -17,7 +17,6 @@
 #include "../../Graphics/Roads.h"
 
 #include "../../Utils/Helpers.hpp"
-#include "../../Utils/Collision.h"
 
 
 namespace RoadManipulator
@@ -152,16 +151,16 @@ namespace RoadManipulator
 
 		position = context.MVP * position;
 
+		trans = transformToImGuiScreenSpace(position);
+
 		if (position.z < 0.001f)
 		{
 			return false;
 		}
 
-		trans = transformToImGuiScreenSpace(position);
-
 		if (trans.x <= 0.0f || trans.x >= context.width || trans.y <= 0.0f || trans.y >= context.height)
 		{
-			return false;
+			//return false;
 		}
 
 		//drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
@@ -285,6 +284,7 @@ namespace RoadManipulator
 			}
 		}
 
+		// lines to control points
 		for (unsigned int i = 0; i < points.size(); ++i)
 		{
 			int p1 = i;
@@ -319,35 +319,17 @@ namespace RoadManipulator
 
 			ImVec2 point1 = pointsTransformImGui[p1];
 			ImVec2 point2 = pointsTransformImGui[p2];
-			/*if (pointInvisible)
+
+			if (pointInvisible)
 			{
-				//std::cout << "p1: " << points[p1].x << ", " << points[p1].y << ", " << points[p1].z << std::endl;
-				//std::cout << "p2: " << points[p2].x << ", " << points[p2].y << ", " << points[p2].z << std::endl;
+				glm::vec2 dir = glm::vec2(point2.x - point1.x, point2.y - point1.y);
 
-				glm::vec3 rayDirection = glm::normalize(points[p2] - points[p1]);
-				Plane plane;
-				plane.set(0, 0, 1, -0.001f);
-
-				float t;
-				float vd;
-				if (collisionRayToPlane(points[p1], rayDirection, plane, t, vd))
-				{
-					glm::vec3 newPoint1 = points[p1] + t * rayDirection;
-
-					glm::vec4 newPoint1Vec4 = context.MVP * glm::vec4(newPoint1.x, newPoint1.y, newPoint1.z, 1.0f);
-
-					std::cout << "p1: " << points[p1].x << ", " << points[p1].y << ", " << points[p1].z << std::endl;
-					std::cout << t << "     " << newPoint1Vec4.x << ", " << newPoint1Vec4.y << ", " << newPoint1Vec4.z << std::endl;
-
-					point1 = transformToImGuiScreenSpace(newPoint1Vec4);
-				}
-			}*/
-
-			if (!pointInvisible)
-			{
-				ImDrawList* drawList = context.drawList;
-				drawList->AddLine(point1, point2, 0xFFFFFFFF);
+				point1.x = point2.x + 10000 * dir.x;
+				point1.y = point2.y + 10000 * dir.y;
 			}
+
+			ImDrawList* drawList = context.drawList;
+			drawList->AddLine(point1, point2, 0xFFFFFFFF);
 		}
 
 		HandleMouseWheelInput(points, segments);
