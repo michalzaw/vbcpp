@@ -179,7 +179,15 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 		{
 			XMLElement* segmentElement = doc.NewElement("Segment");
 
-			segmentElement->SetAttribute("type", segment.type == RST_LINE ? "line" : "arc");
+			std::string type;
+			if (segment.type == RST_LINE)
+				type = "line";
+			else if (segment.type == RST_ARC)
+				type = "arc";
+			if (segment.type == RST_BEZIER_CURVE)
+				type = "bezier";
+
+			segmentElement->SetAttribute("type", type.c_str());
 			segmentElement->SetAttribute("radius", segment.r);
 			segmentElement->SetAttribute("points", segment.pointsCount);
 			segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
