@@ -46,6 +46,7 @@ class RoadObject : public RenderObject
 
 		void buildModel(bool reuseExistingModel = true);
 
+		RoadType getRoadType();
 		RRoadProfile* getRoadProfile();
 		std::vector<glm::vec3>& getPoints();
 		std::vector<RoadSegment>& getSegments();

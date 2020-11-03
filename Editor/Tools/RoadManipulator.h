@@ -12,6 +12,12 @@ struct RoadSegment;
 
 namespace RoadManipulator
 {
+	enum class RoadType
+	{
+		ARC,
+		BEZIER_CURVE
+	};
+
 	// call BeginFrame right after ImGui_XXXX_NewFrame();
 	void BeginFrame();
 
@@ -24,7 +30,7 @@ namespace RoadManipulator
 	int GetActiveSegment();
 	int GetActivePoint();
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, float* deltaMatrix = 0);
+	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix = 0);
 };
 
 

@@ -23,6 +23,8 @@ namespace RoadManipulator
 {
 	struct Context
 	{
+		RoadType roadType;
+
 		ImDrawList* drawList;
 
 		glm::mat4 viewMatrix;
@@ -104,8 +106,10 @@ namespace RoadManipulator
 		return context.activePoint;
 	}
 
-	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
+	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType)
 	{
+		context.roadType = roadType;
+
 		context.viewMatrix = view;
 		context.projectionMatrix = projection;
 		context.modelMatrix = matrix;
@@ -210,7 +214,11 @@ namespace RoadManipulator
 		if (mouseToPointDistance <= 6.0f && CanActivate())
 		{
 			context.activePoint = index;
-			context.activeSegment = std::max(index - 1, 0);
+
+			if (context.roadType == RoadType::ARC)
+				context.activeSegment = std::max(index - 1, 0);
+			else
+				context.activeSegment = std::max((index - 1) / 3, 0);
 		}
 
 		return newPosition;
@@ -218,7 +226,7 @@ namespace RoadManipulator
 
 	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
-		if (segments.size() == 0)
+		if (segments.size() == 0 || context.roadType == RoadType::BEZIER_CURVE)
 			return;
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -259,9 +267,9 @@ namespace RoadManipulator
 		}
 	}
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, float* deltaMatrix)
+	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
 	{
-		ComputeContext(view, projection, matrix, points, segments);
+		ComputeContext(view, projection, matrix, points, segments, roadType);
 
 		ImGuiIO& io = ImGui::GetIO();
 
@@ -285,51 +293,54 @@ namespace RoadManipulator
 		}
 
 		// lines to control points
-		for (unsigned int i = 0; i < points.size(); ++i)
+		if (context.roadType == RoadType::BEZIER_CURVE)
 		{
-			int p1 = i;
-			int p2 = i;
-			if (i % 3 == 1)
+			for (unsigned int i = 0; i < points.size(); ++i)
 			{
-				p2 = i - 1;
-			}
-			else if (i % 3 == 2)
-			{
-				p2 = i + 1;
-			}
-			else
-			{
-				continue;
-			}
+				int p1 = i;
+				int p2 = i;
+				if (i % 3 == 1)
+				{
+					p2 = i - 1;
+				}
+				else if (i % 3 == 2)
+				{
+					p2 = i + 1;
+				}
+				else
+				{
+					continue;
+				}
 
-			bool pointInvisible = false;
-			if (!pointsVisibility[p1] && !pointsVisibility[p2])
-			{
-				continue;
-			}
-			else if (!pointsVisibility[p1])
-			{
-				pointInvisible = true;
-			}
-			else if (!pointsVisibility[p2])
-			{
-				pointInvisible = true;
-				std::swap(p1, p2);
-			}
+				bool pointInvisible = false;
+				if (!pointsVisibility[p1] && !pointsVisibility[p2])
+				{
+					continue;
+				}
+				else if (!pointsVisibility[p1])
+				{
+					pointInvisible = true;
+				}
+				else if (!pointsVisibility[p2])
+				{
+					pointInvisible = true;
+					std::swap(p1, p2);
+				}
 
-			ImVec2 point1 = pointsTransformImGui[p1];
-			ImVec2 point2 = pointsTransformImGui[p2];
+				ImVec2 point1 = pointsTransformImGui[p1];
+				ImVec2 point2 = pointsTransformImGui[p2];
 
-			if (pointInvisible)
-			{
-				glm::vec2 dir = glm::vec2(point2.x - point1.x, point2.y - point1.y);
+				if (pointInvisible)
+				{
+					glm::vec2 dir = glm::vec2(point2.x - point1.x, point2.y - point1.y);
 
-				point1.x = point2.x + 10000 * dir.x;
-				point1.y = point2.y + 10000 * dir.y;
+					point1.x = point2.x + 10000 * dir.x;
+					point1.y = point2.y + 10000 * dir.y;
+				}
+
+				ImDrawList* drawList = context.drawList;
+				drawList->AddLine(point1, point2, 0xFFFFFFFF);
 			}
-
-			ImDrawList* drawList = context.drawList;
-			drawList->AddLine(point1, point2, 0xFFFFFFFF);
 		}
 
 		HandleMouseWheelInput(points, segments);

@@ -1231,7 +1231,8 @@ namespace vbEditor
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			roadComponent->getPoints(),
-			roadComponent->getSegments());
+			roadComponent->getSegments(),
+			static_cast<RoadManipulator::RoadType>(roadComponent->getRoadType()));
 
 		roadActiveSegment = RoadManipulator::GetActiveSegment();
 		roadActivePoint = RoadManipulator::GetActivePoint();

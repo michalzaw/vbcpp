@@ -98,6 +98,12 @@ void RoadObject::buildModel(bool reuseExistingModel)
 }
 
 
+RoadType RoadObject::getRoadType()
+{
+	return _roadType;
+}
+
+
 RRoadProfile* RoadObject::getRoadProfile()
 {
 	return _roadProfile;
