@@ -6,6 +6,7 @@ set (GRAPHICS_SOURCES
 		Graphics/CameraFPS.hpp
 		Graphics/CameraStatic.cpp
 		Graphics/CameraStatic.hpp
+		Graphics/CrossroadComponent.cpp
 		Graphics/CrossroadComponent.h
 		Graphics/DisplayComponent.cpp
 		Graphics/DisplayComponent.h

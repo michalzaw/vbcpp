@@ -228,39 +228,48 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 		return;
 	}
 
-	if (index % 3 == 0)	// point on curve
+	if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		glm::vec3 deltaPosition = newPosition - _points[index];
-
-		if (index - 1 >= 0)
+		if (index == 0 && _connectionPoints[0].crossroadComponent != nullptr ||
+			index == _points.size() - 1 && _connectionPoints[1].crossroadComponent != nullptr)
 		{
-			_points[index - 1] += deltaPosition;
+			return;
 		}
-		if (index + 1 < _points.size())
+
+		if (index % 3 == 0)	// point on curve
 		{
-			_points[index + 1] += deltaPosition;
+			glm::vec3 deltaPosition = newPosition - _points[index];
+
+			if (index - 1 >= 0)
+			{
+				_points[index - 1] += deltaPosition;
+			}
+			if (index + 1 < _points.size())
+			{
+				_points[index + 1] += deltaPosition;
+			}
 		}
-	}
-	else if (index % 3 == 1) // control point
-	{
-		if (index - 2 >= 0)
+		else if (index % 3 == 1) // control point
 		{
-			glm::vec3 direction = glm::normalize(_points[index] - _points[index - 1]);
+			if (index - 2 >= 0)
+			{
+				glm::vec3 direction = glm::normalize(_points[index] - _points[index - 1]);
 
-			float length = glm::length(_points[index - 2] - _points[index - 1]);
+				float length = glm::length(_points[index - 2] - _points[index - 1]);
 
-			_points[index - 2] = _points[index - 1] - direction * length;
+				_points[index - 2] = _points[index - 1] - direction * length;
+			}
 		}
-	}
-	else if (index % 3 == 2)
-	{
-		if (index + 2 < _points.size())
+		else if (index % 3 == 2)
 		{
-			glm::vec3 direction = glm::normalize(_points[index] - _points[index + 1]);
+			if (index + 2 < _points.size())
+			{
+				glm::vec3 direction = glm::normalize(_points[index] - _points[index + 1]);
 
-			float length = glm::length(_points[index + 2] - _points[index + 1]);
+				float length = glm::length(_points[index + 2] - _points[index + 1]);
 
-			_points[index + 2] = _points[index + 1] - direction * length;
+				_points[index + 2] = _points[index + 1] - direction * length;
+			}
 		}
 	}
 
@@ -285,10 +294,72 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 
 	_connectionPoints[index].crossroadComponent = crossroadComponent;
 	_connectionPoints[index].index = indexInCrossroad;
+
+	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		setConnectedPointPosition(index);
+	}
 }
 
 
 RoadConnectionPoint& RoadObject::getConnectionPoint(int index)
 {
 	return _connectionPoints[index];
+}
+
+
+void RoadObject::setConnectedPointPosition(int connectionPointIndex)
+{
+	CrossroadComponent* crossroadComponent = _connectionPoints[connectionPointIndex].crossroadComponent;
+	int indexInCrossroad = _connectionPoints[connectionPointIndex].index;
+
+	if (_roadType == RoadType::LINES_AND_ARC)
+	{
+		int pointIndex;
+		if (connectionPointIndex == 0)
+		{
+			pointIndex = 0;
+		}
+		else if (connectionPointIndex == 1)
+		{
+			pointIndex = _points.size() - 1;
+		}
+
+		_points[pointIndex] = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
+	}
+	else if (_roadType == RoadType::BEZIER_CURVES)
+	{
+		int pointIndex;
+		int controlPointIndex;
+		if (connectionPointIndex == 0)
+		{
+			pointIndex = 0;
+			controlPointIndex = 1;
+		}
+		else if (connectionPointIndex == 1)
+		{
+			pointIndex = _points.size() - 1;
+			controlPointIndex = pointIndex - 1;
+		}
+
+		glm::vec3 newPosition = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
+		glm::vec3 direction = crossroadComponent->getGlobalDirectionOfConnectionPoint(indexInCrossroad);
+
+		float length = glm::length(_points[pointIndex] - _points[controlPointIndex]);
+
+		_points[pointIndex] = newPosition;
+		_points[controlPointIndex] = _points[pointIndex] + length * direction;
+	}
+}
+
+
+void RoadObject::resetConnectedPointPositions()
+{
+	for (int i = 0; i < 2; ++i)
+	{
+		if (_connectionPoints[i].crossroadComponent != nullptr)
+		{
+			setConnectedPointPosition(i);
+		}
+	}
 }

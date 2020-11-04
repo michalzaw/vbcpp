@@ -61,6 +61,9 @@ class RoadObject : public RenderObject
 		void setConnectionPoint(int index, CrossroadComponent* crossroadComponent, int indexInCrossroad = 0);
 		RoadConnectionPoint& getConnectionPoint(int index);
 
+		void setConnectedPointPosition(int connectionPointIndex);
+		void resetConnectedPointPositions();
+
 };
 
 
