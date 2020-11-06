@@ -2,6 +2,7 @@
 #define CROSSROADCOMPONENT_H_INCLUDED
 
 #include <vector>
+#include <list>
 
 #include <glm/glm.hpp>
 
@@ -31,47 +32,19 @@ class CrossroadComponent : public Component
 		std::vector<CrossroadConnectionPoint> _connectionPoints;
 
 	public:
-		CrossroadComponent(std::vector<CrossroadConnectionPoint>& connectionPoints)
-			: Component(CT_CROSSROAD),
-			_connectionPoints(connectionPoints)
-		{
+		CrossroadComponent(std::vector<CrossroadConnectionPoint>& connectionPoints);
 
-		}
+		void connectRoad(int connectionPointIndex, RoadObject* roadObject);
+		void disconnectRoad(int connectionPointIndex, RoadObject* roadObject);
 
-		void connectRoad(int connectionPointIndex, RoadObject* roadObject)
-		{
-			if (connectionPointIndex >= _connectionPoints.size() && roadObject != nullptr)
-				return;
+		int getConnectionsCount();
 
-			_connectionPoints[connectionPointIndex].connectedRoads.push_back(roadObject);
-		}
+		CrossroadConnectionPoint& getConnectionPoint(int index);
 
-		void disconnectRoad(int connectionPointIndex, RoadObject* roadObject)
-		{
-			if (connectionPointIndex >= _connectionPoints.size() && roadObject != nullptr)
-				return;
+		glm::vec3 getGlobalPositionOfConnectionPoint(int index);
+		glm::vec3 getGlobalDirectionOfConnectionPoint(int index);
 
-			for (std::list<RoadObject*>::iterator i = _connectionPoints[connectionPointIndex].connectedRoads.begin();
-				 i != _connectionPoints[connectionPointIndex].connectedRoads.end();
-				 ++i)
-			{
-				if ((*i) == roadObject)
-				{
-					i = _connectionPoints[connectionPointIndex].connectedRoads.erase(i);
-					break;
-				}
-			}
-		}
-
-		int getConnectionsCount()
-		{
-			return _connectionPoints.size();
-		}
-
-		CrossroadConnectionPoint& getConnectionPoint(int index)
-		{
-			return _connectionPoints[index];
-		}
+		void changedTransform() override;
 
 };
 

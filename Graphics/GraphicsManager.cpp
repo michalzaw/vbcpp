@@ -86,9 +86,9 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-RoadObject* GraphicsManager::addRoadObject(RRoadProfile* roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
+RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
 {
-	RoadObject* roadObject = new RoadObject(roadProfile, points, segments, buildModelAfterCreate);
+	RoadObject* roadObject = new RoadObject(roadType, roadProfile, points, segments, buildModelAfterCreate);
 
 	owner->addComponent(roadObject);
 

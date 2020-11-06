@@ -16,5 +16,4 @@ bool isAABBInFrustum(Frustum& frustum, AABB& aabb);
 // this function does not work with scaled objects
 bool isRayIntersectOBB(glm::vec3 rayOrigin, glm::vec3 rayDirection, AABB& aabb, glm::mat4 modelMatrix, float& intersection_distance);
 
-
 #endif // COLLISION_H_INCLUDED

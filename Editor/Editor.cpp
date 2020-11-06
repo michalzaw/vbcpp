@@ -483,6 +483,16 @@ namespace vbEditor
 		CM_ROAD_EDIT
 	};
 
+	struct RoadConnectionPoint
+	{
+		CrossroadComponent* crossroadComponent;
+		int index;
+
+		RoadConnectionPoint(CrossroadComponent* crossroadComponent, int index)
+			: crossroadComponent(crossroadComponent), index(index)
+		{}
+	};
+
 	Window window;
 	int _windowWidth = 1024;
 	int _windowHeight = 768;
@@ -510,6 +520,7 @@ namespace vbEditor
 	static bool _saveMap = false;
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
+	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
 
 
@@ -815,6 +826,7 @@ namespace vbEditor
 				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
+				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
 				ImGui::EndMenu();
 			}
 
@@ -894,7 +906,27 @@ namespace vbEditor
 				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
 				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				roadRenderObject->setIsCastShadows(false);
+
+				setSelectedSceneObject(roadSceneObject);
+			}
+		}
+
+		static int currenProfiletSelection2 = 0;
+		if (_addRoad2DialogWindow)
+		{
+			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection2))
+			{
+				_addRoad2DialogWindow = false;
+
+				_clickMode = CM_ROAD_EDIT;
+
+				std::string profileName = _availableRoadProfiles[currenProfiletSelection2];
+				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 				roadRenderObject->setIsCastShadows(false);
 
 				setSelectedSceneObject(roadSceneObject);
@@ -1200,19 +1232,55 @@ namespace vbEditor
 		}
 	}
 
+	void createAvailableConnectionPointsList(std::vector<glm::vec3>& connectionPointsPositions, std::vector<RoadConnectionPoint>& connectionPoints)
+	{
+		const std::vector<CrossroadComponent*>& crossroadComponents = GraphicsManager::getInstance().getCrossroadComponents();
+		for (CrossroadComponent* crossroadComponent : crossroadComponents)
+		{
+			float distance = glm::length(crossroadComponent->getSceneObject()->getPosition() - _camera->getPosition());
+			if (distance < 500.0f) // todo: value
+			{
+				for (int i = 0; i < crossroadComponent->getConnectionsCount(); ++i)
+				{
+					connectionPointsPositions.push_back(crossroadComponent->getGlobalPositionOfConnectionPoint(i));
+					connectionPoints.push_back(RoadConnectionPoint(crossroadComponent, i));
+				}
+			}
+		}
+	}
+
 	void showRoadTools()
 	{
 		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 
+		std::vector<glm::vec3> connectionPointsPositions;
+		std::vector<RoadConnectionPoint> connectionPoints;
+		createAvailableConnectionPointsList(connectionPointsPositions, connectionPoints);
+
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			roadComponent->getPoints(),
-			roadComponent->getSegments());
+			roadComponent->getSegments(),
+			static_cast<RoadManipulator::RoadType>(roadComponent->getRoadType()));
 
 		roadActiveSegment = RoadManipulator::GetActiveSegment();
 		roadActivePoint = RoadManipulator::GetActivePoint();
+		if (RoadManipulator::IsModified())
+		{
+			roadComponent->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+		if (RoadManipulator::IsCreatedNewConnection())
+		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
+			roadComponent->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+
+			isRoadModified = true;
+		}
+
 		if (!isRoadModified)
 		{
 			isRoadModified = RoadManipulator::IsModified();

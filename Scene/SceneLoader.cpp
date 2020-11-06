@@ -397,7 +397,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 			const char* type = segmentElement->Attribute("type");
 			if (strcmp(type, "arc") == 0)
 				segment.type = RST_ARC;
-			else if (strcmp(type, "line"))
+			else if (strcmp(type, "line") == 0)
 				segment.type = RST_LINE;
 			segment.r = toFloat(segmentElement->Attribute("radius"));
 
@@ -426,7 +426,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, true, roadSceneObject);
+		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -473,8 +473,10 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 			const char* type = segmentElement->Attribute("type");
 			if (strcmp(type, "arc") == 0)
 				segment.type = RST_ARC;
-			else if (strcmp(type, "line"))
+			else if (strcmp(type, "line") == 0)
 				segment.type = RST_LINE;
+			else if (strcmp(type, "bezier") == 0)
+				segment.type = RST_BEZIER_CURVE;
 			segment.r = toFloat(segmentElement->Attribute("radius"));
 
 			segment.pointsCount = toInt(segmentElement->Attribute("points"));
@@ -489,8 +491,13 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 			segmentElement = segmentElement->NextSiblingElement("Segment");
 		}
 
+		RoadType roadType = RoadType::LINES_AND_ARC;
+		if (segments.size() > 0 && segments[0].type == RST_BEZIER_CURVE)
+			roadType = RoadType::BEZIER_CURVES;
+
+
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, points, segments, false, roadSceneObject);
+		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 
 
