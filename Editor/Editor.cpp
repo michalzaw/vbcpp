@@ -483,6 +483,16 @@ namespace vbEditor
 		CM_ROAD_EDIT
 	};
 
+	struct RoadConnectionPoint
+	{
+		CrossroadComponent* crossroadComponent;
+		int index;
+
+		RoadConnectionPoint(CrossroadComponent* crossroadComponent, int index)
+			: crossroadComponent(crossroadComponent), index(index)
+		{}
+	};
+
 	Window window;
 	int _windowWidth = 1024;
 	int _windowHeight = 768;
@@ -1222,12 +1232,34 @@ namespace vbEditor
 		}
 	}
 
+	void createAvailableConnectionPointsList(std::vector<glm::vec3>& connectionPointsPositions, std::vector<RoadConnectionPoint>& connectionPoints)
+	{
+		const std::vector<CrossroadComponent*>& crossroadComponents = GraphicsManager::getInstance().getCrossroadComponents();
+		for (CrossroadComponent* crossroadComponent : crossroadComponents)
+		{
+			float distance = glm::length(crossroadComponent->getSceneObject()->getPosition() - _camera->getPosition());
+			if (distance < 500.0f) // todo: value
+			{
+				for (int i = 0; i < crossroadComponent->getConnectionsCount(); ++i)
+				{
+					connectionPointsPositions.push_back(crossroadComponent->getGlobalPositionOfConnectionPoint(i));
+					connectionPoints.push_back(RoadConnectionPoint(crossroadComponent, i));
+				}
+			}
+		}
+	}
+
 	void showRoadTools()
 	{
 		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 
+		std::vector<glm::vec3> connectionPointsPositions;
+		std::vector<RoadConnectionPoint> connectionPoints;
+		createAvailableConnectionPointsList(connectionPointsPositions, connectionPoints);
+
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			roadComponent->getPoints(),
@@ -1239,6 +1271,14 @@ namespace vbEditor
 		if (RoadManipulator::IsModified())
 		{
 			roadComponent->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+		if (RoadManipulator::IsCreatedNewConnection())
+		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
+			roadComponent->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+
+			isRoadModified = true;
 		}
 
 		if (!isRoadModified)

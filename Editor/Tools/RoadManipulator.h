@@ -22,10 +22,13 @@ namespace RoadManipulator
 	void BeginFrame();
 
 	void SetRect(float x, float y, float width, float height);
+	void SetAvailableConnectionPoints(std::vector<glm::vec3>* availableConnectionPoints);
 
 	int IsModified();
 	int GetModifiedPointIndex();
 	glm::vec3 GetModifiedPointNewPostion();
+	int IsCreatedNewConnection();
+	int GetNewConnectionIndex();
 
 	int GetActiveSegment();
 	int GetActivePoint();

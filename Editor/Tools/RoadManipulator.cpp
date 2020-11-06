@@ -41,12 +41,20 @@ namespace RoadManipulator
 		float yMax = 0.f;
 		float displayRatio = 1.f;
 
+		std::vector<glm::vec3>* availableConnectionPoints = nullptr;
+
 		bool isAnyPointModified = false;
 		int modifiedPointIndex = -1;
 		glm::vec3 modifiedPointNewPosition;
 
+		bool isCreatedNewConnection = false;
+		int newConnectionIndex = -1;
+
 		int activePoint = 0;
 		int activeSegment = 0;
+
+		bool isUsingGizmo = false;
+		bool isUsingGizmoLastFrame = false;
 	};
 
 	static Context context;
@@ -81,6 +89,11 @@ namespace RoadManipulator
 		context.displayRatio = width / height;
 	}
 
+	void SetAvailableConnectionPoints(std::vector<glm::vec3>* availableConnectionPoints)
+	{
+		context.availableConnectionPoints = availableConnectionPoints;
+	}
+
 	int IsModified()
 	{
 		return context.isAnyPointModified;
@@ -94,6 +107,16 @@ namespace RoadManipulator
 	glm::vec3 GetModifiedPointNewPostion()
 	{
 		return context.modifiedPointNewPosition;
+	}
+
+	int IsCreatedNewConnection()
+	{
+		return context.isCreatedNewConnection;
+	}
+
+	int GetNewConnectionIndex()
+	{
+		return context.newConnectionIndex;
 	}
 
 	int GetActiveSegment()
@@ -118,6 +141,7 @@ namespace RoadManipulator
 		context.MVP = context.viewProjection * context.modelMatrix;
 
 		context.isAnyPointModified = false;
+		context.isCreatedNewConnection = false;
 
 		if (context.activePoint >= points.size())
 		{
@@ -127,6 +151,9 @@ namespace RoadManipulator
 		{
 			context.activeSegment = segments.size() - 1;
 		}
+
+		context.isUsingGizmoLastFrame = context.isUsingGizmo;
+		context.isUsingGizmo = false;
 	}
 
 	static ImVec2 transformToImGuiScreenSpace(glm::vec4 position)
@@ -149,7 +176,7 @@ namespace RoadManipulator
 	}
 
 	// return true - if the point is drawn
-	bool DrawPoint(glm::vec4 position, ImVec2& trans)
+	bool DrawPoint(glm::vec4 position, ImVec2& trans, ImU32 color = IM_COL32(255, 255, 255, 255))
 	{
 		ImDrawList* drawList = context.drawList;
 
@@ -171,7 +198,7 @@ namespace RoadManipulator
 		//drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
 
 		//drawList->AddCircleFilled(trans, 10.0f, IM_COL32(255, 0, 0, 255));
-		drawList->AddCircleFilled(trans, 6.0f, IM_COL32(255, 255, 255, 255));
+		drawList->AddCircleFilled(trans, 6.0f, color);
 
 		return true;
 	}
@@ -200,6 +227,8 @@ namespace RoadManipulator
 			);
 
 			newPosition = modelMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+			context.isUsingGizmo = ImGuizmo::IsUsing();
 		}
 
 		float mouseToPointDistance = glm::length(glm::vec2(io.MousePos.x - trans.x, io.MousePos.y - trans.y));
@@ -267,13 +296,47 @@ namespace RoadManipulator
 		}
 	}
 
+	void drawAvailableConnectionPoints(std::vector<ImVec2>& roadPointsTransform)
+	{
+		if (context.availableConnectionPoints == nullptr || roadPointsTransform.size() == 0)
+		{
+			return;
+		}
+
+		for (int i = 0; i < context.availableConnectionPoints->size(); ++i)
+		{
+			ImVec2 transform;
+			glm::vec3 pos = (*context.availableConnectionPoints)[i];
+
+			int alpha = (ImGui::IsMouseDown(0) && context.isUsingGizmoLastFrame) ? 255 : 0;
+			DrawPoint(glm::vec4(pos.x, pos.y, pos.z, 1.0f), transform, IM_COL32(255, 255, 255, alpha));
+
+			if (context.activePoint == 0 || context.activePoint == roadPointsTransform.size() - 1)
+			{
+				if (glm::length(glm::vec2(roadPointsTransform[context.activePoint].x, roadPointsTransform[context.activePoint].y) - glm::vec2(transform.x, transform.y)) <= 10)
+				{
+					if (ImGui::IsMouseDown(0))
+					{
+						context.drawList->AddCircleFilled(transform, 10.0f, IM_COL32(255, 0, 0, 128));
+					}
+					
+					if (ImGui::IsMouseReleased(0) && context.isUsingGizmoLastFrame)
+					{
+						context.isCreatedNewConnection = true;
+						context.newConnectionIndex = i;
+					}
+				}
+			}
+		}
+	}
+
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
 	{
 		ComputeContext(view, projection, matrix, points, segments, roadType);
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		std::vector<ImVec2> pointsTransformImGui(points.size());
+		std::vector<ImVec2> pointsTransformImGui(points.size()); // todo: ten wektor chyba trzeba przeniesc do Context
 		std::vector<bool> pointsVisibility(points.size());
 
 		for (unsigned int i = 0; i < points.size(); ++i)
@@ -344,6 +407,8 @@ namespace RoadManipulator
 		}
 
 		HandleMouseWheelInput(points, segments);
+
+		drawAvailableConnectionPoints(pointsTransformImGui);
 	}
 
 };
