@@ -8,8 +8,8 @@
 class PhysicalBodyConvexHull : public PhysicalBody
 {
     public:
-        PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass);
-        PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass);
+        PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
+        PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
 
         virtual ~PhysicalBodyConvexHull();
 

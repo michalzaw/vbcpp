@@ -26,7 +26,7 @@ enum collisiontypes {
 class PhysicalBody : public Component
 {
     public:
-        PhysicalBody(btScalar m);
+        PhysicalBody(btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         virtual ~PhysicalBody();
 
         btRigidBody* getRigidBody() { return _rigidBody.get(); }
@@ -77,6 +77,8 @@ class PhysicalBody : public Component
         btScalar                _mass;
         btVector3               _position;      // default position
         btVector3               _oldScale;
+		bool					_centerOfMassOffset;
+		btVector3				_centerOfMassOffsetValue;
 
         std::vector<Constraint*> _constraints;
 

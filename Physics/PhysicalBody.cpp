@@ -7,10 +7,11 @@
 // =========================================
 // CONSTRUCTOR & DESTRUCTOR
 
-PhysicalBody::PhysicalBody(btScalar m)
+PhysicalBody::PhysicalBody(btScalar m, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : Component(CT_PHYSICAL_BODY),
 _rigidBody(nullptr), _collShape(nullptr), _motionState(nullptr),
 _mass(m), _position(btVector3(0,0,0)), _oldScale(btVector3(1,1,1)),
+_centerOfMassOffset(centerOfMassOffset), _centerOfMassOffsetValue(centerOfMassOffsetValue),
 _isUpdateTransformFromObject(true)
 {
 
@@ -30,7 +31,7 @@ void PhysicalBody::update()
         if (_mass > 0)
         {
             btTransform transf;
-            _motionState->getWorldTransform(transf);
+			transf = _motionState->m_graphicsWorldTrans;
 
             _isUpdateTransformFromObject = false;
             _object->setPosition(glm::vec3(transf.getOrigin().getX(),transf.getOrigin().getY(),transf.getOrigin().getZ()));
@@ -46,14 +47,14 @@ void PhysicalBody::changedTransform()
     if (_isUpdateTransformFromObject)
     {
         btTransform transf;
-        transf.setIdentity();
+		_motionState->m_graphicsWorldTrans.setIdentity();
 
         glm::mat4 m;
         m = _object->getGlobalTransformMatrix();
-        transf.setFromOpenGLMatrix(&m[0][0]);
+		_motionState->m_graphicsWorldTrans.setFromOpenGLMatrix(&m[0][0]);
 
+		_motionState->getWorldTransform(transf);
         _rigidBody->setCenterOfMassTransform(transf);
-        _motionState->setWorldTransform(transf);
 
         for (int i = 0; i < _constraints.size(); ++i)
         {

@@ -189,9 +189,9 @@ PhysicalBodyStaticPlane* PhysicsManager::createPhysicalBodyStaticPlane(btVector3
     return b;
 }
 
-PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 {
-    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass, centerOfMassOffset, centerOfMassOffsetValue);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 
@@ -200,9 +200,9 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(Vertex* ver
     return b;
 }
 
-PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter)
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 {
-    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass);
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, vertexCount, mass, centerOfMassOffset, centerOfMassOffsetValue);
 
     _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
 

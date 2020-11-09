@@ -92,6 +92,8 @@ void RObjectLoader::loadPhysicsComponent(tinyxml2::XMLElement* componentElement,
 	else if (bodyType == "dynamic")
 	{
 		object->getComponents()[componentIndex]["mass"] = componentElement->Attribute("mass");
+		object->getComponents()[componentIndex]["centerOfMassOffset"] = XmlUtils::getAttributeStringOptional(componentElement, "centerOfMassOffset", "false");
+		object->getComponents()[componentIndex]["centerOfMassOffsetValue"] = XmlUtils::getAttributeStringOptional(componentElement, "centerOfMassOffsetValue", "0,0,0");
 	}
 	else if (bodyType == "static")
 	{
@@ -254,10 +256,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				Logger::info("- Creating dynamic Convex Hull collision shape");
 
 				float mass = toFloat(components[i]["mass"]);
+				bool centerOfMassOffset = toBool(components[i]["centerOfMassOffset"]);
+				btVector3 centerOfMassOffsetValue = XMLstringToBtVec3(components[i]["centerOfMassOffsetValue"].c_str());
 				int collidesWith = COL_TERRAIN | COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
 
 				PhysicalBodyConvexHull* physicalBody = physicsManager->createPhysicalBodyConvexHull(model->getCollisionMesh(), model->getCollisionMeshSize(), mass,
-					COL_ENV, collidesWith);
+					COL_ENV, collidesWith, centerOfMassOffset, centerOfMassOffsetValue);
 
 				sceneObject->addComponent(physicalBody);
 			}
