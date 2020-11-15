@@ -35,7 +35,7 @@ void PhysicsDebuggerWindow::drawWindow()
 		PhysicsDebugRenderer* debugRenderer = static_cast<PhysicsDebugRenderer*>(_sceneManager->getPhysicsManager()->getDebugRenderer());
 
 		bool physicsDebuggerEnabled = _sceneManager->getPhysicsManager()->getDebugRenderingState();
-		if (ImGui::Checkbox("Enabled", &physicsDebuggerEnabled))
+		if (ImGui::Checkbox("Debug renderer enabled", &physicsDebuggerEnabled))
 		{
 			_sceneManager->getPhysicsManager()->setDebugRenderingState(physicsDebuggerEnabled);
 		}
@@ -61,6 +61,21 @@ void PhysicsDebuggerWindow::drawWindow()
 		drawDebugModeCheckBox(debugMode, "DBG_DrawFrames", btIDebugDraw::DBG_DrawFrames);
 
 		debugRenderer->setDebugMode(debugMode);
+
+		ImGui::Separator();
+
+		bool isPhysicsEnabled = _sceneManager->getPhysicsManager()->isRunning();
+		if (ImGui::Checkbox("Physics enabled", &isPhysicsEnabled))
+		{
+			if (isPhysicsEnabled)
+			{
+				_sceneManager->getPhysicsManager()->play();
+			}
+			else
+			{
+				_sceneManager->getPhysicsManager()->stop();
+			}
+		}
 	}
 	ImGui::End();
 }
