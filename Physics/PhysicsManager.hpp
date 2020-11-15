@@ -69,6 +69,7 @@ class PhysicsManager : virtual public RefCounter
         void removeConstraint(Constraint* c);
 
 		void setDebugRenderer(btIDebugDraw* debugRenderer);
+		btIDebugDraw* getDebugRenderer();
 		void setDebugRenderingState(bool enable);
 		bool getDebugRenderingState();
 

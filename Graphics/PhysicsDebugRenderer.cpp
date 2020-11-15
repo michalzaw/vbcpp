@@ -9,6 +9,7 @@
 
 
 PhysicsDebugRenderer::PhysicsDebugRenderer()
+	: _numberOfVerticesToRendering(0)
 {
 	_drawMode = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints;
 
@@ -81,15 +82,15 @@ int PhysicsDebugRenderer::getDebugMode() const
 
 void PhysicsDebugRenderer::flushLines()
 {
-	int numberOfVertices = _vertices.size();
+	_numberOfVerticesToRendering = _vertices.size();
 	int vertexSize = sizeof(DebugVertex);
 
-	if (_vbo->getBufferSize() < numberOfVertices * vertexSize)
+	if (_vbo->getBufferSize() < _numberOfVerticesToRendering * vertexSize)
 	{
-		numberOfVertices = _vbo->getBufferSize() / vertexSize;
+		_numberOfVerticesToRendering = _vbo->getBufferSize() / vertexSize;
 	}
 
-	_vbo->updateVertexData(&(_vertices[0]), numberOfVertices);
+	_vbo->updateVertexData(&(_vertices[0]), _numberOfVerticesToRendering);
 
 	_vertices.clear();
 }
@@ -133,7 +134,7 @@ void PhysicsDebugRenderer::renderAll(bool clearRenderTargetBeforeRendering)
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(DebugVertex), (void*)(sizeof(float) * 3));
 
-	glDrawArrays(GL_LINES, 0, _vbo->getQuantumOfVertices());
+	glDrawArrays(GL_LINES, 0, _numberOfVerticesToRendering);
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);

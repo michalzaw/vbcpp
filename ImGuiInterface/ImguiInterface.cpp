@@ -17,6 +17,7 @@ ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager, std::
 
 	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, _buses);
 	_colorsWindow = new ColorsWindow(_sceneManager, _buses);
+	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, _buses, false);
 }
 
 
@@ -24,6 +25,7 @@ ImGuiInterface::~ImGuiInterface()
 {
 	delete _busLineAndDirectionWindow;
 	delete _colorsWindow;
+	delete _physicsDebuggerWindow;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -81,6 +83,7 @@ void ImGuiInterface::draw()
 		if (GameConfig::getInstance().developmentMode)
 		{
 			_colorsWindow->draw();
+			_physicsDebuggerWindow->draw();
 		}
 
 		ImGui::Render();
@@ -97,6 +100,7 @@ void ImGuiInterface::drawMainMenu()
         {
             ImGui::MenuItem("Bus line and direction", NULL, _busLineAndDirectionWindow->getOpenFlagPointer());
             ImGui::MenuItem("Colors", NULL, _colorsWindow->getOpenFlagPointer());
+			ImGui::MenuItem("Physics debugger", NULL, _physicsDebuggerWindow->getOpenFlagPointer());
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

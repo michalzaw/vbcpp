@@ -28,6 +28,7 @@ class PhysicsDebugRenderer : public btIDebugDraw
 		int _drawMode;
 
 		std::vector<DebugVertex> _vertices;
+		int _numberOfVerticesToRendering;
 
 		RShader* _shader;
 		VBO* _vbo;

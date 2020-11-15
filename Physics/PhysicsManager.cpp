@@ -366,6 +366,12 @@ void PhysicsManager::setDebugRenderer(btIDebugDraw* debugRenderer)
 }
 
 
+btIDebugDraw* PhysicsManager::getDebugRenderer()
+{
+	return _debugRenderer;
+}
+
+
 void PhysicsManager::setDebugRenderingState(bool enable)
 {
 	_debugRendeignEnable = enable;
