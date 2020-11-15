@@ -69,6 +69,8 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	terrainMesh->getRigidBody()->setFriction(1.0f);
 	terrainObject->addComponent(terrainMesh);
 
+	terrainMesh->setVisualisationInDebugDrawingStatus(false);
+
 	return true;
 }
 

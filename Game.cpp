@@ -103,6 +103,10 @@ void Game::initializeEngineSystems()
 
 #ifdef DRAW_IMGUI
 	_imGuiInterface = new ImGuiInterface(_window, _sceneManager, &_buses);
+
+	_physicsDebugRenderer = new PhysicsDebugRenderer;
+
+	_physicsManager->setDebugRenderer(_physicsDebugRenderer);
 #endif // DRAW_IMGUI
 }
 
@@ -258,6 +262,10 @@ void Game::run()
 		}
 
 #ifdef DRAW_IMGUI
+		if (_physicsManager->getDebugRenderingState())
+		{
+			_physicsDebugRenderer->renderAll();
+		}
 		_imGuiInterface->draw();
 #endif // DRAW_IMGUI
 
@@ -291,6 +299,7 @@ void Game::terminate()
 	delete _sceneManager;
 
 #ifdef DRAW_IMGUI
+	delete _physicsDebugRenderer;
 	delete _imGuiInterface;
 #endif // DRAW_IMGUI
 

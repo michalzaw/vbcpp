@@ -12,7 +12,6 @@
 #include "PhysicalBodyRaycastVehicle.h"
 #include "PhysicalBodyWheel.h"
 
-
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
 #include "ConstraintBall.h"
@@ -69,6 +68,10 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
+		void setDebugRenderer(btIDebugDraw* debugRenderer);
+		void setDebugRenderingState(bool enable);
+		bool getDebugRenderingState();
+
         //friend class PhysicalBody;
 
     private:
@@ -80,6 +83,9 @@ class PhysicsManager : virtual public RefCounter
 
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
+
+		btIDebugDraw* _debugRenderer;
+		bool		  _debugRendeignEnable;
 
         bool _running;
 };

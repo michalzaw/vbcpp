@@ -28,6 +28,8 @@ PhysicsManager::PhysicsManager()
   _collisionDispatcher(0),
   _collisionConfiguration(0),
   _broadphase(0),
+  _debugRenderer(nullptr),
+  _debugRendeignEnable(false),
   _running(false)
 {
     createPhysicsWorld();
@@ -137,8 +139,12 @@ void PhysicsManager::simulate(btScalar timeStep)
         {
             _physicalBodies[i]->update();
         }
-    }
 
+		if (_debugRendeignEnable && _debugRenderer != nullptr)
+		{
+			_dynamicsWorld->debugDrawWorld();
+		}
+    }
 }
 
 
@@ -346,5 +352,37 @@ void PhysicsManager::removeConstraint(Constraint* c)
     _constraints.remove(c);
 
 	delete c;
+}
+
+
+void PhysicsManager::setDebugRenderer(btIDebugDraw* debugRenderer)
+{
+	_debugRenderer = debugRenderer;
+
+	if (_debugRendeignEnable)
+	{
+		_dynamicsWorld->setDebugDrawer(_debugRenderer);
+	}
+}
+
+
+void PhysicsManager::setDebugRenderingState(bool enable)
+{
+	_debugRendeignEnable = enable;
+
+	if (_debugRendeignEnable)
+	{
+		_dynamicsWorld->setDebugDrawer(_debugRenderer);
+	}
+	else
+	{
+		_dynamicsWorld->setDebugDrawer(nullptr);
+	}
+}
+
+
+bool PhysicsManager::getDebugRenderingState()
+{
+	return _debugRendeignEnable;
 }
 

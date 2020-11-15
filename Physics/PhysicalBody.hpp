@@ -64,6 +64,8 @@ class PhysicalBody : public Component
             _position = pos;
         }
 
+		void setVisualisationInDebugDrawingStatus(bool enabled);
+
         virtual void update();
 
 

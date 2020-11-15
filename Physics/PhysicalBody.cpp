@@ -24,6 +24,19 @@ PhysicalBody::~PhysicalBody()
 }
 
 
+void PhysicalBody::setVisualisationInDebugDrawingStatus(bool enabled)
+{
+	if (enabled)
+	{
+		_rigidBody->setCollisionFlags(_rigidBody->getCollisionFlags() & ~(btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT));
+	}
+	else
+	{
+		_rigidBody->setCollisionFlags(_rigidBody->getCollisionFlags() | btCollisionObject::CF_DISABLE_VISUALIZE_OBJECT);
+	}
+}
+
+
 void PhysicalBody::update()
 {
     if (_object->isActive())

@@ -44,6 +44,8 @@ set (GRAPHICS_SOURCES
 		Graphics/NVMeshMender/NVMeshMender.h
 		Graphics/OGLDriver.cpp
 		Graphics/OGLDriver.h
+		Graphics/PhysicsDebugRenderer.cpp
+		Graphics/PhysicsDebugRenderer.h
 		Graphics/PostProcessingBloom.cpp
 		Graphics/PostProcessingBloom.h
 		Graphics/PostProcessingEffect.cpp

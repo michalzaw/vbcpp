@@ -6,6 +6,8 @@
 
 #include "Game/Hud.h"
 
+#include "Graphics/PhysicsDebugRenderer.h"
+
 #include "GUI/GUIManager.h"
 
 #include "ImGuiInterface/ImGuiInterface.h"
@@ -39,6 +41,7 @@ class Game
 		SceneManager* _sceneManager;
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
+		PhysicsDebugRenderer* _physicsDebugRenderer;
 
 		double _lastFPSupdate;
 		int _numberOfFrames;
