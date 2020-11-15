@@ -1,10 +1,9 @@
 #include "PhysicsDebugRenderer.h"
 
-#include <iostream>
-
 #include "GraphicsManager.h"
 #include "VBO.h"
 
+#include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -50,15 +49,23 @@ void PhysicsDebugRenderer::drawLine(const btVector3& from, const btVector3& to, 
 }
 
 
-void PhysicsDebugRenderer::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+void PhysicsDebugRenderer::drawLine(const btVector3& from, const btVector3& to, const btVector3& fromColor, const btVector3& toColor)
 {
+	_vertices.push_back(DebugVertex{ glm::vec3(from.x(), from.y(), from.z()), glm::vec3(fromColor.x(), fromColor.y(), fromColor.z()) });
+	_vertices.push_back(DebugVertex{ glm::vec3(to.x(), to.y(), to.z()), glm::vec3(toColor.x(), toColor.y(), toColor.z()) });
+}
 
+
+void PhysicsDebugRenderer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
+{
+	drawSphere(pointOnB, 0.1f, color);
+	drawLine(pointOnB, pointOnB + normalOnB, color);
 }
 
 
 void PhysicsDebugRenderer::reportErrorWarning(const char* warningString)
 {
-
+	Logger::error("[Physics Debugger] - " + std::string(warningString));
 }
 
 

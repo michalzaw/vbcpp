@@ -42,7 +42,6 @@ void PhysicsDebuggerWindow::drawWindow()
 		btIDebugDraw* debugRenderer = _sceneManager->getPhysicsManager()->getDebugRenderer();
 		int debugMode = debugRenderer->getDebugMode();
 
-		drawDebugModeCheckBox(debugMode, "DBG_NoDebug", btIDebugDraw::DBG_NoDebug);
 		drawDebugModeCheckBox(debugMode, "DBG_DrawWireframe", btIDebugDraw::DBG_DrawWireframe);
 		drawDebugModeCheckBox(debugMode, "DBG_DrawAabb", btIDebugDraw::DBG_DrawAabb);
 		drawDebugModeCheckBox(debugMode, "DBG_DrawContactPoints", btIDebugDraw::DBG_DrawContactPoints);
