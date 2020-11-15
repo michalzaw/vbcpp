@@ -8,7 +8,8 @@
 
 
 PhysicsDebugRenderer::PhysicsDebugRenderer()
-	: _numberOfVerticesToRendering(0)
+	: _numberOfVerticesToRendering(0),
+	_clearRenderTargetBeforeRendering(true)
 {
 	_drawMode = btIDebugDraw::DBG_DrawWireframe + btIDebugDraw::DBG_DrawContactPoints + btIDebugDraw::DBG_DrawConstraints;
 
@@ -115,11 +116,23 @@ Framebuffer* PhysicsDebugRenderer::getTargetFramebuffer()
 }
 
 
-void PhysicsDebugRenderer::renderAll(bool clearRenderTargetBeforeRendering)
+void PhysicsDebugRenderer::setClearRenderTargetBeforeRenderingFlag(bool enabled)
+{
+	_clearRenderTargetBeforeRendering = enabled;
+}
+
+
+bool PhysicsDebugRenderer::getClearRenderTargetBeforeRenderingFlag()
+{
+	return _clearRenderTargetBeforeRendering;
+}
+
+
+void PhysicsDebugRenderer::renderAll()
 {
 	_targetFramebuffer->bind();
 
-	if (clearRenderTargetBeforeRendering)
+	if (_clearRenderTargetBeforeRendering)
 	{
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}

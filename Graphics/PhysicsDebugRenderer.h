@@ -35,6 +35,8 @@ class PhysicsDebugRenderer : public btIDebugDraw
 
 		Framebuffer* _targetFramebuffer;
 
+		bool _clearRenderTargetBeforeRendering;
+
 	public:
 		PhysicsDebugRenderer();
 		~PhysicsDebugRenderer();
@@ -55,8 +57,10 @@ class PhysicsDebugRenderer : public btIDebugDraw
 
 		void setTargetFramebuffer(Framebuffer* framebuffer);
 		Framebuffer* getTargetFramebuffer();
+		void setClearRenderTargetBeforeRenderingFlag(bool enabled);
+		bool getClearRenderTargetBeforeRenderingFlag();
 
-		void renderAll(bool clearRenderTargetBeforeRendering = true);
+		void renderAll();
 };
 
 

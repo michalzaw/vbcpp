@@ -1,5 +1,7 @@
 #include "PhysicsDebuggerWindow.h"
 
+#include "../Graphics/PhysicsDebugRenderer.h"
+
 
 PhysicsDebuggerWindow::PhysicsDebuggerWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
 	: ImGuiWindow(sceneManager, buses, isOpen)
@@ -30,16 +32,23 @@ void PhysicsDebuggerWindow::drawWindow()
 {
 	if (ImGui::Begin("Physics debbuger", &_isOpen))
 	{
+		PhysicsDebugRenderer* debugRenderer = static_cast<PhysicsDebugRenderer*>(_sceneManager->getPhysicsManager()->getDebugRenderer());
+
 		bool physicsDebuggerEnabled = _sceneManager->getPhysicsManager()->getDebugRenderingState();
 		if (ImGui::Checkbox("Enabled", &physicsDebuggerEnabled))
 		{
 			_sceneManager->getPhysicsManager()->setDebugRenderingState(physicsDebuggerEnabled);
 		}
 
+		bool drawOnClearScreen = debugRenderer->getClearRenderTargetBeforeRenderingFlag();
+		if (ImGui::Checkbox("Draw on clear screen", &drawOnClearScreen))
+		{
+			debugRenderer->setClearRenderTargetBeforeRenderingFlag(drawOnClearScreen);
+		}
+
 		ImGui::Separator();
 		ImGui::Text("Rendering mode flags");
 
-		btIDebugDraw* debugRenderer = _sceneManager->getPhysicsManager()->getDebugRenderer();
 		int debugMode = debugRenderer->getDebugMode();
 
 		drawDebugModeCheckBox(debugMode, "DBG_DrawWireframe", btIDebugDraw::DBG_DrawWireframe);
