@@ -1,12 +1,12 @@
 #include "VBO.h"
 
 
-VBO::VBO(unsigned int size)
+VBO::VBO(unsigned int size, GLenum usage)
     : _vboId(0), _vertexSize(0), _bufferSize(size), _quantumOfVertices(0)
 {
     glGenBuffers(1, &_vboId);
     glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, size, NULL, usage);
 }
 
 

@@ -57,7 +57,7 @@ struct StaticModelMesh
 
     void setMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
                      unsigned int materialIndex, ShaderType shaderType,
-					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0)
+					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0, bool staticData = true)
     {
         this->vertices = vertices;
         this->verticesCount = verticesCount;
@@ -85,8 +85,9 @@ struct StaticModelMesh
 		}
 		else
 		{
-			vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex));
-			ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int));
+			GLenum usage = staticData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+			vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex), usage);
+			ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int), usage);
 		}
 
         vbo->addVertexData(vertices, verticesCount);

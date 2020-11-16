@@ -3,12 +3,12 @@
 #include <cstddef>
 
 
-IBO::IBO(unsigned int size)
+IBO::IBO(unsigned int size, GLenum usage)
     : _iboId(0), _bufferSize(size), _indicesCount(0)
 {
     glGenBuffers(1, &_iboId);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, NULL, usage);
 }
 
 

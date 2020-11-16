@@ -14,7 +14,7 @@ class IBO
         unsigned int _indicesCount;
 
     public:
-        IBO(unsigned int size);
+        IBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         ~IBO();
 
         unsigned int getBufferSize();

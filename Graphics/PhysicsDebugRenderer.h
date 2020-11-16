@@ -24,6 +24,8 @@ struct DebugVertex
 class PhysicsDebugRenderer : public btIDebugDraw
 {
 	private:
+		static const int MAX_VERICES_COUNT = 100000;
+
 		DefaultColors _defaultsColors;
 		int _drawMode;
 

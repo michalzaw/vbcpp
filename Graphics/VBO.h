@@ -17,7 +17,7 @@ class VBO
         unsigned int _quantumOfVertices;
 
     public:
-        VBO(unsigned int size);
+        VBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         ~VBO();
 
         unsigned int getVertexSize();

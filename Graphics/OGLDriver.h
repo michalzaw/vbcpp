@@ -55,8 +55,8 @@ class OGLDriver
         bool initialize();
 
         VAO* createVAO();
-        VBO* createVBO(unsigned int size);
-        IBO* createIBO(unsigned int size);
+        VBO* createVBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
+        IBO* createIBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         UBO* createUBO(unsigned int size);
         Framebuffer* createFramebuffer();
 

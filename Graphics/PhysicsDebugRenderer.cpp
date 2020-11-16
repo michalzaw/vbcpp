@@ -15,7 +15,7 @@ PhysicsDebugRenderer::PhysicsDebugRenderer()
 
 	_shader = ResourceManager::getInstance().loadShader("Shaders/debugPhysics.vert", "Shaders/debugPhysics.frag");
 
-	_vbo = OGLDriver::getInstance().createVBO(100000 * sizeof(DebugVertex));
+	_vbo = OGLDriver::getInstance().createVBO(MAX_VERICES_COUNT * sizeof(DebugVertex), GL_DYNAMIC_DRAW);
 
 	_vertices.push_back(DebugVertex{ glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f) });
 	_vbo->addVertexData(&_vertices[0], 1);
@@ -59,7 +59,7 @@ void PhysicsDebugRenderer::drawLine(const btVector3& from, const btVector3& to, 
 
 void PhysicsDebugRenderer::drawContactPoint(const btVector3& pointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)
 {
-	drawSphere(pointOnB, 0.1f, color);
+	drawSphere(pointOnB, 0.01f, color);
 	drawLine(pointOnB, pointOnB + normalOnB, color);
 }
 

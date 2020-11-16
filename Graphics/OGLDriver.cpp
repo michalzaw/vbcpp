@@ -104,9 +104,9 @@ VAO* OGLDriver::createVAO()
 }
 
 
-VBO* OGLDriver::createVBO(unsigned int size)
+VBO* OGLDriver::createVBO(unsigned int size, GLenum usage)
 {
-    VBO* vbo = new VBO(size);
+    VBO* vbo = new VBO(size, usage);
 
     if (vbo != NULL)
     {
@@ -117,9 +117,9 @@ VBO* OGLDriver::createVBO(unsigned int size)
 }
 
 
-IBO* OGLDriver::createIBO(unsigned int size)
+IBO* OGLDriver::createIBO(unsigned int size, GLenum usage)
 {
-    IBO* ibo = new IBO(size);
+    IBO* ibo = new IBO(size, usage);
 
     if (ibo != NULL)
     {

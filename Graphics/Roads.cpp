@@ -416,7 +416,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 			else // GM_EDITOR
 			{
 				// vbo for ~ 4600 vertices
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader, false, 1024 * 1024, 1024 * 1024);
+				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader, false, 1024 * 1024, 1024 * 1024, false);
 			}
 		}
 		else
