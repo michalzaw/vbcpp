@@ -2,47 +2,8 @@
 
 #include "../Game/GameConfig.h"
 
+#include "../Utils/BezierCurvesUtils.h"
 #include "../Utils/Logger.h"
-
-
-float calculateBezierCurvePoint(float p1, float p2, float p3, float p4, float t)
-{
-	return (1 - t) * (1 - t) * (1 - t) * p1 +
-		3 * (1 - t) * (1 - t) * t * p2 +
-		3 * (1 - t) * t * t * p3 +
-		t * t * t * p4;
-}
-
-
-glm::vec3 calculateBezierCurvePoint(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, float t)
-{
-	return glm::vec3(
-		calculateBezierCurvePoint(p1.x, p2.x, p3.x, p4.x, t),
-		calculateBezierCurvePoint(p1.y, p2.y, p3.y, p4.y, t),
-		calculateBezierCurvePoint(p1.z, p2.z, p3.z, p4.z, t)
-	);
-}
-
-
-float calculateDerivativeOfBezierCurve(float p1, float p2, float p3, float p4, float t)
-{
-	return -3 * (1 - t) * (1 - t) * p1 +
-		3 * (1 - t) * (1 - t) * p2 -
-		6 * t * (1 - t) * p2 -
-		3 * t * t * p3 +
-		6 * t * (1 - t) * p3 +
-		3 * t * t * p4;
-}
-
-
-glm::vec3 calculateDerivativeOfBezierCurve(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, float t)
-{
-	return glm::vec3(
-		calculateDerivativeOfBezierCurve(p1.x, p2.x, p3.x, p4.x, t),
-		calculateDerivativeOfBezierCurve(p1.y, p2.y, p3.y, p4.y, t),
-		calculateDerivativeOfBezierCurve(p1.z, p2.z, p3.z, p4.z, t)
-	);
-}
 
 
 glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
@@ -62,19 +23,6 @@ glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, 
 	}
 
 	return collisionMesh;
-}
-
-
-void generateBezierCurvePoints(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4, unsigned int numberOfPoints, std::vector<glm::vec3>& points)
-{
-	points.reserve(numberOfPoints);
-
-	for (int i = 0; i < numberOfPoints; ++i)
-	{
-		float t = static_cast<float>(i) / static_cast<float>(numberOfPoints - 1);
-
-		points.push_back(calculateBezierCurvePoint(p1, p2, p3, p4, t));
-	}
 }
 
 
@@ -147,7 +95,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 		int bezierCurveBeginSegmentPoint = k * 3;
 		if (segments[k].type == RST_BEZIER_CURVE)
 		{
-			generateBezierCurvePoints(points[bezierCurveBeginSegmentPoint], points[bezierCurveBeginSegmentPoint + 1], points[bezierCurveBeginSegmentPoint + 2], points[bezierCurveBeginSegmentPoint + 3], pointsCount, bezierCurvePoints);
+			BezierCurvesUtils::generateBezierCurvePoints(points[bezierCurveBeginSegmentPoint], points[bezierCurveBeginSegmentPoint + 1], points[bezierCurveBeginSegmentPoint + 2], points[bezierCurveBeginSegmentPoint + 3], pointsCount, bezierCurvePoints);
 		}
 
 

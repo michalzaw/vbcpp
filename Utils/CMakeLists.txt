@@ -1,4 +1,5 @@
 set (UTILS_SOURCES
+	Utils/BezierCurvesUtils.cpp
 	Utils/Collision.cpp
 	Utils/Engine.cpp
 	Utils/FilesHelper.cpp
@@ -22,6 +23,7 @@ set (UTILS_SOURCES
 )
 
 set (UTILS_HEADERS
+	Utils/BezierCurvesUtils.h
 	Utils/Collision.h
 	Utils/Engine.h
 	Utils/FilesHelper.h
