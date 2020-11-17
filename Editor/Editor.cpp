@@ -1262,6 +1262,7 @@ namespace vbEditor
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
+			_camera->getPosition(),
 			roadComponent->getPoints(),
 			roadComponent->getSegments(),
 			static_cast<RoadManipulator::RoadType>(roadComponent->getRoadType()));

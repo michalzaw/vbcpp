@@ -184,7 +184,7 @@ namespace RoadManipulator
 
 		trans = transformToImGuiScreenSpace(position);
 
-		if (position.z < 0.001f)
+		if (position.z < 0.1f) // todo: < near and > far
 		{
 			return false;
 		}
@@ -330,7 +330,22 @@ namespace RoadManipulator
 		}
 	}
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
+	ImVec2 fixPointOutsideCamera(const ImVec2& pointToBeFixed, const ImVec2& secondPoint, const glm::vec3& cameraPosition, const glm::vec3& pointToBeFixedWorldPosition, float windowHeight)
+	{
+		const float a = (secondPoint.y - pointToBeFixed.y) / (secondPoint.x - pointToBeFixed.x);
+		const float b = pointToBeFixed.y - (a * pointToBeFixed.x);
+
+		if (cameraPosition.y - pointToBeFixedWorldPosition.y > 0)
+		{
+			return ImVec2((windowHeight - b) / a, windowHeight);
+		}
+		else
+		{
+			return ImVec2(-b / a, 0.0f);
+		}
+	}
+
+	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, glm::vec3 cameraPosition, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
 	{
 		ComputeContext(view, projection, matrix, points, segments, roadType);
 
@@ -375,34 +390,27 @@ namespace RoadManipulator
 					continue;
 				}
 
-				bool pointInvisible = false;
+				ImVec2 point1 = pointsTransformImGui[p1];
+				ImVec2 point2 = pointsTransformImGui[p2];
+
+				ImVec2 fixedPoint1 = point1;
+				ImVec2 fixedPoint2 = point2;
+
 				if (!pointsVisibility[p1] && !pointsVisibility[p2])
 				{
 					continue;
 				}
-				else if (!pointsVisibility[p1])
+				if (!pointsVisibility[p1])
 				{
-					pointInvisible = true;
+					fixedPoint1 = fixPointOutsideCamera(point1, point2, cameraPosition, points[p1], context.height);
 				}
-				else if (!pointsVisibility[p2])
+				if (!pointsVisibility[p2])
 				{
-					pointInvisible = true;
-					std::swap(p1, p2);
-				}
-
-				ImVec2 point1 = pointsTransformImGui[p1];
-				ImVec2 point2 = pointsTransformImGui[p2];
-
-				if (pointInvisible)
-				{
-					glm::vec2 dir = glm::vec2(point2.x - point1.x, point2.y - point1.y);
-
-					point1.x = point2.x + 10000 * dir.x;
-					point1.y = point2.y + 10000 * dir.y;
+					fixedPoint2 = fixPointOutsideCamera(point2, point1, cameraPosition, points[p2], context.height);
 				}
 
 				ImDrawList* drawList = context.drawList;
-				drawList->AddLine(point1, point2, 0xFFFFFFFF);
+				drawList->AddLine(fixedPoint1, fixedPoint2, 0xFFFFFFFF);
 			}
 		}
 
