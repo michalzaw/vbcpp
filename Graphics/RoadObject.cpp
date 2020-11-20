@@ -3,9 +3,11 @@
 #include <algorithm>
 
 #include "CrossroadComponent.h"
+#include "RoadGenerator.h"
 
 #include "../Scene/SceneObject.h"
 
+#include "../Utils/BezierCurvesUtils.h"
 #include "../Utils/Logger.h"
 
 
@@ -14,6 +16,16 @@ RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vecto
 {
 	_type = CT_ROAD_OBJECT;
 	
+	if (buildModelAfterCreate)
+		buildModel();
+}
+
+
+RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate)
+	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2)
+{
+	_type = CT_ROAD_OBJECT;
+
 	if (buildModelAfterCreate)
 		buildModel();
 }
@@ -31,6 +43,7 @@ RoadObject::~RoadObject()
 
 void RoadObject::buildModel(bool reuseExistingModel)
 {
+	
 	std::vector<RoadConnectionPointData*> connectionPointsData;
 	for (int i = 0; i < 2; ++i)
 	{
@@ -70,6 +83,25 @@ void RoadObject::buildModel(bool reuseExistingModel)
 		delete[] _materials;
 	}
 
+	if (_roadType == RoadType::LINES_AND_ARC)
+	{
+		buildModelLinesAndArcMode(connectionPointsData, reuseExistingModel);
+	}
+	else if (_roadType == RoadType::BEZIER_CURVES)
+	{
+		buildModelBezierCurvesMode(connectionPointsData, reuseExistingModel);
+	}
+
+	for (int i = 0; i < 2; ++i)
+	{
+		if (connectionPointsData[i] != nullptr)
+			delete connectionPointsData[i];
+	}
+}
+
+
+void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+{
 	RStaticModel* newModel;
 	if (_model == nullptr)
 	{
@@ -89,12 +121,43 @@ void RoadObject::buildModel(bool reuseExistingModel)
 		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _model);
 	}
 	setModel(newModel);
+}
 
-	for (int i = 0; i < 2; ++i)
+
+void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+{
+	//buildModelLinesAndArcMode(connectionPointsData, reuseExistingModel);
+	//return;
+	if (_points.size() == 0)
 	{
-		if (connectionPointsData[i] != nullptr)
-			delete connectionPointsData[i];
+		Logger::info("RoadObject: New road. Model was not built");
+		return;
 	}
+
+	if ((_points.size() - 1) % 3 != 0)
+	{
+		Logger::error("RoadObject: Invalid number of control points");
+		return;
+	}
+
+	_curvePoints.clear();
+
+	for (int i = 0; i < _points.size() - 1; i += 3)
+	{
+		std::vector<glm::vec3> segmentPoints;
+		BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], 50, segmentPoints);
+
+		if (i == 0)
+		{
+			_curvePoints.insert(_curvePoints.end(), segmentPoints.begin(), segmentPoints.end());
+		}
+		else
+		{
+			_curvePoints.insert(_curvePoints.end(), segmentPoints.begin() + 1, segmentPoints.end());
+		}
+	}
+
+	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), _curvePoints, connectionPointsData));
 }
 
 

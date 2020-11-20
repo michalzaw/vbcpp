@@ -40,11 +40,17 @@ class RoadObject : public RenderObject
 		std::vector<RoadSegment> _segments;
 		std::vector<RoadConnectionPoint> _connectionPoints;
 
+		// fields for BEZIER_CURVES type
+		std::vector<glm::vec3> _curvePoints;
+
 	public:
 		RoadObject(RoadType roadType, RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate);
+		RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate); // BEZIER_CURVES
 		virtual ~RoadObject();
 
 		void buildModel(bool reuseExistingModel = true);
+		void buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel);
+		void buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel);
 
 		RoadType getRoadType();
 		RRoadProfile* getRoadProfile();
