@@ -126,15 +126,7 @@ void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>
 
 void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
 {
-	//buildModelLinesAndArcMode(connectionPointsData, reuseExistingModel);
-	//return;
-	if (_points.size() == 0)
-	{
-		Logger::info("RoadObject: New road. Model was not built");
-		return;
-	}
-
-	if ((_points.size() - 1) % 3 != 0)
+	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
 		Logger::error("RoadObject: Invalid number of control points");
 		return;
@@ -142,18 +134,21 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 
 	_curvePoints.clear();
 
-	for (int i = 0; i < _points.size() - 1; i += 3)
+	if (_points.size() > 0)
 	{
-		std::vector<glm::vec3> segmentPoints;
-		BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], 50, segmentPoints);
+		for (int i = 0; i < _points.size() - 1; i += 3)
+		{
+			std::vector<glm::vec3> segmentPoints;
+			BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], 50, segmentPoints);
 
-		if (i == 0)
-		{
-			_curvePoints.insert(_curvePoints.end(), segmentPoints.begin(), segmentPoints.end());
-		}
-		else
-		{
-			_curvePoints.insert(_curvePoints.end(), segmentPoints.begin() + 1, segmentPoints.end());
+			if (i == 0)
+			{
+				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin(), segmentPoints.end());
+			}
+			else
+			{
+				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin() + 1, segmentPoints.end());
+			}
 		}
 	}
 
@@ -248,7 +243,7 @@ void RoadObject::addPoint(glm::vec3 position)
 
 			// modify last control point
 			_points[pointsCount - 2] = _points[pointsCount - 1] + controlPointsDirection * distanceLastCurvePointToLastControlPoint;
-			 
+			
 
 			// first control point
 			_points.push_back(_points[pointsCount - 1] - controlPointsDirection * distanceLastCurvePointToNewPoint * 0.5f);

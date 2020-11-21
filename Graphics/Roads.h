@@ -86,6 +86,7 @@ struct RoadConnectionPointData
 };
 
 
+// deprecated - new version for spline based roads is in RoadGenerator namespace
 RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, std::vector<RoadConnectionPointData*>& roadConnectionPoints, RStaticModel* oldModel = NULL);
 
 
