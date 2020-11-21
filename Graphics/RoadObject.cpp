@@ -65,14 +65,6 @@ void RoadObject::buildModel(bool reuseExistingModel)
 		}
 	}
 
-	// delete objects in base class RenderObject
-	/*
-	// delete generated RStaticModel
-	if (_model != nullptr)
-	{
-		delete _model;
-	}*/
-
 	if (_modelRootNode)
 	{
 		delete _modelRootNode;
@@ -81,6 +73,12 @@ void RoadObject::buildModel(bool reuseExistingModel)
 	if (_materials)
 	{
 		delete[] _materials;
+	}
+
+	if (!reuseExistingModel && _model != nullptr)
+	{
+		delete _model;
+		_model = nullptr;
 	}
 
 	if (_roadType == RoadType::LINES_AND_ARC)
@@ -102,25 +100,7 @@ void RoadObject::buildModel(bool reuseExistingModel)
 
 void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
 {
-	RStaticModel* newModel;
-	if (_model == nullptr)
-	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData);
-	}
-	else if (!reuseExistingModel)
-	{
-		if (_model != nullptr)
-		{
-			delete _model;
-		}
-
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData);
-	}
-	else
-	{
-		newModel = createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _model);
-	}
-	setModel(newModel);
+	setModel(createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _model));
 }
 
 
@@ -152,7 +132,7 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 		}
 	}
 
-	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), _curvePoints, connectionPointsData));
+	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), _curvePoints, connectionPointsData, _model));
 }
 
 
