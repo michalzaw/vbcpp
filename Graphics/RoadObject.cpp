@@ -247,8 +247,8 @@ void RoadObject::addPoint(glm::vec3 position)
 			}
 
 			// modify last control point
-			_points[pointsCount - 2] = _points[pointsCount - 1] + controlPointsDirection * distanceLastCurvePointToLastControlPoint * 0.5f;
-
+			_points[pointsCount - 2] = _points[pointsCount - 1] + controlPointsDirection * distanceLastCurvePointToLastControlPoint;
+			 
 
 			// first control point
 			_points.push_back(_points[pointsCount - 1] - controlPointsDirection * distanceLastCurvePointToNewPoint * 0.5f);
