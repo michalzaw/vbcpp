@@ -51,4 +51,33 @@ namespace BezierCurvesUtils
 			outPoints.push_back(calculateBezierCurvePoint(p1, p2, p3, p4, t));
 		}
 	}
+
+	void generateBezierCurvePointsWithConstDistance(int resolution, float distance, std::vector<glm::vec3>& outPoints, const std::function<glm::vec3(float)>& function)
+	{
+		outPoints.clear();
+
+		float distanceFromLastPoint = distance;
+		glm::vec3 lastPoint;
+
+		const float deltaPosition = 1.0f / static_cast<float>(resolution);
+
+		for (int i = 0; i < resolution; ++i)
+		{
+			const float t = i * deltaPosition;
+			const glm::vec3 currentPoint = function(t);
+
+			if (i != 0)
+			{
+				distanceFromLastPoint += glm::distance(currentPoint, lastPoint);
+			}
+
+			while (distanceFromLastPoint >= distance)
+			{
+				distanceFromLastPoint -= distance;
+				outPoints.push_back(currentPoint);
+			}
+
+			lastPoint = currentPoint;
+		}
+	}
 }

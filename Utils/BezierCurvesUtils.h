@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <functional>
 
 #include <glm/glm.hpp>
 
@@ -19,6 +20,8 @@ namespace BezierCurvesUtils
 
 	void generateBezierCurvePoints(const glm::vec3& p1, const glm::vec3& p2, const glm::vec3& p3, const glm::vec3& p4,
 								   unsigned int numberOfPoints, std::vector<glm::vec3>& outPoints);
+
+	void generateBezierCurvePointsWithConstDistance(int resolution, float distance, std::vector<glm::vec3>& outPoints, const std::function<glm::vec3(float)>& function);
 }
 
 

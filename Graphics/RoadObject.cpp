@@ -120,6 +120,10 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 		{
 			std::vector<glm::vec3> segmentPoints;
 			BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], 50, segmentPoints);
+			/*BezierCurvesUtils::generateBezierCurvePointsWithConstDistance(10000, 4.0f, segmentPoints, [this, i](float t)
+				{
+					return BezierCurvesUtils::calculateBezierCurvePoint(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], t);
+				});*/
 
 			if (i == 0)
 			{
