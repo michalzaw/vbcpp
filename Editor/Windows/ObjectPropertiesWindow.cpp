@@ -285,6 +285,143 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 }
 
 
+void showRoadComponentDetails(RoadObject* roadComponent)
+{
+	if (ImGui::CollapsingHeader("Road component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		int roadProfilesCurrentItem = 0;
+		std::vector<const char*> roadProfilesComboItems;
+		for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
+		{
+			roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+
+			if (vbEditor::_availableRoadProfiles[i] == roadComponent->getRoadProfile()->getName())
+				roadProfilesCurrentItem = i;
+		}
+		if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
+		{
+			roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
+
+			roadComponent->buildModel(false);
+		}
+
+		ImGui::Separator();
+
+		if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
+		{
+			ImGui::Text("Point: %d", vbEditor::roadActivePoint);
+
+			float* pointPosition = glm::value_ptr(roadComponent->getPoints()[vbEditor::roadActivePoint]);
+
+			if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
+			{
+				vbEditor::isRoadModified = true;
+			}
+
+			if (vbEditor::roadActivePoint % 3 == 0)
+			{
+				if (ImGui::Button("Delete point"))
+				{
+					roadComponent->deletePoint(vbEditor::roadActivePoint);
+
+					if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
+					{
+						--vbEditor::roadActivePoint;
+						--vbEditor::roadActiveSegment;
+					}
+
+					if (roadComponent->getPoints().size() == 0)
+					{
+						vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
+						vbEditor::_selectedSceneObject = nullptr;
+
+						return;
+					}
+
+					vbEditor::isRoadModified = true;
+				}
+			}
+		}
+
+		if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
+
+			int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
+			if (ImGui::DragInt("Points count", points, 0.5f, 0, 1000))
+			{
+				vbEditor::isRoadModified = true;
+				*points = std::max(*points, 0);
+			}
+		}
+
+		ImGui::Separator();
+
+		std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+		CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
+
+		int crossroadCurrentItems[2] = { 0, 0 };
+		int connectionPointCurrentItems[2] = { roadComponent->getConnectionPoint(0).index, roadComponent->getConnectionPoint(1).index };
+
+		std::string crossroadsComboItems{};
+		crossroadsComboItems += " ";
+		crossroadsComboItems += '\0';
+
+		for (int i = 0; i < availableCrossroads.size(); ++i)
+		{
+			crossroadsComboItems += availableCrossroads[i]->getSceneObject()->getName() + '\0';
+
+			for (int j = 0; j < 2; ++j)
+			{
+				if (availableCrossroads[i] == connectedCrossroads[j])
+				{
+					crossroadCurrentItems[j] = i + 1;
+				}
+			}
+		}
+
+		for (int i = 0; i < 2; ++i)
+		{
+			ImGui::Text("Connection: %d", i);
+
+			ImGui::PushID(i);
+			if (ImGui::Combo("Crossroad", &crossroadCurrentItems[i], crossroadsComboItems.c_str()))
+			{
+				if (crossroadCurrentItems[i] == 0)
+				{
+					roadComponent->setConnectionPoint(i, nullptr);
+				}
+				else
+				{
+					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
+				}
+
+				vbEditor::isRoadModified = true;
+			}
+
+			if (connectedCrossroads[i] != nullptr)
+			{
+				std::string connectionPointComboItems{};
+				for (int j = 0; j < connectedCrossroads[i]->getConnectionsCount(); ++j)
+				{
+					connectionPointComboItems += toString(j) + '\0';
+				}
+
+				if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
+				{
+					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
+
+					vbEditor::isRoadModified = true;
+				}
+			}
+			ImGui::PopID();
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -332,9 +469,9 @@ void showObjectProperties()
 				showRenderComponentDetails(grassComponent);
 			}
 
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (roadComponent)
-			{
+			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+			//if (roadComponent)
+			//{
 				//if (ImGui::CollapsingHeader("Road", ImGuiTreeNodeFlags_DefaultOpen))
 				//{
 				//	// left
@@ -409,6 +546,13 @@ void showObjectProperties()
 				//		roadComponent->buildModel();
 				//	}
 				//}
+			RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+			if (roadComponent && roadComponent->getRoadType() == RoadType::BEZIER_CURVES)
+			{
+				showRoadComponentDetails(roadComponent);
+			}
+			if (roadComponent && roadComponent->getRoadType() == RoadType::LINES_AND_ARC)
+			{
 				if (ImGui::CollapsingHeader("Road component", ImGuiTreeNodeFlags_DefaultOpen))
 				{
 					if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
