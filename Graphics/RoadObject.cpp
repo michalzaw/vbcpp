@@ -258,13 +258,67 @@ void RoadObject::deletePoint(unsigned int index)
 		return;
 	}
 
-	_points.erase(_points.begin() + index);
-
-	unsigned int segmentIndex = std::max((int)index - 1, 0);
-
-	if (segmentIndex < _segments.size())
+	if (_roadType == RoadType::LINES_AND_ARC)
 	{
-		_segments.erase(_segments.begin() + segmentIndex);
+		_points.erase(_points.begin() + index);
+
+		unsigned int segmentIndex = std::max((int)index - 1, 0);
+
+		if (segmentIndex < _segments.size())
+		{
+			_segments.erase(_segments.begin() + segmentIndex);
+		}
+	}
+	else if (_roadType == RoadType::BEZIER_CURVES)
+	{
+		if (index % 3 == 1 || index % 3 == 2)
+		{
+			return;
+		}
+
+		if (index == 0 && _points.size() == 1)
+		{
+			setConnectionPoint(0, nullptr);
+
+			_points.erase(_points.begin());
+		}
+		else if (index == 0)
+		{
+			setConnectionPoint(0, nullptr);
+
+			_points.erase(_points.begin());
+			_points.erase(_points.begin());
+			_points.erase(_points.begin());
+		}
+		else if (index == _points.size() - 1)
+		{
+			setConnectionPoint(1, nullptr);
+
+			_points.erase(_points.end() - 1);
+			_points.erase(_points.end() - 1);
+			_points.erase(_points.end() - 1);
+		}
+		else
+		{
+			auto nextPointIterator = _points.erase(_points.begin() + index);
+			// next control point
+			if (nextPointIterator != _points.end())
+			{
+				nextPointIterator = _points.erase(nextPointIterator);
+			}
+			// previous control point
+			if (nextPointIterator - 1 != _points.end())
+			{
+				nextPointIterator = _points.erase(nextPointIterator - 1);
+			}
+		}
+
+		unsigned int segmentIndex = std::max(((int)index - 1) / 3, 0);
+
+		if (segmentIndex < _segments.size())
+		{
+			_segments.erase(_segments.begin() + segmentIndex);
+		}
 	}
 }
 
