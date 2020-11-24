@@ -188,9 +188,13 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 				type = "bezier";
 
 			segmentElement->SetAttribute("type", type.c_str());
-			segmentElement->SetAttribute("radius", segment.r);
 			segmentElement->SetAttribute("points", segment.pointsCount);
-			segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+
+			if (segment.type != RST_BEZIER_CURVE)
+			{
+				segmentElement->SetAttribute("radius", segment.r);
+				segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+			}
 
 			roadElement->InsertEndChild(segmentElement);
 		}

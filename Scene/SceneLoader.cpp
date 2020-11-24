@@ -479,13 +479,14 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 				segment.type = RST_LINE;
 			else if (strcmp(type, "bezier") == 0)
 				segment.type = RST_BEZIER_CURVE;
-			segment.r = toFloat(segmentElement->Attribute("radius"));
 
 			segment.pointsCount = toInt(segmentElement->Attribute("points"));
-			const char* interpolation = segmentElement->Attribute("interpolation");
-			if (strcmp(interpolation, "lin") == 0)
+
+			segment.r = XmlUtils::getAttributeFloatOptional(segmentElement, "radius");
+			std::string interpolation = XmlUtils::getAttributeStringOptional(segmentElement, "interpolation", "lin");
+			if (interpolation == "lin")
 				segment.interpolation = RI_LIN;
-			else if (strcmp(interpolation, "cos") == 0)
+			else if (interpolation == "cos")
 				segment.interpolation = RI_COS;
 
 			segments.push_back(segment);

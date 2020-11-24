@@ -111,6 +111,11 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 		Logger::error("RoadObject: Invalid number of control points");
 		return;
 	}
+	if (_points.size() / 3 != _segments.size())
+	{
+		Logger::error("RoadObject: Invalid number of segments");
+		return;
+	}
 
 	_curvePoints.clear();
 
@@ -118,8 +123,9 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 	{
 		for (int i = 0; i < _points.size() - 1; i += 3)
 		{
+			int segmentIndex = i / 3;
 			std::vector<glm::vec3> segmentPoints;
-			BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], 50, segmentPoints);
+			BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], _segments[segmentIndex].pointsCount, segmentPoints);
 			/*BezierCurvesUtils::generateBezierCurvePointsWithConstDistance(10000, 4.0f, segmentPoints, [this, i](float t)
 				{
 					return BezierCurvesUtils::calculateBezierCurvePoint(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], t);
