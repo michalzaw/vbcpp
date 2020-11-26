@@ -11,8 +11,10 @@ set (EDITOR_SOURCES
 	Editor/Windows/RoadTools.cpp
 	Editor/Windows/MapInfoWindow.cpp
 	Editor/Windows/MaterialEditorWindow.cpp
+	Editor/Windows/GenerateObjectsAlongRoadWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
+	Editor/Utils/ObjectsGenerator.cpp
 )
 
 set (EDITOR_HEADERS 
@@ -30,8 +32,10 @@ set (EDITOR_HEADERS
 	Editor/Windows/RoadTools.h
 	Editor/Windows/MapInfoWindow.h
 	Editor/Windows/MaterialEditorWindow.h
+	Editor/Windows/GenerateObjectsAlongRoadWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
+	Editor/Utils/ObjectsGenerator.h
 )
 
 set (EDITOR_SOURCES ${EDITOR_SOURCES} PARENT_SCOPE)

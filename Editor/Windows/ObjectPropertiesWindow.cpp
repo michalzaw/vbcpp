@@ -254,6 +254,8 @@ namespace vbEditor
 	extern RenderObject* currentRenderObject;
 	extern RStaticModel* currentStaticModel;
 	extern unsigned int currentMaterialIndex;
+
+	extern bool _showGenerateObjectsAlongRoadWindow;
 }
 
 
@@ -417,6 +419,11 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				}
 			}
 			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Generate objects"))
+		{
+			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
 		}
 	}
 }

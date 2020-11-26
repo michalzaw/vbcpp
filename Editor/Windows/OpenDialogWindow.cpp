@@ -44,7 +44,7 @@ bool openMapDialog(const std::vector<std::string>& items, int& current_item)
 	return closeWindow;
 }
 
-bool openMapDialog(std::string title, std::string buttonTitle, std::vector<std::string>& items, int & current_item)
+bool openMapDialog(std::string title, std::string buttonTitle, const std::vector<std::string>& items, int & current_item)
 {
 	bool closeWindow = false;
 

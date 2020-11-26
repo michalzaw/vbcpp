@@ -26,6 +26,7 @@
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
 #include "Windows/MaterialEditorWindow.h"
+#include "Windows/GenerateObjectsAlongRoadWindow.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -522,7 +523,7 @@ namespace vbEditor
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
-
+	bool _showGenerateObjectsAlongRoadWindow = false;
 
 	std::string windowTitle = "VBCPP - World Editor";
 
@@ -972,6 +973,15 @@ namespace vbEditor
 			if (!materialEditorWindow())
 			{
 				_showMaterialEditorWindow = false;
+			}
+		}
+
+		if (_showGenerateObjectsAlongRoadWindow)
+		{
+			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+			if (!generateObjectsAlongRoadWindow(_availableObjects, roadComponent))
+			{
+				_showGenerateObjectsAlongRoadWindow = false;
 			}
 		}
 
