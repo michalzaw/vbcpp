@@ -100,6 +100,7 @@ namespace vbEditor
 				ObjectsGenerator::generateObjectsAlongRoad(roadComponent, &_generatorData, _sceneManager);
 			}
 		}
+		ImGui::End();
 
 		if (_showAddObjectWindow)
 		{
