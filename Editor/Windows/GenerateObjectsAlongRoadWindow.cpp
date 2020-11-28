@@ -52,7 +52,7 @@ namespace vbEditor
 	void showLocationParameters()
 	{
 		ImGui::DragInt("Distance between objects", &_generatorData.distance, 0.1f, 1, 1000);
-		ImGui::DragFloat("Distance from the road axis", &_generatorData.distanceFromCenter, 0.01f, 0.0f, 1000.0f);
+		ImGui::DragFloat2("Offset from the road axis", glm::value_ptr(_generatorData.offsetFromCenter), 0.01f, 0.0f, 1000.0f);
 		ImGui::DragFloat3("Rotation", glm::value_ptr(_generatorData.rotation), 0.1f, 0.0f, 360.0f);
 
 		ImGui::Checkbox("Right", &_generatorData.rightSide);

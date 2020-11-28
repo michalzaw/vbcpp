@@ -19,7 +19,7 @@ namespace ObjectsGenerator
 		std::vector<std::string> objectsNames;
 
 		int distance;
-		float distanceFromCenter;
+		glm::vec2 offsetFromCenter;
 		glm::vec3 rotation;
 		bool rightSide;
 		bool leftSide;
@@ -28,7 +28,7 @@ namespace ObjectsGenerator
 		glm::vec3 rotationOffset;
 
 		ObjectsAlongRoadGeneratorData()
-			: distance(10), distanceFromCenter(0.0f), rotation(0.0f, 0.0f, 0.0f), rightSide(true), leftSide(false),
+			: distance(10), offsetFromCenter(0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), rightSide(true), leftSide(false),
 			positionOffset(0.0f, 0.0f, 0.0f), rotationOffset(0.0f, 0.0f, 0.0f)
 		{}
 
