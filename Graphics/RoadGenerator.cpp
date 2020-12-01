@@ -32,13 +32,24 @@ namespace RoadGenerator
 		}
 	}
 
-	glm::vec3 calculateNormalForPointsConnectedToCrossroad(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3, RoadConnectionPointData* roadConnectionPointData)
+	glm::vec3 calculateNormalForFirstPointsConnectedToCrossroad(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3)
 	{
 		glm::vec3 v1 = point1;
 		glm::vec3 v2 = point2;
 		glm::vec3 v3 = point3;
 
 		v3.y = v2.y;
+
+		return glm::normalize(glm::cross(v3 - v2, v1 - v2));
+	}
+
+	glm::vec3 calculateNormalForLastPointsConnectedToCrossroad(const glm::vec3& point1, const glm::vec3& point2, const glm::vec3& point3)
+	{
+		glm::vec3 v1 = point1;
+		glm::vec3 v2 = point2;
+		glm::vec3 v3 = point3;
+
+		v1.y = v3.y;
 
 		return glm::normalize(glm::cross(v3 - v2, v1 - v2));
 	}
@@ -122,25 +133,29 @@ namespace RoadGenerator
 			}
 
 			// Calculate normal for first and last point in lane - if road is connected to crossroad
-			int firstVertexForLastConnectionPoint = lanesVerticesArray[i].size() - 4;
-			int trianglesIndices[2][3] = {
-					{ 0, 1, 3 },
-					{ firstVertexForLastConnectionPoint + 0, firstVertexForLastConnectionPoint + 3, firstVertexForLastConnectionPoint + 2 }
-			};
-
-			for (int j = 0; j < 2; ++j)
+			if (roadConnectionPoints[0] != nullptr)
 			{
-				if (roadConnectionPoints[j] != nullptr)
-				{
-					unsigned int i1 = trianglesIndices[j][0];
-					unsigned int i2 = trianglesIndices[j][1];
-					unsigned int i3 = trianglesIndices[j][2];
+				unsigned int i1 = 0;
+				unsigned int i2 = 1;
+				unsigned int i3 = 3;
 
-					glm::vec3 normal = calculateNormalForPointsConnectedToCrossroad(lanesVerticesArray[i][i1].pos, lanesVerticesArray[i][i2].pos, lanesVerticesArray[i][i3].pos, roadConnectionPoints[0]);
+				glm::vec3 normal = calculateNormalForFirstPointsConnectedToCrossroad(lanesVerticesArray[i][i1].pos, lanesVerticesArray[i][i2].pos, lanesVerticesArray[i][i3].pos);
 
-					lanesVerticesArray[i][i1].normal = normal;
-					lanesVerticesArray[i][i2].normal = normal;
-				}
+				lanesVerticesArray[i][i1].normal = normal;
+				lanesVerticesArray[i][i2].normal = normal;
+			}
+
+			if (roadConnectionPoints[1] != nullptr)
+			{
+				int firstVertexForLastConnectionPoint = lanesVerticesArray[i].size() - 4;
+				unsigned int i1 = firstVertexForLastConnectionPoint + 0;
+				unsigned int i2 = firstVertexForLastConnectionPoint + 3;
+				unsigned int i3 = firstVertexForLastConnectionPoint + 2;
+
+				glm::vec3 normal = calculateNormalForLastPointsConnectedToCrossroad(lanesVerticesArray[i][i1].pos, lanesVerticesArray[i][i2].pos, lanesVerticesArray[i][i3].pos);
+
+				lanesVerticesArray[i][i2].normal = normal;
+				lanesVerticesArray[i][i3].normal = normal;
 			}
 		}
 	}
