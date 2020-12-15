@@ -18,5 +18,5 @@ uniform float SpecularPower;
 
 void main()
 {
-	FragmentColor = texture2D(Texture, TexCoord);
+	FragmentColor = texture2D(Texture, vec2(TexCoord.x, 1.0f - TexCoord.y));
 }

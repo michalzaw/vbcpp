@@ -254,7 +254,10 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	if (sMaterial.shader == MIRROR_MATERIAL && !GameConfig::getInstance().isMirrorsEnabled)
 	{
 		sMaterial.shader = SOLID_MATERIAL;
-		sMaterial.diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+		if (sMaterial.diffuseTexture == NULL)
+		{
+			sMaterial.diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+		}
 	}
 
 
