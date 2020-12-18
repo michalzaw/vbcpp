@@ -31,6 +31,7 @@ struct BusRayCastWheel
 {
     PhysicalBodyWheel* wheel;
     bool                  steering;
+	bool                  tag;
     bool                  powered;
     bool                  handbrake;
     float                 maxBrakeForce;

@@ -237,6 +237,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         float radius = (float)atof(wheelElement->Attribute("radius"));
 
         int steering = (int)atoi(wheelElement->Attribute("steering"));
+		int tag = XmlUtils::getAttributeIntOptional(wheelElement, "tag", 0);
         int powered = (int)atoi(wheelElement->Attribute("powered"));
         int handbrake = (int)atoi(wheelElement->Attribute("handbrake"));
 
@@ -292,6 +293,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         BusRayCastWheel* w = new BusRayCastWheel;
         w->wheel = wheelBody;
         w->steering = steering;
+		w->tag = tag;
         w->powered = powered;
         w->handbrake = handbrake;
         w->maxBrakeForce = brakeForce;
@@ -366,7 +368,8 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
 
         SceneObject* steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
         steeringWheelObject->setPosition(position);
-        steeringWheelObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI));
+        //steeringWheelObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI));
+		steeringWheelObject->setRotation(glm::vec3(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z)));
         steeringWheelObject->setScale(scale);
 
         std::string modelPath = _busPath + modelFile;

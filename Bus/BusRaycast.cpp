@@ -178,6 +178,10 @@ void BusRaycast::turnLeft(float dt)
         {
             wheel->wheel->setSteeringValue(_steerAngle);
         }
+		if (wheel->tag)
+		{
+			wheel->wheel->setSteeringValue(_steerAngle * -0.5);
+		}
     }
 }
 
@@ -203,6 +207,10 @@ void BusRaycast::turnRight(float dt)
         {
             wheel->wheel->setSteeringValue(_steerAngle);
         }
+		if (wheel->tag)
+		{
+			wheel->wheel->setSteeringValue(_steerAngle * -0.5);
+		}
     }
 }
 
@@ -237,6 +245,10 @@ void BusRaycast::centerSteringWheel(float dt)
         {
             wheel->wheel->setSteeringValue(_steerAngle);
         }
+		if (wheel->tag)
+		{
+			wheel->wheel->setSteeringValue(_steerAngle * -0.5);
+		}
     }
 }
 
