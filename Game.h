@@ -49,6 +49,7 @@ class Game
 
 		std::vector<Bus*> _buses;
 		Bus* _activeBus;
+		std::vector<CameraFPS*> _cameras;
 		CameraFPS* _activeCamera;
 
 		Hud* _hud;
@@ -84,6 +85,7 @@ class Game
 
 		void keyCallback(int key, int scancode, int action, int mods);
 		void mouseButtonCallback(int button, int action, int mods);
+		void scrollCallback(double xOffset, double yOffset);
 };
 
 

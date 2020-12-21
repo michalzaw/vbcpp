@@ -5,6 +5,7 @@
 
 #include "Bus/BusLoader.h"
 
+#include "Game/CameraControlSystem.h"
 #include "Game/GameConfig.h"
 
 #include "Graphics/Renderer.h"
@@ -14,6 +15,14 @@
 #include "Utils/ResourceManager.h"
 #include "Utils/Logger.h"
 #include "Utils/RaycastingUtils.h"
+
+
+enum GameCamera
+{
+	GC_DRIVER,
+	GC_BUS,
+	GC_GLOBAL
+};
 
 
 Game* instance = nullptr;
@@ -28,6 +37,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 {
 	instance->mouseButtonCallback(button, action, mods);
+}
+
+
+void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	instance->scrollCallback(xOffset, yOffset);
 }
 
 
@@ -68,6 +83,7 @@ void Game::createWindow()
 	// Callbacki do obslugi zdarzen
 	glfwSetKeyCallback(_window->getWindow(), ::keyCallback);
 	glfwSetMouseButtonCallback(_window->getWindow(), ::mouseButtonCallback);
+	glfwSetScrollCallback(_window->getWindow(), ::scrollCallback);
 }
 
 
@@ -111,23 +127,83 @@ void Game::initializeEngineSystems()
 }
 
 
-void Game::initScene()
+CameraFPS* createCameraBusDriver(SceneManager* sceneManager)
 {
-	SceneObject* cameraObject = _sceneManager->addSceneObject("cam1");
+	SceneObject* cameraObject = sceneManager->addSceneObject("cameraBusDriver");
+
 	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(10.0f);
-	cameraObject->setRotation(0, degToRad(-90), 0);
-	cameraObject->setPosition(10, 7, -10);
+	cameraFPS->setMoveSpeed(5);
+	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
-	setActiveCamera(cameraFPS);
+	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	cameraObject->addComponent(cameraControlComponent);
+	cameraControlComponent->setMovmentControl(false);
+
+	return cameraFPS;
+}
+
+
+CameraFPS* createCameraBus(SceneManager* sceneManager)
+{
+	SceneObject* cameraObject = sceneManager->addSceneObject("cameraBus");
+
+	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	cameraObject->addComponent(cameraFPS);
+	cameraFPS->setRotationSpeed(0.001f);
+	cameraFPS->setMoveSpeed(5);
+	cameraObject->setRotation(degToRad(0.0f), degToRad(165.0f), degToRad(0.0f));
+	cameraObject->setPosition(0, 0, 0);
+	cameraFPS->setPositionOffset(10.0f);
+
+	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	cameraObject->addComponent(cameraControlComponent);
+	cameraControlComponent->setMovmentControl(false);
+
+	return cameraFPS;
+}
+
+
+CameraFPS* createCameraFPSGlobal(SceneManager* sceneManager)
+{
+	SceneObject* cameraObject = sceneManager->addSceneObject("cameraFPSGlobal");
+
+	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	cameraObject->addComponent(cameraFPS);
+	cameraFPS->setRotationSpeed(0.001f);
+	cameraFPS->setMoveSpeed(5);
+	cameraObject->setRotation(0, 0, 0);
+	cameraObject->setPosition(0, 0, 0);
+
+	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	cameraObject->addComponent(cameraControlComponent);
+
+	return cameraFPS;
+}
+
+
+void Game::initScene()
+{
+	_cameras.resize(3);
+
+	_cameras[GC_DRIVER] = createCameraBusDriver(_sceneManager);
+	_cameras[GC_BUS] = createCameraBus(_sceneManager);
+	_cameras[GC_GLOBAL] = createCameraFPSGlobal(_sceneManager);
+
+	setActiveCamera(_cameras[GC_BUS]);
 }
 
 
 void Game::setActiveCamera(CameraFPS* camera)
 {
+	if (_activeCamera != nullptr)
+	{
+		CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(_activeCamera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), false);
+	}
+	CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(camera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), true);
+
 	_activeCamera = camera;
 
 	GraphicsManager::getInstance().setCurrentCamera(camera);
@@ -150,11 +226,17 @@ void Game::loadScene()
 									   degToRad(_sceneManager->getBusStart().rotation.y),
 									   degToRad(_sceneManager->getBusStart().rotation.z));
 
-	CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+	bus->getSceneObject()->addChild(_cameras[GC_DRIVER]->getSceneObject());
+	_cameras[GC_DRIVER]->getSceneObject()->setPosition(_activeBus->getDriverPosition());
+	_cameras[GC_DRIVER]->getSceneObject()->setRotation(0, 0, 0);
+
+	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
+
+	/*CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
 	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));
 	camera->getSceneObject()->setRotation(degToRad(-5.0f),
 										  degToRad(60.0f),
-										  degToRad(0.0f));
+										  degToRad(0.0f));*/
 
 
 	Renderer::getInstance().bakeStaticShadows();
@@ -247,6 +329,11 @@ void Game::run()
 		{
 			readInput(deltaTime);
 
+			if (_isCameraControll)
+			{
+				CameraControlSystem::getInstance().update(deltaTime);
+			}
+
 			while (accumulator > TIME_STEP)
 			{
 				fixedStepUpdate(TIME_STEP);
@@ -318,7 +405,7 @@ void Game::readInput(double deltaTime)
 
 	GLFWwindow* window = _window->getWindow();
 
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+	/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		_activeCamera->moveForward(deltaTime);
 	}
@@ -336,7 +423,7 @@ void Game::readInput(double deltaTime)
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
 	{
 		_activeCamera->strafeLeft(deltaTime);
-	}
+	}*/
 
 	if (_isMirrorControll)
 	{
@@ -442,14 +529,14 @@ void Game::readInput(double deltaTime)
 	}
 
 
-	if (_isCameraControll)
+	/*if (_isCameraControll)
 	{
 		double xpos, ypos;
 		glfwGetCursorPos(window, &xpos, &ypos);
 		glfwSetCursorPos(window, _window->getWidth() / 2, _window->getHeight() / 2);
 
 		_activeCamera->setRotation(xpos, ypos);
-	}
+	}*/
 }
 
 
@@ -509,12 +596,12 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		_activeBus->doorOpenClose(2);
 	}
 
-	else if (key == GLFW_KEY_9 && action == GLFW_PRESS)
+	else if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
 		_activeBus->doorOpenClose(3);
 	}
 
-	else if (key == GLFW_KEY_C && action == GLFW_PRESS)
+	/*else if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
 		if (_activeCamera->getSceneObject()->hasParent())
 		{
@@ -527,7 +614,7 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 			_activeCamera->getSceneObject()->setPosition(_activeBus->getDriverPosition());
 			_activeCamera->getSceneObject()->setRotation(0, 0, 0);
 		}
-	}
+	}*/
 
 	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
 	{
@@ -581,6 +668,24 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
 												  degToRad(_sceneManager->getBusStart().rotation.y),
 												  degToRad(_sceneManager->getBusStart().rotation.z));
+	}
+	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
+	{
+		_cameras[GC_DRIVER]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+
+		setActiveCamera(_cameras[GC_DRIVER]);
+	}
+	else if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
+	{
+		_cameras[GC_BUS]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+
+		setActiveCamera(_cameras[GC_BUS]);
+	}
+	else if (key == GLFW_KEY_F7 && action == GLFW_PRESS)
+	{
+		_cameras[GC_GLOBAL]->getSceneObject()->setPosition(_activeCamera->getPosition());
+
+		setActiveCamera(_cameras[GC_GLOBAL]);
 	}
 
 	// debug
@@ -672,5 +777,16 @@ void Game::mouseButtonCallback(int button, int action, int mods)
 			RenderObject* renderObject = *i;
 			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
 		}
+	}
+}
+
+
+void Game::scrollCallback(double xOffset, double yOffset)
+{
+	if (_isCameraControll)
+	{
+		float newOffset = _activeCamera->getPositionOffset() + yOffset;
+		newOffset = clamp(newOffset, 1.0f, 30.0f);
+		_activeCamera->setPositionOffset(newOffset);
 	}
 }

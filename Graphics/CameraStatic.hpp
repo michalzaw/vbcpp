@@ -56,6 +56,8 @@ class CameraStatic : public Component
 		GLfloat getBottom();
 		GLfloat getTop();
 
+		GLfloat getPositionOffset();
+
 		mat4 getProjectionMatrix();
 		mat4 getViewMatrix();
 
@@ -68,6 +70,8 @@ class CameraStatic : public Component
 		void setRight(GLfloat right);
 		void setBottom(GLfloat bottom);
 		void setTop(GLfloat top);
+
+		void setPositionOffset(GLfloat positionOffset);
 
 		void setOrthoProjectionParams(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat near, GLfloat far);
 
@@ -110,6 +114,8 @@ class CameraStatic : public Component
 		GLfloat     _right;
 		GLfloat     _bottom;
 		GLfloat     _top;
+
+		GLfloat		_positionOffset;
 
 		AABB        _aabb;                 bool _aabbIs;
 

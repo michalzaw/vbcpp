@@ -23,9 +23,10 @@ CameraStatic::CameraStatic(CameraProjectionType projectionType)
 	: Component(CT_CAMERA),
 	_projectionType(projectionType),
 	_projectionMatrix(1.0), _viewMatrix(1.0),
-	_lookAt(vec3(0,0,0)), _upVector(vec3(0,1,0)),
-    _farValue(0.1f), _nearValue(1000.0f), _viewAngle(45.0f), _windowWidth(800), _windowHeight(600),
-    _left(-1.0f), _right(1.0f), _bottom(-1.0f), _top(1.0f)
+	_lookAt(vec3(0, 0, 0)), _upVector(vec3(0, 1, 0)),
+	_farValue(0.1f), _nearValue(1000.0f), _viewAngle(45.0f), _windowWidth(800), _windowHeight(600),
+	_left(-1.0f), _right(1.0f), _bottom(-1.0f), _top(1.0f),
+	_positionOffset(0.0f)
 {
     changedTransform();
 
@@ -62,6 +63,12 @@ vec3 CameraStatic::getPosition()
 {
     glm::vec4 pos = _object->getGlobalTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
     //glm::vec4 pos = getGlobalTransform()->getTransformMatrix() * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	if (_positionOffset != 0.0f)
+	{
+		return glm::vec3(pos.x, pos.y, pos.z) - _positionOffset * getDirection();
+	}
+
     return glm::vec3(pos.x, pos.y, pos.z);
     //return getGlobalTransform()->getPosition();
 }
@@ -118,6 +125,12 @@ GLfloat CameraStatic::getBottom()
 GLfloat CameraStatic::getTop()
 {
     return _top;
+}
+
+
+GLfloat CameraStatic::getPositionOffset()
+{
+	return _positionOffset;
 }
 
 
@@ -328,6 +341,16 @@ void CameraStatic::setTop(GLfloat top)
 {
     _top = top;
 
+	_projectionMatrixIs = false;
+	_aabbIs = false;
+}
+
+
+void CameraStatic::setPositionOffset(GLfloat positionOffset)
+{
+	_positionOffset = positionOffset;
+
+	changedTransform();
 	_projectionMatrixIs = false;
 	_aabbIs = false;
 }

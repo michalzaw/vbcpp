@@ -31,6 +31,7 @@ enum ComponentType
 
     CT_BUS_STOP,
 	CT_DISPLAY,
+	CT_CAMERA_CONTROL,
 
     COMPONENTS_TYPE_SIZE
 };
@@ -60,6 +61,7 @@ class Component
         bool            isActive();
 
         virtual void changedTransform() {}
+		virtual void update(float deltaTime) {}
 
 };
 
