@@ -2,6 +2,8 @@
 #define INPUTSYSTEM_H_INCLUDED
 
 
+#include <vector>
+
 class Window;
 
 
@@ -10,6 +12,10 @@ class InputSystem
 	private:
 		bool _isInitialized;
 		Window* _window;
+
+		std::vector<bool> _keys;
+		std::vector<bool> _keysPressed;
+		std::vector<bool> _keysReleased;
 
 		InputSystem();
 
@@ -26,6 +32,8 @@ class InputSystem
 		void scrollCallback(double xOffset, double yOffset);
 
 		bool isKeyDown(int key);
+		bool isKeyPressed(int key);
+		bool isKeyReleased(int key);
 		void getCursorPosition(double* x, double* y);
 		void setCursorPosition(double x, double y);
 };

@@ -12,6 +12,7 @@
 
 #include "Scene/SceneLoader.h"
 
+#include "Utils/InputSystem.h"
 #include "Utils/ResourceManager.h"
 #include "Utils/Logger.h"
 #include "Utils/RaycastingUtils.h"
@@ -80,10 +81,11 @@ void Game::createWindow()
 	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.isFullscreen, gameConfig.verticalSync);
 	_window->setWindowTitle(WINDOW_TITLE);
 
+	InputSystem::getInstance().init(_window);
 	// Callbacki do obslugi zdarzen
-	glfwSetKeyCallback(_window->getWindow(), ::keyCallback);
-	glfwSetMouseButtonCallback(_window->getWindow(), ::mouseButtonCallback);
-	glfwSetScrollCallback(_window->getWindow(), ::scrollCallback);
+	//glfwSetKeyCallback(_window->getWindow(), ::keyCallback);
+	//glfwSetMouseButtonCallback(_window->getWindow(), ::mouseButtonCallback);
+	//glfwSetScrollCallback(_window->getWindow(), ::scrollCallback);
 }
 
 
@@ -295,10 +297,19 @@ void Game::updateFpsCounter(double timePhysicsCurr)
 
 void Game::fixedStepUpdate(double deltaTime)
 {
+	InputSystem::getInstance().update();
+
 	_physicsManager->simulate(deltaTime);
 	_activeBus->update(deltaTime);
 	GraphicsManager::getInstance().update(deltaTime);
 	BusStopSystem::getInstance().update(deltaTime, _activeBus);
+
+	if (_isCameraControll)
+	{
+		CameraControlSystem::getInstance().update(deltaTime);
+	}
+
+	fixedStepReadInput(deltaTime);
 }
 
 
@@ -329,11 +340,6 @@ void Game::run()
 		{
 			readInput(deltaTime);
 
-			if (_isCameraControll)
-			{
-				CameraControlSystem::getInstance().update(deltaTime);
-			}
-
 			while (accumulator > TIME_STEP)
 			{
 				fixedStepUpdate(TIME_STEP);
@@ -360,7 +366,7 @@ void Game::run()
 		Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
 
 		_window->swapBuffers();
-		_window->updateEvents();
+		//_window->updateEvents();
 	}
 
 }
@@ -540,8 +546,177 @@ void Game::readInput(double deltaTime)
 }
 
 
-void Game::keyCallback(int key, int scancode, int action, int mods)
+void Game::fixedStepReadInput(float deltaTime)
 {
+	InputSystem& input = InputSystem::getInstance();
+
+#ifdef DRAW_IMGUI
+	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
+	{
+		return;
+	}
+	if (input.isKeyPressed(GLFW_KEY_GRAVE_ACCENT))
+	{
+		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
+	}
+#endif // DRAW_IMGUI
+
+	if (input.isKeyPressed(GLFW_KEY_ESCAPE))
+	{
+		_window->setCloseFlag();
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_L))
+	{
+		_activeBus->setIsEnableHeadlights(!_activeBus->isEnableHeadlights());
+	}
+	if (input.isKeyPressed(GLFW_KEY_K))
+	{
+		_activeBus->setIsEnableLights(!_activeBus->isEnableLights());
+	}
+	if (input.isKeyPressed(GLFW_KEY_H))
+	{
+		SceneObject* dirLight = _sceneManager->getSceneObject("sun");
+		Light* l = dynamic_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+
+		if (l->getDiffiseIntenisty() > 0.05)
+		{
+			l->setAmbientIntensity(0.0025);
+			l->setDiffuseIntensity(0.0);
+			Renderer::getInstance().setDayNightRatio(-1.0f);
+		}
+		else
+		{
+			l->setAmbientIntensity(0.025);
+			l->setDiffuseIntensity(0.5);
+			Renderer::getInstance().setDayNightRatio(1.0f);
+		}
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_Z))
+	{
+		_activeBus->doorOpenClose(1);
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_X))
+	{
+		_activeBus->doorOpenClose(2);
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_C))
+	{
+		_activeBus->doorOpenClose(3);
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+	{
+		_activeBus->getGearbox()->shiftUp();
+	}
+	if (input.isKeyPressed(GLFW_KEY_LEFT_CONTROL))
+	{
+		_activeBus->getGearbox()->shiftDown();
+	}
+	if (input.isKeyPressed(GLFW_KEY_0))
+	{
+		if (!_activeBus->getEngine()->isRunning())
+		{
+			_activeBus->startEngine();
+		}
+		else
+		{
+			_activeBus->stopEngine();
+		}
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_P))
+	{
+		if (!_physicsManager->isRunning())
+			_physicsManager->play();
+		else
+			_physicsManager->stop();
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_SPACE))
+	{
+		instance->_activeBus->toggleHandbrake();
+	}
+
+	if (input.isKeyPressed(GLFW_KEY_M))
+	{
+		++_mirrorControllIndex;
+		if (_mirrorControllIndex < _activeBus->getMirrorsCount())
+		{
+			_isMirrorControll = true;
+		}
+		else
+		{
+			_isMirrorControll = false;
+			_mirrorControllIndex = -1;
+		}
+	}
+	if (input.isKeyPressed(GLFW_KEY_R))
+	{
+		_activeBus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
+		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
+			degToRad(_sceneManager->getBusStart().rotation.y),
+			degToRad(_sceneManager->getBusStart().rotation.z));
+	}
+	if (input.isKeyPressed(GLFW_KEY_F5))
+	{
+		_cameras[GC_DRIVER]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+
+		setActiveCamera(_cameras[GC_DRIVER]);
+	}
+	if (input.isKeyPressed(GLFW_KEY_F6))
+	{
+		_cameras[GC_BUS]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+
+		setActiveCamera(_cameras[GC_BUS]);
+	}
+	if (input.isKeyPressed(GLFW_KEY_F7))
+	{
+		_cameras[GC_GLOBAL]->getSceneObject()->setPosition(_activeCamera->getPosition());
+
+		setActiveCamera(_cameras[GC_GLOBAL]);
+	}
+
+	// debug
+	if (GameConfig::getInstance().developmentMode)
+	{
+		if (input.isKeyPressed(GLFW_KEY_1) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			ResourceManager::getInstance().reloadAllShaders();
+		}
+		if (input.isKeyPressed(GLFW_KEY_2) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			ResourceManager::getInstance().reloadAllTextures();
+		}
+		if (input.isKeyPressed(GLFW_KEY_3) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			Renderer::getInstance().toogleRenderAABBFlag();
+		}
+		if (input.isKeyPressed(GLFW_KEY_4) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			Renderer::getInstance().toogleRenderOBBFlag();
+		}
+		if (input.isKeyPressed(GLFW_KEY_5) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
+		}
+		if (input.isKeyPressed(GLFW_KEY_8) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
+		}
+		if (input.isKeyPressed(GLFW_KEY_9) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+		}
+	}
+}
+
+
+void Game::keyCallback(int key, int scancode, int action, int mods)
+{/*
 #ifdef DRAW_IMGUI
 	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
 	{
@@ -552,8 +727,8 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
 	}
 #endif // DRAW_IMGUI
-
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+	*/
+	/*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 	{
 		_window->setCloseFlag();
 	}
@@ -584,9 +759,9 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 			Renderer::getInstance().setDayNightRatio(1.0f);
 		}
 
-	}
+	}*/
 
-	else if (key == GLFW_KEY_Z && action == GLFW_PRESS)
+	/*else if (key == GLFW_KEY_Z && action == GLFW_PRESS)
 	{
 		_activeBus->doorOpenClose(1);
 	}
@@ -599,7 +774,7 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 	else if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
 		_activeBus->doorOpenClose(3);
-	}
+	}*/
 
 	/*else if (key == GLFW_KEY_C && action == GLFW_PRESS)
 	{
@@ -616,7 +791,7 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		}
 	}*/
 
-	else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
+	/*else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
 	{
 		_activeBus->getGearbox()->shiftUp();
 	}
@@ -719,7 +894,7 @@ void Game::keyCallback(int key, int scancode, int action, int mods)
 		{
 			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
 		}
-	}
+	}*/
 }
 
 

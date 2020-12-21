@@ -2,8 +2,6 @@
 
 #include <cstdio>
 
-#include "../Utils/InputSystem.h"
-
 Window::Window()
 : _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _isFullscreen(false)
 {
@@ -57,8 +55,6 @@ bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, b
 
     //if (!initGLEW())
     //    return false;
-
-	InputSystem::getInstance().init(this);
 
     return true;
 }

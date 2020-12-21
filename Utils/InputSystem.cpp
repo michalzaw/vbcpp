@@ -8,6 +8,24 @@
 static std::unique_ptr<InputSystem> inputSystemInstance;
 
 
+void inputSystemKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	inputSystemInstance->keyCallback(key, scancode, action, mods);
+}
+
+
+void inputSystemMouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+	inputSystemInstance->mouseButtonCallback(button, action, mods);
+}
+
+
+void inputSystemScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+	inputSystemInstance->scrollCallback(xOffset, yOffset);
+}
+
+
 InputSystem::InputSystem()
 	: _isInitialized(false), _window(nullptr)
 {
@@ -34,9 +52,13 @@ void InputSystem::init(Window* window)
 {
 	_window = window;
 
-	//glfwSetKeyCallback(_window->getWindow(), ::keyCallback);
-	//glfwSetMouseButtonCallback(_window->getWindow(), ::mouseButtonCallback);
-	//glfwSetScrollCallback(_window->getWindow(), ::scrollCallback);
+	glfwSetKeyCallback(_window->getWindow(), inputSystemKeyCallback);
+	glfwSetMouseButtonCallback(_window->getWindow(), inputSystemMouseButtonCallback);
+	glfwSetScrollCallback(_window->getWindow(), inputSystemScrollCallback);
+
+	_keys.resize(GLFW_KEY_LAST + 1);
+	_keysPressed.resize(GLFW_KEY_LAST + 1);
+	_keysReleased.resize(GLFW_KEY_LAST + 1);
 
 	_isInitialized = true;
 }
@@ -44,13 +66,25 @@ void InputSystem::init(Window* window)
 
 void InputSystem::update()
 {
-	//glfwPollEvents();
+	std::fill(_keysPressed.begin(), _keysPressed.end(), false);
+	std::fill(_keysReleased.begin(), _keysReleased.end(), false);
+
+	glfwPollEvents();
 }
 
 
 void InputSystem::keyCallback(int key, int scancode, int action, int mods)
 {
-
+	if (action == GLFW_PRESS)
+	{
+		_keys[key] = true;
+		_keysPressed[key] = true;
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		_keys[key] = false;
+		_keysReleased[key] = true;
+	}
 }
 
 
@@ -68,7 +102,20 @@ void InputSystem::scrollCallback(double xOffset, double yOffset)
 
 bool InputSystem::isKeyDown(int key)
 {
-	return glfwGetKey(_window->getWindow(), key) == GLFW_PRESS;
+	return _keys[key];
+	//return glfwGetKey(_window->getWindow(), key) == GLFW_PRESS;
+}
+
+
+bool InputSystem::isKeyPressed(int key)
+{
+	return _keysPressed[key];
+}
+
+
+bool InputSystem::isKeyReleased(int key)
+{
+	return _keysReleased[key];
 }
 
 

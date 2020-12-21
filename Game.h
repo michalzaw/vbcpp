@@ -71,6 +71,7 @@ class Game
 		void fixedStepUpdate(double deltaTime);
 
 		void readInput(double deltaTime);
+		void fixedStepReadInput(float deltaTime);
 
 		void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f));
 
