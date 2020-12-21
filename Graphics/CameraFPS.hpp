@@ -33,9 +33,17 @@ class CameraFPS : virtual public CameraStatic
 
 		void setRotationSpeed(float speed);
 
+		void setMinPositionOffset(float minValue);
+
+		void setMaxPositionOffset(float maxValue);
+
 		float getMoveSpeed();
 
 		float getRotationSpeed();
+
+		float getMinPositionOffset();
+
+		float getMaxPositionOffset();
 
 		//void setCursorPos(GLdouble xpos, GLdouble ypos);
 
@@ -47,6 +55,9 @@ class CameraFPS : virtual public CameraStatic
 	protected:
 		GLfloat _moveSpeed;
 		GLfloat _rotateSpeed;
+
+		GLfloat _minPositionOffset;
+		GLfloat _maxPositionOffset;
 
 		//GLdouble    _oldXpos;
 		//GLdouble    _oldYpos;

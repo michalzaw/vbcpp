@@ -158,6 +158,9 @@ CameraFPS* createCameraBus(SceneManager* sceneManager)
 	cameraFPS->setMoveSpeed(5);
 	cameraObject->setRotation(degToRad(0.0f), degToRad(165.0f), degToRad(0.0f));
 	cameraObject->setPosition(0, 0, 0);
+
+	cameraFPS->setMinPositionOffset(1.0f);
+	cameraFPS->setMaxPositionOffset(30.0f);
 	cameraFPS->setPositionOffset(10.0f);
 
 	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
@@ -712,6 +715,34 @@ void Game::fixedStepReadInput(float deltaTime)
 			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
 		}
 	}
+
+	// mouse
+	if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
+	{
+		_isCameraControll = !_isCameraControll;
+		glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
+
+		_window->setCursorMode(_isCameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+	}
+
+	if (input.isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT))
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
+		ypos = _window->getHeight() - ypos;
+
+		glm::vec3 rayStart;
+		glm::vec3 rayDir;
+		calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
+
+		// collision with model nodes
+		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+		for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+		{
+			RenderObject* renderObject = *i;
+			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+		}
+	}
 }
 
 
@@ -927,7 +958,7 @@ void Game::rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode
 
 void Game::mouseButtonCallback(int button, int action, int mods)
 {
-	if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
+	/*if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
 	{
 		_isCameraControll = !_isCameraControll;
 		glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
@@ -952,16 +983,16 @@ void Game::mouseButtonCallback(int button, int action, int mods)
 			RenderObject* renderObject = *i;
 			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
 		}
-	}
+	}*/
 }
 
 
 void Game::scrollCallback(double xOffset, double yOffset)
 {
-	if (_isCameraControll)
+	/*if (_isCameraControll)
 	{
 		float newOffset = _activeCamera->getPositionOffset() + yOffset;
 		newOffset = clamp(newOffset, 1.0f, 30.0f);
 		_activeCamera->setPositionOffset(newOffset);
-	}
+	}*/
 }

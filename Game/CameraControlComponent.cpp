@@ -2,6 +2,7 @@
 
 #include "../Graphics/CameraFPS.hpp"
 
+#include "../Utils/Helpers.hpp"
 #include "../Utils/InputSystem.h"
 
 
@@ -77,5 +78,18 @@ void CameraControlComponent::update(float deltaTime)
 
 			_camera->setRotation(xpos, ypos);
 		}
+	}
+
+	float minPositionOffset = _camera->getMinPositionOffset();
+	float maxPositionOffset = _camera->getMaxPositionOffset();
+
+	if (minPositionOffset != 0.0f && maxPositionOffset != 0.0f)
+	{
+		double scrollOffsetY = inputSystem.getScrollOffsetY();
+
+		float newOffset = _camera->getPositionOffset() + scrollOffsetY;
+		newOffset = clamp(newOffset, minPositionOffset, maxPositionOffset);
+
+		_camera->setPositionOffset(newOffset);
 	}
 }

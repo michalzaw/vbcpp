@@ -6,7 +6,8 @@
 CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
     //: CameraStatic(width, height, viewAngle, nearValue, farValue),
     : CameraStatic(CPT_PERSPECTIVE),
-	_moveSpeed(3.0f), _rotateSpeed(0.0005f)//, _oldXpos(0), _oldYpos(0)
+	_moveSpeed(3.0f), _rotateSpeed(0.0005f),
+	_minPositionOffset(0.0f), _maxPositionOffset(0.0f)//, _oldXpos(0), _oldYpos(0)
 {
     setWindowDimensions(width, height);
     setViewAngle(viewAngle);
@@ -163,6 +164,16 @@ void CameraFPS::setRotationSpeed(float speed)
 	_rotateSpeed = speed;
 }
 
+void CameraFPS::setMinPositionOffset(float minValue)
+{
+	_minPositionOffset = minValue;
+}
+
+void CameraFPS::setMaxPositionOffset(float maxValue)
+{
+	_maxPositionOffset = maxValue;
+}
+
 float CameraFPS::getMoveSpeed()
 {
     return _moveSpeed;
@@ -171,6 +182,16 @@ float CameraFPS::getMoveSpeed()
 float CameraFPS::getRotationSpeed()
 {
     return _rotateSpeed;
+}
+
+float CameraFPS::getMinPositionOffset()
+{
+	return _minPositionOffset;
+}
+
+float CameraFPS::getMaxPositionOffset()
+{
+	return _maxPositionOffset;
 }
 
 /*void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)

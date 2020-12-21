@@ -17,6 +17,12 @@ class InputSystem
 		std::vector<bool> _keysPressed;
 		std::vector<bool> _keysReleased;
 
+		std::vector<bool> _mouseButtonPressed;
+		std::vector<bool> _mouseButtonReleased;
+
+		double _scrollOffsetX;
+		double _scrollOffsetY;
+
 		InputSystem();
 
 	public:
@@ -34,6 +40,13 @@ class InputSystem
 		bool isKeyDown(int key);
 		bool isKeyPressed(int key);
 		bool isKeyReleased(int key);
+
+		bool isMouseButtonPressed(int mouseButton);
+		bool isMouseButtonReleased(int mouseButton);
+
+		double getScrollOffsetX();
+		double getScrollOffsetY();
+
 		void getCursorPosition(double* x, double* y);
 		void setCursorPosition(double x, double y);
 };
