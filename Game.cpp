@@ -29,24 +29,6 @@ enum GameCamera
 Game* instance = nullptr;
 
 
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-	instance->keyCallback(key, scancode, action, mods);
-}
-
-
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
-{
-	instance->mouseButtonCallback(button, action, mods);
-}
-
-
-void scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
-{
-	instance->scrollCallback(xOffset, yOffset);
-}
-
-
 Game::Game()
 	: _state(GS_LOADING),
 	_window(nullptr),
@@ -80,18 +62,14 @@ void Game::createWindow()
 	_window = new Window;
 	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.isFullscreen, gameConfig.verticalSync);
 	_window->setWindowTitle(WINDOW_TITLE);
-
-	InputSystem::getInstance().init(_window);
-	// Callbacki do obslugi zdarzen
-	//glfwSetKeyCallback(_window->getWindow(), ::keyCallback);
-	//glfwSetMouseButtonCallback(_window->getWindow(), ::mouseButtonCallback);
-	//glfwSetScrollCallback(_window->getWindow(), ::scrollCallback);
 }
 
 
 void Game::initializeEngineSystems()
 {
 	GameConfig& gameConfig = GameConfig::getInstance();
+
+	InputSystem::getInstance().init(_window);
 
 	OGLDriver::getInstance().initialize();
 
@@ -129,9 +107,9 @@ void Game::initializeEngineSystems()
 }
 
 
-CameraFPS* createCameraBusDriver(SceneManager* sceneManager)
+CameraFPS* Game::createCameraBusDriver()
 {
-	SceneObject* cameraObject = sceneManager->addSceneObject("cameraBusDriver");
+	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBusDriver");
 
 	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
@@ -148,9 +126,9 @@ CameraFPS* createCameraBusDriver(SceneManager* sceneManager)
 }
 
 
-CameraFPS* createCameraBus(SceneManager* sceneManager)
+CameraFPS* Game::createCameraBus()
 {
-	SceneObject* cameraObject = sceneManager->addSceneObject("cameraBus");
+	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBus");
 
 	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
@@ -158,6 +136,8 @@ CameraFPS* createCameraBus(SceneManager* sceneManager)
 	cameraFPS->setMoveSpeed(5);
 	cameraObject->setRotation(degToRad(0.0f), degToRad(165.0f), degToRad(0.0f));
 	cameraObject->setPosition(0, 0, 0);
+
+	cameraFPS->setMaxVerticalAngle(0.0f);
 
 	cameraFPS->setMinPositionOffset(1.0f);
 	cameraFPS->setMaxPositionOffset(30.0f);
@@ -171,9 +151,9 @@ CameraFPS* createCameraBus(SceneManager* sceneManager)
 }
 
 
-CameraFPS* createCameraFPSGlobal(SceneManager* sceneManager)
+CameraFPS* Game::createCameraFPSGlobal()
 {
-	SceneObject* cameraObject = sceneManager->addSceneObject("cameraFPSGlobal");
+	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraFPSGlobal");
 
 	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
@@ -193,9 +173,9 @@ void Game::initScene()
 {
 	_cameras.resize(3);
 
-	_cameras[GC_DRIVER] = createCameraBusDriver(_sceneManager);
-	_cameras[GC_BUS] = createCameraBus(_sceneManager);
-	_cameras[GC_GLOBAL] = createCameraFPSGlobal(_sceneManager);
+	_cameras[GC_DRIVER] = createCameraBusDriver();
+	_cameras[GC_BUS] = createCameraBus();
+	_cameras[GC_GLOBAL] = createCameraFPSGlobal();
 
 	setActiveCamera(_cameras[GC_BUS]);
 }
@@ -414,26 +394,6 @@ void Game::readInput(double deltaTime)
 
 	GLFWwindow* window = _window->getWindow();
 
-	/*if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-	{
-		_activeCamera->moveForward(deltaTime);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-	{
-		_activeCamera->moveBackward(deltaTime);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-	{
-		_activeCamera->strafeRight(deltaTime);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-	{
-		_activeCamera->strafeLeft(deltaTime);
-	}*/
-
 	if (_isMirrorControll)
 	{
 		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
@@ -536,16 +496,6 @@ void Game::readInput(double deltaTime)
 	{
 		Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() / 1.1f);
 	}
-
-
-	/*if (_isCameraControll)
-	{
-		double xpos, ypos;
-		glfwGetCursorPos(window, &xpos, &ypos);
-		glfwSetCursorPos(window, _window->getWidth() / 2, _window->getHeight() / 2);
-
-		_activeCamera->setRotation(xpos, ypos);
-	}*/
 }
 
 
@@ -746,189 +696,6 @@ void Game::fixedStepReadInput(float deltaTime)
 }
 
 
-void Game::keyCallback(int key, int scancode, int action, int mods)
-{/*
-#ifdef DRAW_IMGUI
-	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
-	{
-		return;
-	}
-	if (key == GLFW_KEY_GRAVE_ACCENT && action == GLFW_PRESS)
-	{
-		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
-	}
-#endif // DRAW_IMGUI
-	*/
-	/*if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-	{
-		_window->setCloseFlag();
-	}
-
-	else if (key == GLFW_KEY_L && action == GLFW_PRESS)
-	{
-		_activeBus->setIsEnableHeadlights(!_activeBus->isEnableHeadlights());
-	}
-	else if (key == GLFW_KEY_K && action == GLFW_PRESS)
-	{
-		_activeBus->setIsEnableLights(!_activeBus->isEnableLights());
-	}
-	else if (key == GLFW_KEY_H && action == GLFW_PRESS)
-	{
-		SceneObject* dirLight = _sceneManager->getSceneObject("sun");
-		Light* l = dynamic_cast<Light*>(dirLight->getComponent(CT_LIGHT));
-
-		if (l->getDiffiseIntenisty() > 0.05)
-		{
-			l->setAmbientIntensity(0.0025);
-			l->setDiffuseIntensity(0.0);
-			Renderer::getInstance().setDayNightRatio(-1.0f);
-		}
-		else
-		{
-			l->setAmbientIntensity(0.025);
-			l->setDiffuseIntensity(0.5);
-			Renderer::getInstance().setDayNightRatio(1.0f);
-		}
-
-	}*/
-
-	/*else if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-	{
-		_activeBus->doorOpenClose(1);
-	}
-
-	else if (key == GLFW_KEY_X && action == GLFW_PRESS)
-	{
-		_activeBus->doorOpenClose(2);
-	}
-
-	else if (key == GLFW_KEY_C && action == GLFW_PRESS)
-	{
-		_activeBus->doorOpenClose(3);
-	}*/
-
-	/*else if (key == GLFW_KEY_C && action == GLFW_PRESS)
-	{
-		if (_activeCamera->getSceneObject()->hasParent())
-		{
-			_activeCamera->getSceneObject()->setPosition(_activeCamera->getPosition());
-			_activeCamera->getSceneObject()->removeParent();
-		}
-		else
-		{
-			_activeBus->getSceneObject()->addChild(_activeCamera->getSceneObject());
-			_activeCamera->getSceneObject()->setPosition(_activeBus->getDriverPosition());
-			_activeCamera->getSceneObject()->setRotation(0, 0, 0);
-		}
-	}*/
-
-	/*else if (key == GLFW_KEY_LEFT_SHIFT && action == GLFW_PRESS)
-	{
-		_activeBus->getGearbox()->shiftUp();
-	}
-	else if (key == GLFW_KEY_LEFT_CONTROL && action == GLFW_PRESS)
-	{
-		_activeBus->getGearbox()->shiftDown();
-	}
-	else if (key == GLFW_KEY_0 && action == GLFW_PRESS)
-	{
-		if (!_activeBus->getEngine()->isRunning())
-		{
-			_activeBus->startEngine();
-		}
-		else
-		{
-			_activeBus->stopEngine();
-		}
-	}
-
-	else if (key == GLFW_KEY_P && action == GLFW_PRESS)
-	{
-		if (!_physicsManager->isRunning())
-			_physicsManager->play();
-		else
-			_physicsManager->stop();
-	}
-
-	else if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-	{
-		instance->_activeBus->toggleHandbrake();
-	}
-
-	else if (key == GLFW_KEY_M && action == GLFW_PRESS)
-	{
-		++_mirrorControllIndex;
-		if (_mirrorControllIndex < _activeBus->getMirrorsCount())
-		{
-			_isMirrorControll = true;
-		}
-		else
-		{
-			_isMirrorControll = false;
-			_mirrorControllIndex = -1;
-		}
-	}
-	else if (key == GLFW_KEY_R && action == GLFW_PRESS)
-	{
-		_activeBus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-												  degToRad(_sceneManager->getBusStart().rotation.y),
-												  degToRad(_sceneManager->getBusStart().rotation.z));
-	}
-	else if (key == GLFW_KEY_F5 && action == GLFW_PRESS)
-	{
-		_cameras[GC_DRIVER]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-
-		setActiveCamera(_cameras[GC_DRIVER]);
-	}
-	else if (key == GLFW_KEY_F6 && action == GLFW_PRESS)
-	{
-		_cameras[GC_BUS]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-
-		setActiveCamera(_cameras[GC_BUS]);
-	}
-	else if (key == GLFW_KEY_F7 && action == GLFW_PRESS)
-	{
-		_cameras[GC_GLOBAL]->getSceneObject()->setPosition(_activeCamera->getPosition());
-
-		setActiveCamera(_cameras[GC_GLOBAL]);
-	}
-
-	// debug
-	if (GameConfig::getInstance().developmentMode)
-	{
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			ResourceManager::getInstance().reloadAllShaders();
-		}
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			ResourceManager::getInstance().reloadAllTextures();
-		}
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			Renderer::getInstance().toogleRenderAABBFlag();
-		}
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			Renderer::getInstance().toogleRenderOBBFlag();
-		}
-		if (key == GLFW_KEY_5 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
-		}
-		if (key == GLFW_KEY_8 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
-		}
-		if (key == GLFW_KEY_9 && action == GLFW_PRESS && glfwGetKey(_window->getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
-		}
-	}*/
-}
-
-
 void Game::rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform)
 {
 	AABB* aabb = modelNode->getAABB();
@@ -953,46 +720,4 @@ void Game::rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode
 	{
 		rayTestWithModelNode(renderObject, modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
 	}
-}
-
-
-void Game::mouseButtonCallback(int button, int action, int mods)
-{
-	/*if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_RIGHT)
-	{
-		_isCameraControll = !_isCameraControll;
-		glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
-
-		_window->setCursorMode(_isCameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-	}
-
-	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT)
-	{
-		double xpos, ypos;
-		glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
-		ypos = _window->getHeight() - ypos;
-
-		glm::vec3 rayStart;
-		glm::vec3 rayDir;
-		calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
-
-		// collision with model nodes
-		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
-		for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
-		{
-			RenderObject* renderObject = *i;
-			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
-		}
-	}*/
-}
-
-
-void Game::scrollCallback(double xOffset, double yOffset)
-{
-	/*if (_isCameraControll)
-	{
-		float newOffset = _activeCamera->getPositionOffset() + yOffset;
-		newOffset = clamp(newOffset, 1.0f, 30.0f);
-		_activeCamera->setPositionOffset(newOffset);
-	}*/
 }

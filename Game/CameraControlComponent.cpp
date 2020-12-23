@@ -7,7 +7,6 @@
 
 #include "../Graphics/CameraFPS.hpp"
 
-#include "../Utils/Helpers.hpp"
 #include "../Utils/InputSystem.h"
 
 
@@ -15,43 +14,15 @@ CameraControlComponent::CameraControlComponent(CameraFPS* camera)
 	: Component(CT_CAMERA_CONTROL),
 	_camera(camera),
 	_movmentControl(true), _rotationControl(true),
-	_changePositionOffset(false), _newPositionOffset(0.0f)
+	_changePositionOffsetSpeed(10.0f), _deltaPositionOffset(0.0f),
+	RAY_TEST_FILTER_MASK(COL_TERRAIN | COL_ENV), RAY_TEST_FILTER_GROUP(COL_WHEEL)
 {
 	_isActive = false;
 }
 
 
-void CameraControlComponent::setMovmentControl(bool isEnable)
+void CameraControlComponent::updateFromInput(float deltaTime)
 {
-	_movmentControl = isEnable;
-}
-
-
-void CameraControlComponent::setRotationControl(bool isEnable)
-{
-	_rotationControl = isEnable;
-}
-
-
-bool CameraControlComponent::isMOvementControl()
-{
-	return _movmentControl;
-}
-
-
-bool CameraControlComponent::isRotationControl()
-{
-	return _rotationControl;
-}
-
-
-void CameraControlComponent::update(float deltaTime)
-{
-	if (!_isActive)
-	{
-		return;
-	}
-
 	InputSystem& inputSystem = InputSystem::getInstance();
 
 	if (_movmentControl)
@@ -76,52 +47,115 @@ void CameraControlComponent::update(float deltaTime)
 
 	if (_rotationControl)
 	{
-		//if (_isCameraControll)
-		{
-			double xpos, ypos;
-			inputSystem.getCursorPosition(&xpos, &ypos);
-			inputSystem.setCursorPosition(_camera->getWindowWidth() / 2, _camera->getWindowHeight() / 2);
+		double xpos, ypos;
+		inputSystem.getCursorPosition(&xpos, &ypos);
+		inputSystem.setCursorPosition(_camera->getWindowWidth() / 2, _camera->getWindowHeight() / 2);
 
-			_camera->setRotation(xpos, ypos);
+		_camera->setRotation(xpos, ypos);
+	}
+
+	if (_camera->getMinPositionOffset() != 0.0f && _camera->getMaxPositionOffset() != 0.0f)
+	{
+		_deltaPositionOffset += inputSystem.getScrollOffsetY();
+	}
+}
+
+
+void CameraControlComponent::updateCameraPositionOffset(float deltaTime)
+{
+	float delta = 0.0f;
+
+	if (_deltaPositionOffset < 0.0f)
+	{
+		delta = -_changePositionOffsetSpeed * deltaTime;
+
+		if (delta < _deltaPositionOffset)
+		{
+			delta = _deltaPositionOffset;
+		}
+	}
+	else if (_deltaPositionOffset > 0.0f)
+	{
+		delta = _changePositionOffsetSpeed * deltaTime;
+
+		if (delta > _deltaPositionOffset)
+		{
+			delta = _deltaPositionOffset;
 		}
 	}
 
-	float minPositionOffset = _camera->getMinPositionOffset();
-	float maxPositionOffset = _camera->getMaxPositionOffset();
+	_deltaPositionOffset -= delta;
+	_camera->setPositionOffset(_camera->getPositionOffset() + delta);
+}
 
-	if (minPositionOffset != 0.0f && maxPositionOffset != 0.0f)
+
+void CameraControlComponent::moveCameraAboveTerrain()
+{
+	const glm::vec3 rayOrigin = _camera->getPosition() - glm::vec3(0.0f, 1.5f, 0.0f);
+	const glm::vec3 rayDirection = glm::vec3(0.0f, 1.0f, 0.0f);
+
+	glm::vec3 hitPosition;
+	if (_camera->getSceneObject()->getSceneManager()->getPhysicsManager()->rayTest(rayOrigin, rayDirection, RAY_TEST_FILTER_MASK, RAY_TEST_FILTER_GROUP, hitPosition))
 	{
-		double scrollOffsetY = inputSystem.getScrollOffsetY();
+		const glm::vec3 cameraPosition = _camera->getPosition();
+		_camera->getSceneObject()->setPosition(cameraPosition.x, hitPosition.y + 1.5f, cameraPosition.z);
+	}
+}
 
-		_newPositionOffset = _camera->getPositionOffset() + scrollOffsetY;
-		_newPositionOffset = clamp(_newPositionOffset, minPositionOffset, maxPositionOffset);
 
-		_camera->setPositionOffset(_newPositionOffset);
+void CameraControlComponent::setMovmentControl(bool isEnable)
+{
+	_movmentControl = isEnable;
+}
+
+
+void CameraControlComponent::setRotationControl(bool isEnable)
+{
+	_rotationControl = isEnable;
+}
+
+
+void CameraControlComponent::setChangePositionOffsetSpeed(float speed)
+{
+	_changePositionOffsetSpeed = speed;
+}
+
+
+bool CameraControlComponent::isMOvementControl()
+{
+	return _movmentControl;
+}
+
+
+bool CameraControlComponent::isRotationControl()
+{
+	return _rotationControl;
+}
+
+
+float CameraControlComponent::getChangePositionOffsetSpeed()
+{
+	return _changePositionOffsetSpeed;
+}
+
+
+void CameraControlComponent::update(float deltaTime)
+{
+	if (_isActive)
+	{
+		updateFromInput(deltaTime);
 	}
 
+	const float minPositionOffset = _camera->getMinPositionOffset();
+	const float maxPositionOffset = _camera->getMaxPositionOffset();
 
-
-
-	if (_camera->getSceneObject()->getParent() == nullptr && _camera->getMinPositionOffset() == 0.0f && _camera->getMaxPositionOffset() == 0.0f)
+	if (minPositionOffset != 0.0f || maxPositionOffset != 0.0f)
 	{
-		const glm::vec3 rayOrigin = _camera->getPosition() - glm::vec3(0.0f, 1.5f, 0.0f);
-		const glm::vec3 rayDirection = glm::vec3(0.0f, 1.0f, 0.0f);
-		const short int filterMask = COL_TERRAIN | COL_ENV;
-		const short int filterGroup = COL_WHEEL;
-
-		glm::vec3 hitPosition;
-		if (_camera->getSceneObject()->getSceneManager()->getPhysicsManager()->rayTest(rayOrigin, rayDirection, filterMask, filterGroup, hitPosition))
-		{
-			const glm::vec3 cameraPosition = _camera->getPosition();
-			_camera->getSceneObject()->setPosition(cameraPosition.x, hitPosition.y + 1.5f, cameraPosition.z);
-		}
+		updateCameraPositionOffset(deltaTime);
 	}
-	else if (_camera->getSceneObject()->getParent() != nullptr && (_camera->getMinPositionOffset() != 0.0f || _camera->getMaxPositionOffset() != 0.0f))
+
+	if (_camera->getSceneObject()->getParent() == nullptr && minPositionOffset == 0.0f && maxPositionOffset == 0.0f)
 	{
-		const glm::vec3 cameraRotation = _camera->getSceneObject()->getRotation();
-		if (cameraRotation.x >= 0.0f)
-		{
-			_camera->getSceneObject()->setRotation(0.0f, cameraRotation.y, cameraRotation.z);
-		}
+		moveCameraAboveTerrain();
 	}
 }

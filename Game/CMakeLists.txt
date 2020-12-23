@@ -11,7 +11,7 @@ set (GAME_HEADERS
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h
 	Game/CameraControlComponent.h
-	Game/CameraControlSystem.cpp
+	Game/CameraControlSystem.h
 	Game/Directories.h
 	Game/GameConfig.h
 	Game/Hud.h

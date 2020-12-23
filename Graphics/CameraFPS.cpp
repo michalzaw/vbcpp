@@ -7,7 +7,7 @@ CameraFPS::CameraFPS(int width, int height, GLfloat viewAngle, GLfloat nearValue
     //: CameraStatic(width, height, viewAngle, nearValue, farValue),
     : CameraStatic(CPT_PERSPECTIVE),
 	_moveSpeed(3.0f), _rotateSpeed(0.0005f),
-	_minPositionOffset(0.0f), _maxPositionOffset(0.0f)//, _oldXpos(0), _oldYpos(0)
+	_minVerticalAngle(-0.4f * PI), _maxVerticalAngle(0.4f * PI)//, _oldXpos(0), _oldYpos(0)
 {
     setWindowDimensions(width, height);
     setViewAngle(viewAngle);
@@ -64,8 +64,8 @@ void CameraFPS::setRotation(int mousePosX, int mousePosY)
 
 	if (horizontalAngle > 2 * PI || horizontalAngle < -2 * PI) horizontalAngle = 0.0f;
 
-	if (verticalAngle > 0.4f * PI) verticalAngle = 0.4f * PI;
-	if (verticalAngle < -0.4f * PI) verticalAngle = -0.4f * PI;
+	if (verticalAngle > _maxVerticalAngle) verticalAngle = _maxVerticalAngle;
+	if (verticalAngle < _minVerticalAngle) verticalAngle = _minVerticalAngle;
 
 	//_objectTransform->setRotation(glm::vec3(verticalAngle, horizontalAngle, 0.0f));
 	_object->setRotation(verticalAngle, horizontalAngle, 0.0f);
@@ -164,14 +164,14 @@ void CameraFPS::setRotationSpeed(float speed)
 	_rotateSpeed = speed;
 }
 
-void CameraFPS::setMinPositionOffset(float minValue)
+void CameraFPS::setMinVerticalAngle(float angle)
 {
-	_minPositionOffset = minValue;
+	_minVerticalAngle = angle;
 }
 
-void CameraFPS::setMaxPositionOffset(float maxValue)
+void CameraFPS::setMaxVerticalAngle(float angle)
 {
-	_maxPositionOffset = maxValue;
+	_maxVerticalAngle = angle;
 }
 
 float CameraFPS::getMoveSpeed()
@@ -184,14 +184,14 @@ float CameraFPS::getRotationSpeed()
     return _rotateSpeed;
 }
 
-float CameraFPS::getMinPositionOffset()
+float CameraFPS::getMinVerticalAngle()
 {
-	return _minPositionOffset;
+	return _minVerticalAngle;
 }
 
-float CameraFPS::getMaxPositionOffset()
+float CameraFPS::getMaxVerticalAngle()
 {
-	return _maxPositionOffset;
+	return _maxVerticalAngle;
 }
 
 /*void CameraFPS::setCursorPos(GLdouble xpos, GLdouble ypos)

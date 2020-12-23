@@ -58,6 +58,10 @@ class Game
 		bool _isMirrorControll;
 		int _mirrorControllIndex;
 
+		CameraFPS* createCameraBusDriver();
+		CameraFPS* createCameraBus();
+		CameraFPS* createCameraFPSGlobal();
+
 		void loadGameConfig();
 		void createWindow();
 		void initializeEngineSystems();
@@ -84,9 +88,6 @@ class Game
 
 		void terminate();
 
-		void keyCallback(int key, int scancode, int action, int mods);
-		void mouseButtonCallback(int button, int action, int mods);
-		void scrollCallback(double xOffset, double yOffset);
 };
 
 

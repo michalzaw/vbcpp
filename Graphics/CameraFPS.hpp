@@ -3,9 +3,6 @@
 
 #include "CameraStatic.hpp"
 
-
-
-
 /*
 
 */
@@ -22,28 +19,19 @@ class CameraFPS : virtual public CameraStatic
 		void setRotation(int mousePosX, int mousePosY);
 
 		void moveForward(double deltaTime);
-
 		void moveBackward(double deltaTime);
-
 		void strafeLeft(double deltaTime);
-
 		void strafeRight(double deltaTime);
 
 		void setMoveSpeed(float speed);
-
 		void setRotationSpeed(float speed);
-
-		void setMinPositionOffset(float minValue);
-
-		void setMaxPositionOffset(float maxValue);
+		void setMinVerticalAngle(float angle);
+		void setMaxVerticalAngle(float angle);
 
 		float getMoveSpeed();
-
 		float getRotationSpeed();
-
-		float getMinPositionOffset();
-
-		float getMaxPositionOffset();
+		float getMinVerticalAngle();
+		float getMaxVerticalAngle();
 
 		//void setCursorPos(GLdouble xpos, GLdouble ypos);
 
@@ -53,11 +41,11 @@ class CameraFPS : virtual public CameraStatic
 		//GLdouble getVerticalAngle() { return m_VerticalAngle; }
 
 	protected:
-		GLfloat _moveSpeed;
-		GLfloat _rotateSpeed;
+		float _moveSpeed;
+		float _rotateSpeed;
 
-		GLfloat _minPositionOffset;
-		GLfloat _maxPositionOffset;
+		float _minVerticalAngle;
+		float _maxVerticalAngle;
 
 		//GLdouble    _oldXpos;
 		//GLdouble    _oldYpos;

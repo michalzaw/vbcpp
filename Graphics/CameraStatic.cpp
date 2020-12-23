@@ -1,8 +1,10 @@
 #include "CameraStatic.hpp"
 
+#include <algorithm>
+
 #include "../Scene/SceneObject.h"
 
-#include <algorithm>
+#include "../Utils/Helpers.hpp"
 
 
 /*CameraStatic::CameraStatic(int width, int height, GLfloat viewAngle, GLfloat nearValue, GLfloat farValue)
@@ -26,7 +28,7 @@ CameraStatic::CameraStatic(CameraProjectionType projectionType)
 	_lookAt(vec3(0, 0, 0)), _upVector(vec3(0, 1, 0)),
 	_farValue(0.1f), _nearValue(1000.0f), _viewAngle(45.0f), _windowWidth(800), _windowHeight(600),
 	_left(-1.0f), _right(1.0f), _bottom(-1.0f), _top(1.0f),
-	_positionOffset(0.0f)
+	_minPositionOffset(0.0f), _maxPositionOffset(0.0f), _positionOffset(0.0f)
 {
     changedTransform();
 
@@ -125,6 +127,18 @@ GLfloat CameraStatic::getBottom()
 GLfloat CameraStatic::getTop()
 {
     return _top;
+}
+
+
+GLfloat CameraStatic::getMinPositionOffset()
+{
+	return _minPositionOffset;
+}
+
+
+GLfloat CameraStatic::getMaxPositionOffset()
+{
+	return _maxPositionOffset;
 }
 
 
@@ -346,9 +360,21 @@ void CameraStatic::setTop(GLfloat top)
 }
 
 
+void CameraStatic::setMinPositionOffset(GLfloat minValue)
+{
+	_minPositionOffset = minValue;
+}
+
+
+void CameraStatic::setMaxPositionOffset(GLfloat maxValue)
+{
+	_maxPositionOffset = maxValue;
+}
+
+
 void CameraStatic::setPositionOffset(GLfloat positionOffset)
 {
-	_positionOffset = positionOffset;
+	_positionOffset = clamp(positionOffset, _minPositionOffset, _maxPositionOffset);
 
 	changedTransform();
 	_projectionMatrixIs = false;
