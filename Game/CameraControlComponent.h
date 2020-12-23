@@ -16,6 +16,9 @@ class CameraControlComponent : public Component
 		bool _movmentControl;
 		bool _rotationControl;
 
+		bool _changePositionOffset;
+		float _newPositionOffset;
+
 	public:
 		CameraControlComponent(CameraFPS* camera);
 

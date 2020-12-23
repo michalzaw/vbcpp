@@ -68,6 +68,8 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
+		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength = 1000.0f);
+
 		void setDebugRenderer(btIDebugDraw* debugRenderer);
 		btIDebugDraw* getDebugRenderer();
 		void setDebugRenderingState(bool enable);

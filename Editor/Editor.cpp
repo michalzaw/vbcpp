@@ -536,30 +536,6 @@ namespace vbEditor
 	ClickMode _clickMode = CM_PICK_OBJECT;
 	RObject* _objectToAdd = nullptr;
 
-	// TODO: move to separate file
-	bool calculateMousePositionInWorldspaceUsingBulletRaycasting(glm::vec3 rayStart, glm::vec3 rayDir, glm::vec3& position)
-	{
-		glm::vec3 rayEnd = rayStart + (rayDir * 1000);
-		btCollisionWorld::ClosestRayResultCallback rayCallback(btVector3(rayStart.x, rayStart.y, rayStart.z),
-			btVector3(rayEnd.x, rayEnd.y, rayEnd.z));
-
-		rayCallback.m_collisionFilterMask = COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL;
-		rayCallback.m_collisionFilterGroup = COL_ENV;
-
-		_sceneManager->getPhysicsManager()->getDynamicsWorld()->rayTest(btVector3(rayStart.x, rayStart.y, rayStart.z),
-			btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
-			rayCallback);
-
-		if (rayCallback.hasHit())
-		{
-			position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
-
-			return true;
-		}
-
-		return false;
-	}
-
 	void setSelectedSceneObject(SceneObject* object)
 	{
 		_selectedSceneObject = object;
@@ -623,7 +599,7 @@ namespace vbEditor
 			if (_clickMode == CM_ADD_OBJECT)
 			{
 				glm::vec3 hitPosition;
-				if (calculateMousePositionInWorldspaceUsingBulletRaycasting(rayStart, rayDir, hitPosition))
+				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
 				{
 					SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 
@@ -633,7 +609,7 @@ namespace vbEditor
 			else if (_clickMode == CM_ROAD_EDIT && glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			{
 				glm::vec3 hitPosition;
-				if (calculateMousePositionInWorldspaceUsingBulletRaycasting(rayStart, rayDir, hitPosition))
+				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
 				{
 					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 					if (roadObject != nullptr)

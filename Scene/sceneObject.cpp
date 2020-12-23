@@ -1,5 +1,6 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
+#include "../Game/CameraControlSystem.h"
 
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
@@ -89,6 +90,10 @@ SceneObject::~SceneObject()
 
 			case CT_DISPLAY:
 				GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+				break;
+
+			case CT_CAMERA_CONTROL:
+				CameraControlSystem::getInstance().removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 				break;
 
         }
@@ -301,6 +306,10 @@ void SceneObject::removeComponent(Component* component)
 
 				case CT_DISPLAY:
 					GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+					break;
+
+				case CT_CAMERA_CONTROL:
+					CameraControlSystem::getInstance().removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 					break;
 
             }

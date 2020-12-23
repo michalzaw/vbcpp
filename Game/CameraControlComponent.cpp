@@ -14,7 +14,8 @@
 CameraControlComponent::CameraControlComponent(CameraFPS* camera)
 	: Component(CT_CAMERA_CONTROL),
 	_camera(camera),
-	_movmentControl(true), _rotationControl(true)
+	_movmentControl(true), _rotationControl(true),
+	_changePositionOffset(false), _newPositionOffset(0.0f)
 {
 	_isActive = false;
 }
@@ -92,74 +93,35 @@ void CameraControlComponent::update(float deltaTime)
 	{
 		double scrollOffsetY = inputSystem.getScrollOffsetY();
 
-		float newOffset = _camera->getPositionOffset() + scrollOffsetY;
-		newOffset = clamp(newOffset, minPositionOffset, maxPositionOffset);
+		_newPositionOffset = _camera->getPositionOffset() + scrollOffsetY;
+		_newPositionOffset = clamp(_newPositionOffset, minPositionOffset, maxPositionOffset);
 
-		_camera->setPositionOffset(newOffset);
+		_camera->setPositionOffset(_newPositionOffset);
 	}
 
 
 
-	SceneObject* terrainSceneObject = _camera->getSceneObject()->getSceneManager()->getSceneObject("terrain");
 
-	glm::vec3 rayOrigin = _camera->getPosition() - glm::vec3(0.0f, 1.5f, 0.0f);
-	glm::vec3 rayEnd = rayOrigin + glm::vec3(0.0f, 1.0f, 0.0f) * 1000.0f;
+	if (_camera->getSceneObject()->getParent() == nullptr && _camera->getMinPositionOffset() == 0.0f && _camera->getMaxPositionOffset() == 0.0f)
+	{
+		const glm::vec3 rayOrigin = _camera->getPosition() - glm::vec3(0.0f, 1.5f, 0.0f);
+		const glm::vec3 rayDirection = glm::vec3(0.0f, 1.0f, 0.0f);
+		const short int filterMask = COL_TERRAIN | COL_ENV;
+		const short int filterGroup = COL_WHEEL;
 
-	btCollisionWorld::ClosestRayResultCallback RayCallback(
-		btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
-		btVector3(rayEnd.x, rayEnd.y, rayEnd.z)
-	);
-
-	RayCallback.m_collisionFilterMask = COL_TERRAIN | COL_ENV;
-	RayCallback.m_collisionFilterGroup = COL_WHEEL;
-
-	terrainSceneObject->getSceneManager()->getPhysicsManager()->getDynamicsWorld()->rayTest(
-		btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
-		btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
-		RayCallback
-	);
-
-	if (RayCallback.hasHit()) {
-
-		if (_camera->getMinPositionOffset() == 0.0f && _camera->getMaxPositionOffset() == 0.0f)
+		glm::vec3 hitPosition;
+		if (_camera->getSceneObject()->getSceneManager()->getPhysicsManager()->rayTest(rayOrigin, rayDirection, filterMask, filterGroup, hitPosition))
 		{
-			glm::vec3 cameraPosition = _camera->getPosition();
-			_camera->getSceneObject()->setPosition(cameraPosition.x, RayCallback.m_hitPointWorld.y() + 1.5, cameraPosition.z);
-		}
-		else
-		{
-			/*glm::vec3 direction = glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z()) - _camera->getPosition();
-
-			glm::mat4 inverseModelMatrix = glm::inverse(_camera->getSceneObject()->getParent()->getGlobalTransformMatrix());
-			glm::vec4 d = inverseModelMatrix * glm::vec4(direction.x, direction.y, direction.z, 0.0f);
-
-			_camera->getSceneObject()->setPosition(_camera->getSceneObject()->getPosition() + glm::vec3(d.x, d.y, d.z));*/
-
-			float distanceToTerrain = glm::distance(glm::vec3(RayCallback.m_hitPointWorld.x(), RayCallback.m_hitPointWorld.y(), RayCallback.m_hitPointWorld.z()), _camera->getPosition());
-
-			_camera->setPositionOffset(_camera->getPositionOffset() - distanceToTerrain + 1.5f);
-
+			const glm::vec3 cameraPosition = _camera->getPosition();
+			_camera->getSceneObject()->setPosition(cameraPosition.x, hitPosition.y + 1.5f, cameraPosition.z);
 		}
 	}
-	else {
-	}
-
-
-
-
-	/*SceneObject* terrainSceneObject = _camera->getSceneObject()->getSceneManager()->getSceneObject("terrain");
-	Terrain* terrainComponent = static_cast<Terrain*>(terrainSceneObject->getComponent(CT_TERRAIN));
-
-	float height = terrainComponent->getHeight(_camera->getPosition().x, _camera->getPosition().y);
-
-	std::cout << height << std::endl;
-
-	if (height > _camera->getPosition().y)
+	else if (_camera->getSceneObject()->getParent() != nullptr && (_camera->getMinPositionOffset() != 0.0f || _camera->getMaxPositionOffset() != 0.0f))
 	{
-
+		const glm::vec3 cameraRotation = _camera->getSceneObject()->getRotation();
+		if (cameraRotation.x >= 0.0f)
+		{
+			_camera->getSceneObject()->setRotation(0.0f, cameraRotation.y, cameraRotation.z);
+		}
 	}
-	else
-	{
-
-	}*/
 }

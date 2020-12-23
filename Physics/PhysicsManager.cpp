@@ -355,6 +355,35 @@ void PhysicsManager::removeConstraint(Constraint* c)
 }
 
 
+bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength)
+{
+	const glm::vec3 rayEnd = rayOrigin + (rayDir * rayLength);
+
+	btCollisionWorld::ClosestRayResultCallback rayCallback(
+		btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
+		btVector3(rayEnd.x, rayEnd.y, rayEnd.z)
+	);
+
+	rayCallback.m_collisionFilterMask = filterMask;
+	rayCallback.m_collisionFilterGroup = filterGroup;
+
+	_dynamicsWorld->rayTest(
+		btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z),
+		btVector3(rayEnd.x, rayEnd.y, rayEnd.z),
+		rayCallback
+	);
+
+	if (rayCallback.hasHit())
+	{
+		position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+
+		return true;
+	}
+
+	return false;
+}
+
+
 void PhysicsManager::setDebugRenderer(btIDebugDraw* debugRenderer)
 {
 	_debugRenderer = debugRenderer;
