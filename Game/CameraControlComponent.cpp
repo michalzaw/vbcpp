@@ -54,7 +54,7 @@ void CameraControlComponent::updateFromInput(float deltaTime)
 		_camera->setRotation(xpos, ypos);
 	}
 
-	if (_camera->getMinPositionOffset() != 0.0f && _camera->getMaxPositionOffset() != 0.0f)
+	if (_camera->getMinPositionOffset() != 0.0f || _camera->getMaxPositionOffset() != 0.0f)
 	{
 		_deltaPositionOffset += inputSystem.getScrollOffsetY();
 	}
