@@ -149,6 +149,8 @@ void main()
 	float roughness = texture(RoughnessTexture, TexCoord).r;//a;//0.1f;
 	float ao = texture(AoTexture, TexCoord).r;//1.0f;
 	
+	if (texture(AlbedoTexture, TexCoord).a < 0.5)
+		discard;
 	
 	vec3 f0 = vec3(0.04f);
 	f0 = mix(f0, albedo, metalic);
@@ -158,7 +160,7 @@ void main()
 	// Radiancja
 	for (int i = 0; i < Lights.DirCount; ++i)
 	{
-		vec3 lightColor = Lights.DirLights[i].Base.Color * Lights.DirLights[i].Base.DiffuseIntensity * 8;
+		vec3 lightColor = Lights.DirLights[i].Base.Color * Lights.DirLights[i].Base.DiffuseIntensity * 1.9;
 		vec3 lightDir = -normalize(Lights.DirLights[i].Direction);
 		
 		float cosTheta = max(dot(normal, lightDir), 0.0f);
@@ -220,10 +222,10 @@ void main()
 	
 	vec3 r = reflect(-viewDir, normal);
 	
-	const float MAX_REFLECTION_DOT = 4.0f;
+	const float MAX_REFLECTION_DOT = 5.0f;
 	vec3 prefilteredColor = textureLod(SpecularIrradianceMap, r, roughness * MAX_REFLECTION_DOT).rgb;
 	vec2 envBRDF = texture(brdfLUT, vec2(max(dot(normal, viewDir), 0.0f), 1 - roughness)).rg;
-	vec3 ambient_specular = prefilteredColor * (f * envBRDF.x + envBRDF.y);
+	vec3 ambient_specular = prefilteredColor * (f0 * envBRDF.x + envBRDF.y);
 	
 	
 	

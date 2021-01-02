@@ -242,6 +242,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 		sMaterial.shader = MIRROR_MATERIAL;
 	else if (strcmp(type, "pbr") == 0)
 		sMaterial.shader = PBR_MATERIAL;
+	else if (strcmp(type, "pbr_tree") == 0)
+		sMaterial.shader = PBR_TREE_MATERIAL;
 	else if (strcmp(type, "new_tree") == 0)
 		sMaterial.shader = NEW_TREE_MATERIAL;
 
@@ -262,7 +264,7 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 
 
 	// add missing pbr textures
-	if (sMaterial.shader == PBR_MATERIAL)
+	if (sMaterial.shader == PBR_MATERIAL || sMaterial.shader == PBR_TREE_MATERIAL)
 	{
 		if (sMaterial.diffuseTexture == NULL)
 		{
