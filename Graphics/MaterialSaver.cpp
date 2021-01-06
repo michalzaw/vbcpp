@@ -38,6 +38,10 @@ std::string mapShaderTypeToString(ShaderType shaderType)
 			return "grass";
 		case GLASS_MATERIAL:
 			return "glass";
+		case PBR_TREE_MATERIAL:
+			return "pbr_tree";
+		case NEW_TREE_2_MATERIAL:
+			return "new_tree2";
 	}
 
 	return "solid";
