@@ -120,6 +120,12 @@ void saveMaterial(XMLElement* materialsElement, XMLDocument& doc, Material* mate
 	{
 		std::string fixDisappearanceAlphaStr = toString(material->fixDisappearanceAlpha);
 		matElement->SetAttribute("fixDisappearanceAlpha", fixDisappearanceAlphaStr.c_str());
+
+		std::string alphaTestThresholdStr = toString(material->alphaTestThreshold);
+		matElement->SetAttribute("alphaTestThreshold", alphaTestThresholdStr.c_str());
+
+		std::string shadowmappingAlphaTestThresholdStr = toString(material->shadowmappingAlphaTestThreshold);
+		matElement->SetAttribute("shadowmappingAlphaTestThreshold", shadowmappingAlphaTestThresholdStr.c_str());
 	}
 
 	if (material->shader == GLASS_MATERIAL)

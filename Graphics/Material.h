@@ -57,6 +57,8 @@ class Material
 	float roughnessValue;
 
 	float fixDisappearanceAlpha;
+	float alphaTestThreshold;
+	float shadowmappingAlphaTestThreshold;
 
     glm::vec2 offset;
     glm::vec2 scale;

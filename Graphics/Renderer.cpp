@@ -208,6 +208,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_MATERIAL_SPECULAR_POWER] = "SpecularPower";
 	_uniformsNames[UNIFORM_MATERIAL_TRANSPARENCY] = "Transparency";
 	_uniformsNames[UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA] = "fixDisappearanceAlphaRatio";
+	_uniformsNames[UNIFORM_ALPHA_TEST_THRESHOLD] = "alphaTestThreshold";
 	_uniformsNames[UNIFORM_CAMERA_POSITION] = "CameraPosition";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_1] = "LightSpaceMatrix[0]";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_2] = "LightSpaceMatrix[1]";
@@ -1011,6 +1012,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
+	// NEW_TREE_2_MATERIAL
+	defines.clear();
+	defines.push_back("NORMALMAPPING");
+	defines.push_back("TREE");
+	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+	_shaderList[NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
+
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
@@ -1337,7 +1345,7 @@ void Renderer::renderDepth(RenderData* renderData)
         Material* material = i->material;
 
         ShaderType shaderType;
-        bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == PBR_TREE_MATERIAL;
+        bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL;
         if (isAlphaTest)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
         else
@@ -1352,7 +1360,7 @@ void Renderer::renderDepth(RenderData* renderData)
 				glEnable(GL_CULL_FACE);
 			}
 
-			if (material->shader == PBR_TREE_MATERIAL)
+			if (material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
 			{
 				glDisable(GL_CULL_FACE);
 			}
@@ -1381,6 +1389,7 @@ void Renderer::renderDepth(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
 
 			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
+			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEST_THRESHOLD], material->shadowmappingAlphaTestThreshold);
         }
 
         mesh->ibo->bind();
@@ -1419,7 +1428,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         {
             shader->enable();
 
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
             {
                 glEnable(GL_CULL_FACE);
             }
@@ -1432,7 +1441,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
                 glDisable(GL_BLEND);
             }
 
-            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL)
+            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
@@ -1507,6 +1516,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 		shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
+		shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEST_THRESHOLD], material->alphaTestThreshold);
 
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_CAMERA_POSITION], camera->getPosition());
@@ -1575,7 +1585,7 @@ void Renderer::renderScene(RenderData* renderData)
         {
             shader->enable();
 
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
             {
                 glEnable(GL_CULL_FACE);
             }
@@ -1588,7 +1598,7 @@ void Renderer::renderScene(RenderData* renderData)
                 glDisable(GL_BLEND);
             }
 
-            if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL)
+            if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
@@ -1682,6 +1692,7 @@ void Renderer::renderScene(RenderData* renderData)
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ALPHA_TEST_THRESHOLD], material->alphaTestThreshold);
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_POWER], material->shininess);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_CAMERA_POSITION], camera->getPosition());

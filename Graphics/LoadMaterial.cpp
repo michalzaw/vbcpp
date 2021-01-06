@@ -84,6 +84,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 	sMaterial.roughnessValue = XmlUtils::getAttributeFloatOptional(materialElement, "roughness", sMaterial.roughnessValue);
 
 	sMaterial.fixDisappearanceAlpha = (float)XmlUtils::getAttributeBoolOptional(materialElement, "fixDisappearanceAlpha");
+	sMaterial.alphaTestThreshold = (float)XmlUtils::getAttributeFloatOptional(materialElement, "alphaTestThreshold", 0.2f);
+	sMaterial.shadowmappingAlphaTestThreshold = (float)XmlUtils::getAttributeFloatOptional(materialElement, "shadowmappingAlphaTestThreshold", 0.1f);
 
     sMaterial.offset = XMLstringToVec2(materialElement->Attribute("offset"));
     sMaterial.scale = XMLstringToVec2(materialElement->Attribute("scale"));
@@ -246,6 +248,8 @@ Material MaterialLoader::loadMaterial(std::string materialName, std::string texP
 		sMaterial.shader = PBR_TREE_MATERIAL;
 	else if (strcmp(type, "new_tree") == 0)
 		sMaterial.shader = NEW_TREE_MATERIAL;
+	else if (strcmp(type, "new_tree2") == 0)
+		sMaterial.shader = NEW_TREE_2_MATERIAL;
 
 
     if (sMaterial.shader == GLASS_MATERIAL && sMaterial.glassTexture == NULL)

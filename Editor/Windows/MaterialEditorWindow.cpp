@@ -250,6 +250,18 @@ namespace vbEditor
 			currentMaterial->fixDisappearanceAlpha = fixDisappearanceAlpha ? 1.0f : 0.0f;
 			isMaterialModified = true;
 		}
+
+		float* alphaTestThreshold = &(currentMaterial->alphaTestThreshold);
+		if (ImGui::DragFloat("Alpha test threshold", alphaTestThreshold, 0.01f, 0.0f, 0.0f))
+		{
+			isMaterialModified = true;
+		}
+
+		float* shadowmappingAlphaTestThreshold = &(currentMaterial->shadowmappingAlphaTestThreshold);
+		if (ImGui::DragFloat("Alpha test threshold (shadowmap rendering)", shadowmappingAlphaTestThreshold, 0.01f, 0.0f, 0.0f))
+		{
+			isMaterialModified = true;
+		}
 	}
 
 	bool materialEditorWindow()

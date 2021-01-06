@@ -2,6 +2,7 @@
 
 #ifdef ALPHA_TEST
 uniform sampler2D AlphaTexture;
+uniform float alphaTestThreshold;
 
 in vec2 uv;
 #endif
@@ -11,7 +12,7 @@ out vec4 FragmentColor;
 void main()
 {
 #ifdef ALPHA_TEST
-	if (texture2D(AlphaTexture, uv).a < 0.1f) // dla pbr_tree powinno byc 0.4
+	if (texture2D(AlphaTexture, uv).a < alphaTestThreshold) // dla pbr_tree powinno byc 0.4
 		discard;
 #endif
 
