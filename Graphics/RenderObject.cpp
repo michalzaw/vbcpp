@@ -4,15 +4,14 @@
 
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
-    _model(NULL),
-	_modelRootNode(NULL),
-    _materials(NULL), _materialsCount(0),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
     #ifdef _DEBUG_MODE
         printf("*** RenderObject: Konstruktor\n");
     #endif // _DEBUG_MODE
+	
+	_modelsDatas.resize(1);
 
     if (model != NULL)
     {
@@ -22,15 +21,18 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
 
 RenderObject::~RenderObject()
 {
-    if (_modelRootNode)
-    {
-        delete _modelRootNode;
-    }
+	for (ModelData& modelData : _modelsDatas)
+	{
+		if (modelData.modelRootNode)
+		{
+			delete modelData.modelRootNode;
+		}
 
-    if (_materials)
-    {
-        delete[] _materials;
-    }
+		if (modelData.materials)
+		{
+			delete[] modelData.materials;
+		}
+	}
     #ifdef _DEBUG_MODE
         printf("*** RenderObject: Destruktor\n");
     #endif // _DEBUG_MODE
@@ -39,11 +41,13 @@ RenderObject::~RenderObject()
 
 void RenderObject::calculateNewAABB()
 {
+	RStaticModel* model = _modelsDatas[0].model;
+
     glm::vec3 newMin(FLT_MAX, FLT_MAX, FLT_MAX); //_object->transformLocalPointToGlobal(aabbVertices[0]);
     glm::vec3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX); //_object->transformLocalPointToGlobal(aabbVertices[0]);
 
-    glm::vec3 min = _model->getAABB()->getMinCoords();
-    glm::vec3 max = _model->getAABB()->getMaxCoords();
+    glm::vec3 min = model->getAABB()->getMinCoords();
+    glm::vec3 max = model->getAABB()->getMaxCoords();
 
     glm::vec3 aabbVertices[] = {
         glm::vec3(min.x, min.y, min.z),
@@ -80,36 +84,41 @@ void RenderObject::calculateNewAABB()
 }
 
 
-void RenderObject::setModel(RStaticModel* model)
+void RenderObject::setModel(RStaticModel* model, int lod)
 {
-    _model = model;
+	if (lod <= _modelsDatas.size())
+	{
+		_modelsDatas.resize(lod + 1);
+	}
 
-    _modelRootNode = new ModelNode(_model->getRootNode());
+    _modelsDatas[lod].model = model;
 
-	_materialsCount = _model->getMaterialsCount();
-    _materials = new Material[_model->getMaterialsCount()];
-    for (int i = 0; i < _model->getMaterialsCount(); ++i)
+    _modelsDatas[lod].modelRootNode = new ModelNode(model->getRootNode());
+
+	_modelsDatas[lod].materialsCount = model->getMaterialsCount();
+    _modelsDatas[lod].materials = new Material[model->getMaterialsCount()];
+    for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
-		updateLocalMaterialFromModel(i);
+		updateLocalMaterialFromModel(i, lod);
     }
 }
 
 
-RStaticModel* RenderObject::getModel()
+RStaticModel* RenderObject::getModel(int lod)
 {
-    return _model;
+    return _modelsDatas[lod].model;
 
 }
 
 
-ModelNode* RenderObject::getModelRootNode()
+ModelNode* RenderObject::getModelRootNode(int lod)
 {
-    return _modelRootNode;
+    return _modelsDatas[lod].modelRootNode;
 }
 
 
 
-ModelNode* RenderObject::getModelNodeByName(std::string name, ModelNode* node)
+ModelNode* RenderObject::getModelNodeByName(std::string name, ModelNode* node, int lod)
 {
     if (node->getName() == name)
     {
@@ -129,40 +138,40 @@ ModelNode* RenderObject::getModelNodeByName(std::string name, ModelNode* node)
 }
 
 
-ModelNode* RenderObject::getModelNodeByName(std::string name)
+ModelNode* RenderObject::getModelNodeByName(std::string name, int lod)
 {
-    return getModelNodeByName(name, _modelRootNode);
+    return getModelNodeByName(name, _modelsDatas[lod].modelRootNode, lod);
 }
 
 
-void RenderObject::updateLocalMaterialFromModel(unsigned int index)
+void RenderObject::updateLocalMaterialFromModel(unsigned int index, int lod)
 {
-	_materials[index] = *(_model->getMaterial(index));
+	_modelsDatas[lod].materials[index] = *(_modelsDatas[lod].model->getMaterial(index));
 
-	if (_materials[index].shader == MIRROR_MATERIAL)
+	if (_modelsDatas[lod].materials[index].shader == MIRROR_MATERIAL)
 	{
-		MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _materials[index].mirrorName);
+		MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _modelsDatas[lod].materials[index].mirrorName);
 		if (mirrorComponent != NULL)
 		{
-			_materials[index].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+			_modelsDatas[lod].materials[index].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
 		}
 		else
 		{
-			GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_materials[index]);
+			GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_modelsDatas[lod].materials[index]);
 		}
 	}
 }
 
 
-Material* RenderObject::getMaterial(unsigned int index)
+Material* RenderObject::getMaterial(unsigned int index, int lod)
 {
-    return &_materials[index];
+    return &_modelsDatas[lod].materials[index];
 }
 
 
-unsigned int RenderObject::getMaterialsCount()
+unsigned int RenderObject::getMaterialsCount(int lod)
 {
-	return _materialsCount;
+	return _modelsDatas[lod].materialsCount;
 }
 
 
@@ -200,6 +209,12 @@ AABB* RenderObject::getAABB()
     }
 
     return &_aabb;
+}
+
+
+unsigned int RenderObject::getNumberOfLod()
+{
+	return _modelsDatas.size();
 }
 
 

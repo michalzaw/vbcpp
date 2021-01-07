@@ -17,9 +17,9 @@ Terrain::Terrain(std::string heightmapFileName, std::string dirPath, std::string
 
 Terrain::~Terrain()
 {
-	if (_model != nullptr)
+	if (_modelsDatas[0].model != nullptr)
 	{
-		delete _model;
+		delete _modelsDatas[0].model;
 	}
 }
 

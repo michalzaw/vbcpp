@@ -187,7 +187,7 @@ class Renderer
         void prepareLightsData();
 
 
-        void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass,
+        void addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, int lod,
                                             glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
         void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList,
                                                  glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));

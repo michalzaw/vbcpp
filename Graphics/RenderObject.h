@@ -14,13 +14,25 @@
 #include "../Scene/Component.h"
 
 
+struct ModelData
+{
+	RStaticModel* model;
+	ModelNode* modelRootNode;
+	Material* materials;
+	unsigned int  materialsCount;
+
+	ModelData()
+		: model(NULL),
+		modelRootNode(NULL),
+		materials(NULL), materialsCount(0)
+	{}
+};
+
+
 class RenderObject : public Component
 {
     protected:
-        RStaticModel* _model;
-        ModelNode*    _modelRootNode;
-        Material*     _materials;
-		unsigned int  _materialsCount;
+		std::vector<ModelData> _modelsDatas;
 
         bool _isCastShadows;
 		bool _isDynamicObject;
@@ -30,20 +42,20 @@ class RenderObject : public Component
 
         void calculateNewAABB();
 
-        ModelNode* getModelNodeByName(std::string name, ModelNode* node);
+        ModelNode* getModelNodeByName(std::string name, ModelNode* node, int lod = 0);
 
     public:
         RenderObject(RStaticModel* model = NULL, bool isDynamicObject = false);
         virtual ~RenderObject();
 
-        void setModel(RStaticModel* model);
-        RStaticModel* getModel();
-        ModelNode* getModelRootNode();
-        ModelNode* getModelNodeByName(std::string name);
+        void setModel(RStaticModel* model, int lod = 0);
+        RStaticModel* getModel(int lod = 0);
+        ModelNode* getModelRootNode(int lod = 0);
+        ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
-		void updateLocalMaterialFromModel(unsigned int index);
-        Material* getMaterial(unsigned int index);
-		unsigned int getMaterialsCount();
+		void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
+        Material* getMaterial(unsigned int index, int lod = 0);
+		unsigned int getMaterialsCount(int lod = 0);
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();
@@ -51,6 +63,8 @@ class RenderObject : public Component
 		bool isDynamicObject();
 
         AABB* getAABB();
+
+		unsigned int getNumberOfLod();
 
         virtual void changedTransform();
 

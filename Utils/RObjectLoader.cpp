@@ -73,9 +73,11 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["model"] = componentElement->Attribute("model");
+	object->getComponents()[componentIndex]["lowPolyModel"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModel");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
 	object->getComponents()[componentIndex]["normalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "normalsSmoothing", "true");
+	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
 }
 
 
@@ -235,6 +237,15 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath, toBool(components[i]["normalsSmoothing"]));
 			RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
 			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
+
+			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
+			if (!lowPolyModeFile.empty())
+			{
+				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
+
+				RStaticModel* lowPolyModel = ResourceManager::getInstance().loadModel(lowPolyModelPath, objectDirPath, toBool(components[i]["lowPolyModelNormalsSmoothing"]));
+				renderObject->setModel(lowPolyModel, 1);
+			}
 		}
 		else if (componentType == "physics")
 		{

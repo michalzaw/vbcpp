@@ -493,7 +493,7 @@ void Renderer::prepareLightsData()
 }
 
 
-void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
+void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, RenderPass renderPass, int lod, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
 {
     glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
     glm::mat4 n = parentNormalMatrix * modelNode->getNormalMatrix();
@@ -503,7 +503,7 @@ void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListEl
     for (int k = 0; k < modelNode->getMeshesCount(); ++k)
     {
         tempRenderElement.mesh = modelNode->getMesh(k);
-        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex);
+        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex, lod);
         //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
         if (renderPass == RP_SHADOWS)
         {
@@ -520,7 +520,7 @@ void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListEl
 
     for (int i = 0; i < modelNode->getChildrenCount(); ++i)
     {
-        addStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, renderPass, t, n);
+        addStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, renderPass, lod, t, n);
     }
 }
 
@@ -606,12 +606,29 @@ void Renderer::prepareRenderData()
             if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
                 isObjectInCamera(object, _renderDataList[j]->camera))
             {
-                tempRenderElement.model = object->getModel();
+                tempRenderElement.model = object->getModel(); // todo: tu powinien byc tez pobierany po lod
                 tempRenderElement.object = object->getSceneObject();
                 tempRenderElement.renderObject = object;
 
-                ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
-                addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass);
+				ModelNode* modelNode;
+				int lod = 0;
+				if (tempRenderElement.renderObject->getNumberOfLod() == 1 || renderPass == RP_SHADOWS)
+				{
+					modelNode = tempRenderElement.renderObject->getModelRootNode();
+				}
+				else
+				{
+					if (glm::distance(_renderDataList[j]->camera->getPosition(), tempRenderElement.object->getPosition()) > 30.0f)
+					{
+						modelNode = tempRenderElement.renderObject->getModelRootNode(1);
+						lod = 1;
+					}
+					else
+					{
+						modelNode = tempRenderElement.renderObject->getModelRootNode(0);
+					}
+				}
+                addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass, lod);
             }
         }
 #ifdef DRAW_AABB
@@ -647,7 +664,7 @@ void Renderer::prepareRenderData()
 				tempRenderElement.renderObject = sky;
 
 				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
-				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass);
+				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[j]->renderList, renderPass, 0);
 			}
 		}
 	}
@@ -684,13 +701,15 @@ void Renderer::prepareRenderDataForStaticShadowmaps()
 			if (renderPass == RP_SHADOWS && isCastShadows && isStaticObject &&
 				isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera))
 			{
+				int lod = object->getNumberOfLod() > 1 ? 1 : 0;
+
 				tempRenderElement.type = RET_SINGLE;
-				tempRenderElement.model = object->getModel();
+				tempRenderElement.model = object->getModel(lod);
 				tempRenderElement.object = object->getSceneObject();
 				tempRenderElement.renderObject = object;
 
-				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
-				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataListForStaticShadowmapping[j]->renderList, renderPass);
+				ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode(lod);
+				addStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataListForStaticShadowmapping[j]->renderList, renderPass, lod); // todo: tu tez powinien byc brany odpowiedni lod
 			}
 		}
 	}

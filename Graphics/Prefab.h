@@ -25,7 +25,7 @@ class Prefab : public RenderObject
 
         ~Prefab()
         {
-            delete _model;
+            delete _modelsDatas[0].model;
         }
 
         void init()
