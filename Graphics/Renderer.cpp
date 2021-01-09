@@ -438,7 +438,7 @@ void Renderer::prepareLightsData()
 
 
     // Shadowmaping
-    if (_isShadowMappingEnable)
+    if (_isShadowMappingEnable && _shadowMap != NULL)
     {
         float cascadeEnd[4] = {0.1, 25.0f, 100.0f, 500.0f };
 
@@ -1579,7 +1579,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 void Renderer::renderScene(RenderData* renderData)
 {
     glm::mat4 lightSpaceMatrix[ShadowMap::CASCADE_COUNT];
-    if (_isShadowMappingEnable)
+    if (_isShadowMappingEnable && _shadowMap != NULL)
     {
         for (int j = 0; j < _shadowMap->CASCADE_COUNT; ++j)
         {

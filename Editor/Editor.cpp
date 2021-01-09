@@ -741,7 +741,7 @@ namespace vbEditor
 		renderer.setMsaaAntialiasing(true);
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
-		renderer.setIsShadowMappingEnable(false);
+		renderer.setIsShadowMappingEnable(true);
 		renderer.init(window.getWidth(), window.getHeight());
 		renderer.setDayNightRatio(1.0f);
 		renderer.setAlphaToCoverage(true);
@@ -804,6 +804,11 @@ namespace vbEditor
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
+				ImGui::Separator();
+				if (ImGui::MenuItem("Bake static shadows", NULL))
+				{
+					Renderer::getInstance().bakeStaticShadows();
+				}
 				ImGui::EndMenu();
 			}
 
@@ -853,6 +858,8 @@ namespace vbEditor
 
 				mapInfo.name = _availableMaps[currentSelection];
 				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+
+				Renderer::getInstance().bakeStaticShadows();
 			}
 		}
 
