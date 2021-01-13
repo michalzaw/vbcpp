@@ -20,6 +20,7 @@ namespace vbEditor
 {
 	RenderObject* currentRenderObject = nullptr;
 	RStaticModel* currentStaticModel = nullptr;
+	unsigned int currentModelLod = 0;
 	unsigned int currentMaterialIndex = 0;
 
 	Material* currentMaterial = nullptr;
@@ -37,7 +38,7 @@ namespace vbEditor
 		{
 			if (renderObject->getModel() == currentStaticModel)
 			{
-				renderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+				renderObject->updateLocalMaterialFromModel(currentMaterialIndex, currentModelLod);
 			}
 		}
 	}
@@ -66,7 +67,7 @@ namespace vbEditor
 		if (isMaterialModified)
 		{
 			*currentMaterial = originalMaterial;
-			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex, currentModelLod);
 		}
 	}
 
@@ -305,7 +306,7 @@ namespace vbEditor
 
 		if (isMaterialModified)
 		{
-			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex);
+			currentRenderObject->updateLocalMaterialFromModel(currentMaterialIndex, currentModelLod);
 		}
 
 		if (!isOpen)

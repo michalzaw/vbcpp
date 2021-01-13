@@ -253,6 +253,7 @@ namespace vbEditor
 	extern bool _showMaterialEditorWindow;
 	extern RenderObject* currentRenderObject;
 	extern RStaticModel* currentStaticModel;
+	extern unsigned int currentModelLod;
 	extern unsigned int currentMaterialIndex;
 
 	extern bool _showGenerateObjectsAlongRoadWindow;
@@ -263,25 +264,84 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 {
 	if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text("Materials");
-
-		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
-
-		for (int i = 0; i < renderComponent->getMaterialsCount(); ++i)
+		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
 		{
-			Material* material = renderComponent->getModel()->getMaterial(i);
+			char id[50];
+			sprintf(id, "Lod %d", i);
 
-			if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+			ImGui::PushID(id);
+
+			ImGui::Text(id);
+
+			RStaticModel* model = renderComponent->getModel(i);
+
+			char buffer[1024] = { '\0' };
+			strncpy(buffer, model->getPath().c_str(), sizeof buffer);
+			buffer[sizeof buffer - 1] = '\0';
+
+			ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("..."))
 			{
-				if (ImGui::IsMouseDoubleClicked(0))
+				/*std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+
+				if (result.size() == 1)
 				{
-					Logger::info(material->name);
-					vbEditor::_showMaterialEditorWindow = true;
-					vbEditor::currentRenderObject = renderComponent;
-					vbEditor::currentStaticModel = renderComponent->getModel();
-					vbEditor::currentMaterialIndex = i;
+					Logger::info(result[0]);
+
+					std::string path = result[0];
+					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
+
+					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
+					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
+					{
+						FilesHelper::copyFile(path, newPath);
+					}
+					texture = ResourceManager::getInstance().loadTexture(newPath);
+
+					isMaterialModified = true;
+				}*/
+			}
+
+			ImGui::Text("Materials");
+
+			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+
+			for (int j = 0; j < renderComponent->getMaterialsCount(i); ++j)
+			{
+				Material* material = renderComponent->getModel(i)->getMaterial(j);
+
+				if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+				{
+					if (ImGui::IsMouseDoubleClicked(0))
+					{
+						Logger::info(material->name);
+						vbEditor::_showMaterialEditorWindow = true;
+						vbEditor::currentRenderObject = renderComponent;
+						vbEditor::currentStaticModel = renderComponent->getModel(i);
+						vbEditor::currentModelLod = i;
+						vbEditor::currentMaterialIndex = j;
+					}
 				}
 			}
+
+			ImGui::Separator();
+
+			ImGui::PopID();
+		}
+
+		bool isCastShadows = renderComponent->isCastShadows();
+		if (ImGui::Checkbox("Cast shadows", &isCastShadows))
+		{
+			renderComponent->setIsCastShadows(isCastShadows);
+		}
+
+		bool isDynamicObject = renderComponent->isDynamicObject();
+		if (ImGui::Checkbox("Dynamic object", &isDynamicObject))
+		{
+			renderComponent->setIsDynamicObject(isDynamicObject);
 		}
 	}
 }
