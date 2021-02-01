@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include "Math.h"
+
 glm::vec2 XMLstringToVec2(const char* xmlstring)
 {
     std::stringstream ss(xmlstring);
@@ -92,4 +94,16 @@ btVector3 XMLstringToBtVec3(const char* xmlstring)
     btVector3 outVec(n1, n2, n3);
 
     return outVec;
+}
+
+float getValueFromCurveInPoint(const std::vector<glm::vec2>& curve, float point)
+{
+    const float p = clamp(point, curve[0].x, curve[curve.size() - 1].x);
+    for (int i = 1; i < curve.size(); ++i)
+    {
+        if (p <= curve[i].x)
+        {
+            return lerp(curve[i - 1].y, curve[i].y, (p - curve[i - 1].x) / (curve[i].x - curve[i - 1].x));
+        }
+    }
 }

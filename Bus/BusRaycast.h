@@ -148,6 +148,8 @@ class BusRaycast : public Bus
         void setRandomNumberOfPassengersGettingOff();
 
         void catchInputFromDesktop();
+
+        float getSoundVolume(const SoundDefinition& soundDefinition);
 };
 
 

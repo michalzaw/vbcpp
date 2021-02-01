@@ -45,5 +45,7 @@ inline bool isVectorContains(std::vector<T>& vector, T& element)
     return std::find(vector.begin(), vector.end(), element) != vector.end();
 }
 
+float getValueFromCurveInPoint(const std::vector<glm::vec2>& curve, float point);
+
 
 #endif // HELPERS_HPP_INCLUDED

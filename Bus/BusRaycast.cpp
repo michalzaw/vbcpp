@@ -104,6 +104,29 @@ void BusRaycast::catchInputFromDesktop()
 }
 
 
+float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition)
+{
+    float volume = soundDefinition.volume;
+
+    for (const auto& curve : soundDefinition.volumeCurves)
+    {
+        float variableValue = 0.0f;
+        if (curve.variable == SVCV_THROTTLE)
+        {
+            variableValue = _engine->getThrottle();
+        }
+        else if (curve.variable == SVCV_RPM)
+        {
+            variableValue = _engine->getCurrentRPM();
+        }
+
+        volume *= getValueFromCurveInPoint(curve.points, variableValue);
+    }
+
+    return volume;
+}
+
+
 BusRayCastModule& BusRaycast::getModule(int index)
 {
     return _modules[index];
@@ -475,6 +498,7 @@ void BusRaycast::update(float deltaTime)
 
     for (int i = 0; i < _engineSounds.size(); ++i)
     {
+        _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i]));
         _engineSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineSounds()[i].rpm);
     }
 

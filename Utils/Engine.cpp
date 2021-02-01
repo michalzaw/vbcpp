@@ -114,6 +114,8 @@ void Engine::loadSounds(XMLElement* soundsElement)
         Logger::info("Engine sound: " + soundDefinition.soundFilename);
         Logger::info("Engine volume: " + toString(soundDefinition.volume));
 
+        loadVolumeCurvesForSounds(engSound, soundDefinition);
+
         _engineSounds.push_back(soundDefinition);
 
         engSound = engSound->NextSiblingElement("Sound");
@@ -121,7 +123,7 @@ void Engine::loadSounds(XMLElement* soundsElement)
 }
 
 
-void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement)
+void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement, SoundDefinition& soundDefinition)
 {
     XMLElement* curveElement = soundElement->FirstChildElement("VolumeCurve");
     while (curveElement != nullptr)
@@ -129,7 +131,7 @@ void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement)
         SoundVolumeCurve curve;
         curve.variable = getSoundVolumeCurveFromStrings(curveElement->Attribute("variable"));
 
-        XMLElement* pointElement = soundElement->FirstChildElement("Point");
+        XMLElement* pointElement = curveElement->FirstChildElement("Point");
         while (pointElement != nullptr)
         {
             const float value = XmlUtils::getAttributeFloat(pointElement, "value");
@@ -139,6 +141,8 @@ void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement)
 
             pointElement = pointElement->NextSiblingElement("Point");
         }
+
+        soundDefinition.volumeCurves.push_back(curve);
 
         curveElement = curveElement->NextSiblingElement("VolumeCurve");
     }

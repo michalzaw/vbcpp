@@ -138,7 +138,7 @@ class Engine
         float getMaxTorque();
 
         void loadSounds(tinyxml2::XMLElement* soundsElement);
-        void loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement);
+        void loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement, SoundDefinition& soundDefinition);
 };
 
 #endif // ENGINE_H_INCLUDED
