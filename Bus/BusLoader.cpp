@@ -33,10 +33,6 @@ Bus* BusLoader::loadBus(const std::string& busName)
     XMLDocument doc;
     doc.LoadFile(configFileName.c_str());
 
-
-    loadEngineAndGearbox(doc);
-
-
     XMLElement* busElement = doc.FirstChildElement("Bus");
 
     Logger::info("Bus XML DATA");
@@ -70,8 +66,6 @@ Bus* BusLoader::loadBus(const std::string& busName)
 BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
 {
     _bus = new BusRaycast();
-    _bus->_engine = std::move(_engine);
-    _bus->_gearbox = std::move(_gearbox);
 
     bool result = loadBusModules(busElement);
     if (!result)
@@ -80,19 +74,44 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
         return NULL;
     }
 
+    loadEngineAndGearbox(busElement);
+
     return _bus;
 }
 
 
-void BusLoader::loadEngineAndGearbox(XMLDocument& doc)
+void BusLoader::loadEngineAndGearbox(XMLElement* busElement)
 {
-    XMLElement* objElement = doc.FirstChildElement("Gearbox");
-    std::string gearboxFile(objElement->Attribute("model"));
-    _gearbox = std::unique_ptr<Gearbox> (new Gearbox(gearboxFile));
+    XMLElement* objElement = busElement->FirstChildElement("Gearbox");
+    const std::string gearboxFile(objElement->Attribute("model"));
+    _bus->_gearbox = std::unique_ptr<Gearbox>(new Gearbox(gearboxFile));
 
-    objElement = doc.FirstChildElement("Engine");
-    std::string engineFile(objElement->Attribute("model"));
-    _engine = std::unique_ptr<Engine> (new Engine(engineFile));
+    objElement = busElement->FirstChildElement("Engine");
+    const std::string engineFile = objElement->Attribute("model");
+    const glm::vec3 enginePosition = XmlUtils::getAttributeVec3Optional(objElement, "position");
+    const int moduleIndex = XmlUtils::getAttributeIntOptional(objElement, "module");
+
+    _bus->_engine = std::unique_ptr<Engine>(new Engine(engineFile));
+
+
+    if (moduleIndex < _bus->_modules.size())
+    {
+        SceneObject* engineSoundsObject = _sMgr->addSceneObject("busEngine");
+        engineSoundsObject->setPosition(enginePosition);
+
+        _bus->_modules[moduleIndex].sceneObject->addChild(engineSoundsObject);
+        _bus->_engineSoundsObject = engineSoundsObject;
+
+        for (const auto& soundDefinition : _bus->_engine->getEngineSounds())
+        {
+            SoundComponent* engineSound = createSound(engineSoundsObject, soundDefinition);
+            _bus->_engineSounds.push_back(engineSound);
+        }
+    }
+    else
+    {
+        Logger::error("Error while loading engine sounds. Invali module index.");
+    }
 }
 
 
@@ -976,23 +995,37 @@ void BusLoader::loadModulesConnectionData(XMLElement* moduleElement, BusRayCastM
 }
 
 
+SoundComponent* BusLoader::createSound(SceneObject* soundObject, const SoundDefinition& soundDefinition)
+{
+    RSound* engineSound = ResourceManager::getInstance().loadSound(soundDefinition.soundFilename);
+    SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
+    soundObject->addComponent(soundComp);
+    soundComp->setGain(soundDefinition.volume);
+    soundComp->setPlayDistance(soundDefinition.playDistance);
+
+    _sndMgr->addSoundComponent(soundComp);
+
+    return soundComp;
+}
+
+
 void BusLoader::createRequireSoundComponents()
 {
     // Create Sound Component if sound filename is defined in Engine XML config file
-    if (_bus->_engine->getSoundFilename() != "")
+    /*if (_bus->_engine->getEngineSound()->soundFilename != "")
     {
-        RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getSoundFilename());
+        RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getEngineSound()->soundFilename);
         SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
         _bus->_modules[0].sceneObject->addComponent(soundComp);
-        soundComp->setGain(_bus->_engine->getSoundVolume());
+        soundComp->setGain(_bus->_engine->getEngineSound()->volume);
         soundComp->setPlayDistance(20.0f);
 
         _sndMgr->addSoundComponent(soundComp);
 
 		_bus->_engineSoundSource = soundComp;
-    }
+    }*/
 
-	if (_bus->_engine->getStartSoundFilename() != "")
+	/*if (_bus->_engine->getStartSoundFilename() != "")
 	{
 		RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getStartSoundFilename());
 		SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, false);
@@ -1016,7 +1049,7 @@ void BusLoader::createRequireSoundComponents()
 		_sndMgr->addSoundComponent(soundComp);
 
 		_bus->_engineStopSoundSource = soundComp;
-	}
+	}*/
 
     // Create announcement source component
     SoundComponent* announcementSource = new SoundComponent(NULL, EST_PLAYER, false);

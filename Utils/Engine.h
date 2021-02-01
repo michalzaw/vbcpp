@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 struct point
 {
     point() : rpm(0), torque(0) { }
@@ -28,6 +30,44 @@ enum EngineState
 	ES_RUN,
 	ES_STOPPING
 };
+
+
+enum SoundVolumeCurveVariable
+{
+    SVCV_THROTTLE,
+    SVCV_RPM,
+
+    SVCV_VARIABLE_COUNT
+};
+
+
+const std::string soundVolumeCurveStrings[] = { "throttle", "rpm" };
+SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name);
+
+
+struct SoundVolumeCurve
+{
+    SoundVolumeCurveVariable variable;
+    std::vector<glm::vec2> points;
+};
+
+
+struct SoundDefinition
+{
+    std::string soundFilename;
+    float rpm;
+    float volume;
+    float playDistance;
+
+    std::vector<SoundVolumeCurve> volumeCurves;
+
+};
+
+
+namespace tinyxml2
+{
+    class XMLElement;
+}
 
 
 class Engine
@@ -58,7 +98,7 @@ class Engine
 
 		float getDifferentialRatio() { return _differentialRatio; }
 
-        std::string getSoundFilename() { return _soundFilename; }
+        /*std::string getSoundFilename() { return _soundFilename; }
 
 		float getSoundRpm() { return _soundRpm; }
 
@@ -66,10 +106,11 @@ class Engine
 
 		std::string getStartSoundFilename() { return _startSoundFilename; }
 
-		std::string getStopSoundFilename() { return _stopSoundFilename; }
+		std::string getStopSoundFilename() { return _stopSoundFilename; }*/
+
+        const std::vector<SoundDefinition>& getEngineSounds() { return _engineSounds; }
 
         void update(float dt);
-
 
     protected:
         EngineState _state;
@@ -81,11 +122,13 @@ class Engine
 
 		float _differentialRatio;
 
-        std::string _soundFilename;
-		float		_soundRpm;
-        float       _volume;
-		std::string _startSoundFilename;
-		std::string _stopSoundFilename;
+        //std::string _soundFilename;
+		//float		_soundRpm;
+        //float       _volume;
+		//std::string _startSoundFilename;
+		//std::string _stopSoundFilename;
+
+        std::vector<SoundDefinition> _engineSounds;
 
         std::vector<point>  _torqueCurve;
         std::vector<params> _curveParams;
@@ -93,6 +136,9 @@ class Engine
         void loadData(const std::string filename);
         void calculateTorqueLine();
         float getMaxTorque();
+
+        void loadSounds(tinyxml2::XMLElement* soundsElement);
+        void loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement);
 };
 
 #endif // ENGINE_H_INCLUDED

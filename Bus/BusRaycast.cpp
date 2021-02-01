@@ -19,6 +19,7 @@ BusRaycast::BusRaycast()
     _brake(false), _accelerate(false), _handbrake(true), _idle(true),
     _isEnableLights(false), _isEnableHeadlights(false),
     _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
+    _engineSoundsObject(NULL),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
 	_displayText.head = "";
@@ -34,6 +35,11 @@ BusRaycast::~BusRaycast()
     Logger::info("Bus Destruktor");
 
     SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
+
+    if (_engineSoundsObject != NULL)
+    {
+        sceneManager->removeSceneObject(_engineSoundsObject);
+    }
 
 	for (BusRayCastWheel* wheel : _wheels)
 	{
@@ -315,7 +321,11 @@ void BusRaycast::startEngine()
 		}
 		else
 		{
-			_engineSoundSource->play();
+            for (int i = 0; i < _engineSounds.size(); ++i)
+            {
+                _engineSounds[i]->play();
+            }
+
 			_engine->setState(ES_RUN);
 		}
     }
@@ -326,7 +336,10 @@ void BusRaycast::stopEngine()
 {
     if (_engine)
     {
-		_engineSoundSource->stop();
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            _engineSounds[i]->stop();
+        }
 
 		if (_engineStopSoundSource != nullptr)
 		{
@@ -449,14 +462,21 @@ void BusRaycast::update(float deltaTime)
 	if (_engine->getState() == ES_STARTING && _engineStartSoundSource->getState() == AL_STOPPED)
 	{
 		_engine->setState(ES_RUN);
-		_engineSoundSource->play();
+
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            _engineSounds[i]->play();
+        }
 	}
 	else if (_engine->getState() == ES_STOPPING && _engineStopSoundSource->getState() == AL_STOPPED)
 	{
 		_engine->setState(ES_OFF);
 	}
 
-	_engineSoundSource->setPitch(_engine->getCurrentRPM() / _engine->getSoundRpm());
+    for (int i = 0; i < _engineSounds.size(); ++i)
+    {
+        _engineSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineSounds()[i].rpm);
+    }
 
     btScalar wheelAngularVelocity = 0.0f;
 

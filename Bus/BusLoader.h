@@ -53,7 +53,7 @@ class BusLoader
         BusRaycast* _bus;
 
         BusRaycast* loadBusRaycast(XMLElement* busElement);
-        void loadEngineAndGearbox(XMLDocument& doc);
+        void loadEngineAndGearbox(XMLElement* busElement);
         bool loadBusModules(XMLElement* busElement);
 
         void loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
@@ -78,6 +78,7 @@ class BusLoader
         void loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
                             SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel);
 
+        SoundComponent* createSound(SceneObject* soundObject, const SoundDefinition& soundDefinition);
         void createRequireSoundComponents();
 
     public:

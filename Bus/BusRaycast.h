@@ -129,6 +129,9 @@ class BusRaycast : public Bus
         LightsList      _headlights;
         bool            _isEnableHeadlights;
 
+        SceneObject* _engineSoundsObject;
+        std::vector<SoundComponent*> _engineSounds;
+
         std::vector<BusRayCastWheel*>       _wheels;
         DoorList        _doors;
 

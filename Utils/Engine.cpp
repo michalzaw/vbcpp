@@ -13,8 +13,19 @@ using namespace tinyxml2;
 #include "ResourceManager.h"
 #include "Logger.h"
 #include "XmlUtils.h"
+#include "Strings.h"
 
 #include "../Game/Directories.h"
+
+
+SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name)
+{
+    for (int i = 0; i < SVCV_VARIABLE_COUNT; ++i)
+    {
+        if (soundVolumeCurveStrings[i] == name)
+            return static_cast<SoundVolumeCurveVariable>(i);
+    }
+}
 
 
 Engine::Engine(std::string filename)
@@ -85,6 +96,55 @@ void Engine::throttleDown()
 }
 
 
+void Engine::loadSounds(XMLElement* soundsElement)
+{
+    XMLElement* engSound = soundsElement->FirstChildElement("Sound");
+    while (engSound != nullptr)
+    {
+        SoundDefinition soundDefinition;
+
+        soundDefinition.soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
+        soundDefinition.rpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
+        soundDefinition.volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
+        soundDefinition.playDistance = XmlUtils::getAttributeFloatOptional(engSound, "playDistance", 20.0f);
+
+        //_startSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "startFile");
+        //_stopSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
+
+        Logger::info("Engine sound: " + soundDefinition.soundFilename);
+        Logger::info("Engine volume: " + toString(soundDefinition.volume));
+
+        _engineSounds.push_back(soundDefinition);
+
+        engSound = engSound->NextSiblingElement("Sound");
+    }
+}
+
+
+void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement)
+{
+    XMLElement* curveElement = soundElement->FirstChildElement("VolumeCurve");
+    while (curveElement != nullptr)
+    {
+        SoundVolumeCurve curve;
+        curve.variable = getSoundVolumeCurveFromStrings(curveElement->Attribute("variable"));
+
+        XMLElement* pointElement = soundElement->FirstChildElement("Point");
+        while (pointElement != nullptr)
+        {
+            const float value = XmlUtils::getAttributeFloat(pointElement, "value");
+            const float volume = XmlUtils::getAttributeFloat(pointElement, "volume");
+
+            curve.points.push_back(glm::vec2(value, volume));
+
+            pointElement = pointElement->NextSiblingElement("Point");
+        }
+
+        curveElement = curveElement->NextSiblingElement("VolumeCurve");
+    }
+}
+
+
 void Engine::loadData(std::string filename)
 {
     std::string fullPath = GameDirectories::BUS_PARTS + filename + ".xml";
@@ -114,18 +174,8 @@ void Engine::loadData(std::string filename)
     std::string model(engDesc->Attribute("name"));
     std::string comment(engDesc->Attribute("comment"));
 
-    XMLElement* engSound = engElement->FirstChildElement("Sound");
-
-	_soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
-
-	_soundRpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
-    _volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
-
-	_startSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "startFile");
-	_stopSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
-
-    std::cout << "Engine sound: " << _soundFilename << std::endl;
-    std::cout << "Engine volume: " << _volume << std::endl;
+    XMLElement* soundsElement = engElement->FirstChildElement("Sounds");
+    loadSounds(soundsElement);
 
     XMLElement* pointList = engElement->FirstChildElement("Points");
 
