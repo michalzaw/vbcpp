@@ -69,6 +69,7 @@ class PhysicsManager : virtual public RefCounter
         void removeConstraint(Constraint* c);
 
 		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength = 1000.0f);
+        bool isPointInObject(const glm::vec3& point, PhysicalBody* physicalBody);
 
 		void setDebugRenderer(btIDebugDraw* debugRenderer);
 		btIDebugDraw* getDebugRenderer();
@@ -86,6 +87,8 @@ class PhysicsManager : virtual public RefCounter
 
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
+
+        btSphereShape* _pointSphere;
 
 		btIDebugDraw* _debugRenderer;
 		bool		  _debugRendeignEnable;

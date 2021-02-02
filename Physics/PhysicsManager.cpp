@@ -22,6 +22,26 @@ PhysicsManager& PhysicsManager::getInstance()
 }
 */
 
+
+struct MyContactResultCallback : public btCollisionWorld::ContactResultCallback
+{
+    bool result;
+
+    MyContactResultCallback()
+        : result(false)
+    {
+
+    }
+
+    virtual	btScalar addSingleResult(btManifoldPoint& cp, const btCollisionObjectWrapper* colObj0Wrap, int partId0, int index0, const btCollisionObjectWrapper* colObj1Wrap, int partId1, int index1)
+    {
+        result = true;
+
+        return 1.0f;
+    }
+};
+
+
 PhysicsManager::PhysicsManager()
 : _dynamicsWorld(0),
   _constraintSolver(0),
@@ -33,6 +53,8 @@ PhysicsManager::PhysicsManager()
   _running(false)
 {
     createPhysicsWorld();
+
+    _pointSphere = new btSphereShape(0.0f);
 }
 
 PhysicsManager::~PhysicsManager()
@@ -71,6 +93,8 @@ PhysicsManager::~PhysicsManager()
 	//printf("Ilosc obiektow kolizji po czyszczeniu: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
     destroyPhysicsWorld();
+
+    delete _pointSphere;
 }
 
 
@@ -381,6 +405,24 @@ bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir
 	}
 
 	return false;
+}
+
+
+bool PhysicsManager::isPointInObject(const glm::vec3& point, PhysicalBody* physicalBody)
+{
+    btTransform transform;
+    transform.setIdentity();
+    transform.setOrigin(btVector3(point.x, point.y, point.z));
+
+    btCollisionObject sphereObject;
+    sphereObject.setCollisionShape(_pointSphere);
+    sphereObject.setWorldTransform(transform);
+
+    MyContactResultCallback callback;
+
+    _dynamicsWorld->contactPairTest(physicalBody->getRigidBody(), &sphereObject, callback);
+
+    return callback.result;
 }
 
 
