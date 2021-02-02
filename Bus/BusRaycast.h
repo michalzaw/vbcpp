@@ -149,7 +149,9 @@ class BusRaycast : public Bus
 
         void catchInputFromDesktop();
 
-        float getSoundVolume(const SoundDefinition& soundDefinition);
+        float getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus);
+
+        bool isCurrentCameraInBus();
 };
 
 

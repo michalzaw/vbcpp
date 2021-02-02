@@ -18,6 +18,16 @@ using namespace tinyxml2;
 #include "../Game/Directories.h"
 
 
+AudibilityType getAudibilityTypeFromStrings(const std::string& name)
+{
+    for (int i = 0; i < AT_TYPE_COUNT; ++i)
+    {
+        if (audibilityTypeStrings[i] == name)
+            return static_cast<AudibilityType>(i);
+    }
+}
+
+
 SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name)
 {
     for (int i = 0; i < SVCV_VARIABLE_COUNT; ++i)
@@ -104,6 +114,7 @@ void Engine::loadSounds(XMLElement* soundsElement)
         SoundDefinition soundDefinition;
 
         soundDefinition.soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
+        soundDefinition.audibilityType = getAudibilityTypeFromStrings(XmlUtils::getAttributeStringOptional(engSound, "audibility", audibilityTypeStrings[0]));
         soundDefinition.rpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
         soundDefinition.volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
         soundDefinition.playDistance = XmlUtils::getAttributeFloatOptional(engSound, "playDistance", 20.0f);

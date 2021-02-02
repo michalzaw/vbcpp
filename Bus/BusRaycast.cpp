@@ -104,8 +104,14 @@ void BusRaycast::catchInputFromDesktop()
 }
 
 
-float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition)
+float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus)
 {
+    if ((soundDefinition.audibilityType == AT_INTERIOR && !isCameraInBus) ||
+        (soundDefinition.audibilityType == AT_EXTERIOR && isCameraInBus))
+    {
+        return 0.0f;
+    }
+
     float volume = soundDefinition.volume;
 
     for (const auto& curve : soundDefinition.volumeCurves)
@@ -124,6 +130,27 @@ float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition)
     }
 
     return volume;
+}
+
+
+bool BusRaycast::isCurrentCameraInBus()
+{
+    for (const auto& busModule : _modules)
+    {
+        CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+        const glm::vec3 cameraPosition = camera->getPosition();
+
+        PhysicalBody* busModulePhysicalObject = static_cast<PhysicalBody*>(busModule.sceneObject->getComponent(CT_PHYSICAL_BODY));
+
+        PhysicsManager* physcsManager = busModule.sceneObject->getSceneManager()->getPhysicsManager();
+        bool isCameraInBusModule = physcsManager->isPointInObject(cameraPosition, busModulePhysicalObject);
+        if (isCameraInBusModule)
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -496,9 +523,11 @@ void BusRaycast::update(float deltaTime)
 		_engine->setState(ES_OFF);
 	}
 
+    bool isCameraInBus = isCurrentCameraInBus();
+
     for (int i = 0; i < _engineSounds.size(); ++i)
     {
-        _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i]));
+        _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i], isCameraInBus));
         _engineSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineSounds()[i].rpm);
     }
 

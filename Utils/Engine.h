@@ -32,6 +32,20 @@ enum EngineState
 };
 
 
+enum AudibilityType
+{
+    AT_ALWAYS,
+    AT_INTERIOR,
+    AT_EXTERIOR,
+
+    AT_TYPE_COUNT
+};
+
+
+const std::string audibilityTypeStrings[] = { "always", "interior", "exterior" };
+AudibilityType getAudibilityTypeFromStrings(const std::string& name);
+
+
 enum SoundVolumeCurveVariable
 {
     SVCV_THROTTLE,
@@ -55,6 +69,7 @@ struct SoundVolumeCurve
 struct SoundDefinition
 {
     std::string soundFilename;
+    AudibilityType audibilityType;
     float rpm;
     float volume;
     float playDistance;
