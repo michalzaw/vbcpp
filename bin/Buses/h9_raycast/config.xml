@@ -1,10 +1,11 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<Gearbox model="gbx_ikarus260" />
-<Engine model="eng_wskmielec" />
-
 <Bus name="autosan" textures="PKS"> 
+
+	<Gearbox model="gbx_ikarus260" />
+	<Engine model="eng_wskmielec" />
+
 	<Module type="main" model="h9.fbx" mass="800" position="0,0,0" > <!-- mass in tons -->
 
 		<Wheel name="wheel1" side="right" steering="1" powered="0" handbrake="0" model="fwheel.fbx" position="1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />
