@@ -38,9 +38,19 @@ SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name)
 }
 
 
+SoundTrigger getSoundTriggerFromStrings(const std::string& name)
+{
+    for (int i = 0; i < ST_TRIGGERS_COUNT; ++i)
+    {
+        if (soundTriggerStrings[i] == name)
+            return static_cast<SoundTrigger>(i);
+    }
+}
+
+
 Engine::Engine(std::string filename)
 : _state(ES_OFF),
-_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(3.45f)
+_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(/*5.21f*/3.45f)
 {
     loadData(filename);
 
@@ -115,19 +125,26 @@ void Engine::loadSounds(XMLElement* soundsElement)
 
         soundDefinition.soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
         soundDefinition.audibilityType = getAudibilityTypeFromStrings(XmlUtils::getAttributeStringOptional(engSound, "audibility", audibilityTypeStrings[0]));
-        soundDefinition.rpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
+        soundDefinition.rpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", -1.0f);
+        soundDefinition.looped = XmlUtils::getAttributeBoolOptional(engSound, "looped");
         soundDefinition.volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
         soundDefinition.playDistance = XmlUtils::getAttributeFloatOptional(engSound, "playDistance", 20.0f);
-
-        //_startSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "startFile");
-        //_stopSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
 
         Logger::info("Engine sound: " + soundDefinition.soundFilename);
         Logger::info("Engine volume: " + toString(soundDefinition.volume));
 
-        loadVolumeCurvesForSounds(engSound, soundDefinition);
+        if (soundDefinition.looped)
+        {
+            loadVolumeCurvesForSounds(engSound, soundDefinition);
 
-        _engineSounds.push_back(soundDefinition);
+            _engineLoopedSounds.push_back(soundDefinition);
+        }
+        else
+        {
+            soundDefinition.trigger = getSoundTriggerFromStrings(XmlUtils::getAttributeString(engSound, "trigger"));
+
+            _engineSounds.push_back(soundDefinition);
+        }
 
         engSound = engSound->NextSiblingElement("Sound");
     }

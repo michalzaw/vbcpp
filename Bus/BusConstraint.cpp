@@ -565,13 +565,13 @@ void BusConstraint::loadXMLdata(std::string busname)
     }
 
     // Create Sound Component if sound filename is defined in Engine XML config file
-    if (_engine->getEngineSounds().size() > 0)
+    if (_engine->getEngineLoopedSounds().size() > 0)
     {
-        RSound* engineSound = ResourceManager::getInstance().loadSound(_engine->getEngineSounds()[0].soundFilename);
+        RSound* engineSound = ResourceManager::getInstance().loadSound(_engine->getEngineLoopedSounds()[0].soundFilename);
         SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
         //_sceneObject->addComponent(soundComp);
         _modules[0].sceneObject->addComponent(soundComp);
-        soundComp->setGain(_engine->getEngineSounds()[0].volume);
+        soundComp->setGain(_engine->getEngineLoopedSounds()[0].volume);
 
         _sndMgr->addSoundComponent(soundComp);
     }

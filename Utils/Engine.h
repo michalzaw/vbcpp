@@ -59,6 +59,19 @@ const std::string soundVolumeCurveStrings[] = { "throttle", "rpm" };
 SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name);
 
 
+enum SoundTrigger
+{
+    ST_START_ENGINE,
+    ST_STOP_ENGINE,
+
+    ST_TRIGGERS_COUNT
+};
+
+
+const std::string soundTriggerStrings[] = { "start_engine", "stop_engine" };
+SoundTrigger getSoundTriggerFromStrings(const std::string& name);
+
+
 struct SoundVolumeCurve
 {
     SoundVolumeCurveVariable variable;
@@ -71,11 +84,12 @@ struct SoundDefinition
     std::string soundFilename;
     AudibilityType audibilityType;
     float rpm;
+    bool looped;
     float volume;
     float playDistance;
+    SoundTrigger trigger;
 
     std::vector<SoundVolumeCurve> volumeCurves;
-
 };
 
 
@@ -113,15 +127,7 @@ class Engine
 
 		float getDifferentialRatio() { return _differentialRatio; }
 
-        /*std::string getSoundFilename() { return _soundFilename; }
-
-		float getSoundRpm() { return _soundRpm; }
-
-        float getSoundVolume() { return _volume; }
-
-		std::string getStartSoundFilename() { return _startSoundFilename; }
-
-		std::string getStopSoundFilename() { return _stopSoundFilename; }*/
+        const std::vector<SoundDefinition>& getEngineLoopedSounds() { return _engineLoopedSounds; }
 
         const std::vector<SoundDefinition>& getEngineSounds() { return _engineSounds; }
 
@@ -137,12 +143,7 @@ class Engine
 
 		float _differentialRatio;
 
-        //std::string _soundFilename;
-		//float		_soundRpm;
-        //float       _volume;
-		//std::string _startSoundFilename;
-		//std::string _stopSoundFilename;
-
+        std::vector<SoundDefinition> _engineLoopedSounds;
         std::vector<SoundDefinition> _engineSounds;
 
         std::vector<point>  _torqueCurve;

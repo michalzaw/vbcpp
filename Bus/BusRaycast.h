@@ -130,6 +130,7 @@ class BusRaycast : public Bus
         bool            _isEnableHeadlights;
 
         SceneObject* _engineSoundsObject;
+        std::vector<SoundComponent*> _engineLoopedSounds;
         std::vector<SoundComponent*> _engineSounds;
 
         std::vector<BusRayCastWheel*>       _wheels;
@@ -152,6 +153,8 @@ class BusRaycast : public Bus
         float getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus);
 
         bool isCurrentCameraInBus();
+
+        bool isSoundPlay(SoundTrigger trigger);
 };
 
 

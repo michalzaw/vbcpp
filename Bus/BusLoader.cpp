@@ -102,9 +102,14 @@ void BusLoader::loadEngineAndGearbox(XMLElement* busElement)
         _bus->_modules[moduleIndex].sceneObject->addChild(engineSoundsObject);
         _bus->_engineSoundsObject = engineSoundsObject;
 
-        for (const auto& soundDefinition : _bus->_engine->getEngineSounds())
+        for (const auto& soundDefinition : _bus->_engine->getEngineLoopedSounds())
         {
             SoundComponent* engineSound = createSound(engineSoundsObject, soundDefinition);
+            _bus->_engineLoopedSounds.push_back(engineSound);
+        }
+        for (int i = 0; i < _bus->_engine->getEngineSounds().size(); ++i)
+        {
+            SoundComponent* engineSound = createSound(engineSoundsObject, _bus->_engine->getEngineSounds()[i]);
             _bus->_engineSounds.push_back(engineSound);
         }
     }
@@ -998,7 +1003,7 @@ void BusLoader::loadModulesConnectionData(XMLElement* moduleElement, BusRayCastM
 SoundComponent* BusLoader::createSound(SceneObject* soundObject, const SoundDefinition& soundDefinition)
 {
     RSound* engineSound = ResourceManager::getInstance().loadSound(soundDefinition.soundFilename);
-    SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
+    SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, soundDefinition.looped);
     soundObject->addComponent(soundComp);
     soundComp->setGain(soundDefinition.volume);
     soundComp->setPlayDistance(soundDefinition.playDistance);
@@ -1011,46 +1016,6 @@ SoundComponent* BusLoader::createSound(SceneObject* soundObject, const SoundDefi
 
 void BusLoader::createRequireSoundComponents()
 {
-    // Create Sound Component if sound filename is defined in Engine XML config file
-    /*if (_bus->_engine->getEngineSound()->soundFilename != "")
-    {
-        RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getEngineSound()->soundFilename);
-        SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
-        _bus->_modules[0].sceneObject->addComponent(soundComp);
-        soundComp->setGain(_bus->_engine->getEngineSound()->volume);
-        soundComp->setPlayDistance(20.0f);
-
-        _sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineSoundSource = soundComp;
-    }*/
-
-	/*if (_bus->_engine->getStartSoundFilename() != "")
-	{
-		RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getStartSoundFilename());
-		SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, false);
-		_bus->_modules[0].sceneObject->addComponent(soundComp);
-		soundComp->setGain(_bus->_engine->getSoundVolume());
-		soundComp->setPlayDistance(20.0f);
-
-		_sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineStartSoundSource = soundComp;
-	}
-
-	if (_bus->_engine->getStopSoundFilename() != "")
-	{
-		RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getStopSoundFilename());
-		SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, false);
-		_bus->_modules[0].sceneObject->addComponent(soundComp);
-		soundComp->setGain(_bus->_engine->getSoundVolume());
-		soundComp->setPlayDistance(20.0f);
-
-		_sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineStopSoundSource = soundComp;
-	}*/
-
     // Create announcement source component
     SoundComponent* announcementSource = new SoundComponent(NULL, EST_PLAYER, false);
     _bus->_modules[0].sceneObject->addComponent(announcementSource);

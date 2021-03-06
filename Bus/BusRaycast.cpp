@@ -26,7 +26,6 @@ BusRaycast::BusRaycast()
 	_displayText.line1 = "virtual bus";
 	_displayText.line2 = "";
 	_displayText.type = ONE_LINE;
-
 }
 
 
@@ -150,6 +149,17 @@ bool BusRaycast::isCurrentCameraInBus()
         }
     }
 
+    return false;
+}
+
+
+bool BusRaycast::isSoundPlay(SoundTrigger trigger)
+{
+    for (int i = 0; i < _engineSounds.size(); ++i)
+    {
+        if (_engine->getEngineSounds()[i].trigger == trigger)
+            return _engineSounds[i]->getState() == AL_PLAYING;
+    }
     return false;
 }
 
@@ -364,16 +374,23 @@ void BusRaycast::startEngine()
 {
     if (_engine)
     {
-		if (_engineStartSoundSource != nullptr)
-		{
-			_engineStartSoundSource->play();
-			_engine->setState(ES_STARTING);
-		}
-		else
-		{
-            for (int i = 0; i < _engineSounds.size(); ++i)
+        bool existStartEngineSound = false;
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            if (_engine->getEngineSounds()[i].trigger == ST_START_ENGINE)
             {
                 _engineSounds[i]->play();
+                _engine->setState(ES_STARTING);
+
+                existStartEngineSound = true;
+            }
+        }
+
+		if (!existStartEngineSound)
+		{
+            for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+            {
+                _engineLoopedSounds[i]->play();
             }
 
 			_engine->setState(ES_RUN);
@@ -386,17 +403,24 @@ void BusRaycast::stopEngine()
 {
     if (_engine)
     {
-        for (int i = 0; i < _engineSounds.size(); ++i)
+        for (int i = 0; i < _engineLoopedSounds.size(); ++i)
         {
-            _engineSounds[i]->stop();
+            _engineLoopedSounds[i]->stop();
         }
 
-		if (_engineStopSoundSource != nullptr)
-		{
-			_engineStopSoundSource->play();
-			_engine->setState(ES_STOPPING);
-		}
-		else
+        bool existStopEngineSound = false;
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            if (_engine->getEngineSounds()[i].trigger == ST_STOP_ENGINE)
+            {
+                _engineSounds[i]->play();
+                _engine->setState(ES_STOPPING);
+
+                existStopEngineSound = true;
+            }
+        }
+		
+        if (!existStopEngineSound)
 		{
 			_engine->setState(ES_OFF);
 		}
@@ -509,26 +533,36 @@ void BusRaycast::update(float deltaTime)
 
     _engine->update(deltaTime);
 
-	if (_engine->getState() == ES_STARTING && _engineStartSoundSource->getState() == AL_STOPPED)
+	if (_engine->getState() == ES_STARTING && !isSoundPlay(ST_START_ENGINE))
 	{
 		_engine->setState(ES_RUN);
 
-        for (int i = 0; i < _engineSounds.size(); ++i)
+        for (int i = 0; i < _engineLoopedSounds.size(); ++i)
         {
-            _engineSounds[i]->play();
+            _engineLoopedSounds[i]->play();
         }
 	}
-	else if (_engine->getState() == ES_STOPPING && _engineStopSoundSource->getState() == AL_STOPPED)
+	else if (_engine->getState() == ES_STOPPING && !isSoundPlay(ST_STOP_ENGINE))
 	{
 		_engine->setState(ES_OFF);
 	}
 
     bool isCameraInBus = isCurrentCameraInBus();
 
+    for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+    {
+        _engineLoopedSounds[i]->setGain(getSoundVolume(_engine->getEngineLoopedSounds()[i], isCameraInBus));
+        if (_engine->getEngineLoopedSounds()[i].rpm > 0.0f)
+        {
+            _engineLoopedSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineLoopedSounds()[i].rpm);
+        }
+    }
     for (int i = 0; i < _engineSounds.size(); ++i)
     {
-        _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i], isCameraInBus));
-        _engineSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineSounds()[i].rpm);
+        if (_engineSounds[i] != nullptr)
+        {
+            _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i], isCameraInBus));
+        }
     }
 
     btScalar wheelAngularVelocity = 0.0f;
