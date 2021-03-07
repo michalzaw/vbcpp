@@ -454,8 +454,9 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
             float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
             float minValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "minValue");
+            short axis = XmlUtils::getAttributeIntOptional(indicatorElement, "axis", 0);
 
-            _bus->_desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue);
+            _bus->_desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue, axis);
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
         }

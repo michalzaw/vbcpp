@@ -46,7 +46,7 @@ Desktop::Desktop(RenderObject* desktopRenderObject)
 }
 
 
-void Desktop::setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue)
+void Desktop::setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue, short axis)
 {
     ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(indicatorNodeNameInModel);
 
@@ -54,6 +54,7 @@ void Desktop::setIndicator(DesktopIndicatorType type, std::string indicatorNodeN
     _indicators[type].maxAngle = maxAngle;
     _indicators[type].maxValue = maxValue;
     _indicators[type].minValue = minValue;
+    _indicators[type].axis = axis;
 }
 
 
@@ -214,13 +215,16 @@ void Desktop::update(float deltaTime)
         if (_indicators[i].modelNode != NULL)
         {
             float destRot = _indicators[i].currentValue;
-            float curRot = _indicators[i].modelNode->getTransform().getRotation().y;
+            float curRot = _indicators[i].modelNode->getTransform().getRotation()[_indicators[i].axis];
             if (destRot == curRot)
             {
                 continue;
             }
 
-            _indicators[i].modelNode->getTransform().rotate(0, (destRot - curRot) * 4.0f * deltaTime, 0);
+            float deltaRotation = (destRot - curRot) * 4.0f * deltaTime;
+            _indicators[i].modelNode->getTransform().rotate(_indicators[i].axis == 0 ? deltaRotation : 0.0f,
+                                                            _indicators[i].axis == 1 ? deltaRotation : 0.0f,
+                                                            _indicators[i].axis == 2 ? deltaRotation : 0.0f);
         }
     }
 }

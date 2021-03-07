@@ -56,6 +56,7 @@ struct Indicator
     float maxValue;
     float maxAngle;
     float minValue;
+    short int axis;
 
     float currentValue;
 
@@ -128,7 +129,7 @@ class Desktop
     public:
         Desktop(RenderObject* desktopRenderObject);
 
-        void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f);
+        void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f, short axis = 1);
         Indicator& getIndicator(DesktopIndicatorType type);
 
         void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
