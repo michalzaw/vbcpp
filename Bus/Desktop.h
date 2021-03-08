@@ -29,11 +29,13 @@ enum DesktopButtonType
 {
     DBT_DOOR_1,
     DBT_DOOR_2,
+    DBT_DOOR_3,
+    DBT_DOOR_4,
 
     BUTTONS_COUNT
 };
 
-const std::string desktopButtonTypeStrings[] = { "door1", "door2" };
+const std::string desktopButtonTypeStrings[] = { "door1", "door2", "door3", "door4" };
 DesktopButtonType getDesktopButtonTypeFromString(std::string name);
 
 
@@ -41,12 +43,14 @@ enum DesktopLightType
 {
     DLT_DOOR_1,
     DLT_DOOR_2,
+    DLT_DOOR_3,
+    DLT_DOOR_4,
     DLT_BACKLIGHTING,
 
     DESKTOP_LIGHTS_COUNT
 };
 
-const std::string desktopLightTypeStrings[] = { "door1", "door2", "backlighting" };
+const std::string desktopLightTypeStrings[] = { "door1", "door2", "door3", "door4", "backlighting" };
 DesktopLightType getDesktopLightTypeFromString(std::string name);
 
 
@@ -56,8 +60,9 @@ struct Indicator
     float maxValue;
     float maxAngle;
     float minValue;
-    short int axis;
+    glm::vec3 rotationAxis;
 
+    float valueFromVariable;
     float currentValue;
 
     Indicator()
@@ -129,7 +134,7 @@ class Desktop
     public:
         Desktop(RenderObject* desktopRenderObject);
 
-        void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f, short axis = 1);
+        void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
         Indicator& getIndicator(DesktopIndicatorType type);
 
         void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);

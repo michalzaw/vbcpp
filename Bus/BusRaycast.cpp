@@ -99,6 +99,14 @@ void BusRaycast::catchInputFromDesktop()
         {
             doorOpenClose(2);
         }
+        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_3).modelNode))
+        {
+            doorOpenClose(3);
+        }
+        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_4).modelNode))
+        {
+            doorOpenClose(4);
+        }
     }
 }
 

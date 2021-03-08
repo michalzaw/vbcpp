@@ -454,7 +454,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
             float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
             float minValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "minValue");
-            short axis = XmlUtils::getAttributeIntOptional(indicatorElement, "axis", 0);
+            glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
             _bus->_desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue, axis);
 
@@ -476,8 +476,9 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             XMLElement* buttonStateElement = buttonElement->FirstChildElement("State");
             while (buttonStateElement != nullptr)
             {
-                glm::vec3 translation = XMLstringToVec3(buttonStateElement->Attribute("translation"));
-                translationForStates.push_back(translation);
+                glm::vec3 translationDirection = XMLstringToVec3(buttonStateElement->Attribute("translationDirection"));
+                float offset = XmlUtils::getAttributeFloat(buttonStateElement, "translationOffset");
+                translationForStates.push_back(translationDirection * offset);
 
                 glm::vec3 rotation = XMLstringToVec3(buttonStateElement->Attribute("rotation"));
                 rotationForStates.push_back(rotation);
