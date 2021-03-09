@@ -64,11 +64,11 @@ Indicator& Desktop::getIndicator(DesktopIndicatorType type)
 }
 
 
-void Desktop::setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning)
+void Desktop::setButton(DesktopButtonType type, std::string buttonNodeNameInModel, glm::vec3 rotationAxix, std::vector<glm::vec3>& translateForStates, std::vector<float>& rotateForStates, bool isReturning)
 {
     ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(buttonNodeNameInModel);
 
-    _buttons[type].setData(modelNode, translateForStates, rotateForStates, isReturning);
+    _buttons[type].setData(modelNode, rotationAxix, translateForStates, rotateForStates, isReturning);
 }
 
 
@@ -189,23 +189,36 @@ void Desktop::update(float deltaTime)
             {
                 if (_buttons[i].isReturning && _buttons[i].currentState == 1)
                     _buttons[i].currentState = 0;
-                continue;
             }
-            glm::vec3 direction = glm::normalize(destPos - curPos);
-            glm::vec3 deltaPos = direction * deltaTime * 0.025;
+            else
+            {
+                glm::vec3 direction = glm::normalize(destPos - curPos);
+                glm::vec3 deltaPos = direction * deltaTime * 0.025;
 
-            _buttons[i].modelNode->getTransform().move(deltaPos);
+                _buttons[i].modelNode->getTransform().move(deltaPos);
 
-            glm::vec3 pos = _buttons[i].modelNode->getTransform().getPosition();
-            if (direction.x > 0 && pos.x > destPos.x || direction.x < 0 && pos.x < destPos.x)
-                pos.x = destPos.x;
-            if (direction.y > 0 && pos.y > destPos.y || direction.y < 0 && pos.y < destPos.y)
-                pos.y = destPos.y;
-            if (direction.z > 0 && pos.z > destPos.z || direction.z < 0 && pos.z < destPos.z)
-                pos.z = destPos.z;
+                glm::vec3 pos = _buttons[i].modelNode->getTransform().getPosition();
+                if (direction.x > 0 && pos.x > destPos.x || direction.x < 0 && pos.x < destPos.x)
+                    pos.x = destPos.x;
+                if (direction.y > 0 && pos.y > destPos.y || direction.y < 0 && pos.y < destPos.y)
+                    pos.y = destPos.y;
+                if (direction.z > 0 && pos.z > destPos.z || direction.z < 0 && pos.z < destPos.z)
+                    pos.z = destPos.z;
 
-            _buttons[i].modelNode->getTransform().setPosition(pos);
+                _buttons[i].modelNode->getTransform().setPosition(pos);
+            }
 
+            // rotation
+            float destRot = _buttons[i].rotateForStates[_buttons[i].currentState];
+            float curRot = _buttons[i].currentRotation;
+            if (destRot != curRot)
+            {
+                float deltaRotation = (destRot - curRot) * 4.0f * deltaTime;
+                _buttons[i].currentRotation += deltaRotation;
+
+                glm::quat rotation = glm::angleAxis(_buttons[i].currentRotation, _buttons[i].rotationAxis);
+                _buttons[i].modelNode->getTransform().setRotationQuaternion(rotation);
+            }
         }
     }
 

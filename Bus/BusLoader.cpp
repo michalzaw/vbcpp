@@ -469,9 +469,17 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
 
             std::string modelNodeName(buttonElement->Attribute("modelNodeName"));
             bool isReturning = XmlUtils::getAttributeBool(buttonElement, "isReturning");
+            glm::vec3 rotationAxis = XmlUtils::getAttributeVec3Optional(buttonElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
+            bool defaultState = XmlUtils::getAttributeBoolOptional(buttonElement, "defaultState", true);
 
             std::vector<glm::vec3> translationForStates;
-            std::vector<glm::vec3> rotationForStates;
+            std::vector<float> rotationForStates;
+
+            if (defaultState)
+            {
+                translationForStates.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
+                rotationForStates.push_back(0.0f);
+            }
 
             XMLElement* buttonStateElement = buttonElement->FirstChildElement("State");
             while (buttonStateElement != nullptr)
@@ -480,13 +488,13 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
                 float offset = XmlUtils::getAttributeFloat(buttonStateElement, "translationOffset");
                 translationForStates.push_back(translationDirection * offset);
 
-                glm::vec3 rotation = XMLstringToVec3(buttonStateElement->Attribute("rotation"));
-                rotationForStates.push_back(rotation);
+                float rotation = XmlUtils::getAttributeFloat(buttonStateElement, "rotation");
+                rotationForStates.push_back(degToRad(rotation));
 
                 buttonStateElement = buttonStateElement->NextSiblingElement("State");
             }
 
-            _bus->_desktop->setButton(type, modelNodeName, translationForStates, rotationForStates, isReturning);
+            _bus->_desktop->setButton(type, modelNodeName, rotationAxis, translationForStates, rotationForStates, isReturning);
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }

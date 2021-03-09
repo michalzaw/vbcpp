@@ -76,30 +76,31 @@ struct DesktopButton
 {
     ModelNode* modelNode;
     unsigned int statesCount;
+    glm::vec3 rotationAxis;
     std::vector<glm::vec3> translateForStates;
-    std::vector<glm::vec3> rotateForStates;
+    std::vector<float> rotateForStates;
     bool isReturning;
 
     unsigned int currentState;
+
+    float currentRotation;
 
     DesktopButton()
     {
         modelNode = NULL;
     }
 
-    void setData(ModelNode* modelNode, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning)
+    void setData(ModelNode* modelNode, glm::vec3 rotationAxis, std::vector<glm::vec3>& translateForStates, std::vector<float>& rotateForStates, bool isReturning)
     {
         this->modelNode = modelNode;
-        this->statesCount = translateForStates.size() + 1;
+        this->statesCount = translateForStates.size();
         this->translateForStates = translateForStates;
         this->rotateForStates = rotateForStates;
         this->isReturning = isReturning;
-
-        this->translateForStates.insert(this->translateForStates.begin(), glm::vec3(0.0f, 0.0f, 0.0f));
-        this->rotateForStates.insert(this->rotateForStates.begin(), glm::vec3(0.0f, 0.0f, 0.0f));
-
+        this->rotationAxis = rotationAxis;
 
         this->currentState = 0;
+        this->currentRotation = 0.0f;
     }
 
 };
@@ -137,7 +138,7 @@ class Desktop
         void setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue = 0.0f, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
         Indicator& getIndicator(DesktopIndicatorType type);
 
-        void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, std::vector<glm::vec3>& translateForStates, std::vector<glm::vec3>& rotateForStates, bool isReturning);
+        void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, glm::vec3 rotationAxix, std::vector<glm::vec3>& translateForStates, std::vector<float>& rotateForStates, bool isReturning);
         DesktopButton& getButton(DesktopButtonType type);
 
         void setLight(DesktopLightType type, std::string lightNodeNameInModel, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor);
