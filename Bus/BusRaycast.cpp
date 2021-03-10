@@ -2,6 +2,8 @@
 
 #include "../Scene/ClickableObject.h"
 
+#include "../Game/GameEnvironment.h"
+
 #include "../Utils/Math.h"
 
 #include "../Graphics/GraphicsManager.h"
@@ -661,11 +663,11 @@ void BusRaycast::update(float deltaTime)
 
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 
+    GameEnvironment::Variables::floatVaribles[GameEnvironment::PredefinedVariables::BUS_SPEED] = getBusSpeed();
+    GameEnvironment::Variables::floatVaribles[GameEnvironment::PredefinedVariables::BUS_ENGINE_RPM] = _engine->getCurrentRPM();
+
     if (_desktop != NULL)
     {
-        _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
-        _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
-
         _desktop->update(deltaTime);
     }
 }

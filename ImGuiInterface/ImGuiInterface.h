@@ -4,6 +4,7 @@
 #include "BusLineAndDirectionWindow.h"
 #include "ColorsWindow.h"
 #include "PhysicsDebuggerWindow.h"
+#include "VariablesWindow.h"
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
@@ -29,6 +30,7 @@ class ImGuiInterface
 		BusLineAndDirectionWindow* _busLineAndDirectionWindow;
 		ColorsWindow* _colorsWindow;
 		PhysicsDebuggerWindow* _physicsDebuggerWindow;
+        VariablesWindow* _variablesWindow;
 
         void initializeImGui();
 

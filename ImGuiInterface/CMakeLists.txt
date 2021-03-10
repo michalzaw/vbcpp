@@ -4,6 +4,7 @@ set (IMGUI_INTERFACE_SOURCES
 	ImguiInterface/BusLineAndDirectionWindow.cpp
 	ImguiInterface/ColorsWindow.cpp
 	ImguiInterface/PhysicsDebuggerWindow.cpp
+	ImguiInterface/VariablesWindow.cpp
 )
 
 set (IMGUI_INTERFACE_HEADERS
@@ -12,6 +13,7 @@ set (IMGUI_INTERFACE_HEADERS
 	ImguiInterface/BusLineAndDirectionWindow.h
 	ImguiInterface/ColorsWindow.h
 	ImguiInterface/PhysicsDebuggerWindow.h
+	ImguiInterface/VariablesWindow.h
 )
 
 set (IMGUI_INTERFACE_SOURCES ${IMGUI_INTERFACE_SOURCES} PARENT_SCOPE)

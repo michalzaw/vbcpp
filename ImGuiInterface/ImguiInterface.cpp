@@ -18,6 +18,7 @@ ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager, std::
 	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, _buses);
 	_colorsWindow = new ColorsWindow(_sceneManager, _buses);
 	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, _buses, false);
+    _variablesWindow = new VariablesWindow(_sceneManager, _buses, false);
 }
 
 
@@ -84,6 +85,7 @@ void ImGuiInterface::draw()
 		{
 			_colorsWindow->draw();
 			_physicsDebuggerWindow->draw();
+            _variablesWindow->draw();
 		}
 
 		ImGui::Render();
@@ -101,6 +103,7 @@ void ImGuiInterface::drawMainMenu()
             ImGui::MenuItem("Bus line and direction", NULL, _busLineAndDirectionWindow->getOpenFlagPointer());
             ImGui::MenuItem("Colors", NULL, _colorsWindow->getOpenFlagPointer());
 			ImGui::MenuItem("Physics debugger", NULL, _physicsDebuggerWindow->getOpenFlagPointer());
+            ImGui::MenuItem("Game variables", NULL, _variablesWindow->getOpenFlagPointer());
             ImGui::EndMenu();
         }
         ImGui::EndMainMenuBar();

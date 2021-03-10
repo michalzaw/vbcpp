@@ -4,6 +4,7 @@ set (GAME_SOURCES
 	Game/CameraControlComponent.cpp
 	Game/CameraControlSystem.cpp
 	Game/GameConfig.cpp
+	Game/GameEnvironment.cpp
 	Game/Hud.cpp
 )
 
@@ -14,6 +15,7 @@ set (GAME_HEADERS
 	Game/CameraControlSystem.h
 	Game/Directories.h
 	Game/GameConfig.h
+	Game/GameEnvironment.h
 	Game/Hud.h
     
 )

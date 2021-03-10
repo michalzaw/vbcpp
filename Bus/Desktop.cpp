@@ -2,6 +2,8 @@
 
 #include "Bus.h"
 
+#include "../Game/GameEnvironment.h"
+
 #include "../Utils/Helpers.hpp"
 
 
@@ -46,21 +48,19 @@ Desktop::Desktop(RenderObject* desktopRenderObject)
 }
 
 
-void Desktop::setIndicator(DesktopIndicatorType type, std::string indicatorNodeNameInModel, float maxAngle, float maxValue, float minValue, glm::vec3 rotationAxis)
+void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, float maxAngle, float maxValue, float minValue, glm::vec3 rotationAxis)
 {
     ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(indicatorNodeNameInModel);
 
-    _indicators[type].modelNode = modelNode;
-    _indicators[type].maxAngle = maxAngle;
-    _indicators[type].maxValue = maxValue;
-    _indicators[type].minValue = minValue;
-    _indicators[type].rotationAxis = rotationAxis;
-}
+    Indicator newIndicator;
+    newIndicator.modelNode = modelNode;
+    newIndicator.variableName = variable;
+    newIndicator.maxAngle = maxAngle;
+    newIndicator.maxValue = maxValue;
+    newIndicator.minValue = minValue;
+    newIndicator.rotationAxis = rotationAxis;
 
-
-Indicator& Desktop::getIndicator(DesktopIndicatorType type)
-{
-    return _indicators[type];
+    _indicators.push_back(newIndicator);
 }
 
 
@@ -96,12 +96,12 @@ DesktopLight& Desktop::getDesktopLight(DesktopLightType type)
 
 void Desktop::setIndicatorValue(DesktopIndicatorType type, float value)
 {
-    Indicator& indicator = getIndicator(type);
-    if (indicator.modelNode == NULL)
-        return;
+    //Indicator& indicator = getIndicator(type);
+    //if (indicator.modelNode == NULL)
+    //    return;
 
-    float v = clamp(value, indicator.minValue, indicator.maxValue) - indicator.minValue;
-    indicator.valueFromVariable = -v / (indicator.maxValue - indicator.minValue) * indicator.maxAngle;
+    //float v = clamp(value, indicator.minValue, indicator.maxValue) - indicator.minValue;
+    //indicator.valueFromVariable = -v / (indicator.maxValue - indicator.minValue) * indicator.maxAngle;
 
     //indicator.modelNode->getTransform().setRotation(0, indicator.currentValue, 0);
 }
@@ -222,8 +222,13 @@ void Desktop::update(float deltaTime)
         }
     }
 
-    for (int i = 0; i < INDICATORS_COUNT; ++i)
+    for (int i = 0; i < _indicators.size(); ++i)
     {
+        Indicator& indicator = _indicators[i];
+        float variableValue = GameEnvironment::Variables::floatVaribles[indicator.variableName];
+
+        float v = clamp(variableValue, indicator.minValue, indicator.maxValue) - indicator.minValue;
+        indicator.valueFromVariable = -v / (indicator.maxValue - indicator.minValue) * indicator.maxAngle;
 
         if (_indicators[i].modelNode != NULL)
         {

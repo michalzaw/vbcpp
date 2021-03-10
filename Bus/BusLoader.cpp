@@ -447,16 +447,14 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
         {
-            const char* cType = indicatorElement->Attribute("type");
-            DesktopIndicatorType type = getDesktopIndicatorTypeFromString(cType);
-
             std::string modelNodeName(indicatorElement->Attribute("modelNodeName"));
+            std::string variableName(indicatorElement->Attribute("variable"));
             float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
             float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
             float minValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "minValue");
             glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
-            _bus->_desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue, axis);
+            _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, axis);
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
         }
