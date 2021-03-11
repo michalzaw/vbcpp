@@ -59,10 +59,7 @@ struct Indicator
     ModelNode* modelNode;
     std::string variableName;
 
-    float maxValue;
-    float maxAngle;
-    float minValue;
-    float minAngle;
+    std::vector<glm::vec2> rotationCurve;
     glm::vec3 rotationAxis;
 
     float valueFromVariable;
@@ -140,6 +137,7 @@ class Desktop
         Desktop(RenderObject* desktopRenderObject);
 
         void addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, float maxAngle, float maxValue, float minValue = 0.0f, float minAngle = 0.0f, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
+        void addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
 
         void setButton(DesktopButtonType type, std::string buttonNodeNameInModel, glm::vec3 rotationAxix, std::vector<glm::vec3>& translateForStates, std::vector<float>& rotateForStates, bool isReturning);
         DesktopButton& getButton(DesktopButtonType type);

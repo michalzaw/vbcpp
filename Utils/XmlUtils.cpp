@@ -118,4 +118,18 @@ namespace XmlUtils
 			return defaultValue;
 	}
 
+	void loadCurveFromXmlFile(tinyxml2::XMLElement* element, std::vector<glm::vec2>& curve, const std::string& xParamName, const std::string yParamName)
+	{
+		XMLElement* pointElement = element->FirstChildElement("Point");
+		while (pointElement != nullptr)
+		{
+			const float value = XmlUtils::getAttributeFloat(pointElement, xParamName.c_str());
+			const float volume = XmlUtils::getAttributeFloat(pointElement, yParamName.c_str());
+
+			curve.push_back(glm::vec2(value, volume));
+
+			pointElement = pointElement->NextSiblingElement("Point");
+		}
+	}
+
 } // namespace

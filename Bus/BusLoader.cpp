@@ -449,13 +449,26 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         {
             std::string modelNodeName(indicatorElement->Attribute("modelNodeName"));
             std::string variableName(indicatorElement->Attribute("variable"));
-            float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
-            float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
+            float maxAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "maxAngle");
+            float maxValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "maxValue");
             float minValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "minValue");
             float minAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "minAngle");
             glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
-            _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+            std::vector<glm::vec2> curve;
+            XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
+            if (curve.size() > 1)
+            {
+                for (auto& point : curve)
+                {
+                    point.y = degToRad(point.y);
+                }
+                _bus->_desktop->addIndicator(modelNodeName, variableName, curve, axis);
+            }
+            else
+            {
+                _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+            }
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
         }

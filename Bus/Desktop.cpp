@@ -55,10 +55,23 @@ void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const st
     Indicator newIndicator;
     newIndicator.modelNode = modelNode;
     newIndicator.variableName = variable;
-    newIndicator.maxAngle = maxAngle;
-    newIndicator.maxValue = maxValue;
-    newIndicator.minValue = minValue;
-    newIndicator.minAngle = minAngle;
+    newIndicator.rotationAxis = rotationAxis;
+
+    newIndicator.rotationCurve.push_back(glm::vec2(minValue, minAngle));
+    newIndicator.rotationCurve.push_back(glm::vec2(maxValue, maxAngle));
+
+    _indicators.push_back(newIndicator);
+}
+
+
+void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis)
+{
+    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(indicatorNodeNameInModel);
+
+    Indicator newIndicator;
+    newIndicator.modelNode = modelNode;
+    newIndicator.variableName = variable;
+    newIndicator.rotationCurve = rotationCurve;
     newIndicator.rotationAxis = rotationAxis;
 
     _indicators.push_back(newIndicator);
@@ -228,9 +241,7 @@ void Desktop::update(float deltaTime)
         Indicator& indicator = _indicators[i];
         float variableValue = GameEnvironment::Variables::floatVaribles[indicator.variableName];
 
-        float v = clamp(variableValue, indicator.minValue, indicator.maxValue) - indicator.minValue;
-
-        indicator.valueFromVariable = -(v / (indicator.maxValue - indicator.minValue) * (indicator.maxAngle - indicator.minAngle) + indicator.minAngle);
+        indicator.valueFromVariable = -getValueFromCurveInPoint(indicator.rotationCurve, variableValue);
 
         if (_indicators[i].modelNode != NULL)
         {

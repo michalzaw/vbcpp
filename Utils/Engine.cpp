@@ -159,16 +159,7 @@ void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement, Sound
         SoundVolumeCurve curve;
         curve.variable = getSoundVolumeCurveFromStrings(curveElement->Attribute("variable"));
 
-        XMLElement* pointElement = curveElement->FirstChildElement("Point");
-        while (pointElement != nullptr)
-        {
-            const float value = XmlUtils::getAttributeFloat(pointElement, "value");
-            const float volume = XmlUtils::getAttributeFloat(pointElement, "volume");
-
-            curve.points.push_back(glm::vec2(value, volume));
-
-            pointElement = pointElement->NextSiblingElement("Point");
-        }
+        XmlUtils::loadCurveFromXmlFile(curveElement, curve.points, "value", "volume");
 
         soundDefinition.volumeCurves.push_back(curve);
 
