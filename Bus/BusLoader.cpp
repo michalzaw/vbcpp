@@ -200,7 +200,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
     if (_bus->_desktop == NULL)
     {
-        _bus->_desktop = new Desktop(NULL);
+        _bus->_desktop = new Desktop(NULL, NULL);
     }
 
 	_bus->updateDisplays();
@@ -412,6 +412,49 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
 }
 
 
+void bindButtonActionToState(BusRaycast* bus, DesktopButtonState& buttonState, DesktopButtonAction action, int actionParam)
+{
+    buttonState.actionParam = actionParam;
+
+    if (action == DBA_DOOR_OPEN)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorOpen, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_OPEN_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorOpenClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_OPEN)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupOpen, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_OPEN_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupOpenClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_BLOCK)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorBlock, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_UNBLOCK)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorUnblock, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_TOGGLE_HANDBRAKE)
+    {
+        buttonState.action = std::bind(&BusRaycast::toggleHandbrake, bus);
+    }
+}
+
+
 void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModule)
 {
     XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
@@ -442,7 +485,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         busModule.sceneObject->addChild(desktopObject);
 
         _bus->_desktopObject = desktopObject;
-        _bus->_desktop = new Desktop(_bus->_desktopRenderObject);
+        _bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
@@ -476,37 +519,43 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         XMLElement* buttonElement = desktopElement->FirstChildElement("Button");
         while (buttonElement != nullptr)
         {
-            const char* cType = buttonElement->Attribute("type");
-            DesktopButtonType type = getDesktopButtonTypeFromString(cType);
-
             std::string modelNodeName(buttonElement->Attribute("modelNodeName"));
             bool isReturning = XmlUtils::getAttributeBool(buttonElement, "isReturning");
             glm::vec3 rotationAxis = XmlUtils::getAttributeVec3Optional(buttonElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
             bool defaultState = XmlUtils::getAttributeBoolOptional(buttonElement, "defaultState", true);
 
-            std::vector<glm::vec3> translationForStates;
-            std::vector<float> rotationForStates;
+            std::vector<DesktopButtonState> buttonStates;
 
             if (defaultState)
             {
-                translationForStates.push_back(glm::vec3(0.0f, 0.0f, 0.0f));
-                rotationForStates.push_back(0.0f);
+                buttonStates.push_back(DesktopButtonState());
             }
 
             XMLElement* buttonStateElement = buttonElement->FirstChildElement("State");
             while (buttonStateElement != nullptr)
             {
-                glm::vec3 translationDirection = XMLstringToVec3(buttonStateElement->Attribute("translationDirection"));
-                float offset = XmlUtils::getAttributeFloat(buttonStateElement, "translationOffset");
-                translationForStates.push_back(translationDirection * offset);
+                glm::vec3 translationDirection = XmlUtils::getAttributeVec3Optional(buttonStateElement, "translationDirection");
+                float offset = XmlUtils::getAttributeFloatOptional(buttonStateElement, "translationOffset");
 
-                float rotation = XmlUtils::getAttributeFloat(buttonStateElement, "rotation");
-                rotationForStates.push_back(degToRad(rotation));
+                float rotation = XmlUtils::getAttributeFloatOptional(buttonStateElement, "rotation");
+
+                DesktopButtonState state(translationDirection * offset, degToRad(rotation));
+
+                std::string actionName = XmlUtils::getAttributeStringOptional(buttonStateElement, "action");
+                if (!actionName.empty())
+                {
+                    int actionParam = XmlUtils::getAttributeIntOptional(buttonStateElement, "actionParam");
+
+                    DesktopButtonAction action = getDesktopButtonActionFromString(actionName);
+                    bindButtonActionToState(_bus, state, action, actionParam);
+                }
+
+                buttonStates.push_back(state);
 
                 buttonStateElement = buttonStateElement->NextSiblingElement("State");
             }
 
-            _bus->_desktop->setButton(type, modelNodeName, rotationAxis, translationForStates, rotationForStates, isReturning);
+            _bus->_desktop->addButton(modelNodeName, rotationAxis, buttonStates, isReturning);
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }

@@ -548,17 +548,17 @@ void Game::fixedStepReadInput(float deltaTime)
 
 	if (input.isKeyPressed(GLFW_KEY_Z))
 	{
-		_activeBus->doorOpenClose(1);
+		_activeBus->doorGroupOpenClose(1);
 	}
 
 	if (input.isKeyPressed(GLFW_KEY_X))
 	{
-		_activeBus->doorOpenClose(2);
+		_activeBus->doorGroupOpenClose(2);
 	}
 
 	if (input.isKeyPressed(GLFW_KEY_C))
 	{
-		_activeBus->doorOpenClose(3);
+		_activeBus->doorGroupOpenClose(3);
 	}
 
 	if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT))

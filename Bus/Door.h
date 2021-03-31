@@ -28,19 +28,32 @@ class Door
 
 		virtual void removeObjectsAndConstraint(SceneManager* sceneManager);
 
-        virtual void open()
+        void open()
 		{
-			_state = EDS_OPENING;
-			_doorOpenSound->play();
+            if (!_blocked)
+            {
+                openImpl();
+
+                _state = EDS_OPENING;
+                _doorOpenSound->play();
+            }
 		}
 
-        virtual void close()
+        void close()
 		{
-			_state = EDS_CLOSING;
-			_doorCloseSound->play();
+            if (!_blocked)
+            {
+                closeImpl();
+
+                _state = EDS_CLOSING;
+                _doorCloseSound->play();
+            }
 		}
 
         virtual void setLoose() = 0;
+
+        void block() { _blocked = true; }
+        void unblock() { _blocked = false; }
 
         void playOpenSound() { _doorOpenSound->play(); }
         void playCloseSound() { _doorCloseSound->play(); }
@@ -57,6 +70,11 @@ class Door
 		SceneObject*			 _doorSceneObject;
         SoundComponent*          _doorOpenSound;
         SoundComponent*          _doorCloseSound;
+
+        bool                     _blocked;
+
+        virtual void openImpl() = 0;
+        virtual void closeImpl() = 0;
 };
 
 

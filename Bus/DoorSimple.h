@@ -14,14 +14,15 @@ class DoorSimple : public Door
 
 		void removeObjectsAndConstraint(SceneManager* sceneManager) override;
 
-		void open() override;
-		void close() override;
 		void setLoose() override;
 
 		ConstraintHinge* getConstraint() { return _hingeConstraint; }
 
     protected:
         ConstraintHinge*         _hingeConstraint;
+
+		void openImpl() override;
+		void closeImpl() override;
 };
 
 

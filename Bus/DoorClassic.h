@@ -17,8 +17,6 @@ class DoorClassic : public Door
 
 		void removeObjectsAndConstraint(SceneManager* sceneManager) override;
 
-        void open() override;
-        void close() override;
         void setLoose() override;
 
 		ConstraintHinge* getConstraintBusToArm();
@@ -31,6 +29,9 @@ class DoorClassic : public Door
         RotationDir             _rotationDir;
 
         float                   _velocity;
+
+        void openImpl() override;
+        void closeImpl() override;
 };
 
 

@@ -28,7 +28,7 @@ void DoorClassic::removeObjectsAndConstraint(SceneManager* sceneManager)
 }
 
 
-void DoorClassic::open()
+void DoorClassic::openImpl()
 {
     int direction = 0;
     if (_rotationDir == ERD_CW)
@@ -39,12 +39,10 @@ void DoorClassic::open()
     _hingeBusToArm->getBulletConstraint()->enableAngularMotor(true, 2.1f * direction * _velocity, 0.15f);
     _hingeArmToDoor->getBulletConstraint()->enableAngularMotor(true, -4.2f * direction * _velocity, 0.3f);
     _state = EDS_OPENING;
-
-    Door::open();
 }
 
 
-void DoorClassic::close()
+void DoorClassic::closeImpl()
 {
     int direction = 0;
     if (_rotationDir == ERD_CW)
@@ -55,8 +53,6 @@ void DoorClassic::close()
     _hingeBusToArm->getBulletConstraint()->enableAngularMotor(true, -2.1f * direction * _velocity, 0.15f);
     _hingeArmToDoor->getBulletConstraint()->enableAngularMotor(true, 4.2f * direction * _velocity, 0.3f);
     _state = EDS_CLOSING;
-
-    Door::close();
 }
 
 

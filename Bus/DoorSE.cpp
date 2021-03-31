@@ -35,25 +35,21 @@ void DoorSE::removeObjectsAndConstraint(SceneManager* sceneManager)
 }
 
 
-void DoorSE::open()
+void DoorSE::openImpl()
 {
 	if (_rotationDir == ERD_CCW)
 		_constraintBusToArm1->getBulletConstraint()->enableAngularMotor(true, -1.7f, 2.15f);
 	else
 		_constraintBusToArm1->getBulletConstraint()->enableAngularMotor(true, 1.7f, 2.15f);
-
-	Door::open();
 }
 
 
-void DoorSE::close()
+void DoorSE::closeImpl()
 {
 	if (_rotationDir == ERD_CCW)
 		_constraintBusToArm1->getBulletConstraint()->enableAngularMotor(true, 1.7f, 2.15f);
 	else
 		_constraintBusToArm1->getBulletConstraint()->enableAngularMotor(true, -1.7f, 2.15f);
-
-	Door::close();
 }
 
 

@@ -78,7 +78,7 @@ class Bus : public RefCounter
         virtual void startEngine() = 0;
         virtual void stopEngine() = 0;
 
-        virtual void doorOpenClose(char doorGroup) = 0;
+        virtual void doorGroupOpenClose(char doorGroup) = 0;
         virtual Door* getDoor(unsigned char doorIndex) = 0;
         virtual int getDoorsCount() = 0;
 

@@ -83,7 +83,7 @@ class BusConstraint : public Bus
         void stopEngine();
 
         // Door methods
-        void doorOpenClose(char doorGroup);
+        void doorGroupOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex);
         int getDoorsCount();

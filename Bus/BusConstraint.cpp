@@ -855,7 +855,7 @@ float BusConstraint::getBusSpeed()
 }
 
 
-void BusConstraint::doorOpenClose(char doorGroup)
+void BusConstraint::doorGroupOpenClose(char doorGroup)
 {
     for (unsigned char i = 0; i < _doors.size(); i++)
     //if (doorIndex <= _doors.size()-1)

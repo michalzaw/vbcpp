@@ -89,30 +89,6 @@ void BusRaycast::setRandomNumberOfPassengersGettingOff()
 }
 
 
-void BusRaycast::catchInputFromDesktop()
-{
-    if (_desktopClickableObject != NULL && _desktopClickableObject->isClicked())
-    {
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_1).modelNode))
-        {
-            doorOpenClose(1);
-        }
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_2).modelNode))
-        {
-            doorOpenClose(2);
-        }
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_3).modelNode))
-        {
-            doorOpenClose(3);
-        }
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_4).modelNode))
-        {
-            doorOpenClose(4);
-        }
-    }
-}
-
-
 float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus)
 {
     if ((soundDefinition.audibilityType == AT_INTERIOR && !isCameraInBus) ||
@@ -368,6 +344,12 @@ void BusRaycast::toggleHandbrake()
 }
 
 
+bool BusRaycast::getHandbrakeState()
+{
+    return _handbrake;
+}
+
+
 Gearbox* BusRaycast::getGearbox()
 {
     if (_gearbox) return _gearbox.get(); else return 0;
@@ -434,36 +416,6 @@ void BusRaycast::stopEngine()
 		{
 			_engine->setState(ES_OFF);
 		}
-    }
-}
-
-
-
-void BusRaycast::doorOpenClose(char doorGroup)
-{
-    _desktop->clickButton((DesktopButtonType)(DBT_DOOR_1 + doorGroup - 1));
-
-    for (unsigned char i = 0; i < _doors.size(); i++)
-    {
-        if (_doors[i]->getGroup() == doorGroup)
-        {
-            if (_doors[i]->getState() == EDS_CLOSING)
-            {
-                _doors[i]->open();
-
-                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), true);
-            }
-            else
-            if (_doors[i]->getState() == EDS_OPENING)
-            {
-                _doors[i]->close();
-
-                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), false);
-
-                if (isAllDoorClosed())
-                    setRandomNumberOfPassengersGettingOff();
-            }
-        }
     }
 }
 
@@ -539,8 +491,6 @@ float BusRaycast::getBusSpeed()
 
 void BusRaycast::update(float deltaTime)
 {
-    catchInputFromDesktop();
-
     _engine->update(deltaTime);
 
 	if (_engine->getState() == ES_STARTING && !isSoundPlay(ST_START_ENGINE))
@@ -670,4 +620,108 @@ void BusRaycast::update(float deltaTime)
     {
         _desktop->update(deltaTime);
     }
+}
+
+
+void BusRaycast::doorOpen(char door)
+{
+    if (_doors[door]->getState() == EDS_CLOSING)
+    {
+        _doors[door]->open();
+    }
+}
+
+
+void BusRaycast::doorClose(char door)
+{
+    if (_doors[door]->getState() == EDS_OPENING)
+    {
+        _doors[door]->close();
+
+        if (isAllDoorClosed())
+            setRandomNumberOfPassengersGettingOff();
+    }
+}
+
+
+void BusRaycast::doorOpenClose(char door)
+{
+    if (_doors[door]->getState() == EDS_CLOSING)
+    {
+        _doors[door]->open();
+    }
+    else if (_doors[door]->getState() == EDS_OPENING)
+    {
+        _doors[door]->close();
+
+        if (isAllDoorClosed())
+            setRandomNumberOfPassengersGettingOff();
+    }
+}
+
+
+void BusRaycast::doorGroupOpen(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->open();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorGroupClose(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->close();
+
+                if (isAllDoorClosed())
+                    setRandomNumberOfPassengersGettingOff();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorGroupOpenClose(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->open();
+            }
+            else if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->close();
+
+                if (isAllDoorClosed())
+                    setRandomNumberOfPassengersGettingOff();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorBlock(char door)
+{
+    _doors[door]->block();
+}
+
+
+void BusRaycast::doorUnblock(char door)
+{
+    _doors[door]->unblock();
 }
