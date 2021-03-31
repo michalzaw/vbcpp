@@ -208,9 +208,9 @@ ClickableObject* GraphicsManager::addClickableObject()
 }
 
 
-DisplayComponent* GraphicsManager::addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
+DisplayComponent* GraphicsManager::addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)
 {
-	DisplayComponent* displayComponent = new DisplayComponent(font, displayWidth, displayHeight);
+	DisplayComponent* displayComponent = new DisplayComponent(font, displayWidth, displayHeight, textColor);
 
 	_displayComponents.push_back(displayComponent);
 

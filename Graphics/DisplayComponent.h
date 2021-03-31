@@ -62,13 +62,15 @@ class DisplayComponent : public Component
 		void generateTexture();
 
 	public:
-		DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
+		DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor = DEFAULT_TEXT_COLOR);//2 * vec3(1, 0.4, 0.1) * vec3(0.96, 0.67, 0.22);
 		~DisplayComponent();
 
 		void setText(DisplayText& text);
 		DisplayText& getText();
 
 		void init();
+
+		static constexpr glm::vec3 DEFAULT_TEXT_COLOR = glm::vec3(1.92, 0.536, 0.044);
 
 };
 

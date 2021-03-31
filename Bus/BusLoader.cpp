@@ -1031,6 +1031,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
 		std::string fontName = std::string(displayElement->Attribute("font"));
 		int type = XmlUtils::getAttributeIntOptional(displayElement, "type");
+        glm::vec3 textColor = XmlUtils::getAttributeVec3Optional(displayElement, "textColor", DisplayComponent::DEFAULT_TEXT_COLOR);
 
 		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
 		displaySceneObject->setPosition(position);
@@ -1046,7 +1047,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
 
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
-		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints);
+		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints, textColor);
 		displaySceneObject->addComponent(displayComponent);
 		displayComponent->init();
 

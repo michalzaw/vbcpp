@@ -6,9 +6,9 @@
 #include "../Graphics/Renderer.h"
 
 
-DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
+DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)
 	: Component(CT_DISPLAY),
-	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight), _emissiveColor(1.92, 0.536, 0.044)//2 * vec3(1, 0.4, 0.1) * vec3(0.96, 0.67, 0.22);
+	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight), _emissiveColor(textColor)//(2 * 0.66, 2 * 0.77, 2 * 0.32)
 {
 	_tabGeneratorShader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/tabGenerator.frag");
 

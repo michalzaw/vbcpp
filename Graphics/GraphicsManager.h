@@ -93,7 +93,7 @@ class GraphicsManager
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
         MirrorComponent*addMirrorComponent(std::string name, float renderingDistance);
         ClickableObject*addClickableObject();
-		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
+		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
 
