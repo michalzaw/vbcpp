@@ -17,7 +17,7 @@ class VariablesWindow : public ImGuiWindow
 		virtual void drawWindow() override;
 
 	public:
-		VariablesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+		VariablesWindow(SceneManager* sceneManager, bool isOpen = true);
 };
 
 

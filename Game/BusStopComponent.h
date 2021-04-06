@@ -15,6 +15,8 @@ class BusStopComponent : public Component
     friend class BusStopSystem;
 
     private:
+        static const int MAX_NUMBER_OF_PASSENGERS = 30;
+
         std::string _name;
         int _id;
         std::string _announcementFileName;
@@ -30,7 +32,7 @@ class BusStopComponent : public Component
             _name(name), _numberOfPassengers(0), _time(0.0f),
             _announcementIsPlay(false)
         {
-
+            setNumberOfPassengers(rand() % MAX_NUMBER_OF_PASSENGERS);
         }
 
         ~BusStopComponent()

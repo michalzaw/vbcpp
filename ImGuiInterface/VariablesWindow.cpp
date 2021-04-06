@@ -3,8 +3,8 @@
 #include "../Game/GameEnvironment.h"
 
 
-VariablesWindow::VariablesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-	: ImGuiWindow(sceneManager, buses, isOpen),
+VariablesWindow::VariablesWindow(SceneManager* sceneManager, bool isOpen)
+	: ImGuiWindow(sceneManager, isOpen),
 	_newVariableFloatName(""), _newVariableFloatValue(0.0f),
 	_newVariablesStringName(""), _newVariablesStringValue("")
 {

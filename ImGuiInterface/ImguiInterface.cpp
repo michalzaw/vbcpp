@@ -9,16 +9,16 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager, std::vector<Bus*>* buses)
-	: _window(window), _sceneManager(sceneManager), _buses(buses),
+ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager)
+	: _window(window), _sceneManager(sceneManager),
     _styleDark(true), _isOpen(false)
 {
     initializeImGui();
 
-	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, _buses);
-	_colorsWindow = new ColorsWindow(_sceneManager, _buses);
-	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, _buses, false);
-    _variablesWindow = new VariablesWindow(_sceneManager, _buses, false);
+	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager);
+	_colorsWindow = new ColorsWindow(_sceneManager);
+	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
+    _variablesWindow = new VariablesWindow(_sceneManager, false);
 }
 
 

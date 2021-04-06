@@ -1,8 +1,10 @@
 #include "BusLineAndDirectionWindow.h"
 
+#include "../Game/GameLogicSystem.h"
 
-BusLineAndDirectionWindow::BusLineAndDirectionWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-	: ImGuiWindow(sceneManager, buses, isOpen)
+
+BusLineAndDirectionWindow::BusLineAndDirectionWindow(SceneManager* sceneManager, bool isOpen)
+	: ImGuiWindow(sceneManager, isOpen)
 {
 
 }
@@ -12,7 +14,7 @@ void BusLineAndDirectionWindow::drawWindow()
 {
 	if (ImGui::Begin("Line and direction", &_isOpen))
 	{
-		Bus* bus = (*_buses)[0];
+		Bus* bus = GameLogicSystem::getInstance().getBus(0);
 
 		char lineBuffer[1024];
 		char direction1Buffer[1024];

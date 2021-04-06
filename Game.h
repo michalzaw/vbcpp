@@ -47,7 +47,6 @@ class Game
 		int _numberOfFrames;
 		int _fps;
 
-		std::vector<Bus*> _buses;
 		Bus* _activeBus;
 		std::vector<CameraFPS*> _cameras;
 		CameraFPS* _activeCamera;

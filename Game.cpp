@@ -5,7 +5,8 @@
 
 #include "Bus/BusLoader.h"
 
-#include "Game/CameraControlSystem.h"
+#include "Game/CameraControlComponent.h"
+#include "Game/GameLogicSystem.h"
 #include "Game/GameConfig.h"
 
 #include "Graphics/Renderer.h"
@@ -98,7 +99,7 @@ void Game::initializeEngineSystems()
 	_gui = new GUIManager;
 
 #ifdef DRAW_IMGUI
-	_imGuiInterface = new ImGuiInterface(_window, _sceneManager, &_buses);
+	_imGuiInterface = new ImGuiInterface(_window, _sceneManager);
 
 	_physicsDebugRenderer = new PhysicsDebugRenderer;
 
@@ -118,7 +119,7 @@ CameraFPS* Game::createCameraBusDriver()
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 	cameraControlComponent->setMovmentControl(false);
 
@@ -143,7 +144,7 @@ CameraFPS* Game::createCameraBus()
 	cameraFPS->setMaxPositionOffset(30.0f);
 	cameraFPS->setPositionOffset(10.0f);
 
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 	cameraControlComponent->setMovmentControl(false);
 
@@ -162,7 +163,7 @@ CameraFPS* Game::createCameraFPSGlobal()
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 
 	return cameraFPS;
@@ -185,9 +186,9 @@ void Game::setActiveCamera(CameraFPS* camera)
 {
 	if (_activeCamera != nullptr)
 	{
-		CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(_activeCamera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), false);
+		_activeCamera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)->setIsActive(false);
 	}
-	CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(camera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), true);
+	camera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)->setIsActive(true);
 
 	_activeCamera = camera;
 
@@ -200,7 +201,7 @@ void Game::loadScene()
 {
 	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
 	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel);
-	_buses.push_back(bus);
+	GameLogicSystem::getInstance().addBus(bus);
 	_activeBus = bus;
 
 	SceneLoader sceneLoader(_sceneManager);
@@ -289,7 +290,7 @@ void Game::fixedStepUpdate(double deltaTime)
 
 	if (_isCameraControll)
 	{
-		CameraControlSystem::getInstance().update(deltaTime);
+		GameLogicSystem::getInstance().update(deltaTime);
 	}
 
 	fixedStepReadInput(deltaTime);
@@ -365,10 +366,7 @@ void Game::terminate()
 
 	delete _gui;
 
-	for (int i = 0; i < _buses.size(); ++i)
-	{
-		_buses[i]->drop();
-	}
+	GameLogicSystem::getInstance().destroy();
 
 	_soundManager->drop();
 	_physicsManager->drop();

@@ -22,7 +22,6 @@ class ImGuiInterface
         Window* _window;
 
         SceneManager* _sceneManager;
-		std::vector<Bus*>* _buses;
 
         bool _styleDark;
 		bool _isOpen;
@@ -39,7 +38,7 @@ class ImGuiInterface
 		void ShowTransformGizmo(CameraStatic* camera, SceneObject* obj);
 
     public:
-		ImGuiInterface(Window* window, SceneManager* sceneManager, std::vector<Bus*>* buses);
+		ImGuiInterface(Window* window, SceneManager* sceneManager);
         ~ImGuiInterface();
         
         bool GUIhasFocus();

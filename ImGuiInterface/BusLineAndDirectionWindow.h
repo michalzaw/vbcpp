@@ -11,7 +11,7 @@ class BusLineAndDirectionWindow : public ImGuiWindow
 		virtual void drawWindow() override;
 
 	public:
-		BusLineAndDirectionWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+		BusLineAndDirectionWindow(SceneManager* sceneManager, bool isOpen = true);
 };
 
 

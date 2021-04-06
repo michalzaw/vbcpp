@@ -15,14 +15,13 @@ class ImGuiWindow
 {
     protected:
         SceneManager* _sceneManager;
-		std::vector<Bus*>* _buses;
 
         bool _isOpen;
 
         virtual void drawWindow() = 0;
 
     public:
-		ImGuiWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+		ImGuiWindow(SceneManager* sceneManager, bool isOpen = true);
 
         bool* getOpenFlagPointer();
 

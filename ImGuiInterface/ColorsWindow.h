@@ -11,7 +11,7 @@ class ColorsWindow : public ImGuiWindow
 		virtual void drawWindow() override;
 
 	public:
-		ColorsWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+		ColorsWindow(SceneManager* sceneManager, bool isOpen = true);
 };
 
 
