@@ -2,6 +2,9 @@
 #define LOGGER_H_INCLUDED
 
 
+#include <string>
+
+
 class Logger
 {
     private:

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Game/Hud.h"
+#include "Game/GameScene.h"
 
 #include "Graphics/PhysicsDebugRenderer.h"
 
@@ -20,19 +21,10 @@
 #define DRAW_IMGUI
 
 
-enum GameState
-{
-	GS_LOADING,
-	GS_GAME
-};
-
-
 class Game
 {
 	private:
 		static constexpr char* WINDOW_TITLE = "Virtual Bus Core++";
-
-		GameState _state;
 
 		Window* _window;
 
@@ -47,36 +39,17 @@ class Game
 		int _numberOfFrames;
 		int _fps;
 
-		Bus* _activeBus;
-		std::vector<CameraFPS*> _cameras;
-		CameraFPS* _activeCamera;
-
-		Hud* _hud;
-
-		bool _isCameraControll;
-		bool _isMirrorControll;
-		int _mirrorControllIndex;
-
-		CameraFPS* createCameraBusDriver();
-		CameraFPS* createCameraBus();
-		CameraFPS* createCameraFPSGlobal();
+		GameScene* _gameScene;
 
 		void loadGameConfig();
 		void createWindow();
 		void initializeEngineSystems();
-		void initScene();
-		void setActiveCamera(CameraFPS* camera);
-		void loadScene();
-		void initGui();
-		void startGame();
 
 		void updateFpsCounter(double timePhysicsCurr);
 		void fixedStepUpdate(double deltaTime);
 
 		void readInput(double deltaTime);
 		void fixedStepReadInput(float deltaTime);
-
-		void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f));
 
 	public:
 		Game();

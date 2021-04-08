@@ -6,6 +6,7 @@ set (GAME_SOURCES
 	Game/GameEnvironment.cpp
 	Game/GameLogicSystem.cpp
 	Game/Hud.cpp
+	Game/MainGameScene.cpp
 )
 
 set (GAME_HEADERS 
@@ -16,7 +17,9 @@ set (GAME_HEADERS
 	Game/GameConfig.h
 	Game/GameEnvironment.h
 	Game/GameLogicSystem.h
+	Game/GameScene.h
 	Game/Hud.h
+	Game/MainGameScene.h
     
 )
 
