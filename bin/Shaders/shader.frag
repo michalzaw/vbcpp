@@ -193,7 +193,7 @@ void main()
 
 #ifdef GLASS
 	vec3 vector = normalize(vec3(Position - CameraPosition));
-	vec3 reflection = reflect(vector, Normal);
+	vec3 reflection = reflect(vector, normal);
 	
 	float reflectionValue = texture2D(glassTexture, TexCoord).r;
 	float t = reflectionValue;
@@ -320,13 +320,13 @@ float isGrass = 0.0f;
 #ifdef CAR_PAINT
 	vec3 vector = normalize(vec3(Position - CameraPosition));
 	
-	vec3 reflection = reflect(vector, Normal);
+	vec3 reflection = reflect(vector, normal);
 	
-	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), 1);
+	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, normal)), 1);
 	
 	
 	vec3 FragmentToEye = normalize(CameraPosition - Position);
-	float vvv = clamp(dot(Normal, FragmentToEye), 0.0f, 1.0f);
+	float vvv = clamp(dot(normal, FragmentToEye), 0.0f, 1.0f);
 	
 	//FragmentColor.rgb = texture(env, normalize(reflection)).rgb * (1.0f - 0.9f * vvv) + 0.8f * LightsColor.rgb;
 	fresnel = mix(0.2, 0.5, fresnel);
@@ -337,7 +337,7 @@ float isGrass = 0.0f;
 	FragmentColor.a = 1.0f;
 	
 #ifdef GLASS
-	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, Normal)), matDiffuse.a);
+	float fresnel = R0 + (1.0 - R0) * pow((1.0 - dot(-vector, normal)), matDiffuse.a);
 	
 	float q = mix(Transparency * 0.0f, Transparency, reflectionValue);
 	FragmentColor.a = mix(q, mix(q, 1.0f, reflectionValue), fresnel);//0.3
