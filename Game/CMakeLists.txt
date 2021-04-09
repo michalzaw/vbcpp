@@ -7,6 +7,7 @@ set (GAME_SOURCES
 	Game/GameLogicSystem.cpp
 	Game/Hud.cpp
 	Game/MainGameScene.cpp
+	Game/MenuSelectBusScene.cpp
 )
 
 set (GAME_HEADERS 
@@ -20,6 +21,7 @@ set (GAME_HEADERS
 	Game/GameScene.h
 	Game/Hud.h
 	Game/MainGameScene.h
+	Game/MenuSelectBusScene.h
     
 )
 

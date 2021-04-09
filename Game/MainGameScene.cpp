@@ -336,11 +336,6 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	}
 #endif // DRAW_IMGUI
 
-	if (input.isKeyPressed(GLFW_KEY_ESCAPE))
-	{
-		_window->setCloseFlag();
-	}
-
 	if (input.isKeyPressed(GLFW_KEY_L))
 	{
 		_activeBus->setIsEnableHeadlights(!_activeBus->isEnableHeadlights());

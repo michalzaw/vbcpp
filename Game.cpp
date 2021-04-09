@@ -9,6 +9,7 @@
 #include "Game/GameLogicSystem.h"
 #include "Game/GameConfig.h"
 #include "Game/MainGameScene.h"
+#include "Game/MenuSelectBusScene.h"
 
 #include "Graphics/Renderer.h"
 
@@ -105,6 +106,7 @@ void Game::initialize()
 	initializeEngineSystems();
 
 	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
+	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
 	_gameScene->initialize();
 }
 
@@ -248,6 +250,11 @@ void Game::fixedStepReadInput(float deltaTime)
 		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
 	}
 #endif // DRAW_IMGUI
+
+	if (input.isKeyPressed(GLFW_KEY_ESCAPE))
+	{
+		_window->setCloseFlag();
+	}
 
 	_gameScene->fixedStepReadInput(deltaTime);
 }
