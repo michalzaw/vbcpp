@@ -8,6 +8,7 @@
 #include "../Graphics/Renderer.h"
 
 #include "../Utils/InputSystem.h"
+#include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -65,6 +66,38 @@ void MenuSelectBusScene::addBus(const std::string& name)
 }
 
 
+void MenuSelectBusScene::selectNextBus()
+{
+	/*_buses[_selectedBus]->setIsActive(false);
+	_selectedBus = (_selectedBus + 1) % _buses.size();
+	_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
+	_buses[_selectedBus]->setIsActive(true);*/
+
+	_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
+	_selectedBus = (_selectedBus + 1) % _buses2.size();
+	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+}
+
+
+void MenuSelectBusScene::selectPreviousBus()
+{
+	/*_buses[_selectedBus]->setIsActive(false);
+	_selectedBus = (_selectedBus - 1) % _buses.size();
+	_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
+	_buses[_selectedBus]->setIsActive(true);*/
+
+	_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
+	_selectedBus = _selectedBus - 1;
+	if (_selectedBus < 0)
+	{
+		_selectedBus = _buses2.size() - 1;
+	}
+	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+}
+
+
 void MenuSelectBusScene::initialize()
 {
 	_physicsManager->stop();
@@ -74,12 +107,24 @@ void MenuSelectBusScene::initialize()
 	GraphicsManager::getInstance().setCurrentCamera(camera);
 	_soundManager->setActiveCamera(camera);
 
-	/*RTexture2D* logoTexture = ResourceManager::getInstance().loadTexture("logo.jpg");
+	/*RTexture2D* logoTexture = ResourceManager::getInstance().loadTexture("Data/logo.jpg");
 	Image* logoImage = _gui->addImage(logoTexture);
 
 	float scale = _window->getWidth() / 2.0f / logoTexture->getSize().x;
 	logoImage->setScale(scale, scale);
-	logoImage->setPosition(_window->getWidth() / 2.0f - logoTexture->getSize().x * scale / 2.0f, _window->getHeight() / 2.0f - logoTexture->getSize().y * scale / 2.0f);*/
+	logoImage->setPosition(_window->getWidth() / 2.0f - logoImage->getRealSize().x / 2.0f, _window->getHeight() / 2.0f - logoImage->getRealSize().y / 2.0f);*/
+
+	/*RTexture2D* arrow1Texture = ResourceManager::getInstance().loadTexture("Data/arrow_back.png");
+	Button* previousBusButton = _gui->addButton(arrow1Texture);
+	previousBusButton->setScale(2, 2);
+	previousBusButton->setPosition(0.0f, _window->getHeight() / 2.0f - previousBusButton->getRealSize().y / 2.0f);
+	previousBusButton->setOnClickCallback(std::bind(&MenuSelectBusScene::selectPreviousBus, this));
+
+	RTexture2D* arrow2Texture = ResourceManager::getInstance().loadTexture("Data/arrow_forward.png");
+	Button* nextBusButton = _gui->addButton(arrow2Texture);
+	nextBusButton->setScale(2.0f, 2.0f);
+	nextBusButton->setPosition(_window->getWidth() - nextBusButton->getRealSize().x, _window->getHeight() / 2.0f - nextBusButton->getRealSize().y / 2.0f);
+	nextBusButton->setOnClickCallback(std::bind(&MenuSelectBusScene::selectNextBus, this));*/
 
 	// light
 	SceneObject* lightSceneObject = _sceneManager->addSceneObject("bus");
@@ -144,27 +189,11 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 
 	if (input.isKeyPressed(GLFW_KEY_LEFT))
 	{
-		/*_buses[_selectedBus]->setIsActive(false);
-		_selectedBus = (_selectedBus - 1) % _buses.size();
-		_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
-		_buses[_selectedBus]->setIsActive(true);*/
-
-		_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
-		_selectedBus = (_selectedBus - 1) % _buses2.size();
-		_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-		_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+		selectPreviousBus();
 	}
 	else if (input.isKeyPressed(GLFW_KEY_RIGHT))
 	{
-		/*_buses[_selectedBus]->setIsActive(false);
-		_selectedBus = (_selectedBus + 1) % _buses.size();
-		_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
-		_buses[_selectedBus]->setIsActive(true);*/
-
-		_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
-		_selectedBus = (_selectedBus + 1) % _buses2.size();
-		_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-		_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+		selectNextBus();
 	}
 }
 

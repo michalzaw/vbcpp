@@ -46,19 +46,19 @@ class GUIObject
         GUIObject();
         ~GUIObject();
 
-        void setPosition(glm::vec3 position);
-        void setPosition(glm::vec2 position);
-        void setPosition(float x, float y, float z = 0.0f);
-        void setScale(glm::vec2 scale);
-        void setScale(float scaleX, float scaleY);
-        void setRotation(float angle);          // Radians
+        virtual void setPosition(glm::vec3 position);
+        virtual void setPosition(glm::vec2 position);
+        virtual void setPosition(float x, float y, float z = 0.0f);
+        virtual void setScale(glm::vec2 scale);
+        virtual void setScale(float scaleX, float scaleY);
+        virtual void setRotation(float angle);          // Radians
 
-        void move(glm::vec3 delta);
-        void move(glm::vec2 delta);
-        void move(float x, float y, float z = 0.0f);
-        void scale(glm::vec2 delta);
-        void scale(float x, float y);
-        void rotate(float angle);
+        virtual void move(glm::vec3 delta);
+        virtual void move(glm::vec2 delta);
+        virtual void move(float x, float y, float z = 0.0f);
+        virtual void scale(glm::vec2 delta);
+        virtual void scale(float x, float y);
+        virtual void rotate(float angle);
 
         glm::vec3   getPosition();
         glm::vec2   getScale();
@@ -78,6 +78,8 @@ class GUIObject
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0) { return _identityTransformMatrix; }
         virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0) { return _identityTransformMatrix; }
+
+        virtual void update(float deltaTime) {}
 
         virtual void addDataToRenderList(GUIRenderList* renderList) = 0;
 

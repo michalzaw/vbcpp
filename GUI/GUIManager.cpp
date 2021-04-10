@@ -37,6 +37,16 @@ Label* GUIManager::addLabel(RFont* font, std::string text)
 }
 
 
+Button* GUIManager::addButton(RTexture* texture, RFont* font, std::string text)
+{
+    Button* button = new Button(texture, font, text);
+
+    _objects.push_back(button);
+
+    return button;
+}
+
+
 unsigned int GUIManager::getObjectsCount()
 {
     return _objects.size();
@@ -49,6 +59,15 @@ GUIObject* GUIManager::getObject(unsigned int index)
         return _objects[index];
 
     return NULL;
+}
+
+
+void GUIManager::update(float deltaTime)
+{
+    for (GUIObject* guiObject : _objects)
+    {
+        guiObject->update(deltaTime);
+    }
 }
 
 

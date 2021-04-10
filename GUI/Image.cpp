@@ -88,7 +88,7 @@ void Image::calculateVerticesTransformMatrix()
 {
     _verticesTransformMatrix = glm::translate(glm::vec3(_position.x, _position.y, _position.z)) *
                                glm::rotate(_rotation, glm::vec3(0.0f, 0.0f, 1.0f)) *
-                               glm::scale(glm::vec3(_size, 1.0f)) * glm::scale(glm::vec3(_scale, 1.0f));
+                               glm::scale(glm::vec3(getRealSize(), 1.0f));
 }
 
 
@@ -138,6 +138,12 @@ UintRect& Image::getTextureRect()
 glm::vec2 Image::getSize()
 {
     return _size;
+}
+
+
+glm::vec2 Image::getRealSize()
+{
+    return _size * _scale;
 }
 
 

@@ -16,6 +16,9 @@ class MenuSelectBusScene final : public GameScene
 		void addBus(const std::string& modelFileName, const std::string& texturePath);
 		void addBus(const std::string& name);
 
+		void selectNextBus();
+		void selectPreviousBus();
+
 	public:
 		MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui);
 		~MenuSelectBusScene();

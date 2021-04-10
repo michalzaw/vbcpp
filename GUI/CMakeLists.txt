@@ -1,4 +1,5 @@
 set (GUI_SOURCES
+	GUI/Button.cpp
 	GUI/FontLoader.cpp
 	GUI/GUIManager.cpp
 	GUI/GUIObject.cpp
@@ -8,6 +9,7 @@ set (GUI_SOURCES
 )
 
 set (GUI_HEADERS 
+	GUI/Button.h
 	GUI/FontLoader.h
 	GUI/GUIManager.h
 	GUI/GUIObject.h

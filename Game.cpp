@@ -135,6 +135,8 @@ void Game::fixedStepUpdate(double deltaTime)
 	_gameScene->fixedStepUpdate(deltaTime);
 	GraphicsManager::getInstance().update(deltaTime);
 
+	_gui->update(deltaTime);
+
 	fixedStepReadInput(deltaTime);
 }
 

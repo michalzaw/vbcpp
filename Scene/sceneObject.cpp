@@ -330,6 +330,11 @@ void SceneObject::setName(std::string name)
 void SceneObject::setIsActive(bool is)
 {
     _isActive = is;
+
+    for (SceneObject* child : _childrens)
+    {
+        child->setIsActive(is);
+    }
 }
 
 

@@ -9,6 +9,7 @@
 #include "GUIObject.h"
 #include "Image.h"
 #include "Label.h"
+#include "Button.h"
 #include "GUIRenderListElement.h"
 
 
@@ -23,10 +24,13 @@ class GUIManager
 
         Image* addImage(RTexture* texture);
         Label* addLabel(RFont* font, std::string text = "");
+        Button* addButton(RTexture* texture, RFont* font = NULL, std::string text = "");
 
         unsigned int getObjectsCount();
 
         GUIObject* getObject(unsigned int index);
+
+        void update(float deltaTime);
 
         //void renderAllObjects();
         //std::list<GUIObject*>* getGUIList();
