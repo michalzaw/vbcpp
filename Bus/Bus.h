@@ -15,6 +15,7 @@
 #include "../Graphics/MirrorComponent.h"
 #include "../Graphics/DisplayComponent.h"
 
+#include "BusDescription.h"
 #include "Door.h"
 
 
@@ -39,6 +40,8 @@ class Bus : public RefCounter
 		SoundComponent* _engineSoundSource;
 		SoundComponent* _engineStartSoundSource;
 		SoundComponent* _engineStopSoundSource;
+
+        BusDescription _busDescription;
 
     public:
         Bus()
@@ -133,6 +136,11 @@ class Bus : public RefCounter
 		{
 			return _engineStopSoundSource;
 		}
+
+        BusDescription& getBusDescription()
+        {
+            return _busDescription;
+        }
 
 };
 

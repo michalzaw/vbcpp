@@ -67,6 +67,8 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
 {
     _bus = new BusRaycast();
 
+    loadBusDescription(busElement);
+
     bool result = loadBusModules(busElement);
     if (!result)
     {
@@ -116,6 +118,19 @@ void BusLoader::loadEngineAndGearbox(XMLElement* busElement)
     else
     {
         Logger::error("Error while loading engine sounds. Invali module index.");
+    }
+}
+
+
+void BusLoader::loadBusDescription(XMLElement* busElement)
+{
+    XMLElement* descriptionElement = busElement->FirstChildElement("Description");
+    if (descriptionElement != nullptr)
+    {
+        _bus->_busDescription.model = XmlUtils::getAttributeStringOptional(descriptionElement, "model");
+        _bus->_busDescription.description = XmlUtils::getAttributeStringOptional(descriptionElement, "description");
+        _bus->_busDescription.author = XmlUtils::getAttributeStringOptional(descriptionElement, "author");
+        _bus->_busDescription.logo = _busPath + XmlUtils::getAttributeStringOptional(descriptionElement, "logo");
     }
 }
 

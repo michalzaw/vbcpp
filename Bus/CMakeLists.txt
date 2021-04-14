@@ -12,6 +12,7 @@ set (BUS_SOURCES
 set (BUS_HEADERS
 	Bus/Bus.h
 	Bus/BusConstraint.h
+	Bus/BusDescription.h
 	Bus/BusLoader.h
 	Bus/BusRaycast.h
 	Bus/Desktop.h

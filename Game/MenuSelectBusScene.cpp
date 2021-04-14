@@ -1,12 +1,14 @@
 #include "MenuSelectBusScene.h"
 
 #include "CameraControlComponent.h"
+#include "Directories.h"
 #include "GameLogicSystem.h"
 
 #include "../Bus/BusLoader.h"
 
 #include "../Graphics/Renderer.h"
 
+#include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
@@ -23,6 +25,24 @@ MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsMa
 MenuSelectBusScene::~MenuSelectBusScene()
 {
 
+}
+
+
+void MenuSelectBusScene::loadAvailableBusesNames()
+{
+	/*
+	_availableBusesNames = FilesHelper::getDirectoriesList(GameDirectories::BUSES);
+#ifdef DEVELOPMENT_RESOURCES
+	std::vector<std::string> availableBusesDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::BUSES);
+	_availableBusesNames.insert(_availableBusesNames.end(), availableBusesDev.begin(), availableBusesDev.end());
+#endif // DEVELOPMENT_RESOURCES
+	*/
+
+	_availableBusesNames.push_back("MAN");
+	_availableBusesNames.push_back("neoplan");
+	_availableBusesNames.push_back("Solaris_IV");
+	_availableBusesNames.push_back("Solaris_IV_PBR");
+	_availableBusesNames.push_back("h9_raycast");
 }
 
 
@@ -77,6 +97,8 @@ void MenuSelectBusScene::selectNextBus()
 	_selectedBus = (_selectedBus + 1) % _buses2.size();
 	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
 	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+
+	showBusLogo();
 }
 
 
@@ -95,24 +117,50 @@ void MenuSelectBusScene::selectPreviousBus()
 	}
 	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
 	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+
+	showBusLogo();
+}
+
+
+void MenuSelectBusScene::showBusLogo()
+{
+	const std::string& logoFileName = _buses2[_selectedBus]->getBusDescription().logo;
+	if (!logoFileName.empty())
+	{
+		_busLogo->setTexture(ResourceManager::getInstance().loadTexture(logoFileName));
+
+		float scale = _window->getWidth() / 10.0f / _busLogo->getSize().x;
+
+		_busLogo->setScale(scale, scale);
+		_busLogo->setPosition(_window->getWidth() - _busLogo->getRealSize().x - 50.0f, _window->getHeight() - _busLogo->getRealSize().y - 50.0f);
+		//_busLogo->setPosition(0.0f, _window->getHeight() - _busLogo->getRealSize().y);
+		_busLogo->setIsActive(true);
+	}
+	else
+	{
+		_busLogo->setIsActive(false);
+	}
 }
 
 
 void MenuSelectBusScene::initialize()
 {
-	_physicsManager->stop();
+	loadAvailableBusesNames();
 
 	CameraFPS* camera = createCameraFPSGlobal();
 
 	GraphicsManager::getInstance().setCurrentCamera(camera);
 	_soundManager->setActiveCamera(camera);
 
+	_busLogo = _gui->addImage(ResourceManager::getInstance().loadDefaultWhiteTexture());
+	_busLogo->setIsActive(false);
+
 	/*RTexture2D* logoTexture = ResourceManager::getInstance().loadTexture("Data/logo.jpg");
 	Image* logoImage = _gui->addImage(logoTexture);
 
-	float scale = _window->getWidth() / 2.0f / logoTexture->getSize().x;
+	float scale = _window->getWidth() / 10.0f / logoTexture->getSize().x;
 	logoImage->setScale(scale, scale);
-	logoImage->setPosition(_window->getWidth() / 2.0f - logoImage->getRealSize().x / 2.0f, _window->getHeight() / 2.0f - logoImage->getRealSize().y / 2.0f);*/
+	logoImage->setPosition(0.0f, _window->getHeight() - logoImage->getRealSize().y);*/
 
 	/*RTexture2D* arrow1Texture = ResourceManager::getInstance().loadTexture("Data/arrow_back.png");
 	Button* previousBusButton = _gui->addButton(arrow1Texture);
@@ -134,12 +182,12 @@ void MenuSelectBusScene::initialize()
 
 	// sky
 	std::vector<std::string> skyboxFileNamesArray;
-	skyboxFileNamesArray.push_back("Skybox/skybox_negx.hdr");
 	skyboxFileNamesArray.push_back("Skybox/skybox_posx.hdr");
-	skyboxFileNamesArray.push_back("Skybox/skybox_negy.hdr");
+	skyboxFileNamesArray.push_back("Skybox/skybox_negx.hdr");
 	skyboxFileNamesArray.push_back("Skybox/skybox_posy.hdr");
-	skyboxFileNamesArray.push_back("Skybox/skybox_negz.hdr");
+	skyboxFileNamesArray.push_back("Skybox/skybox_negy.hdr");
 	skyboxFileNamesArray.push_back("Skybox/skybox_posz.hdr");
+	skyboxFileNamesArray.push_back("Skybox/skybox_negz.hdr");
 
 	RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
 	GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
@@ -148,11 +196,10 @@ void MenuSelectBusScene::initialize()
 	//addBus("Buses/Solaris_IV/neoplan.fbx", "Buses/Solaris_IV/");
 	//addBus("Buses\\neoplan\\neoplan.fbx", "Buses\\neoplan\\");
 
-	addBus("MAN");
-	addBus("neoplan");
-	addBus("Solaris_IV");
-	addBus("Solaris_IV_PBR");
-	addBus("h9_raycast");
+	for (const std::string& busName : _availableBusesNames)
+	{
+		addBus(busName);
+	}
 
 	_buses2[0]->getSceneObject()->setIsActive(true);
 

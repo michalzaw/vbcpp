@@ -8,9 +8,14 @@
 class MenuSelectBusScene final : public GameScene
 {
 	private:
+		std::vector<std::string> _availableBusesNames;
+
 		std::vector<SceneObject*> _buses;
 		std::vector<Bus*> _buses2;
 		int _selectedBus;
+		Image* _busLogo;
+
+		void loadAvailableBusesNames();
 
 		CameraFPS* createCameraFPSGlobal();
 		void addBus(const std::string& modelFileName, const std::string& texturePath);
@@ -18,6 +23,8 @@ class MenuSelectBusScene final : public GameScene
 
 		void selectNextBus();
 		void selectPreviousBus();
+
+		void showBusLogo();
 
 	public:
 		MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui);

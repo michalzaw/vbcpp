@@ -54,6 +54,7 @@ class BusLoader
 
         BusRaycast* loadBusRaycast(XMLElement* busElement);
         void loadEngineAndGearbox(XMLElement* busElement);
+        void loadBusDescription(XMLElement* busElement);
         bool loadBusModules(XMLElement* busElement);
 
         void loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
