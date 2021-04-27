@@ -177,9 +177,7 @@ class RStaticModel : public Resource
     private:
         StaticModelNode*_rootNode;
 
-
-        Material*       _materials;
-        unsigned int    _materialsCount;
+        std::vector<Material*> _materials;
 
         glm::vec3*      _collisionMesh;
         unsigned int    _collisionMeshSize;
@@ -192,7 +190,7 @@ class RStaticModel : public Resource
         void calculateAABB();
 
     public:
-        RStaticModel(string path, StaticModelNode* rootNode, Material* materials, unsigned int materialsCount,
+        RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
                      GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
@@ -205,6 +203,7 @@ class RStaticModel : public Resource
 
         StaticModelNode* getRootNode();
 
+        std::vector<Material*>& getMaterials();
         Material*       getMaterial(unsigned int i);
         unsigned int    getMaterialsCount();
 

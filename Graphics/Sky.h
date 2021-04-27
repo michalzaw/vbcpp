@@ -13,10 +13,10 @@ private:
 
 public:
 	Sky(RTexture* texture)
-		: Cube(1, Material())
+		: Cube(1, new Material)
 	{
-		_material.diffuseTexture = texture;
-		_material.shader = SKY_MATERIAL;
+		_material->diffuseTexture = texture;
+		_material->shader = SKY_MATERIAL;
 
 		_type = CT_SKY;
 

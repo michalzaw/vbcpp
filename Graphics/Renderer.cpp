@@ -503,7 +503,7 @@ void Renderer::addStaticModelNodeToRenderList(ModelNode* modelNode, RenderListEl
     for (int k = 0; k < modelNode->getMeshesCount(); ++k)
     {
         tempRenderElement.mesh = modelNode->getMesh(k);
-        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex, lod);
+        tempRenderElement.material = tempRenderElement.mesh->material;
         //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
         if (renderPass == RP_SHADOWS)
         {
@@ -535,7 +535,7 @@ void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderL
     for (int j = 0; j < modelNode->getMeshesCount(); ++j)
     {
         tempRenderElement.mesh = modelNode->getMesh(j);
-        tempRenderElement.material = tempRenderElement.renderObject->getMaterial(tempRenderElement.mesh->materialIndex);
+        tempRenderElement.material = tempRenderElement.mesh->material;
         //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
         renderList.push_back(tempRenderElement);
     }
@@ -1360,7 +1360,7 @@ void Renderer::renderDepth(RenderData* renderData)
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
         RStaticModel* model = i->model;
-        StaticModelMesh* mesh = i->mesh;
+        ModelNodeMesh* mesh = i->mesh;
         Material* material = i->material;
 
         ShaderType shaderType;
@@ -1438,7 +1438,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
         RStaticModel* model = i->model;
-        StaticModelMesh* mesh = i->mesh;
+        ModelNodeMesh* mesh = i->mesh;
         Material* material = i->material;
 
         ShaderType shaderType = _shaderListForMirrorRendering[material->shader];
@@ -1596,7 +1596,7 @@ void Renderer::renderScene(RenderData* renderData)
     for (std::list<RenderListElement>::iterator i = renderData->renderList.begin(); i != renderData->renderList.end(); ++i)
     {
         RStaticModel* model = i->model;
-        StaticModelMesh* mesh = i->mesh;
+        ModelNodeMesh* mesh = i->mesh;
         Material* material = i->material;
 
         RShader* shader = _shaderList[material->shader];

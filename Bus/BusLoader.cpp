@@ -162,10 +162,10 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         if (nodeToSkip.empty())
             busModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         else
-            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, nodeToSkip, _normalsSmoothing);
+            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath/*, nodeToSkip*/, _normalsSmoothing);
 
-        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
-		busRenderObject->setIsDynamicObject(true);
+        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel, nodeToSkip, true), busModule.sceneObject);
+		//busRenderObject->setIsDynamicObject(true);
 
 
         // Tworzenie fizycznego obiektu karoserii
@@ -1053,9 +1053,9 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		displaySceneObject->setRotation(rotation);
 		busModule.sceneObject->addChild(displaySceneObject);
 
-		Material material;
-		material.shininess = 96;
-		material.shader = SOLID_EMISSIVE_MATERIAL;
+		Material* material = new Material;
+		material->shininess = 96;
+		material->shader = SOLID_EMISSIVE_MATERIAL;
 		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
 		displayRenderObject->init();
 		displayRenderObject->setIsDynamicObject(true);

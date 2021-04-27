@@ -177,7 +177,7 @@ void Desktop::setLightBacklightingState(DesktopLightType type, bool isEnable)
 
     for (int i = 0; i < light.modelNode->getMeshesCount(); ++i)
     {
-        _desktopRenderObject->getMaterial(light.modelNode->getMesh(i)->materialIndex)->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
+        light.modelNode->getMesh(i)->material->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
     }
 }
 
@@ -196,7 +196,7 @@ void Desktop::setLightState(DesktopLightType type, bool isEnable)
 
     for (int i = 0; i < light.modelNode->getMeshesCount(); ++i)
     {
-        _desktopRenderObject->getMaterial(light.modelNode->getMesh(i)->materialIndex)->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
+        light.modelNode->getMesh(i)->material->emissiveColor += glm::vec4(color.r, color.g, color.b, 0.0f);
     }
 }
 

@@ -1,36 +1,65 @@
 #include "ModelNode.h"
 
+#include "GraphicsManager.h"
+#include "MirrorComponent.h"
 
-ModelNode::ModelNode(StaticModelNode* staticModelNode, ModelNode* parent)
+#include "../Utils/Helpers.hpp"
+
+
+ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, ModelNode* parent)
 {
     _name = staticModelNode->name;
 	_aabb = &(staticModelNode->aabb);
     _transformNode = staticModelNode->transform;
 
-    _meshes = staticModelNode->meshes;
-    _meshesCount = staticModelNode->meshesCount;
+    for (int i = 0; i < staticModelNode->meshesCount; ++i)
+    {
+        const StaticModelMesh& mesh = staticModelNode->meshes[i];
+
+        Material* material = staticModel->getMaterial(mesh.materialIndex);
+        if (material->requireSeparateInstance)
+        {
+            staticModel->getMaterials().push_back(new Material(*material));
+            material = staticModel->getMaterial(staticModel->getMaterialsCount() - 1);
+
+            if (material->shader == MIRROR_MATERIAL)
+            {
+                MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(renderObject->getSceneObject(), material->mirrorName);
+                if (mirrorComponent != NULL)
+                {
+                    material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+                }
+                else
+                {
+                    GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(material);
+                }
+            }
+        }
+        _meshes.push_back(new ModelNodeMesh(mesh.vbo, mesh.ibo, mesh.firstVertex, mesh.firstVertexInVbo, mesh.indicesCount, material));
+    }
 
     _parent = parent;
-    _childrenCount = staticModelNode->children.size();
-    _children = new ModelNode*[_childrenCount];
 
-    for (int i = 0; i < _childrenCount; ++i)
+    for (int i = 0; i < staticModelNode->children.size(); ++i)
     {
-        _children[i] = new ModelNode(staticModelNode->children[i], this);
+        if (!isVectorContains(nodesToSkip, staticModelNode->children[i]->name))
+        {
+            _children.push_back(new ModelNode(staticModel, staticModelNode->children[i], nodesToSkip, renderObject, this));
+        }
     }
 }
 
 
 ModelNode::~ModelNode()
 {
-    if (_children)
+    for (int i = 0; i < _meshes.size(); ++i)
     {
-        for (int i = 0; i < _childrenCount; ++i)
-        {
-            delete _children[i];
-        }
+        delete _meshes[i];
+    }
 
-        delete[] _children;
+    for (int i = 0; i < _children.size(); ++i)
+    {
+        delete _children[i];
     }
 }
 
@@ -73,15 +102,15 @@ glm::mat4& ModelNode::getNormalMatrix()
 }
 
 
-StaticModelMesh* ModelNode::getMesh(unsigned int i)
+ModelNodeMesh* ModelNode::getMesh(unsigned int i)
 {
-    return &_meshes[i];
+    return _meshes[i];
 }
 
 
 unsigned int ModelNode::getMeshesCount()
 {
-    return _meshesCount;
+    return _meshes.size();
 }
 
 
@@ -91,7 +120,7 @@ ModelNode* ModelNode::getParent()
 }
 
 
-ModelNode** ModelNode::getChildren()
+std::vector<ModelNode*>& ModelNode::getChildren()
 {
     return _children;
 }
@@ -99,5 +128,5 @@ ModelNode** ModelNode::getChildren()
 
 unsigned int ModelNode::getChildrenCount()
 {
-    return _childrenCount;
+    return _children.size();
 }

@@ -309,7 +309,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 
 			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
 
-			for (int j = 0; j < renderComponent->getMaterialsCount(i); ++j)
+			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
 			{
 				Material* material = renderComponent->getModel(i)->getMaterial(j);
 

@@ -292,6 +292,6 @@ void DisplayComponent::init()
 {
 	RenderObject* renderObject = static_cast<RenderObject*>(_object->getComponent(CT_RENDER_OBJECT));
 
-	renderObject->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(1);
-	renderObject->getMaterial(0)->emissiveTexture = _displayRenderTexture->getTexture(0);
+	renderObject->getModel()->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(1);
+	renderObject->getModel()->getMaterial(0)->emissiveTexture = _displayRenderTexture->getTexture(0);
 }

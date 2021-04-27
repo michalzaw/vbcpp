@@ -56,7 +56,7 @@ namespace vbEditor
 			Logger::info("modelFileName: " + modelFileName);
 			Logger::info("materialXmlFileName: " + materialXmlFileName);
 			Logger::info("objectDirPath: " + objectDirPath);
-			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getMaterial(0), currentRenderObject->getMaterialsCount(), objectDirPath);
+			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getModel()->getMaterials(), objectDirPath);
 
 			isMaterialModified = false;
 		}

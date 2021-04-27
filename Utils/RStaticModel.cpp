@@ -1,14 +1,13 @@
 #include "RStaticModel.h"
 
 
-RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, Material* materials, unsigned int materialsCount
-                           , GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize)
+RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
+                           GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize)
     : Resource(RT_MODEL, path)
 {
     _rootNode = rootNode;
 
     _materials = materials;
-    _materialsCount = materialsCount;
 
     _collisionMesh = collisionMesh;
     _collisionMeshSize = collisionMeshSize;
@@ -27,9 +26,9 @@ RStaticModel::~RStaticModel()
         delete _rootNode;
     }
 
-    if (_materials)
+    for (int i = 0; i < _materials.size(); ++i)
     {
-        delete[] _materials;
+        delete _materials[i];
     }
 
     if (_collisionMesh)
@@ -130,10 +129,16 @@ StaticModelMesh* RStaticModel::getMesh(unsigned int i)
 }*/
 
 
+std::vector<Material*>& RStaticModel::getMaterials()
+{
+    return _materials;
+}
+
+
 Material* RStaticModel::getMaterial(unsigned int i)
 {
-    if (i < _materialsCount)
-        return &_materials[i];
+    if (i < _materials.size())
+        return _materials[i];
     else
         return NULL;
 }
@@ -141,7 +146,7 @@ Material* RStaticModel::getMaterial(unsigned int i)
 
 unsigned int RStaticModel::getMaterialsCount()
 {
-    return _materialsCount;
+    return _materials.size();
 }
 
 

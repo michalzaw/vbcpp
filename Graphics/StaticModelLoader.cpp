@@ -17,13 +17,13 @@ StaticModelLoader::StaticModelLoader(bool normalsSmoothing)
 
 void StaticModelLoader::loadAllMaterials()
 {
-    _materialsCount = _assimpScene->mNumMaterials;
-	_materials = new Material[_materialsCount];
-	for (int i = 0; i < _materialsCount; ++i)
+    _materials.clear();
+
+	for (int i = 0; i < _assimpScene->mNumMaterials; ++i)
     {
         aiString materialName;
         _assimpScene->mMaterials[i]->Get(AI_MATKEY_NAME, materialName);
-        _materials[i] = _materialLoader->loadMaterial(materialName.C_Str(), _texturesPath);
+        _materials.push_back(_materialLoader->loadMaterial(materialName.C_Str(), _texturesPath));
     }
 }
 
@@ -188,7 +188,7 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
         }
 
         // create mesh
-        meshes[meshesIndex].setMeshData(vertices, meshVertices.size(), indices, meshIndices.size(), materialIndexInScene, _materials[materialIndexInScene].shader);
+        meshes[meshesIndex].setMeshData(vertices, meshVertices.size(), indices, meshIndices.size(), materialIndexInScene, _materials[materialIndexInScene]->shader);
 
         meshesIndex++;
     }
@@ -249,7 +249,7 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
         colMesh[i] = _collisionMesh[i];
     }
 
-    RStaticModel* model = new RStaticModel(fileName, rootNode, _materials, _materialsCount, GL_TRIANGLES, colMesh, _collisionMesh.size());
+    RStaticModel* model = new RStaticModel(fileName, rootNode, _materials, GL_TRIANGLES, colMesh, _collisionMesh.size());
 
     _materialLoader->closeFile();
 	_collisionMesh.clear();
@@ -354,7 +354,8 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
 
 
     StaticModelMesh* meshes = new StaticModelMesh[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
-    Material* materials = new Material[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
+    //Material* materials = new Material[!isCollisionMeshExist ? meshesCount : (meshesCount - 1)];
+    std::vector<Material*> materials;
 
     MaterialLoader matLoader;
 	matLoader.openFile(materialXmlFileName.c_str());
@@ -383,9 +384,9 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
             indices[j] = meshesIndices[i][j];
         }
 
-        materials[meshCounter] = matLoader.loadMaterial(materialName.C_Str(), texturesPath);
+        materials.push_back(matLoader.loadMaterial(materialName.C_Str(), texturesPath));
 
-        meshes[meshCounter].setMeshData(vertices, meshesVertices[i].size(), indices, meshesIndices[i].size(), meshCounter, materials[meshCounter].shader);
+        meshes[meshCounter].setMeshData(vertices, meshesVertices[i].size(), indices, meshesIndices[i].size(), meshCounter, materials[meshCounter]->shader);
 
         ++meshCounter;
     }
@@ -411,7 +412,7 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
     rootNode->meshesCount = !isCollisionMeshExist ? meshesCount : (meshesCount - 1);
     rootNode->parent = NULL;
 
-    RStaticModel* model = new RStaticModel(fileName, rootNode, materials, rootNode->meshesCount, GL_TRIANGLES, colMesh, collisionMesh.size());
+    RStaticModel* model = new RStaticModel(fileName, rootNode, materials, GL_TRIANGLES, colMesh, collisionMesh.size());
 
     return model;
 }

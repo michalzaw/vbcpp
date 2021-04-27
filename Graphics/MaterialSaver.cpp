@@ -146,12 +146,17 @@ void saveMaterial(XMLElement* materialsElement, XMLDocument& doc, Material* mate
 		matElement->SetAttribute("mirror_name", material->mirrorName.c_str());
 	}
 
+	if (material->requireSeparateInstance)
+	{
+		matElement->SetAttribute("requireSeparateInstance", "true");
+	}
+
 	materialsElement->InsertEndChild(matElement);
 }
 
 namespace MaterialSaver
 {
-	void saveMaterials(std::string fileName, Material* materials, unsigned int materialsCount, std::string texPath)
+	void saveMaterials(std::string fileName, std::vector<Material*>& materials, std::string texPath)
 	{
 		Logger::info("Saving materials. Path: " + fileName);
 		XMLDocument doc;
@@ -162,9 +167,9 @@ namespace MaterialSaver
 		XMLElement* rootNode = doc.NewElement(XML_MATERIAL_ROOT);
 		doc.InsertEndChild(rootNode);
 
-		for (int i = 0; i < materialsCount; ++i)
+		for (int i = 0; i < materials.size(); ++i)
 		{
-			saveMaterial(rootNode, doc, &materials[i], texPath);
+			saveMaterial(rootNode, doc, materials[i], texPath);
 		}
 
 		XMLError err = doc.SaveFile(fileName.c_str());

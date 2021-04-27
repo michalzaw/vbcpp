@@ -114,11 +114,11 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
     MaterialLoader matLoader;
     matLoader.openFile(materialFileName.c_str());
 
-    Material* materials = new Material[1];
-    materials[0] = matLoader.loadMaterial(materialName, texturePath);
+    std::vector<Material*> materials;
+    materials.push_back(matLoader.loadMaterial(materialName, texturePath));
 
     StaticModelMesh* meshes = new StaticModelMesh[1];
-    meshes[0].setMeshData(vertices, verticesSize, indices, indicesSize, 0, materials[0].shader);
+    meshes[0].setMeshData(vertices, verticesSize, indices, indicesSize, 0, materials[0]->shader);
 
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = "terrain";
@@ -126,7 +126,7 @@ RStaticModel* TerrainLoader::loadTerFile(const char* fileName, std::string mater
     modelNode->meshesCount = 1;
     modelNode->parent = NULL;
 
-    RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, collisionMeshSize);
+    RStaticModel* model = new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, collisionMeshSize);
 
     return model;
 }
@@ -138,7 +138,7 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 {
     MaterialLoader matLoader;
     matLoader.openFile(materialFileName.c_str());
-    Material material = matLoader.loadMaterial(materialName, texturePath);
+    Material* material = matLoader.loadMaterial(materialName, texturePath);
 
 
     const float cellSize = 1.0f;
@@ -190,8 +190,8 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
 
             terrainVertices[z * width + x].position = vertexPosition;
-            terrainVertices[z * width + x].texCoord = glm::vec2(static_cast<float>(x) / width * material.scale.x + material.offset.x,
-                                                                static_cast<float>(z) / height * material.scale.y + material.offset.y);
+            terrainVertices[z * width + x].texCoord = glm::vec2(static_cast<float>(x) / width * material->scale.x + material->offset.x,
+                                                                static_cast<float>(z) / height * material->scale.y + material->offset.y);
             terrainVertices[z * width + x].normal = glm::vec3(0.0f, 0.0f, 0.0f);
             terrainVertices[z * width + x].tangent = glm::vec3(0.0f, 0.0f, 0.0f);
             terrainVertices[z * width + x].bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -339,9 +339,9 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
 
     StaticModelMesh* meshes = new StaticModelMesh[1];
-    Material* materials = new Material[1];
-    materials[0] = material;
-    meshes[0].setMeshData(vert, v.size(), ind, in.size(), 0, materials[0].shader);
+    std::vector<Material*> materials;
+    materials.push_back(material);
+    meshes[0].setMeshData(vert, v.size(), ind, in.size(), 0, materials[0]->shader);
 
     StaticModelNode* modelNode = new StaticModelNode;
     modelNode->name = "terrain";
@@ -349,7 +349,7 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
     modelNode->meshesCount = 1;
     modelNode->parent = NULL;
 
-    RStaticModel* model = new RStaticModel("", modelNode, materials, 1, GL_TRIANGLES, collisionMesh, indicesSize);
+    RStaticModel* model = new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, indicesSize);
 
 
 	if (heightmapData != NULL)

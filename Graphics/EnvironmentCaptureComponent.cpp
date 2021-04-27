@@ -86,7 +86,7 @@ void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
 	_prefilterEnvMapShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/prefilterEnvironment.frag");
 
 
-	_cube = new Cube(1, Material());
+	_cube = new Cube(1, new Material);
 	_cube->init();
 }
 
@@ -122,7 +122,7 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		StaticModelMesh* cubeMesh = _cube->getModelRootNode()->getMesh(0);
+		ModelNodeMesh* cubeMesh = _cube->getModelRootNode()->getMesh(0);
 		cubeMesh->vbo->bind();
 		cubeMesh->ibo->bind();
 
@@ -185,7 +185,7 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-			StaticModelMesh * cubeMesh = _cube->getModelRootNode()->getMesh(0);
+			ModelNodeMesh * cubeMesh = _cube->getModelRootNode()->getMesh(0);
 			cubeMesh->vbo->bind();
 			cubeMesh->ibo->bind();
 

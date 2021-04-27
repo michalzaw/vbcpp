@@ -90,10 +90,10 @@ namespace RoadGenerator
 				}
 				lastPoint = centerPoint;
 
-				vertex1.s = 1.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;
-				vertex1.t = distanceFromLaneBegin * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;
-				vertex2.s = 0.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;
-				vertex2.t = distanceFromLaneBegin * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;
+				vertex1.s = 1.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;
+				vertex1.t = distanceFromLaneBegin * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;
+				vertex2.s = 0.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;
+				vertex2.t = distanceFromLaneBegin * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;
 
 				lanesVerticesArray[i].push_back(vertex1);
 				lanesVerticesArray[i].push_back(vertex2);
@@ -202,11 +202,11 @@ namespace RoadGenerator
 			}
 			else if (isGame)
 			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader);
+				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader);
 			}
 			else
 			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
+				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 			}
 		}
 
@@ -237,10 +237,10 @@ namespace RoadGenerator
 		int lanesCount = roadLanes.size();
 
 		// materials
-		Material* materials = new Material[lanesCount];
+		std::vector<Material*> materials;
 		for (int i = 0; i < lanesCount; ++i)
 		{
-			materials[i] = roadLanes[i].material;
+			materials.push_back(new Material(*roadLanes[i].material));
 		}
 
 		StaticModelNode* modelNode = new StaticModelNode;
@@ -249,7 +249,7 @@ namespace RoadGenerator
 		modelNode->meshesCount = lanesCount;
 		modelNode->parent = nullptr;
 
-		return new RStaticModel("", modelNode, materials, lanesCount, GL_TRIANGLES, collisionMesh, collistionMeshSize);
+		return new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, collistionMeshSize);
 	}
 
 	RStaticModel* updateOldModel(RStaticModel* oldModel, glm::vec3* collisionMesh, int collistionMeshSize)

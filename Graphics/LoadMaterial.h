@@ -35,7 +35,7 @@ class MaterialLoader
         void openFile(const char* fileName);
         void closeFile();
 
-        Material loadMaterial(std::string materialName, std::string texPath);
+        Material* loadMaterial(std::string materialName, std::string texPath);
 
         static std::string createMaterialFileName(std::string modelFileName)
         {

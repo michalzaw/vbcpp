@@ -112,7 +112,7 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 
 	if (renderObject)
 	{
-		std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
+		std::string skyboxTexturePaths = renderObject->getModel()->getMaterial(0)->diffuseTexture->getPath();
 		skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
 	}
 }
