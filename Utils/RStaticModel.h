@@ -169,6 +169,26 @@ struct StaticModelNode
         return NULL;
     }
 
+    StaticModelNode* getNodeByName(const std::string& name)
+    {
+        for (StaticModelNode* child : children)
+        {
+            if (child->name == name)
+            {
+                return child;
+            }
+            else
+            {
+                StaticModelNode* node = child->getNodeByName(name);
+                if (node != nullptr)
+                {
+                    return node;
+                }
+            }
+        }
+
+        return nullptr;
+    }
 };
 
 
@@ -202,6 +222,7 @@ class RStaticModel : public Resource
         ~RStaticModel();
 
         StaticModelNode* getRootNode();
+        StaticModelNode* getNodeByName(const std::string& name);
 
         std::vector<Material*>& getMaterials();
         Material*       getMaterial(unsigned int i);

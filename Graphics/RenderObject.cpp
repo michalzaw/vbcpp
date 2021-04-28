@@ -33,7 +33,25 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
 
     if (model != NULL)
     {
-        setModel(model, nodesToSkip);
+        setModel(model, nodesToSkip, model->getRootNode());
+    }
+}
+
+
+RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject)
+    : Component(CT_RENDER_OBJECT),
+    _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isCalculatedAABB(false)
+{
+    #ifdef _DEBUG_MODE
+        printf("*** RenderObject: Konstruktor\n");
+    #endif // _DEBUG_MODE
+
+    _modelsDatas.resize(1);
+
+    if (model != NULL)
+    {
+        setModel(model, modelNode);
     }
 }
 
@@ -100,11 +118,20 @@ void RenderObject::calculateNewAABB()
 
 void RenderObject::setModel(RStaticModel* model, int lod)
 {
-    setModel(model, std::vector<std::string>{}, lod);
+    setModel(model, std::vector<std::string>{}, model->getRootNode(), lod);
 }
 
 
-void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, int lod)
+void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, int lod)
+{
+    setModel(model, std::vector<std::string>{}, modelNode, lod);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setPosition(0.0f, 0.0f, 0.0f);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setRotation(0.0f, 0.0f, 0.0f);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setScale(1.0f, 1.0f, 1.0f);
+}
+
+
+void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod)
 {
     if (lod <= _modelsDatas.size())
     {
@@ -113,7 +140,7 @@ void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>&
 
     _modelsDatas[lod].model = model;
 
-    _modelsDatas[lod].modelRootNode = new ModelNode(model, model->getRootNode(), nodesToSkip, this);
+    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this);
 
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {

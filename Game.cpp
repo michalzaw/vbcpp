@@ -10,6 +10,7 @@
 #include "Game/GameConfig.h"
 #include "Game/MainGameScene.h"
 #include "Game/MenuSelectBusScene.h"
+#include "Game/TestScene.h"
 
 #include "Graphics/Renderer.h"
 
@@ -78,7 +79,7 @@ void Game::initializeEngineSystems()
 	renderer.setDayNightRatio(1.0f);
 	renderer.setAlphaToCoverage(true);
 	renderer.setExposure(1.87022f);
-	renderer.setToneMappingType(TMT_ACES);
+	renderer.setToneMappingType(TMT_CLASSIC);
 	renderer.t = 0;
 
 	// unused
@@ -105,8 +106,9 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
+	//_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
 	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
+	_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
 	_gameScene->initialize();
 }
 

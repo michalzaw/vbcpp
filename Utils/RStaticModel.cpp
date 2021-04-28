@@ -114,6 +114,17 @@ StaticModelNode* RStaticModel::getRootNode()
 }
 
 
+StaticModelNode* RStaticModel::getNodeByName(const std::string& name)
+{
+    if (_rootNode->name == name)
+    {
+        return _rootNode;
+    }
+
+    return _rootNode->getNodeByName(name);
+}
+
+
 /*unsigned int RStaticModel::getMeshesCount()
 {
     return _meshesCount;
