@@ -157,7 +157,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         std::string modelPath = _busPath + modelFile;
 
         std::vector<std::string> nodeToSkip;
-        loadModelNodes(moduleElement, modelPath, _texturePath, nodeToSkip, _cachedModelNodes);
+        fetchOptionalModelNodes(moduleElement, modelPath, _texturePath, nodeToSkip);
 
         if (nodeToSkip.empty())
             _currentBusModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
@@ -165,7 +165,6 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
             _currentBusModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
 
         RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(_currentBusModel, nodeToSkip, true), busModule.sceneObject);
-		//busRenderObject->setIsDynamicObject(true);
 
 
         // Tworzenie fizycznego obiektu karoserii
@@ -224,8 +223,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 }
 
 
-void BusLoader::loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
-                               std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes)
+void BusLoader::fetchOptionalModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames)
 {
     XMLElement* doorElement = moduleElement->FirstChildElement("Door");
     while (doorElement != nullptr)
@@ -244,19 +242,6 @@ void BusLoader::loadModelNodes(XMLElement* moduleElement, std::string modelPath,
             modelNodesNames.push_back(armModelNodeName);
 
         doorElement = doorElement->NextSiblingElement("Door");
-    }
-
-    if (!modelNodesNames.empty())
-    {
-        std::vector<Transform> loadedNodesTransformsInModel;
-        std::vector<RStaticModel*> loadedNodes;
-
-        ResourceManager::getInstance().loadModelWithHierarchyOnlyNodes(modelPath, texturePath, modelNodesNames, loadedNodesTransformsInModel, loadedNodes, _normalsSmoothing);
-
-        for (int i = 0; i < modelNodesNames.size(); ++i)
-        {
-            modelNodes[modelNodesNames[i]] = ModelNodeAndTransform(loadedNodes[i], loadedNodesTransformsInModel[i]);
-        }
     }
 }
 

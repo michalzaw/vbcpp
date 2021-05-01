@@ -59,8 +59,7 @@ class BusLoader
         void loadBusDescription(XMLElement* busElement);
         bool loadBusModules(XMLElement* busElement);
 
-        void loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
-                            std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes);
+        void fetchOptionalModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames);
 
         void loadWheels(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& busModule);
