@@ -294,6 +294,17 @@ PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(glm
     return b;
 }
 
+PhysicalBodyRaycastVehicle* PhysicsManager::createPhysicalBodyRayCastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyRaycastVehicle* b = new PhysicalBodyRaycastVehicle(vertices, mass, this);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
 
 PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel)
 {

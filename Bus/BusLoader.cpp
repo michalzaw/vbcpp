@@ -143,6 +143,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
     while (moduleElement != nullptr)
     {
         std::string modelFile = XmlUtils::getAttributeString(moduleElement, "model");
+        std::string collisionNodeName = XmlUtils::getAttributeStringOptional(moduleElement, "collisionModelNode");
         glm::vec3 modulePosition = XmlUtils::getAttributeVec3Optional(moduleElement, "position");
         float mass = XmlUtils::getAttributeFloat(moduleElement, "mass");
 
@@ -168,22 +169,29 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
 
         // Tworzenie fizycznego obiektu karoserii
-
-        if (_currentBusModel->getCollisionMeshSize() > 0)
+        if (!collisionNodeName.empty())
         {
-            int wheelCollidesWith = COL_TERRAIN | COL_ENV;
+            std::vector<glm::vec3> collisionMeshVertices;
 
+            StaticModelNode* collisionNode = _currentBusModel->getNodeByName(collisionNodeName);
+            collisionNode->getVerticesArray(collisionMeshVertices);
+
+            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(collisionMeshVertices, mass, COL_BUS, _busCollidesWith);
+        }
+        else if (_currentBusModel->getCollisionMeshSize() > 0)
+        {
             busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(_currentBusModel->getCollisionMesh(), _currentBusModel->getCollisionMeshSize(), mass, COL_BUS, _busCollidesWith);
-            busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, _wheelCollidesWith);
-            busModule.rayCastVehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
-
-            busModule.sceneObject->addComponent(busModule.rayCastVehicle);
         }
         else
         {
             Logger::error("Collision mesh not found in bus model!\n");
             return false;
         }
+
+        busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, _wheelCollidesWith);
+        busModule.rayCastVehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
+
+        busModule.sceneObject->addComponent(busModule.rayCastVehicle);
 
 
         // Loading other bus module elements
@@ -225,12 +233,18 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
 void BusLoader::fetchOptionalModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames)
 {
+    std::string collisionNodeName = XmlUtils::getAttributeStringOptional(moduleElement, "collisionModelNode");
+
+    if (!collisionNodeName.empty())
+        modelNodesNames.push_back(collisionNodeName);
+
     XMLElement* doorElement = moduleElement->FirstChildElement("Door");
     while (doorElement != nullptr)
     {
         std::string doorModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "modelNode");
         std::string doorCollisionModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "collisionModelNode");
         std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
+        std::string armCollisionModelNode = XmlUtils::getAttributeStringOptional(doorElement, "armCollisionModelNode");
 
         if (!doorModelNodeName.empty())
             modelNodesNames.push_back(doorModelNodeName);
@@ -240,6 +254,9 @@ void BusLoader::fetchOptionalModelNodes(XMLElement* moduleElement, std::string m
 
         if (!armModelNodeName.empty())
             modelNodesNames.push_back(armModelNodeName);
+
+        if (!armCollisionModelNode.empty())
+            modelNodesNames.push_back(armCollisionModelNode);
 
         doorElement = doorElement->NextSiblingElement("Door");
     }
