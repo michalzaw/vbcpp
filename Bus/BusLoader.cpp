@@ -16,7 +16,8 @@ using namespace tinyxml2;
 
 BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager, SoundManager* soundManager)
     : _sMgr(sceneManager), _pMgr(physicsManager), _sndMgr(soundManager),
-    _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV)
+    _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
+    _currentBusModel(nullptr)
 {
 
 }
@@ -158,23 +159,22 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         std::vector<std::string> nodeToSkip;
         loadModelNodes(moduleElement, modelPath, _texturePath, nodeToSkip, _cachedModelNodes);
 
-        RStaticModel* busModel;
         if (nodeToSkip.empty())
-            busModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
+            _currentBusModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         else
-            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath/*, nodeToSkip*/, _normalsSmoothing);
+            _currentBusModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
 
-        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel, nodeToSkip, true), busModule.sceneObject);
+        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(_currentBusModel, nodeToSkip, true), busModule.sceneObject);
 		//busRenderObject->setIsDynamicObject(true);
 
 
         // Tworzenie fizycznego obiektu karoserii
 
-        if (busModel->getCollisionMeshSize() > 0)
+        if (_currentBusModel->getCollisionMeshSize() > 0)
         {
             int wheelCollidesWith = COL_TERRAIN | COL_ENV;
 
-            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), mass, COL_BUS, _busCollidesWith);
+            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(_currentBusModel->getCollisionMesh(), _currentBusModel->getCollisionMeshSize(), mass, COL_BUS, _busCollidesWith);
             busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, _wheelCollidesWith);
             busModule.rayCastVehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
 
@@ -231,10 +231,14 @@ void BusLoader::loadModelNodes(XMLElement* moduleElement, std::string modelPath,
     while (doorElement != nullptr)
     {
         std::string doorModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "modelNode");
+        std::string doorCollisionModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "collisionModelNode");
         std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
 
         if (!doorModelNodeName.empty())
             modelNodesNames.push_back(doorModelNodeName);
+
+        if (!doorCollisionModelNodeName.empty())
+            modelNodesNames.push_back(doorCollisionModelNodeName);
 
         if (!armModelNodeName.empty())
             modelNodesNames.push_back(armModelNodeName);
@@ -650,32 +654,39 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
 
         std::string doorModelName = XmlUtils::getAttributeStringOptional(doorElement, "model");
         std::string doorModelNodeName;
+        std::string doorCollisionModelNode;
         if (doorModelName.empty())
         {
             isDoorLoadedFromSeparateModel = false;
             doorModelNodeName = XmlUtils::getAttributeString(doorElement, "modelNode");
+            doorCollisionModelNode = XmlUtils::getAttributeString(doorElement, "collisionModelNode");
         }
 
 
         glm::vec3 doorPosition;
         glm::vec3 doorRotation;
         RStaticModel* doorModel;
+        StaticModelNode* doorModelNode;
+        StaticModelNode* doorCollisionNode;
         if (isDoorLoadedFromSeparateModel)
         {
             std::string doorModelPath = _busPath + doorModelName;
 
             doorModel = ResourceManager::getInstance().loadModel(doorModelPath, _texturePath, _normalsSmoothing);
+            doorModelNode = doorModel->getRootNode();
+            doorCollisionNode = nullptr; // tymczasowe - zamiast tego bedzie brany collisionMesh utworzony na podstawie materialu
 
             doorPosition = XmlUtils::getAttributeVec3(doorElement, "position");
             doorRotation = XmlUtils::getAttributeVec3Optional(doorElement, "rotation");
         }
         else
         {
-            doorModel = _cachedModelNodes[doorModelNodeName].model;
+            doorModel = _currentBusModel;
+            doorModelNode = doorModel->getNodeByName(doorModelNodeName);
+            doorCollisionNode = doorModel->getNodeByName(doorCollisionModelNode);
 
-            Transform& doorTransform = _cachedModelNodes[doorModelNodeName].transform;
-            doorPosition = doorTransform.getPosition();
-            doorRotation = doorTransform.getRotation();
+            doorPosition = doorModelNode->transform.getPosition();
+            doorRotation = doorModelNode->transform.getRotation();
         }
 
 
@@ -715,7 +726,7 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
         }
         else if (doorType == "classic")
         {
-            loadDoorClassic(doorElement, busModule, doorObj, doorModel, mass, group, openSoundComp, closeSoundComp, isDoorLoadedFromSeparateModel);
+            loadDoorClassic(doorElement, busModule, doorObj, doorModel, doorModelNode, doorCollisionNode, mass, group, openSoundComp, closeSoundComp, isDoorLoadedFromSeparateModel);
         }
         else
         {
@@ -859,8 +870,8 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 }
 
 
-void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
-                                SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel)
+void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, StaticModelNode* doorModelNode, StaticModelNode* doorCollisionNode,
+                                float mass, char group, SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel)
 {
     float velocity = XmlUtils::getAttributeFloatOptional(doorElement, "velocity", 1.0f);
     std::string rotDir = XmlUtils::getAttributeStringOptional(doorElement, "rotationDir", "CW");
@@ -880,33 +891,39 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
 
     std::string armModelName = XmlUtils::getAttributeStringOptional(doorElement, "armModel");
     std::string armModelNodeName;
+    std::string armCollisionModelNode;
     if (armModelName.empty())
     {
         isArmLoadedFromSeparateMode = false;
         armModelNodeName = XmlUtils::getAttributeString(doorElement, "armModelNode");
+        armCollisionModelNode = XmlUtils::getAttributeStringOptional(doorElement, "armCollisionModelNode");
     }
 
 
-    RStaticModel* armModel;
     glm::vec3 armPosition;
     glm::vec3 armRotation;
-
+    RStaticModel* armModel;
+    StaticModelNode* armModelNode;
+    StaticModelNode* armCollisionNode;
     if (isArmLoadedFromSeparateMode)
     {
         std::string armModelPath = _busPath + armModelName;
 
         armModel = ResourceManager::getInstance().loadModel(armModelPath, _texturePath, _normalsSmoothing);
+        armModelNode = armModel->getRootNode();
+        armCollisionNode = nullptr; // tymczasowe - zamiast tego bedzie brany collisionMesh utworzony na podstawie materialu
 
         armPosition = XmlUtils::getAttributeVec3(doorElement, "armPosition");
         armRotation = XmlUtils::getAttributeVec3(doorElement, "armRotation");
     }
     else
     {
-        armModel = _cachedModelNodes[armModelNodeName].model;
+        armModel = _currentBusModel;
+        armModelNode = armModel->getNodeByName(armModelNodeName);
+        armCollisionNode = armModel->getNodeByName(armCollisionModelNode);
 
-        Transform& armTransform = _cachedModelNodes[armModelNodeName].transform;
-        armPosition = armTransform.getPosition();
-        armRotation = armTransform.getRotation();
+        armPosition = armModelNode->transform.getPosition();
+        armRotation = armModelNode->transform.getRotation();
     }
 
 
@@ -914,18 +931,57 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     armObject->setPosition(armPosition);
     armObject->setRotation(armRotation);
 
-    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel), armObject);
+    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel, armModelNode), armObject);
 	armRenderObject->setIsDynamicObject(true);
 
-    PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, COL_NOTHING);
+    PhysicalBody* armBody;
+
+    if (isArmLoadedFromSeparateMode)
+    {
+        glm::vec3* armCollisionMesh = armModel->getCollisionMesh();
+        unsigned int armCollisionMeshSize = armModel->getCollisionMeshSize();
+
+        armBody = _pMgr->createPhysicalBodyConvexHull(armCollisionMesh, armCollisionMeshSize, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else if (armCollisionNode != nullptr)
+    {
+        std::vector<glm::vec3> armCollisionMeshVector;
+        armCollisionNode->getVerticesArray(armCollisionMeshVector);
+
+        armBody = _pMgr->createPhysicalBodyConvexHull(armCollisionMeshVector, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else
+    {
+        armBody = _pMgr->createPhysicalBodyConvexHull(std::vector<glm::vec3>{}, armMass, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyConvexHull((glm::vec3*)foo, 0, mass, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyCylinder(btVector3(0.1, 2.0, 0.1), mass, Y_AXIS, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyBox(btVector3(0.3, 1.0, 0.3), mass, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, COL_NOTHING);
+    }
+
     armObject->addComponent(armBody);
 
 
     // door object
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel, doorModelNode), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
-    PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
+    PhysicalBodyConvexHull* doorBody;
+    if (doorCollisionNode == nullptr)
+    {
+        glm::vec3* doorCollisionMesh = doorModel->getCollisionMesh();
+        unsigned int doorCollisionMeshSize = doorModel->getCollisionMeshSize();
+
+        doorBody = _pMgr->createPhysicalBodyConvexHull(doorCollisionMesh, doorCollisionMeshSize, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else
+    {
+        std::vector<glm::vec3> doorCollisionMeshVector;
+        doorCollisionNode->getVerticesArray(doorCollisionMeshVector);
+
+        doorBody = _pMgr->createPhysicalBodyConvexHull(doorCollisionMeshVector, mass, COL_DOOR, _doorCollidesWith);
+    }
+
     doorObj->addComponent(doorBody);
 
 

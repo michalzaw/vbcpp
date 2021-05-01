@@ -2,7 +2,7 @@
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
-_vertices(vertices), _vertexCount(vertexCount), _verticesvec(0)
+_vertices(vertices), _vertexCount(vertexCount), _verticesvec(nullptr)
 {
     updateBody();
 }
@@ -10,10 +10,19 @@ _vertices(vertices), _vertexCount(vertexCount), _verticesvec(0)
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
-_verticesvec(vertices), _vertexCount(vertexCount), _vertices(0)
+_verticesvec(vertices), _vertexCount(vertexCount), _vertices(nullptr)
 {
     updateBody();
 }
+
+
+PhysicalBodyConvexHull::PhysicalBodyConvexHull(std::vector<glm::vec3> vertices, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
+	: PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
+	_verticesVector(vertices), _verticesvec(nullptr), _vertexCount(0), _vertices(nullptr)
+{
+	updateBody();
+}
+
 
 
 PhysicalBodyConvexHull::~PhysicalBodyConvexHull()
@@ -31,6 +40,10 @@ void PhysicalBodyConvexHull::updateBody()
 			_collShape.reset(new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex)));//32);
 		else if (_verticesvec)
 			_collShape.reset(new btConvexHullShape((btScalar*)_verticesvec, _vertexCount, sizeof(glm::vec3)));//32);
+		else
+		{
+			_collShape.reset(new btConvexHullShape((btScalar*)_verticesVector.data(), _verticesVector.size(), sizeof(glm::vec3)));
+		}
 
 		/*
 		_collShape = new btConvexHullShape;
@@ -58,6 +71,8 @@ void PhysicalBodyConvexHull::updateBody()
 			shape = new btConvexHullShape((btScalar*)_vertices, _vertexCount, sizeof(Vertex));//32);
 		else if (_verticesvec)
 			shape = new btConvexHullShape((btScalar*)_verticesvec, _vertexCount, sizeof(glm::vec3));//32);
+		else
+			_collShape.reset(new btConvexHullShape((btScalar*)&_verticesVector[0], _verticesVector.size(), sizeof(glm::vec3)));
 
 		btCompoundShape* compoundShape = new btCompoundShape;
 

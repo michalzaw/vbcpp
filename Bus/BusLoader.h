@@ -52,6 +52,8 @@ class BusLoader
 
         BusRaycast* _bus;
 
+        RStaticModel* _currentBusModel;
+
         BusRaycast* loadBusRaycast(XMLElement* busElement);
         void loadEngineAndGearbox(XMLElement* busElement);
         void loadBusDescription(XMLElement* busElement);
@@ -76,8 +78,8 @@ class BusLoader
                             SoundComponent* openSoundComp, SoundComponent* closeSoundComp);
         void loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
                         SoundComponent* openSoundComp, SoundComponent* closeSoundComp);
-        void loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
-                            SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel);
+        void loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, StaticModelNode* doorModelNode, StaticModelNode* doorCollisionNode,
+                            float mass, char group, SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel);
 
         SoundComponent* createSound(SceneObject* soundObject, const SoundDefinition& soundDefinition);
         void createRequireSoundComponents();

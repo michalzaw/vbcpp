@@ -189,6 +189,17 @@ struct StaticModelNode
 
         return nullptr;
     }
+
+    void getVerticesArray(std::vector<glm::vec3>& vertices)
+    {
+        for (int i = 0; i < meshesCount; ++i)
+        {
+            for (int j = 0; j < meshes[i].verticesCount; ++j)
+            {
+                vertices.push_back(meshes[i].vertices[j].position);
+            }
+        }
+    }
 };
 
 

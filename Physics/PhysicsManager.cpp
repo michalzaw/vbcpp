@@ -241,6 +241,17 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* 
     return b;
 }
 
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
+{
+    PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, mass, centerOfMassOffset, centerOfMassOffsetValue);
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
 PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(RStaticModel* model, short collisionGroup, short collisionFilter)
 {
     PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(model);
