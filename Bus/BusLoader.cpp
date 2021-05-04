@@ -954,7 +954,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     }
     else
     {
-        armBody = _pMgr->createPhysicalBodyConvexHull(std::vector<glm::vec3>{}, armMass, COL_DOOR, _doorCollidesWith);
+        armBody = _pMgr->createPhysicalBodyConvexHull(std::vector<glm::vec3>{}, armMass, COL_DOOR, COL_NOTHING);
         //armBody = _pMgr->createPhysicalBodyConvexHull((glm::vec3*)foo, 0, mass, COL_DOOR, _doorCollidesWith);
         //armBody = _pMgr->createPhysicalBodyCylinder(btVector3(0.1, 2.0, 0.1), mass, Y_AXIS, COL_DOOR, _doorCollidesWith);
         //armBody = _pMgr->createPhysicalBodyBox(btVector3(0.3, 1.0, 0.3), mass, COL_DOOR, _doorCollidesWith);
