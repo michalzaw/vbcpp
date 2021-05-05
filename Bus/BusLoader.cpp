@@ -22,7 +22,7 @@ BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager,
 
 }
 
-Bus* BusLoader::loadBus(const std::string& busName)
+Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std::string, std::string>& variables)
 {
     std::string configFileName = GameDirectories::BUSES + busName + "/" + BUS_CONFIG_FILENAME;
 
@@ -45,6 +45,8 @@ Bus* BusLoader::loadBus(const std::string& busName)
 
     _busPath = GameDirectories::BUSES + busName + "/";
     _texturePath = _busPath + textureFolder + "/";
+
+    _variables = variables;
 
     Logger::info("Bus name: " + _objName);
 
@@ -69,6 +71,7 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
     _bus = new BusRaycast();
 
     loadBusDescription(busElement);
+    loadAvailableVariables(busElement);
 
     bool result = loadBusModules(busElement);
     if (!result)
@@ -136,6 +139,25 @@ void BusLoader::loadBusDescription(XMLElement* busElement)
 }
 
 
+void BusLoader::loadAvailableVariables(XMLElement* busElement)
+{
+    XMLElement* variablesElement = busElement->FirstChildElement("Variables");
+    if (variablesElement != nullptr)
+    {
+        for (XMLElement* variableElement = variablesElement->FirstChildElement("Variable"); variableElement != nullptr; variableElement = variableElement->NextSiblingElement("Variable"))
+        {
+            const std::string name = XmlUtils::getAttributeString(variableElement, "name");
+            const std::string defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue");
+            
+            if (_variables.find(name) == _variables.end())
+            {
+                _variables[name] = defaultValue;
+            }
+        }
+    }
+}
+
+
 bool BusLoader::loadBusModules(XMLElement* busElement)
 {
     // Reading bus body configuration
@@ -158,7 +180,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         std::string modelPath = _busPath + modelFile;
 
         std::vector<std::string> nodeToSkip;
-        fetchOptionalModelNodes(moduleElement, modelPath, _texturePath, nodeToSkip);
+        fetchOptionalModelNodes(moduleElement, nodeToSkip);
 
         if (nodeToSkip.empty())
             _currentBusModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
@@ -195,17 +217,8 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
 
         // Loading other bus module elements
-
-        loadWheels(moduleElement, busModule);
-        loadInteriorLights(moduleElement, busModule);
-        loadDriverParams(busElement, busModule);
-        loadSteeringWheel(moduleElement, busModule);
-        loadDesktop(moduleElement, busModule);
-        loadHeadlights(moduleElement, busModule);
-        loadDoors(moduleElement, busModule);
-        loadEnvironmentCaptureComponents(moduleElement, busModule);
-        loadMirrors(moduleElement, busModule);
-		loadDisplays(moduleElement, busModule);
+        loadModuleElements(moduleElement, busElement, busModule);
+        loadModuleConditionalElements(moduleElement, busElement, busModule);
 
         _bus->_modules.push_back(busModule);
 
@@ -231,34 +244,69 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 }
 
 
-void BusLoader::fetchOptionalModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames)
+void BusLoader::fetchOptionalModelNodes(XMLElement* element, std::vector<std::string>& modelNodesNames)
 {
-    std::string collisionNodeName = XmlUtils::getAttributeStringOptional(moduleElement, "collisionModelNode");
+    const int attributesNamesLength = 4;
+    const std::string attributesNames[attributesNamesLength] = {
+        "modelNode",
+        "collisionModelNode",
+        "armModelNode",
+        "armCollisionModelNode"
+    };
 
-    if (!collisionNodeName.empty())
-        modelNodesNames.push_back(collisionNodeName);
-
-    XMLElement* doorElement = moduleElement->FirstChildElement("Door");
-    while (doorElement != nullptr)
+    for (int i = 0; i < attributesNamesLength; ++i)
     {
-        std::string doorModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "modelNode");
-        std::string doorCollisionModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "collisionModelNode");
-        std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
-        std::string armCollisionModelNode = XmlUtils::getAttributeStringOptional(doorElement, "armCollisionModelNode");
+        const char* value = element->Attribute(attributesNames[i].c_str());
+        if (value != nullptr)
+        {
+            modelNodesNames.push_back(value);
+        }
 
-        if (!doorModelNodeName.empty())
-            modelNodesNames.push_back(doorModelNodeName);
+        for (XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
+        {
+            fetchOptionalModelNodes(child, modelNodesNames);
+        }
+    }
+}
 
-        if (!doorCollisionModelNodeName.empty())
-            modelNodesNames.push_back(doorCollisionModelNodeName);
 
-        if (!armModelNodeName.empty())
-            modelNodesNames.push_back(armModelNodeName);
+void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule)
+{
+    loadWheels(moduleElement, busModule);
+    loadInteriorLights(moduleElement, busModule);
+    loadDriverParams(busElement, busModule);
+    loadSteeringWheel(moduleElement, busModule);
+    loadDesktop(moduleElement, busModule);
+    loadHeadlights(moduleElement, busModule);
+    loadDoors(moduleElement, busModule);
+    loadEnvironmentCaptureComponents(moduleElement, busModule);
+    loadMirrors(moduleElement, busModule);
+    loadDisplays(moduleElement, busModule);
+    loadCustomElements(moduleElement, busModule);
+}
 
-        if (!armCollisionModelNode.empty())
-            modelNodesNames.push_back(armCollisionModelNode);
 
-        doorElement = doorElement->NextSiblingElement("Door");
+void BusLoader::loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule)
+{
+    for (XMLElement* conditionalElement = moduleElement->FirstChildElement("ConnditionalElements");
+         conditionalElement != nullptr;
+         conditionalElement = conditionalElement->NextSiblingElement("ConnditionalElements"))
+    {
+        const std::string variable = XmlUtils::getAttributeString(conditionalElement, "variable");
+        const std::string value = XmlUtils::getAttributeString(conditionalElement, "value");
+
+        auto currentVariableValue = _variables.find(variable);
+        if (currentVariableValue != _variables.end())
+        {
+            if (value == currentVariableValue->second)
+            {
+                loadModuleElements(conditionalElement, busElement, busModule);
+            }
+        }
+        else
+        {
+            Logger::error("Variable " + variable + " not exist");
+        }
     }
 }
 
@@ -1128,6 +1176,32 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 
 		displayElement = displayElement->NextSiblingElement("Display");
 	}
+}
+
+
+void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule)
+{
+    XMLElement* childElement = parentElement->FirstChildElement("Element");
+    while (childElement != nullptr)
+    {
+        Logger::info("XML: Custom element");
+
+        std::string modelNodeName = XmlUtils::getAttributeString(childElement, "modelNode");
+
+        StaticModelNode* customElementNode = _currentBusModel->getNodeByName(modelNodeName);
+        if (customElementNode != nullptr)
+        {
+            SceneObject* customElementSceneObject = _sMgr->addSceneObject(modelNodeName);
+            customElementSceneObject->setPosition(customElementNode->transform.getPosition());
+            customElementSceneObject->setRotation(customElementNode->transform.getRotation());
+            customElementSceneObject->setScale(customElementNode->transform.getScale());
+            busModule.sceneObject->addChild(customElementSceneObject);
+
+            RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
+        }
+
+        childElement = childElement->NextSiblingElement("Element");
+    }
 }
 
 

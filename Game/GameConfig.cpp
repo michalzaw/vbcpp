@@ -1,6 +1,7 @@
 #include "GameConfig.h"
 
 #include "../Utils/Strings.h"
+#include "../Utils/XmlUtils.h"
 
 
 void GameConfig::loadGameConfig(const char* filename)
@@ -31,6 +32,7 @@ void GameConfig::loadGameConfig(const char* filename)
         if (strcmp(ename,"Bus") == 0)
         {
             busModel = std::string(child->Attribute("model"));
+            busConfiguration = XmlUtils::getAttributeStringOptional(child, "configuration");
         }
         else
         if (strcmp(ename,"Configuration") == 0)

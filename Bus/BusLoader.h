@@ -48,7 +48,7 @@ class BusLoader
         std::unique_ptr<Gearbox> _gearbox;
         std::unique_ptr<Engine> _engine;
 
-        std::unordered_map<std::string, ModelNodeAndTransform> _cachedModelNodes;
+        std::unordered_map<std::string, std::string> _variables;
 
         BusRaycast* _bus;
 
@@ -57,9 +57,13 @@ class BusLoader
         BusRaycast* loadBusRaycast(XMLElement* busElement);
         void loadEngineAndGearbox(XMLElement* busElement);
         void loadBusDescription(XMLElement* busElement);
+        void loadAvailableVariables(XMLElement* busElement);
         bool loadBusModules(XMLElement* busElement);
 
-        void fetchOptionalModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames);
+        void fetchOptionalModelNodes(XMLElement* moduleElement, std::vector<std::string>& modelNodesNames);
+
+        void loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
+        void loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
 
         void loadWheels(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& busModule);
@@ -71,6 +75,7 @@ class BusLoader
         void loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusRayCastModule& busModule);
         void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
 		void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
+        void loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule);
         void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);
 
         void loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
@@ -86,7 +91,7 @@ class BusLoader
     public:
         BusLoader(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr);
 
-        Bus* loadBus(const std::string& busName);
+        Bus* loadBus(const std::string& busName, const std::unordered_map<std::string, std::string>& variables = {});
 
 };
 

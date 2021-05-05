@@ -52,6 +52,7 @@ class GameConfig
         std::string mapFile;
         std::string mapTexPath;
         std::string busModel;
+        std::string busConfiguration;
 
         bool isFullscreen;
 		bool verticalSync;

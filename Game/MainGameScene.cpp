@@ -5,6 +5,7 @@
 #include "Hud.h"
 
 #include "../Bus/BusLoader.h"
+#include "../Bus/BusConfigurationsLoader.h"
 
 #include "../Graphics/Renderer.h"
 
@@ -134,9 +135,18 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 
 void MainGameScene::loadScene()
 {
+	std::unordered_map<std::string, std::string> busVariables;
+
 	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
-	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel);
+
+	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, GameConfig::getInstance().busConfiguration, busVariables);
+	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
 	GameLogicSystem::getInstance().addBus(bus);
+
+	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, "Typ 2", busVariables);
+	Bus* bus2 = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
+	GameLogicSystem::getInstance().addBus(bus2);
+
 	_activeBus = bus;
 
 	SceneLoader sceneLoader(_sceneManager);
@@ -144,6 +154,11 @@ void MainGameScene::loadScene()
 
 	bus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
 	bus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
+		degToRad(_sceneManager->getBusStart().rotation.y),
+		degToRad(_sceneManager->getBusStart().rotation.z));
+
+	bus2->getSceneObject()->setPosition(_sceneManager->getBusStart().position + vec3(20.0f, 0.0f, 0.0f));
+	bus2->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
 		degToRad(_sceneManager->getBusStart().rotation.y),
 		degToRad(_sceneManager->getBusStart().rotation.z));
 
@@ -324,6 +339,15 @@ void MainGameScene::readInput(double deltaTime)
 void MainGameScene::fixedStepReadInput(float deltaTime)
 {
 	InputSystem& input = InputSystem::getInstance();
+
+	if (input.isKeyPressed(GLFW_KEY_1))
+	{
+		_activeBus = GameLogicSystem::getInstance().getBus(0);
+	}
+	if (input.isKeyPressed(GLFW_KEY_2))
+	{
+		_activeBus = GameLogicSystem::getInstance().getBus(1);
+	}
 
 #ifdef DRAW_IMGUI
 	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)

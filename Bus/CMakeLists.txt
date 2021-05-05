@@ -1,4 +1,5 @@
 set (BUS_SOURCES
+	Bus/BusConfigurationsLoader.cpp
 	Bus/BusConstraint.cpp
 	Bus/BusLoader.cpp
 	Bus/BusRaycast.cpp
@@ -11,6 +12,7 @@ set (BUS_SOURCES
 
 set (BUS_HEADERS
 	Bus/Bus.h
+	Bus/BusConfigurationsLoader.h
 	Bus/BusConstraint.h
 	Bus/BusDescription.h
 	Bus/BusLoader.h
