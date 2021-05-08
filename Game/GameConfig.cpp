@@ -43,7 +43,7 @@ void GameConfig::loadGameConfig(const char* filename)
 
                 if (strcmp(ename,"Fullscreen") == 0)
                 {
-                    isFullscreen = toBool(configElement->GetText());
+                    fullscreenMode = toInt(configElement->GetText());
                 }
 				if (strcmp(ename, "VerticalSync") == 0)
 				{

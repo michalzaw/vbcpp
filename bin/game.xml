@@ -10,7 +10,7 @@
 	<Bus model="h9_raycast" />
 	
 	<Configuration>
-		<Fullscreen>false</Fullscreen>
+		<Fullscreen>0</Fullscreen><!-- 0 - window, 1 - fullscreen, 2 - windowed fullscreen -->
 		<VerticalSync>false</VerticalSync>
 		
 		<HdrQuality>16</HdrQuality>

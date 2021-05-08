@@ -3,7 +3,7 @@
 #include <cstdio>
 
 Window::Window()
-: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _isFullscreen(false)
+: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _fullscreenMode(0)
 {
     glfwSetErrorCallback(errorCallback);
 }
@@ -14,13 +14,13 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool verticalSync, bool isResizable)
+bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, bool verticalSync, bool isResizable)
 {
     _width = w;
     _height = h;
     _xPos = posx;
     _yPos = posy;
-    _isFullscreen = isFullscreen;
+    _fullscreenMode = fullscreenMode;
 	_verticalSyncEnabled = verticalSync;
 
     if ( !glfwInit() )
@@ -38,8 +38,25 @@ bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, b
 
 	glfwWindowHint( GLFW_RESIZABLE, isResizable );
 
+    GLFWmonitor* monitor = NULL;
+    if (_fullscreenMode == 1)
+    {
+        monitor = glfwGetPrimaryMonitor();
+    }
+    else if (_fullscreenMode == 2)
+    {
+        monitor = glfwGetPrimaryMonitor();
+
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    }
+
 	// Create window with given size and title
-	_win = glfwCreateWindow(_width, _height, _title.c_str(), _isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+	_win = glfwCreateWindow(_width, _height, _title.c_str(), monitor, NULL);
 
 	if (!_win)
         return false;
