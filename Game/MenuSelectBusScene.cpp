@@ -14,8 +14,8 @@
 #include "../Utils/ResourceManager.h"
 
 
-MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui)
-	: GameScene(window, physicsManager, soundManager, sceneManager, gui),
+MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
 	_selectedBus(0), _selectedBusConfiguration(0)
 {
 

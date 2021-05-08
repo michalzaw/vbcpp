@@ -12,8 +12,8 @@
 #include "../Utils/ResourceManager.h"
 
 
-TestScene::TestScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui)
-	: GameScene(window, physicsManager, soundManager, sceneManager, gui)
+TestScene::TestScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface)
 {
 
 }

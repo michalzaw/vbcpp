@@ -1,11 +1,10 @@
 #ifndef IMGUIINTERFACEI_H_INCLUDED
 #define IMGUIINTERFACEI_H_INCLUDED
 
-#include "BusLineAndDirectionWindow.h"
-#include "ColorsWindow.h"
-#include "PhysicsDebuggerWindow.h"
-#include "VariablesWindow.h"
-#include "MenuBar.h"
+
+#include <vector>
+
+#include "ImGuiWindow.h"
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
@@ -27,11 +26,7 @@ class ImGuiInterface
         bool _styleDark;
 		bool _isOpen;
 
-		BusLineAndDirectionWindow* _busLineAndDirectionWindow;
-		ColorsWindow* _colorsWindow;
-		PhysicsDebuggerWindow* _physicsDebuggerWindow;
-        VariablesWindow* _variablesWindow;
-        MenuBar* _menuBar;
+        std::vector<ImGuiWindow*> _windows;
 
         void initializeImGui();
 
@@ -43,6 +38,8 @@ class ImGuiInterface
 
 		void setIsOpen(bool isOpen);
 		bool isOpen();
+
+        void addWindow(ImGuiWindow* window);
 
         void draw();
 };

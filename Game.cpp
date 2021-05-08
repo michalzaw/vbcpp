@@ -106,9 +106,9 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	//_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
-	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
-	_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui);
+	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 	_gameScene->initialize();
 }
 

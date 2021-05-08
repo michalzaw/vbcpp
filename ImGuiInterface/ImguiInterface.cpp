@@ -14,31 +14,15 @@ ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager)
     _styleDark(true), _isOpen(false)
 {
     initializeImGui();
-
-	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager);
-	_colorsWindow = new ColorsWindow(_sceneManager);
-	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
-    _variablesWindow = new VariablesWindow(_sceneManager, false);
-
-    std::vector<MenuItem> windowMenuItems;
-    windowMenuItems.push_back(MenuItem("Bus line and direction", _busLineAndDirectionWindow->getOpenFlagPointer()));
-    windowMenuItems.push_back(MenuItem("Colors", _colorsWindow->getOpenFlagPointer()));
-    windowMenuItems.push_back(MenuItem("Physics debugger", _physicsDebuggerWindow->getOpenFlagPointer()));
-    windowMenuItems.push_back(MenuItem("Game variables", _variablesWindow->getOpenFlagPointer()));
-
-    std::vector<MenuItem> menuItems;
-    menuItems.push_back(MenuItem("Window", windowMenuItems));
-
-    _menuBar = new MenuBar(_sceneManager, menuItems);
 }
 
 
 ImGuiInterface::~ImGuiInterface()
 {
-	delete _busLineAndDirectionWindow;
-	delete _colorsWindow;
-	delete _physicsDebuggerWindow;
-    delete _menuBar;
+    for (int i = 0; i < _windows.size(); ++i)
+    {
+        delete _windows[i];
+    }
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -82,6 +66,12 @@ bool ImGuiInterface::isOpen()
 }
 
 
+void ImGuiInterface::addWindow(ImGuiWindow* window)
+{
+    _windows.push_back(window);
+}
+
+
 void ImGuiInterface::draw()
 {
 	if (_isOpen)
@@ -90,14 +80,10 @@ void ImGuiInterface::draw()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		_busLineAndDirectionWindow->draw();
-		if (GameConfig::getInstance().developmentMode)
-		{
-			_colorsWindow->draw();
-			_physicsDebuggerWindow->draw();
-            _variablesWindow->draw();
-            _menuBar->draw();
-		}
+        for (ImGuiWindow* window : _windows)
+        {
+            window->draw();
+        }
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

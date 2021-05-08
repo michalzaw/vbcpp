@@ -7,6 +7,12 @@
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
 
+#include "../ImGuiInterface/BusLineAndDirectionWindow.h"
+#include "../ImGuiInterface/ColorsWindow.h"
+#include "../ImGuiInterface/PhysicsDebuggerWindow.h"
+#include "../ImGuiInterface/VariablesWindow.h"
+#include "../ImGuiInterface/MenuBar.h"
+
 #include "../Graphics/Renderer.h"
 
 #include "../Scene/SceneLoader.h"
@@ -25,8 +31,8 @@ enum GameCamera
 };
 
 
-MainGameScene::MainGameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui)
-	: GameScene(window, physicsManager, soundManager, sceneManager, gui),
+MainGameScene::MainGameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
 	_state(GS_LOADING),
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
@@ -185,6 +191,39 @@ void MainGameScene::initGui()
 }
 
 
+void MainGameScene::initImGuiInterface()
+{
+	// windows
+	ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager);
+
+	_imGuiInterface->addWindow(busLineAndDirectionWindow);
+
+	if (GameConfig::getInstance().developmentMode)
+	{
+		ImGuiWindow* colorsWindow = new ColorsWindow(_sceneManager);
+		ImGuiWindow* physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
+		ImGuiWindow* variablesWindow = new VariablesWindow(_sceneManager, false);
+
+		_imGuiInterface->addWindow(colorsWindow);
+		_imGuiInterface->addWindow(physicsDebuggerWindow);
+		_imGuiInterface->addWindow(variablesWindow);
+
+		// menu
+		std::vector<MenuItem> windowMenuItems;
+		windowMenuItems.push_back(MenuItem("Bus line and direction", busLineAndDirectionWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Colors", colorsWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Physics debugger", physicsDebuggerWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Game variables", variablesWindow->getOpenFlagPointer()));
+
+		std::vector<MenuItem> menuItems;
+		menuItems.push_back(MenuItem("Window", windowMenuItems));
+
+		ImGuiWindow* menuBar = new MenuBar(_sceneManager, menuItems);
+		_imGuiInterface->addWindow(menuBar);
+	}
+}
+
+
 void MainGameScene::startGame()
 {
 	_state = GS_GAME;
@@ -203,6 +242,8 @@ void MainGameScene::initialize()
 	loadScene();
 
 	initGui();
+
+	initImGuiInterface();
 
 	startGame();
 }

@@ -4,6 +4,8 @@
 
 #include "../GUI/GUIManager.h"
 
+#include "../ImGuiInterface/ImGuiInterface.h"
+
 #include "../Scene/SceneManager.h"
 
 #include "../Window/Window.h"
@@ -18,12 +20,13 @@ class GameScene
 		SoundManager* _soundManager;
 		SceneManager* _sceneManager;
 		GUIManager* _gui;
+		ImGuiInterface* _imGuiInterface;
 		//Window* _window;
 
 	public:
-		GameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui)
+		GameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
 			: _window(window),
-			_physicsManager(physicsManager), _soundManager(soundManager), _sceneManager(sceneManager), _gui(gui)
+			_physicsManager(physicsManager), _soundManager(soundManager), _sceneManager(sceneManager), _gui(gui), _imGuiInterface(imGuiInterface)
 		{
 
 		}
