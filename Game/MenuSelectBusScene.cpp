@@ -4,7 +4,7 @@
 #include "Directories.h"
 #include "GameLogicSystem.h"
 
-#include "../Bus/BusLoader.h"
+#include "../Bus/BusPreviewLoader.h"
 
 #include "../Graphics/Renderer.h"
 
@@ -16,7 +16,7 @@
 
 MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui)
 	: GameScene(window, physicsManager, soundManager, sceneManager, gui),
-	_selectedBus(0)
+	_selectedBus(0), _selectedBusConfiguration(0)
 {
 
 }
@@ -38,7 +38,7 @@ void MenuSelectBusScene::loadAvailableBusesNames()
 #endif // DEVELOPMENT_RESOURCES
 	*/
 
-	_availableBusesNames.push_back("MAN");
+	//_availableBusesNames.push_back("MAN");
 	_availableBusesNames.push_back("neoplan");
 	_availableBusesNames.push_back("Solaris_IV");
 	_availableBusesNames.push_back("Solaris_IV_PBR");
@@ -54,8 +54,8 @@ CameraFPS* MenuSelectBusScene::createCameraFPSGlobal()
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
 	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(0, 0, 0);
-	cameraObject->setPosition(0, 0.5f, -15);
+	cameraObject->setRotation(0, degToRad(180.0f), 0);
+	cameraObject->setPosition(0, 0.5f, 15);
 
 	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
@@ -77,12 +77,12 @@ void MenuSelectBusScene::addBus(const std::string& modelFileName, const std::str
 
 void MenuSelectBusScene::addBus(const std::string& name)
 {
-	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
+	BusPreviewLoader busLoader(_sceneManager, _physicsManager, _soundManager);
 	
-	Bus* bus = busLoader.loadBus(name);
-	bus->getSceneObject()->setIsActive(false);
+	BusPreview* busPreview = busLoader.loadBusPreview(name);
+	busPreview->bus->getSceneObject()->setIsActive(false);
 
-	_buses2.push_back(bus);
+	_buses2.push_back(busPreview);
 }
 
 
@@ -93,12 +93,14 @@ void MenuSelectBusScene::selectNextBus()
 	_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
 	_buses[_selectedBus]->setIsActive(true);*/
 
-	_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
+	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(false);
 	_selectedBus = (_selectedBus + 1) % _buses2.size();
-	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(true);
 
 	showBusLogo();
+
+	_selectedBusConfiguration = 0;
 }
 
 
@@ -109,22 +111,70 @@ void MenuSelectBusScene::selectPreviousBus()
 	_buses[_selectedBus]->setRotation(0.0f, 0.0f, 0.0f);
 	_buses[_selectedBus]->setIsActive(true);*/
 
-	_buses2[_selectedBus]->getSceneObject()->setIsActive(false);
+	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(false);
 	_selectedBus = _selectedBus - 1;
 	if (_selectedBus < 0)
 	{
 		_selectedBus = _buses2.size() - 1;
 	}
-	_buses2[_selectedBus]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-	_buses2[_selectedBus]->getSceneObject()->setIsActive(true);
+	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
+	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(true);
 
 	showBusLogo();
+
+	_selectedBusConfiguration = 0;
+}
+
+
+void MenuSelectBusScene::selectNextBusConfiguration()
+{
+	++_selectedBusConfiguration;
+	if (_selectedBusConfiguration >= _buses2[_selectedBus]->predefinedConfigurations.size())
+	{
+		_selectedBusConfiguration = 0;
+	}
+
+	int i = 0;
+	for (auto& configuration : _buses2[_selectedBus]->predefinedConfigurations)
+	{
+		if (i == _selectedBusConfiguration)
+		{
+			_buses2[_selectedBus]->setConfiguration(configuration.second);
+		}
+
+		++i;
+	}
+
+	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(30.0f), 0.0f);
+}
+
+
+void MenuSelectBusScene::selectPreviousBusConfiguration()
+{
+	--_selectedBusConfiguration;
+	if (_selectedBusConfiguration < 0)
+	{
+		_selectedBusConfiguration = _buses2[_selectedBus]->predefinedConfigurations.size() - 1;
+	}
+
+	int i = 0;
+	for (auto& configuration : _buses2[_selectedBus]->predefinedConfigurations)
+	{
+		if (i == _selectedBusConfiguration)
+		{
+			_buses2[_selectedBus]->setConfiguration(configuration.second);
+		}
+
+		++i;
+	}
+
+	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(30.0f), 0.0f);
 }
 
 
 void MenuSelectBusScene::showBusLogo()
 {
-	const std::string& logoFileName = _buses2[_selectedBus]->getBusDescription().logo;
+	const std::string& logoFileName = _buses2[_selectedBus]->bus->getBusDescription().logo;
 	if (!logoFileName.empty())
 	{
 		_busLogo->setTexture(ResourceManager::getInstance().loadTexture(logoFileName));
@@ -201,11 +251,11 @@ void MenuSelectBusScene::initialize()
 		addBus(busName);
 	}
 
-	_buses2[0]->getSceneObject()->setIsActive(true);
+	_buses2[0]->bus->getSceneObject()->setIsActive(true);
 
 	//_buses[0]->setPosition(0.0f, -1.5f, 0.0f);
-	_buses2[2]->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
-	_buses2[3]->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
+	_buses2[2]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
+	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
 	Renderer::getInstance().bakeStaticShadows();
 }
@@ -214,7 +264,7 @@ void MenuSelectBusScene::initialize()
 void MenuSelectBusScene::fixedStepUpdate(double deltaTime)
 {
 	//_buses[_selectedBus]->rotate(0.0f, degToRad(10.0f * deltaTime), 0.0f);
-	_buses2[_selectedBus]->getSceneObject()->rotate(0.0f, degToRad(10.0f * deltaTime), 0.0f);
+	_buses2[_selectedBus]->bus->getSceneObject()->rotate(0.0f, degToRad(10.0f * deltaTime), 0.0f);
 }
 
 
@@ -242,11 +292,22 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 	{
 		selectNextBus();
 	}
+	else if (input.isKeyPressed(GLFW_KEY_UP))
+	{
+		selectNextBusConfiguration();
+	}
+	else if (input.isKeyPressed(GLFW_KEY_DOWN))
+	{
+		selectPreviousBusConfiguration();
+	}
 }
 
 
 void MenuSelectBusScene::terminate()
 {
-
+	for (BusPreview* busPreview : _buses2)
+	{
+		delete busPreview;
+	}
 }
 

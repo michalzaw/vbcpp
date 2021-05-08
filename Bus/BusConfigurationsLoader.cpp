@@ -66,4 +66,48 @@ namespace BusConfigurationsLoader
 			}
 		}
 	}
+
+
+	void loadAllBusPredefinedConfigurations(const std::string& busName, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& outPredefinedConfigurations,
+											const std::unordered_map<std::string, std::string>& variablesDefaultValues)
+	{
+		std::string configFileName = GameDirectories::BUSES + busName + "/" + CONFIG_FILENAME;
+
+#ifdef DEVELOPMENT_RESOURCES
+		if (!FilesHelper::isFileExists(configFileName))
+			configFileName = ResourceManager::getInstance().getAlternativeResourcePath() + configFileName;
+#endif // DEVELOPMENT_RESOURCES
+
+		XMLDocument doc;
+		XMLError result = doc.LoadFile(configFileName.c_str());
+		if (result != XML_SUCCESS)
+		{
+			Logger::error("Cannot read xml file: " + configFileName + "! Result: " + toString(result));
+			return;
+		}
+
+		XMLElement* rootElement = doc.FirstChildElement("PredefinedConfigurations");
+
+		Logger::info("Bus predefined configurations XML DATA");
+
+		for (XMLElement* configurationElement = rootElement->FirstChildElement("Configuration");
+			configurationElement != nullptr;
+			configurationElement = configurationElement->NextSiblingElement("Configuration"))
+		{
+			const std::string name = XmlUtils::getAttributeString(configurationElement, "name");
+
+			loadVariables(configurationElement, outPredefinedConfigurations[name]);
+
+			for (auto& variableDefault : variablesDefaultValues)
+			{
+				const std::string& variableDefaultName = variableDefault.first;
+				const std::string& variableDefaulValue = variableDefault.second;
+
+				if (outPredefinedConfigurations[name].find(variableDefaultName) == outPredefinedConfigurations[name].end())
+				{
+					outPredefinedConfigurations[name][variableDefaultName] = variableDefaulValue;
+				}
+			}
+		}
+	}
 }

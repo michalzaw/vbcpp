@@ -28,7 +28,7 @@ struct ModelNodeAndTransform
 
 class BusLoader
 {
-    private:
+    protected:
         static constexpr char* BUS_CONFIG_FILENAME = "config.xml";
 
         int _busCollidesWith;
@@ -63,20 +63,20 @@ class BusLoader
         void fetchOptionalModelNodes(XMLElement* moduleElement, std::vector<std::string>& modelNodesNames);
 
         void loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
-        void loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
+        virtual void loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
 
-        void loadWheels(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadDriverParams(XMLElement* busElement, BusRayCastModule& busModule);
-        void loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
-		void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
-        void loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule);
-        void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadWheels(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadDriverParams(XMLElement* busElement, BusRayCastModule& busModule);
+        virtual void loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule);
+        virtual void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);
 
         void loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
                             SoundComponent* openSoundComp, SoundComponent* closeSoundComp);

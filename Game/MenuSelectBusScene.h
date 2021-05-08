@@ -5,14 +5,18 @@
 #include "GameScene.h"
 
 
+struct BusPreview;
+
+
 class MenuSelectBusScene final : public GameScene
 {
 	private:
 		std::vector<std::string> _availableBusesNames;
 
 		std::vector<SceneObject*> _buses;
-		std::vector<Bus*> _buses2;
+		std::vector<BusPreview*> _buses2;
 		int _selectedBus;
+		int _selectedBusConfiguration;
 		Image* _busLogo;
 
 		void loadAvailableBusesNames();
@@ -23,6 +27,8 @@ class MenuSelectBusScene final : public GameScene
 
 		void selectNextBus();
 		void selectPreviousBus();
+		void selectNextBusConfiguration();
+		void selectPreviousBusConfiguration();
 
 		void showBusLogo();
 
