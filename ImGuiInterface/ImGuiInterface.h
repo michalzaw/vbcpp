@@ -5,6 +5,7 @@
 #include "ColorsWindow.h"
 #include "PhysicsDebuggerWindow.h"
 #include "VariablesWindow.h"
+#include "MenuBar.h"
 
 #include "../ImGui/imgui.h"
 #include "../ImGui/imgui_impl_glfw.h"
@@ -30,12 +31,9 @@ class ImGuiInterface
 		ColorsWindow* _colorsWindow;
 		PhysicsDebuggerWindow* _physicsDebuggerWindow;
         VariablesWindow* _variablesWindow;
+        MenuBar* _menuBar;
 
         void initializeImGui();
-
-        void drawMainMenu();
-
-		void ShowTransformGizmo(CameraStatic* camera, SceneObject* obj);
 
     public:
 		ImGuiInterface(Window* window, SceneManager* sceneManager);

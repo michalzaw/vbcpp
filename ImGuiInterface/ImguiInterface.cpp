@@ -19,6 +19,17 @@ ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager)
 	_colorsWindow = new ColorsWindow(_sceneManager);
 	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
     _variablesWindow = new VariablesWindow(_sceneManager, false);
+
+    std::vector<MenuItem> windowMenuItems;
+    windowMenuItems.push_back(MenuItem("Bus line and direction", _busLineAndDirectionWindow->getOpenFlagPointer()));
+    windowMenuItems.push_back(MenuItem("Colors", _colorsWindow->getOpenFlagPointer()));
+    windowMenuItems.push_back(MenuItem("Physics debugger", _physicsDebuggerWindow->getOpenFlagPointer()));
+    windowMenuItems.push_back(MenuItem("Game variables", _variablesWindow->getOpenFlagPointer()));
+
+    std::vector<MenuItem> menuItems;
+    menuItems.push_back(MenuItem("Window", windowMenuItems));
+
+    _menuBar = new MenuBar(_sceneManager, menuItems);
 }
 
 
@@ -27,6 +38,7 @@ ImGuiInterface::~ImGuiInterface()
 	delete _busLineAndDirectionWindow;
 	delete _colorsWindow;
 	delete _physicsDebuggerWindow;
+    delete _menuBar;
 
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
@@ -78,34 +90,16 @@ void ImGuiInterface::draw()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		drawMainMenu();
-
 		_busLineAndDirectionWindow->draw();
 		if (GameConfig::getInstance().developmentMode)
 		{
 			_colorsWindow->draw();
 			_physicsDebuggerWindow->draw();
             _variablesWindow->draw();
+            _menuBar->draw();
 		}
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
-}
-
-
-void ImGuiInterface::drawMainMenu()
-{
-    if( ImGui::BeginMainMenuBar() )
-    {
-        if (ImGui::BeginMenu("Windows"))
-        {
-            ImGui::MenuItem("Bus line and direction", NULL, _busLineAndDirectionWindow->getOpenFlagPointer());
-            ImGui::MenuItem("Colors", NULL, _colorsWindow->getOpenFlagPointer());
-			ImGui::MenuItem("Physics debugger", NULL, _physicsDebuggerWindow->getOpenFlagPointer());
-            ImGui::MenuItem("Game variables", NULL, _variablesWindow->getOpenFlagPointer());
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
 }
