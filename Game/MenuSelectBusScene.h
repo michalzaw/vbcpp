@@ -6,6 +6,7 @@
 
 
 struct BusPreview;
+class MenuSelectBusInterfaceWindow;
 
 
 class MenuSelectBusScene final : public GameScene
@@ -18,6 +19,8 @@ class MenuSelectBusScene final : public GameScene
 		int _selectedBus;
 		int _selectedBusConfiguration;
 		Image* _busLogo;
+
+		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
 
 		void loadAvailableBusesNames();
 

@@ -8,6 +8,8 @@
 
 #include "../Graphics/Renderer.h"
 
+#include "../ImGuiInterface/MenuSelectBusInterfaceWindow.h"
+
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
 #include "../Utils/Logger.h"
@@ -16,7 +18,8 @@
 
 MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
 	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
-	_selectedBus(0), _selectedBusConfiguration(0)
+	_selectedBus(0), _selectedBusConfiguration(0),
+	_menuInterfaceWindow(nullptr)
 {
 
 }
@@ -101,6 +104,8 @@ void MenuSelectBusScene::selectNextBus()
 	showBusLogo();
 
 	_selectedBusConfiguration = 0;
+
+	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
 }
 
 
@@ -123,6 +128,8 @@ void MenuSelectBusScene::selectPreviousBus()
 	showBusLogo();
 
 	_selectedBusConfiguration = 0;
+
+	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
 }
 
 
@@ -258,6 +265,9 @@ void MenuSelectBusScene::initialize()
 	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
 	Renderer::getInstance().bakeStaticShadows();
+
+	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(_sceneManager, true);
+	_imGuiInterface->addWindow(_menuInterfaceWindow);
 }
 
 

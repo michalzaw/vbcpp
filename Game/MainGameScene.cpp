@@ -390,17 +390,6 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		_activeBus = GameLogicSystem::getInstance().getBus(1);
 	}
 
-#ifdef DRAW_IMGUI
-	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard)
-	{
-		return;
-	}
-	if (input.isKeyPressed(GLFW_KEY_GRAVE_ACCENT))
-	{
-		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
-	}
-#endif // DRAW_IMGUI
-
 	if (input.isKeyPressed(GLFW_KEY_L))
 	{
 		_activeBus->setIsEnableHeadlights(!_activeBus->isEnableHeadlights());
