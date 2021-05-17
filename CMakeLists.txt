@@ -190,6 +190,8 @@ add_executable(${EDITOR_BIN_NAME}
                     ${GRAPHICS_HEADERS}
                     ${IMGUI_SOURCES}
                     ${IMGUI_HEADERS}
+                    ${IMGUI_INTERFACE_SOURCES}
+                    ${IMGUI_INTERFACE_HEADERS}
                     ${GUI_SOURCES}
                     ${GUI_HEADERS}
                     ${PHYSICS_SOURCES}
