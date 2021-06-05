@@ -3,9 +3,9 @@
 #include "../Bus/BusPreviewLoader.h"
 
 
-MenuSelectBusInterfaceWindow::MenuSelectBusInterfaceWindow(SceneManager* sceneManager, bool isOpen)
+MenuSelectBusInterfaceWindow::MenuSelectBusInterfaceWindow(std::unordered_map<std::string, std::string>* selectedBusConfigurationVariables, SceneManager* sceneManager, bool isOpen)
 	: ImGuiWindow(sceneManager, isOpen),
-	_busPreview(nullptr)
+	_busPreview(nullptr), _selectedBusConfigurationVariables(selectedBusConfigurationVariables)
 {
 
 }
@@ -61,28 +61,104 @@ void MenuSelectBusInterfaceWindow::drawBusConfigurations()
 	const ImGuiIO& io = ImGui::GetIO();
 
 	const ImU32 flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus;
-	ImGui::SetNextWindowSize(ImVec2(300, 200));
-	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 350, io.DisplaySize.y - 250));
+	ImGui::SetNextWindowSize(ImVec2(400, 200));
+	ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - 450, io.DisplaySize.y - 250));
+
+	//ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
+	//ImGui::PushStyleColor(ImGuiCol_Border, 0);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
 	if (ImGui::Begin("BusConfigurations", nullptr, flags))
 	{
-		ImGui::SetWindowFontScale(1.5);
+		//ImGui::SetWindowFontScale(1.5);
 
 		if (_busPreview != nullptr)
 		{
-			static int selected = 0;
-
-			int i = 0;
-			for (const auto& busConfiguration : _busPreview->predefinedConfigurations)
+			static int selectedConfiguration = 0;
+			std::string configurationNames = "";
+			for (const auto& configurationName : _busPreview->predefinedConfigurations)
 			{
-				ImGui::RadioButton(busConfiguration.first.c_str(), &selected, i);
-				++i;
+				configurationNames += configurationName.first + '\0';
+			}
+
+			ImGui::PushID("Configuration");
+			{
+				ImGui::SetNextItemWidth(400 - (2 * 8));
+				if (ImGui::Combo("", &selectedConfiguration, configurationNames.c_str()))
+				{
+					changeBusConfiguration(selectedConfiguration);
+				}
+			}
+			ImGui::PopID();
+
+			ImGui::Separator();
+
+			for (int i = 0; i < _busPreview->availableVariables.size(); ++i)
+			{
+				const GameVariable& variable = _busPreview->availableVariables[i];
+
+				ImGui::PushID(variable.name.c_str());
+				{
+					ImGui::Text(variable.displayName.c_str());
+					if (ImGui::IsItemHovered())
+					{
+						ImGui::SetTooltip(variable.description.c_str());
+					}
+
+					ImGui::SameLine(200);
+
+					int selectedVariableValue = 0;
+					std::string variableValues = "";
+
+					int j = 0;
+					for (const auto& variableValue : variable.values)
+					{
+						variableValues += variableValue + '\0';
+
+						if (variableValue == (*_selectedBusConfigurationVariables)[variable.name])
+						{
+							selectedVariableValue = j;
+						}
+
+						++j;
+					}
+
+					ImGui::SetNextItemWidth(400 - 200 - 8);
+					if (ImGui::Combo("", &selectedVariableValue, variableValues.c_str()))
+					{
+						(*_selectedBusConfigurationVariables)[variable.name] = _busPreview->availableVariables[i].values[selectedVariableValue];
+
+						_busPreview->setConfiguration(*_selectedBusConfigurationVariables);
+						_busPreview->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
+					}
+				}
+				ImGui::PopID();
 			}
 			
 		}
-
-		//ImGui::Text("Lorem ipsum\nHello world\n1\n22\n333\n\n Dlugi tekst");
 	}
 	ImGui::End();
+
+	ImGui::PopStyleVar();
+	//ImGui::PopStyleColor(2);
+}
+
+
+void MenuSelectBusInterfaceWindow::changeBusConfiguration(int index)
+{
+	int i = 0;
+	for (auto& configuration : _busPreview->predefinedConfigurations)
+	{
+		if (i == index)
+		{
+			(*_selectedBusConfigurationVariables) = configuration.second;
+		}
+
+		++i;
+	}
+
+	_busPreview->setConfiguration(*_selectedBusConfigurationVariables);
+	_busPreview->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
 }
 
 

@@ -17,7 +17,8 @@ class MenuSelectBusScene final : public GameScene
 		std::vector<SceneObject*> _buses;
 		std::vector<BusPreview*> _buses2;
 		int _selectedBus;
-		int _selectedBusConfiguration;
+		int _selectedBusConfigurationIndex;
+		std::unordered_map<std::string, std::string> _selectedBusConfigurationVariables;
 		Image* _busLogo;
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
@@ -30,8 +31,7 @@ class MenuSelectBusScene final : public GameScene
 
 		void selectNextBus();
 		void selectPreviousBus();
-		void selectNextBusConfiguration();
-		void selectPreviousBusConfiguration();
+		void showSelectedBus();
 
 		void showBusLogo();
 

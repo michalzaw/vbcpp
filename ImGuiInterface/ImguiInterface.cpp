@@ -43,7 +43,7 @@ void ImGuiInterface::initializeImGui()
     ImGui_ImplOpenGL3_Init("#version 130");
 
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
+    io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 20.0f);
     io.Fonts->AddFontDefault();
 }
 

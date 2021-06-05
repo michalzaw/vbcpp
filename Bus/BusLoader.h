@@ -55,14 +55,14 @@ class BusLoader
         RStaticModel* _currentBusModel;
 
         BusRaycast* loadBusRaycast(XMLElement* busElement);
-        void loadEngineAndGearbox(XMLElement* busElement);
-        void loadBusDescription(XMLElement* busElement);
-        void loadAvailableVariables(XMLElement* busElement);
-        bool loadBusModules(XMLElement* busElement);
+        virtual void loadEngineAndGearbox(XMLElement* busElement);
+        virtual void loadBusDescription(XMLElement* busElement);
+        virtual void loadAvailableVariables(XMLElement* busElement);
+        virtual bool loadBusModules(XMLElement* busElement);
 
-        void fetchOptionalModelNodes(XMLElement* moduleElement, std::vector<std::string>& modelNodesNames);
+        virtual void fetchOptionalModelNodes(XMLElement* moduleElement, std::vector<std::string>& modelNodesNames);
 
-        void loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
+        virtual void loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
         virtual void loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule);
 
         virtual void loadWheels(XMLElement* moduleElement, BusRayCastModule& busModule);

@@ -5,6 +5,7 @@
 #include "../Game/Directories.h"
 
 #include "../Utils/FilesHelper.h"
+#include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
@@ -20,6 +21,29 @@ BusPreviewLoader::BusPreviewLoader(SceneManager* smgr, PhysicsManager* pmgr, Sou
 }
 
 
+void BusPreviewLoader::loadAvailableVariables(XMLElement* busElement)
+{
+    XMLElement* variablesElement = busElement->FirstChildElement("Variables");
+    if (variablesElement != nullptr)
+    {
+        for (XMLElement* variableElement = variablesElement->FirstChildElement("Variable"); variableElement != nullptr; variableElement = variableElement->NextSiblingElement("Variable"))
+        {
+            GameVariable variable;
+            variable.name = XmlUtils::getAttributeString(variableElement, "name");
+            variable.defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue");
+            variable.values = split(XmlUtils::getAttributeStringOptional(variableElement, "values"), ',');
+            variable.displayName = XmlUtils::getAttributeStringOptional(variableElement, "displayName", variable.name);
+            variable.description = XmlUtils::getAttributeStringOptional(variableElement, "description");
+            variable.defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue", variable.values[0]);
+
+            _busPreview->availableVariables.push_back(variable);
+
+            _variables[variable.name] = variable.defaultValue;
+        }
+    }
+}
+
+
 void BusPreviewLoader::loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule)
 {
     for (XMLElement* conditionalElement = moduleElement->FirstChildElement("ConnditionalElements");
@@ -29,8 +53,10 @@ void BusPreviewLoader::loadModuleConditionalElements(XMLElement* moduleElement, 
         const std::string variable = XmlUtils::getAttributeString(conditionalElement, "variable");
         const std::string value = XmlUtils::getAttributeString(conditionalElement, "value");
 
-        auto currentVariableValue = _variables.find(variable);
-        if (currentVariableValue != _variables.end())
+        const auto& gameVariable = std::find_if(begin(_busPreview->availableVariables),
+                                                end(_busPreview->availableVariables),
+                                                [&variable](GameVariable gameVariable) { return gameVariable.name == variable; });
+        if (gameVariable != end(_busPreview->availableVariables))
         {
             SceneObject* sceneObject = _sMgr->addSceneObject(variable);
             SceneObject* busModuleSceneObject = busModule.sceneObject;
@@ -175,7 +201,7 @@ BusPreview* BusPreviewLoader::loadBusPreview(const std::string& busName)
     _busPreview->bus = loadBus(busName);
 
     // ustawienie konfiguracji na podstawie domyslnych wartosci zmiennych
-    _busPreview->setConfiguration(_variables);
+    //_busPreview->setConfiguration(_variables);
 
     BusConfigurationsLoader::loadAllBusPredefinedConfigurations(busName, _busPreview->predefinedConfigurations, _variables);
 

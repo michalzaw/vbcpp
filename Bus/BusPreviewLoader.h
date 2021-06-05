@@ -5,9 +5,22 @@
 #include "BusLoader.h"
 
 
-struct BusPreview
+struct GameVariable final
+{
+	std::string name;
+	std::vector<std::string> values;
+	std::string displayName;
+	std::string description;
+	std::string defaultValue;
+};
+
+
+struct BusPreview final
 {
 	Bus* bus;
+
+	std::vector<GameVariable> availableVariables;
+
 	std::unordered_map<std::string, std::unordered_map<std::string, std::vector<SceneObject*>>> variableDependentObjects; // map[varName][varValue] = std::vector<SceneObject*>
 
 	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> predefinedConfigurations; // map[configurationName][varName] = varValue
@@ -33,10 +46,12 @@ struct BusPreview
 };
 
 
-class BusPreviewLoader : public BusLoader
+class BusPreviewLoader final : public BusLoader
 {
 	private:
 		BusPreview* _busPreview;
+
+		void loadAvailableVariables(XMLElement* busElement) override;
 
 		void loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule) override;
 

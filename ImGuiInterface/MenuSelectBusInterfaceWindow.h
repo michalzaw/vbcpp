@@ -2,6 +2,8 @@
 #define MENUSELECTBUSINTERFACEWINDOW_H_INCLUDED
 
 
+//#include <functional>
+
 #include "ImGuiWindow.h"
 
 
@@ -12,13 +14,16 @@ class MenuSelectBusInterfaceWindow : public ImGuiWindow
 {
 	private:
 		BusPreview* _busPreview;
+		std::unordered_map<std::string, std::string>* _selectedBusConfigurationVariables;
 
 		void drawWindow() override;
 
 		void drawBusConfigurations();
 
+		void changeBusConfiguration(int index);
+
 	public:
-		MenuSelectBusInterfaceWindow(SceneManager* sceneManager, bool isOpen = true);
+		MenuSelectBusInterfaceWindow(std::unordered_map<std::string, std::string>* selectedBusConfigurationVariables, SceneManager* sceneManager, bool isOpen = true);
 
 		void setCurrentBusPreview(BusPreview* busPreview);
 

@@ -18,7 +18,7 @@
 
 MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
 	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
-	_selectedBus(0), _selectedBusConfiguration(0),
+	_selectedBus(0), _selectedBusConfigurationIndex(0),
 	_menuInterfaceWindow(nullptr)
 {
 
@@ -98,14 +98,8 @@ void MenuSelectBusScene::selectNextBus()
 
 	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(false);
 	_selectedBus = (_selectedBus + 1) % _buses2.size();
-	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(true);
 
-	showBusLogo();
-
-	_selectedBusConfiguration = 0;
-
-	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
+	showSelectedBus();
 }
 
 
@@ -122,60 +116,33 @@ void MenuSelectBusScene::selectPreviousBus()
 	{
 		_selectedBus = _buses2.size() - 1;
 	}
+
+	showSelectedBus();
+}
+
+
+void MenuSelectBusScene::showSelectedBus()
+{
 	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
 	_buses2[_selectedBus]->bus->getSceneObject()->setIsActive(true);
 
+	_selectedBusConfigurationIndex = 0;
+
+	auto firstConfiguration = _buses2[_selectedBus]->predefinedConfigurations.begin();
+	if (firstConfiguration != _buses2[_selectedBus]->predefinedConfigurations.end())
+	{
+		_selectedBusConfigurationVariables = firstConfiguration->second;
+	}
+	else
+	{
+		_selectedBusConfigurationVariables.clear();
+	}
+
+	_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
+
 	showBusLogo();
 
-	_selectedBusConfiguration = 0;
-
 	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
-}
-
-
-void MenuSelectBusScene::selectNextBusConfiguration()
-{
-	++_selectedBusConfiguration;
-	if (_selectedBusConfiguration >= _buses2[_selectedBus]->predefinedConfigurations.size())
-	{
-		_selectedBusConfiguration = 0;
-	}
-
-	int i = 0;
-	for (auto& configuration : _buses2[_selectedBus]->predefinedConfigurations)
-	{
-		if (i == _selectedBusConfiguration)
-		{
-			_buses2[_selectedBus]->setConfiguration(configuration.second);
-		}
-
-		++i;
-	}
-
-	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(30.0f), 0.0f);
-}
-
-
-void MenuSelectBusScene::selectPreviousBusConfiguration()
-{
-	--_selectedBusConfiguration;
-	if (_selectedBusConfiguration < 0)
-	{
-		_selectedBusConfiguration = _buses2[_selectedBus]->predefinedConfigurations.size() - 1;
-	}
-
-	int i = 0;
-	for (auto& configuration : _buses2[_selectedBus]->predefinedConfigurations)
-	{
-		if (i == _selectedBusConfiguration)
-		{
-			_buses2[_selectedBus]->setConfiguration(configuration.second);
-		}
-
-		++i;
-	}
-
-	_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(30.0f), 0.0f);
 }
 
 
@@ -265,16 +232,16 @@ void MenuSelectBusScene::initialize()
 		addBus(busName);
 	}
 
-	_buses2[0]->bus->getSceneObject()->setIsActive(true);
-
 	//_buses[0]->setPosition(0.0f, -1.5f, 0.0f);
 	_buses2[2]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
 	Renderer::getInstance().bakeStaticShadows();
 
-	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(_sceneManager, true);
+	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(&_selectedBusConfigurationVariables, _sceneManager, true);
 	_imGuiInterface->addWindow(_menuInterfaceWindow);
+
+	showSelectedBus();
 }
 
 
@@ -308,14 +275,6 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 	else if (input.isKeyPressed(GLFW_KEY_RIGHT))
 	{
 		selectNextBus();
-	}
-	else if (input.isKeyPressed(GLFW_KEY_UP))
-	{
-		selectNextBusConfiguration();
-	}
-	else if (input.isKeyPressed(GLFW_KEY_DOWN))
-	{
-		selectPreviousBusConfiguration();
 	}
 }
 
