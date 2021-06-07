@@ -130,3 +130,23 @@ unsigned int ModelNode::getChildrenCount()
 {
     return _children.size();
 }
+
+
+void ModelNode::replaceMaterialsByName(const std::vector<Material*>& materials)
+{
+    for (ModelNodeMesh* mesh : _meshes)
+    {
+        for (Material* material : materials)
+        {
+            if (mesh->material->name == material->name)
+            {
+                mesh->material = material;
+            }
+        }
+    }
+
+    for (ModelNode* child : _children)
+    {
+        child->replaceMaterialsByName(materials);
+    }
+}

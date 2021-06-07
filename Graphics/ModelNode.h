@@ -63,6 +63,8 @@ class ModelNode
         std::vector<ModelNode*>& getChildren();
         unsigned int getChildrenCount();
 
+        void replaceMaterialsByName(const std::vector<Material*>& materials);
+
 };
 
 

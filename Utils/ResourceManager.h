@@ -7,6 +7,7 @@
 #include "../Graphics/RRoadProfile.h"
 #include "../Graphics/RoadProfileLoader.h"
 #include "../Graphics/RDisplayFont.h"
+#include "../Graphics/RMaterialsCollection.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -68,6 +69,8 @@ class ResourceManager
 		RRoadProfile* loadRoadProfile(std::string name);
 
 		RDisplayFont* loadDisplayFont(std::string name);
+
+        RMaterialsCollection* loadMaterialsCollection(std::string path);
 
 		void setAlternativeResourcePath(std::string path);
 		std::string getAlternativeResourcePath();

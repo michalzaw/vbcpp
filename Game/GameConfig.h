@@ -52,6 +52,7 @@ class GameConfig
         std::string mapFile;
         std::string mapTexPath;
         std::string busModel;
+        std::string busRepaint;
         std::string busConfiguration;
 
         int fullscreenMode;

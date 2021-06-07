@@ -111,6 +111,14 @@ std::string FilesHelper::getFileExtension(std::string fileName)
 }
 
 
+std::string FilesHelper::getPathToDirectoryFromFileName(std::string fileName)
+{
+	auto lastSlashPosition = fileName.find_last_of("/\\");
+
+	return fileName.substr(0, lastSlashPosition + 1);
+}
+
+
 std::string FilesHelper::getRelativePathToDir(std::string filePath, std::string dirPath)
 {
 	std::string dirPathFromFilePath = filePath.substr(0, dirPath.size());

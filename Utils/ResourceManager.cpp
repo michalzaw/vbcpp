@@ -725,6 +725,44 @@ RDisplayFont* ResourceManager::loadDisplayFont(std::string name)
 }
 
 
+RMaterialsCollection* ResourceManager::loadMaterialsCollection(std::string path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RMaterialsCollection* materialsCollection = dynamic_cast<RMaterialsCollection*>(res);
+        return materialsCollection;
+    }
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(path))
+        path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
+    RMaterialsCollection* temp = new RMaterialsCollection(path);
+
+    MaterialLoader materialLoader;
+    materialLoader.openFile(path.c_str());
+
+    materialLoader.loadAllMaterials(temp->getMaterials(), FilesHelper::getPathToDirectoryFromFileName(path));
+
+    materialLoader.closeFile();
+
+    std::unique_ptr<RMaterialsCollection> materialsCollection(temp);
+    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << materialsCollection.get()->getPath() << std::endl;
+
+    RMaterialsCollection* mc = dynamic_cast<RMaterialsCollection*>(materialsCollection.get());
+
+    if (mc)
+    {
+        _resources.push_back(std::move(materialsCollection));
+        return mc;
+    }
+    else
+        return 0;
+}
+
+
 void ResourceManager::setAlternativeResourcePath(std::string path)
 {
 	_alternativeResourcePath = path;

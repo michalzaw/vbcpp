@@ -15,7 +15,8 @@ enum ResourceType
     RT_SOUND,
 	RT_OBJECT,
 	RT_ROAD_PROFILE,
-	RT_DISPLAY_FONT
+	RT_DISPLAY_FONT,
+    RT_MATERIALS_COLLECTION
 };
 
 class Resource

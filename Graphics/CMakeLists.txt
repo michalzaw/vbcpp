@@ -66,6 +66,8 @@ set (GRAPHICS_SOURCES
 		Graphics/RenderData.h
 		Graphics/RenderObject.cpp
 		Graphics/RenderObject.h
+		Graphics/RMaterialsCollection.cpp
+		Graphics/RMaterialsCollection.h
 		Graphics/RoadGenerator.cpp
 		Graphics/RoadGenerator.h
 		Graphics/RoadObject.cpp

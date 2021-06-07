@@ -4,6 +4,7 @@ set (BUS_SOURCES
 	Bus/BusLoader.cpp
 	Bus/BusPreviewLoader.cpp
 	Bus/BusRaycast.cpp
+	Bus/BusRepaintLoader.cpp
 	Bus/Desktop.cpp
 	Bus/Door.cpp
 	Bus/DoorClassic.cpp
@@ -19,6 +20,7 @@ set (BUS_HEADERS
 	Bus/BusLoader.h
 	Bus/BusPreviewLoader.h
 	Bus/BusRaycast.h
+	Bus/BusRepaintLoader.h
 	Bus/Desktop.h
 	Bus/Door.h
 	Bus/DoorClassic.h

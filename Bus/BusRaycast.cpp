@@ -623,6 +623,35 @@ void BusRaycast::update(float deltaTime)
 }
 
 
+void replaceMaterialsByNameInSceneObject(SceneObject* sceneObject, std::vector<Material*>& altMaterials)
+{
+    Component* renderObject = sceneObject->getComponent(CT_RENDER_OBJECT);
+    if (renderObject != nullptr)
+    {
+        static_cast<RenderObject*>(renderObject)->replaceMaterialsByName(altMaterials);
+    }
+
+    for (SceneObject* child : sceneObject->getChildren())
+    {
+        replaceMaterialsByNameInSceneObject(child, altMaterials);
+    }
+}
+
+
+void BusRaycast::replaceMaterialsByName(std::vector<Material*>& altMaterials)
+{
+    for (const BusRayCastModule& busModule : _modules)
+    {
+        replaceMaterialsByNameInSceneObject(busModule.sceneObject, altMaterials);
+    }
+
+    for (Door* door : _doors)
+    {
+        replaceMaterialsByNameInSceneObject(door->getSceneObject(), altMaterials);
+    }
+}
+
+
 void BusRaycast::doorOpen(char door)
 {
     if (_doors[door]->getState() == EDS_CLOSING)

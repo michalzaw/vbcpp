@@ -97,6 +97,11 @@ class Bus : public RefCounter
 
         virtual void update(float deltaTime) = 0;
 
+        virtual void replaceMaterialsByName(std::vector<Material*>& altMaterials)
+        {
+
+        }
+
         void setNumberOfPassengers(unsigned int number)
         {
             _numberOfPassengers = number;

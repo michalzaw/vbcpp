@@ -32,6 +32,7 @@ void GameConfig::loadGameConfig(const char* filename)
         if (strcmp(ename,"Bus") == 0)
         {
             busModel = std::string(child->Attribute("model"));
+            busRepaint = XmlUtils::getAttributeStringOptional(child, "repaint");
             busConfiguration = XmlUtils::getAttributeStringOptional(child, "configuration");
         }
         else

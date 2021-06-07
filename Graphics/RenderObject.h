@@ -55,6 +55,7 @@ class RenderObject : public Component
         ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
 		void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
+        void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();

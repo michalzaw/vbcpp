@@ -44,23 +44,42 @@ void MaterialLoader::closeFile()
 }
 
 
-Material* MaterialLoader::loadMaterial(std::string materialName, std::string texPath)
+void MaterialLoader::loadAllMaterials(std::vector<Material*>& outMaterials, const std::string& texPath)
 {
-    XMLElement* materialElement = NULL;
-    XMLElement* root = _xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
+	XMLElement* root = _xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
 
-    for (XMLElement* child = root->FirstChildElement(XML_MATERIAL_ELEMENT); child != NULL; child = child->NextSiblingElement())
-    {
-        std::string elementName(child->Name());
+	for (XMLElement* child = root->FirstChildElement(XML_MATERIAL_ELEMENT); child != NULL; child = child->NextSiblingElement())
+	{
+		const char* name = child->Attribute("name");
 
-        const char* name = child->Attribute("name");
-        if (strcmp(name, materialName.c_str()) == 0)
-        {
-            materialElement = child;
-            break;
-        }
-    }
+		outMaterials.push_back(loadMaterial(child, name, texPath));
+	}
+}
 
+
+Material* MaterialLoader::loadMaterial(const std::string& materialName, const std::string& texPath)
+{
+	XMLElement* materialElement = NULL;
+	XMLElement* root = _xmlFile->FirstChildElement(XML_MATERIAL_ROOT);
+
+	for (XMLElement* child = root->FirstChildElement(XML_MATERIAL_ELEMENT); child != NULL; child = child->NextSiblingElement())
+	{
+		std::string elementName(child->Name());
+
+		const char* name = child->Attribute("name");
+		if (strcmp(name, materialName.c_str()) == 0)
+		{
+			materialElement = child;
+			break;
+		}
+	}
+
+	return loadMaterial(materialElement, materialName, texPath);
+}
+
+
+Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::string& materialName, const std::string& texPath)
+{
     Material* sMaterial = new Material;
     sMaterial->name = materialName;
 

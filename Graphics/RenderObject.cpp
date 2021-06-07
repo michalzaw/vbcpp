@@ -207,6 +207,12 @@ void RenderObject::updateLocalMaterialFromModel(unsigned int index, int lod)
 }
 
 
+void RenderObject::replaceMaterialsByName(const std::vector<Material*>& materials, int lod)
+{
+    _modelsDatas[lod].modelRootNode->replaceMaterialsByName(materials);
+}
+
+
 void RenderObject::setIsCastShadows(bool isCastShadows)
 {
     _isCastShadows = isCastShadows;

@@ -28,6 +28,7 @@ class FilesHelper
 
 		static std::string getFileNameFromPath(std::string path);
 		static std::string getFileExtension(std::string fileName);
+        static std::string getPathToDirectoryFromFileName(std::string fileName);
 
 		static std::string getRelativePathToDir(std::string filePath, std::string dirPath);
 		static std::string getRelativePathToDirInGameDir(std::string filePath, std::string dirPath);

@@ -6,6 +6,7 @@
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
+#include "../Bus/BusRepaintLoader.h"
 
 #include "../ImGuiInterface/BusLineAndDirectionWindow.h"
 #include "../ImGuiInterface/ColorsWindow.h"
@@ -179,6 +180,24 @@ void MainGameScene::loadScene()
 	camera->getSceneObject()->setRotation(degToRad(-5.0f),
 										  degToRad(60.0f),
 										  degToRad(0.0f));*/
+
+
+	if (!GameConfig::getInstance().busRepaint.empty())
+	{
+		std::vector<RMaterialsCollection*> altMaterialsCollections;
+		BusRepaintLoader::loadBusRepaint(GameConfig::getInstance().busModel, GameConfig::getInstance().busRepaint, altMaterialsCollections);
+		for (RMaterialsCollection* materialsCollection : altMaterialsCollections)
+		{
+			_activeBus->replaceMaterialsByName(materialsCollection->getMaterials());
+		}
+	}
+
+	std::vector<RMaterialsCollection*> altMaterialsCollections2;
+	BusRepaintLoader::loadBusRepaint(GameConfig::getInstance().busModel, "MPK", altMaterialsCollections2);
+	for (RMaterialsCollection* materialsCollection : altMaterialsCollections2)
+	{
+		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
+	}
 
 
 	Renderer::getInstance().bakeStaticShadows();
