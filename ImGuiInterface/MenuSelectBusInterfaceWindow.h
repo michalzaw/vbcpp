@@ -19,6 +19,8 @@ class MenuSelectBusInterfaceWindow : public ImGuiWindow
 		void drawWindow() override;
 
 		void drawBusConfigurations();
+		void drawBusRepaints();
+		void drawStartButton();
 
 		void changeBusConfiguration(int index);
 

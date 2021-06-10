@@ -3,6 +3,7 @@
 
 
 #include "BusLoader.h"
+#include "BusRepaintDescription.h"
 
 
 struct GameVariable final
@@ -17,6 +18,8 @@ struct GameVariable final
 
 struct BusPreview final
 {
+	std::string busName;
+
 	Bus* bus;
 
 	std::vector<GameVariable> availableVariables;
@@ -24,6 +27,8 @@ struct BusPreview final
 	std::unordered_map<std::string, std::unordered_map<std::string, std::vector<SceneObject*>>> variableDependentObjects; // map[varName][varValue] = std::vector<SceneObject*>
 
 	std::unordered_map<std::string, std::unordered_map<std::string, std::string>> predefinedConfigurations; // map[configurationName][varName] = varValue
+
+	std::vector<BusRepaintDescription> availableRepaints;
 
 	void setConfiguration(std::unordered_map<std::string, std::string>& variables)
 	{

@@ -1,6 +1,7 @@
 #include "BusPreviewLoader.h"
 
 #include "BusConfigurationsLoader.h"
+#include "BusRepaintLoader.h"
 
 #include "../Game/Directories.h"
 
@@ -198,12 +199,15 @@ BusPreview* BusPreviewLoader::loadBusPreview(const std::string& busName)
 {
     _busPreview = new BusPreview;
 
+    _busPreview->busName = busName;
+
     _busPreview->bus = loadBus(busName);
 
     // ustawienie konfiguracji na podstawie domyslnych wartosci zmiennych
     //_busPreview->setConfiguration(_variables);
 
     BusConfigurationsLoader::loadAllBusPredefinedConfigurations(busName, _busPreview->predefinedConfigurations, _variables);
+    BusRepaintLoader::loadAllRepaintsDescriptions(busName, _busPreview->availableRepaints);
 
     return _busPreview;
 }

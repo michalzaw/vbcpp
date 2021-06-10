@@ -20,6 +20,7 @@ set (BUS_HEADERS
 	Bus/BusLoader.h
 	Bus/BusPreviewLoader.h
 	Bus/BusRaycast.h
+	Bus/BusRepaintDescription.h
 	Bus/BusRepaintLoader.h
 	Bus/Desktop.h
 	Bus/Door.h

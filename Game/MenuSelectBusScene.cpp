@@ -209,6 +209,7 @@ void MenuSelectBusScene::initialize()
 	SceneObject* lightSceneObject = _sceneManager->addSceneObject("bus");
 	Light* light = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
 	lightSceneObject->addComponent(light);
+	lightSceneObject->setRotation(0, PI, 0);
 	light->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
 
 	// sky
