@@ -569,7 +569,7 @@ void Renderer::prepareRenderData()
     for (int i = 0; i < graphicsManager._mirrorComponents.size(); ++i)
     {
         Frustum frustum(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
-        if (isPointInFrustum(frustum, graphicsManager._mirrorComponents[i]->getPosition()))
+        if (graphicsManager._mirrorComponents[i]->isActive() && isPointInFrustum(frustum, graphicsManager._mirrorComponents[i]->getPosition()))
         {
             graphicsManager._mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(graphicsManager.getCurrentCamera()->getPosition());
             RenderData* renderData = new RenderData;
@@ -857,6 +857,16 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
             {
                 RenderData* renderData = (*j);
                 _renderDataListForShadowmapping.erase(j);
+
+                for (std::vector<RenderData*>::iterator k = _renderDataList.begin(); k != _renderDataList.end(); ++k)
+                {
+                    if (renderData == *k)
+                    {
+                        _renderDataList.erase(k);
+                        break;
+                    }
+                }
+
                 delete renderData;
 
                 break;

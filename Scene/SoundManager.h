@@ -129,6 +129,13 @@ class SoundManager : virtual public RefCounter
             return soundcomp;
         }
 
+        void removeSoundComponent(SoundComponent* soundComponent)
+        {
+            _sounds.remove(soundComponent);
+
+            delete soundComponent;
+        }
+
     protected:
         CameraStatic*   _camera;
         ALCdevice*      _device;

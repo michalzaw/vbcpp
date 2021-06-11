@@ -106,8 +106,8 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 	//_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 	_gameScene->initialize();
 }
@@ -258,6 +258,15 @@ void Game::fixedStepReadInput(float deltaTime)
 	if (input.isKeyPressed(GLFW_KEY_ESCAPE))
 	{
 		_window->setCloseFlag();
+	}
+	if (input.isKeyPressed(GLFW_KEY_ENTER))
+	{
+		delete _gameScene;
+
+		_sceneManager->clearScene();
+
+		_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+		_gameScene->initialize();
 	}
 
 	_gameScene->fixedStepReadInput(deltaTime);

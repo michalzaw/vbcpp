@@ -61,6 +61,10 @@ SceneObject::~SceneObject()
                 _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
                 break;
 
+            case CT_SOUND:
+                _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(*i));
+                break;
+
             case CT_TREE_COMPONENT:
                 delete *i;
                 break;
@@ -275,6 +279,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_PHYSICAL_BODY:
                     _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                    break;
+
+                case CT_SOUND:
+                    _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(*i));
                     break;
 
                 case CT_TREE_COMPONENT:

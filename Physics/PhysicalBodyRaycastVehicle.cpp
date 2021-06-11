@@ -35,6 +35,8 @@ PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(std::vector<glm::vec3>& v
 
 PhysicalBodyRaycastVehicle::~PhysicalBodyRaycastVehicle()
 {
+    _physMgr->getDynamicsWorld()->removeVehicle(_rayCastVehicle);
+
     delete _rayCastVehicle;
     delete _rayCaster;
 }
