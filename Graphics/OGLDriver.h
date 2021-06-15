@@ -41,6 +41,7 @@ class OGLDriver
         UBO* _currentUBO;
 
         Framebuffer* _defaultFramebuffer;
+        std::vector<Framebuffer*> _uninitializedFramebuffers;
 
 		float _maxAnisotropy;
 
@@ -103,6 +104,8 @@ class OGLDriver
 
             return ibos[shaderType].size() - 1;
         }
+
+        void update();
 
 };
 

@@ -546,6 +546,11 @@ void GraphicsManager::update(float deltaTime)
     {
         (*i)->clear();
     }
+
+    for (DisplayComponent* displayComponent : _displayComponents)
+    {
+        displayComponent->update(deltaTime);
+    }
 }
 
 

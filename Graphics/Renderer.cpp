@@ -18,7 +18,8 @@ Renderer::Renderer()
     _mainRenderData(NULL),
     _renderObjectsAAABB(true), _renderObjectsOBB(false),
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
-	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
+	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
+    _requiredRebuildStaticLighting(false)
 {
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
@@ -889,6 +890,20 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 }
 
 
+void Renderer::rebuildStaticLightingInternal()
+{
+    bakeStaticShadows();
+
+    EnvironmentCaptureComponent* envCaptureComponent = GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent();
+    if (envCaptureComponent != nullptr)
+    {
+        envCaptureComponent->generateRequiredPbrMaps();
+    }
+
+    _requiredRebuildStaticLighting = false;
+}
+
+
 void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 {
     if (_isInitialized)
@@ -1318,10 +1333,21 @@ void Renderer::bakeStaticShadows()
 }
 
 
+void Renderer::rebuildStaticLighting()
+{
+    _requiredRebuildStaticLighting = true;
+}
+
+
 void Renderer::renderAll()
 {
     prepareLightsData();
     prepareRenderData();
+
+    if (_requiredRebuildStaticLighting)
+    {
+        rebuildStaticLightingInternal();
+    }
 
     for (int i = 0; i < _renderDataList.size(); ++i)
     {

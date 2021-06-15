@@ -167,6 +167,8 @@ class Renderer
 
 		RTexture2D* _brdfLutTexture;
 
+		bool _requiredRebuildStaticLighting;
+
 
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
@@ -199,6 +201,9 @@ class Renderer
 
         void createRenderDatasForShadowMap(ShadowMap* shadowMap);
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
+
+
+		void rebuildStaticLightingInternal();
 
         Renderer();
 
@@ -249,6 +254,7 @@ class Renderer
 		VBO* getQuadVbo();
 
 		void bakeStaticShadows();
+		void rebuildStaticLighting();
 
         void renderAll();
         void renderDepth(RenderData* renderData);

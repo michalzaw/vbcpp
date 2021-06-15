@@ -9,6 +9,7 @@
 DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)
 	: Component(CT_DISPLAY),
 	_font(font), _displayWidth(displayWidth), _displayHeight(displayHeight), _emissiveColor(textColor)//(2 * 0.66, 2 * 0.77, 2 * 0.32)
+	, _isTextChanged(false)
 {
 	_tabGeneratorShader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/tabGenerator.frag");
 
@@ -30,7 +31,6 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
 	_displayRenderTexture->setTextureFiltering(0, TFM_TRILINEAR, TFM_LINEAR);
 	_displayRenderTexture->setTextureFiltering(1, TFM_TRILINEAR, TFM_LINEAR);
-	_displayRenderTexture->init();
 }
 
 
@@ -275,10 +275,7 @@ void DisplayComponent::generateTexture()
 void DisplayComponent::setText(DisplayText& text)
 {
 	_displayText = text;
-
-	generateMatrixTexture();
-
-	generateTexture();
+	_isTextChanged = true;
 }
 
 
@@ -294,4 +291,17 @@ void DisplayComponent::init()
 
 	renderObject->getModel()->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(1);
 	renderObject->getModel()->getMaterial(0)->emissiveTexture = _displayRenderTexture->getTexture(0);
+}
+
+
+void DisplayComponent::update(float deltaTime)
+{
+	if (_isTextChanged)
+	{
+		generateMatrixTexture();
+
+		generateTexture();
+
+		_isTextChanged = false;
+	}
 }

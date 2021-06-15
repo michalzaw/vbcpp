@@ -237,7 +237,7 @@ void MenuSelectBusScene::initialize()
 	_buses2[2]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
-	Renderer::getInstance().bakeStaticShadows();
+	Renderer::getInstance().rebuildStaticLighting();
 
 	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(&_selectedBusConfigurationVariables, _sceneManager, true);
 	_imGuiInterface->addWindow(_menuInterfaceWindow);

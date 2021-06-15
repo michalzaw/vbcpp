@@ -49,6 +49,7 @@ class DisplayComponent : public Component
 		int _displayHeight;
 
 		DisplayText _displayText;
+		bool _isTextChanged;
 
 		Framebuffer* _displayRenderTexture;
 
@@ -69,6 +70,8 @@ class DisplayComponent : public Component
 		DisplayText& getText();
 
 		void init();
+
+		void update(float deltaTime) override;
 
 		static constexpr glm::vec3 DEFAULT_TEXT_COLOR = glm::vec3(1.92, 0.536, 0.044);
 

@@ -149,6 +149,7 @@ Framebuffer* OGLDriver::createFramebuffer()
     Framebuffer* framebuffer = new Framebuffer;
 
     _framebufferList.push_back(framebuffer);
+    _uninitializedFramebuffers.push_back(framebuffer);
 
     return framebuffer;
 }
@@ -216,6 +217,16 @@ void OGLDriver::deleteUBO(UBO* ubo)
 
 void OGLDriver::deleteFramebuffer(Framebuffer* framebuffer)
 {
+    for (int i = 0; i < _uninitializedFramebuffers.size(); ++i)
+    {
+        if (_uninitializedFramebuffers[i] == framebuffer)
+        {
+            _uninitializedFramebuffers.erase(_uninitializedFramebuffers.begin() + i);
+
+            break;
+        }
+    }
+
     for (int i = 0; i < _framebufferList.size(); ++i)
     {
         if (_framebufferList[i] == framebuffer)
@@ -262,4 +273,18 @@ Framebuffer* OGLDriver::getDefaultFramebuffer()
 float OGLDriver::getMaxAnisotropy()
 {
 	return _maxAnisotropy;
+}
+
+
+void OGLDriver::update()
+{
+    for (Framebuffer* framebuffer : _uninitializedFramebuffers)
+    {
+        if (!framebuffer->_isInitialized)
+        {
+            framebuffer->init();
+        }
+    }
+
+    _uninitializedFramebuffers.clear();
 }

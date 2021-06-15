@@ -36,7 +36,6 @@ void ShadowMap::create()
         _shadowMap[i]->addTexture(TF_DEPTH_COMPONENT, _shadowmapSize[i], _shadowmapSize[i]);
         _shadowMap[i]->getTexture(0)->setParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         _shadowMap[i]->getTexture(0)->setParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        _shadowMap[i]->init();
 
         _cameraForShadowMap[i] = GraphicsManager::getInstance().addCameraStatic(CPT_ORTHOGRAPHIC);
         _cameraForShadowMap[i]->setOrthoProjectionParams(-256.0f, 256.0f, -256.0f, 256.0f, -256.0f, 256.0f);

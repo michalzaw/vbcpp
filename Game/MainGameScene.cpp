@@ -192,15 +192,15 @@ void MainGameScene::loadScene()
 		}
 	}
 
-	std::vector<RMaterialsCollection*> altMaterialsCollections2;
+	/*std::vector<RMaterialsCollection*> altMaterialsCollections2;
 	BusRepaintLoader::loadBusRepaint(GameConfig::getInstance().busModel, "MPK", altMaterialsCollections2);
 	for (RMaterialsCollection* materialsCollection : altMaterialsCollections2)
 	{
 		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
-	}
+	}*/
 
 
-	Renderer::getInstance().bakeStaticShadows();
+	Renderer::getInstance().rebuildStaticLighting();
 }
 
 

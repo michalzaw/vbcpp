@@ -29,7 +29,6 @@ class MirrorComponent : public CameraStatic
             _framebuffer = OGLDriver::getInstance().createFramebuffer();
             _framebuffer->addDepthRenderbuffer(256, 512);
             _framebuffer->addTexture(TF_RGBA, 256, 512);
-            _framebuffer->init();
         }
 
         Framebuffer* getFramebuffer()

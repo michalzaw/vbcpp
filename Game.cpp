@@ -170,6 +170,8 @@ void Game::run()
 		{
 			readInput(deltaTime);
 
+			OGLDriver::getInstance().update();
+
 			while (accumulator > TIME_STEP)
 			{
 				fixedStepUpdate(TIME_STEP);

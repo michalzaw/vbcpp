@@ -35,19 +35,7 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* enviro
 	if (GameConfig::getInstance().pbrSupport)
 	{
 		initIrradianceFramebufferAndShader();
-		
-		if (_irradianceMap == NULL)
-			generateIrradianceMap();
-		
-		if (_specularIrradianceMap == NULL)
-			generatePrefilteredEnvMap();
 	}
-
-	if (_irradianceMap == NULL)
-		_irradianceMap = _environmentMap;
-
-	if (_specularIrradianceMap == NULL)
-		_specularIrradianceMap = _environmentMap;
 }
 
 
@@ -212,6 +200,25 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 RTextureCubeMap* EnvironmentCaptureComponent::getEnvironmentMap()
 {
     return _environmentMap;
+}
+
+
+void EnvironmentCaptureComponent::generateRequiredPbrMaps()
+{
+	if (GameConfig::getInstance().pbrSupport)
+	{
+		if (_irradianceMap == NULL)
+			generateIrradianceMap();
+
+		if (_specularIrradianceMap == NULL)
+			generatePrefilteredEnvMap();
+	}
+
+	if (_irradianceMap == NULL)
+		_irradianceMap = _environmentMap;
+
+	if (_specularIrradianceMap == NULL)
+		_specularIrradianceMap = _environmentMap;
 }
 
 
