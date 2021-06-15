@@ -28,9 +28,9 @@ DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int dis
 	_displayRenderTexture = OGLDriver::getInstance().createFramebuffer();
 	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
 	_displayRenderTexture->addTexture(TF_RGBA, _displayWidth * pointWidth, _displayHeight * pointHeight);
-	_displayRenderTexture->setViewport(UintRect(0, 0, _displayWidth * pointWidth, _displayHeight * pointHeight));
-	_displayRenderTexture->getTexture(0)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
-	_displayRenderTexture->getTexture(1)->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+	_displayRenderTexture->setTextureFiltering(0, TFM_TRILINEAR, TFM_LINEAR);
+	_displayRenderTexture->setTextureFiltering(1, TFM_TRILINEAR, TFM_LINEAR);
+	_displayRenderTexture->init();
 }
 
 

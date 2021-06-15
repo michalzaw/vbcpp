@@ -133,8 +133,8 @@ void Renderer::createFramebuffersForPostProcessing()
 	{
 		_postProcessingFramebuffers[i] = OGLDriver::getInstance().createFramebuffer();
 		_postProcessingFramebuffers[i]->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, false);
-		_postProcessingFramebuffers[i]->getTexture(0)->setFiltering(TFM_LINEAR, TFM_LINEAR);
-		_postProcessingFramebuffers[i]->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+		_postProcessingFramebuffers[i]->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
+        _postProcessingFramebuffers[i]->init();
 	}
 }
 
@@ -178,9 +178,9 @@ void Renderer::recreateAllFramebuffers()
 	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->init();
 	//framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	//framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
-	framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 	_mainRenderData->framebuffer = framebuffer;
 
 	createFramebuffersForPostProcessing();
@@ -905,9 +905,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    framebuffer->init();
     //framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
-    framebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
     _mainRenderData = new RenderData;
     _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();

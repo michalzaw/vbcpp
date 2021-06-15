@@ -78,6 +78,7 @@ bool OGLDriver::initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
     _defaultFramebuffer = new Framebuffer();
+    _defaultFramebuffer->_isCreated = true;
     _defaultFramebuffer->_fboBuffs.push_back(GL_BACK_LEFT);
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
@@ -146,7 +147,6 @@ UBO* OGLDriver::createUBO(unsigned int size)
 Framebuffer* OGLDriver::createFramebuffer()
 {
     Framebuffer* framebuffer = new Framebuffer;
-    framebuffer->init();
 
     _framebufferList.push_back(framebuffer);
 
