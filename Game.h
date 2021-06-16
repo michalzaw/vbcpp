@@ -3,6 +3,8 @@
 
 
 #include <string>
+#include <thread>
+#include <atomic>
 
 #include "Game/Hud.h"
 #include "Game/GameScene.h"
@@ -34,6 +36,9 @@ class Game
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
 		PhysicsDebugRenderer* _physicsDebugRenderer;
+
+		std::thread* _loadingThread;
+		std::atomic<bool> _initialized;
 
 		double _lastFPSupdate;
 		int _numberOfFrames;

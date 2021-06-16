@@ -21,6 +21,8 @@
 #include "Utils/Logger.h"
 #include "Utils/RaycastingUtils.h"
 
+#include "Window/Window.h"
+
 
 Game* instance = nullptr;
 
@@ -28,6 +30,7 @@ Game* instance = nullptr;
 Game::Game()
 	: _window(nullptr),
 	_physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
+	_initialized(false),
 	_fps(0)
 {
 	instance = this;
@@ -98,6 +101,16 @@ void Game::initializeEngineSystems()
 }
 
 
+void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initialized)
+{
+	glfwMakeContextCurrent(window->getWindow());
+
+	scene->initialize();
+
+	initialized = true;
+}
+
+
 void Game::initialize()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -106,10 +119,18 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	//_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 	//_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	_gameScene->initialize();
+	
+	Window* backgroundWindow = new Window;
+	backgroundWindow->createInvisibleWindow(_window);
+
+	_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
+	_loadingThread->detach();
+
+	//_gameScene->initialize();
+	//_initialized = true;
 }
 
 
@@ -166,7 +187,10 @@ void Game::run()
 
 		updateFpsCounter(timePhysicsCurr);
 
+		//glfwPollEvents();
+
 		//if (_state == GS_GAME)
+		if (_initialized)
 		{
 			readInput(deltaTime);
 
@@ -195,7 +219,7 @@ void Game::run()
 #endif // DRAW_IMGUI
 
 		// Render GUI
-		Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
+		//Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
 
 		_window->swapBuffers();
 		//_window->updateEvents();

@@ -19,6 +19,7 @@ class Window
 
         // fullscreenMode: 0 - window, 1 - fullscreen, 2 - windowed fullscreen
         bool createWindow(int w = 1024, int h = 768, int posx = 100, int posy = 100, int fullscreenMode = 0, bool verticalSync = false, bool isResizable = false);
+        bool createInvisibleWindow(Window* mainWindow);
         GLFWwindow* getWindow() { return _win; }
 
         int getHeight() { return _height; }

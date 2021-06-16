@@ -36,7 +36,7 @@ bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glfwWindowHint( GLFW_RESIZABLE, isResizable );
+	glfwWindowHint(GLFW_RESIZABLE, isResizable);
 
     GLFWmonitor* monitor = NULL;
     if (_fullscreenMode == 1)
@@ -73,6 +73,17 @@ bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, 
     //if (!initGLEW())
     //    return false;
 
+    return true;
+}
+
+bool Window::createInvisibleWindow(Window* mainWindow)
+{
+    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    _win = glfwCreateWindow(10, 10, "window2", NULL, mainWindow->getWindow());
+
+    if (!_win)
+        return false;
+    
     return true;
 }
 
