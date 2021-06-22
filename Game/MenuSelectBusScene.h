@@ -36,7 +36,7 @@ class MenuSelectBusScene final : public GameScene
 		void showBusLogo();
 
 	public:
-		MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface);
+		MenuSelectBusScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface);
 		~MenuSelectBusScene();
 
 		void initialize() override;

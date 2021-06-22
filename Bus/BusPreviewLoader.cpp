@@ -15,8 +15,8 @@
 #include "../Graphics/DisplayComponent.h"
 
 
-BusPreviewLoader::BusPreviewLoader(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr)
-	: BusLoader(smgr, pmgr, sndMgr)
+BusPreviewLoader::BusPreviewLoader(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr)
+	: BusLoader(smgr, gmgr, pmgr, sndMgr)
 {
 
 }
@@ -104,7 +104,7 @@ void BusPreviewLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& b
 
         const std::string modelPath = _busPath + wheelModel;
         RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
-        RenderObject* wheelRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel, true), wheelObj);
+        RenderObject* wheelRenderObject = _gMgr->addRenderObject(new RenderObject(wheel, true), wheelObj);
     }
 }
 
@@ -154,7 +154,7 @@ void BusPreviewLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& bu
 
             busModule.sceneObject->addChild(doorObj);
 
-            RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel, doorModelNode, true), doorObj);
+            RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode, true), doorObj);
         }
 
         // arm
@@ -189,7 +189,7 @@ void BusPreviewLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& bu
 
             busModule.sceneObject->addChild(armObj);
 
-            RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel, armModelNode, true), armObj);
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode, true), armObj);
         }
     }
 }

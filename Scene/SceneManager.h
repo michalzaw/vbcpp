@@ -33,10 +33,10 @@ class SceneManager
         BusStart    _busStart;
 
     public:
-        SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr);
+        SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
 
-        //GraphicsManager*    getGraphicsManager();
+        GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
         PhysicsManager*     getPhysicsManager() { return _physicsManager; };
         SoundManager*       getSoundManager() { return _soundManager; };
 
@@ -55,7 +55,7 @@ class SceneManager
 
             _sceneObjects.clear();
 
-            GraphicsManager::getInstance().clearQuadTree();
+            _graphicsManager->clearQuadTree();
         }
 
         SceneObject*    getSceneObject(std::string name);

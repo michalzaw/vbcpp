@@ -12,8 +12,8 @@ using namespace tinyxml2;
 
 #include "../Game/Directories.h"
 
-SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _physicsManager(pMgr), _soundManager(sndMgr)
+SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
+    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
 {
     #ifdef _DEBUG_MODE
         std::cout << "Create SceneManager\n";

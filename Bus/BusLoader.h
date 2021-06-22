@@ -36,6 +36,7 @@ class BusLoader
         int _doorCollidesWith;
 
         SceneManager* _sMgr;
+        GraphicsManager* _gMgr;
         PhysicsManager* _pMgr;
         SoundManager* _sndMgr;
 
@@ -89,7 +90,7 @@ class BusLoader
         void createRequireSoundComponents();
 
     public:
-        BusLoader(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr);
+        BusLoader(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr);
 
         Bus* loadBus(const std::string& busName, const std::unordered_map<std::string, std::string>& variables = {});
 

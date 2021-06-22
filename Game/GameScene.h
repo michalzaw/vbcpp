@@ -16,6 +16,7 @@ class GameScene
 	protected:
 		Window* _window;
 
+		GraphicsManager* _graphicsManager;
 		PhysicsManager* _physicsManager;
 		SoundManager* _soundManager;
 		SceneManager* _sceneManager;
@@ -24,9 +25,9 @@ class GameScene
 		//Window* _window;
 
 	public:
-		GameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+		GameScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
 			: _window(window),
-			_physicsManager(physicsManager), _soundManager(soundManager), _sceneManager(sceneManager), _gui(gui), _imGuiInterface(imGuiInterface)
+			_graphicsManager(graphicsManager), _physicsManager(physicsManager), _soundManager(soundManager), _sceneManager(sceneManager), _gui(gui), _imGuiInterface(imGuiInterface)
 		{
 
 		}

@@ -32,8 +32,8 @@ enum GameCamera
 };
 
 
-MainGameScene::MainGameScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
+MainGameScene::MainGameScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+	: GameScene(window, graphicsManager, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
 	_state(GS_LOADING),
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
@@ -55,7 +55,7 @@ CameraFPS* MainGameScene::createCameraBusDriver()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBusDriver");
 
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
 	cameraFPS->setMoveSpeed(5);
@@ -74,7 +74,7 @@ CameraFPS* MainGameScene::createCameraBus()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBus");
 
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
 	cameraFPS->setMoveSpeed(5);
@@ -99,7 +99,7 @@ CameraFPS* MainGameScene::createCameraFPSGlobal()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraFPSGlobal");
 
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
 	cameraFPS->setMoveSpeed(5);
@@ -135,7 +135,7 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 
 	_activeCamera = camera;
 
-	GraphicsManager::getInstance().setCurrentCamera(camera);
+	_graphicsManager->setCurrentCamera(camera);
 	_soundManager->setActiveCamera(camera);
 }
 
@@ -144,7 +144,7 @@ void MainGameScene::loadScene()
 {
 	std::unordered_map<std::string, std::string> busVariables;
 
-	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
+	BusLoader busLoader(_sceneManager, _graphicsManager, _physicsManager, _soundManager);
 
 	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, GameConfig::getInstance().busConfiguration, busVariables);
 	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
@@ -175,7 +175,7 @@ void MainGameScene::loadScene()
 
 	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
 
-	/*CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+	/*CameraStatic* camera = _graphicsManager->getCurrentCamera();
 	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));
 	camera->getSceneObject()->setRotation(degToRad(-5.0f),
 										  degToRad(60.0f),
@@ -552,7 +552,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		}
 		if (input.isKeyPressed(GLFW_KEY_9) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
 		{
-			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
+			_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
 		}
 	}
 
@@ -576,7 +576,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
 
 		// collision with model nodes
-		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+		std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
 		for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
 		{
 			RenderObject* renderObject = *i;

@@ -64,7 +64,7 @@ class BusPreviewLoader final : public BusLoader
 		void loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule) override;
 
 	public:
-		BusPreviewLoader(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr);
+		BusPreviewLoader(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr);
 
 		BusPreview* loadBusPreview(const std::string& busName);
 };

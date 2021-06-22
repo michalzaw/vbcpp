@@ -30,6 +30,7 @@ class Game
 
 		Window* _window;
 
+		GraphicsManager* _graphicsManager;
 		PhysicsManager* _physicsManager;
 		SoundManager* _soundManager;
 		SceneManager* _sceneManager;

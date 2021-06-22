@@ -16,8 +16,8 @@
 #include "../Utils/ResourceManager.h"
 
 
-MenuSelectBusScene::MenuSelectBusScene(Window* window, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-	: GameScene(window, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
+MenuSelectBusScene::MenuSelectBusScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
+	: GameScene(window, graphicsManager, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
 	_selectedBus(0), _selectedBusConfigurationIndex(0),
 	_menuInterfaceWindow(nullptr)
 {
@@ -53,7 +53,7 @@ CameraFPS* MenuSelectBusScene::createCameraFPSGlobal()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraFPSGlobal");
 
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
+	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
 	cameraFPS->setMoveSpeed(5);
@@ -72,7 +72,7 @@ void MenuSelectBusScene::addBus(const std::string& modelFileName, const std::str
 	SceneObject* busSceneObject = _sceneManager->addSceneObject("bus");
 
 	RStaticModel* busModel = ResourceManager::getInstance().loadModel(modelFileName, texturePath);
-	RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel, true), busSceneObject);
+	RenderObject* busRenderObject = _graphicsManager->addRenderObject(new RenderObject(busModel, true), busSceneObject);
 
 	_buses.push_back(busSceneObject);
 }
@@ -80,7 +80,7 @@ void MenuSelectBusScene::addBus(const std::string& modelFileName, const std::str
 
 void MenuSelectBusScene::addBus(const std::string& name)
 {
-	BusPreviewLoader busLoader(_sceneManager, _physicsManager, _soundManager);
+	BusPreviewLoader busLoader(_sceneManager, _graphicsManager, _physicsManager, _soundManager);
 	
 	BusPreview* busPreview = busLoader.loadBusPreview(name);
 	busPreview->bus->getSceneObject()->setIsActive(false);
@@ -173,7 +173,7 @@ void MenuSelectBusScene::initialize()
 
 	CameraFPS* camera = createCameraFPSGlobal();
 
-	GraphicsManager::getInstance().setCurrentCamera(camera);
+	_graphicsManager->setCurrentCamera(camera);
 	_soundManager->setActiveCamera(camera);
 
 	_busLogo = _gui->addImage(ResourceManager::getInstance().loadDefaultWhiteTexture());
@@ -207,7 +207,7 @@ void MenuSelectBusScene::initialize()
 
 	// light
 	SceneObject* lightSceneObject = _sceneManager->addSceneObject("bus");
-	Light* light = GraphicsManager::getInstance().addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
+	Light* light = _graphicsManager->addDirectionalLight(glm::vec3(1.0f, 1.0f, 1.0f), 0.5f, 0.5f);
 	lightSceneObject->addComponent(light);
 	lightSceneObject->setRotation(0, PI, 0);
 	light->setShadowMapping(GameConfig::getInstance().isShadowmappingEnable);
@@ -222,7 +222,7 @@ void MenuSelectBusScene::initialize()
 	skyboxFileNamesArray.push_back("Skybox/skybox_negz.hdr");
 
 	RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
-	GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
+	_graphicsManager->addGlobalEnvironmentCaptureComponent(skyboxTexture);
 
 	// buses
 	//addBus("Buses/Solaris_IV/neoplan.fbx", "Buses/Solaris_IV/");

@@ -122,7 +122,8 @@ bool BusRaycast::isCurrentCameraInBus()
 {
     for (const auto& busModule : _modules)
     {
-        CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+        GraphicsManager* graphicsManager = busModule.sceneObject->getSceneManager()->getGraphicsManager();
+        CameraStatic* camera = graphicsManager->getCurrentCamera();
         const glm::vec3 cameraPosition = camera->getPosition();
 
         PhysicalBody* busModulePhysicalObject = static_cast<PhysicalBody*>(busModule.sceneObject->getComponent(CT_PHYSICAL_BODY));

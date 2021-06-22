@@ -5,8 +5,6 @@
 #include "../Scene/SceneObject.h"
 
 
-static std::unique_ptr<GraphicsManager> gmInstance;
-
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f), _windTimer(0.0f),
     _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
@@ -65,14 +63,6 @@ GraphicsManager::~GraphicsManager()
     //delete _quadTree;
 }
 
-GraphicsManager& GraphicsManager::getInstance()
-{
-    if ( !gmInstance )
-        gmInstance = std::unique_ptr<GraphicsManager>(new GraphicsManager);
-
-    return *gmInstance;
-}
-
 
 RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject* owner)//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
 {
@@ -82,6 +72,19 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
 
     _renderObjects.push_back(object);
     //_quadTree->addObject(object);
+
+    for (Material* material : object->getMirrorMaterials())
+    {
+        MirrorComponent* mirrorComponent = findMirrorComponent(object->getSceneObject(), material->mirrorName);
+        if (mirrorComponent != NULL)
+        {
+            material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+        }
+        else
+        {
+            registerPendingMaterialForMirrorComponent(material);
+        }
+    }
 
     return object;
 }

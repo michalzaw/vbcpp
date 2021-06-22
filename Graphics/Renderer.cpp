@@ -10,6 +10,7 @@ static std::unique_ptr<Renderer> rendererInstance;
 
 Renderer::Renderer()
     : _isInitialized(false),
+    _graphicsManager(nullptr),
     _screenWidth(0), _screenHeight(0),
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
 	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
@@ -281,14 +282,11 @@ void Renderer::initUniformLocations()
 
 void Renderer::prepareLightsData()
 {
-    GraphicsManager& graphicsManager = GraphicsManager::getInstance();
-
-
     // Aktualizacja UBO swiatel
     int d = 0;
     int p = 0;
     int s = 0;
-    for (std::list<Light*>::iterator i = graphicsManager._lights.begin(); i != graphicsManager._lights.end(); ++i)
+    for (std::list<Light*>::iterator i = _graphicsManager->_lights.begin(); i != _graphicsManager->_lights.end(); ++i)
     {
         if (!(*i)->isActive())
             continue;
@@ -446,7 +444,7 @@ void Renderer::prepareLightsData()
 		for (int i = 0; i < ShadowMap::CASCADE_COUNT - 1; ++i)
 		{
 			CameraStatic* cameraForShadowMap = _shadowMap->getCameraForShadowMap(i);
-			CameraStatic* currentCamera = graphicsManager.getCurrentCamera();
+			CameraStatic* currentCamera = _graphicsManager->getCurrentCamera();
 
 			Frustum frustum(glm::perspective(currentCamera->getViewAngle(), (float)currentCamera->getWindowWidth() / (float)currentCamera->getWindowHeight(),
 				cascadeEnd[i], cascadeEnd[i + 1]) * currentCamera->getViewMatrix());
@@ -550,9 +548,6 @@ void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderL
 
 void Renderer::prepareRenderData()
 {
-    GraphicsManager& graphicsManager = GraphicsManager::getInstance();
-
-
     for (int i = 0; i < _renderDataList.size(); ++i)
     {
         if ( _renderDataList[i] != _mainRenderData && !isVectorContains(_renderDataListForShadowmapping, _renderDataList[i]))
@@ -567,15 +562,15 @@ void Renderer::prepareRenderData()
     {
         _renderDataList.push_back(_renderDataListForShadowmapping[i]);
     }
-    for (int i = 0; i < graphicsManager._mirrorComponents.size(); ++i)
+    for (int i = 0; i < _graphicsManager->_mirrorComponents.size(); ++i)
     {
         Frustum frustum(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
-        if (graphicsManager._mirrorComponents[i]->isActive() && isPointInFrustum(frustum, graphicsManager._mirrorComponents[i]->getPosition()))
+        if (_graphicsManager->_mirrorComponents[i]->isActive() && isPointInFrustum(frustum, _graphicsManager->_mirrorComponents[i]->getPosition()))
         {
-            graphicsManager._mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(graphicsManager.getCurrentCamera()->getPosition());
+            _graphicsManager->_mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(_graphicsManager->getCurrentCamera()->getPosition());
             RenderData* renderData = new RenderData;
-            renderData->camera = graphicsManager._mirrorComponents[i];
-            renderData->framebuffer = graphicsManager._mirrorComponents[i]->getFramebuffer();
+            renderData->camera = _graphicsManager->_mirrorComponents[i];
+            renderData->framebuffer = _graphicsManager->_mirrorComponents[i]->getFramebuffer();
             renderData->renderPass = RP_MIRROR;
             _renderDataList.push_back(renderData);
         }
@@ -592,7 +587,7 @@ void Renderer::prepareRenderData()
 
     RenderListElement tempRenderElement;
 
-    for (std::list<RenderObject*>::iterator i = graphicsManager._renderObjects.begin(); i != graphicsManager._renderObjects.end(); ++i)
+    for (std::list<RenderObject*>::iterator i = _graphicsManager->_renderObjects.begin(); i != _graphicsManager->_renderObjects.end(); ++i)
     {
         RenderObject* object = *i;
 
@@ -637,7 +632,7 @@ void Renderer::prepareRenderData()
 #endif // DRAW_AABB
     }
 
-    for (std::list<Grass*>::iterator i = graphicsManager._grassComponents.begin(); i != graphicsManager._grassComponents.end(); ++i)
+    for (std::list<Grass*>::iterator i = _graphicsManager->_grassComponents.begin(); i != _graphicsManager->_grassComponents.end(); ++i)
     {
         RenderObject* object = *i;
 
@@ -651,7 +646,7 @@ void Renderer::prepareRenderData()
     }
 
 
-	RenderObject* sky = graphicsManager.getSky();
+	RenderObject* sky = _graphicsManager->getSky();
 	if (sky != NULL)
 	{
 		for (int j = 0; j < _renderDataList.size(); ++j)
@@ -676,8 +671,6 @@ void Renderer::prepareRenderData()
 
 void Renderer::prepareRenderDataForStaticShadowmaps()
 {
-	GraphicsManager& graphicsManager = GraphicsManager::getInstance();
-
 	for (int i = 0; i < _renderDataListForStaticShadowmapping.size(); ++i)
 	{
 		_renderDataListForStaticShadowmapping[i]->renderList.clear();
@@ -686,7 +679,7 @@ void Renderer::prepareRenderDataForStaticShadowmaps()
 
 	RenderListElement tempRenderElement;
 
-	for (std::list<RenderObject*>::iterator i = graphicsManager._renderObjects.begin(); i != graphicsManager._renderObjects.end(); ++i)
+	for (std::list<RenderObject*>::iterator i = _graphicsManager->_renderObjects.begin(); i != _graphicsManager->_renderObjects.end(); ++i)
 	{
 		RenderObject* object = *i;
 
@@ -890,11 +883,51 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 }
 
 
+void Renderer::clearRenderDatasForShadowMap()
+{
+    for (std::vector<RenderData*>::iterator j = _renderDataListForShadowmapping.begin(); j != _renderDataListForShadowmapping.end();)
+    {
+        RenderData* renderData = (*j);
+        j = _renderDataListForShadowmapping.erase(j);
+
+        for (std::vector<RenderData*>::iterator k = _renderDataList.begin(); k != _renderDataList.end(); ++k)
+        {
+            if (renderData == *k)
+            {
+                _renderDataList.erase(k);
+                break;
+            }
+        }
+
+        delete renderData;
+    }
+
+    for (std::vector<RenderData*>::iterator i = _renderDataListForStaticShadowmapping.begin(); i != _renderDataListForStaticShadowmapping.end();)
+    {
+        RenderData* renderData = (*i);
+        i = _renderDataListForStaticShadowmapping.erase(i);
+        delete renderData;
+    }
+
+    _shadowMap = NULL;
+}
+
+
 void Renderer::rebuildStaticLightingInternal()
 {
+    clearRenderDatasForShadowMap();
+
+    for (Light* light : _graphicsManager->_lights)
+    {
+        if (light->isShadowMapping())
+        {
+            registerShadowMap(light->getShadowMap());
+        }
+    }
+
     bakeStaticShadows();
 
-    EnvironmentCaptureComponent* envCaptureComponent = GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent();
+    EnvironmentCaptureComponent* envCaptureComponent = _graphicsManager->getGlobalEnvironmentCaptureComponent();
     if (envCaptureComponent != nullptr)
     {
         envCaptureComponent->generateRequiredPbrMaps();
@@ -925,7 +958,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 
     _mainRenderData = new RenderData;
-    _mainRenderData->camera = GraphicsManager::getInstance().getCurrentCamera();
+    _mainRenderData->camera = _graphicsManager->getCurrentCamera();
     _mainRenderData->framebuffer = framebuffer;
     _mainRenderData->renderPass = RP_NORMAL;
 
@@ -1097,6 +1130,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 }
 
 
+void Renderer::setGraphicsManager(GraphicsManager* graphicsManager)
+{
+    _graphicsManager = graphicsManager;
+}
+
+
 void Renderer::setAlphaToCoverage(bool isEnable)
 {
     _alphaToCoverage = isEnable;
@@ -1232,6 +1271,7 @@ bool Renderer::isShadowMappingEnable()
 
 void Renderer::registerShadowMap(ShadowMap* shadowMap)
 {
+    // todo: graphicsManager refactor
     if (_isShadowMappingEnable && _shadowMap == NULL)
     {
         _shadowMap = shadowMap;
@@ -1243,6 +1283,7 @@ void Renderer::registerShadowMap(ShadowMap* shadowMap)
 
 void Renderer::unregisterShadowMap(ShadowMap* shadowMap)
 {
+    // todo: graphicsManager refactor
     if (_shadowMap == shadowMap)
     {
         _shadowMap = NULL;
@@ -1256,6 +1297,12 @@ void Renderer::setCurrentMainCamera(CameraStatic* camera)
 {
     //_renderDataList[_renderDataList.size() - 1]->camera = camera;
     _mainRenderData->camera = camera;
+}
+
+
+CameraStatic* Renderer::getCurrentMainCamera()
+{
+    return _mainRenderData->camera;
 }
 
 
@@ -1341,13 +1388,13 @@ void Renderer::rebuildStaticLighting()
 
 void Renderer::renderAll()
 {
-    prepareLightsData();
-    prepareRenderData();
-
     if (_requiredRebuildStaticLighting)
     {
         rebuildStaticLightingInternal();
     }
+
+    prepareLightsData();
+    prepareRenderData();
 
     for (int i = 0; i < _renderDataList.size(); ++i)
     {
@@ -1525,8 +1572,8 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
             if (material->reflectionTexture1 == EMT_GLOBAL)
             {
-                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_MATRIX], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
@@ -1540,8 +1587,8 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
             if (material->reflectionTexture2 == EMT_GLOBAL)
             {
-                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ENVIRONMENTMAP_2_MATRIX], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
@@ -1686,8 +1733,8 @@ void Renderer::renderScene(RenderData* renderData)
 
             if (material->reflectionTexture1 == EMT_GLOBAL)
             {
-                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_MATRIX], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
@@ -1701,8 +1748,8 @@ void Renderer::renderScene(RenderData* renderData)
 
             if (material->reflectionTexture2 == EMT_GLOBAL)
             {
-                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
-                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_MATRIX], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
+                shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getEnvironmentMap());
+                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_ENVIRONMENTMAP_2_MATRIX], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getRotationMatrix());
             }
             else
             {
@@ -1721,7 +1768,7 @@ void Renderer::renderScene(RenderData* renderData)
 
         if (material->shader == TREE_MATERIAL)
         {
-            glm::vec3 d = GraphicsManager::getInstance().getWindVector();
+            glm::vec3 d = _graphicsManager->getWindVector();
 
             Component* treeComponent = i->object->getComponent(CT_TREE_COMPONENT);
             if (treeComponent != NULL)
@@ -1803,14 +1850,14 @@ void Renderer::renderScene(RenderData* renderData)
 
 		if (material->shader == PBR_MATERIAL || material->shader == PBR_TREE_MATERIAL)
 		{
-			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_IRRADIANCE_MAP], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
-			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SPECULAR_IRRADIANCE_MAP], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_IRRADIANCE_MAP], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SPECULAR_IRRADIANCE_MAP], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_BRDF_LUT], _brdfLutTexture);
 		}
 		if (material->shader == SKY_MATERIAL)
 		{
-			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
-			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
+			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 		}
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_1], color1);
@@ -1818,7 +1865,7 @@ void Renderer::renderScene(RenderData* renderData)
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_3], color3);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
-		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], GraphicsManager::getInstance().getWindTimer());
+		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], _graphicsManager->getWindTimer());
 
         if (i->type != RET_GRASS)
         {

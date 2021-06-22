@@ -18,6 +18,8 @@
 
 namespace vbEditor
 {
+	extern GraphicsManager* _graphicsManager;
+
 	RenderObject* currentRenderObject = nullptr;
 	RStaticModel* currentStaticModel = nullptr;
 	unsigned int currentModelLod = 0;
@@ -33,7 +35,7 @@ namespace vbEditor
 
 	void reloadCurrentMaterialInAllObjects()
 	{
-		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+		std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
 		for (RenderObject* renderObject : renderObjects)
 		{
 			if (renderObject->getModel() == currentStaticModel)

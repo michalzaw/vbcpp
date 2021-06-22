@@ -2,6 +2,8 @@
 
 #include "GraphicsManager.h"
 
+#include "../Scene/SceneManager.h"
+
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
@@ -194,14 +196,15 @@ void RenderObject::updateLocalMaterialFromModel(unsigned int index, int lod)
     Material* material = _modelsDatas[lod].model->getMaterial(index);
 	if (material->shader == MIRROR_MATERIAL)
 	{
-		MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), material->mirrorName);
+        GraphicsManager* graphicsManager = getSceneObject()->getSceneManager()->getGraphicsManager();
+		MirrorComponent* mirrorComponent = graphicsManager->findMirrorComponent(getSceneObject(), material->mirrorName);
 		if (mirrorComponent != NULL)
 		{
             material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
 		}
 		else
 		{
-			GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(material);
+            graphicsManager->registerPendingMaterialForMirrorComponent(material);
 		}
 	}
 }
@@ -210,6 +213,18 @@ void RenderObject::updateLocalMaterialFromModel(unsigned int index, int lod)
 void RenderObject::replaceMaterialsByName(const std::vector<Material*>& materials, int lod)
 {
     _modelsDatas[lod].modelRootNode->replaceMaterialsByName(materials);
+}
+
+
+void RenderObject::addMirrorMaterial(Material* material)
+{
+    _mirrorMaterials.push_back(material);
+}
+
+
+const std::vector<Material*>& RenderObject::getMirrorMaterials()
+{
+    return _mirrorMaterials;
 }
 
 

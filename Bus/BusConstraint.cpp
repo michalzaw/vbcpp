@@ -15,8 +15,8 @@ using namespace tinyxml2;
 
 #include "../Utils/Helpers.hpp"
 
-BusConstraint::BusConstraint(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
-: _sceneObject(0), _chasisBody(0), _sMgr(smgr), _pMgr(pmgr), _sndMgr(sndMgr),
+BusConstraint::BusConstraint(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename)
+: _sceneObject(0), _chasisBody(0), _sMgr(smgr), _gMgr(gmgr), _pMgr(pmgr), _sndMgr(sndMgr),
 _maxSteerAngle(0.55f), _steerStep(0.3f),
 _brake(false), _accelerate(false), _handbrake(true), _idle(true),
 _brakeForce(0.0f), _brakeForceStep(0.1f),
@@ -114,7 +114,7 @@ void BusConstraint::loadXMLdata(std::string busname)
 
         busModel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
         //GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), _sceneObject);
-        GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
+        _gMgr->addRenderObject(new RenderObject(busModel), busModule.sceneObject);
 
         //_sceneObject->addComponent(renderObj);
 
@@ -186,7 +186,7 @@ void BusConstraint::loadXMLdata(std::string busname)
 
             std::string modelPath = "Buses/" + busname + "/" + wheelModel;
             RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-            GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelObj);
+            _gMgr->addRenderObject(new RenderObject(wheel), wheelObj);
 
             //wheelObj->addComponent(wheelRender);
 
@@ -251,7 +251,7 @@ void BusConstraint::loadXMLdata(std::string busname)
 
 
             SceneObject* light = _sMgr->addSceneObject("busLight" + toString(_lights.size()));
-            Light* lightComponent = GraphicsManager::getInstance().addPointLight(color, ambientIntensity,
+            Light* lightComponent = _gMgr->addPointLight(color, ambientIntensity,
                                                                                  diffuseIntensity,
                                                                                  LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
             light->addComponent(lightComponent);
@@ -292,7 +292,7 @@ void BusConstraint::loadXMLdata(std::string busname)
             _steeringWheelObject = _sMgr->addSceneObject("steeringWheel");
 
             RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, "./");
-            GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
+            _gMgr->addRenderObject(new RenderObject(steeringWheelModel), _steeringWheelObject);
 
             const char* cPosition = steeringWheelElement->Attribute("position");
             glm::vec3 position = XMLstringToVec3(cPosition);
@@ -335,7 +335,7 @@ void BusConstraint::loadXMLdata(std::string busname)
 
 
             SceneObject* light = _sMgr->addSceneObject(headlightName);
-            Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity,
+            Light* lightComponent = _gMgr->addSpotLight(color, ambientIntensity,
                                                                                 diffuseIntensity, cutoff,
                                                                                 LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
             light->addComponent(lightComponent);
@@ -397,7 +397,7 @@ void BusConstraint::loadXMLdata(std::string busname)
                 std::string modelPath = "Buses/" + busname + "/" + doorModel;
 
                 RStaticModel* dr = ResourceManager::getInstance().loadModel(modelPath, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(dr), doorObj);
+                _gMgr->addRenderObject(new RenderObject(dr), doorObj);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -447,7 +447,7 @@ void BusConstraint::loadXMLdata(std::string busname)
                 std::string armPath = "Buses/" + busname + "/" + armModel;
 
                 RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+                _gMgr->addRenderObject(new RenderObject(arm), armObj);
 
                 btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
@@ -481,7 +481,7 @@ void BusConstraint::loadXMLdata(std::string busname)
                 std::string arm2Path = "Buses/" + busname + "/" + arm2Model;
 
                 RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+                _gMgr->addRenderObject(new RenderObject(arm2), arm2Obj);
                 //arm2Obj->addComponent(arm2Render);
 
                 btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
@@ -513,7 +513,7 @@ void BusConstraint::loadXMLdata(std::string busname)
                 std::string doorPath = "Buses/" + busname + "/" + doorModel;
 
                 RStaticModel* door = ResourceManager::getInstance().loadModel(doorPath, texturePath);
-                GraphicsManager::getInstance().addRenderObject(new RenderObject(door), doorObj);
+                _gMgr->addRenderObject(new RenderObject(door), doorObj);
                 //doorObj->addComponent(doorRender);
 
                 btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);

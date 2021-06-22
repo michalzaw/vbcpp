@@ -14,8 +14,8 @@
 using namespace tinyxml2;
 
 
-BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager, SoundManager* soundManager)
-    : _sMgr(sceneManager), _pMgr(physicsManager), _sndMgr(soundManager),
+BusLoader::BusLoader(SceneManager* sceneManager, GraphicsManager* gmgr, PhysicsManager* physicsManager, SoundManager* soundManager)
+    : _sMgr(sceneManager), _gMgr(gmgr), _pMgr(physicsManager), _sndMgr(soundManager),
     _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
     _currentBusModel(nullptr)
 {
@@ -56,7 +56,7 @@ Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std
     }
     else if (busType == "constraint")
     {
-        return new BusConstraint(_sMgr, _pMgr, _sndMgr, busName);
+        return new BusConstraint(_sMgr, _gMgr, _pMgr, _sndMgr, busName);
     }
     else
     {
@@ -187,7 +187,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         else
             _currentBusModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
 
-        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(_currentBusModel, nodeToSkip, true), busModule.sceneObject);
+        RenderObject* busRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, nodeToSkip, true), busModule.sceneObject);
 
 
         // Tworzenie fizycznego obiektu karoserii
@@ -367,7 +367,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
 
         std::string modelPath = _busPath + wheelModel;
         RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
-        RenderObject* wheelRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
+        RenderObject* wheelRenderObject = _gMgr->addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
 		wheelRenderObject->setIsDynamicObject(true);
 
 
@@ -415,8 +415,8 @@ void BusLoader::loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& 
 
 
         SceneObject* light = _sMgr->addSceneObject("busLight" + toString(_bus->_lights.size()));
-        Light* lightComponent = GraphicsManager::getInstance().addPointLight(color, ambientIntensity, diffuseIntensity,
-                                                                             LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+        Light* lightComponent = _gMgr->addPointLight(color, ambientIntensity, diffuseIntensity,
+                                                     LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
         light->addComponent(lightComponent);
         light->setPosition(position);
         busModule.sceneObject->addChild(light);
@@ -467,7 +467,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
-        RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
+        RenderObject* renderObject = _gMgr->addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
 		renderObject->setIsDynamicObject(true);
 
         busModule.sceneObject->addChild(steeringWheelObject);
@@ -542,12 +542,12 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         desktopObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
         desktopObject->setScale(scale);
 
-        _bus->_desktopClickableObject = GraphicsManager::getInstance().addClickableObject();
+        _bus->_desktopClickableObject = _gMgr->addClickableObject();
         desktopObject->addComponent(_bus->_desktopClickableObject);
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
-        _bus->_desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), desktopObject);
+        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel), desktopObject);
 		_bus->_desktopRenderObject->setIsDynamicObject(true);
 
 
@@ -671,8 +671,8 @@ void BusLoader::loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busM
 
 
         SceneObject* light = _sMgr->addSceneObject(headlightName);
-        Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity, diffuseIntensity, cutoff,
-                                                                            LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+        Light* lightComponent = _gMgr->addSpotLight(color, ambientIntensity, diffuseIntensity, cutoff,
+                                                    LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
         light->addComponent(lightComponent);
         light->setPosition(position);
         light->setRotation(rotation);
@@ -798,7 +798,7 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 	btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
 
 
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
@@ -844,7 +844,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string armPath = _busPath + armModel;
 
     RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath, _normalsSmoothing);
-    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+    RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(arm), armObj);
 	armRenderObject->setIsDynamicObject(true);
 
     btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
@@ -875,7 +875,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string arm2Path = _busPath + arm2Model;
 
     RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath, _normalsSmoothing);
-    RenderObject* arm2RenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+    RenderObject* arm2RenderObject = _gMgr->addRenderObject(new RenderObject(arm2), arm2Obj);
 	arm2RenderObject->setIsDynamicObject(true);
 
     btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
@@ -893,7 +893,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     btVector3 doorPivotA = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
     btVector3 doorPivotB = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
 
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
     //btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
@@ -981,7 +981,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     armObject->setPosition(armPosition);
     armObject->setRotation(armRotation);
 
-    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel, armModelNode), armObject);
+    RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode), armObject);
 	armRenderObject->setIsDynamicObject(true);
 
     PhysicalBody* armBody;
@@ -1013,7 +1013,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
 
 
     // door object
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel, doorModelNode), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody;
@@ -1096,7 +1096,7 @@ void BusLoader::loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusR
                 t[index++] = _busPath + s;
             }
             RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(t);
-            busModule.sceneObject->addComponent(GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap));
+            busModule.sceneObject->addComponent(_gMgr->addEnvironmentCaptureComponent(cubeMap));
         }
     }
 }
@@ -1121,7 +1121,7 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 		float renderingDistance = GameConfig::getInstance().mirrorRenderingDistance;
 
         SceneObject* mirrorObject = _sMgr->addSceneObject(name);
-        MirrorComponent* mirrorComponent = GraphicsManager::getInstance().addMirrorComponent(name, renderingDistance);
+        MirrorComponent* mirrorComponent = _gMgr->addMirrorComponent(name, renderingDistance);
         mirrorComponent->setNormalVector(normal);
 
         mirrorObject->addComponent(mirrorComponent);
@@ -1165,10 +1165,10 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
 		displayRenderObject->init();
 		displayRenderObject->setIsDynamicObject(true);
-		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
+        _gMgr->addRenderObject(displayRenderObject, displaySceneObject);
 
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
-		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints, textColor);
+		DisplayComponent* displayComponent = _gMgr->addDisplayComponent(displayFont, widthInPoints, heightInPoints, textColor);
 		displaySceneObject->addComponent(displayComponent);
 		displayComponent->init();
 
@@ -1197,7 +1197,7 @@ void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& 
             customElementSceneObject->setScale(customElementNode->transform.getScale());
             busModule.sceneObject->addChild(customElementSceneObject);
 
-            RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
         }
 
         childElement = childElement->NextSiblingElement("Element");

@@ -30,8 +30,10 @@ class TreeComponent : public Component
 
         glm::vec3 getWindVector()
         {
-            return (GraphicsManager::getInstance().getWindDirection() + _windDirectionFactor)
-                    * sinf(GraphicsManager::getInstance().getWindValue() + _windVelocityFactor);
+            // todo: implement, temporary unused
+            return glm::vec3(0.0f, 0.0f, 0.0f);
+            //return (GraphicsManager::getInstance().getWindDirection() + _windDirectionFactor)
+            //        * sinf(GraphicsManager::getInstance().getWindValue() + _windVelocityFactor);
 
         }
 

@@ -38,23 +38,23 @@ SceneObject::~SceneObject()
         switch ((*i)->getType())
         {
             case CT_RENDER_OBJECT:
-                GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(*i));
+                _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
                 break;
 
 			case CT_ROAD_OBJECT:
-				GraphicsManager::getInstance().removeRoadObject(static_cast<RoadObject*>(*i));
+                _sceneManager->getGraphicsManager()->removeRoadObject(static_cast<RoadObject*>(*i));
 				break;
 
 			case CT_TERRAIN:
-				GraphicsManager::getInstance().removeTerrain(static_cast<Terrain*>(*i));
+                _sceneManager->getGraphicsManager()->removeTerrain(static_cast<Terrain*>(*i));
 				break;
 
             case CT_CAMERA:
-                GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(*i));
+                _sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(*i));
                 break;
 
             case CT_LIGHT:
-                GraphicsManager::getInstance().removeLight(static_cast<Light*>(*i));
+                _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(*i));
                 break;
 
             case CT_PHYSICAL_BODY:
@@ -70,7 +70,7 @@ SceneObject::~SceneObject()
                 break;
 
             case CT_GRASS:
-                GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(*i));
+                _sceneManager->getGraphicsManager()->removeGrassComponent(static_cast<Grass*>(*i));
                 break;
 
             case CT_BUS_STOP:
@@ -78,23 +78,23 @@ SceneObject::~SceneObject()
                 break;
 
             case CT_ENVIRONMENT_CAPTURE_COMPONENT:
-                GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
                 break;
 
             case CT_MIRROR:
-                GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(*i));
                 break;
 
             case CT_CLICKABLE_OBJECT:
-                GraphicsManager::getInstance().removeClickableObject(static_cast<ClickableObject*>(*i));
+                _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(*i));
                 break;
 
 			case CT_SKY:
-				GraphicsManager::getInstance().removeSky(static_cast<Sky*>(*i));
+                _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(*i));
 				break;
 
 			case CT_DISPLAY:
-				GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+                _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(*i));
 				break;
 
 			case CT_CAMERA_CONTROL:
@@ -258,23 +258,23 @@ void SceneObject::removeComponent(Component* component)
 			switch (component->getType())
             {
                 case CT_RENDER_OBJECT:
-                    GraphicsManager::getInstance().removeRenderObject(static_cast<RenderObject*>(component));
+                    _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(component));
                     break;
 
 				case CT_ROAD_OBJECT:
-					GraphicsManager::getInstance().removeRoadObject(static_cast<RoadObject*>(component));
+                    _sceneManager->getGraphicsManager()->removeRoadObject(static_cast<RoadObject*>(component));
 					break;
 
 				case CT_TERRAIN:
-					GraphicsManager::getInstance().removeTerrain(static_cast<Terrain*>(component));
+                    _sceneManager->getGraphicsManager()->removeTerrain(static_cast<Terrain*>(component));
 					break;
 
                 case CT_CAMERA:
-                    GraphicsManager::getInstance().removeCamera(static_cast<CameraStatic*>(component));
+                    _sceneManager->getGraphicsManager()->removeCamera(static_cast<CameraStatic*>(component));
                     break;
 
                 case CT_LIGHT:
-                    GraphicsManager::getInstance().removeLight(static_cast<Light*>(component));
+                    _sceneManager->getGraphicsManager()->removeLight(static_cast<Light*>(component));
                     break;
 
                 case CT_PHYSICAL_BODY:
@@ -290,7 +290,7 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_GRASS:
-                    GraphicsManager::getInstance().removeGrassComponent(static_cast<Grass*>(component));
+                    _sceneManager->getGraphicsManager()->removeGrassComponent(static_cast<Grass*>(component));
                     break;
 
                 case CT_BUS_STOP:
@@ -298,23 +298,23 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:
-                    GraphicsManager::getInstance().removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
                     break;
 
                 case CT_MIRROR:
-                    GraphicsManager::getInstance().removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(*i));
                     break;
 
                 case CT_CLICKABLE_OBJECT:
-                    GraphicsManager::getInstance().removeClickableObject(static_cast<ClickableObject*>(*i));
+                    _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(*i));
                     break;
 
 				case CT_SKY:
-					GraphicsManager::getInstance().removeSky(static_cast<Sky*>(*i));
+                    _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(*i));
 					break;
 
 				case CT_DISPLAY:
-					GraphicsManager::getInstance().removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(*i));
 					break;
 
 				case CT_CAMERA_CONTROL:

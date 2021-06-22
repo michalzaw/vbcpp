@@ -24,15 +24,7 @@ ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode
 
             if (material->shader == MIRROR_MATERIAL)
             {
-                MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(renderObject->getSceneObject(), material->mirrorName);
-                if (mirrorComponent != NULL)
-                {
-                    material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
-                }
-                else
-                {
-                    GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(material);
-                }
+                renderObject->addMirrorMaterial(material);
             }
         }
         _meshes.push_back(new ModelNodeMesh(mesh.vbo, mesh.ibo, mesh.firstVertex, mesh.firstVertexInVbo, mesh.indicesCount, material));

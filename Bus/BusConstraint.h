@@ -45,7 +45,7 @@ typedef std::vector<Light*> HeadlightsList;
 class BusConstraint : public Bus
 {
     public:
-        BusConstraint(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
+        BusConstraint(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
         virtual ~BusConstraint();
 
         SceneObject* getSceneObject() { return _modules[0].sceneObject; }
@@ -104,6 +104,7 @@ class BusConstraint : public Bus
     private:
         SceneObject*    _sceneObject;
         PhysicalBodyConvexHull* _chasisBody;
+        GraphicsManager* _gMgr;
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
         SoundManager*   _sndMgr;

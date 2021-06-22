@@ -118,6 +118,8 @@ class Renderer
     private:
         bool _isInitialized;
 
+		GraphicsManager* _graphicsManager;
+
         bool _alphaToCoverage;
 
         float _exposure;
@@ -201,6 +203,7 @@ class Renderer
 
         void createRenderDatasForShadowMap(ShadowMap* shadowMap);
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
+		void clearRenderDatasForShadowMap();
 
 
 		void rebuildStaticLightingInternal();
@@ -220,6 +223,8 @@ class Renderer
         glm::vec4 grassColor;
 
         void init(unsigned int screenWidth, unsigned int screenHeight);
+
+		void setGraphicsManager(GraphicsManager* graphicsManager);
 
         void setAlphaToCoverage(bool isEnable);
         bool isAlphaToCoverageEnable();
@@ -241,6 +246,7 @@ class Renderer
         void unregisterShadowMap(ShadowMap* shadowMap);
 
         void setCurrentMainCamera(CameraStatic* camera);
+		CameraStatic* getCurrentMainCamera();
 
         void setDayNightRatio(float ratio);
         float getDayNightRatio();

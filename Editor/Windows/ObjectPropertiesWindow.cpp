@@ -421,7 +421,7 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 		ImGui::Separator();
 
-		std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+		std::vector<CrossroadComponent*> availableCrossroads = vbEditor::_sceneManager->getGraphicsManager()->getCrossroadComponents();
 		CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
 
 		int crossroadCurrentItems[2] = { 0, 0 };
@@ -710,7 +710,7 @@ void showObjectProperties()
 					//ImGui::Text("Connections");
 
 
-					std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+					std::vector<CrossroadComponent*> availableCrossroads = vbEditor::_sceneManager->getGraphicsManager()->getCrossroadComponents();
 					CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
 
 					int crossroadCurrentItems[2] = { 0, 0 };

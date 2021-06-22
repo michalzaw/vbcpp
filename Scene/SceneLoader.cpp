@@ -62,7 +62,7 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	Logger::info("Material: " + materialName);
 
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
-	Terrain* terrainObj = GraphicsManager::getInstance().addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
+	Terrain* terrainObj = _sceneManager->getGraphicsManager()->addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
 	terrainObj->setIsCastShadows(false);
 	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);
 	terrainMesh->setRestitution(0.9f);
@@ -111,7 +111,7 @@ void SceneLoader::loadGrass(XMLElement* grassElement)
 		heightmapTextureForGrass->setFiltering(TFM_LINEAR, TFM_LINEAR);
 
 		SceneObject * grassObject = _sceneManager->addSceneObject("grass");
-		Grass * grassComponent = GraphicsManager::getInstance().addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
+		Grass * grassComponent = _sceneManager->getGraphicsManager()->addGrassComponent(grassModel, heightmapTextureForGrass, grassDensityTexture);
 		grassComponent->setRenderingDistance(renderingDistance);
 		grassComponent->setGrassColor(glm::vec4(grassColor.x, grassColor.y, grassColor.z, 1.0f));
 		grassObject->addComponent(grassComponent);
@@ -149,7 +149,7 @@ void SceneLoader::loadSunLight(XMLElement* sunElement)
 		float diffuseIntensity = atof(sunElement->Attribute("diffuseIntensity"));
 
 		SceneObject* dirLightObject = _sceneManager->addSceneObject("sun");
-		Light* lightComponent = GraphicsManager::getInstance().addDirectionalLight(color, ambientIntensity, diffuseIntensity);
+		Light* lightComponent = _sceneManager->getGraphicsManager()->addDirectionalLight(color, ambientIntensity, diffuseIntensity);
 		dirLightObject->addComponent(lightComponent);
 		dirLightObject->setRotation(rotation);
 		dirLightObject->setPosition(glm::vec3(0, 0, 0));
@@ -182,9 +182,9 @@ void SceneLoader::loadSky(XMLElement* skyElement)
 			SceneObject* skySceneObject = _sceneManager->addSceneObject("sky");
 
 			RTextureCubeMap* skyboxTexture = ResourceManager::getInstance().loadTextureCubeMap(&skyboxFileNamesArray[0]);
-			Sky* skyComponent = GraphicsManager::getInstance().addSky(skyboxTexture, skySceneObject);
+			Sky* skyComponent = _sceneManager->getGraphicsManager()->addSky(skyboxTexture, skySceneObject);
 
-			GraphicsManager::getInstance().addGlobalEnvironmentCaptureComponent(skyboxTexture);
+			_sceneManager->getGraphicsManager()->addGlobalEnvironmentCaptureComponent(skyboxTexture);
 
 		}
 		else
@@ -359,7 +359,7 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadProfile, segments, roadSceneObject);
+		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadProfile, segments, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -428,7 +428,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
+		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -500,7 +500,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		RoadObject* roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
 		roadRenderObject->setIsCastShadows(false);
 
 

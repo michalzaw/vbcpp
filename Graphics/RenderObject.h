@@ -31,6 +31,8 @@ class RenderObject : public Component
     protected:
 		std::vector<ModelData> _modelsDatas;
 
+        std::vector<Material*> _mirrorMaterials;
+
         bool _isCastShadows;
 		bool _isDynamicObject;
 
@@ -56,6 +58,9 @@ class RenderObject : public Component
 
 		void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
         void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
+
+        void addMirrorMaterial(Material* material);
+        const std::vector<Material*>& getMirrorMaterials();
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();

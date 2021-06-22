@@ -230,12 +230,14 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 		if (componentType == "render")
 		{
+			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
+
 			std::string modelFile = components[i]["model"];
 
 			std::string modelPath = objectDirPath + modelFile;
 
 			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath, toBool(components[i]["normalsSmoothing"]));
-			RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(model), sceneObject);
+			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
 			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
 
 			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
@@ -332,15 +334,19 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		}
 		else if (componentType == "environmentCapture")
 		{
+			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
+
 			std::string textures = components[i]["textures"];
 			std::vector<std::string> t = split(textures, ',');
 
 			RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(&t[0]);
-			EnvironmentCaptureComponent* component = GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap);
+			EnvironmentCaptureComponent* component = graphicsManager->addEnvironmentCaptureComponent(cubeMap);
 			sceneObject->addComponent(component);
 		}
 		else if (componentType == "crossroad")
 		{
+			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
+
 			int pointsCount = toInt(components[i]["pointsCount"]);
 			std::vector<CrossroadConnectionPoint> connectionPoints(pointsCount);
 
@@ -350,7 +356,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				connectionPoints[j].direction = XMLstringToVec3(components[i]["direction#" + toString(j)].c_str());
 			}
 
-			CrossroadComponent* crossroad = GraphicsManager::getInstance().addCrossRoad(connectionPoints);
+			CrossroadComponent* crossroad = graphicsManager->addCrossRoad(connectionPoints);
 			sceneObject->addComponent(crossroad);
 		}
 	}

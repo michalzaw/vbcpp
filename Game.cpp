@@ -29,7 +29,7 @@ Game* instance = nullptr;
 
 Game::Game()
 	: _window(nullptr),
-	_physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
+	_graphicsManager(nullptr), _physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
 	_initialized(false),
 	_fps(0)
 {
@@ -67,12 +67,14 @@ void Game::initializeEngineSystems()
 
 	OGLDriver::getInstance().initialize();
 
+	_graphicsManager = new GraphicsManager;
 	_physicsManager = new PhysicsManager;
 	_soundManager = new SoundManager();
 	_soundManager->setMute(true);
-	_sceneManager = new SceneManager(_physicsManager, _soundManager);
+	_sceneManager = new SceneManager(_graphicsManager, _physicsManager, _soundManager);
 
 	Renderer& renderer = Renderer::getInstance();
+	renderer.setGraphicsManager(_graphicsManager);
 	renderer.setFramebufferTextureFormat(gameConfig.hdrQuality == 32 ? TF_RGBA_32F : TF_RGBA_16F);
 	renderer.setMsaaAntialiasing(gameConfig.msaaAntialiasing);
 	renderer.setMsaaAntialiasingLevel(gameConfig.msaaAntialiasingLevel);
@@ -86,8 +88,8 @@ void Game::initializeEngineSystems()
 	renderer.t = 0;
 
 	// unused
-	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-	GraphicsManager::getInstance().setWindVelocity(0.6f);
+	_graphicsManager->setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
+	_graphicsManager->setWindVelocity(0.6f);
 
 	_gui = new GUIManager;
 
@@ -119,9 +121,9 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	//_gameScene = new MenuSelectBusScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	//_gameScene = new TestScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	_gameScene = new MainGameScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new MenuSelectBusScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	//_gameScene = new TestScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 	
 	Window* backgroundWindow = new Window;
 	backgroundWindow->createInvisibleWindow(_window);
@@ -156,7 +158,7 @@ void Game::fixedStepUpdate(double deltaTime)
 
 	_physicsManager->simulate(deltaTime);
 	_gameScene->fixedStepUpdate(deltaTime);
-	GraphicsManager::getInstance().update(deltaTime);
+	_graphicsManager->update(deltaTime);
 
 	_gui->update(deltaTime);
 
@@ -291,7 +293,7 @@ void Game::fixedStepReadInput(float deltaTime)
 
 		_sceneManager->clearScene();
 
-		_gameScene = new MainGameScene(_window, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+		_gameScene = new MainGameScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
 		_gameScene->initialize();
 	}
 

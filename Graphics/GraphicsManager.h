@@ -67,15 +67,11 @@ class GraphicsManager
 
         std::list<Material*> _pendingMaterialsForMirrorComponent;
 
-        GraphicsManager();
-
         void findAndAssigneMirrorComponentToPendingMaterials(MirrorComponent* mirrorComponent);
 
     public:
+        GraphicsManager();
         ~GraphicsManager();
-
-        static GraphicsManager& getInstance();
-
 
         //RenderObject*   qddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);

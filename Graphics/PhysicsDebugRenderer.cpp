@@ -1,6 +1,6 @@
 #include "PhysicsDebugRenderer.h"
 
-#include "GraphicsManager.h"
+#include "Renderer.h"
 #include "VBO.h"
 
 #include "../Utils/Logger.h"
@@ -143,7 +143,7 @@ void PhysicsDebugRenderer::renderAll()
 	_vbo->bind();
 	_shader->enable();
 
-	CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
+	CameraStatic* camera = Renderer::getInstance().getCurrentMainCamera();
 	glm::mat4 MVP = camera->getProjectionMatrix() * camera->getViewMatrix();
 
 	_shader->setUniform(_shader->getUniformLocation("MVP"), MVP);
