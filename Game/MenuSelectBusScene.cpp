@@ -60,9 +60,6 @@ CameraFPS* MenuSelectBusScene::createCameraFPSGlobal()
 	cameraObject->setRotation(0, degToRad(180.0f), 0);
 	cameraObject->setPosition(0, 0.5f, 15);
 
-	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
-	cameraObject->addComponent(cameraControlComponent);
-
 	return cameraFPS;
 }
 

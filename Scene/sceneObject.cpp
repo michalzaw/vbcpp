@@ -74,7 +74,7 @@ SceneObject::~SceneObject()
                 break;
 
             case CT_BUS_STOP:
-                BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
+                _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
                 break;
 
             case CT_ENVIRONMENT_CAPTURE_COMPONENT:
@@ -98,7 +98,7 @@ SceneObject::~SceneObject()
 				break;
 
 			case CT_CAMERA_CONTROL:
-				GameLogicSystem::getInstance().removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
+				_sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 				break;
 
         }
@@ -294,7 +294,7 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_BUS_STOP:
-                    BusStopSystem::getInstance().removeBusStop(static_cast<BusStopComponent*>(*i));
+                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
                     break;
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:
@@ -318,7 +318,7 @@ void SceneObject::removeComponent(Component* component)
 					break;
 
 				case CT_CAMERA_CONTROL:
-					GameLogicSystem::getInstance().removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
+                    _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 					break;
 
             }

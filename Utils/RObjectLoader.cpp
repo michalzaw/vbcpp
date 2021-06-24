@@ -329,7 +329,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		}
 		else if (componentType == "bus-stop")
 		{
-			BusStopComponent* component = BusStopSystem::getInstance().addBusStopComponent("Przystanek");
+			BusStopComponent* component = sceneManager->getBusStopSystem()->addBusStopComponent("Przystanek");
 			sceneObject->addComponent(component);
 		}
 		else if (componentType == "environmentCapture")

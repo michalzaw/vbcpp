@@ -11,6 +11,7 @@ using namespace tinyxml2;
 #include "../Graphics/LoadTerrainModel.h"
 
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
 
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
     : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
@@ -20,6 +21,9 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
     #endif // _DEBUG_MODE
     _physicsManager->grab();
     _soundManager->grab();
+
+    _gameLogicSystem = new GameLogicSystem;
+    _busStopSystem = new BusStopSystem;
 
     _busStart.position = glm::vec3(0,3,0);
     _busStart.rotation = glm::vec3(0,0,0);
@@ -45,6 +49,10 @@ SceneManager::~SceneManager()
 
     _physicsManager->drop();
     _soundManager->drop();
+    delete _graphicsManager;
+
+    delete _gameLogicSystem;
+    delete _busStopSystem;
 
     //delete _graphicsManager;
     //delete _physicsManager;

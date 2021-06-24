@@ -62,7 +62,7 @@ CameraFPS* MainGameScene::createCameraBusDriver()
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
-	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 	cameraControlComponent->setMovmentControl(false);
 
@@ -87,7 +87,7 @@ CameraFPS* MainGameScene::createCameraBus()
 	cameraFPS->setMaxPositionOffset(30.0f);
 	cameraFPS->setPositionOffset(10.0f);
 
-	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 	cameraControlComponent->setMovmentControl(false);
 
@@ -106,7 +106,7 @@ CameraFPS* MainGameScene::createCameraFPSGlobal()
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
-	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 
 	return cameraFPS;
@@ -148,11 +148,11 @@ void MainGameScene::loadScene()
 
 	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, GameConfig::getInstance().busConfiguration, busVariables);
 	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
-	GameLogicSystem::getInstance().addBus(bus);
+	_buses.push_back(bus);
 
 	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, "Typ 2", busVariables);
 	Bus* bus2 = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
-	GameLogicSystem::getInstance().addBus(bus2);
+	_buses.push_back(bus2);
 
 	_activeBus = bus;
 
@@ -213,7 +213,7 @@ void MainGameScene::initGui()
 void MainGameScene::initImGuiInterface()
 {
 	// windows
-	ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager);
+	ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, &_buses);
 
 	_imGuiInterface->addWindow(busLineAndDirectionWindow);
 
@@ -272,11 +272,11 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 {
 	_activeBus->update(deltaTime);
 
-	BusStopSystem::getInstance().update(deltaTime, _activeBus);
+	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
 
 	if (_isCameraControll)
 	{
-		GameLogicSystem::getInstance().update(deltaTime);
+		_sceneManager->getGameLogicSystem()->update(deltaTime);
 	}
 }
 
@@ -402,11 +402,11 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 
 	if (input.isKeyPressed(GLFW_KEY_1))
 	{
-		_activeBus = GameLogicSystem::getInstance().getBus(0);
+		_activeBus = _buses[0];
 	}
 	if (input.isKeyPressed(GLFW_KEY_2))
 	{
-		_activeBus = GameLogicSystem::getInstance().getBus(1);
+		_activeBus = _buses[1];
 	}
 
 	if (input.isKeyPressed(GLFW_KEY_L))
@@ -588,7 +588,10 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 
 void MainGameScene::terminate()
 {
-
+	for (int i = 0; i < _buses.size(); ++i)
+	{
+		delete _buses[i];
+	}
 }
 
 

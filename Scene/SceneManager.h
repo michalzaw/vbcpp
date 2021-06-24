@@ -15,6 +15,9 @@
 #include "../Game/BusStopSystem.h"
 
 
+class GameLogicSystem;
+class BusStopSystem;
+
 struct BusStart
 {
     glm::vec3 position;
@@ -27,6 +30,8 @@ class SceneManager
         GraphicsManager*    _graphicsManager;
         PhysicsManager*     _physicsManager;
         SoundManager*       _soundManager;
+        GameLogicSystem*    _gameLogicSystem;
+        BusStopSystem*      _busStopSystem;
 
         std::list<SceneObject*> _sceneObjects;
 
@@ -39,6 +44,8 @@ class SceneManager
         GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
         PhysicsManager*     getPhysicsManager() { return _physicsManager; };
         SoundManager*       getSoundManager() { return _soundManager; };
+        GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
+        BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
 
 
         SceneObject*    addSceneObject(std::string name, RObject* objectDefinition = NULL);

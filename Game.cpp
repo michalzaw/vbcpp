@@ -232,6 +232,7 @@ void Game::run()
 
 void Game::terminate()
 {
+	_gameScene->terminate();
 	delete _gameScene;
 
 	_physicsManager->stop();
@@ -239,8 +240,6 @@ void Game::terminate()
 	_window->setCursorMode(GLFW_CURSOR_NORMAL);
 
 	delete _gui;
-
-	GameLogicSystem::getInstance().destroy();
 
 	_soundManager->drop();
 	_physicsManager->drop();

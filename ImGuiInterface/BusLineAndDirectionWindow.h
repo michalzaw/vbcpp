@@ -8,10 +8,12 @@
 class BusLineAndDirectionWindow : public ImGuiWindow
 {
 	private:
+		std::vector<Bus*>* _buses;
+
 		virtual void drawWindow() override;
 
 	public:
-		BusLineAndDirectionWindow(SceneManager* sceneManager, bool isOpen = true);
+		BusLineAndDirectionWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
 };
 
 

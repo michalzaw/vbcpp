@@ -38,7 +38,7 @@ CameraFPS* TestScene::createCameraFPSGlobal()
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0.5f, -15);
 
-	CameraControlComponent* cameraControlComponent = GameLogicSystem::getInstance().addCameraControlComponent(cameraFPS);
+	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 
 	cameraControlComponent->setIsActive(true);
@@ -122,7 +122,7 @@ void TestScene::fixedStepUpdate(double deltaTime)
 {
 	//busObject->rotate(0.0f, degToRad(10.0f * deltaTime), 0.0f);
 
-	GameLogicSystem::getInstance().update(deltaTime);
+	_sceneManager->getGameLogicSystem()->update(deltaTime);
 }
 
 

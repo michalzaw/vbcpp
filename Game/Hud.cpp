@@ -5,6 +5,8 @@
 #include "../Bus/Bus.h"
 #include "../Game/BusStopSystem.h"
 
+#include "../Scene/SceneManager.h"
+
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 
@@ -143,12 +145,12 @@ void Hud::update(int fps)
 		_imagesDoorOpened[i]->setIsActive(_bus->getDoor(i)->getState() == EDS_OPENING);
 	}
 
-
-	BusStopSystem& busStopSystem = BusStopSystem::getInstance();
-	if (busStopSystem.getCurrentBusStop() != NULL)
+	// todo: graphicsManager refactor
+	BusStopSystem* busStopSystem = _bus->getSceneObject()->getSceneManager()->getBusStopSystem();
+	if (busStopSystem->getCurrentBusStop() != NULL)
 	{
-		_labelBusStop->setText(busStopSystem.getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem.getDistanceToCurrentBusStop()) + "m)");
-		_labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem.getCurrentBusStop()->getNumberOfPassengers()));
+		_labelBusStop->setText(busStopSystem->getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem->getDistanceToCurrentBusStop()) + "m)");
+		_labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem->getCurrentBusStop()->getNumberOfPassengers()));
 	}
 	else
 	{

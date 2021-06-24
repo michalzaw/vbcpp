@@ -20,6 +20,7 @@ class MainGameScene final : public GameScene
 	private:
 		GameState _state;
 
+		std::vector<Bus*> _buses;
 		Bus* _activeBus;
 		std::vector<CameraFPS*> _cameras;
 		CameraFPS* _activeCamera;

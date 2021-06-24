@@ -8,9 +8,6 @@
 #include "../Graphics/CameraFPS.hpp"
 
 
-static std::unique_ptr<GameLogicSystem> instance;
-
-
 GameLogicSystem::GameLogicSystem()
 {
 
@@ -23,21 +20,12 @@ GameLogicSystem::~GameLogicSystem()
 }
 
 
-GameLogicSystem& GameLogicSystem::getInstance()
-{
-	if (!instance)
-		instance = std::unique_ptr<GameLogicSystem>(new GameLogicSystem);
-
-	return *instance;
-}
-
-
-Bus* GameLogicSystem::addBus(Bus* bus)
+/*Bus* GameLogicSystem::addBus(Bus* bus)
 {
 	_buses.push_back(bus);
 
 	return bus;
-}
+}*/
 
 
 CameraControlComponent* GameLogicSystem::addCameraControlComponent(CameraFPS* camera)
@@ -61,7 +49,7 @@ CameraControlComponent* GameLogicSystem::addCameraControlComponent(CameraFPS* ca
 }*/
 
 
-void GameLogicSystem::removeBus(Bus* bus)
+/*void GameLogicSystem::removeBus(Bus* bus)
 {
 	for (std::vector<Bus*>::iterator i = _buses.begin(); i != _buses.end(); ++i)
 	{
@@ -74,7 +62,7 @@ void GameLogicSystem::removeBus(Bus* bus)
 			return;
 		}
 	}
-}
+}*/
 
 
 void GameLogicSystem::removeCameraControlComponent(CameraControlComponent* component)
@@ -109,10 +97,10 @@ void GameLogicSystem::removeCameraControlComponent(CameraControlComponent* compo
 }*/
 
 
-Bus* GameLogicSystem::getBus(unsigned int index)
+/*Bus* GameLogicSystem::getBus(unsigned int index)
 {
 	return _buses[index];
-}
+}*/
 
 
 void GameLogicSystem::update(float deltaTime)
@@ -131,12 +119,12 @@ void GameLogicSystem::update(float deltaTime)
 
 void GameLogicSystem::destroy()
 {
-	for (std::vector<Bus*>::iterator i = _buses.begin(); i != _buses.end(); ++i)
+	/*for (std::vector<Bus*>::iterator i = _buses.begin(); i != _buses.end(); ++i)
 	{
 		delete* i;
 	}
 
-	_buses.clear();
+	_buses.clear();*/
 
 	for (std::vector<CameraControlComponent*>::iterator i = _cameraControlComponents.begin(); i != _cameraControlComponents.end(); ++i)
 	{
