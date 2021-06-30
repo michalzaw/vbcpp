@@ -32,8 +32,8 @@ enum GameCamera
 };
 
 
-MainGameScene::MainGameScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-	: GameScene(window, graphicsManager, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
+MainGameScene::MainGameScene(Window* window)
+	: GameScene(window),
 	_state(GS_LOADING),
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
@@ -265,6 +265,8 @@ void MainGameScene::initialize()
 	initImGuiInterface();
 
 	startGame();
+
+	Renderer::getInstance().setGraphicsManager(_graphicsManager);
 }
 
 

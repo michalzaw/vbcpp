@@ -14,8 +14,8 @@
 #include "../Utils/ResourceManager.h"
 
 
-TestScene::TestScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-	: GameScene(window, graphicsManager, physicsManager, soundManager, sceneManager, gui, imGuiInterface)
+TestScene::TestScene(Window* window)
+	: GameScene(window)
 {
 
 }
@@ -114,7 +114,9 @@ void TestScene::initialize()
 	Bus* bus = busLoader.loadBus("neoplan");
 	bus->getSceneObject()->move(1.0f, 0.0f, 0.0f);
 
-	Renderer::getInstance().bakeStaticShadows();
+	Renderer::getInstance().rebuildStaticLighting();
+
+	Renderer::getInstance().setGraphicsManager(_graphicsManager);
 }
 
 

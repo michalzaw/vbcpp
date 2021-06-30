@@ -958,7 +958,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 
     _mainRenderData = new RenderData;
-    _mainRenderData->camera = _graphicsManager->getCurrentCamera();
+    //_mainRenderData->camera = _graphicsManager->getCurrentCamera();
     _mainRenderData->framebuffer = framebuffer;
     _mainRenderData->renderPass = RP_NORMAL;
 

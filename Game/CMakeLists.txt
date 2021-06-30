@@ -5,6 +5,7 @@ set (GAME_SOURCES
 	Game/GameConfig.cpp
 	Game/GameEnvironment.cpp
 	Game/GameLogicSystem.cpp
+	Game/GameScene.cpp
 	Game/Hud.cpp
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp

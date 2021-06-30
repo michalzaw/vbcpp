@@ -20,9 +20,6 @@
 #include "Window/Window.h"
 
 
-#define DRAW_IMGUI
-
-
 class Game
 {
 	private:
@@ -30,12 +27,6 @@ class Game
 
 		Window* _window;
 
-		GraphicsManager* _graphicsManager;
-		PhysicsManager* _physicsManager;
-		SoundManager* _soundManager;
-		SceneManager* _sceneManager;
-		GUIManager* _gui;
-		ImGuiInterface* _imGuiInterface;
 		PhysicsDebugRenderer* _physicsDebugRenderer;
 
 		std::thread* _loadingThread;

@@ -29,7 +29,6 @@ Game* instance = nullptr;
 
 Game::Game()
 	: _window(nullptr),
-	_graphicsManager(nullptr), _physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
 	_initialized(false),
 	_fps(0)
 {
@@ -67,14 +66,7 @@ void Game::initializeEngineSystems()
 
 	OGLDriver::getInstance().initialize();
 
-	_graphicsManager = new GraphicsManager;
-	_physicsManager = new PhysicsManager;
-	_soundManager = new SoundManager();
-	_soundManager->setMute(true);
-	_sceneManager = new SceneManager(_graphicsManager, _physicsManager, _soundManager);
-
 	Renderer& renderer = Renderer::getInstance();
-	renderer.setGraphicsManager(_graphicsManager);
 	renderer.setFramebufferTextureFormat(gameConfig.hdrQuality == 32 ? TF_RGBA_32F : TF_RGBA_16F);
 	renderer.setMsaaAntialiasing(gameConfig.msaaAntialiasing);
 	renderer.setMsaaAntialiasingLevel(gameConfig.msaaAntialiasingLevel);
@@ -86,20 +78,6 @@ void Game::initializeEngineSystems()
 	renderer.setExposure(1.87022f);
 	renderer.setToneMappingType(TMT_CLASSIC);
 	renderer.t = 0;
-
-	// unused
-	_graphicsManager->setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-	_graphicsManager->setWindVelocity(0.6f);
-
-	_gui = new GUIManager;
-
-#ifdef DRAW_IMGUI
-	_imGuiInterface = new ImGuiInterface(_window, _sceneManager);
-
-	_physicsDebugRenderer = new PhysicsDebugRenderer;
-
-	_physicsManager->setDebugRenderer(_physicsDebugRenderer);
-#endif // DRAW_IMGUI
 }
 
 
@@ -121,18 +99,18 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = new MainGameScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	//_gameScene = new MenuSelectBusScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
-	//_gameScene = new TestScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+	_gameScene = new MainGameScene(_window);
+	//_gameScene = new MenuSelectBusScene(_window);
+	//_gameScene = new TestScene(_window);
 	
 	Window* backgroundWindow = new Window;
 	backgroundWindow->createInvisibleWindow(_window);
 
-	_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
-	_loadingThread->detach();
+	//_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
+	//_loadingThread->detach();
 
-	//_gameScene->initialize();
-	//_initialized = true;
+	_gameScene->initialize();
+	_initialized = true;
 }
 
 
@@ -156,13 +134,7 @@ void Game::fixedStepUpdate(double deltaTime)
 {
 	InputSystem::getInstance().update();
 
-	_physicsManager->simulate(deltaTime);
-	_gameScene->fixedStepUpdate(deltaTime);
-	_graphicsManager->update(deltaTime);
-
-	_gui->update(deltaTime);
-
-	fixedStepReadInput(deltaTime);
+	_gameScene->fixedStepUpdateScene(deltaTime);
 }
 
 
@@ -201,27 +173,26 @@ void Game::run()
 			while (accumulator > TIME_STEP)
 			{
 				fixedStepUpdate(TIME_STEP);
+				fixedStepReadInput(TIME_STEP);
 
 				accumulator -= TIME_STEP;
 			}
 
-			_soundManager->update();
-
-			_gameScene->update(deltaTime);
+			_gameScene->updateScene(deltaTime);
 
 			Renderer::getInstance().renderAll();
 		}
 
 #ifdef DRAW_IMGUI
-		if (_physicsManager->getDebugRenderingState())
+		/*if (_physicsManager->getDebugRenderingState())
 		{
 			_physicsDebugRenderer->renderAll();
-		}
-		_imGuiInterface->draw();
+		}*/
+		_gameScene->getImGuiInterface()->draw();
 #endif // DRAW_IMGUI
 
 		// Render GUI
-		//Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
+		Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
 
 		_window->swapBuffers();
 		//_window->updateEvents();
@@ -232,23 +203,10 @@ void Game::run()
 
 void Game::terminate()
 {
-	_gameScene->terminate();
+	_gameScene->terminateScene();
 	delete _gameScene;
 
-	_physicsManager->stop();
-
 	_window->setCursorMode(GLFW_CURSOR_NORMAL);
-
-	delete _gui;
-
-	_soundManager->drop();
-	_physicsManager->drop();
-	delete _sceneManager;
-
-#ifdef DRAW_IMGUI
-	delete _physicsDebugRenderer;
-	delete _imGuiInterface;
-#endif // DRAW_IMGUI
 
 	delete _window;
 }
@@ -278,7 +236,7 @@ void Game::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_GRAVE_ACCENT))
 	{
-		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
+		_gameScene->getImGuiInterface()->setIsOpen(!_gameScene->getImGuiInterface()->isOpen());
 	}
 #endif // DRAW_IMGUI
 
@@ -288,11 +246,12 @@ void Game::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_ENTER))
 	{
+		_gameScene->terminateScene();
 		delete _gameScene;
 
-		_sceneManager->clearScene();
+		//_sceneManager->clearScene();
 
-		_gameScene = new MainGameScene(_window, _graphicsManager, _physicsManager, _soundManager, _sceneManager, _gui, _imGuiInterface);
+		_gameScene = new MainGameScene(_window);
 		_gameScene->initialize();
 	}
 

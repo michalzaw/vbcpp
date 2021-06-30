@@ -16,8 +16,8 @@
 #include "../Utils/ResourceManager.h"
 
 
-MenuSelectBusScene::MenuSelectBusScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-	: GameScene(window, graphicsManager, physicsManager, soundManager, sceneManager, gui, imGuiInterface),
+MenuSelectBusScene::MenuSelectBusScene(Window* window)
+	: GameScene(window),
 	_selectedBus(0), _selectedBusConfigurationIndex(0),
 	_menuInterfaceWindow(nullptr)
 {
@@ -240,6 +240,8 @@ void MenuSelectBusScene::initialize()
 	_imGuiInterface->addWindow(_menuInterfaceWindow);
 
 	showSelectedBus();
+
+	Renderer::getInstance().setGraphicsManager(_graphicsManager);
 }
 
 

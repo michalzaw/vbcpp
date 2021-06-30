@@ -13,7 +13,7 @@ class TestScene final : public GameScene
 		CameraFPS* createCameraFPSGlobal();
 
 	public:
-		TestScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface);
+		explicit TestScene(Window* window);
 		~TestScene();
 
 		void initialize() override;

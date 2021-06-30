@@ -11,6 +11,9 @@
 #include "../Window/Window.h"
 
 
+#define DRAW_IMGUI
+
+
 class GameScene
 {
 	protected:
@@ -22,16 +25,17 @@ class GameScene
 		SceneManager* _sceneManager;
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
-		//Window* _window;
 
 	public:
-		GameScene(Window* window, GraphicsManager* graphicsManager, PhysicsManager* physicsManager, SoundManager* soundManager, SceneManager* sceneManager, GUIManager* gui, ImGuiInterface* imGuiInterface)
-			: _window(window),
-			_graphicsManager(graphicsManager), _physicsManager(physicsManager), _soundManager(soundManager), _sceneManager(sceneManager), _gui(gui), _imGuiInterface(imGuiInterface)
-		{
+		explicit GameScene(Window* window);
+		virtual ~GameScene();
 
-		}
-		virtual ~GameScene() {}
+		void fixedStepUpdateScene(double deltaTime);
+		void updateScene(double deltaTime);
+		void terminateScene();
+
+		GUIManager* getGuiManager() { return _gui; }
+		ImGuiInterface* getImGuiInterface() { return _imGuiInterface; }
 
 		virtual void initialize() = 0;
 
