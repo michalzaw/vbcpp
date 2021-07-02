@@ -19,19 +19,14 @@
 class ImGuiInterface
 {
     private:
-        Window* _window;
-
         SceneManager* _sceneManager;
 
-        bool _styleDark;
 		bool _isOpen;
 
         std::vector<ImGuiWindow*> _windows;
 
-        void initializeImGui();
-
     public:
-		ImGuiInterface(Window* window, SceneManager* sceneManager);
+		ImGuiInterface(SceneManager* sceneManager);
         ~ImGuiInterface();
         
         bool GUIhasFocus();

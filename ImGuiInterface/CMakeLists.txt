@@ -11,6 +11,7 @@ set (IMGUI_INTERFACE_SOURCES
 
 set (IMGUI_INTERFACE_HEADERS
 	ImguiInterface/ImguiInterface.h
+	ImGuiInterface/ImGuiInterfaceContext.h
 	ImguiInterface/ImguiWindow.h
 	ImguiInterface/BusLineAndDirectionWindow.h
 	ImguiInterface/ColorsWindow.h

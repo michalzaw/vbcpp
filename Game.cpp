@@ -14,6 +14,8 @@
 
 #include "Graphics/Renderer.h"
 
+#include "ImGuiInterface/ImGuiInterfaceContext.h"
+
 #include "Scene/SceneLoader.h"
 
 #include "Utils/InputSystem.h"
@@ -78,6 +80,8 @@ void Game::initializeEngineSystems()
 	renderer.setExposure(1.87022f);
 	renderer.setToneMappingType(TMT_CLASSIC);
 	renderer.t = 0;
+
+	ImGuiInterfaceContext::initializeImGuiContext(_window, true);
 }
 
 
@@ -207,6 +211,8 @@ void Game::terminate()
 	delete _gameScene;
 
 	_window->setCursorMode(GLFW_CURSOR_NORMAL);
+
+	ImGuiInterfaceContext::destroyImGuiContext();
 
 	delete _window;
 }

@@ -9,11 +9,11 @@
 
 #include "glm/gtc/type_ptr.hpp"
 
-ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager)
-	: _window(window), _sceneManager(sceneManager),
-    _styleDark(true), _isOpen(false)
+ImGuiInterface::ImGuiInterface(SceneManager* sceneManager)
+	: _sceneManager(sceneManager),
+    _isOpen(false)
 {
-    initializeImGui();
+    
 }
 
 
@@ -23,28 +23,6 @@ ImGuiInterface::~ImGuiInterface()
     {
         delete _windows[i];
     }
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-
-void ImGuiInterface::initializeImGui()
-{
-    ImGui::CreateContext();
-
-    if (_styleDark)
-        ImGui::StyleColorsDark();
-    else
-        ImGui::StyleColorsLight();
-
-    ImGui_ImplGlfw_InitForOpenGL(_window->getWindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 130");
-
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 20.0f);
-    io.Fonts->AddFontDefault();
 }
 
 
