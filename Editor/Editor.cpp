@@ -703,7 +703,7 @@ namespace vbEditor
 
 	bool createWindow()
 	{
-		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true, true))
+		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true, false, true))
 		{
 			return false;
 		}

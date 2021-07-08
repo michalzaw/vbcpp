@@ -59,6 +59,70 @@ OGLDriver& OGLDriver::getInstance()
 }
 
 
+void OGLDriver::debugOutputCallback(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
+{
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+    {
+        return;
+    }
+
+    std::string sourceStr;
+    std::string typeStr;
+    std::string severityStr;
+    
+    switch (source)
+    {
+        case GL_DEBUG_SOURCE_API:             sourceStr = "Source: API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   sourceStr = "Source: Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: sourceStr = "Source: Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     sourceStr = "Source: Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION:     sourceStr = "Source: Application"; break;
+        case GL_DEBUG_SOURCE_OTHER:           sourceStr = "Source: Other"; break;
+    }
+
+    switch (type)
+    {
+        case GL_DEBUG_TYPE_ERROR:               typeStr = "Type: Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr = "Type: Deprecated Behaviour"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  typeStr = "Type: Undefined Behaviour"; break;
+        case GL_DEBUG_TYPE_PORTABILITY:         typeStr = "Type: Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         typeStr = "Type: Performance"; break;
+        case GL_DEBUG_TYPE_MARKER:              typeStr = "Type: Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          typeStr = "Type: Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP:           typeStr = "Type: Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER:               typeStr = "Type: Other"; break;
+    }
+
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH:         severityStr = "HIGH"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       severityStr = "MEDIUM"; break;
+        case GL_DEBUG_SEVERITY_LOW:          severityStr = "LOW"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severityStr = "NOTIFICATION"; break;
+    }
+
+    Logger::info("[OpenGL][" + severityStr + " | " + sourceStr + " | " + typeStr + "](id=" + toString(id) + ") " + message);
+}
+
+
+bool OGLDriver::isDebugContextEnabled()
+{
+    int contextFlags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &contextFlags);
+
+    return contextFlags & GL_CONTEXT_FLAG_DEBUG_BIT;
+}
+
+
+void OGLDriver::initializeDebugContext()
+{
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(debugOutputCallback, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+}
+
+
 bool OGLDriver::initialize()
 {
     glewExperimental = true;
@@ -67,6 +131,18 @@ bool OGLDriver::initialize()
 
     if (createVAO() == NULL)
         return false;
+
+
+    if (isDebugContextEnabled())
+    {
+        Logger::info("OpenGL debug context: on");
+        initializeDebugContext();
+    }
+    else
+    {
+        Logger::info("OpenGL debug context: off");
+    }
+
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);

@@ -55,7 +55,7 @@ void Game::createWindow()
 	GameConfig& gameConfig = GameConfig::getInstance();
 
 	_window = new Window;
-	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.fullscreenMode, gameConfig.verticalSync);
+	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.fullscreenMode, gameConfig.verticalSync, gameConfig.openGlDebugContext);
 	_window->setWindowTitle(WINDOW_TITLE);
 }
 

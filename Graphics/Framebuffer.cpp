@@ -149,8 +149,12 @@ void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, 
 void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
     RTexture2D* texture = new RTexture2D(format, glm::uvec2(width, height), multisample, samplesCount);
-    texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
-    texture->setClampMode(TCM_CLAMP);
+
+    if (!multisample)
+    {
+        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+        texture->setClampMode(TCM_CLAMP);
+    }
 
     _textures.push_back(texture);
 

@@ -110,6 +110,10 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					pbrSupport = toBool(configElement->GetText());
 				}
+                else if (strcmp(ename, "OpenGlDebugContext") == 0)
+                {
+                    openGlDebugContext = toBool(configElement->GetText());
+                }
             }
         }
     }

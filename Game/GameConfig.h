@@ -28,7 +28,7 @@ class GameConfig
 			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			textureCompression(false), anisotropicFiltering(false), anisotropySamples(4.0f),
-			pbrSupport(false), developmentMode(false),
+			pbrSupport(false), openGlDebugContext(false), developmentMode(false),
 			mode(GM_GAME)
         {}
         GameConfig(const GameConfig&) {}
@@ -73,6 +73,8 @@ class GameConfig
 		float anisotropySamples;
 
 		bool pbrSupport;
+
+        bool openGlDebugContext;
 
 		bool developmentMode;
 

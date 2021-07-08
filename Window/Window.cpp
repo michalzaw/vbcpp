@@ -14,7 +14,7 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, bool verticalSync, bool isResizable)
+bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, bool verticalSync, bool debugContext, bool isResizable)
 {
     _width = w;
     _height = h;
@@ -35,6 +35,8 @@ bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugContext);
 
 	glfwWindowHint(GLFW_RESIZABLE, isResizable);
 
