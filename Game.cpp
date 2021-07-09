@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <thread>
+#include <future>
 
 #include "Bus/BusLoader.h"
 
@@ -32,7 +33,8 @@ Game* instance = nullptr;
 Game::Game()
 	: _window(nullptr),
 	_initialized(false),
-	_fps(0)
+	_fps(0),
+	_nextGameScene(nullptr)
 {
 	instance = this;
 }
@@ -91,6 +93,11 @@ void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initiali
 
 	scene->initialize();
 
+	Renderer::getInstance().setGraphicsManager(scene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
+
+	glFinish();
+
 	initialized = true;
 }
 
@@ -110,11 +117,13 @@ void Game::initialize()
 	Window* backgroundWindow = new Window;
 	backgroundWindow->createInvisibleWindow(_window);
 
-	//_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
-	//_loadingThread->detach();
+	_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
+	_loadingThread->detach();
 
-	_gameScene->initialize();
-	_initialized = true;
+	//_gameScene->initialize();
+	//_initialized = true;
+	//Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+	//Renderer::getInstance().rebuildStaticLighting();
 }
 
 
@@ -139,6 +148,14 @@ void Game::fixedStepUpdate(double deltaTime)
 	InputSystem::getInstance().update();
 
 	_gameScene->fixedStepUpdateScene(deltaTime);
+}
+
+
+void initializeScene(Window* window, GameScene* scene)
+{
+	glfwMakeContextCurrent(window->getWindow());
+
+	scene->initialize();
 }
 
 
@@ -185,21 +202,47 @@ void Game::run()
 			_gameScene->updateScene(deltaTime);
 
 			Renderer::getInstance().renderAll();
-		}
+
 
 #ifdef DRAW_IMGUI
-		/*if (_physicsManager->getDebugRenderingState())
-		{
-			_physicsDebugRenderer->renderAll();
-		}*/
-		_gameScene->getImGuiInterface()->draw();
+			/*if (_physicsManager->getDebugRenderingState())
+			{
+				_physicsDebugRenderer->renderAll();
+			}*/
+			_gameScene->getImGuiInterface()->draw();
 #endif // DRAW_IMGUI
 
-		// Render GUI
-		Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
-
+			// Render GUI
+			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
+		}
 		_window->swapBuffers();
 		//_window->updateEvents();
+
+		GameScene* nextGameScene = _gameScene->getNextScene();
+		if (nextGameScene != _gameScene && _nextGameScene == nullptr)
+		{
+			Window* backgroundWindow = new Window;
+			backgroundWindow->createInvisibleWindow(_window);
+
+			_nextGameScene = nextGameScene;
+			_loadingSceneFuture = std::async(std::launch::async, initializeScene, backgroundWindow, _nextGameScene);
+
+			/*_loadingSceneDone = false;
+			_loadingThread = new std::thread(loadingThread, backgroundWindow, _nextGameScene, std::ref(_loadingSceneDone));
+			_loadingThread->detach();*/
+		}
+		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+		//if (_nextGameScene != nullptr && _loadingSceneDone)
+		{
+			_gameScene->terminate();
+			delete _gameScene;
+			
+			_gameScene = _nextGameScene;
+			_nextGameScene = nullptr;
+
+			Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+			Renderer::getInstance().rebuildStaticLighting();
+		}
 	}
 
 }
@@ -252,13 +295,13 @@ void Game::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_ENTER))
 	{
-		_gameScene->terminateScene();
+		/*_gameScene->terminateScene();
 		delete _gameScene;
 
 		//_sceneManager->clearScene();
 
 		_gameScene = new MainGameScene(_window);
-		_gameScene->initialize();
+		_gameScene->initialize();*/
 	}
 
 	_gameScene->fixedStepReadInput(deltaTime);

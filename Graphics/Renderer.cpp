@@ -1296,7 +1296,7 @@ void Renderer::unregisterShadowMap(ShadowMap* shadowMap)
 void Renderer::setCurrentMainCamera(CameraStatic* camera)
 {
     //_renderDataList[_renderDataList.size() - 1]->camera = camera;
-    _mainRenderData->camera = camera;
+    //_mainRenderData->camera = camera;
 }
 
 
@@ -1388,6 +1388,8 @@ void Renderer::rebuildStaticLighting()
 
 void Renderer::renderAll()
 {
+    _mainRenderData->camera = _graphicsManager->getCurrentCamera();
+
     if (_requiredRebuildStaticLighting)
     {
         rebuildStaticLightingInternal();

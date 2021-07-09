@@ -2,7 +2,8 @@
 
 
 GameScene::GameScene(Window* window)
-	: _window(window)
+	: _window(window),
+	_nextGameScene(this)
 {
 	_graphicsManager = new GraphicsManager;
 	_physicsManager = new PhysicsManager;
@@ -29,6 +30,18 @@ GameScene::GameScene(Window* window)
 GameScene::~GameScene()
 {
 
+}
+
+
+void GameScene::setNextGameScene(GameScene* gameScene)
+{
+	_nextGameScene = gameScene;
+}
+
+
+GameScene* GameScene::getNextScene()
+{
+	return _nextGameScene;
 }
 
 

@@ -5,6 +5,7 @@
 #include <string>
 #include <thread>
 #include <atomic>
+#include <future>
 
 #include "Game/Hud.h"
 #include "Game/GameScene.h"
@@ -37,6 +38,9 @@ class Game
 		int _fps;
 
 		GameScene* _gameScene;
+		GameScene* _nextGameScene;
+		std::future<void> _loadingSceneFuture;
+		std::atomic<bool> _loadingSceneDone;
 
 		void loadGameConfig();
 		void createWindow();

@@ -38,6 +38,7 @@ void ShadowMap::create()
         _shadowMap[i]->addTexture(TF_DEPTH_COMPONENT, _shadowmapSize[i], _shadowmapSize[i]);
         _shadowMap[i]->getTexture(0)->setParameter(GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
         _shadowMap[i]->getTexture(0)->setParameter(GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        OGLDriver::getInstance().registerFramebufferForInitialization(_shadowMap[i]);
 
         // todo: graphicsManager refactor
         _cameraForShadowMap[i] = _lightObject->getSceneManager()->getGraphicsManager()->addCameraStatic(CPT_ORTHOGRAPHIC);

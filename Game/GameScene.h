@@ -16,6 +16,9 @@
 
 class GameScene
 {
+	private:
+		GameScene* _nextGameScene;
+
 	protected:
 		Window* _window;
 
@@ -26,6 +29,8 @@ class GameScene
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
 
+		void setNextGameScene(GameScene* gameScene);
+
 	public:
 		explicit GameScene(Window* window);
 		virtual ~GameScene();
@@ -34,8 +39,11 @@ class GameScene
 		void updateScene(double deltaTime);
 		void terminateScene();
 
+		GraphicsManager* getGraphicsManager() { return _graphicsManager; }
 		GUIManager* getGuiManager() { return _gui; }
 		ImGuiInterface* getImGuiInterface() { return _imGuiInterface; }
+
+		GameScene* getNextScene();
 
 		virtual void initialize() = 0;
 

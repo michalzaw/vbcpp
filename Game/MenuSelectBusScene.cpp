@@ -3,6 +3,7 @@
 #include "CameraControlComponent.h"
 #include "Directories.h"
 #include "GameLogicSystem.h"
+#include "MainGameScene.h"
 
 #include "../Bus/BusPreviewLoader.h"
 
@@ -275,6 +276,10 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 	else if (input.isKeyPressed(GLFW_KEY_RIGHT))
 	{
 		selectNextBus();
+	}
+	if (input.isKeyPressed(GLFW_KEY_ENTER))
+	{
+		setNextGameScene(new MainGameScene(_window));
 	}
 }
 

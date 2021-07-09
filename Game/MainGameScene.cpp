@@ -198,9 +198,6 @@ void MainGameScene::loadScene()
 	{
 		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
 	}*/
-
-
-	Renderer::getInstance().rebuildStaticLighting();
 }
 
 
@@ -265,8 +262,6 @@ void MainGameScene::initialize()
 	initImGuiInterface();
 
 	startGame();
-
-	Renderer::getInstance().setGraphicsManager(_graphicsManager);
 }
 
 
