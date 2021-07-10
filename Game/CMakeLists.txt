@@ -21,6 +21,7 @@ set (GAME_HEADERS
 	Game/GameEnvironment.h
 	Game/GameLogicSystem.h
 	Game/GameScene.h
+	Game/GameScenesNames.h
 	Game/Hud.h
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h

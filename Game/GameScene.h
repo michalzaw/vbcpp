@@ -17,7 +17,7 @@
 class GameScene
 {
 	private:
-		GameScene* _nextGameScene;
+		std::string _nextGameScene;
 
 	protected:
 		Window* _window;
@@ -29,7 +29,7 @@ class GameScene
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
 
-		void setNextGameScene(GameScene* gameScene);
+		void setNextGameScene(const std::string& gameSceneName);
 
 	public:
 		explicit GameScene(Window* window);
@@ -44,7 +44,7 @@ class GameScene
 		GUIManager* getGuiManager() { return _gui; }
 		ImGuiInterface* getImGuiInterface() { return _imGuiInterface; }
 
-		GameScene* getNextScene();
+		const std::string& getNextScene();
 
 		virtual void initialize() = 0;
 

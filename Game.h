@@ -36,6 +36,10 @@ class Game
 		int _numberOfFrames;
 		int _fps;
 
+		std::unordered_map<std::string, std::function<GameScene*()>> _registeredScenes;
+
+		std::string _gameSceneName;
+		std::string _nextGameSceneName;
 		GameScene* _gameScene;
 		GameScene* _nextGameScene;
 		std::future<void> _loadingSceneFuture;
@@ -50,10 +54,20 @@ class Game
 		void readInput(double deltaTime);
 		void fixedStepReadInput(float deltaTime);
 
+		template<typename T>
+		GameScene* createScene();
+
+		GameScene* getSceneByName(const std::string& name);
+
 		void asyncLoadScene(Window* window, GameScene* scene);
 
 	public:
 		Game();
+
+		template<typename T>
+		void registerSceneType(const std::string& name);
+
+		void setFirstScene(const std::string& sceneName);
 
 		void initialize();
 
@@ -62,6 +76,19 @@ class Game
 		void terminate();
 
 };
+
+
+template<typename T>
+GameScene* Game::createScene()
+{
+	return new T(_window);
+}
+
+template<typename T>
+void Game::registerSceneType(const std::string& name)
+{
+	_registeredScenes.insert(std::make_pair(name, std::bind(&Game::createScene<T>, this)));
+}
 
 
 #endif // GAME_H_INCLUDED

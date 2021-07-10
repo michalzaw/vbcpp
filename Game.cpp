@@ -7,9 +7,6 @@
 #include "Game/CameraControlComponent.h"
 #include "Game/GameLogicSystem.h"
 #include "Game/GameConfig.h"
-#include "Game/MainGameScene.h"
-#include "Game/MenuSelectBusScene.h"
-#include "Game/TestScene.h"
 
 #include "Graphics/Renderer.h"
 
@@ -31,7 +28,7 @@ Game* instance = nullptr;
 Game::Game()
 	: _window(nullptr), _backgroundWindow(nullptr),
 	_fps(0),
-	_nextGameScene(nullptr)
+	_gameSceneName(""), _nextGameSceneName(""), _gameScene(nullptr), _nextGameScene(nullptr)
 {
 	instance = this;
 }
@@ -103,6 +100,12 @@ void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initiali
 }
 
 
+void Game::setFirstScene(const std::string& sceneName)
+{
+	_gameSceneName = sceneName;
+}
+
+
 void Game::initialize()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -111,9 +114,7 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	//_gameScene = new MainGameScene(_window);
-	_gameScene = new MenuSelectBusScene(_window);
-	//_gameScene = new TestScene(_window);
+	_gameScene = getSceneByName(_gameSceneName);
 	
 	//Window* backgroundWindow = new Window;
 	//backgroundWindow->createInvisibleWindow(_window);
@@ -149,6 +150,18 @@ void Game::fixedStepUpdate(double deltaTime)
 	InputSystem::getInstance().update();
 
 	_gameScene->fixedStepUpdateScene(deltaTime);
+}
+
+
+GameScene* Game::getSceneByName(const std::string& name)
+{
+	auto createSceneFunction = _registeredScenes.find(name);
+	if (createSceneFunction != _registeredScenes.end())
+	{
+		return createSceneFunction->second();
+	}
+
+	return nullptr;
 }
 
 
@@ -221,8 +234,8 @@ void Game::run()
 		_window->swapBuffers();
 		//_window->updateEvents();
 
-		GameScene* nextGameScene = _gameScene->getNextScene();
-		if (nextGameScene != _gameScene && _nextGameScene == nullptr)
+		_nextGameSceneName = _gameScene->getNextScene();
+		if (!_nextGameSceneName.empty() && _nextGameScene == nullptr)
 		{
 			if (_backgroundWindow == nullptr)
 			{
@@ -230,7 +243,7 @@ void Game::run()
 				_backgroundWindow->createInvisibleWindow(_window);
 			}
 
-			_nextGameScene = nextGameScene;
+			_nextGameScene = getSceneByName(_nextGameSceneName);
 			_loadingSceneFuture = std::async(std::launch::async, &Game::asyncLoadScene, this, _backgroundWindow, _nextGameScene);
 		}
 		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
@@ -238,7 +251,9 @@ void Game::run()
 			_gameScene->terminate();
 			delete _gameScene;
 			
+			_gameSceneName = _nextGameSceneName;
 			_gameScene = _nextGameScene;
+			_nextGameSceneName = "";
 			_nextGameScene = nullptr;
 
 			Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());

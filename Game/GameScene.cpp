@@ -3,7 +3,7 @@
 
 GameScene::GameScene(Window* window)
 	: _window(window),
-	_nextGameScene(this)
+	_nextGameScene("")
 {
 	_graphicsManager = new GraphicsManager;
 	_physicsManager = new PhysicsManager;
@@ -29,13 +29,13 @@ GameScene::~GameScene()
 }
 
 
-void GameScene::setNextGameScene(GameScene* gameScene)
+void GameScene::setNextGameScene(const std::string& gameSceneName)
 {
-	_nextGameScene = gameScene;
+	_nextGameScene = gameSceneName;
 }
 
 
-GameScene* GameScene::getNextScene()
+const std::string& GameScene::getNextScene()
 {
 	return _nextGameScene;
 }
