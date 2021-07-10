@@ -1,8 +1,6 @@
 #include "Game.h"
 
 #include <ctime>
-#include <thread>
-#include <future>
 
 #include "Bus/BusLoader.h"
 
@@ -31,8 +29,7 @@ Game* instance = nullptr;
 
 
 Game::Game()
-	: _window(nullptr),
-	_initialized(false),
+	: _window(nullptr), _backgroundWindow(nullptr),
 	_fps(0),
 	_nextGameScene(nullptr)
 {
@@ -84,6 +81,10 @@ void Game::initializeEngineSystems()
 	renderer.t = 0;
 
 	ImGuiInterfaceContext::initializeImGuiContext(_window, true);
+
+#ifdef DRAW_IMGUI
+	_physicsDebugRenderer = new PhysicsDebugRenderer;
+#endif // DRAW_IMGUI
 }
 
 
@@ -110,20 +111,20 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = new MainGameScene(_window);
-	//_gameScene = new MenuSelectBusScene(_window);
+	//_gameScene = new MainGameScene(_window);
+	_gameScene = new MenuSelectBusScene(_window);
 	//_gameScene = new TestScene(_window);
 	
-	Window* backgroundWindow = new Window;
-	backgroundWindow->createInvisibleWindow(_window);
+	//Window* backgroundWindow = new Window;
+	//backgroundWindow->createInvisibleWindow(_window);
 
-	_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
-	_loadingThread->detach();
+	//_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
+	//_loadingThread->detach();
 
-	//_gameScene->initialize();
-	//_initialized = true;
-	//Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
-	//Renderer::getInstance().rebuildStaticLighting();
+	_gameScene->initialize();
+	_initialized = true;
+	Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
 }
 
 
@@ -151,11 +152,13 @@ void Game::fixedStepUpdate(double deltaTime)
 }
 
 
-void initializeScene(Window* window, GameScene* scene)
+void Game::asyncLoadScene(Window* window, GameScene* scene)
 {
 	glfwMakeContextCurrent(window->getWindow());
 
 	scene->initialize();
+
+	glFinish();
 }
 
 
@@ -205,10 +208,10 @@ void Game::run()
 
 
 #ifdef DRAW_IMGUI
-			/*if (_physicsManager->getDebugRenderingState())
+			if (_gameScene->getPhysicsManager()->getDebugRenderingState())
 			{
 				_physicsDebugRenderer->renderAll();
-			}*/
+			}
 			_gameScene->getImGuiInterface()->draw();
 #endif // DRAW_IMGUI
 
@@ -221,18 +224,16 @@ void Game::run()
 		GameScene* nextGameScene = _gameScene->getNextScene();
 		if (nextGameScene != _gameScene && _nextGameScene == nullptr)
 		{
-			Window* backgroundWindow = new Window;
-			backgroundWindow->createInvisibleWindow(_window);
+			if (_backgroundWindow == nullptr)
+			{
+				_backgroundWindow = new Window;
+				_backgroundWindow->createInvisibleWindow(_window);
+			}
 
 			_nextGameScene = nextGameScene;
-			_loadingSceneFuture = std::async(std::launch::async, initializeScene, backgroundWindow, _nextGameScene);
-
-			/*_loadingSceneDone = false;
-			_loadingThread = new std::thread(loadingThread, backgroundWindow, _nextGameScene, std::ref(_loadingSceneDone));
-			_loadingThread->detach();*/
+			_loadingSceneFuture = std::async(std::launch::async, &Game::asyncLoadScene, this, _backgroundWindow, _nextGameScene);
 		}
 		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
-		//if (_nextGameScene != nullptr && _loadingSceneDone)
 		{
 			_gameScene->terminate();
 			delete _gameScene;
@@ -242,6 +243,9 @@ void Game::run()
 
 			Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
 			Renderer::getInstance().rebuildStaticLighting();
+#ifdef DRAW_IMGUI
+			_gameScene->getPhysicsManager()->setDebugRenderer(_physicsDebugRenderer);
+#endif // DRAW_IMGUI
 		}
 	}
 
@@ -258,6 +262,11 @@ void Game::terminate()
 	ImGuiInterfaceContext::destroyImGuiContext();
 
 	delete _window;
+
+	if (_backgroundWindow != nullptr)
+	{
+		delete _backgroundWindow;
+	}
 }
 
 

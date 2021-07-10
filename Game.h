@@ -3,8 +3,6 @@
 
 
 #include <string>
-#include <thread>
-#include <atomic>
 #include <future>
 
 #include "Game/Hud.h"
@@ -27,10 +25,11 @@ class Game
 		static constexpr char* WINDOW_TITLE = "Virtual Bus Core++";
 
 		Window* _window;
+		Window* _backgroundWindow;
 
 		PhysicsDebugRenderer* _physicsDebugRenderer;
 
-		std::thread* _loadingThread;
+		//std::thread* _loadingThread;
 		std::atomic<bool> _initialized;
 
 		double _lastFPSupdate;
@@ -40,7 +39,6 @@ class Game
 		GameScene* _gameScene;
 		GameScene* _nextGameScene;
 		std::future<void> _loadingSceneFuture;
-		std::atomic<bool> _loadingSceneDone;
 
 		void loadGameConfig();
 		void createWindow();
@@ -51,6 +49,8 @@ class Game
 
 		void readInput(double deltaTime);
 		void fixedStepReadInput(float deltaTime);
+
+		void asyncLoadScene(Window* window, GameScene* scene);
 
 	public:
 		Game();

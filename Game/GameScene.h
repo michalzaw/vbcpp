@@ -40,6 +40,7 @@ class GameScene
 		void terminateScene();
 
 		GraphicsManager* getGraphicsManager() { return _graphicsManager; }
+		PhysicsManager* getPhysicsManager() { return _physicsManager; }
 		GUIManager* getGuiManager() { return _gui; }
 		ImGuiInterface* getImGuiInterface() { return _imGuiInterface; }
 

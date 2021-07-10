@@ -233,6 +233,8 @@ Framebuffer* OGLDriver::createFramebuffer()
 // inicjalizacja odbywa sie na glownym watku
 void OGLDriver::registerFramebufferForInitialization(Framebuffer* framebuffer)
 {
+    glFinish();
+
     _uninitializedFramebuffersMutex.lock();
     _uninitializedFramebuffers.push_back(framebuffer);
     _uninitializedFramebuffersMutex.unlock();

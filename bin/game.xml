@@ -33,7 +33,7 @@
 		<AnisotropicFiltering>false</AnisotropicFiltering>
 		<AnisotropySamples>4</AnisotropySamples>
 		
-		<PbrSupport>false</PbrSupport>
+		<PbrSupport>true</PbrSupport>
 
 		<OpenGlDebugContext>false</OpenGlDebugContext>
     </Configuration>

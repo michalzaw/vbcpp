@@ -19,10 +19,6 @@ GameScene::GameScene(Window* window)
 
 #ifdef DRAW_IMGUI
 	_imGuiInterface = new ImGuiInterface(_sceneManager);
-
-	//_physicsDebugRenderer = new PhysicsDebugRenderer;
-
-	//_physicsManager->setDebugRenderer(_physicsDebugRenderer);
 #endif // DRAW_IMGUI
 }
 

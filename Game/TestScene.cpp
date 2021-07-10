@@ -113,10 +113,6 @@ void TestScene::initialize()
 	BusLoader busLoader(_sceneManager, _graphicsManager, _physicsManager, _soundManager);
 	Bus* bus = busLoader.loadBus("neoplan");
 	bus->getSceneObject()->move(1.0f, 0.0f, 0.0f);
-
-	Renderer::getInstance().rebuildStaticLighting();
-
-	Renderer::getInstance().setGraphicsManager(_graphicsManager);
 }
 
 
