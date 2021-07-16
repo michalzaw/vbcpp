@@ -20,7 +20,7 @@
 
 MenuSelectBusScene::MenuSelectBusScene(Window* window)
 	: GameScene(window),
-	_selectedBus(0), _selectedBusConfigurationIndex(0),
+	_selectedBus(0), _selectedBusConfigurationIndex(0), _selectedBusRepaintName(""),
 	_menuInterfaceWindow(nullptr)
 {
 
@@ -236,7 +236,7 @@ void MenuSelectBusScene::initialize()
 	_buses2[2]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
-	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(&_selectedBusConfigurationVariables, _sceneManager, true);
+	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(&_selectedBusConfigurationVariables, _selectedBusRepaintName, _sceneManager, true);
 	_imGuiInterface->addWindow(_menuInterfaceWindow);
 
 	showSelectedBus();
@@ -276,7 +276,10 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_ENTER))
 	{
-		setNextGameScene(GameScenesNames::MAIN_SCENE);
+		std::unordered_map<std::string, std::string> params;
+		MainGameScene::createSceneParams(params, _buses2[_selectedBus]->busName, _selectedBusRepaintName, _selectedBusConfigurationVariables);
+
+		setNextGameScene(GameScenesNames::MAIN_SCENE, params);
 	}
 }
 

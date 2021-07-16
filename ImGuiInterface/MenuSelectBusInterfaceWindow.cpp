@@ -4,9 +4,9 @@
 #include "../Bus/BusRepaintLoader.h"
 
 
-MenuSelectBusInterfaceWindow::MenuSelectBusInterfaceWindow(std::unordered_map<std::string, std::string>* selectedBusConfigurationVariables, SceneManager* sceneManager, bool isOpen)
+MenuSelectBusInterfaceWindow::MenuSelectBusInterfaceWindow(std::unordered_map<std::string, std::string>* selectedBusConfigurationVariables, std::string& selectedBusRepaintName, SceneManager* sceneManager, bool isOpen)
 	: ImGuiWindow(sceneManager, isOpen),
-	_busPreview(nullptr), _selectedBusConfigurationVariables(selectedBusConfigurationVariables)
+	_busPreview(nullptr), _selectedBusConfigurationVariables(selectedBusConfigurationVariables), _selectedBusRepaintName(selectedBusRepaintName)
 {
 
 }
@@ -177,6 +177,8 @@ void MenuSelectBusInterfaceWindow::drawBusRepaints()
 					{
 						_busPreview->bus->replaceMaterialsByName(materialsCollection->getMaterials());
 					}
+
+					_selectedBusRepaintName = repaintDescription.repainDirectorytName;
 				}
 
 				if (ImGui::IsItemHovered())

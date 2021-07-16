@@ -2,6 +2,8 @@
 #define GAMESCENE_H_INCLUDED
 
 
+#include <unordered_map>
+
 #include "../GUI/GUIManager.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
@@ -18,8 +20,11 @@ class GameScene
 {
 	private:
 		std::string _nextGameScene;
+		std::unordered_map<std::string, std::string> _nextGameSceneParams;
 
 	protected:
+		std::unordered_map<std::string, std::string> _params;
+
 		Window* _window;
 
 		GraphicsManager* _graphicsManager;
@@ -29,7 +34,7 @@ class GameScene
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
 
-		void setNextGameScene(const std::string& gameSceneName);
+		void setNextGameScene(const std::string& gameSceneName, const std::unordered_map<std::string, string>& params = {});
 
 	public:
 		explicit GameScene(Window* window);
@@ -44,7 +49,10 @@ class GameScene
 		GUIManager* getGuiManager() { return _gui; }
 		ImGuiInterface* getImGuiInterface() { return _imGuiInterface; }
 
+		void setParams(const std::unordered_map<std::string, string>& params);
+
 		const std::string& getNextScene();
+		const std::unordered_map<std::string, std::string>& getNextSceneParams();
 
 		virtual void initialize() = 0;
 

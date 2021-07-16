@@ -51,6 +51,40 @@ MainGameScene::~MainGameScene()
 }
 
 
+void MainGameScene::createSceneParams(std::unordered_map<std::string, std::string>& outParams, const std::string& busModel, const std::string& busConfiguration, const std::string& busRepaint)
+{
+	outParams[PARAM_BUS_MODEL] = busModel;
+	outParams[PARAM_BUS_CONFIGURATION] = busConfiguration;
+	outParams[PARAM_BUS_REPAINT] = busRepaint;
+}
+
+
+void MainGameScene::createSceneParams(std::unordered_map<std::string, std::string>& outParams, const std::string& busModel, const std::string& busRepaint,
+									  const std::unordered_map<std::string, std::string>& busConfigurationVariables)
+{
+	outParams[PARAM_BUS_MODEL] = busModel;
+	outParams[PARAM_BUS_REPAINT] = busRepaint;
+
+	for (const auto& variable : busConfigurationVariables)
+	{
+		outParams["var_" + variable.first] = variable.second;
+	}
+}
+
+
+void MainGameScene::getBusConfigurationVariablesFromSceneParams(const std::unordered_map<std::string, std::string>& sceneParams,
+																std::unordered_map<std::string, std::string>& outBusConfigurationVariables)
+{
+	for (const auto& variable : sceneParams)
+	{
+		if (startsWith(variable.first, "var_"))
+		{
+			outBusConfigurationVariables[variable.first.substr(4)] = variable.second;
+		}
+	}
+}
+
+
 CameraFPS* MainGameScene::createCameraBusDriver()
 {
 	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBusDriver");
@@ -146,12 +180,24 @@ void MainGameScene::loadScene()
 
 	BusLoader busLoader(_sceneManager, _graphicsManager, _physicsManager, _soundManager);
 
-	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, GameConfig::getInstance().busConfiguration, busVariables);
-	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
+	const std::string& busModel = _params[PARAM_BUS_MODEL];
+	const std::string& busConfiguration = _params[PARAM_BUS_CONFIGURATION];
+	const std::string& busRepaint = _params[PARAM_BUS_REPAINT];
+
+	if (busConfiguration.empty())
+	{
+		getBusConfigurationVariablesFromSceneParams(_params, busVariables);
+	}
+	else
+	{
+		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, busConfiguration, busVariables);
+	}
+
+	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(GameConfig::getInstance().busModel, "Typ 2", busVariables);
-	Bus* bus2 = busLoader.loadBus(GameConfig::getInstance().busModel, busVariables);
+	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
+	Bus* bus2 = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus2);
 
 	_activeBus = bus;
@@ -182,10 +228,10 @@ void MainGameScene::loadScene()
 										  degToRad(0.0f));*/
 
 
-	if (!GameConfig::getInstance().busRepaint.empty())
+	if (!busRepaint.empty())
 	{
 		std::vector<RMaterialsCollection*> altMaterialsCollections;
-		BusRepaintLoader::loadBusRepaint(GameConfig::getInstance().busModel, GameConfig::getInstance().busRepaint, altMaterialsCollections);
+		BusRepaintLoader::loadBusRepaint(busModel, busRepaint, altMaterialsCollections);
 		for (RMaterialsCollection* materialsCollection : altMaterialsCollections)
 		{
 			_activeBus->replaceMaterialsByName(materialsCollection->getMaterials());

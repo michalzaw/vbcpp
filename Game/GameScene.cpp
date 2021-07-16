@@ -29,15 +29,28 @@ GameScene::~GameScene()
 }
 
 
-void GameScene::setNextGameScene(const std::string& gameSceneName)
+void GameScene::setNextGameScene(const std::string& gameSceneName, const std::unordered_map<std::string, string>& params)
 {
 	_nextGameScene = gameSceneName;
+	_nextGameSceneParams = params;
+}
+
+
+void GameScene::setParams(const std::unordered_map<std::string, string>& params)
+{
+	_params = params;
 }
 
 
 const std::string& GameScene::getNextScene()
 {
 	return _nextGameScene;
+}
+
+
+const std::unordered_map<std::string, std::string>& GameScene::getNextSceneParams()
+{
+	return _nextGameSceneParams;
 }
 
 

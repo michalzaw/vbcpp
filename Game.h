@@ -44,6 +44,8 @@ class Game
 		GameScene* _nextGameScene;
 		std::future<void> _loadingSceneFuture;
 
+		std::unordered_map<std::string, std::string> _firstSceneParams;
+
 		void loadGameConfig();
 		void createWindow();
 		void initializeEngineSystems();
@@ -67,7 +69,7 @@ class Game
 		template<typename T>
 		void registerSceneType(const std::string& name);
 
-		void setFirstScene(const std::string& sceneName);
+		void setFirstScene(const std::string& sceneName, const std::unordered_map<std::string, std::string>& params = {});
 
 		void initialize();
 

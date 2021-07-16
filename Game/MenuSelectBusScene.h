@@ -19,6 +19,7 @@ class MenuSelectBusScene final : public GameScene
 		int _selectedBus;
 		int _selectedBusConfigurationIndex;
 		std::unordered_map<std::string, std::string> _selectedBusConfigurationVariables;
+		std::string _selectedBusRepaintName;
 		Image* _busLogo;
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;

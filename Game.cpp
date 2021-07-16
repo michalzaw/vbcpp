@@ -36,13 +36,7 @@ Game::Game()
 
 void Game::loadGameConfig()
 {
-	GameConfig& gameConfig = GameConfig::getInstance();
-	gameConfig.loadGameConfig("game.xml");
 
-#ifdef DEVELOPMENT_RESOURCES
-	gameConfig.loadDevelopmentConfig("devSettings.xml");
-	ResourceManager::getInstance().setAlternativeResourcePath(gameConfig.alternativeResourcesPath);
-#endif // DEVELOPMENT_RESOURCES
 }
 
 
@@ -100,9 +94,10 @@ void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initiali
 }
 
 
-void Game::setFirstScene(const std::string& sceneName)
+void Game::setFirstScene(const std::string& sceneName, const std::unordered_map<std::string, std::string>& params)
 {
 	_gameSceneName = sceneName;
+	_firstSceneParams = params;
 }
 
 
@@ -115,6 +110,7 @@ void Game::initialize()
 	initializeEngineSystems();
 
 	_gameScene = getSceneByName(_gameSceneName);
+	_gameScene->setParams(_firstSceneParams);
 	
 	//Window* backgroundWindow = new Window;
 	//backgroundWindow->createInvisibleWindow(_window);
@@ -244,6 +240,7 @@ void Game::run()
 			}
 
 			_nextGameScene = getSceneByName(_nextGameSceneName);
+			_nextGameScene->setParams(_gameScene->getNextSceneParams());
 			_loadingSceneFuture = std::async(std::launch::async, &Game::asyncLoadScene, this, _backgroundWindow, _nextGameScene);
 		}
 		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
