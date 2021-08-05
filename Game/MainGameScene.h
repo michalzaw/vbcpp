@@ -30,6 +30,7 @@ class MainGameScene final : public GameScene
 		CameraFPS* _activeCamera;
 
 		Hud* _hud;
+		ProgressBar* _progressBar;
 
 		bool _isCameraControll;
 		bool _isMirrorControll;

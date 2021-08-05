@@ -1046,6 +1046,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // GUI_LABEL_SHADER
     _shaderList[GUI_LABEL_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/LabelShader.frag");
 
+    // GUI_PROGRESS_BAR_SHADER
+    _shaderList[GUI_PROGRESS_BAR_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIProgressBarshader.frag");
+
     // DEBUG_SHADER
     _shaderList[DEBUG_SHADER] = ResourceManager::getInstance().loadShader("Shaders/debug.vert", "Shaders/debug.frag");
 
@@ -2117,10 +2120,19 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_GUI_TEXCOORDS_TRANSFORM_MATRIX], i->getTexCoordTransformMatrix());
         shader->setUniform(_uniformsLocations[shaderType][UNIFORM_GUI_COLOR], i->getColor());
 
+        for (const auto& uniform : i->getCustomUniforms())
+        {
+            // todo: refactor
+            GLint location = shader->getUniformLocation(uniform.first.c_str());
+            shader->setUniform(location, uniform.second);
+        }
+
         i->getVBO()->bind();
 
-
-        shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], i->getTexture());
+        if (i->getTexture() != nullptr)
+        {
+            shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], i->getTexture());
+        }
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GUIVertex), (void*)0);

@@ -11,6 +11,7 @@
 #include "Label.h"
 #include "Button.h"
 #include "GUIRenderListElement.h"
+#include "ProgressBar.h"
 
 
 class GUIManager
@@ -25,6 +26,7 @@ class GUIManager
         Image* addImage(RTexture* texture);
         Label* addLabel(RFont* font, std::string text = "");
         Button* addButton(RTexture* texture, RFont* font = NULL, std::string text = "");
+        ProgressBar* addProgressBar(bool indeterminate = true);
 
         unsigned int getObjectsCount();
 

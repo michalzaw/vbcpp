@@ -6,6 +6,7 @@ set (GUI_SOURCES
 	GUI/GUIRenderListElement.cpp
 	GUI/Image.cpp
 	GUI/Label.cpp
+	GUI/ProgressBar.cpp
 )
 
 set (GUI_HEADERS 
@@ -16,6 +17,7 @@ set (GUI_HEADERS
 	GUI/GUIRenderListElement.h
 	GUI/Image.h
 	GUI/Label.h
+	GUI/ProgressBar.h
 )
 
 set (GUI_SOURCES ${GUI_SOURCES} PARENT_SCOPE)

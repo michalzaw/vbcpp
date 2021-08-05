@@ -1,6 +1,7 @@
 #include "MainGameScene.h"
 
 #include "CameraControlComponent.h"
+#include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
 
@@ -250,6 +251,11 @@ void MainGameScene::loadScene()
 void MainGameScene::initGui()
 {
 	_hud = new Hud(_gui, _activeBus);
+
+	_progressBar = _gui->addProgressBar();
+	_progressBar->setPosition(100, 100);
+	_progressBar->setColor(glm::vec4(0.0f, 0.8f, 0.1f, 1.0f));
+	_progressBar->setSize(100);
 }
 
 
@@ -327,6 +333,9 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 void MainGameScene::update(double deltaTime)
 {
 	_hud->update(deltaTime);
+
+	//_progressBar->setValue(GameEnvironment::Variables::floatVaribles["progressBarValue2"] / 100.0f);
+	_progressBar->setType(GameEnvironment::Variables::floatVaribles["progressBarType"]);
 }
 
 

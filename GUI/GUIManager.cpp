@@ -47,6 +47,16 @@ Button* GUIManager::addButton(RTexture* texture, RFont* font, std::string text)
 }
 
 
+ProgressBar* GUIManager::addProgressBar(bool indeterminate)
+{
+    ProgressBar* progressBar = new ProgressBar(indeterminate);
+
+    _objects.push_back(progressBar);
+
+    return progressBar;
+}
+
+
 unsigned int GUIManager::getObjectsCount()
 {
     return _objects.size();
