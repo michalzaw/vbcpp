@@ -125,6 +125,8 @@ class Renderer
         float _exposure;
 		ToneMappingType _toneMappingType;
 
+		float _sceneVisibility;
+
 		TextureFormat _framebufferTextureFormat;
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
@@ -230,6 +232,8 @@ class Renderer
         bool isAlphaToCoverageEnable();
         void setExposure(float exposure);
         float getExposure();
+		void setSceneVisibility(float visibility);
+		float getSceneVisibility();
 		void setToneMappingType(ToneMappingType type);
 		ToneMappingType getToneMappingType();
 		void setFramebufferTextureFormat(TextureFormat format);

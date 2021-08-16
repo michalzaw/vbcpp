@@ -29,10 +29,11 @@ GameScene::~GameScene()
 }
 
 
-void GameScene::setNextGameScene(const std::string& gameSceneName, const std::unordered_map<std::string, string>& params)
+void GameScene::setNextGameScene(const std::string& gameSceneName, bool useLoadingScreenToLoadNextGameScene, const std::unordered_map<std::string, string>& params)
 {
 	_nextGameScene = gameSceneName;
 	_nextGameSceneParams = params;
+	_useLoadingScreenToLoadNextGameScene = useLoadingScreenToLoadNextGameScene;
 }
 
 
@@ -45,6 +46,12 @@ void GameScene::setParams(const std::unordered_map<std::string, string>& params)
 const std::string& GameScene::getNextScene()
 {
 	return _nextGameScene;
+}
+
+
+bool GameScene::isUseLoadingScreenToLoadNextGameScene()
+{
+	return _useLoadingScreenToLoadNextGameScene;
 }
 
 

@@ -279,7 +279,7 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 		std::unordered_map<std::string, std::string> params;
 		MainGameScene::createSceneParams(params, _buses2[_selectedBus]->busName, _selectedBusRepaintName, _selectedBusConfigurationVariables);
 
-		setNextGameScene(GameScenesNames::MAIN_SCENE, params);
+		setNextGameScene(GameScenesNames::MAIN_SCENE, true, params);
 	}
 }
 

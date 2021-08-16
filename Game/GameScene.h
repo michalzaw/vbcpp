@@ -21,6 +21,7 @@ class GameScene
 	private:
 		std::string _nextGameScene;
 		std::unordered_map<std::string, std::string> _nextGameSceneParams;
+		bool _useLoadingScreenToLoadNextGameScene;
 
 	protected:
 		std::unordered_map<std::string, std::string> _params;
@@ -33,8 +34,6 @@ class GameScene
 		SceneManager* _sceneManager;
 		GUIManager* _gui;
 		ImGuiInterface* _imGuiInterface;
-
-		void setNextGameScene(const std::string& gameSceneName, const std::unordered_map<std::string, string>& params = {});
 
 	public:
 		explicit GameScene(Window* window);
@@ -51,7 +50,9 @@ class GameScene
 
 		void setParams(const std::unordered_map<std::string, string>& params);
 
+		void setNextGameScene(const std::string& gameSceneName, bool useLoadingScreenToLoadNextGameScene = true, const std::unordered_map<std::string, string>& params = {});
 		const std::string& getNextScene();
+		bool isUseLoadingScreenToLoadNextGameScene();
 		const std::unordered_map<std::string, std::string>& getNextSceneParams();
 
 		virtual void initialize() = 0;

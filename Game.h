@@ -37,14 +37,17 @@ class Game
 		int _fps;
 
 		std::unordered_map<std::string, std::function<GameScene*()>> _registeredScenes;
+		std::string _loadingScene;
 
 		std::string _gameSceneName;
 		std::string _nextGameSceneName;
 		GameScene* _gameScene;
 		GameScene* _nextGameScene;
 		std::future<void> _loadingSceneFuture;
+		bool _swapScenes;
 
 		std::unordered_map<std::string, std::string> _firstSceneParams;
+		bool _useLoadingScreen;
 
 		void loadGameConfig();
 		void createWindow();
@@ -62,14 +65,18 @@ class Game
 		GameScene* getSceneByName(const std::string& name);
 
 		void asyncLoadScene(Window* window, GameScene* scene);
+		void swapScenesImpl(float deltaTime);
+		void performSwapScenes();
 
 	public:
 		Game();
 
 		template<typename T>
 		void registerSceneType(const std::string& name);
+		template<typename T>
+		void registerLoadingSceneType(const std::string& name);
 
-		void setFirstScene(const std::string& sceneName, const std::unordered_map<std::string, std::string>& params = {});
+		void setFirstScene(const std::string& sceneName, bool useLoadingScreen = true, const std::unordered_map<std::string, std::string>& params = {});
 
 		void initialize();
 
@@ -90,6 +97,13 @@ template<typename T>
 void Game::registerSceneType(const std::string& name)
 {
 	_registeredScenes.insert(std::make_pair(name, std::bind(&Game::createScene<T>, this)));
+}
+
+template<typename T>
+void Game::registerLoadingSceneType(const std::string& name)
+{
+	registerSceneType<T>(name);
+	_loadingScene = name;
 }
 
 

@@ -28,7 +28,9 @@ Game* instance = nullptr;
 Game::Game()
 	: _window(nullptr), _backgroundWindow(nullptr),
 	_fps(0),
-	_gameSceneName(""), _nextGameSceneName(""), _gameScene(nullptr), _nextGameScene(nullptr)
+	_loadingScene(""),
+	_gameSceneName(""), _nextGameSceneName(""), _gameScene(nullptr), _nextGameScene(nullptr), _swapScenes(false),
+	_useLoadingScreen(true)
 {
 	instance = this;
 }
@@ -94,10 +96,11 @@ void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initiali
 }
 
 
-void Game::setFirstScene(const std::string& sceneName, const std::unordered_map<std::string, std::string>& params)
+void Game::setFirstScene(const std::string& sceneName, bool useLoadingScreen, const std::unordered_map<std::string, std::string>& params)
 {
 	_gameSceneName = sceneName;
 	_firstSceneParams = params;
+	_useLoadingScreen = useLoadingScreen;
 }
 
 
@@ -109,8 +112,16 @@ void Game::initialize()
 	createWindow();
 	initializeEngineSystems();
 
-	_gameScene = getSceneByName(_gameSceneName);
-	_gameScene->setParams(_firstSceneParams);
+	if (_useLoadingScreen && !_loadingScene.empty())
+	{
+		_gameScene = getSceneByName(_loadingScene);
+		_gameScene->setNextGameScene(_gameSceneName, false, _firstSceneParams);
+	}
+	else
+	{
+		_gameScene = getSceneByName(_gameSceneName);
+		_gameScene->setParams(_firstSceneParams);
+	}
 	
 	//Window* backgroundWindow = new Window;
 	//backgroundWindow->createInvisibleWindow(_window);
@@ -168,6 +179,50 @@ void Game::asyncLoadScene(Window* window, GameScene* scene)
 	scene->initialize();
 
 	glFinish();
+
+	glfwMakeContextCurrent(nullptr);
+}
+
+
+void Game::swapScenesImpl(float deltaTime)
+{
+	static float speed = -1;
+	float sceneVisibility = Renderer::getInstance().getSceneVisibility();
+	if (speed < 0 && sceneVisibility > 0.0f || speed > 0 && sceneVisibility < 1.0f)
+	{
+		sceneVisibility += speed * deltaTime;
+		sceneVisibility = clamp(sceneVisibility, 0.0f, 1.0f);
+		Renderer::getInstance().setSceneVisibility(sceneVisibility);
+	}
+
+	if (speed < 0 && sceneVisibility == 0.0f)
+	{
+		speed = -speed;
+		performSwapScenes();
+	}
+	if (speed > 0 && sceneVisibility == 1)
+	{
+		speed = -speed;
+		_swapScenes = false;
+	}
+}
+
+
+void Game::performSwapScenes()
+{
+	_gameScene->terminate();
+	delete _gameScene;
+
+	_gameSceneName = _nextGameSceneName;
+	_gameScene = _nextGameScene;
+	_nextGameSceneName = "";
+	_nextGameScene = nullptr;
+
+	Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
+#ifdef DRAW_IMGUI
+	_gameScene->getPhysicsManager()->setDebugRenderer(_physicsDebugRenderer);
+#endif // DRAW_IMGUI
 }
 
 
@@ -239,25 +294,26 @@ void Game::run()
 				_backgroundWindow->createInvisibleWindow(_window);
 			}
 
-			_nextGameScene = getSceneByName(_nextGameSceneName);
-			_nextGameScene->setParams(_gameScene->getNextSceneParams());
+			if (_gameScene->isUseLoadingScreenToLoadNextGameScene() && !_loadingScene.empty())
+			{
+				_nextGameScene = getSceneByName(_loadingScene);
+				_nextGameScene->setNextGameScene(_nextGameSceneName, false, _gameScene->getNextSceneParams());
+			}
+			else
+			{
+				_nextGameScene = getSceneByName(_nextGameSceneName);
+				_nextGameScene->setParams(_gameScene->getNextSceneParams());
+			}
+
 			_loadingSceneFuture = std::async(std::launch::async, &Game::asyncLoadScene, this, _backgroundWindow, _nextGameScene);
 		}
 		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
 		{
-			_gameScene->terminate();
-			delete _gameScene;
-			
-			_gameSceneName = _nextGameSceneName;
-			_gameScene = _nextGameScene;
-			_nextGameSceneName = "";
-			_nextGameScene = nullptr;
-
-			Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
-			Renderer::getInstance().rebuildStaticLighting();
-#ifdef DRAW_IMGUI
-			_gameScene->getPhysicsManager()->setDebugRenderer(_physicsDebugRenderer);
-#endif // DRAW_IMGUI
+			_swapScenes = true;
+		}
+		if (_swapScenes)
+		{
+			swapScenesImpl(deltaTime);
 		}
 	}
 

@@ -12,7 +12,7 @@ Renderer::Renderer()
     : _isInitialized(false),
     _graphicsManager(nullptr),
     _screenWidth(0), _screenHeight(0),
-    _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC),
+    _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC), _sceneVisibility(1.0f),
 	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
@@ -1168,6 +1168,23 @@ float Renderer::getExposure()
     return _exposure;
 }
 
+
+void Renderer::setSceneVisibility(float visibility)
+{
+    if (_isInitialized)
+    {
+        PostProcessingToneMapping* toneMappingEffect = static_cast<PostProcessingToneMapping*>(findEffect(PPT_TONE_MAPPING));
+        toneMappingEffect->setVisibility(visibility);
+    }
+
+    _sceneVisibility = visibility;
+}
+
+
+float Renderer::getSceneVisibility()
+{
+    return _sceneVisibility;
+}
 
 void Renderer::setToneMappingType(ToneMappingType type)
 {

@@ -9,7 +9,7 @@ class ProgressBar final : public GUIObject
 {
 	public:
 		static const int TYPE1 = 0;
-		static const int TYPE2 = 0;
+		static const int TYPE2 = 1;
 
 	private:
 		bool _isInitialized;
