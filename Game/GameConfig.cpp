@@ -139,6 +139,14 @@ void GameConfig::loadDevelopmentConfig(const char* filename)
 		{
 			developmentMode = toBool(child->GetText());
 		}
+        else if (strcmp(ename, "firstScene") == 0)
+        {
+            firstScene = std::string(child->GetText());
+        }
+        else if (strcmp(ename, "useLoadingScreen") == 0)
+        {
+            useLoadingScreen = toBool(child->GetText());
+        }
 	}
 }
 

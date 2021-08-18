@@ -28,7 +28,7 @@ class GameConfig
 			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			textureCompression(false), anisotropicFiltering(false), anisotropySamples(4.0f),
-			pbrSupport(false), openGlDebugContext(false), developmentMode(false),
+			pbrSupport(false), openGlDebugContext(false), developmentMode(false), firstScene(""), useLoadingScreen(true),
 			mode(GM_GAME)
         {}
         GameConfig(const GameConfig&) {}
@@ -77,8 +77,9 @@ class GameConfig
         bool openGlDebugContext;
 
 		bool developmentMode;
-
 		std::string alternativeResourcesPath;
+        std::string firstScene;
+        bool useLoadingScreen;
 
 };
 

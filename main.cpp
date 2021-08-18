@@ -24,9 +24,15 @@ int main()
 	game.registerSceneType<TestScene>(GameScenesNames::TEST_SCENE);
 	game.registerLoadingSceneType<LoadingScreenScene>(GameScenesNames::LOADING_SCREEN);
 
+	std::string firstSceneName = GameScenesNames::MENU_SELECT_BUS;
+	bool useLoadingScreen = true;
+#ifdef DEVELOPMENT_RESOURCES
+	firstSceneName = !gameConfig.firstScene.empty() ? gameConfig.firstScene : firstSceneName;
+	useLoadingScreen = gameConfig.useLoadingScreen;
+#endif // DEVELOPMENT_RESOURCES
 	std::unordered_map<std::string, std::string> params;
 	MainGameScene::createSceneParams(params, GameConfig::getInstance().busModel, GameConfig::getInstance().busConfiguration, GameConfig::getInstance().busRepaint);
-	game.setFirstScene(GameScenesNames::MENU_SELECT_BUS, true, params);
+	game.setFirstScene(firstSceneName, useLoadingScreen, params);
 
 	game.initialize();
 	game.run();
