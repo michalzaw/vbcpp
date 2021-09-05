@@ -5,7 +5,7 @@
 #include "../Utils/InputSystem.h"
 
 
-Button::Button(RTexture* texture, RFont* font, const std::string& text)
+Button::Button(RTexture* texture, RTexture* textureHovered, RFont* font, const std::string& text)
 	: _label(nullptr)
 {
 	_image = new Image(texture);
@@ -15,6 +15,9 @@ Button::Button(RTexture* texture, RFont* font, const std::string& text)
 		_label = new Label(font);
 		_label->setText(text);
 	}
+
+	_texture = texture;
+	_textureHovered = textureHovered != nullptr ? textureHovered : texture;
 }
 
 
@@ -120,11 +123,13 @@ void Button::update(float deltaTime)
 	InputSystem& input = InputSystem::getInstance();
 
 	double mouseX, mouseY;
-	input.getCursorPosition(&mouseX, &mouseY);
+	input.getCursorPosition(&mouseX, &mouseY, true);
 
 	if (mouseX > _position.x && mouseX < _position.x + getRealSize().x &&
 		mouseY > _position.y && mouseY < _position.y + getRealSize().y)
 	{
+		_image->setTexture(_textureHovered);
+
 		if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT))
 		{
 			if (_onClickCallback)
@@ -132,6 +137,10 @@ void Button::update(float deltaTime)
 				_onClickCallback();
 			}
 		}
+	}
+	else
+	{
+		_image->setTexture(_texture);
 	}
 }
 

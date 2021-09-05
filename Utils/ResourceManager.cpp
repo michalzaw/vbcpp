@@ -567,7 +567,7 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 
 RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 {
-    Resource* res = findResource(path);
+    Resource* res = findResource(FontLoader::createFontResourceName(path.c_str(), pixelSize));
     if (res != 0)
     {
         RFont* font = dynamic_cast<RFont*>(res);

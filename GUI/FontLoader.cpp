@@ -2,6 +2,8 @@
 
 #include "GUIObject.h"
 
+#include "../Utils/Strings.h"
+
 
 FontLoader::FontLoader()
 {
@@ -74,7 +76,7 @@ RFont* FontLoader::loadFont(const char* fontName, int pixelSize)
     FT_Set_Pixel_Sizes(face, pixelSize, pixelSize);
 
 
-    font = new RFont(fontName);
+    font = new RFont(createFontResourceName(fontName, pixelSize));
     font->_vbo = new VBO(1024 * sizeof(GUIVertex));
 
     _textureData = new unsigned char*[256];
@@ -128,4 +130,10 @@ RFont* FontLoader::loadFont(const char* fontName, int pixelSize)
 
 
     return font;
+}
+
+
+std::string FontLoader::createFontResourceName(const char* fontName, int pixelSize)
+{
+    return std::string(fontName) + ";" + toString(pixelSize);
 }

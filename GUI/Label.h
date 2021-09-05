@@ -17,6 +17,8 @@ class Label : public GUIObject
         std::string _text;
         unsigned int _textSize;
 
+        unsigned int _width;
+
         unsigned int _maxWidth;
         unsigned int _maxHeight;
 
@@ -48,6 +50,7 @@ class Label : public GUIObject
 
         RFont* getFont();
         std::string getText();
+        unsigned int getWidth();
         unsigned int getMaxWidth();
         unsigned int getMaxHeight();
 

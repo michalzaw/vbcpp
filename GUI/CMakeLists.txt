@@ -6,6 +6,7 @@ set (GUI_SOURCES
 	GUI/GUIRenderListElement.cpp
 	GUI/Image.cpp
 	GUI/Label.cpp
+	GUI/Picker.cpp
 	GUI/ProgressBar.cpp
 )
 
@@ -17,6 +18,7 @@ set (GUI_HEADERS
 	GUI/GUIRenderListElement.h
 	GUI/Image.h
 	GUI/Label.h
+	GUI/Picker.h
 	GUI/ProgressBar.h
 )
 

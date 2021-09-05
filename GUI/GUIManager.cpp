@@ -37,9 +37,9 @@ Label* GUIManager::addLabel(RFont* font, std::string text)
 }
 
 
-Button* GUIManager::addButton(RTexture* texture, RFont* font, std::string text)
+Button* GUIManager::addButton(RTexture* texture, RTexture* textureHovered, RFont* font, std::string text)
 {
-    Button* button = new Button(texture, font, text);
+    Button* button = new Button(texture, textureHovered, font, text);
 
     _objects.push_back(button);
 
@@ -54,6 +54,16 @@ ProgressBar* GUIManager::addProgressBar(bool indeterminate)
     _objects.push_back(progressBar);
 
     return progressBar;
+}
+
+
+Picker* GUIManager::addPicker(RFont* font, const std::vector<std::string>& options, unsigned int width)
+{
+    Picker* picker = new Picker(font, options, width);
+
+    _objects.push_back(picker);
+
+    return picker;
 }
 
 

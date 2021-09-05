@@ -3,7 +3,7 @@
 
 Label::Label(RFont* font)
     : _font(font),
-    _text(""), _textSize(0),
+    _text(""), _textSize(0), _width(0),
     _maxWidth(0), _maxHeight(0)
 {
     _color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -34,6 +34,8 @@ bool Label::buildTextData()
 {
     if (_font == NULL)
         return false;
+
+    _width = 0;
 
     float x = 0;
     float y = 0;
@@ -72,6 +74,11 @@ bool Label::buildTextData()
                 }
 
                 x = _charsOffsets[i].x;
+
+                if (x > _width)
+                {
+                    _width = x;
+                }
             }
         }
 
@@ -80,6 +87,11 @@ bool Label::buildTextData()
 
     _charsTransforms.resize(_charsOffsets.size());
     _charsTransformsIs.resize(_charsOffsets.size(), false);
+
+    if (x > _width)
+    {
+        _width = x;
+    }
 
     return true;
 }
@@ -149,6 +161,12 @@ RFont* Label::getFont()
 std::string Label::getText()
 {
     return _text;
+}
+
+
+unsigned int Label::getWidth()
+{
+    return _width * _scale.x;
 }
 
 
