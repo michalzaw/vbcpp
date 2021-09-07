@@ -26,23 +26,18 @@ Picker::Picker(RFont* font, const std::vector<std::string>& options, unsigned in
 				_selectedOption = _options.size() - 1;
 			}
 
-			_label->setText(_options[_selectedOption]);
-
-			setAllElementsPositions();
+			onValueChanged();
 		});
 
 	_buttonArrowForward->setOnClickCallback([this]()
 		{
-
 			++_selectedOption;
 			if (_selectedOption >= _options.size())
 			{
 				_selectedOption = 0;
 			}
 
-			_label->setText(_options[_selectedOption]);
-
-			setAllElementsPositions();
+			onValueChanged();
 		});
 }
 
@@ -66,6 +61,19 @@ void Picker::setAllElementsPositions()
 
 	_imageBackground->setScale((_width) / _imageBackground->getTexture()->getSize().x,
 							   (_height) / _imageBackground->getTexture()->getSize().y);
+}
+
+
+void Picker::onValueChanged()
+{
+	_label->setText(_options[_selectedOption]);
+
+	setAllElementsPositions();
+
+	if (_onValueChangedCallback)
+	{
+		_onValueChangedCallback(_selectedOption, _options[_selectedOption]);
+	}
 }
 
 
@@ -208,4 +216,10 @@ void Picker::addDataToRenderList(GUIRenderList* renderList)
 	_buttonArrowBack->addDataToRenderList(renderList);
 	_buttonArrowForward->addDataToRenderList(renderList);
 	_label->addDataToRenderList(renderList);
+}
+
+
+void Picker::setOnValueChangedCallback(const std::function<void(int, const std::string&)>& onValueChangedCallback)
+{
+	_onValueChangedCallback = onValueChangedCallback;
 }

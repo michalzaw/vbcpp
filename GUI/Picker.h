@@ -27,7 +27,10 @@ class Picker final : public GUIObject
 		std::vector<std::string> _options;
 		int _selectedOption;
 
+		std::function<void(int, const std::string&)> _onValueChangedCallback;
+
 		void setAllElementsPositions();
+		void onValueChanged();
 
 		inline void changedVerticesTransformMatrixParameters() override
 		{
@@ -80,6 +83,7 @@ class Picker final : public GUIObject
 
 		void addDataToRenderList(GUIRenderList* renderList) override;
 
+		void setOnValueChangedCallback(const std::function<void(int, const std::string&)>& onValueChangedCallback);
 };
 
 

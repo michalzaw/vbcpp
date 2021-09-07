@@ -235,6 +235,10 @@ void TestScene::initialize()
 		picker1->setPosition(180, 250 - pickerMargin.y);
 		picker1->setBackgroundColor(pickerBackgroundColor);
 		picker1->setMargin(pickerMargin);
+		picker1->setOnValueChangedCallback([](int index, const std::string& value)
+			{
+				std::cout << "Selected item: " << value + " (" << index << ")\n";
+			});
 
 		Label* labelFront = _gui->addLabel(fontRegular26, "Front pojazdu");
 		labelFront->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
