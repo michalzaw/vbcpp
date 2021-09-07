@@ -207,13 +207,17 @@ void TestScene::initialize()
 
 
 	{
-		//Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)));
-		//imageBackground->setScale(220, 110);
-		//imageBackground->setPosition(160, 120);
+		Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)));
+		imageBackground->setScale(220, 110);
+		imageBackground->setPosition(160, 120);
 
 
 		RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
 		RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 26);
+		glm::vec2 pickerMargin = glm::vec2(5.0f, 7.5f);
+		//glm::vec4 pickerBackgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.1f);
+		//glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
+		glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
 		Label* labelTitle = _gui->addLabel(fontBoldItalic32, "KONFIGURACJA");
 		labelTitle->setPosition(200, 300);
@@ -227,8 +231,10 @@ void TestScene::initialize()
 		optionsConfigurations.push_back("Typ 1");
 		optionsConfigurations.push_back("Typ 2");
 		optionsConfigurations.push_back("Test123");
-		Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400);
-		picker1->setPosition(180, 250);
+		Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400, 40);
+		picker1->setPosition(180, 250 - pickerMargin.y);
+		picker1->setBackgroundColor(pickerBackgroundColor);
+		picker1->setMargin(pickerMargin);
 
 		Label* labelFront = _gui->addLabel(fontRegular26, "Front pojazdu");
 		labelFront->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -237,8 +243,10 @@ void TestScene::initialize()
 		std::vector<std::string> optionsFront;
 		optionsFront.push_back("1");
 		optionsFront.push_back("2");
-		Picker* picker2 = _gui->addPicker(fontRegular26, optionsFront, 200);
-		picker2->setPosition(380, 200);
+		Picker* picker2 = _gui->addPicker(fontRegular26, optionsFront, 200, 40);
+		picker2->setPosition(380, 200 - pickerMargin.y);
+		picker2->setBackgroundColor(pickerBackgroundColor);
+		picker2->setMargin(pickerMargin);
 
 		Label* labelDisplay = _gui->addLabel(fontRegular26, "Wyswietlacz");
 		labelDisplay->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
@@ -247,8 +255,10 @@ void TestScene::initialize()
 		std::vector<std::string> optionsDisplay;
 		optionsDisplay.push_back("true");
 		optionsDisplay.push_back("false");
-		Picker* picker3 = _gui->addPicker(fontRegular26, optionsDisplay, 200);
-		picker3->setPosition(380, 150);
+		Picker* picker3 = _gui->addPicker(fontRegular26, optionsDisplay, 200, 40);
+		picker3->setPosition(380, 150 - pickerMargin.y);
+		picker3->setBackgroundColor(pickerBackgroundColor);
+		picker3->setMargin(pickerMargin);
 	}
 
 
@@ -264,17 +274,17 @@ void TestScene::initialize()
 	options.push_back("9");
 	options.push_back("10");
 	options.push_back("20");
-	Picker* picker1 = _gui->addPicker(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 32), options, 400);
+	Picker* picker1 = _gui->addPicker(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 32), options, 400, 40);
 	picker1->setPosition(100, 50);
 
 	/*float y = _window->getHeight() - 50;
 	for (int i = 0; i < 20; ++i)
 	{
 		int size = 12 + 2 * i;
+		y -= size;
+
 		Label* label = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", size), "Font: " + toString(size));
 		label->setPosition(10, y);
-
-		y -= 50;
 	}*/
 }
 

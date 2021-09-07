@@ -34,13 +34,16 @@ class RFont : virtual public Resource
 
         VBO* _vbo;
 
+        int _pixelSize;
+
     public:
-        RFont(std::string path);
+        RFont(std::string path, int pixelSize);
         virtual ~RFont();
 
         const CharacterInfo& getCharacterInfo(char character);
         RTexture2D* getTexture();
         VBO* getVBO();
+        int getPixelSize();
 
 };
 

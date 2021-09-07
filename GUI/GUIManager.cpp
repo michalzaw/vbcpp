@@ -57,9 +57,9 @@ ProgressBar* GUIManager::addProgressBar(bool indeterminate)
 }
 
 
-Picker* GUIManager::addPicker(RFont* font, const std::vector<std::string>& options, unsigned int width)
+Picker* GUIManager::addPicker(RFont* font, const std::vector<std::string>& options, unsigned int width, unsigned int height)
 {
-    Picker* picker = new Picker(font, options, width);
+    Picker* picker = new Picker(font, options, width, height);
 
     _objects.push_back(picker);
 

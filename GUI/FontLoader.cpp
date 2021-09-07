@@ -76,7 +76,7 @@ RFont* FontLoader::loadFont(const char* fontName, int pixelSize)
     FT_Set_Pixel_Sizes(face, pixelSize, pixelSize);
 
 
-    font = new RFont(createFontResourceName(fontName, pixelSize));
+    font = new RFont(createFontResourceName(fontName, pixelSize), pixelSize);
     font->_vbo = new VBO(1024 * sizeof(GUIVertex));
 
     _textureData = new unsigned char*[256];

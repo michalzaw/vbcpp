@@ -1,9 +1,10 @@
 #include "RFont.h"
 
 
-RFont::RFont(std::string path)
+RFont::RFont(std::string path, int pixelSize)
     : Resource(RT_FONT_RESOURCE, path),
-    _characterTexture(NULL), _vbo(NULL)
+    _characterTexture(NULL), _vbo(NULL),
+    _pixelSize(pixelSize)
 {
 
 }
@@ -34,4 +35,10 @@ RTexture2D* RFont::getTexture()
 VBO* RFont::getVBO()
 {
     return _vbo;
+}
+
+
+int RFont::getPixelSize()
+{
+    return _pixelSize;
 }

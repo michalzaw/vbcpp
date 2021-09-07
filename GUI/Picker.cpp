@@ -3,14 +3,11 @@
 #include "../Utils/ResourceManager.h"
 
 
-Picker::Picker(RFont* font, const std::vector<std::string>& options, unsigned int width)
-	: _width(width),
+Picker::Picker(RFont* font, const std::vector<std::string>& options, unsigned int width, unsigned int height)
+	: _width(width), _height(height), _margin(5.0f, 5.0f), _backgroundColor(1.0f, 1.0f, 1.0f, 0.0f),
 	_options(options), _selectedOption(0)
 {
-	//_imageBackground = new Image(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)));
-	//_imageBackground = new Image(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1.0f, 1.0f, 1.0f, 0.3f)));
-	_imageBackground = new Image(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f)));
-	_imageBackground->setScale((width + 20) / 2.0f, 20.0f);
+	_imageBackground = new Image(ResourceManager::getInstance().loadOneColorTexture(_backgroundColor));
 
 	_buttonArrowBack = new Button(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"), ResourceManager::getInstance().loadTexture("Data/arrow_back2_2.png"));
 	_buttonArrowForward = new Button(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"), ResourceManager::getInstance().loadTexture("Data/arrow_forward2_2.png"));
@@ -18,6 +15,8 @@ Picker::Picker(RFont* font, const std::vector<std::string>& options, unsigned in
 	_label = new Label(font);
 	_label->setText(_options[_selectedOption]);
 	_label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	setAllElementsPositions();
 
 	_buttonArrowBack->setOnClickCallback([this]()
 		{
@@ -58,12 +57,15 @@ Picker::~Picker()
 
 void Picker::setAllElementsPositions()
 {
-	_buttonArrowBack->setPosition(_position);
-	_buttonArrowForward->setPosition(_position.x + _width - _buttonArrowForward->getRealSize().x, _position.y);
+	_buttonArrowBack->setPosition(_position.x + _margin.x, _position.y + _margin.y);
+	_buttonArrowForward->setPosition(_position.x + _width - _buttonArrowForward->getRealSize().x - _margin.x, _position.y + _margin.y);
 
-	_label->setPosition(_position.x + (_width - _label->getWidth()) / 2.0f, _position.y);
+	_label->setPosition(_position.x + (_width - _label->getWidth()) / 2.0f, _position.y + _margin.y);
 
-	_imageBackground->setPosition(_position.x - 10, _position.y - 7.5);
+	_imageBackground->setPosition(_position.x, _position.y);
+
+	_imageBackground->setScale((_width) / _imageBackground->getTexture()->getSize().x,
+							   (_height) / _imageBackground->getTexture()->getSize().y);
 }
 
 
@@ -144,6 +146,50 @@ void Picker::setWidth(unsigned int width)
 unsigned int Picker::getWidth()
 {
 	return _width;
+}
+
+
+void Picker::setHeight(unsigned int height)
+{
+	_height = height;
+
+	setAllElementsPositions();
+}
+
+
+unsigned int Picker::getHeight()
+{
+	return _height;
+}
+
+
+void Picker::setMargin(glm::vec2 margin)
+{
+	_margin = margin;
+
+	setAllElementsPositions();
+}
+
+
+glm::vec2 Picker::getMargin()
+{
+	return _margin;
+}
+
+
+void Picker::setBackgroundColor(glm::vec4 color)
+{
+	if (_backgroundColor != color)
+	{
+		_backgroundColor = color;
+		_imageBackground->setTexture(ResourceManager::getInstance().loadOneColorTexture(_backgroundColor));
+	}
+}
+
+
+glm::vec4 Picker::getBackgroundColor()
+{
+	return _backgroundColor;
 }
 
 

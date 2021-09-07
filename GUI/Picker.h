@@ -18,6 +18,11 @@ class Picker final : public GUIObject
 		Label* _label;
 
 		unsigned int _width;
+		unsigned int _height;
+
+		glm::vec2 _margin;
+
+		glm::vec4 _backgroundColor;
 
 		std::vector<std::string> _options;
 		int _selectedOption;
@@ -35,7 +40,7 @@ class Picker final : public GUIObject
 		}
 
 	public:
-		Picker(RFont* font, const std::vector<std::string>& options, unsigned int width);
+		Picker(RFont* font, const std::vector<std::string>& options, unsigned int width, unsigned int height);
 		~Picker();
 
 		// https://stackoverflow.com/questions/29715420/overriding-overloaded-methods-hides-some-of-the-overloads
@@ -61,6 +66,15 @@ class Picker final : public GUIObject
 
 		void setWidth(unsigned int width);
 		unsigned int getWidth();
+
+		void setHeight(unsigned int height);
+		unsigned int getHeight();
+
+		void setMargin(glm::vec2 margin);
+		glm::vec2 getMargin();
+
+		void setBackgroundColor(glm::vec4 color);
+		glm::vec4 getBackgroundColor();
 
 		void update(float deltaTime) override;
 

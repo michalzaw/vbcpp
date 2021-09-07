@@ -58,7 +58,7 @@ bool Label::buildTextData()
             unsigned int lastSpaceIndex = finadLastSpace(_text, i);
             if (lastSpaceIndex > 0 && lastSpaceIndex < _charsOffsets.size() - 1)
             {
-                y -= 50;
+                y -= _font->getPixelSize();
                 if (_maxHeight > 0 && -y > _maxHeight)
                 {
                     break;
