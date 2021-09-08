@@ -1,5 +1,6 @@
 #include "Picker.h"
 
+#include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -213,11 +214,19 @@ void Picker::setSelectedOption(int selectedOptionIndex)
 
 void Picker::setSelectedOption(const std::string& selectedOption)
 {
-	_selectedOption = find(_options.begin(), _options.end(), selectedOption) - _options.begin();
+	auto f = find(_options.begin(), _options.end(), selectedOption);
+	if (f != _options.end())
+	{
+		_selectedOption = f - _options.begin();
 
-	_label->setText(_options[_selectedOption]);
+		_label->setText(_options[_selectedOption]);
 
-	setAllElementsPositions();
+		setAllElementsPositions();
+	}
+	else
+	{
+		Logger::error("Invalid selectedOption value: " + selectedOption);
+	}
 }
 
 

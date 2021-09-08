@@ -39,6 +39,7 @@ class MenuSelectBusScene final : public GameScene
 		void showBusLogo();
 
 		void createConfigurationWindow();
+		void setValuesInVariablesPickers();
 		void createConfigurationPreviewWindow();
 
 	public:

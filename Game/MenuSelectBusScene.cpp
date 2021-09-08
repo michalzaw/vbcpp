@@ -169,14 +169,16 @@ void MenuSelectBusScene::showBusLogo()
 void MenuSelectBusScene::createConfigurationWindow()
 {
 	RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
-	RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 26);
+	RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 22);
 	glm::vec2 pickerMargin = glm::vec2(5.0f, 7.5f);
 	//glm::vec4 pickerBackgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.1f);
 	//glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 	glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
+	int pickerHeight = 30;
+	int pickerYSpace = 5;
 	int windowWidth = 440;
-	int windowHeight = 220;
+	int windowHeight = 90 + (pickerHeight + pickerYSpace) * 4 + 15;
 
 	//glm::vec2 startPosition = glm::vec2(650, 340);
 	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50);
@@ -193,14 +195,15 @@ void MenuSelectBusScene::createConfigurationWindow()
 	imgLine->setPosition(startPosition + glm::vec2(20, -50));
 	imgLine->setScale(200, 1);
 
-	int pickerHeight = 40;
+	int y = -90;
 
 	std::vector<std::string> optionsConfigurations;
-	optionsConfigurations.push_back("Typ 1");
-	optionsConfigurations.push_back("Typ 2");
-	optionsConfigurations.push_back("Test123");
+	for (const auto& configurationName : _buses2[_selectedBus]->predefinedConfigurations)
+	{
+		optionsConfigurations.push_back(configurationName.first);
+	}
 	Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400, pickerHeight);
-	picker1->setPosition(startPosition + glm::vec2(20, -90 - pickerMargin.y));
+	picker1->setPosition(startPosition + glm::vec2(20, y - pickerMargin.y));
 	picker1->setBackgroundColor(pickerBackgroundColor);
 	picker1->setMargin(pickerMargin);
 	picker1->setOnValueChangedCallback([this](int index, const std::string& value)
@@ -211,11 +214,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 			_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
 			_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
 
-			for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
-			{
-				const std::string& variableValue = _selectedBusConfigurationVariables[_buses2[_selectedBus]->availableVariables[i].name];
-				_busConfigurationVariablesPickers[i]->setSelectedOption(variableValue);
-			}
+			setValuesInVariablesPickers();
 
 			//std::cout << "Selected item: " << value + " (" << index << ")\n";
 
@@ -225,7 +224,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	{
 		const GameVariable& variable = _buses2[_selectedBus]->availableVariables[i];
 
-		int y = -140 - i * 50;
+		y -= pickerHeight + pickerYSpace;
 		int pickerWidth = 150;
 
 		Label* label = _gui->addLabel(fontRegular26, variable.displayName);
@@ -246,7 +245,20 @@ void MenuSelectBusScene::createConfigurationWindow()
 
 		_busConfigurationVariablesPickers.push_back(picker);
 	}
+
+	setValuesInVariablesPickers();
 }
+
+
+void MenuSelectBusScene::setValuesInVariablesPickers()
+{
+	for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
+	{
+		const std::string& variableValue = _selectedBusConfigurationVariables[_buses2[_selectedBus]->availableVariables[i].name];
+		_busConfigurationVariablesPickers[i]->setSelectedOption(variableValue);
+	}
+}
+
 
 void MenuSelectBusScene::createConfigurationPreviewWindow()
 {
