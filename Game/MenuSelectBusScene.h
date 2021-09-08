@@ -36,6 +36,8 @@ class MenuSelectBusScene final : public GameScene
 
 		void showBusLogo();
 
+		void createConfigurationWindow();
+
 	public:
 		explicit MenuSelectBusScene(Window* window);
 		~MenuSelectBusScene();
