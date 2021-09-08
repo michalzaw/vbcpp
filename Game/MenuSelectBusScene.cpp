@@ -179,7 +179,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	int windowHeight = 220;
 
 	//glm::vec2 startPosition = glm::vec2(650, 340);
-	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50 );
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50);
 
 	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
@@ -211,7 +211,13 @@ void MenuSelectBusScene::createConfigurationWindow()
 			_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
 			_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
 
-			std::cout << "Selected item: " << value + " (" << index << ")\n";
+			for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
+			{
+				const std::string& variableValue = _selectedBusConfigurationVariables[_buses2[_selectedBus]->availableVariables[i].name];
+				_busConfigurationVariablesPickers[i]->setSelectedOption(variableValue);
+			}
+
+			//std::cout << "Selected item: " << value + " (" << index << ")\n";
 
 		});
 
@@ -237,8 +243,13 @@ void MenuSelectBusScene::createConfigurationWindow()
 				_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
 				_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
 			});
+
+		_busConfigurationVariablesPickers.push_back(picker);
 	}
-	
+}
+
+void MenuSelectBusScene::createConfigurationPreviewWindow()
+{
 	{
 		Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)));
 		imageBackground->setScale(220, 110);
@@ -376,6 +387,7 @@ void MenuSelectBusScene::initialize()
 	showSelectedBus();
 
 	createConfigurationWindow();
+	//createConfigurationPreviewWindow();
 }
 
 

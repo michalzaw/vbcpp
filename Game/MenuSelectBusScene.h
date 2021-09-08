@@ -24,6 +24,8 @@ class MenuSelectBusScene final : public GameScene
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
 
+		std::vector<Picker*> _busConfigurationVariablesPickers;
+
 		void loadAvailableBusesNames();
 
 		CameraFPS* createCameraFPSGlobal();
@@ -37,6 +39,7 @@ class MenuSelectBusScene final : public GameScene
 		void showBusLogo();
 
 		void createConfigurationWindow();
+		void createConfigurationPreviewWindow();
 
 	public:
 		explicit MenuSelectBusScene(Window* window);

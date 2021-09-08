@@ -201,6 +201,38 @@ glm::vec4 Picker::getBackgroundColor()
 }
 
 
+void Picker::setSelectedOption(int selectedOptionIndex)
+{
+	_selectedOption = selectedOptionIndex;
+
+	_label->setText(_options[_selectedOption]);
+
+	setAllElementsPositions();
+}
+
+
+void Picker::setSelectedOption(const std::string& selectedOption)
+{
+	_selectedOption = find(_options.begin(), _options.end(), selectedOption) - _options.begin();
+
+	_label->setText(_options[_selectedOption]);
+
+	setAllElementsPositions();
+}
+
+
+int Picker::getSelectedOptionIndex()
+{
+	return _selectedOption;
+}
+
+
+const std::string& Picker::getSelectedOptionValue()
+{
+	return _options[_selectedOption];
+}
+
+
 void Picker::update(float deltaTime)
 {
 	_imageBackground->update(deltaTime);

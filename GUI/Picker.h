@@ -79,6 +79,11 @@ class Picker final : public GUIObject
 		void setBackgroundColor(glm::vec4 color);
 		glm::vec4 getBackgroundColor();
 
+		void setSelectedOption(int selectedOptionIndex);
+		void setSelectedOption(const std::string& selectedOption);
+		int getSelectedOptionIndex();
+		const std::string& getSelectedOptionValue();
+
 		void update(float deltaTime) override;
 
 		void addDataToRenderList(GUIRenderList* renderList) override;
