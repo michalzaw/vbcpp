@@ -581,7 +581,7 @@ RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 
     FontLoader loader;
 
-    RFont* mTemp = loader.loadFont(path.c_str(), pixelSize);
+    RFont* mTemp = loader.loadFont2(path, pixelSize);
 
     if (mTemp)
     {

@@ -201,7 +201,7 @@ void Label::addDataToRenderList(GUIRenderList* renderList)
     for (int i = 0; i < _textSize; ++i)
     {
         int charIndex = static_cast<int>(_text[i]);
-        renderList->push_back(GUIRenderListElement(vbo, charIndex * 4,
+        renderList->push_back(GUIRenderListElement(vbo, _font->getCharacterInfo(charIndex)._vboOffset,
                                                    getVerticesTransformMatrix(i), getTexCoordTransformMatrix(i),
                                                    _color, _font->getTexture(),//s[charIndex],
                                                    GUI_LABEL_SHADER));
