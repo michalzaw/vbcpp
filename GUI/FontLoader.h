@@ -19,6 +19,9 @@ class FontLoader
         int _textureWidth;
         int _textureHeight;
 
+        int _charLinesHeights[256];
+        int _currentCharLineWidth;
+
         void loadChar(int index);
         void releaseTextureData();
 

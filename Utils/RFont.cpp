@@ -20,7 +20,7 @@ RFont::~RFont()
 }
 
 
-const CharacterInfo& RFont::getCharacterInfo(char character)
+const CharacterInfo& RFont::getCharacterInfo(int character)
 {
     return _characterInfos[character];
 }

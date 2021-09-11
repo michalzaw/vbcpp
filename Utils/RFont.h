@@ -29,7 +29,7 @@ class RFont : virtual public Resource
     friend class FontLoader;
 
     private:
-        CharacterInfo _characterInfos[256];
+        CharacterInfo _characterInfos[256 * 256];
         RTexture2D* _characterTexture;
 
         VBO* _vbo;
@@ -40,7 +40,7 @@ class RFont : virtual public Resource
         RFont(std::string path, int pixelSize);
         virtual ~RFont();
 
-        const CharacterInfo& getCharacterInfo(char character);
+        const CharacterInfo& getCharacterInfo(int character);
         RTexture2D* getTexture();
         VBO* getVBO();
         int getPixelSize();
