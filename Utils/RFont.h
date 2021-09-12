@@ -26,7 +26,7 @@ struct CharacterInfo
     int x;
     int y;
 
-    int _vboOffset;
+    int vboOffset;
 };
 
 

@@ -10,6 +10,9 @@
 class FontLoader
 {
     private:
+        static const unsigned int MAX_TEXTURE_WIDTH = 4096;
+        static const unsigned int CHAR_MARGIN = 2;
+
         FT_Library _library;
         FT_Face _face;
         RFont* _font;

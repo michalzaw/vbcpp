@@ -7,11 +7,9 @@
 
 
 FontLoader::FontLoader()
+    : _face(nullptr), _font(nullptr)
 {
     FT_Init_FreeType(&_library);
-
-    _face = NULL;
-    _font = NULL;
 }
 
 
@@ -41,9 +39,9 @@ void FontLoader::loadChar(unsigned long charCode, unsigned int glyphIndex)
     }
     _textureData.push_back(textureData);
 
-    if (_currentCharLineWidth + width + 2 > 4096)
+    if (_currentCharLineWidth + width + CHAR_MARGIN > MAX_TEXTURE_WIDTH)
     {
-        _currentLineY += _linesHeights[_currentLineIndex] + 2;
+        _currentLineY += _linesHeights[_currentLineIndex] + CHAR_MARGIN;
         ++_currentLineIndex;
         _linesHeights.push_back(0);
 
@@ -62,7 +60,7 @@ void FontLoader::loadChar(unsigned long charCode, unsigned int glyphIndex)
     _font->_characterInfos[charCode].x = _currentCharLineWidth;
     _font->_characterInfos[charCode].y = _currentLineY;
 
-    _currentCharLineWidth += _font->_characterInfos[charCode].width + 2;
+    _currentCharLineWidth += _font->_characterInfos[charCode].width + CHAR_MARGIN;
     _linesHeights[_currentLineIndex] = std::max(_linesHeights[_currentLineIndex], _font->_characterInfos[charCode].height);
 }
 
@@ -89,6 +87,12 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 {
     Logger::info("Loading font: " + fontName);
 
+    if (pixelSize <= 0)
+    {
+        Logger::error("Invalid pixelSize");
+        return nullptr;
+    }
+
     bool result = FT_New_Face(_library, fontName.c_str(), 0, &_face);
     if (result)
     {
@@ -107,10 +111,9 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 
     _font = new RFont(createFontResourceName(fontName.c_str(), pixelSize), pixelSize);
 
+    int charsCount = 0;
     unsigned int glyphIndex;
     unsigned long charCode = FT_Get_First_Char(_face, &glyphIndex);
-
-    int charsCount = 0;
     while (glyphIndex != 0)
     {
         loadChar(charCode, glyphIndex);
@@ -123,6 +126,8 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
     calculateTextureHeight();
 
     // Create texture
+    GLint initialUnpackAlignment;
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &initialUnpackAlignment);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     _textureWidth = next_p2(_textureWidth);
@@ -153,7 +158,7 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 
         _font->_vbo->addVertexData(vertices, 4);
 
-        _font->_characterInfos[charCode]._vboOffset = index * 4;
+        _font->_characterInfos[charCode].vboOffset = index * 4;
 
         charCode = FT_Get_Next_Char(_face, charCode, &glyphIndex);
         ++index;
@@ -162,10 +167,13 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 
     FT_Done_Face(_face);
 
-    _face = NULL;
+    _face = nullptr;
 
 
     releaseTextureData();
+
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, initialUnpackAlignment);
 
 
     return _font;
