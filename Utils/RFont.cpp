@@ -1,7 +1,7 @@
 #include "RFont.h"
 
 
-RFont::RFont(std::string path, int pixelSize)
+RFont::RFont(const std::string& path, int pixelSize)
     : Resource(RT_FONT_RESOURCE, path),
     _characterTexture(NULL), _vbo(NULL),
     _pixelSize(pixelSize)
@@ -20,7 +20,7 @@ RFont::~RFont()
 }
 
 
-const CharacterInfo& RFont::getCharacterInfo(int character)
+const CharacterInfo& RFont::getCharacterInfo(unsigned int character)
 {
     return _characterInfos[character];
 }

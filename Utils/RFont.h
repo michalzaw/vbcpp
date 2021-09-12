@@ -35,7 +35,6 @@ class RFont : virtual public Resource
     friend class FontLoader;
 
     private:
-        //CharacterInfo _characterInfos[256 * 256];
         std::unordered_map<unsigned int, CharacterInfo> _characterInfos;
         RTexture2D* _characterTexture;
 
@@ -44,10 +43,10 @@ class RFont : virtual public Resource
         int _pixelSize;
 
     public:
-        RFont(std::string path, int pixelSize);
+        RFont(const std::string& path, int pixelSize);
         virtual ~RFont();
 
-        const CharacterInfo& getCharacterInfo(int character);
+        const CharacterInfo& getCharacterInfo(unsigned int character);
         RTexture2D* getTexture();
         VBO* getVBO();
         int getPixelSize();
