@@ -15,7 +15,7 @@ class Label : public GUIObject
         RFont* _font;
 
         std::string _text;
-        unsigned int _textSize;
+        std::vector<unsigned int> _unicodeText;
 
         unsigned int _width;
 
@@ -26,6 +26,7 @@ class Label : public GUIObject
         std::vector<glm::mat4>  _charsTransforms;
         std::vector<bool>       _charsTransformsIs;
 
+        void decodeTextToUnicode();
         bool buildTextData();
         void clearTextData();
 

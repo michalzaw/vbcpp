@@ -37,7 +37,7 @@ inline std::string vec4ToString(glm::vec4 vector)
 
 
 // Convert string to int
-inline int toInt(std::string String)
+inline int toInt(const std::string& String)
 {
 	std::istringstream Stream(String);
 	int Temp;
@@ -56,7 +56,7 @@ inline int toInt(const char* String)
 
 
 // Convert string to float
-inline float toFloat(std::string String)
+inline float toFloat(const std::string& String)
 {
 	std::istringstream Stream(String);
 	float Temp;
@@ -75,7 +75,7 @@ inline float toFloat(const char* String)
 
 
 // Convert string to bool
-inline bool toBool(std::string String)
+inline bool toBool(const std::string& String)
 {
     return strcmp(String.c_str(), "true") == 0;
 }
@@ -92,7 +92,13 @@ std::string trim(const std::string& string);
 
 std::vector<std::string> split(const std::string& string, char delimiter);
 
-bool startsWith(std::string string, std::string start);
+bool startsWith(const std::string& string, const std::string& start);
+
+
+namespace Utf8String
+{
+	unsigned int getNextUtf8Char(const std::string& string, unsigned int& offset);
+}
 
 
 #endif // STRINGS_H_INCLUDED
