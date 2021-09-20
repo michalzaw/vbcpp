@@ -81,6 +81,11 @@ class GameConfig
         std::string firstScene;
         bool useLoadingScreen;
 
+        std::string toString() const
+        {
+            return "Test";
+        }
+
 };
 
 
