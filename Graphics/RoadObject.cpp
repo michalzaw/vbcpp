@@ -8,7 +8,7 @@
 #include "../Scene/SceneObject.h"
 
 #include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 
 
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
@@ -33,7 +33,7 @@ RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& point
 
 RoadObject::~RoadObject()
 {
-	Logger::info("RoadObject destructor\n");
+	LOG_INFO("RoadObject destructor");
 	if (_modelsDatas.size() > 0)
 	{
 		delete _modelsDatas[0].model;
@@ -103,12 +103,12 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
-		Logger::error("RoadObject: Invalid number of control points");
+		LOG_ERROR("RoadObject: Invalid number of control points");
 		return;
 	}
 	if (_points.size() / 3 != _segments.size())
 	{
-		Logger::error("RoadObject: Invalid number of segments");
+		LOG_ERROR("RoadObject: Invalid number of segments");
 		return;
 	}
 

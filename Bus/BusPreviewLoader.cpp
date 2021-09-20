@@ -7,7 +7,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
@@ -76,7 +76,7 @@ void BusPreviewLoader::loadModuleConditionalElements(XMLElement* moduleElement, 
         }
         else
         {
-            Logger::error("Variable " + variable + " not exist");
+            LOG_ERROR("Variable " + variable + " not exist");
         }
     }
 }
@@ -86,7 +86,7 @@ void BusPreviewLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& b
 {
     for (XMLElement* wheelElement = moduleElement->FirstChildElement("Wheel"); wheelElement != nullptr; wheelElement = wheelElement->NextSiblingElement("Wheel"))
     {
-        Logger::info("XML: Wheel data");
+        LOG_INFO("XML: Wheel data");
 
         const std::string wheelName(wheelElement->Attribute("name"));
         const std::string wheelModel(wheelElement->Attribute("model"));
@@ -113,7 +113,7 @@ void BusPreviewLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& bu
 {
     for (XMLElement* doorElement = moduleElement->FirstChildElement("Door"); doorElement != nullptr; doorElement = doorElement->NextSiblingElement("Door"))
     {
-        Logger::info("XML: Door data");
+        LOG_INFO("XML: Door data");
 
         const std::string doorName(doorElement->Attribute("name"));
         const std::string doorModelName = XmlUtils::getAttributeStringOptional(doorElement, "model");

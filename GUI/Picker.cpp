@@ -1,6 +1,6 @@
 #include "Picker.h"
 
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -225,7 +225,7 @@ void Picker::setSelectedOption(const std::string& selectedOption)
 	}
 	else
 	{
-		Logger::error("Invalid selectedOption value: " + selectedOption);
+		LOG_ERROR("Invalid selectedOption value: " + selectedOption);
 	}
 }
 

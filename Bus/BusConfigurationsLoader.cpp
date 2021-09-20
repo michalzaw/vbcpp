@@ -3,7 +3,7 @@
 #include "../Game/Directories.h"
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
@@ -44,13 +44,13 @@ namespace BusConfigurationsLoader
 		XMLError result = doc.LoadFile(configFileName.c_str());
 		if (result != XML_SUCCESS)
 		{
-			Logger::error("Cannot read xml file: " + configFileName + "! Result: " + toString(result));
+			LOG_ERROR("Cannot read xml file: " + configFileName + "! Result: " + Strings::toString((int)result));
 			return;
 		}
 
 		XMLElement* rootElement = doc.FirstChildElement("PredefinedConfigurations");
 
-		Logger::info("Bus predefined configurations XML DATA");
+		LOG_INFO("Bus predefined configurations XML DATA");
 
 		outVariables.clear();
 
@@ -82,13 +82,13 @@ namespace BusConfigurationsLoader
 		XMLError result = doc.LoadFile(configFileName.c_str());
 		if (result != XML_SUCCESS)
 		{
-			Logger::error("Cannot read xml file: " + configFileName + "! Result: " + toString(result));
+			LOG_ERROR("Cannot read xml file: " + configFileName + "! Result: " + Strings::toString((int)result));
 			return;
 		}
 
 		XMLElement* rootElement = doc.FirstChildElement("PredefinedConfigurations");
 
-		Logger::info("Bus predefined configurations XML DATA");
+		LOG_INFO("Bus predefined configurations XML DATA");
 
 		for (XMLElement* configurationElement = rootElement->FirstChildElement("Configuration");
 			configurationElement != nullptr;

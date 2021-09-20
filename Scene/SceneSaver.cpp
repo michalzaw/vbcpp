@@ -10,7 +10,7 @@
 #include "../Graphics/RenderObject.h"
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/Strings.h"
 
 
@@ -29,7 +29,7 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 	std::vector<std::string> textures = split(path, ';');
 
 	if (textures.size() != 6)
-		Logger::error("Scene saver: Invalid skybox textures path");
+		LOG_ERROR("Scene saver: Invalid skybox textures path");
 
 	std::string result = FilesHelper::getRelativePathToDir(textures[0], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[1], GameDirectories::SKYBOX) + "," +
 						 FilesHelper::getRelativePathToDir(textures[2], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[3], GameDirectories::SKYBOX) + "," +

@@ -1,7 +1,7 @@
 #include "RDisplayFont.h"
 
 #include "../Utils/Strings.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 
 
 RDisplayFont::RDisplayFont(std::string path)
@@ -47,7 +47,7 @@ void RDisplayFont::loadOneFont(std::string fileName, int index)
 	std::ifstream fstream(fileName);
 	if (!fstream.is_open())
 	{
-		Logger::error("Failed to open display font file: " + fileName);
+		LOG_ERROR("Failed to open display font file: " + fileName);
 	}
 
 	std::string line;

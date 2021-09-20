@@ -3,7 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
-#include "Logger.h"
+#include "Logger2.h"
 #include "Helpers.hpp"
 #include "Strings.h"
 #include "XmlUtils.h"
@@ -21,7 +21,7 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 	XMLElement* componentsElement = objectElement->FirstChildElement("Components");
 	if (componentsElement == nullptr)
 	{
-		Logger::error("Components element not found!");
+		LOG_ERROR("Components element not found!");
 		return;
 	}
 
@@ -29,7 +29,7 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 	while (componentElement != nullptr)
 	{
 		std::string componentType = componentElement->Attribute("type");
-		Logger::info("Component: " + componentType);
+		LOG_INFO("Component: " + componentType);
 
 		object->getComponents().push_back(std::unordered_map<std::string, std::string>());
 		int componentIndex = object->getComponents().size() - 1;
@@ -121,16 +121,16 @@ void RObjectLoader::loadSoundComponent(tinyxml2::XMLElement* componentElement, R
 
 	// if set in config file - we set play distance accordingly (otherwise - play distance is 10.0f by default)
 	std::string playDistance = XmlUtils::getAttributeStringOptional(componentElement, "playDistance", "10.0");
-	Logger::info("Sound play distance: " + playDistance);
+	LOG_INFO("Sound play distance: " + playDistance);
 	object->getComponents()[componentIndex]["playDistance"] = playDistance;
 
 	// if set in config file - we set volume accordingly (otherwise - volume is 1.0f by default)
 	std::string volume = XmlUtils::getAttributeStringOptional(componentElement, "volume", "1.0");
-	Logger::info("Sound volume: " + volume);
+	LOG_INFO("Sound volume: " + volume);
 	object->getComponents()[componentIndex]["volume"] = volume;
 
 	std::string position = XmlUtils::getAttributeStringOptional(componentElement, "position", "0,0,0");
-	Logger::info("Sound position offset: " + position);
+	LOG_INFO("Sound position offset: " + position);
 	object->getComponents()[componentIndex]["position"] = position;
 }
 
@@ -172,21 +172,21 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 	XMLError result = doc.LoadFile(fullPath.c_str());
 	if (result != XML_SUCCESS)
 	{
-		Logger::error("Cannot read xml file: " + fullPath + "! Result: " + toString(result));
+		LOG_ERROR("Cannot read xml file: " + fullPath + "! Result: " + Strings::toString((int)result));
 	}
 	
 	// Search for main element - Object
 	XMLElement* objElement = doc.FirstChildElement("Object");
 	if (objElement == nullptr)
 	{
-		Logger::error("Object element not found!");
+		LOG_ERROR("Object element not found!");
 		return nullptr;
 	}
 
 	XMLElement* objDesc = objElement->FirstChildElement("Description");
 	if (objDesc == nullptr)
 	{
-		Logger::error("Description element not found!");
+		LOG_ERROR("Description element not found!");
 		return nullptr;
 	}
 
@@ -195,10 +195,10 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 	std::string objectName(objDesc->Attribute("name"));
 	std::string comment(objDesc->Attribute("comment"));
 
-	Logger::info("*** OBJECT DATA ***");
-	Logger::info("Author: " + author);
-	Logger::info("Name: " + objectName);
-	Logger::info("Comment: " + comment);
+	LOG_INFO("*** OBJECT DATA ***");
+	LOG_INFO("Author: " + author);
+	LOG_INFO("Name: " + objectName);
+	LOG_INFO("Comment: " + comment);
 
 
 	RObject* object = new RObject(dirPath, author, objectName, comment);
@@ -266,7 +266,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 			else if (bodyType == "dynamic")
 			{
-				Logger::info("- Creating dynamic Convex Hull collision shape");
+				LOG_INFO("- Creating dynamic Convex Hull collision shape");
 
 				float mass = toFloat(components[i]["mass"]);
 				bool centerOfMassOffset = toBool(components[i]["centerOfMassOffset"]);
@@ -280,7 +280,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 			else if (bodyType == "static")
 			{
-				Logger::info("- Creating static Convex Hull collision shape");
+				LOG_INFO("- Creating static Convex Hull collision shape");
 
 				int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
 
@@ -292,7 +292,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 			else if (bodyType == "bvh")
 			{
-				Logger::info("- Creating BVH Triangle Mesh collision shape");
+				LOG_INFO("- Creating BVH Triangle Mesh collision shape");
 
 				int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
 

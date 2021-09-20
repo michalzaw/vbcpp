@@ -13,7 +13,7 @@
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 
 
 BusRaycast::BusRaycast()
@@ -33,7 +33,7 @@ BusRaycast::BusRaycast()
 
 BusRaycast::~BusRaycast()
 {
-    Logger::info("Bus Destruktor");
+    LOG_INFO("Bus Destruktor");
 
     SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
 

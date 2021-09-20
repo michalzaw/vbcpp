@@ -289,7 +289,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 
 				if (result.size() == 1)
 				{
-					Logger::info(result[0]);
+					LOG_INFO(result[0]);
 
 					std::string path = result[0];
 					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
@@ -317,7 +317,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 				{
 					if (ImGui::IsMouseDoubleClicked(0))
 					{
-						Logger::info(material->name);
+						LOG_INFO(material->name);
 						vbEditor::_showMaterialEditorWindow = true;
 						vbEditor::currentRenderObject = renderComponent;
 						vbEditor::currentStaticModel = renderComponent->getModel(i);

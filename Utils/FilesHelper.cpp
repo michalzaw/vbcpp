@@ -10,7 +10,7 @@
 #endif
 
 
-#include "Logger.h"
+#include "Logger2.h"
 
 
 bool FilesHelper::isDirectoryExists(std::string dirPath)
@@ -48,7 +48,7 @@ std::vector<std::string> FilesHelper::getDirectoriesList(std::string path)
     WIN32_FIND_DATA findFileData;
     HANDLE hFind = FindFirstFile(path.c_str(), &findFileData);
     if (hFind == INVALID_HANDLE_VALUE) {
-        Logger::warning("Open directory failed: " + path + "!");
+		LOG_WARNING("Open directory failed: " + path + "!");
         return directories;
     }
 
@@ -71,7 +71,7 @@ std::vector<std::string> FilesHelper::getDirectoriesList(std::string path)
 
     if (dir == NULL)
     {
-        Logger::warning("Directory: " + path + "is empty!");
+		LOG_WARNING("Directory: " + path + "is empty!");
         return directories;
     }
 
@@ -123,7 +123,7 @@ std::string FilesHelper::getRelativePathToDir(std::string filePath, std::string 
 {
 	std::string dirPathFromFilePath = filePath.substr(0, dirPath.size());
 	if (dirPath != dirPathFromFilePath)
-		Logger::error("Invalid dirPath! Cannot find dirPath: " + dirPath + " in path: " + filePath);
+		LOG_ERROR("Invalid dirPath! Cannot find dirPath: " + dirPath + " in path: " + filePath);
 
 	return filePath.substr(dirPath.size());
 }

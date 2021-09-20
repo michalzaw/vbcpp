@@ -31,33 +31,33 @@ void Framebuffer::checkFramebufferStatus()
     GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        Logger::error("Incomplete FBO:");
+        LOG_ERROR("Incomplete FBO:");
 
         switch (status)
         {
             case GL_FRAMEBUFFER_UNDEFINED:
-                Logger::error("FBO error: GL_FRAMEBUFFER_UNDEFINED");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_UNDEFINED");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
-                Logger::error("FBO error: GL_FRAMEBUFFER_UNSUPPORTED");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_UNSUPPORTED");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
                 break;
         }
     }

@@ -11,7 +11,7 @@ using namespace tinyxml2;
 #include "Math.h"
 #include "FilesHelper.h"
 #include "ResourceManager.h"
-#include "Logger.h"
+#include "Logger2.h"
 #include "XmlUtils.h"
 #include "Strings.h"
 
@@ -130,8 +130,8 @@ void Engine::loadSounds(XMLElement* soundsElement)
         soundDefinition.volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
         soundDefinition.playDistance = XmlUtils::getAttributeFloatOptional(engSound, "playDistance", 20.0f);
 
-        Logger::info("Engine sound: " + soundDefinition.soundFilename);
-        Logger::info("Engine volume: " + toString(soundDefinition.volume));
+        LOG_INFO("Engine sound: " + soundDefinition.soundFilename);
+        LOG_INFO("Engine volume: " + toString(soundDefinition.volume));
 
         if (soundDefinition.looped)
         {
@@ -184,13 +184,13 @@ void Engine::loadData(std::string filename)
     XMLElement* engElement = doc.FirstChildElement("Engine");
 	if (engElement == nullptr)
 	{
-		Logger::error("Engine element not found!Is it correct engine file ? ");
+        LOG_ERROR("Engine element not found!Is it correct engine file ? ");
 		return;
 	}
 
     XMLElement* engDesc = engElement->FirstChildElement("Description");
 	if (engDesc == nullptr)
-		Logger::warning("Description element not found");
+        LOG_ERROR("Description element not found");
 
     // Load file description
     std::string author(engDesc->Attribute("author"));
@@ -203,7 +203,7 @@ void Engine::loadData(std::string filename)
     XMLElement* pointList = engElement->FirstChildElement("Points");
 
     int curvePoints = atoi(pointList->Attribute("count"));
-    Logger::info("Point count: "+ Strings::toString(curvePoints));
+    LOG_INFO("Point count: "+ Strings::toString(curvePoints));
 
     XMLElement* curvePoint = pointList->FirstChildElement("Point");
 
@@ -219,12 +219,12 @@ void Engine::loadData(std::string filename)
         curvePoint = curvePoint->NextSiblingElement("Point");
     }
 
-    Logger::info("*** ENGINE DATA ***");
-    Logger::info("Author: " + author);
-    Logger::info("Model: " + model);
-    Logger::info("Comment: " +  comment);
+    LOG_INFO("*** ENGINE DATA ***");
+    LOG_INFO("Author: " + author);
+    LOG_INFO("Model: " + model);
+    LOG_INFO("Comment: " +  comment);
 
-    Logger::info("Point count: " + Strings::toString(_torqueCurve.size()));
+    LOG_INFO("Point count: " + Strings::toString(_torqueCurve.size()));
 }
 
 

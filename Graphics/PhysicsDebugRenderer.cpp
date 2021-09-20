@@ -3,7 +3,7 @@
 #include "Renderer.h"
 #include "VBO.h"
 
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -66,7 +66,7 @@ void PhysicsDebugRenderer::drawContactPoint(const btVector3& pointOnB, const btV
 
 void PhysicsDebugRenderer::reportErrorWarning(const char* warningString)
 {
-	Logger::error("[Physics Debugger] - " + std::string(warningString));
+	LOG_ERROR("[Physics Debugger] - " + std::string(warningString));
 }
 
 

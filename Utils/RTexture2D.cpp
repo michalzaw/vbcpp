@@ -2,14 +2,14 @@
 
 #include <iostream>
 
-#include "Logger.h"
+#include "Logger2.h"
 #include "Strings.h"
 
 
 RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalFormat, glm::uvec2 size, bool fromFile, bool useCompression)
     : RTexture(path, TT_2D, internalFormat, size, fromFile, useCompression)
 {
-    Logger::info("RTexture2D - Konstruktor: " + _path);
+    LOG_INFO("RTexture2D - Konstruktor: " + _path);
 
 
     glGenTextures(1, &_texID);
@@ -28,7 +28,7 @@ RTexture2D::RTexture2D(string path, unsigned char* data, TextureFormat internalF
 RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, glm::uvec2 size, bool fromFile, bool useCompression)
     : RTexture(path, TT_2D, internalFormat, size, fromFile, useCompression)
 {
-	Logger::info("RTexture2D - Konstruktor: " + _path);
+	LOG_INFO("RTexture2D - Konstruktor: " + _path);
 	 
 
     glGenTextures(1, &_texID);
@@ -47,7 +47,7 @@ RTexture2D::RTexture2D(string path, float* data, TextureFormat internalFormat, g
 RTexture2D::RTexture2D(TextureFormat internalFormat, glm::uvec2 size, bool isMultisample, int samplesCount)
     : RTexture("", isMultisample ? TT_2D_MULTISAMPLE : TT_2D, internalFormat, size, false, false)
 {
-	Logger::info("RTexture2D - Konstruktor: " + _path);
+	LOG_INFO("RTexture2D - Konstruktor: " + _path);
 
 
     glGenTextures(1, &_texID);

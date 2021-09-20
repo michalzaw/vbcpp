@@ -4,7 +4,7 @@
 #include "../Game/GameConfig.h"
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
@@ -29,7 +29,7 @@ namespace BusRepaintLoader
 		XMLError result = doc.LoadFile(configFileName.c_str());
 		if (result != XML_SUCCESS)
 		{
-			Logger::error("Cannot read xml file: " + configFileName + "! Result: " + toString(result));
+			LOG_ERROR("Cannot read xml file: " + configFileName + "! Result: " + Strings::toString((int)result));
 			return nullptr;
 		}
 
@@ -44,7 +44,7 @@ namespace BusRepaintLoader
 		XMLDocument doc;
 		XMLElement* rootElement = loadBusRepaintRootNodeRootNode(doc, repaintPath);
 
-		Logger::info("Bus repaint configurations XML DATA");
+		LOG_INFO("Bus repaint configurations XML DATA");
 
 		outMaterialsCollections.clear();
 
@@ -67,7 +67,7 @@ namespace BusRepaintLoader
 		XMLDocument doc;
 		XMLElement* rootElement = loadBusRepaintRootNodeRootNode(doc, repaintPath);
 
-		Logger::info("Bus repaint configurations XML DATA");
+		LOG_INFO("Bus repaint configurations XML DATA");
 
 
 		BusRepaintDescription description;
@@ -94,7 +94,7 @@ namespace BusRepaintLoader
 
 	void loadAllRepaintsDescriptions(const std::string& busName, std::vector<BusRepaintDescription>& outRepaints)
 	{
-		Logger::info("Loading repaints list for bus: " + busName);
+		LOG_INFO("Loading repaints list for bus: " + busName);
 
 		// loading repaints names
 		std::vector<std::string> repaintsNames;
@@ -112,11 +112,11 @@ namespace BusRepaintLoader
 #endif // DEVELOPMENT_RESOURCES
 		else
 		{
-			Logger::error("Invalid repaints path: " + repaintsPath);
+			LOG_ERROR("Invalid repaints path: " + repaintsPath);
 		}
 
 		// loading descriptions
-		Logger::info("Loading repaints descriptions for bus: " + busName);
+		LOG_INFO("Loading repaints descriptions for bus: " + busName);
 
 		for (const std::string& repaintName : repaintsNames)
 		{

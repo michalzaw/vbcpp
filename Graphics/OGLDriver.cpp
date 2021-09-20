@@ -1,6 +1,6 @@
 #include "OGLDriver.h"
 
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/Strings.h"
 
 
@@ -101,7 +101,7 @@ void OGLDriver::debugOutputCallback(GLenum source, GLenum type, unsigned int id,
         case GL_DEBUG_SEVERITY_NOTIFICATION: severityStr = "NOTIFICATION"; break;
     }
 
-    Logger::info("[OpenGL][" + severityStr + " | " + sourceStr + " | " + typeStr + "](id=" + toString(id) + ") " + message);
+    LOG_INFO("[OpenGL][" + severityStr + " | " + sourceStr + " | " + typeStr + "](id=" + Strings::toString(id) + ") " + message);
 }
 
 
@@ -135,12 +135,12 @@ bool OGLDriver::initialize()
 
     if (isDebugContextEnabled())
     {
-        Logger::info("OpenGL debug context: on");
+        LOG_INFO("OpenGL debug context: on");
         initializeDebugContext();
     }
     else
     {
-        Logger::info("OpenGL debug context: off");
+        LOG_INFO("OpenGL debug context: off");
     }
 
 
@@ -159,10 +159,10 @@ bool OGLDriver::initialize()
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	Logger::info("OpenGL initalized!");
+	LOG_INFO("OpenGL initalized!");
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropy);
-	Logger::info("- maxAnisotropy: " + toString(_maxAnisotropy));
+	LOG_INFO("- maxAnisotropy: " + Strings::toString(_maxAnisotropy));
 
     return true;
 }

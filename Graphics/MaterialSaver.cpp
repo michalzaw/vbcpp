@@ -4,7 +4,7 @@
 
 #include "LoadMaterial.h"
 
-#include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/FilesHelper.h"
 #include "../Utils/tinyxml2.h"
 using namespace tinyxml2;
@@ -158,7 +158,7 @@ namespace MaterialSaver
 {
 	void saveMaterials(std::string fileName, std::vector<Material*>& materials, std::string texPath)
 	{
-		Logger::info("Saving materials. Path: " + fileName);
+		LOG_INFO("Saving materials. Path: " + fileName);
 		XMLDocument doc;
 
 		XMLDeclaration* declaration = doc.NewDeclaration();
@@ -174,7 +174,7 @@ namespace MaterialSaver
 
 		XMLError err = doc.SaveFile(fileName.c_str());
 
-		Logger::info("Saved file with code: " + err);
+		LOG_INFO("Saved file with code: " + err);
 	}
 
 

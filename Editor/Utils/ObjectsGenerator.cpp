@@ -5,7 +5,7 @@
 #include "../../Graphics/RoadObject.h"
 
 #include "../../Utils/BezierCurvesUtils.h"
-#include "../../Utils/Logger.h"
+#include "../../Utils/Logger2.h"
 #include "../../Utils/ResourceManager.h"
 #include "../../Utils/Strings.h"
 
@@ -117,14 +117,14 @@ namespace ObjectsGenerator
 	{
 		if (generatorData->objectsNames.size() == 0)
 		{
-			Logger::warning("Empty objectsNames array");
+			LOG_WARNING("Empty objectsNames array");
 			return;
 		}
 
 		std::vector<glm::vec3> roadPoints;
 		generateRoadPoints(roadComponent, 1.0f, roadPoints);
-		Logger::info("Number of road points: " + toString(roadPoints.size()) + " with distance: 1.0");
-		Logger::info("Number of objects: " + toString(generatorData->objectsNames.size()));
+		LOG_INFO("Number of road points: " + Strings::toString(roadPoints.size()) + " with distance: 1.0");
+		LOG_INFO("Number of objects: " + Strings::toString(generatorData->objectsNames.size()));
 
 		int objectsCounter = 0;
 		for (int i = 0; i < roadPoints.size(); i += generatorData->distance)
@@ -159,7 +159,7 @@ namespace ObjectsGenerator
 				const glm::vec3 position = roadPoints[i] + offset;
 				const glm::vec3 rotation = calculateRotation(tangentMatrix, generatorData->rotation + randomRotation);
 
-				Logger::info("Index: " + toString(i) + ", objectName: " + objectName + ", pos: (" + vec3ToString(position) + "), rot: (" + vec3ToString(rotation) + ")");
+				LOG_INFO("Index=" + Strings::toString(i) + ", "	+ LOG_VARIABLE(objectName) + ", " + LOG_VARIABLE(position) + ", " + LOG_VARIABLE(rotation));
 
 				SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, sceneManager);
 
@@ -177,7 +177,7 @@ namespace ObjectsGenerator
 				const glm::vec3 position = roadPoints[i] + offset;
 				const glm::vec3 rotation = calculateRotation(tangentMatrix, -(generatorData->rotation + randomRotation));
 
-				Logger::info("Index: " + toString(i) + ", objectName: " + objectName + ", pos: (" + vec3ToString(position) + "), rot: (" + vec3ToString(rotation) + ")");
+				LOG_INFO("Index=" + Strings::toString(i) + ", " + LOG_VARIABLE(objectName) + ", " + LOG_VARIABLE(position) + ", " + LOG_VARIABLE(rotation));
 
 				SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, sceneManager);
 
@@ -185,6 +185,6 @@ namespace ObjectsGenerator
 			}
 		}
 
-		Logger::info("Successfully created " + toString(objectsCounter) + " objects");
+		LOG_INFO("Successfully created " + Strings::toString(objectsCounter) + " objects");
 	}
 }
