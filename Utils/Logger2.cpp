@@ -23,6 +23,16 @@ const std::string logLevelsNames[] =
     ""
 };
 
+LogLevel getLogLevelFromString(const std::string& name)
+{
+    for (int i = 0; i < LOG_LEVELS_COUNT; ++i)
+    {
+        if (logLevelsNames[i] == name)
+            return static_cast<LogLevel>(i);
+    }
+    return LL_DISABLED;
+}
+
 
 void Logger2::init(LogLevel logLevel, bool consoleOutput, bool fileOutput, const std::string& logFileName)
 {

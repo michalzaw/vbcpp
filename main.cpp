@@ -9,9 +9,9 @@
 #include "Utils/Logger2.h"
 
 
-int main()
+void testLogger()
 {
-	Logger2::init(LL_DEBUG, true, true, "log.txt");
+	GameConfig& gameConfig = GameConfig::getInstance();
 
 	LOG_DEBUG("Start application");
 	LOG_INFO("Game initialization");
@@ -28,16 +28,26 @@ int main()
 	LOG_INFO(LOG_VARIABLE(mat));
 	LOG_INFO(LOG_VARIABLE(str2));
 
+	LOG_INFO(LOG_VARIABLE(gameConfig));
+	system("pause");
+}
+
+
+int main()
+{
 	GameConfig& gameConfig = GameConfig::getInstance();
 	gameConfig.loadGameConfig("game.xml");
 
-	LOG_INFO(LOG_VARIABLE(gameConfig));
-	system("pause");
 
 #ifdef DEVELOPMENT_RESOURCES
 	gameConfig.loadDevelopmentConfig("devSettings.xml");
 	ResourceManager::getInstance().setAlternativeResourcePath(gameConfig.alternativeResourcesPath);
 #endif // DEVELOPMENT_RESOURCES
+
+
+	Logger2::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
+
+	testLogger();
 
 	Game game;
 

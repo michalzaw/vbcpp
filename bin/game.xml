@@ -36,5 +36,9 @@
 		<PbrSupport>true</PbrSupport>
 
 		<OpenGlDebugContext>false</OpenGlDebugContext>
+
+		<LoggerLevel>DEBUG</LoggerLevel>
+		<LoggerConsoleOutput>true</LoggerConsoleOutput>
+		<LoggerFileOutput>log.txt</LoggerFileOutput>
     </Configuration>
 </Game>

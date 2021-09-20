@@ -17,8 +17,12 @@ enum LogLevel
     LL_INFO,
     LL_WARNING,
     LL_ERROR,
-    LL_DISABLED
+    LL_DISABLED,
+
+    LOG_LEVELS_COUNT
 };
+
+LogLevel getLogLevelFromString(const std::string& name);
 
 
 class Logger2 final
