@@ -4,14 +4,14 @@
 
 #include "../Scene/SceneManager.h"
 
+#include "../Utils/Logger2.h"
+
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
-    #ifdef _DEBUG_MODE
-        printf("*** RenderObject: Konstruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Konstruktor");
 	
 	_modelsDatas.resize(1);
 
@@ -27,9 +27,7 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
-    #ifdef _DEBUG_MODE
-    printf("*** RenderObject: Konstruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Konstruktor");
 
     _modelsDatas.resize(1);
 
@@ -45,9 +43,7 @@ RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
-    #ifdef _DEBUG_MODE
-        printf("*** RenderObject: Konstruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Konstruktor");
 
     _modelsDatas.resize(1);
 
@@ -67,9 +63,7 @@ RenderObject::~RenderObject()
 			delete modelData.modelRootNode;
 		}
 	}
-    #ifdef _DEBUG_MODE
-        printf("*** RenderObject: Destruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Destruktor");
 }
 
 

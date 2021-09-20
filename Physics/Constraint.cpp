@@ -1,11 +1,12 @@
 #include "Constraint.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger2.h"
 
 Constraint::Constraint(PhysicalBody* bodyA, PhysicalBody* bodyB)
 : _bodyA(bodyA), _bodyB(bodyB), _constraint(0)
 {
-    printf("Hinge - Konstruktor\n");
+    LOG_INFO("Hinge - Konstruktor");
 
     bodyA->addConstraint(this);
     bodyB->addConstraint(this);

@@ -1,6 +1,7 @@
 #include "PhysicalBody.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger2.h"
 
 #include "Constraint.hpp"
 
@@ -19,7 +20,7 @@ _isUpdateTransformFromObject(true)
 
 PhysicalBody::~PhysicalBody()
 {
-    printf("Physical body - Destruktor\n");
+    LOG_INFO("Physical body - Destruktor");
 
 }
 

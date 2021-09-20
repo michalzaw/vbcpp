@@ -11,8 +11,7 @@ RSound* loadSound(const char* fileName)
     if (buffer == AL_NONE)
     {
         ALenum error = alutGetError ();
-        fprintf (stderr, "Error loading file: '%s'\n",
-        alutGetErrorString (error));
+        LOG_ERROR("Error loading file: " + std::string(alutGetErrorString(error)));
     }
 
     RSound* sound = new RSound(fileName, buffer);

@@ -1,6 +1,7 @@
 #include "PhysicalBodySphere.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger2.h"
 
 PhysicalBodySphere::PhysicalBodySphere(btScalar r, btScalar mass)
 : PhysicalBody(mass),
@@ -11,7 +12,7 @@ _radius(r)
 
 PhysicalBodySphere::~PhysicalBodySphere()
 {
-    printf("PhysicalBodyBox - Destruktor\n");
+    LOG_INFO("PhysicalBodySphere - Destruktor");
 }
 
 

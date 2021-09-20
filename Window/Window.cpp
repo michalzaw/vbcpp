@@ -2,6 +2,8 @@
 
 #include <cstdio>
 
+#include "../Utils/Logger2.h"
+
 Window::Window()
 : _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _fullscreenMode(0)
 {
@@ -25,7 +27,7 @@ bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, 
 
     if ( !glfwInit() )
     {
-        fprintf( stderr, "VIDEO: Failed to initialize GLFW!\n");
+        LOG_ERROR("VIDEO: Failed to initialize GLFW");
         //exit(EXIT_FAILURE);
         return false;
     }
@@ -156,7 +158,7 @@ bool Window::initGLEW()
     GLenum err = glewInit();
     if( err != GLEW_OK )
     {
-        fprintf( stderr, "VIDEO: Failed to initialize GLEW! Error: %s\n", glewGetErrorString(err));
+        LOG_ERROR("VIDEO: Failed to initialize GLEW! Error: " + std::string(reinterpret_cast<char const*>(glewGetErrorString(err))));
         //exit(EXIT_FAILURE);
         return false;
     }

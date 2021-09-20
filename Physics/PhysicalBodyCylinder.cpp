@@ -1,6 +1,7 @@
 #include "PhysicalBodyCylinder.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger2.h"
 
 PhysicalBodyCylinder::PhysicalBodyCylinder(btVector3 dim, btScalar mass, ShapeAlign align)
 : PhysicalBody(mass),
@@ -12,7 +13,7 @@ _dimensions(dim), _align(align)
 
 PhysicalBodyCylinder::~PhysicalBodyCylinder()
 {
-    printf("PhysicalBodyBox - Destruktor\n");
+    LOG_INFO("PhysicalBodyCylinder - Destruktor");
 }
 
 

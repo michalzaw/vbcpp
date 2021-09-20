@@ -1,6 +1,7 @@
 #include "PhysicalBodyStaticPlane.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger2.h"
 
 PhysicalBodyStaticPlane::PhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset)
 : PhysicalBody(0),
@@ -11,7 +12,7 @@ _offset(offset)
 
 PhysicalBodyStaticPlane::~PhysicalBodyStaticPlane()
 {
-    printf("PhysicalBodyBox - Destruktor\n");
+    LOG_INFO("PhysicalBodyStaticPlane - Destruktor");
 }
 
 

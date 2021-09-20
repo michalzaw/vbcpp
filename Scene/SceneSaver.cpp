@@ -224,7 +224,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	_dirPath = GameDirectories::MAPS + name + "/";
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
-	printf("Map path: %s\n", fullPath.c_str());
+	LOG_INFO("Map path: " + fullPath);
 
 	XMLDocument doc;
 
@@ -294,7 +294,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		}
 	}
 
-	XMLError err = doc.SaveFile(fullPath.c_str());
+	XMLError errorCode = doc.SaveFile(fullPath.c_str());
 
-	printf("Error code: %d\n", err);
+	LOG_INFO(LOG_VARIABLE((int)errorCode));
 }
