@@ -15,6 +15,7 @@
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
 #include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -215,9 +216,6 @@ void MenuSelectBusScene::createConfigurationWindow()
 			_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
 
 			setValuesInVariablesPickers();
-
-			//std::cout << "Selected item: " << value + " (" << index << ")\n";
-
 		});
 
 	for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
@@ -293,7 +291,7 @@ void MenuSelectBusScene::createConfigurationPreviewWindow()
 		picker1->setMargin(pickerMargin);
 		picker1->setOnValueChangedCallback([](int index, const std::string& value)
 			{
-				std::cout << "Selected item: " << value + " (" << index << ")\n";
+				LOG_DEBUG("Selected item: " + value + " (" + Strings::toString(index) + ")");
 			});
 
 		Label* labelFront = _gui->addLabel(fontRegular26, "Front pojazdu");

@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+#include "../Utils/Logger2.h"
+
 
 std::string ShaderLoader::replaceConstatnsInLine(std::string line, const std::unordered_map<std::string, std::string>& constants)
 {
@@ -47,7 +49,7 @@ bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const
 
                     if (!loadShaderCode(path.c_str(), code, defines, constants))
                     {
-                        std::cout << "Can not open included shader file: " << path << "!\n";
+                        LOG_ERROR("Can not open included shader file: " + path + "!");
                     }
                 }
             }
@@ -88,7 +90,7 @@ bool ShaderLoader::loadShaderCode(const char* fileName, std::string& code, const
         return false;
     }
 
-    //std::cout << code << std::endl;
+    //LOG_DEBUG(code);
 
     return true;
 }
@@ -111,7 +113,7 @@ GLuint ShaderLoader::compileShader(ShaderType type, std::string& code)
 	{
 		std::vector<char> shaderCompileLog(logLength + 1);
 		glGetShaderInfoLog(shaderID, logLength, NULL, &shaderCompileLog[0]);
-		std::cout << &shaderCompileLog[0] << std::endl;
+        LOG_INFO(&shaderCompileLog[0]);
 	}
 
 	return shaderID;
@@ -134,7 +136,7 @@ GLuint ShaderLoader::linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId)
 	{
 		std::vector<char> linkingProgramLog(logLength + 1);
 		glGetProgramInfoLog(programId, logLength, NULL, &linkingProgramLog[0]);
-		std::cout << &linkingProgramLog[0] << std::endl;
+        LOG_INFO(&linkingProgramLog[0]);
 	}
 
 	return programId;
@@ -149,22 +151,22 @@ GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fr
 
 	if (!loadShaderCode(vertexShaderFileName, vertexShaderCode, defines, constants))
     {
-        std::cout << "Can not open VertexShaderFile: " << vertexShaderFileName << "!\n";
+        LOG_ERROR("Can not open VertexShaderFile: " + std::string(vertexShaderFileName) + "!");
     }
     if (!loadShaderCode(fragmentShaderFileName, fragmentShaderCode, defines, constants))
     {
-        std::cout << "Can not open FragmentShaderFile: " << fragmentShaderFileName << "!\n";
+        LOG_ERROR("Can not open FragmentShaderFile: " + std::string(fragmentShaderFileName) + "!");
     }
 
 
-	std::cout << "Compiling shader: " << vertexShaderFileName << "\n";
+    LOG_INFO("Compiling shader: " + std::string(vertexShaderFileName));
 	GLuint vertexShaderId = compileShader(ST_VERTEX_SHADER, vertexShaderCode);
 
-	std::cout << "Compiling shader: " << fragmentShaderFileName << "\n";
+    LOG_INFO("Compiling shader: " + std::string(fragmentShaderFileName));
 	GLuint fragmentShaderId = compileShader(ST_FRAGMENT_SHADER, fragmentShaderCode);
 
 
-	std::cout << "Linking program\n";
+    LOG_INFO("Linking program");
     GLuint programId = linkProgram(vertexShaderId, fragmentShaderId);
 
 

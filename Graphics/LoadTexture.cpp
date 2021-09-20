@@ -4,6 +4,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 
 #include <gli/texture2d.hpp>
 #include <gli/load.hpp>
@@ -286,7 +287,7 @@ GLuint loadTextureRect(const char* fileName)
     int width, height;
     unsigned char* image;// = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGBA);
 
-    std::cout << "Loading texture: " << fileName << std::endl;
+	LOG_INFO("Loading texture: " + std::string(fileName));
     //std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
 
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);

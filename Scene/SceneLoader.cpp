@@ -275,7 +275,7 @@ void SceneLoader::loadObject(XMLElement* objectElement)
 		while (componentElement != nullptr)
 		{
 			std::string componentType = componentElement->Attribute("type");
-			std::cout << "Component: " << componentType << std::endl;
+			Logger::info("Component: " + componentType);
 
 			if (componentType == "bus-stop")
 			{

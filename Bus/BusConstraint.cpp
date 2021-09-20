@@ -24,14 +24,14 @@ _steeringWheelObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
 _isEnableLights(false), _isEnableHeadlights(false),
 _collidesWith(COL_TERRAIN | COL_ENV)
 {
-    std::cout << "Bus Konstruktor" << std::endl;
+    LOG_INFO("Bus Konstruktor");
 
     loadXMLdata(filename);
 }
 
 BusConstraint::~BusConstraint()
 {
-    std::cout << "Bus Destruktor" << std::endl;
+    LOG_INFO("Bus Destruktor");
 
     WheelList::iterator wit = _wheels.begin();
 
@@ -74,14 +74,14 @@ void BusConstraint::loadXMLdata(std::string busname)
 
     XMLElement* busElement = doc.FirstChildElement("Bus");
 
-    std::cout << "XML DATA" << std::endl;
+    LOG_INFO("XML DATA");
 
     std::string sObjName(busElement->Attribute("name"));
 
 
     std::string sTextureFolder(busElement->Attribute("textures"));
 
-    std::cout<< sObjName << std::endl;
+    LOG_INFO(sObjName);
 
     RStaticModel* busModel = 0;
 
@@ -139,7 +139,7 @@ void BusConstraint::loadXMLdata(std::string busname)
         }
         else
         {
-            std::cout << "ERROR: Collision mesh not found in bus model!\n" << std::endl;
+            LOG_ERROR("Collision mesh not found in bus model!");
             return;
         }
 
@@ -147,10 +147,10 @@ void BusConstraint::loadXMLdata(std::string busname)
         XMLElement* wheelElement = moduleElement->FirstChildElement("Wheel");
         while (wheelElement != nullptr)
         {
-            std::cout << "XML: Wheel data" << std::endl;
+            LOG_INFO("XML: Wheel data");
 
             std::string wheelName(wheelElement->Attribute("name"));
-            std::cout << wheelName << std::endl;
+            LOG_INFO(LOG_VARIABLE(wheelName));
             std::string wheelModel(wheelElement->Attribute("model"));
             std::string side(wheelElement->Attribute("side"));
             float mass = (float)atof(wheelElement->Attribute("mass"));
@@ -355,7 +355,7 @@ void BusConstraint::loadXMLdata(std::string busname)
         XMLElement* doorElement = moduleElement->FirstChildElement("Door");
         while (doorElement != nullptr)
         {
-            std::cout << "XML: Door data" << std::endl;
+            LOG_INFO("XML: Door data");
 
             std::string doorName(doorElement->Attribute("name"));
             std::string doorType(doorElement->Attribute("type"));
@@ -366,8 +366,8 @@ void BusConstraint::loadXMLdata(std::string busname)
             std::string openSound = "Buses/" + busname + "/" + std::string(doorElement->Attribute("doorOpenSound"));
             std::string closeSound = "Buses/" + busname + "/" + std::string(doorElement->Attribute("doorCloseSound"));
 
-            std::cout << "Door open sound:" << openSound << std::endl;
-            std::cout << "Door open sound:" << closeSound <<std::endl;
+            LOG_INFO("Door open sound:" + openSound);
+            LOG_INFO("Door open sound:" + closeSound);
 
 
             // Create sound component

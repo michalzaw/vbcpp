@@ -4,6 +4,8 @@
 
 #include "MaterialSaver.h"
 
+#include "../Utils/Logger2.h"
+
 
 using namespace tinyxml2;
 
@@ -226,7 +228,7 @@ RStaticModel* StaticModelLoader::loadModelWithHierarchy(std::string fileName, st
     }
     if (_assimpScene == NULL)
     {
-        std::cout << "Error parsing file: " << fileName << ": " << _assimpImporter.GetErrorString() << std::endl;
+        LOG_ERROR("Error parsing file: " + fileName + ": " + _assimpImporter.GetErrorString());
         return NULL;
     }
 
@@ -286,7 +288,7 @@ RStaticModel* StaticModelLoader::loadModel(std::string fileName, std::string tex
     _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITHOUT_HIERARCHY);
     if (_assimpScene == NULL)
     {
-        std::cout << "Error parsing file: " << fileName << ": " << _assimpImporter.GetErrorString() << std::endl;
+        LOG_ERROR("Error parsing file: " + fileName + ": " + _assimpImporter.GetErrorString());
         return NULL;
     }
 

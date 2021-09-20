@@ -203,7 +203,7 @@ void Engine::loadData(std::string filename)
     XMLElement* pointList = engElement->FirstChildElement("Points");
 
     int curvePoints = atoi(pointList->Attribute("count"));
-    std::cout << "Point count: " << curvePoints << std::endl;
+    Logger::info("Point count: "+ Strings::toString(curvePoints));
 
     XMLElement* curvePoint = pointList->FirstChildElement("Point");
 
@@ -219,12 +219,12 @@ void Engine::loadData(std::string filename)
         curvePoint = curvePoint->NextSiblingElement("Point");
     }
 
-    std::cout << "*** ENGINE DATA ***" << std::endl;
-    std::cout << "Author: " << author << std::endl;
-    std::cout << "Model: " << model << std::endl;
-    std::cout << "Comment: " << comment << std::endl;
+    Logger::info("*** ENGINE DATA ***");
+    Logger::info("Author: " + author);
+    Logger::info("Model: " + model);
+    Logger::info("Comment: " +  comment);
 
-    std::cout << "Point count: " << _torqueCurve.size() << std::endl;
+    Logger::info("Point count: " + Strings::toString(_torqueCurve.size()));
 }
 
 

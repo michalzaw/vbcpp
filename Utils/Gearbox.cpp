@@ -10,6 +10,7 @@ using namespace tinyxml2;
 
 #include "ResourceManager.h"
 #include "FilesHelper.h"
+#include "Logger2.h"
 
 #include "../Game/Directories.h"
 
@@ -60,10 +61,10 @@ void Gearbox::loadData(std::string filename)
 
     // Search for main element - Gearbox
     XMLElement* gbxElement = doc.FirstChildElement("Gearbox");
-    if (gbxElement == nullptr) std::cout << "Gearbox element not found! Is it correct gearbox file?" << std::endl;
+    if (gbxElement == nullptr) LOG_ERROR("Gearbox element not found! Is it correct gearbox file?");
 
     XMLElement* gbxDesc = gbxElement->FirstChildElement("Description");
-    if (gbxDesc == nullptr) std::cout << "Description element not found" << std::endl;
+    if (gbxDesc == nullptr) LOG_ERROR("Description element not found");
 
     // Load file description
     std::string author(gbxDesc->Attribute("author"));
@@ -92,12 +93,12 @@ void Gearbox::loadData(std::string filename)
     _currentGear = EGM_NEUTRAL;
 
     // Print debug data on screen
-    std::cout << "*** GEARBOX DATA ***" << std::endl;
-    std::cout << "Author: " << author << std::endl;
-    std::cout << "Model: " << model << std::endl;
-    std::cout << "Comment: " << comment << std::endl;
+    LOG_INFO("*** GEARBOX DATA ***");
+    LOG_INFO("Author: " + author);
+    LOG_INFO("Model: " + model);
+    LOG_INFO("Comment: " + comment);
 
-    std::cout << "Gear count: " << _gearCount << std::endl;
+    LOG_INFO("Gear count: " + Strings::toString(_gearCount));
 
     //for (int i = 0; i < _gears.size(); i++)
     //    std::cout << "Gear " << i << ": " << _gears[i] << std::endl;

@@ -61,14 +61,12 @@ PhysicsManager::~PhysicsManager()
 {
   	//printf("Ilosc obiektow kolizji przed czyszczeniem: %d\n", (int)(_dynamicsWorld->getNumCollisionObjects()));
 
-    std::cout << "Ilosc polaczen na stosie: " << _constraints.size() << std::endl;
+    LOG_INFO("Ilosc polaczen na stosie: " + Strings::toString(_constraints.size()));
 	//delete collision shapes
 	for (int j = 0; j < _constraints.size(); j++)
 	{
-	    std::cout << "Constraint: " << _constraints[j] << std::endl;
         Constraint* c = _constraints[j];
 
-        std::cout << "Bullet Constraint: " << c->getBulletConstraint() << std::endl;
         //removePhysicalBody(body);
         _dynamicsWorld->removeConstraint(c->getBulletConstraint());
 
@@ -343,8 +341,7 @@ ConstraintHinge* PhysicsManager::createConstraintHinge(PhysicalBody* bodyA, Phys
 {
     ConstraintHinge* c = new ConstraintHinge(bodyA, bodyB, pivotA, pivotB, axisA, axisB);
 
-    std::cout << "Constraint created: " << c << std::endl;
-    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+    LOG_DEBUG("Constraint hinge created");
 
     _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 
@@ -358,8 +355,7 @@ ConstraintHinge2* PhysicsManager::createConstraintHinge2(PhysicalBody* bodyA, Ph
 {
     ConstraintHinge2* c = new ConstraintHinge2(bodyA, bodyB, pivot, axisA, axisB);
 
-    std::cout << "Constraint created: " << c << std::endl;
-    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+    LOG_DEBUG("Constraint hinge2 created");
 
     _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 
@@ -373,8 +369,7 @@ ConstraintBall* PhysicsManager::createConstraintBall(PhysicalBody* bodyA, Physic
 {
     ConstraintBall* c = new ConstraintBall(bodyA, bodyB, pivotA, pivotB);
 
-    std::cout << "Constraint created: " << c << std::endl;
-    std::cout << "Bullet constraint: " << c->getBulletConstraint() << std::endl;
+    LOG_DEBUG("Constraint ball created");
 
     _dynamicsWorld->addConstraint(c->getBulletConstraint(), true);
 

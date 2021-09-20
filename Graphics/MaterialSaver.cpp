@@ -248,7 +248,6 @@ namespace MaterialSaver
 			matElement->SetAttribute("shininess", shininessStr.c_str());
 
 			std::string transparencyStr = toString(opacity);
-			std::cout << transparencyStr.c_str() << " " << opacity << std::endl;
 			matElement->SetAttribute("transparency", transparencyStr.c_str());
 
 			std::string offsetStr = "0,0";//toString(material->texture1_map.offset[0]) + "," + toString(material->texture1_map.offset[1]);

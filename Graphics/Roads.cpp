@@ -141,7 +141,6 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 
 					glm::vec2 d = glm::normalize(glm::vec2(segmentEnd.x - segmentBegin.x, segmentEnd.z - segmentBegin.z));
 					v = glm::vec2(-d.y, d.x);
-					//std::cout << v.x << " " << v.y << std::endl;
 				}
 				else if (segments[k].type == RST_BEZIER_CURVE)
 				{

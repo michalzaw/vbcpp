@@ -3,7 +3,7 @@
 RModel::RModel(std::string path, Model* m)
 : Resource(RT_MODEL, path)
 {
-    std::cout << "*** RModel: Konstruktor: " << _path << std::endl;
+    LOG_INFO("*** RModel: Konstruktor: " + _path);
 
     //_oglDriver = m->getDriver();
 
@@ -31,30 +31,30 @@ RModel::RModel(std::string path, Model* m)
 
 RModel::~RModel()
 {
-    std::cout << "*** RModel: Destruktor: " << _path << std::endl;
+    LOG_INFO("*** RModel: Destruktor: " + _path);
 
-    std::cout << "*** RModel: Usuwanie _vbo" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _vbo");
     if (_vbo)
     {
         OGLDriver::getInstance().deleteVBO(_vbo);
         _vbo = 0;
     }
 
-    std::cout << "*** RModel: Usuwanie _ibo" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _ibo");
     if (_ibo)
     {
         OGLDriver::getInstance().deleteIBO(_ibo);
         _ibo = 0;
     }
 
-    std::cout << "*** RModel: Usuwanie _vertices" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _vertices");
     if (_vertices)
     {
         delete[] _vertices;
         _vertices = 0;
     }
 
-    std::cout << "*** RModel: Usuwanie _indices" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _indices");
     if (_indices)
     {
         delete[] _indices;
@@ -63,14 +63,14 @@ RModel::~RModel()
 
     // >>>>>
 
-    std::cout << "*** RModel: Usuwanie _meshes" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _meshes");
     if (_meshes)
     {
         delete[] _meshes;
         _meshes = 0;
     }
 
-    std::cout << "*** RModel: Usuwanie _collisionMesh" << std::endl;
+    LOG_DEBUG("*** RModel: Usuwanie _collisionMesh");
     if (_collisionMesh)
     {
         delete[] _collisionMesh;

@@ -2,6 +2,7 @@
 
 #include "../Game/GameConfig.h"
 
+#include "../Utils/Logger2.h"
 #include "../Utils/XmlUtils.h"
 
 #include "../Utils/tinyxml2.h"
@@ -90,8 +91,8 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 
     sMaterial->transparency = (float)atof(materialElement->Attribute("transparency"));
 
-    std::cout << "Material name: " << sMaterial->name << std::endl;
-    std::cout << "Material transparency: " << (float)sMaterial->transparency << std::endl;
+	LOG_INFO("Material name: " + sMaterial->name);
+	LOG_DEBUG("Material transparency: " + Strings::toString(sMaterial->transparency));
 
     sMaterial->ambientColor = XMLstringToVec4(materialElement->Attribute("ambient"));
     sMaterial->diffuseColor = XMLstringToVec4(materialElement->Attribute("diffuse"));
@@ -115,7 +116,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		std::string texStr = std::string(diffuseTexturePath);
 
-		std::cout << "DiffuseTexture: " << texStr << std::endl;
+		LOG_DEBUG("DiffuseTexture: " + texStr);
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
@@ -133,7 +134,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		std::string texStr = std::string(normalmapTexturePath);
 
-		std::cout << "NormalMap: " << texStr << std::endl;
+		LOG_DEBUG("NormalMap: " + texStr);
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
@@ -151,7 +152,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
     {
 		std::string texStr = std::string(c);
 
-        std::cout << "GlassTexture: " << texStr << std::endl;
+		LOG_DEBUG("GlassTexture: " + texStr);
 
         for(unsigned int i = 0; i < texStr.size(); i++ )
             texStr[i] = tolower(texStr[i]);
@@ -168,7 +169,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		std::string texStr = std::string(c1);
 
-		std::cout << "MetalicTexture: " << texStr << std::endl;
+		LOG_DEBUG("MetalicTexture: " + texStr);
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
@@ -185,7 +186,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		std::string texStr = std::string(c2);
 
-		std::cout << "RoughnessTexture: " << texStr << std::endl;
+		LOG_DEBUG("RoughnessTexture: " + texStr);
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);
@@ -202,7 +203,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		std::string texStr = std::string(c3);
 
-		std::cout << "AoTexture: " << texStr << std::endl;
+		LOG_DEBUG("AoTexture: " + texStr);
 
 		for (unsigned int i = 0; i < texStr.size(); i++)
 			texStr[i] = tolower(texStr[i]);

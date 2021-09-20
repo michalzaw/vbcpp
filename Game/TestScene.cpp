@@ -11,6 +11,7 @@
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
 #include "../Utils/Logger.h"
+#include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 
 
@@ -237,7 +238,7 @@ void TestScene::initialize()
 		picker1->setMargin(pickerMargin);
 		picker1->setOnValueChangedCallback([](int index, const std::string& value)
 			{
-				std::cout << "Selected item: " << value + " (" << index << ")\n";
+				LOG_DEBUG("Selected item: " + value + " (" + Strings::toString(index) + ")");
 			});
 
 		Label* labelFront = _gui->addLabel(fontRegular26, "Front pojazdu");

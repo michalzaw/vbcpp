@@ -16,9 +16,7 @@ using namespace tinyxml2;
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
     : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Create SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
     _soundManager->grab();
 
@@ -37,9 +35,7 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
 
 SceneManager::~SceneManager()
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Destroy SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Destroy SceneManager");
 
 
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
