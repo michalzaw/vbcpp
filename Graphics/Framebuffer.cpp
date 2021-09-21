@@ -1,7 +1,5 @@
 #include "Framebuffer.h"
 
-#include  "../Utils/Logger.h"
-
 
 Framebuffer::Framebuffer()
     : _fboId(0), _depthRenderbuffer(0), _isCreated(false), _isInitialized(false), _viewport(0, 0, 0, 0)

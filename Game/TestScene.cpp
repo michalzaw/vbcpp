@@ -10,7 +10,6 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
-#include "../Utils/Logger.h"
 #include "../Utils/Logger2.h"
 #include "../Utils/ResourceManager.h"
 

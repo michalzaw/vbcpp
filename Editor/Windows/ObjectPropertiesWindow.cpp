@@ -12,7 +12,6 @@
 #include "../../ImGui/imgui_internal.h"
 
 #include "RoadTools.h"
-#include "../../Utils/Logger.h"
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)

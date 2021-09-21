@@ -3,7 +3,6 @@
 #include "../Game/GameConfig.h"
 
 #include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/Logger.h"
 
 
 glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
