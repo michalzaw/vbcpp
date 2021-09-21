@@ -1,7 +1,7 @@
 #include "PhysicalBodyCylinder.hpp"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 PhysicalBodyCylinder::PhysicalBodyCylinder(btVector3 dim, btScalar mass, ShapeAlign align)
 : PhysicalBody(mass),

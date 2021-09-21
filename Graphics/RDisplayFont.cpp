@@ -1,7 +1,7 @@
 #include "RDisplayFont.h"
 
 #include "../Utils/Strings.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 RDisplayFont::RDisplayFont(std::string path)

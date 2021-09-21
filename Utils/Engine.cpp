@@ -11,7 +11,7 @@ using namespace tinyxml2;
 #include "Math.h"
 #include "FilesHelper.h"
 #include "ResourceManager.h"
-#include "Logger2.h"
+#include "Logger.h"
 #include "XmlUtils.h"
 #include "Strings.h"
 

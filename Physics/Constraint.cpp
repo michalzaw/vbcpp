@@ -1,7 +1,7 @@
 #include "Constraint.hpp"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 Constraint::Constraint(PhysicalBody* bodyA, PhysicalBody* bodyB)
 : _bodyA(bodyA), _bodyB(bodyB), _constraint(0)

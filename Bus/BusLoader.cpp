@@ -3,7 +3,7 @@
 #include "../Game/Directories.h"
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"

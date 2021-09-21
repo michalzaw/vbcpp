@@ -3,7 +3,7 @@
 #include <stb_image.h>
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 #include <gli/texture2d.hpp>
 #include <gli/load.hpp>

@@ -8,7 +8,7 @@
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/RObject.h"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"

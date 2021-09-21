@@ -12,7 +12,7 @@
 #include "../../Graphics/LoadMaterial.h"
 
 #include "../../Utils/FilesHelper.h"
-#include "../../Utils/Logger2.h"
+#include "../../Utils/Logger.h"
 #include "../../Utils/ResourceManager.h"
 
 

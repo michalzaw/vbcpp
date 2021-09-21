@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Logger2.h"
+#include "Logger.h"
 
 
 RTextureCubeMap::RTextureCubeMap(std::string path, unsigned char** data, TextureFormat internalFormat, unsigned int size, bool fromFile)

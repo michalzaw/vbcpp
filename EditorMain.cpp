@@ -1,6 +1,6 @@
 #include "Editor/Editor.h"
 
-#include "Utils/Logger2.h"
+#include "Utils/Logger.h"
 
 
 int main()
@@ -9,7 +9,7 @@ int main()
 
 	//editor.run();
 
-	Logger2::init(LL_DEBUG, true, true, "logEditor.txt");
+	Logger::init(LL_DEBUG, true, true, "logEditor.txt");
 
 	vbEditor::createWindow();
 	vbEditor::initializeEngineSubsystems();
@@ -18,7 +18,7 @@ int main()
 
 	vbEditor::shutDown();
 
-	Logger2::destroy();
+	Logger::destroy();
 
 	return 0;
 }

@@ -2,7 +2,7 @@
 
 #include <cstdio>
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 Window::Window()
 : _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _fullscreenMode(0)

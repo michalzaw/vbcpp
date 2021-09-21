@@ -10,7 +10,7 @@
 #endif
 
 
-#include "Logger2.h"
+#include "Logger.h"
 
 
 bool FilesHelper::isDirectoryExists(std::string dirPath)

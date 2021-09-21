@@ -4,7 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/Resource.h"
 #include "../Utils/RTexture.h"
 

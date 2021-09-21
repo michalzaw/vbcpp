@@ -10,7 +10,7 @@ using namespace tinyxml2;
 
 #include "ResourceManager.h"
 #include "FilesHelper.h"
-#include "Logger2.h"
+#include "Logger.h"
 
 #include "../Game/Directories.h"
 

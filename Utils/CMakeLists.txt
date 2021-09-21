@@ -6,7 +6,7 @@ set (UTILS_SOURCES
 	Utils/Gearbox.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp
-	Utils/Logger2.cpp
+	Utils/Logger.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
@@ -33,7 +33,6 @@ set (UTILS_HEADERS
 	Utils/Helpers.hpp
 	Utils/InputSystem.h
 	Utils/Logger.h
-	Utils/Logger2.h
 	Utils/Math.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h

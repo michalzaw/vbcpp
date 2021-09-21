@@ -2,7 +2,7 @@
 
 #include "LoadMaterial.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 #include "../Utils/tinyxml2.h"
 using namespace tinyxml2;

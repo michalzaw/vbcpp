@@ -10,7 +10,7 @@
 #include "../Graphics/RenderObject.h"
 
 #include "../Utils/FilesHelper.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/Strings.h"
 
 

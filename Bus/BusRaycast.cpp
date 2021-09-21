@@ -13,7 +13,7 @@
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Strings.h"
 #include "../Utils/XmlUtils.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 BusRaycast::BusRaycast()

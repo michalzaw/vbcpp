@@ -1,4 +1,4 @@
-#include "Logger2.h"
+#include "Logger.h"
 
 #include <iomanip>
 #include <iostream>
@@ -8,10 +8,10 @@
 #include "FilesHelper.h"
 
 
-LogLevel Logger2::_logLevel = LL_DISABLED;
-bool Logger2::_consoleOutput = false;
-bool Logger2::_fileOutput = false;
-std::ofstream* Logger2::_logFile = nullptr;
+LogLevel Logger::_logLevel = LL_DISABLED;
+bool Logger::_consoleOutput = false;
+bool Logger::_fileOutput = false;
+std::ofstream* Logger::_logFile = nullptr;
 
 
 const std::string logLevelsNames[] =
@@ -34,7 +34,7 @@ LogLevel getLogLevelFromString(const std::string& name)
 }
 
 
-void Logger2::init(LogLevel logLevel, bool consoleOutput, bool fileOutput, const std::string& logFileName)
+void Logger::init(LogLevel logLevel, bool consoleOutput, bool fileOutput, const std::string& logFileName)
 {
     _logLevel = logLevel;
     _consoleOutput = consoleOutput;
@@ -59,7 +59,7 @@ void Logger2::init(LogLevel logLevel, bool consoleOutput, bool fileOutput, const
 }
 
 
-void Logger2::destroy()
+void Logger::destroy()
 {
     if (_logFile != nullptr)
     {
@@ -77,7 +77,7 @@ void Logger2::destroy()
 }
 
 
-void Logger2::setLogLevel(LogLevel newLogLevel)
+void Logger::setLogLevel(LogLevel newLogLevel)
 {
     LOG_INFO("Changed logLevel: " + logLevelsNames[_logLevel] + " -> " + logLevelsNames[newLogLevel]);
     if (newLogLevel != LL_DISABLED)
@@ -90,13 +90,13 @@ void Logger2::setLogLevel(LogLevel newLogLevel)
 }
 
 
-LogLevel Logger2::getLogLevel()
+LogLevel Logger::getLogLevel()
 {
     return _logLevel;
 }
 
 
-void Logger2::logMessage(LogLevel level, const char* fileName, unsigned int line, const std::string& message)
+void Logger::logMessage(LogLevel level, const char* fileName, unsigned int line, const std::string& message)
 {
     if (level < _logLevel)
     {

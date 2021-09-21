@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/Timer.h"
 
 

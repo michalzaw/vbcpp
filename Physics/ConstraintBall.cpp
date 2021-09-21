@@ -1,7 +1,7 @@
 #include "ConstraintBall.h"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 ConstraintBall::ConstraintBall(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB)
 : Constraint(bodyA, bodyB),

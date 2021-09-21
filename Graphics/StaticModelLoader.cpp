@@ -4,7 +4,7 @@
 
 #include "MaterialSaver.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 using namespace tinyxml2;

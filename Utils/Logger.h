@@ -25,7 +25,7 @@ enum LogLevel
 LogLevel getLogLevelFromString(const std::string& name);
 
 
-class Logger2 final
+class Logger final
 {
     private:
         static LogLevel _logLevel;
@@ -52,10 +52,10 @@ class Logger2 final
 };
 
 #ifdef VB_ENABLE_LOGGER
-#define LOG_DEBUG(message) Logger2::logMessage(LL_DEBUG, __FILE__, __LINE__, message)
-#define LOG_INFO(message) Logger2::logMessage(LL_INFO, __FILE__, __LINE__, message)
-#define LOG_WARNING(message) Logger2::logMessage(LL_WARNING, __FILE__, __LINE__, message)
-#define LOG_ERROR(message) Logger2::logMessage(LL_ERROR, __FILE__, __LINE__, message)
+#define LOG_DEBUG(message) Logger::logMessage(LL_DEBUG, __FILE__, __LINE__, message)
+#define LOG_INFO(message) Logger::logMessage(LL_INFO, __FILE__, __LINE__, message)
+#define LOG_WARNING(message) Logger::logMessage(LL_WARNING, __FILE__, __LINE__, message)
+#define LOG_ERROR(message) Logger::logMessage(LL_ERROR, __FILE__, __LINE__, message)
 #else
 #define LOG_DEBUG(message)
 #define LOG_INFO(message)

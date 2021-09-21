@@ -1,6 +1,6 @@
 #include "PhysicalBodyConvexHull.hpp"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),

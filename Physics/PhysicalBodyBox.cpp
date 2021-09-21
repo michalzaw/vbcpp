@@ -1,7 +1,7 @@
 #include "PhysicalBodyBox.hpp"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 PhysicalBodyBox::PhysicalBodyBox(btVector3 halfExtents, btScalar mass)
 : PhysicalBody(mass),

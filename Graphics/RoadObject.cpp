@@ -8,7 +8,7 @@
 #include "../Scene/SceneObject.h"
 
 #include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)

@@ -3,7 +3,7 @@
 #include "Renderer.h"
 #include "VBO.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
 

@@ -2,7 +2,7 @@
 #define REFCOUNTER_H_INCLUDED
 
 
-#include "Logger2.h"
+#include "Logger.h"
 
 
 //! \brief Reference Counter class

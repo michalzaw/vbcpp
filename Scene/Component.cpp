@@ -2,7 +2,7 @@
 
 #include "SceneObject.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 Component::Component(ComponentType type)

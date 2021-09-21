@@ -1,7 +1,7 @@
 #include "PhysicalBodySphere.hpp"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 PhysicalBodySphere::PhysicalBodySphere(btScalar r, btScalar mass)
 : PhysicalBody(mass),

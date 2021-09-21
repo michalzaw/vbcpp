@@ -4,7 +4,7 @@
 
 #include "../Scene/SceneManager.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),

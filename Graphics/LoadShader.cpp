@@ -2,7 +2,7 @@
 
 #include <sstream>
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 std::string ShaderLoader::replaceConstatnsInLine(std::string line, const std::unordered_map<std::string, std::string>& constants)

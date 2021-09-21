@@ -2,7 +2,7 @@
 
 #include "../Game/GameConfig.h"
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 #include "../Utils/XmlUtils.h"
 
 #include "../Utils/tinyxml2.h"

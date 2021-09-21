@@ -1,7 +1,7 @@
 #include "PhysicalBody.hpp"
 
 #include "../Utils/Helpers.hpp"
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 #include "Constraint.hpp"
 

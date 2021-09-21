@@ -3,7 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
-#include "Logger2.h"
+#include "Logger.h"
 #include "Helpers.hpp"
 #include "Strings.h"
 #include "XmlUtils.h"

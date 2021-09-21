@@ -3,7 +3,7 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
-#include "../Utils/Logger2.h"
+#include "../Utils/Logger.h"
 
 
 std::string TerrainLoader::createTerFileName(std::string heightmapFilename)

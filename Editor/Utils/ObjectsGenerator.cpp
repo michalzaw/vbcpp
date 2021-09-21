@@ -5,7 +5,7 @@
 #include "../../Graphics/RoadObject.h"
 
 #include "../../Utils/BezierCurvesUtils.h"
-#include "../../Utils/Logger2.h"
+#include "../../Utils/Logger.h"
 #include "../../Utils/ResourceManager.h"
 #include "../../Utils/Strings.h"
 

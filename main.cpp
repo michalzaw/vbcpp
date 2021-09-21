@@ -6,7 +6,7 @@
 #include "Game/LoadingScreenScene.h"
 #include "Game/TestScene.h"
 
-#include "Utils/Logger2.h"
+#include "Utils/Logger.h"
 
 
 void testLogger()
@@ -45,7 +45,7 @@ int main()
 #endif // DEVELOPMENT_RESOURCES
 
 
-	Logger2::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
+	Logger::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
 
 	testLogger();
 
@@ -70,7 +70,7 @@ int main()
 	game.run();
 	game.terminate();
 
-	Logger2::destroy();
+	Logger::destroy();
 
 	return 0;
 }
