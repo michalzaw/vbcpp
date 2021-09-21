@@ -70,5 +70,7 @@ int main()
 	game.run();
 	game.terminate();
 
+	Logger2::destroy();
+
 	return 0;
 }
