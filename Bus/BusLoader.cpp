@@ -36,7 +36,7 @@ Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std
 
     XMLElement* busElement = doc.FirstChildElement("Bus");
 
-    Logger::info("Bus XML DATA");
+    LOG_INFO("Bus XML DATA");
 
     _objName = busElement->Attribute("name");
     std::string textureFolder(busElement->Attribute("textures"));
@@ -48,7 +48,7 @@ Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std
 
     _variables = variables;
 
-    Logger::info("Bus name: " + _objName);
+    LOG_INFO("Bus name: " + _objName);
 
     if (busType == "raycast")
     {
@@ -60,7 +60,7 @@ Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std
     }
     else
     {
-        Logger::error("Unsupported bus type: " + busType);
+        LOG_ERROR("Unsupported bus type: " + busType);
         return NULL;
     }
 }
@@ -121,7 +121,7 @@ void BusLoader::loadEngineAndGearbox(XMLElement* busElement)
     }
     else
     {
-        Logger::error("Error while loading engine sounds. Invali module index.");
+        LOG_ERROR("Error while loading engine sounds. Invalid module index.");
     }
 }
 
@@ -206,7 +206,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         }
         else
         {
-            Logger::error("Collision mesh not found in bus model!\n");
+            LOG_ERROR("Collision mesh not found in bus model!");
             return false;
         }
 
@@ -305,7 +305,7 @@ void BusLoader::loadModuleConditionalElements(XMLElement* moduleElement, XMLElem
         }
         else
         {
-            Logger::error("Variable " + variable + " not exist");
+            LOG_ERROR("Variable " + variable + " not exist");
         }
     }
 }
@@ -316,15 +316,15 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
     XMLElement* wheelElement = moduleElement->FirstChildElement("Wheel");
     if (wheelElement == nullptr)
     {
-        Logger::error("Cannot load Wheel elements from config file!");
+        LOG_ERROR("Cannot load Wheel elements from config file!");
     }
 
     while (wheelElement != nullptr)
     {
-        Logger::info("XML: Wheel data");
+        LOG_INFO("XML: Wheel data");
 
         std::string wheelName(wheelElement->Attribute("name"));
-        Logger::info(wheelName);
+        LOG_INFO(wheelName);
         std::string wheelModel(wheelElement->Attribute("model"));
         std::string side(wheelElement->Attribute("side"));
         float radius = (float)atof(wheelElement->Attribute("radius"));
@@ -404,7 +404,7 @@ void BusLoader::loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& 
     XMLElement* lightElement = moduleElement->FirstChildElement("Light");
     while (lightElement != nullptr)
     {
-        Logger::info("XML: Interior light data");
+        LOG_INFO("XML: Interior light data");
 
         glm::vec3 position = XMLstringToVec3(lightElement->Attribute("position"));
         glm::vec3 color = XMLstringToVec3(lightElement->Attribute("color"));
@@ -441,7 +441,7 @@ void BusLoader::loadDriverParams(XMLElement* busElement, BusRayCastModule& busMo
     }
     else
     {
-        Logger::warning("Cannot load driver position from config file!");
+        LOG_WARNING("Cannot load driver position from config file!");
     }
 }
 
@@ -451,7 +451,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
     XMLElement* steeringWheelElement = moduleElement->FirstChildElement("SteeringWheel");
     if (steeringWheelElement != nullptr)
     {
-        Logger::info("XML: Steering wheel data");
+        LOG_INFO("XML: Steering wheel data");
 
         std::string modelFile = std::string(steeringWheelElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(steeringWheelElement->Attribute("position"));
@@ -476,7 +476,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
     }
     else
     {
-        Logger::info("Cannot load steering wheel element from config file!");
+        LOG_INFO("Cannot load steering wheel element from config file!");
     }
 }
 
@@ -529,7 +529,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
     if (desktopElement != nullptr)
     {
-        Logger::info("XML: Desktop data");
+        LOG_INFO("XML: Desktop data");
 
         std::string modelFile = std::string(desktopElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(desktopElement->Attribute("position"));
@@ -646,7 +646,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     }
     else
     {
-        Logger::info("Cannot load desktop element from config file!");
+        LOG_INFO("Cannot load desktop element from config file!");
     }
 }
 
@@ -656,7 +656,7 @@ void BusLoader::loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busM
     XMLElement* headlightElement = moduleElement->FirstChildElement("Headlight");
     while (headlightElement != nullptr)
     {
-        Logger::info("XML: Headlights data");
+        LOG_INFO("XML: Headlights data");
 
         std::string headlightName(headlightElement->Attribute("name"));
 
@@ -692,7 +692,7 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
     XMLElement* doorElement = moduleElement->FirstChildElement("Door");
     while (doorElement != nullptr)
     {
-        Logger::info("XML: Door data");
+        LOG_INFO("XML: Door data");
 
         // Loading common parameters
 
@@ -780,7 +780,7 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
         }
         else
         {
-            Logger::warning("Unsupported door type: " + doorType + ". Ignored.");
+            LOG_WARNING("Unsupported door type: " + doorType + ". Ignored.");
         }
 
 
@@ -1085,7 +1085,7 @@ void BusLoader::loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusR
         std::string type = std::string(componentElement->Attribute("type"));
         if (type == "environmentCapture")
         {
-            Logger::info("XML: environmentCapture component data");
+            LOG_INFO("XML: environmentCapture component data");
 
             std::string textures = std::string(componentElement->Attribute("textures"));
             std::string t[6];
@@ -1112,7 +1112,7 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 
     while (mirrorElement != nullptr)
     {
-        Logger::info("XML: Mirror component data");
+        LOG_INFO("XML: Mirror component data");
 
         std::string name(mirrorElement->Attribute("name"));
         glm::vec3 position = XMLstringToVec3(mirrorElement->Attribute("position"));
@@ -1141,7 +1141,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 	XMLElement* displayElement = moduleElement->FirstChildElement("Display");
 	while (displayElement != nullptr)
 	{
-		Logger::info("XML: Display component data");
+		LOG_INFO("XML: Display component data");
 
 		std::string name(displayElement->Attribute("name"));
 		glm::vec3 position = XMLstringToVec3(displayElement->Attribute("position"));
@@ -1184,7 +1184,7 @@ void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& 
     XMLElement* childElement = parentElement->FirstChildElement("Element");
     while (childElement != nullptr)
     {
-        Logger::info("XML: Custom element");
+        LOG_INFO("XML: Custom element");
 
         std::string modelNodeName = XmlUtils::getAttributeString(childElement, "modelNode");
 
@@ -1210,7 +1210,7 @@ void BusLoader::loadModulesConnectionData(XMLElement* moduleElement, BusRayCastM
     XMLElement* jointElement = moduleElement->FirstChildElement("Joint");
     while (jointElement != nullptr)
     {
-        Logger::info("XML: Joint element data");
+        LOG_INFO("XML: Joint element data");
 
         busModule.jointPosition = XMLstringToBtVec3(jointElement->Attribute("position"));
 

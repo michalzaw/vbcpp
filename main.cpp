@@ -6,16 +6,24 @@
 #include "Game/LoadingScreenScene.h"
 #include "Game/TestScene.h"
 
+#include "Utils/Logger.h"
+
 
 int main()
 {
 	GameConfig& gameConfig = GameConfig::getInstance();
 	gameConfig.loadGameConfig("game.xml");
 
+
 #ifdef DEVELOPMENT_RESOURCES
 	gameConfig.loadDevelopmentConfig("devSettings.xml");
 	ResourceManager::getInstance().setAlternativeResourcePath(gameConfig.alternativeResourcesPath);
 #endif // DEVELOPMENT_RESOURCES
+
+
+	Logger::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
+	LOG_INFO("Start game: VirtualBus Core++");
+
 
 	Game game;
 
@@ -37,6 +45,8 @@ int main()
 	game.initialize();
 	game.run();
 	game.terminate();
+
+	Logger::destroy();
 
 	return 0;
 }

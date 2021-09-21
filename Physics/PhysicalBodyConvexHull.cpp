@@ -1,5 +1,7 @@
 #include "PhysicalBodyConvexHull.hpp"
 
+#include "../Utils/Logger.h"
+
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
 _vertices(vertices), _vertexCount(vertexCount), _verticesvec(nullptr)
@@ -27,7 +29,7 @@ PhysicalBodyConvexHull::PhysicalBodyConvexHull(std::vector<glm::vec3> vertices, 
 
 PhysicalBodyConvexHull::~PhysicalBodyConvexHull()
 {
-    printf("ConvexHullShape - Destruktor\n");
+	LOG_INFO("ConvexHullShape - Destruktor");
 }
 
 

@@ -1381,7 +1381,7 @@ void Renderer::bakeStaticShadows()
 		return;
 	}
 
-	Logger::info("Static shadows baking: start" + toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));
+	LOG_INFO("Static shadows baking: start" + Strings::toString(_renderDataListForStaticShadowmapping[0]->renderList.size()));
 	Timer timer;
 	timer.start();
 
@@ -1396,7 +1396,7 @@ void Renderer::bakeStaticShadows()
 	}
 
 	double time = timer.stop();
-	Logger::info("Static shadows baking: end. Time: " + toString(time));
+	LOG_INFO("Static shadows baking: end. Time: " + Strings::toString(time));
 }
 
 

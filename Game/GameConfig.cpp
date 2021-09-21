@@ -114,6 +114,22 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     openGlDebugContext = toBool(configElement->GetText());
                 }
+                else if (strcmp(ename, "LoggerLevel") == 0)
+                {
+                    loggerLevel = std::string(configElement->GetText());
+                }
+                else if (strcmp(ename, "LoggerConsoleOutput") == 0)
+                {
+                    loggerConsoleOutput = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename, "LoggerFileOutput") == 0)
+                {
+                    const char* text = configElement->GetText();
+                    if (text != nullptr)
+                    {
+                        loggerFileOutput = std::string(text);
+                    }
+                }
             }
         }
     }

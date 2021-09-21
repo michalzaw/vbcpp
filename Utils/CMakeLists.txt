@@ -6,6 +6,7 @@ set (UTILS_SOURCES
 	Utils/Gearbox.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp
+	Utils/Logger.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp

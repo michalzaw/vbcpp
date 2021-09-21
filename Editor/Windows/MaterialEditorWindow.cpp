@@ -55,9 +55,9 @@ namespace vbEditor
 			std::string materialXmlFileName = MaterialLoader::createMaterialFileName(modelFileName);
 			std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
 
-			Logger::info("modelFileName: " + modelFileName);
-			Logger::info("materialXmlFileName: " + materialXmlFileName);
-			Logger::info("objectDirPath: " + objectDirPath);
+			LOG_INFO("modelFileName: " + modelFileName);
+			LOG_INFO("materialXmlFileName: " + materialXmlFileName);
+			LOG_INFO("objectDirPath: " + objectDirPath);
 			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getModel()->getMaterials(), objectDirPath);
 
 			isMaterialModified = false;
@@ -192,7 +192,7 @@ namespace vbEditor
 
 				if (result.size() == 1)
 				{
-					Logger::info(result[0]);
+					LOG_INFO(result[0]);
 
 					std::string path = result[0];
 					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();

@@ -85,18 +85,18 @@ void FontLoader::releaseTextureData()
 
 RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 {
-    Logger::info("Loading font: " + fontName);
+    LOG_INFO("Loading font: " + fontName);
 
     if (pixelSize <= 0)
     {
-        Logger::error("Invalid pixelSize");
+        LOG_ERROR("Invalid pixelSize");
         return nullptr;
     }
 
     bool result = FT_New_Face(_library, fontName.c_str(), 0, &_face);
     if (result)
     {
-        Logger::error("Cannot load font: " + fontName);
+        LOG_ERROR("Cannot load font: " + fontName);
         return nullptr;
     }
 
@@ -121,7 +121,7 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
         charCode = FT_Get_Next_Char(_face, charCode, &glyphIndex);
         ++charsCount;
     }
-    Logger::info("Loaded " + toString(charsCount) + " chars");
+    LOG_INFO("Loaded " + Strings::toString(charsCount) + " chars");
 
     calculateTextureHeight();
 

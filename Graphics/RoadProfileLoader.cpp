@@ -17,21 +17,21 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	XMLError result = doc.LoadFile(fullPath.c_str());
 	if (result != XML_SUCCESS)
 	{
-		Logger::error("Cannot read xml file: " + fullPath + "! Result: " + toString(result));
+		LOG_ERROR("Cannot read xml file: " + fullPath + "! Result: " + Strings::toString((int)result));
 	}
 
 	// Search for main element - Profile
 	XMLElement* profileElement = doc.FirstChildElement("Profile");
 	if (profileElement == nullptr)
 	{
-		Logger::error("Profile element not found!");
+		LOG_ERROR("Profile element not found!");
 		return nullptr;
 	}
 
 	XMLElement* profileDesc = profileElement->FirstChildElement("Description");
 	if (profileDesc == nullptr)
 	{
-		Logger::error("Description element not found!");
+		LOG_ERROR("Description element not found!");
 		return nullptr;
 	}
 
@@ -40,10 +40,10 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	std::string profName(profileDesc->Attribute("name"));
 	std::string comment(profileDesc->Attribute("comment"));
 
-	Logger::info("*** PROFILE DATA ***");
-	Logger::info("Author: " + author);
-	Logger::info("Name: " + profName);
-	Logger::info("Comment: " + comment);
+	LOG_INFO("*** PROFILE DATA ***");
+	LOG_INFO("Author: " + author);
+	LOG_INFO("Name: " + profName);
+	LOG_INFO("Comment: " + comment);
 
 
 	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment);
@@ -56,7 +56,7 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 
 	if (lanesElement == nullptr)
 	{
-		Logger::error("Lanes element not found");
+		LOG_ERROR("Lanes element not found");
 		return nullptr;
 	}
 	else

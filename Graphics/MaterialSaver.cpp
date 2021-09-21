@@ -158,7 +158,7 @@ namespace MaterialSaver
 {
 	void saveMaterials(std::string fileName, std::vector<Material*>& materials, std::string texPath)
 	{
-		Logger::info("Saving materials. Path: " + fileName);
+		LOG_INFO("Saving materials. Path: " + fileName);
 		XMLDocument doc;
 
 		XMLDeclaration* declaration = doc.NewDeclaration();
@@ -174,7 +174,7 @@ namespace MaterialSaver
 
 		XMLError err = doc.SaveFile(fileName.c_str());
 
-		Logger::info("Saved file with code: " + err);
+		LOG_INFO("Saved file with code: " + err);
 	}
 
 
@@ -248,7 +248,6 @@ namespace MaterialSaver
 			matElement->SetAttribute("shininess", shininessStr.c_str());
 
 			std::string transparencyStr = toString(opacity);
-			std::cout << transparencyStr.c_str() << " " << opacity << std::endl;
 			matElement->SetAttribute("transparency", transparencyStr.c_str());
 
 			std::string offsetStr = "0,0";//toString(material->texture1_map.offset[0]) + "," + toString(material->texture1_map.offset[1]);

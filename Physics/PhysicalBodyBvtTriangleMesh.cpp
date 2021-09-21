@@ -4,14 +4,14 @@ PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
 : PhysicalBody(0),
 _model(model)
 {
-    printf("BvtTriangleMeshShape - Konstruktor\n");
+    LOG_INFO("BvtTriangleMeshShape - Konstruktor");
     updateBody();
 }
 
 
 PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
 {
-    printf("BvtTriangleMeshShape - Destruktor\n");
+    LOG_INFO("BvtTriangleMeshShape - Destruktor");
 }
 
 

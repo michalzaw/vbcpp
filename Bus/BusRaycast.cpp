@@ -33,7 +33,7 @@ BusRaycast::BusRaycast()
 
 BusRaycast::~BusRaycast()
 {
-    Logger::info("Bus Destruktor");
+    LOG_INFO("Bus Destruktor");
 
     SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
 

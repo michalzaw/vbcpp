@@ -225,7 +225,7 @@ void Picker::setSelectedOption(const std::string& selectedOption)
 	}
 	else
 	{
-		Logger::error("Invalid selectedOption value: " + selectedOption);
+		LOG_ERROR("Invalid selectedOption value: " + selectedOption);
 	}
 }
 

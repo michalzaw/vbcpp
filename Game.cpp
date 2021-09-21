@@ -16,7 +16,6 @@
 
 #include "Utils/InputSystem.h"
 #include "Utils/ResourceManager.h"
-#include "Utils/Logger.h"
 #include "Utils/RaycastingUtils.h"
 
 #include "Window/Window.h"

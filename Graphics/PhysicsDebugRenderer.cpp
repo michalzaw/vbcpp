@@ -66,7 +66,7 @@ void PhysicsDebugRenderer::drawContactPoint(const btVector3& pointOnB, const btV
 
 void PhysicsDebugRenderer::reportErrorWarning(const char* warningString)
 {
-	Logger::error("[Physics Debugger] - " + std::string(warningString));
+	LOG_ERROR("[Physics Debugger] - " + std::string(warningString));
 }
 
 

@@ -21,17 +21,13 @@ SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* 
 
     changedTransform();
 
-    //#ifdef _DEBUG_MODE
-        std::cout << "Create SceneObject: " << _name << std::endl ;
-    //#endif // _DEBUG_MODE
+    LOG_INFO("Create SceneObject: " + _name);
 }
 
 
 SceneObject::~SceneObject()
 {
-    //#ifdef _DEBUG_MODE
-        std::cout << "Destroy SceneObject: " << _name << std::endl;
-    //#endif // _DEBUG_MODE
+    LOG_INFO("Destroy SceneObject: " + _name);
 
     for (std::vector<Component*>:: iterator i = _components.begin(); i != _components.end(); ++i)
     {

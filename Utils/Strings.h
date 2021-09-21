@@ -6,8 +6,10 @@
 #include <sstream>
 #include <cstring>
 #include <vector>
+#include <type_traits>
 
 #include <glm/glm.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 
 // Convert number to string
@@ -98,6 +100,76 @@ bool startsWith(const std::string& string, const std::string& start);
 namespace Utf8String
 {
 	unsigned int getNextUtf8Char(const std::string& string, unsigned int& offset);
+}
+
+
+// New
+
+namespace Strings
+{
+	namespace Internal
+	{
+		template<typename T> struct IsArithmeticTypeForToString
+		{
+			static bool const value =
+				std::is_arithmetic<T>::value;
+		};
+
+		template<typename T> struct IsGlmTypeForToString
+		{
+			static bool const value =
+				std::is_same<T, glm::vec2>::value ||
+				std::is_same<T, glm::vec3>::value ||
+				std::is_same<T, glm::vec4>::value ||
+				std::is_same<T, glm::mat2>::value ||
+				std::is_same<T, glm::mat3>::value ||
+				std::is_same<T, glm::mat4>::value;
+		};
+
+		template <typename T>
+		class HasToStringMethod
+		{
+			typedef char one;
+			struct two { char x[2]; };
+
+			template <typename C> static one test(decltype(&C::toString));
+			template <typename C> static two test(...);
+
+		public:
+			static bool const value = sizeof(test<T>(0)) == sizeof(char);
+		};
+
+		template<typename TYPE>
+		std::string toString(std::enable_if_t<IsArithmeticTypeForToString<TYPE>::value, TYPE> value)
+		{
+			return std::to_string(value);
+		}
+
+		template<typename TYPE>
+		std::string toString(const std::enable_if_t<IsGlmTypeForToString<TYPE>::value, TYPE>& value)
+		{
+			return glm::to_string(value);
+		}
+
+		template<typename TYPE>
+		std::string toString(const std::enable_if_t<HasToStringMethod<TYPE>::value, TYPE>& value)
+		{
+			return value.toString();
+		}
+	}
+
+	// Public functions
+
+	// Convert variable to std::string
+	// Supported types:
+	// - Built-in numeric types
+	// - glm::vec2, glm::vec3, glm::vec4, glm::mat2, glm::mat3, glm::mat4
+	// - any object with const method toString()
+	template<typename TYPE>
+	inline std::string toString(const TYPE& value)
+	{
+		return Internal::toString<TYPE>(value);
+	}
 }
 
 

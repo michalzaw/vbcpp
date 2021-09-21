@@ -142,7 +142,7 @@ RTexture2D* loadTexture(const char* fileName, bool useCompression, bool mipmapin
 	std::string extension = FilesHelper::getFileExtension(fileNameStr);
 	bool hdrImage = extension == HDR_FILE_EXTENSION;
 
-	Logger::info("Loading texture: " + fileNameStr);
+	LOG_INFO("Loading texture: " + fileNameStr);
 
 	if (extension == DDS_FILE_EXTENSION)
 	{
@@ -164,7 +164,7 @@ RTexture2D* loadTexture(const char* fileName, bool useCompression, bool mipmapin
 
     if(image == NULL)
     {
-        Logger::error("Failed to load texture: " + std::string(fileName));
+		LOG_ERROR("Failed to load texture: " + std::string(fileName));
         return NULL;
     }
 
@@ -210,7 +210,7 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
 {
 	bool hdrImage = FilesHelper::getFileExtension(filesNames[0]) == HDR_FILE_EXTENSION;
 
-    Logger::info("Loading cube map");
+    LOG_INFO("Loading cube map");
 
     stbi_set_flip_vertically_on_load(false);
 
@@ -224,10 +224,10 @@ RTextureCubeMap* loadTextureCubeMap(std::string* filesNames, const char* path, b
 		else
 			cubeMapFaces[i] = stbi_load(filesNames[i].c_str(), &width, &height, &chanels, STBI_rgb_alpha);
 
-        Logger::info("Loading texture: " + filesNames[i]);
+        LOG_INFO("Loading texture: " + filesNames[i]);
         if(cubeMapFaces[i] == NULL)
         {
-            Logger::error("Failed to load texture: " + filesNames[i]);
+			LOG_ERROR("Failed to load texture: " + filesNames[i]);
             return NULL;
         }
 
@@ -286,7 +286,7 @@ GLuint loadTextureRect(const char* fileName)
     int width, height;
     unsigned char* image;// = SOIL_load_image(fileName, &width, &height, 0, SOIL_LOAD_RGBA);
 
-    std::cout << "Loading texture: " << fileName << std::endl;
+	LOG_INFO("Loading texture: " + std::string(fileName));
     //std::cout << "SOIL result: " << SOIL_last_result() << std::endl;
 
     glTexImage2D(GL_TEXTURE_RECTANGLE, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);

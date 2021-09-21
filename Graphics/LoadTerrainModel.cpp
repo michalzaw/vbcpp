@@ -3,6 +3,8 @@
 #include <stb_image.h>
 #include <stb_image_write.h>
 
+#include "../Utils/Logger.h"
+
 
 std::string TerrainLoader::createTerFileName(std::string heightmapFilename)
 {
@@ -29,7 +31,7 @@ void TerrainLoader::saveTerFile(const char* fileName, RStaticModel* model)
     StaticModelNode* modelRootNode = model->getRootNode();
     if (modelRootNode == NULL || modelRootNode->meshesCount != 1)
     {
-        std::cout << "Terrain model cannot save to: " << fileName << ", meshes count: " << modelRootNode->getMeshesCount() << std::endl;
+        LOG_WARNING("Terrain model cannot save to: " + std::string(fileName) + ", meshes count: " + Strings::toString(modelRootNode->getMeshesCount()));
         return;
     }
 
