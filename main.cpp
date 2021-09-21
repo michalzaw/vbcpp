@@ -9,30 +9,6 @@
 #include "Utils/Logger.h"
 
 
-void testLogger()
-{
-	GameConfig& gameConfig = GameConfig::getInstance();
-
-	LOG_DEBUG("Start application");
-	LOG_INFO("Game initialization");
-	LOG_WARNING("Cannot load texture");
-	LOG_ERROR("Cannot initialize OpenGL context");
-
-	float zmienna12_1 = 2.43f;
-	glm::vec4 test(1.0f, 2.0f, 3.4f, 1.2345f);
-	glm::mat4 mat(1.0f);
-	std::string str2 = "Hello world";
-
-	LOG_INFO(LOG_VARIABLE(zmienna12_1));
-	LOG_INFO(LOG_VARIABLE(test));
-	LOG_INFO(LOG_VARIABLE(mat));
-	LOG_INFO(LOG_VARIABLE(str2));
-
-	LOG_INFO(LOG_VARIABLE(gameConfig));
-	system("pause");
-}
-
-
 int main()
 {
 	GameConfig& gameConfig = GameConfig::getInstance();
@@ -46,8 +22,8 @@ int main()
 
 
 	Logger::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
+	LOG_INFO("Start game: VirtualBus Core++");
 
-	testLogger();
 
 	Game game;
 
