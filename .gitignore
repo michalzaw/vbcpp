@@ -24,4 +24,4 @@ build*/
 *.exe
 
 bin/devSettings.xml
-bin/log.txt
+bin/log*.txt
