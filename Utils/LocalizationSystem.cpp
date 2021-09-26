@@ -17,12 +17,10 @@ const std::string LocalizationSystem::FILE_NAME_EXTENSION = ".xml";
 static std::unique_ptr<LocalizationSystem> localizationSystemGlobalInstance;
 
 
-LocalizationSystem::LocalizationSystem(const std::string& textsPath)
-	: _textsPath(textsPath)
+LocalizationSystem::LocalizationSystem()
+	: _textsPath(""), _defaultLanguage(""), _language("")
 {
-	LOG_INFO("Created localization system, path: " + _textsPath);
 
-	findAvailableLanguages();
 }
 
 
@@ -82,10 +80,21 @@ LocalizationSystem& LocalizationSystem::getGlobalInstance()
 {
 	if (!localizationSystemGlobalInstance)
 	{
-		localizationSystemGlobalInstance = std::unique_ptr<LocalizationSystem>(new LocalizationSystem("Data/texts/"));
+		localizationSystemGlobalInstance = std::unique_ptr<LocalizationSystem>(new LocalizationSystem);
 	}
 
 	return *localizationSystemGlobalInstance;
+}
+
+
+void LocalizationSystem::initialize(const std::string& textsPath, const std::string& defaultLanguage)
+{
+	LOG_INFO("Created localization system, path: " + textsPath);
+
+	_textsPath = textsPath;
+	_defaultLanguage = defaultLanguage;
+
+	findAvailableLanguages();
 }
 
 
@@ -97,15 +106,17 @@ const std::vector<std::string>& LocalizationSystem::getAvailableLanguages()
 
 void LocalizationSystem::setLanguage(const std::string& language)
 {
-	if (!isVectorContains(_availableLanguages, language))
+	if (isVectorContains(_availableLanguages, language))
 	{
-		LOG_ERROR("Unsupported language: " + language);
-		return;
+		LOG_INFO("Selected language: " + language);
+		_language = language;
+	}
+	else
+	{
+		LOG_WARNING("Unsupported language: " + language + ". Use default language: " + _defaultLanguage);
+		_language = _defaultLanguage;
 	}
 
-	LOG_INFO("Selected language: " + language);
-
-	_language = language;
 	loadTextsFromFile();
 }
 

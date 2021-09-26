@@ -15,6 +15,7 @@ class LocalizationSystem
 		static const std::string FILE_NAME_EXTENSION;
 
 		std::string _textsPath;
+		std::string _defaultLanguage;
 		std::vector<std::string> _availableLanguages;
 
 		std::string _language;
@@ -25,10 +26,12 @@ class LocalizationSystem
 		void loadTextsFromFile();
 
 	public:
-		LocalizationSystem(const std::string& textsPath);
-		virtual ~LocalizationSystem();
+		LocalizationSystem();
+		~LocalizationSystem();
 
 		static LocalizationSystem& getGlobalInstance();
+
+		void initialize(const std::string& textsPath, const std::string& defaultLanguage);
 
 		const std::vector<std::string>& getAvailableLanguages();
 

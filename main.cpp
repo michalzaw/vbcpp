@@ -25,6 +25,7 @@ int main()
 	Logger::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
 	LOG_INFO("Start game: VirtualBus Core++");
 
+	LocalizationSystem::getGlobalInstance().initialize("Data/texts/", "en");
 	LocalizationSystem::getGlobalInstance().setLanguage(gameConfig.language);
 
 	Game game;
