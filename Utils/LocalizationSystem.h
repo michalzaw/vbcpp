@@ -1,0 +1,46 @@
+#ifndef LOCALIZATIONSYSTEM_H_INCLUDED
+#define LOCALIZATIONSYSTEM_H_INCLUDED
+
+
+#include <unordered_map>
+#include <vector>
+#include <regex>
+
+
+class LocalizationSystem
+{
+	private:
+		static const std::regex FILE_NAME_PATTERN;
+		static const std::string FILE_NAME_PREFIX;
+		static const std::string FILE_NAME_EXTENSION;
+
+		std::string _textsPath;
+		std::vector<std::string> _availableLanguages;
+
+		std::string _language;
+
+		std::unordered_map<std::string, std::string> _texts;
+
+		void findAvailableLanguages();
+		void loadTextsFromFile();
+
+	public:
+		LocalizationSystem(const std::string& textsPath);
+		virtual ~LocalizationSystem();
+
+		static LocalizationSystem& getGlobalInstance();
+
+		const std::vector<std::string>& getAvailableLanguages();
+
+		void setLanguage(const std::string& language);
+
+		std::string getText(const std::string& id);
+
+};
+
+
+#define GET_TEXT(textId) LocalizationSystem::getGlobalInstance().getText(#textId)
+#define GET_CUSTOM_TEXT(localizationSystem, textId) localizationSystem.getText(#textId)
+
+
+#endif // LOCALIZATIONSYSTEM_H_INCLUDED

@@ -9,7 +9,7 @@
 class FilesHelper
 {
     public:
-        static bool isFileExists(std::string fileName)
+        static bool isFileExists(const std::string& fileName)
         {
             FILE* file;
             file = fopen(fileName.c_str(), "r");
@@ -22,19 +22,20 @@ class FilesHelper
             return 0;
         }
 
-		static bool isDirectoryExists(std::string dirPath);
+		static bool isDirectoryExists(const std::string& dirPath);
 
-        static std::vector<std::string> getDirectoriesList(std::string path);
+        static std::vector<std::string> getFilesList(const std::string& path);
+        static std::vector<std::string> getDirectoriesList(const std::string& path);
 
-		static std::string getFileNameFromPath(std::string path);
-		static std::string getFileExtension(std::string fileName);
-        static std::string getPathToDirectoryFromFileName(std::string fileName);
+		static std::string getFileNameFromPath(const std::string& path);
+		static std::string getFileExtension(const std::string& fileName);
+        static std::string getPathToDirectoryFromFileName(const std::string& fileName);
 
-		static std::string getRelativePathToDir(std::string filePath, std::string dirPath);
+		static std::string getRelativePathToDir(const std::string& filePath, const std::string& dirPath);
 		static std::string getRelativePathToDirInGameDir(std::string filePath, std::string dirPath);
 		static bool isInPathSubdir(std::string filePath, std::string dirPath);
 
-		static void copyFile(std::string from, std::string to);
+		static void copyFile(const std::string& from, const std::string& to);
 
 };
 

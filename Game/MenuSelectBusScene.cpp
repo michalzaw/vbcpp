@@ -14,6 +14,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
+#include "../Utils/LocalizationSystem.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
@@ -187,7 +188,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
 	imageBackground->setPosition(startPosition.x, startPosition.y - windowHeight);
 
-	Label* labelTitle = _gui->addLabel(fontBoldItalic32, "KONFIGURACJA");
+	Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(CONFIGURATION));
 	labelTitle->setPosition(startPosition + glm::vec2(40, -40));
 	labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -272,7 +273,7 @@ void MenuSelectBusScene::createConfigurationPreviewWindow()
 		//glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 		glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
-		Label* labelTitle = _gui->addLabel(fontBoldItalic32, "KONFIGURACJA");
+		Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(CONFIGURATION));
 		labelTitle->setPosition(200, 300);
 		labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
