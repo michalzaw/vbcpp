@@ -40,5 +40,7 @@
 		<LoggerLevel>DEBUG</LoggerLevel>
 		<LoggerConsoleOutput>true</LoggerConsoleOutput>
 		<LoggerFileOutput>log.txt</LoggerFileOutput>
+
+		<Language>pl</Language>
     </Configuration>
 </Game>

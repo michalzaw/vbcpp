@@ -82,6 +82,8 @@ class GameConfig
         bool loggerConsoleOutput;
         std::string loggerFileOutput;
 
+        std::string language;
+
 		bool developmentMode;
 		std::string alternativeResourcesPath;
         std::string firstScene;

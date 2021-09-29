@@ -14,6 +14,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
+#include "../Utils/LocalizationSystem.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
@@ -130,7 +131,7 @@ void MenuSelectBusScene::showSelectedBus()
 	auto firstConfiguration = _buses2[_selectedBus]->predefinedConfigurations.begin();
 	if (firstConfiguration != _buses2[_selectedBus]->predefinedConfigurations.end())
 	{
-		_selectedBusConfigurationVariables = firstConfiguration->second;
+		_selectedBusConfigurationVariables = firstConfiguration->configuration;
 	}
 	else
 	{
@@ -187,7 +188,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
 	imageBackground->setPosition(startPosition.x, startPosition.y - windowHeight);
 
-	Label* labelTitle = _gui->addLabel(fontBoldItalic32, "KONFIGURACJA");
+	Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(CONFIGURATION));
 	labelTitle->setPosition(startPosition + glm::vec2(40, -40));
 	labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -198,9 +199,10 @@ void MenuSelectBusScene::createConfigurationWindow()
 	int y = -90;
 
 	std::vector<std::string> optionsConfigurations;
-	for (const auto& configurationName : _buses2[_selectedBus]->predefinedConfigurations)
+	for (const auto& predefinedConfiguration : _buses2[_selectedBus]->predefinedConfigurations)
 	{
-		optionsConfigurations.push_back(configurationName.first);
+		const std::string& displayName = _buses2[_selectedBus]->bus->getText(predefinedConfiguration.displayName);
+		optionsConfigurations.push_back(displayName);
 	}
 	Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400, pickerHeight);
 	picker1->setPosition(startPosition + glm::vec2(20, y - pickerMargin.y));
@@ -208,7 +210,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	picker1->setMargin(pickerMargin);
 	picker1->setOnValueChangedCallback([this](int index, const std::string& value)
 		{
-			_selectedBusConfigurationVariables = _buses2[_selectedBus]->predefinedConfigurations[value];
+			_selectedBusConfigurationVariables = _buses2[_selectedBus]->predefinedConfigurations[index].configuration;
 			_selectedBusConfigurationIndex = index;
 
 			_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
@@ -224,17 +226,23 @@ void MenuSelectBusScene::createConfigurationWindow()
 		y -= pickerHeight + pickerYSpace;
 		int pickerWidth = 150;
 
-		Label* label = _gui->addLabel(fontRegular26, variable.displayName);
+		Label* label = _gui->addLabel(fontRegular26, _buses2[_selectedBus]->bus->getText(variable.displayName));
 		label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 		label->setPosition(startPosition + glm::vec2(20, y));
 
-		Picker* picker = _gui->addPicker(fontRegular26, variable.values, pickerWidth, pickerHeight);
+		std::vector<std::string> optionsVariableValues;
+		for (const auto& variableValue : variable.values)
+		{
+			const std::string& displayValue = _buses2[_selectedBus]->bus->getText(variableValue.displayValue);
+			optionsVariableValues.push_back(displayValue);
+		}
+		Picker* picker = _gui->addPicker(fontRegular26, optionsVariableValues, pickerWidth, pickerHeight);
 		picker->setPosition(startPosition + glm::vec2(windowWidth - pickerWidth - 20, y - pickerMargin.y));
 		picker->setBackgroundColor(pickerBackgroundColor);
 		picker->setMargin(pickerMargin);
 		picker->setOnValueChangedCallback([this, variable](int index, const std::string& value)
 			{
-				_selectedBusConfigurationVariables[variable.name] = value;
+				_selectedBusConfigurationVariables[variable.name] = variable.values[index].value;
 
 				_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
 				_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
@@ -252,7 +260,17 @@ void MenuSelectBusScene::setValuesInVariablesPickers()
 	for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
 	{
 		const std::string& variableValue = _selectedBusConfigurationVariables[_buses2[_selectedBus]->availableVariables[i].name];
-		_busConfigurationVariablesPickers[i]->setSelectedOption(variableValue);
+
+		const auto findResult = std::find_if(
+			_buses2[_selectedBus]->availableVariables[i].values.begin(),
+			_buses2[_selectedBus]->availableVariables[i].values.end(),
+			[variableValue](const VariableValue& v) { return v.value == variableValue; }
+		);
+		if (findResult != _buses2[_selectedBus]->availableVariables[i].values.end())
+		{
+			const std::string& displayValue = _buses2[_selectedBus]->bus->getText(findResult->displayValue);
+			_busConfigurationVariablesPickers[i]->setSelectedOption(displayValue);
+		}
 	}
 }
 
@@ -272,7 +290,7 @@ void MenuSelectBusScene::createConfigurationPreviewWindow()
 		//glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 		glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
-		Label* labelTitle = _gui->addLabel(fontBoldItalic32, "KONFIGURACJA");
+		Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(CONFIGURATION));
 		labelTitle->setPosition(200, 300);
 		labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 

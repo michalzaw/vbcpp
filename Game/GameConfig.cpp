@@ -130,6 +130,10 @@ void GameConfig::loadGameConfig(const char* filename)
                         loggerFileOutput = std::string(text);
                     }
                 }
+                else if (strcmp(ename, "Language") == 0)
+                {
+                    language = std::string(configElement->GetText());
+                }
             }
         }
     }

@@ -72,6 +72,7 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
 
     loadBusDescription(busElement);
     loadAvailableVariables(busElement);
+    loadTexts(busElement);
 
     bool result = loadBusModules(busElement);
     if (!result)
@@ -135,6 +136,29 @@ void BusLoader::loadBusDescription(XMLElement* busElement)
         _bus->_busDescription.description = XmlUtils::getAttributeStringOptional(descriptionElement, "description");
         _bus->_busDescription.author = XmlUtils::getAttributeStringOptional(descriptionElement, "author");
         _bus->_busDescription.logo = _busPath + XmlUtils::getAttributeStringOptional(descriptionElement, "logo");
+    }
+}
+
+
+void BusLoader::loadTexts(XMLElement* busElement)
+{
+    XMLElement* textsElement = busElement->FirstChildElement("Texts");
+    if (textsElement != nullptr)
+    {
+        std::string path = XmlUtils::getAttributeStringOptional(textsElement, "path");
+        std::string defaultLanguage = XmlUtils::getAttributeStringOptional(textsElement, "defaultLanguage", LocalizationSystem::getGlobalInstance().getDefaultLanguage());
+
+        path = _busPath + path + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+        if (!FilesHelper::isDirectoryExists(path))
+            path = ResourceManager::getInstance().getAlternativeResourcePath() + path;
+#endif // DEVELOPMENT_RESOURCES
+
+        LOG_DEBUG("Loaded texts. Path: " + path + ", default language: " + defaultLanguage);
+
+        _bus->_texts.initialize(path, defaultLanguage);
+        _bus->_texts.setLanguage(LocalizationSystem::getGlobalInstance().getLanguage());
     }
 }
 

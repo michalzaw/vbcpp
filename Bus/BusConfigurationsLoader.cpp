@@ -68,7 +68,7 @@ namespace BusConfigurationsLoader
 	}
 
 
-	void loadAllBusPredefinedConfigurations(const std::string& busName, std::unordered_map<std::string, std::unordered_map<std::string, std::string>>& outPredefinedConfigurations,
+	void loadAllBusPredefinedConfigurations(const std::string& busName, std::vector<PredefinedConfiguration>& outPredefinedConfigurations,
 											const std::unordered_map<std::string, std::string>& variablesDefaultValues)
 	{
 		std::string configFileName = GameDirectories::BUSES + busName + "/" + CONFIG_FILENAME;
@@ -94,20 +94,25 @@ namespace BusConfigurationsLoader
 			configurationElement != nullptr;
 			configurationElement = configurationElement->NextSiblingElement("Configuration"))
 		{
-			const std::string name = XmlUtils::getAttributeString(configurationElement, "name");
+			PredefinedConfiguration predefinedConfiguration;
 
-			loadVariables(configurationElement, outPredefinedConfigurations[name]);
+			predefinedConfiguration.configurationName = XmlUtils::getAttributeString(configurationElement, "name");
+			predefinedConfiguration.displayName = XmlUtils::getAttributeString(configurationElement, "displayName");
+
+			loadVariables(configurationElement, predefinedConfiguration.configuration);
 
 			for (auto& variableDefault : variablesDefaultValues)
 			{
 				const std::string& variableDefaultName = variableDefault.first;
 				const std::string& variableDefaulValue = variableDefault.second;
 
-				if (outPredefinedConfigurations[name].find(variableDefaultName) == outPredefinedConfigurations[name].end())
+				if (predefinedConfiguration.configuration.find(variableDefaultName) == predefinedConfiguration.configuration.end())
 				{
-					outPredefinedConfigurations[name][variableDefaultName] = variableDefaulValue;
+					predefinedConfiguration.configuration[variableDefaultName] = variableDefaulValue;
 				}
 			}
+
+			outPredefinedConfigurations.push_back(predefinedConfiguration);
 		}
 	}
 }

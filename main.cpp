@@ -7,6 +7,7 @@
 #include "Game/TestScene.h"
 
 #include "Utils/Logger.h"
+#include "Utils/LocalizationSystem.h"
 
 
 int main()
@@ -24,6 +25,8 @@ int main()
 	Logger::init(getLogLevelFromString(gameConfig.loggerLevel), gameConfig.loggerConsoleOutput, !gameConfig.loggerFileOutput.empty(), gameConfig.loggerFileOutput);
 	LOG_INFO("Start game: VirtualBus Core++");
 
+	LocalizationSystem::getGlobalInstance().initialize("Data/texts/", "en");
+	LocalizationSystem::getGlobalInstance().setLanguage(gameConfig.language);
 
 	Game game;
 
