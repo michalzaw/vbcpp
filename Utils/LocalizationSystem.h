@@ -7,7 +7,7 @@
 #include <regex>
 
 
-class LocalizationSystem
+class LocalizationSystem final
 {
 	private:
 		static const std::regex FILE_NAME_PATTERN;
@@ -33,9 +33,11 @@ class LocalizationSystem
 
 		void initialize(const std::string& textsPath, const std::string& defaultLanguage);
 
+		std::string getDefaultLanguage();
 		const std::vector<std::string>& getAvailableLanguages();
 
 		void setLanguage(const std::string& language);
+		std::string getLanguage();
 
 		std::string getText(const std::string& id);
 

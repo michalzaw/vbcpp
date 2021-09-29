@@ -58,6 +58,7 @@ class BusLoader
         BusRaycast* loadBusRaycast(XMLElement* busElement);
         virtual void loadEngineAndGearbox(XMLElement* busElement);
         virtual void loadBusDescription(XMLElement* busElement);
+        virtual void loadTexts(XMLElement* busElement);
         virtual void loadAvailableVariables(XMLElement* busElement);
         virtual bool loadBusModules(XMLElement* busElement);
 

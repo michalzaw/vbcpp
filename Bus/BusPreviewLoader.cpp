@@ -1,6 +1,5 @@
 #include "BusPreviewLoader.h"
 
-#include "BusConfigurationsLoader.h"
 #include "BusRepaintLoader.h"
 
 #include "../Game/Directories.h"
@@ -32,12 +31,32 @@ void BusPreviewLoader::loadAvailableVariables(XMLElement* busElement)
             GameVariable variable;
             variable.name = XmlUtils::getAttributeString(variableElement, "name");
             variable.defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue");
-            variable.values = split(XmlUtils::getAttributeStringOptional(variableElement, "values"), ',');
             variable.displayName = XmlUtils::getAttributeStringOptional(variableElement, "displayName", variable.name);
             variable.description = XmlUtils::getAttributeStringOptional(variableElement, "description");
-            variable.defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue", variable.values[0]);
+
+            for (XMLElement* variableValueElement = variableElement->FirstChildElement("VariableValue");
+                 variableValueElement != nullptr;
+                 variableValueElement = variableValueElement->NextSiblingElement("VariableValue"))
+            {
+                VariableValue variableValue;
+                variableValue.value = XmlUtils::getAttributeString(variableValueElement, "value");
+                variableValue.displayValue = XmlUtils::getAttributeStringOptional(variableValueElement, "displayValue", variableValue.value);
+                const bool isDefaultValue = XmlUtils::getAttributeBoolOptional(variableValueElement, "default");
+
+                if (isDefaultValue)
+                {
+                    variable.defaultValue = variableValue.value;
+                }
+
+                variable.values.push_back(variableValue);
+            }
 
             _busPreview->availableVariables.push_back(variable);
+
+            if (variable.defaultValue.empty() && variable.values.size() > 0)
+            {
+                variable.defaultValue = variable.values[0].value;
+            }
 
             _variables[variable.name] = variable.defaultValue;
         }

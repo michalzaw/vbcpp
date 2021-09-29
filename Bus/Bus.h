@@ -8,6 +8,7 @@
 
 #include "../Utils/Gearbox.h"
 #include "../Utils/Engine.h"
+#include "../Utils/LocalizationSystem.h"
 
 #include "../Scene/SceneObject.h"
 
@@ -42,6 +43,8 @@ class Bus : public RefCounter
 		SoundComponent* _engineStopSoundSource;
 
         BusDescription _busDescription;
+
+        LocalizationSystem _texts;
 
     public:
         Bus()
@@ -145,6 +148,21 @@ class Bus : public RefCounter
         BusDescription& getBusDescription()
         {
             return _busDescription;
+        }
+
+        LocalizationSystem& getTexts()
+        {
+            return _texts;
+        }
+
+        std::string getText(const std::string& textValueOrId)
+        {
+            if (startsWith(textValueOrId, "$"))
+            {
+                return _texts.getText(textValueOrId.substr(1));
+            }
+
+            return textValueOrId;
         }
 
 };

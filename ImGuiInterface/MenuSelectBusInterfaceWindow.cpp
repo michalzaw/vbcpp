@@ -79,9 +79,9 @@ void MenuSelectBusInterfaceWindow::drawBusConfigurations()
 		{
 			static int selectedConfiguration = 0;
 			std::string configurationNames = "";
-			for (const auto& configurationName : _busPreview->predefinedConfigurations)
+			for (const auto& predefinedConfiguration : _busPreview->predefinedConfigurations)
 			{
-				configurationNames += configurationName.first + '\0';
+				configurationNames += predefinedConfiguration.configurationName + '\0';
 			}
 
 			ImGui::PushID("Configuration");
@@ -116,9 +116,9 @@ void MenuSelectBusInterfaceWindow::drawBusConfigurations()
 					int j = 0;
 					for (const auto& variableValue : variable.values)
 					{
-						variableValues += variableValue + '\0';
+						variableValues += variableValue.value + '\0';
 
-						if (variableValue == (*_selectedBusConfigurationVariables)[variable.name])
+						if (variableValue.value == (*_selectedBusConfigurationVariables)[variable.name])
 						{
 							selectedVariableValue = j;
 						}
@@ -129,7 +129,7 @@ void MenuSelectBusInterfaceWindow::drawBusConfigurations()
 					ImGui::SetNextItemWidth(400 - 200 - 8);
 					if (ImGui::Combo("", &selectedVariableValue, variableValues.c_str()))
 					{
-						(*_selectedBusConfigurationVariables)[variable.name] = _busPreview->availableVariables[i].values[selectedVariableValue];
+						(*_selectedBusConfigurationVariables)[variable.name] = _busPreview->availableVariables[i].values[selectedVariableValue].value;
 
 						_busPreview->setConfiguration(*_selectedBusConfigurationVariables);
 						_busPreview->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
@@ -224,16 +224,7 @@ void MenuSelectBusInterfaceWindow::drawStartButton()
 
 void MenuSelectBusInterfaceWindow::changeBusConfiguration(int index)
 {
-	int i = 0;
-	for (auto& configuration : _busPreview->predefinedConfigurations)
-	{
-		if (i == index)
-		{
-			(*_selectedBusConfigurationVariables) = configuration.second;
-		}
-
-		++i;
-	}
+	(*_selectedBusConfigurationVariables) = _busPreview->predefinedConfigurations[index].configuration;
 
 	_busPreview->setConfiguration(*_selectedBusConfigurationVariables);
 	_busPreview->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);

@@ -98,6 +98,12 @@ void LocalizationSystem::initialize(const std::string& textsPath, const std::str
 }
 
 
+std::string LocalizationSystem::getDefaultLanguage()
+{
+	return _defaultLanguage;
+}
+
+
 const std::vector<std::string>& LocalizationSystem::getAvailableLanguages()
 {
 	return _availableLanguages;
@@ -106,6 +112,11 @@ const std::vector<std::string>& LocalizationSystem::getAvailableLanguages()
 
 void LocalizationSystem::setLanguage(const std::string& language)
 {
+	if (language == _language)
+	{
+		return;
+	}
+
 	if (isVectorContains(_availableLanguages, language))
 	{
 		LOG_INFO("Selected language: " + language);
@@ -117,7 +128,15 @@ void LocalizationSystem::setLanguage(const std::string& language)
 		_language = _defaultLanguage;
 	}
 
+	_texts.clear();
+
 	loadTextsFromFile();
+}
+
+
+std::string LocalizationSystem::getLanguage()
+{
+	return _language;
 }
 
 
