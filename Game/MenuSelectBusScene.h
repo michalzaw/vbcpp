@@ -24,6 +24,7 @@ class MenuSelectBusScene final : public GameScene
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
 
+		std::vector<GUIObject*> _busConfigurationWindowElements;
 		std::vector<Picker*> _busConfigurationVariablesPickers;
 
 		void loadAvailableBusesNames();

@@ -2,4 +2,5 @@
 
 <Texts language="pl" displayName="Polski" >
 	<Text name="CONFIGURATION">KONFIGURACJA</Text>
+	<Text name="DEFAULT_BUS_CONFIGURATION">Domyślna</Text>
 </Texts>

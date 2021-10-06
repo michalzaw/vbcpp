@@ -34,6 +34,8 @@ class GUIManager
 
         GUIObject* getObject(unsigned int index);
 
+        void removeObject(GUIObject* object);
+
         void update(float deltaTime);
 
         //void renderAllObjects();

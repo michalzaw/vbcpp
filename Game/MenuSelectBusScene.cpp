@@ -143,6 +143,14 @@ void MenuSelectBusScene::showSelectedBus()
 	showBusLogo();
 
 	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
+
+	for (GUIObject* guiObject : _busConfigurationWindowElements)
+	{
+		_gui->removeObject(guiObject);
+	}
+	_busConfigurationWindowElements.clear();
+	_busConfigurationVariablesPickers.clear();
+	createConfigurationWindow();
 }
 
 
@@ -204,20 +212,33 @@ void MenuSelectBusScene::createConfigurationWindow()
 		const std::string& displayName = _buses2[_selectedBus]->bus->getText(predefinedConfiguration.displayName);
 		optionsConfigurations.push_back(displayName);
 	}
+	if (_buses2[_selectedBus]->predefinedConfigurations.empty())
+	{
+		optionsConfigurations.push_back(GET_TEXT(DEFAULT_BUS_CONFIGURATION));
+	}
 	Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400, pickerHeight);
 	picker1->setPosition(startPosition + glm::vec2(20, y - pickerMargin.y));
 	picker1->setBackgroundColor(pickerBackgroundColor);
 	picker1->setMargin(pickerMargin);
-	picker1->setOnValueChangedCallback([this](int index, const std::string& value)
-		{
-			_selectedBusConfigurationVariables = _buses2[_selectedBus]->predefinedConfigurations[index].configuration;
-			_selectedBusConfigurationIndex = index;
 
-			_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
-			_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
+	if (!_buses2[_selectedBus]->predefinedConfigurations.empty())
+	{
+		picker1->setOnValueChangedCallback([this](int index, const std::string& value)
+			{
+				_selectedBusConfigurationVariables = _buses2[_selectedBus]->predefinedConfigurations[index].configuration;
+				_selectedBusConfigurationIndex = index;
 
-			setValuesInVariablesPickers();
-		});
+				_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
+				_buses2[_selectedBus]->bus->getSceneObject()->setRotation(0.0f, degToRad(0.0f), 0.0f);
+
+				setValuesInVariablesPickers();
+			});
+	}
+
+	_busConfigurationWindowElements.push_back(imageBackground);
+	_busConfigurationWindowElements.push_back(labelTitle);
+	_busConfigurationWindowElements.push_back(imgLine);
+	_busConfigurationWindowElements.push_back(picker1);
 
 	for (int i = 0; i < _buses2[_selectedBus]->availableVariables.size(); ++i)
 	{
@@ -249,6 +270,9 @@ void MenuSelectBusScene::createConfigurationWindow()
 			});
 
 		_busConfigurationVariablesPickers.push_back(picker);
+
+		_busConfigurationWindowElements.push_back(label);
+		_busConfigurationWindowElements.push_back(picker);
 	}
 
 	setValuesInVariablesPickers();
@@ -413,7 +437,6 @@ void MenuSelectBusScene::initialize()
 
 	showSelectedBus();
 
-	createConfigurationWindow();
 	//createConfigurationPreviewWindow();
 }
 

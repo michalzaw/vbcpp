@@ -82,6 +82,19 @@ GUIObject* GUIManager::getObject(unsigned int index)
 }
 
 
+void GUIManager::removeObject(GUIObject* object)
+{
+    for (std::vector<GUIObject*>::iterator i = _objects.begin(); i != _objects.end(); ++i)
+    {
+        if (object == *i)
+        {
+            _objects.erase(i);
+            return;
+        }
+    }
+}
+
+
 void GUIManager::update(float deltaTime)
 {
     for (GUIObject* guiObject : _objects)
