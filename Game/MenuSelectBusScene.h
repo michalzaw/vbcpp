@@ -24,6 +24,7 @@ class MenuSelectBusScene final : public GameScene
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
 
+		std::vector<GUIObject*> _busDescriptionWindowElements;
 		std::vector<GUIObject*> _busConfigurationWindowElements;
 		std::vector<Picker*> _busConfigurationVariablesPickers;
 
@@ -39,6 +40,7 @@ class MenuSelectBusScene final : public GameScene
 
 		void showBusLogo();
 
+		void createBusDescriptionWindow();
 		void createConfigurationWindow();
 		void setValuesInVariablesPickers();
 		void createConfigurationPreviewWindow();

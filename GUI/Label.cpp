@@ -90,6 +90,20 @@ bool Label::buildTextData()
             }
         }
 
+        if (charIndex == static_cast<int>('\n'))
+        {
+            y -= static_cast<int>(_font->getPixelSize() * 1.3);
+            if (_maxHeight > 0 && -y > _maxHeight)
+            {
+                break;
+            }
+            if (x > _width)
+            {
+                _width = x;
+            }
+            x = 0;
+        }
+
         x += _font->getCharacterInfo(charIndex).advX - _font->getCharacterInfo(charIndex).bearingX;
     }
 

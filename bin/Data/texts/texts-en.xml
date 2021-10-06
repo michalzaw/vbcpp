@@ -2,5 +2,6 @@
 
 <Texts language="en" displayName="English" >
 	<Text name="CONFIGURATION">CONFIGURATION</Text>
+	<Text name="BUS_DESCRIPTION">BUS DESCRIPTION</Text>
 	<Text name="DEFAULT_BUS_CONFIGURATION">Default</Text>
 </Texts>

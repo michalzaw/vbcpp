@@ -144,12 +144,18 @@ void MenuSelectBusScene::showSelectedBus()
 
 	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
 
+	for (GUIObject* guiObject : _busDescriptionWindowElements)
+	{
+		_gui->removeObject(guiObject);
+	}
 	for (GUIObject* guiObject : _busConfigurationWindowElements)
 	{
 		_gui->removeObject(guiObject);
 	}
+	_busDescriptionWindowElements.clear();
 	_busConfigurationWindowElements.clear();
 	_busConfigurationVariablesPickers.clear();
+	createBusDescriptionWindow();
 	createConfigurationWindow();
 }
 
@@ -175,6 +181,42 @@ void MenuSelectBusScene::showBusLogo()
 }
 
 
+void MenuSelectBusScene::createBusDescriptionWindow()
+{
+	RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
+	RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 18);
+
+	int windowWidth = 440;
+	int windowHeight = 440;
+
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 325 + 40 + 30);
+
+	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
+	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
+	imageBackground->setPosition(startPosition.x, startPosition.y - windowHeight);
+
+	Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(BUS_DESCRIPTION));
+	labelTitle->setPosition(startPosition + glm::vec2(40, -40));
+	labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+	Image* imgLine = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
+	imgLine->setPosition(startPosition + glm::vec2(20, -50));
+	imgLine->setScale(200, 1);
+
+	Label* description = _gui->addLabel(fontRegular26);
+	description->setPosition(startPosition + glm::vec2(20, -90));
+	description->setMaxWidth(400);
+	description->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	description->setText(_buses2[_selectedBus]->bus->getBusDescription().description);
+
+	_busDescriptionWindowElements.push_back(imageBackground);
+	_busDescriptionWindowElements.push_back(labelTitle);
+	_busDescriptionWindowElements.push_back(imgLine);
+	_busDescriptionWindowElements.push_back(description);
+
+}
+
+
 void MenuSelectBusScene::createConfigurationWindow()
 {
 	RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
@@ -190,7 +232,7 @@ void MenuSelectBusScene::createConfigurationWindow()
 	int windowHeight = 90 + (pickerHeight + pickerYSpace) * 4 + 15;
 
 	//glm::vec2 startPosition = glm::vec2(650, 340);
-	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50);
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50 + 40 + 30);
 
 	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
@@ -457,10 +499,11 @@ void MenuSelectBusScene::initialize()
 										  ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)),
 										  ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32),
 										  "START");
-	buttonStart->setWidth(250);
+	buttonStart->setWidth(440);
 	buttonStart->setHeight(40);
 	buttonStart->setTextColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-	buttonStart->setPosition((_window->getWidth() - buttonStart->getWidth()) / 2.0f, 50);
+	//buttonStart->setPosition((_window->getWidth() - buttonStart->getWidth()) / 2.0f, 50);
+	buttonStart->setPosition(_window->getWidth() - buttonStart->getWidth() - 50, 50);
 	buttonStart->setOnClickCallback([this]()
 		{
 			startGame();
