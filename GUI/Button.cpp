@@ -6,7 +6,7 @@
 
 
 Button::Button(RTexture* texture, RTexture* textureHovered, RFont* font, const std::string& text)
-	: _label(nullptr)
+	: _label(nullptr), _width(texture->getSize().x), _height(texture->getSize().y)
 {
 	_image = new Image(texture);
 
@@ -18,6 +18,8 @@ Button::Button(RTexture* texture, RTexture* textureHovered, RFont* font, const s
 
 	_texture = texture;
 	_textureHovered = textureHovered != nullptr ? textureHovered : texture;
+
+	setAllElementsPositions();
 }
 
 
@@ -30,6 +32,8 @@ Button::Button(RTexture* texture, const UintRect& textureRect, RFont* font, cons
 		_label = new Label(font);
 		_label->setText(text);
 	}
+
+	setAllElementsPositions();
 }
 
 
@@ -40,15 +44,31 @@ Button::~Button()
 }
 
 
+void Button::setAllElementsPositions()
+{
+	_image->setPosition(_position);
+	_image->setScale((_width) / _image->getTexture()->getSize().x,
+					 (_height) / _image->getTexture()->getSize().y);
+
+	if (_label != nullptr)
+	{
+		_label->setPosition(_position.x + (_width - _label->getWidth()) / 2.0f,
+							_position.y + (_height - _label->getFont()->getPixelSize()) / 2.0f);
+	}
+}
+
+
 void Button::setPosition(glm::vec3 position)
 {
     GUIObject::setPosition(position);
 
-	_image->setPosition(position);
+	/*_image->setPosition(position);
 	if (_label != nullptr)
 	{
 		_label->setPosition(position);
-	}
+	}*/
+
+	setAllElementsPositions();
 }
 
 
@@ -61,6 +81,8 @@ void Button::setScale(glm::vec2 scale)
 	{
 		_label->setScale(scale);
 	}
+
+	setAllElementsPositions();
 }
 
 
@@ -73,6 +95,8 @@ void Button::setRotation(float angle)
 	{
 		_label->setRotation(angle);
 	}
+
+	setAllElementsPositions();
 }
 
 
@@ -80,11 +104,13 @@ void Button::move(glm::vec3 delta)
 {
 	GUIObject::move(delta);
 
-	_image->move(delta);
+	/*_image->move(delta);
 	if (_label != nullptr)
 	{
 		_label->move(delta);
-	}
+	}*/
+
+	setAllElementsPositions();
 }
 
 
@@ -97,6 +123,8 @@ void Button::scale(glm::vec2 delta)
 	{
 		_label->scale(delta);
 	}
+
+	setAllElementsPositions();
 }
 
 
@@ -108,6 +136,45 @@ void Button::rotate(float angle)
 	if (_label != nullptr)
 	{
 		_label->rotate(angle);
+	}
+
+	setAllElementsPositions();
+}
+
+
+void Button::setWidth(unsigned int width)
+{
+	_width = width;
+
+	setAllElementsPositions();
+}
+
+
+unsigned int Button::getWidth()
+{
+	return _width;
+}
+
+
+void Button::setHeight(unsigned int height)
+{
+	_height = height;
+
+	setAllElementsPositions();
+}
+
+
+unsigned int Button::getHeight()
+{
+	return _height;
+}
+
+
+void Button::setTextColor(glm::vec4 color)
+{
+	if (_label != nullptr)
+	{
+		_label->setColor(color);
 	}
 }
 

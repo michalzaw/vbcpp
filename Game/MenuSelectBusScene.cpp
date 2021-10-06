@@ -362,6 +362,15 @@ void MenuSelectBusScene::createConfigurationPreviewWindow()
 }
 
 
+void MenuSelectBusScene::startGame()
+{
+	std::unordered_map<std::string, std::string> params;
+	MainGameScene::createSceneParams(params, _buses2[_selectedBus]->busName, _selectedBusRepaintName, _selectedBusConfigurationVariables);
+
+	setNextGameScene(GameScenesNames::MAIN_SCENE, true, params);
+}
+
+
 void MenuSelectBusScene::initialize()
 {
 	loadAvailableBusesNames();
@@ -438,6 +447,24 @@ void MenuSelectBusScene::initialize()
 	showSelectedBus();
 
 	//createConfigurationPreviewWindow();
+
+	
+	/*Button* buttonStart = _gui->addButton(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)),
+										  ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)),
+										  ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Bold.ttf", 20),
+										  "START");*/
+	Button* buttonStart = _gui->addButton(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)),
+										  ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)),
+										  ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32),
+										  "START");
+	buttonStart->setWidth(250);
+	buttonStart->setHeight(40);
+	buttonStart->setTextColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	buttonStart->setPosition((_window->getWidth() - buttonStart->getWidth()) / 2.0f, 50);
+	buttonStart->setOnClickCallback([this]()
+		{
+			startGame();
+		});
 }
 
 
@@ -474,10 +501,7 @@ void MenuSelectBusScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_ENTER))
 	{
-		std::unordered_map<std::string, std::string> params;
-		MainGameScene::createSceneParams(params, _buses2[_selectedBus]->busName, _selectedBusRepaintName, _selectedBusConfigurationVariables);
-
-		setNextGameScene(GameScenesNames::MAIN_SCENE, true, params);
+		startGame();
 	}
 }
 

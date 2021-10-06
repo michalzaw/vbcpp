@@ -18,7 +18,12 @@ class Button final : public GUIObject
 		RTexture* _texture;
 		RTexture* _textureHovered;
 
+		unsigned int _width;
+		unsigned int _height;
+
 		std::function<void(void)> _onClickCallback;
+
+		void setAllElementsPositions();
 
 		inline void changedVerticesTransformMatrixParameters() override
 		{
@@ -52,6 +57,14 @@ class Button final : public GUIObject
 		void move(glm::vec3 delta) override;
 		void scale(glm::vec2 delta) override;
 		void rotate(float angle) override;
+
+		void setWidth(unsigned int width);
+		unsigned int getWidth();
+
+		void setHeight(unsigned int height);
+		unsigned int getHeight();
+
+		void setTextColor(glm::vec4 color);
 
 		glm::vec2 getRealSize();
 

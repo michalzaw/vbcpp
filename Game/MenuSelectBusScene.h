@@ -43,6 +43,8 @@ class MenuSelectBusScene final : public GameScene
 		void setValuesInVariablesPickers();
 		void createConfigurationPreviewWindow();
 
+		void startGame();
+
 	public:
 		explicit MenuSelectBusScene(Window* window);
 		~MenuSelectBusScene();
