@@ -5,7 +5,7 @@
 
 Label::Label(RFont* font)
     : _font(font),
-    _text(""), _width(0),
+    _text(""), _width(0), _height(0),
     _maxWidth(0), _maxHeight(0)
 {
     _color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -88,6 +88,12 @@ bool Label::buildTextData()
                     _width = x;
                 }
             }
+        }
+
+        int charHeight = _font->getCharacterInfo(charIndex).bearingY;
+        if (charHeight > _height)
+        {
+            _height = charHeight;
         }
 
         if (charIndex == static_cast<int>('\n'))
@@ -188,6 +194,12 @@ std::string Label::getText()
 unsigned int Label::getWidth()
 {
     return _width * _scale.x;
+}
+
+
+unsigned int Label::getHeight()
+{
+    return _height * _scale.x;
 }
 
 

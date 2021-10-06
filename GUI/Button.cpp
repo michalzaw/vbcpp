@@ -52,8 +52,8 @@ void Button::setAllElementsPositions()
 
 	if (_label != nullptr)
 	{
-		_label->setPosition(_position.x + (_width - _label->getWidth()) / 2.0f,
-							_position.y + (_height - _label->getFont()->getPixelSize()) / 2.0f);
+		_label->setPosition(_position.x + (_width - _label->getWidth()) / 2,
+							_position.y + (_height - _label->getHeight()) / 2);
 	}
 }
 

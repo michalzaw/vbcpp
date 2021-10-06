@@ -18,6 +18,7 @@ class Label : public GUIObject
         std::vector<unsigned int> _unicodeText;
 
         unsigned int _width;
+        unsigned int _height;
 
         unsigned int _maxWidth;
         unsigned int _maxHeight;
@@ -52,6 +53,7 @@ class Label : public GUIObject
         RFont* getFont();
         std::string getText();
         unsigned int getWidth();
+        unsigned int getHeight();
         unsigned int getMaxWidth();
         unsigned int getMaxHeight();
 
