@@ -41,19 +41,25 @@ MenuSelectBusScene::~MenuSelectBusScene()
 
 void MenuSelectBusScene::loadAvailableBusesNames()
 {
-	/*
+	
 	_availableBusesNames = FilesHelper::getDirectoriesList(GameDirectories::BUSES);
 #ifdef DEVELOPMENT_RESOURCES
 	std::vector<std::string> availableBusesDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::BUSES);
 	_availableBusesNames.insert(_availableBusesNames.end(), availableBusesDev.begin(), availableBusesDev.end());
 #endif // DEVELOPMENT_RESOURCES
-	*/
 
-	//_availableBusesNames.push_back("MAN");
-	_availableBusesNames.push_back("neoplan");
-	_availableBusesNames.push_back("Solaris_IV");
-	_availableBusesNames.push_back("Solaris_IV_PBR");
-	_availableBusesNames.push_back("h9_raycast");
+	// todo: remove
+	for (std::vector<std::string>::iterator i = _availableBusesNames.begin(); i != _availableBusesNames.end();)
+	{
+		if (*i == "h9" || *i == "i211" || *i == "urbino" || *i == "volvo" || *i == "h9_PBR")
+		{
+			i = _availableBusesNames.erase(i);
+		}
+		else
+		{
+			++i;
+		}
+	}
 }
 
 
@@ -559,10 +565,6 @@ void MenuSelectBusScene::initialize()
 	{
 		addBus(busName);
 	}
-
-	//_buses[0]->setPosition(0.0f, -1.5f, 0.0f);
-	_buses2[2]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
-	_buses2[1]->bus->getSceneObject()->setPosition(0.0f, -1.5f, 0.0f);
 
 	_menuInterfaceWindow = new MenuSelectBusInterfaceWindow(&_selectedBusConfigurationVariables, _selectedBusRepaintName, _sceneManager, true);
 	_imGuiInterface->addWindow(_menuInterfaceWindow);
