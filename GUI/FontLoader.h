@@ -10,23 +10,33 @@
 class FontLoader
 {
     private:
-        FT_Library library;
-        FT_Face face;
-        RFont* font;
+        static const unsigned int MAX_TEXTURE_WIDTH = 4096;
+        static const unsigned int CHAR_MARGIN = 2;
 
-        unsigned char** _textureData;
-        unsigned int _textureDataSize;
+        FT_Library _library;
+        FT_Face _face;
+        RFont* _font;
+
+        std::vector<unsigned char*> _textureData;
         int _textureWidth;
         int _textureHeight;
 
-        void loadChar(int index);
+        int _currentCharLineWidth;
+        int _currentLineIndex;
+        int _currentLineY;
+        std::vector<int> _linesHeights;
+
+        void loadChar(unsigned long charCode, unsigned int glyphIndex);
+        void calculateTextureHeight();
         void releaseTextureData();
 
     public:
         FontLoader();
         ~FontLoader();
 
-        RFont* loadFont(const char* fontName, int pixelSize = 32);
+        RFont* loadFont(const std::string& fontName, int pixelSize = 32);
+
+        static std::string createFontResourceName(const char* fontName, int pixelSize);
 };
 
 

@@ -22,13 +22,13 @@ class BusStopSystem
         BusStopComponent* _currentBusStop;
         float _distanceToCurrentBusStop;
 
+    public:
         BusStopSystem()
         {
             _currentBusStop = NULL;
             _distanceToCurrentBusStop = 0.0f;
         }
 
-    public:
         ~BusStopSystem()
         {
             for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
@@ -36,8 +36,6 @@ class BusStopSystem
                 delete *i;
             }
         }
-
-        static BusStopSystem& getInstance();
 
         BusStopComponent* addBusStopComponent(std::string name)
         {

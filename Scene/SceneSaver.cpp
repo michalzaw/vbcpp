@@ -29,7 +29,7 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 	std::vector<std::string> textures = split(path, ';');
 
 	if (textures.size() != 6)
-		Logger::error("Scene saver: Invalid skybox textures path");
+		LOG_ERROR("Scene saver: Invalid skybox textures path");
 
 	std::string result = FilesHelper::getRelativePathToDir(textures[0], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[1], GameDirectories::SKYBOX) + "," +
 						 FilesHelper::getRelativePathToDir(textures[2], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[3], GameDirectories::SKYBOX) + "," +
@@ -112,7 +112,7 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 
 	if (renderObject)
 	{
-		std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
+		std::string skyboxTexturePaths = renderObject->getModel()->getMaterial(0)->diffuseTexture->getPath();
 		skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
 	}
 }
@@ -224,7 +224,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	_dirPath = GameDirectories::MAPS + name + "/";
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
-	printf("Map path: %s\n", fullPath.c_str());
+	LOG_INFO("Map path: " + fullPath);
 
 	XMLDocument doc;
 
@@ -294,7 +294,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		}
 	}
 
-	XMLError err = doc.SaveFile(fullPath.c_str());
+	XMLError errorCode = doc.SaveFile(fullPath.c_str());
 
-	printf("Error code: %d\n", err);
+	LOG_INFO(LOG_VARIABLE((int)errorCode));
 }

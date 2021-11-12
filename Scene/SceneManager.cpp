@@ -11,15 +11,17 @@ using namespace tinyxml2;
 #include "../Graphics/LoadTerrainModel.h"
 
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
 
-SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _physicsManager(pMgr), _soundManager(sndMgr)
+SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
+    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Create SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
     _soundManager->grab();
+
+    _gameLogicSystem = new GameLogicSystem;
+    _busStopSystem = new BusStopSystem;
 
     _busStart.position = glm::vec3(0,3,0);
     _busStart.rotation = glm::vec3(0,0,0);
@@ -33,9 +35,7 @@ SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
 
 SceneManager::~SceneManager()
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Destroy SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Destroy SceneManager");
 
 
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
@@ -45,6 +45,10 @@ SceneManager::~SceneManager()
 
     _physicsManager->drop();
     _soundManager->drop();
+    delete _graphicsManager;
+
+    delete _gameLogicSystem;
+    delete _busStopSystem;
 
     //delete _graphicsManager;
     //delete _physicsManager;

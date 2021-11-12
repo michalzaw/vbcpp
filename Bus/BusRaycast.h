@@ -99,6 +99,8 @@ class BusRaycast : public Bus
 
         void update(float deltaTime) override;
 
+        void replaceMaterialsByName(std::vector<Material*>& altMaterials) override;
+
         void doorOpen(char door);
         void doorClose(char door);
         void doorOpenClose(char door);

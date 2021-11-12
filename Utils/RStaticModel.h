@@ -169,6 +169,37 @@ struct StaticModelNode
         return NULL;
     }
 
+    StaticModelNode* getNodeByName(const std::string& name)
+    {
+        for (StaticModelNode* child : children)
+        {
+            if (child->name == name)
+            {
+                return child;
+            }
+            else
+            {
+                StaticModelNode* node = child->getNodeByName(name);
+                if (node != nullptr)
+                {
+                    return node;
+                }
+            }
+        }
+
+        return nullptr;
+    }
+
+    void getVerticesArray(std::vector<glm::vec3>& vertices)
+    {
+        for (int i = 0; i < meshesCount; ++i)
+        {
+            for (int j = 0; j < meshes[i].verticesCount; ++j)
+            {
+                vertices.push_back(meshes[i].vertices[j].position);
+            }
+        }
+    }
 };
 
 
@@ -177,9 +208,7 @@ class RStaticModel : public Resource
     private:
         StaticModelNode*_rootNode;
 
-
-        Material*       _materials;
-        unsigned int    _materialsCount;
+        std::vector<Material*> _materials;
 
         glm::vec3*      _collisionMesh;
         unsigned int    _collisionMeshSize;
@@ -192,7 +221,7 @@ class RStaticModel : public Resource
         void calculateAABB();
 
     public:
-        RStaticModel(string path, StaticModelNode* rootNode, Material* materials, unsigned int materialsCount,
+        RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
                      GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
@@ -204,7 +233,9 @@ class RStaticModel : public Resource
         ~RStaticModel();
 
         StaticModelNode* getRootNode();
+        StaticModelNode* getNodeByName(const std::string& name);
 
+        std::vector<Material*>& getMaterials();
         Material*       getMaterial(unsigned int i);
         unsigned int    getMaterialsCount();
 

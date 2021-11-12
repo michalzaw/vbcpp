@@ -35,19 +35,7 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* enviro
 	if (GameConfig::getInstance().pbrSupport)
 	{
 		initIrradianceFramebufferAndShader();
-		
-		if (_irradianceMap == NULL)
-			generateIrradianceMap();
-		
-		if (_specularIrradianceMap == NULL)
-			generatePrefilteredEnvMap();
 	}
-
-	if (_irradianceMap == NULL)
-		_irradianceMap = _environmentMap;
-
-	if (_specularIrradianceMap == NULL)
-		_specularIrradianceMap = _environmentMap;
 }
 
 
@@ -76,17 +64,19 @@ void EnvironmentCaptureComponent::initIrradianceFramebufferAndShader()
 
 	_irradianceFramebuffer = OGLDriver::getInstance().createFramebuffer();
 	_irradianceFramebuffer->addCubeMapTexture(TF_RGB_16F, 32);
+	OGLDriver::getInstance().registerFramebufferForInitialization(_irradianceFramebuffer);
 
 	_irradianceShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/irradiance.frag");
 
 
 	_prefilterEnvMapFramebuffer = OGLDriver::getInstance().createFramebuffer();
 	_prefilterEnvMapFramebuffer->addCubeMapTexture(TF_RGBA_16F, 128, true);
+	OGLDriver::getInstance().registerFramebufferForInitialization(_prefilterEnvMapFramebuffer);
 
 	_prefilterEnvMapShader = ResourceManager::getInstance().loadShader("Shaders/pbr/irradiance.vert", "Shaders/pbr/prefilterEnvironment.frag");
 
 
-	_cube = new Cube(1, Material());
+	_cube = new Cube(1, new Material);
 	_cube->init();
 }
 
@@ -122,7 +112,7 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-		StaticModelMesh* cubeMesh = _cube->getModelRootNode()->getMesh(0);
+		ModelNodeMesh* cubeMesh = _cube->getModelRootNode()->getMesh(0);
 		cubeMesh->vbo->bind();
 		cubeMesh->ibo->bind();
 
@@ -185,7 +175,7 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-			StaticModelMesh * cubeMesh = _cube->getModelRootNode()->getMesh(0);
+			ModelNodeMesh * cubeMesh = _cube->getModelRootNode()->getMesh(0);
 			cubeMesh->vbo->bind();
 			cubeMesh->ibo->bind();
 
@@ -210,6 +200,25 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 RTextureCubeMap* EnvironmentCaptureComponent::getEnvironmentMap()
 {
     return _environmentMap;
+}
+
+
+void EnvironmentCaptureComponent::generateRequiredPbrMaps()
+{
+	if (GameConfig::getInstance().pbrSupport)
+	{
+		if (_irradianceMap == NULL)
+			generateIrradianceMap();
+
+		if (_specularIrradianceMap == NULL)
+			generatePrefilteredEnvMap();
+	}
+
+	if (_irradianceMap == NULL)
+		_irradianceMap = _environmentMap;
+
+	if (_specularIrradianceMap == NULL)
+		_specularIrradianceMap = _environmentMap;
 }
 
 

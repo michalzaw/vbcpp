@@ -40,7 +40,7 @@ btVector3 XMLstringToBtVec3(const char* xmlstring);
 inline int next_p2(int n) { int res = 1; while (res < n) res <<= 1; return res; }
 
 template <typename T>
-inline bool isVectorContains(std::vector<T>& vector, T& element)
+inline bool isVectorContains(const std::vector<T>& vector, const T& element)
 {
     return std::find(vector.begin(), vector.end(), element) != vector.end();
 }

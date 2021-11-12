@@ -7,6 +7,7 @@ uniform sampler2D texture1;
 out vec4 Color;
 
 uniform float exposure;
+uniform float visibility;
 
 
 #ifdef REINHARD
@@ -47,6 +48,6 @@ void main()
 	
 	// gamma correction;
 	float gamma = 2.2;
-    Color.rgb = pow(resultColor, vec3(1.0 / gamma));
+	Color.rgb = pow(resultColor, vec3(1.0 / gamma)) * visibility;
 	Color.a = 1.0f;
 }

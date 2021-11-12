@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<Texts language="pl" displayName="Polski" >
+	<Text name="CONFIGURATION">KONFIGURACJA</Text>
+	<Text name="BUS_DESCRIPTION">OPIS AUTOBUSU</Text>
+	<Text name="DEFAULT_BUS_CONFIGURATION">Domyślna</Text>
+</Texts>

@@ -146,14 +146,19 @@ void saveMaterial(XMLElement* materialsElement, XMLDocument& doc, Material* mate
 		matElement->SetAttribute("mirror_name", material->mirrorName.c_str());
 	}
 
+	if (material->requireSeparateInstance)
+	{
+		matElement->SetAttribute("requireSeparateInstance", "true");
+	}
+
 	materialsElement->InsertEndChild(matElement);
 }
 
 namespace MaterialSaver
 {
-	void saveMaterials(std::string fileName, Material* materials, unsigned int materialsCount, std::string texPath)
+	void saveMaterials(std::string fileName, std::vector<Material*>& materials, std::string texPath)
 	{
-		Logger::info("Saving materials. Path: " + fileName);
+		LOG_INFO("Saving materials. Path: " + fileName);
 		XMLDocument doc;
 
 		XMLDeclaration* declaration = doc.NewDeclaration();
@@ -162,14 +167,14 @@ namespace MaterialSaver
 		XMLElement* rootNode = doc.NewElement(XML_MATERIAL_ROOT);
 		doc.InsertEndChild(rootNode);
 
-		for (int i = 0; i < materialsCount; ++i)
+		for (int i = 0; i < materials.size(); ++i)
 		{
-			saveMaterial(rootNode, doc, &materials[i], texPath);
+			saveMaterial(rootNode, doc, materials[i], texPath);
 		}
 
 		XMLError err = doc.SaveFile(fileName.c_str());
 
-		Logger::info("Saved file with code: " + err);
+		LOG_INFO("Saved file with code: " + err);
 	}
 
 
@@ -243,7 +248,6 @@ namespace MaterialSaver
 			matElement->SetAttribute("shininess", shininessStr.c_str());
 
 			std::string transparencyStr = toString(opacity);
-			std::cout << transparencyStr.c_str() << " " << opacity << std::endl;
 			matElement->SetAttribute("transparency", transparencyStr.c_str());
 
 			std::string offsetStr = "0,0";//toString(material->texture1_map.offset[0]) + "," + toString(material->texture1_map.offset[1]);

@@ -118,10 +118,14 @@ class Renderer
     private:
         bool _isInitialized;
 
+		GraphicsManager* _graphicsManager;
+
         bool _alphaToCoverage;
 
         float _exposure;
 		ToneMappingType _toneMappingType;
+
+		float _sceneVisibility;
 
 		TextureFormat _framebufferTextureFormat;
         bool _msaaAntialiasing;
@@ -167,6 +171,8 @@ class Renderer
 
 		RTexture2D* _brdfLutTexture;
 
+		bool _requiredRebuildStaticLighting;
+
 
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
@@ -199,6 +205,10 @@ class Renderer
 
         void createRenderDatasForShadowMap(ShadowMap* shadowMap);
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
+		void clearRenderDatasForShadowMap();
+
+
+		void rebuildStaticLightingInternal();
 
         Renderer();
 
@@ -216,10 +226,14 @@ class Renderer
 
         void init(unsigned int screenWidth, unsigned int screenHeight);
 
+		void setGraphicsManager(GraphicsManager* graphicsManager);
+
         void setAlphaToCoverage(bool isEnable);
         bool isAlphaToCoverageEnable();
         void setExposure(float exposure);
         float getExposure();
+		void setSceneVisibility(float visibility);
+		float getSceneVisibility();
 		void setToneMappingType(ToneMappingType type);
 		ToneMappingType getToneMappingType();
 		void setFramebufferTextureFormat(TextureFormat format);
@@ -236,6 +250,7 @@ class Renderer
         void unregisterShadowMap(ShadowMap* shadowMap);
 
         void setCurrentMainCamera(CameraStatic* camera);
+		CameraStatic* getCurrentMainCamera();
 
         void setDayNightRatio(float ratio);
         float getDayNightRatio();
@@ -249,6 +264,7 @@ class Renderer
 		VBO* getQuadVbo();
 
 		void bakeStaticShadows();
+		void rebuildStaticLighting();
 
         void renderAll();
         void renderDepth(RenderData* renderData);

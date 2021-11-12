@@ -2,130 +2,185 @@
 
 #include "GUIObject.h"
 
+#include "../Utils/Logger.h"
+#include "../Utils/Strings.h"
+
 
 FontLoader::FontLoader()
+    : _face(nullptr), _font(nullptr)
 {
-    FT_Init_FreeType(&library);
-
-    face = NULL;
-    font = NULL;
+    FT_Init_FreeType(&_library);
 }
 
 
 FontLoader::~FontLoader()
 {
-    FT_Done_FreeType(library);
+    FT_Done_FreeType(_library);
 }
 
 
-void FontLoader::loadChar(int index)
+void FontLoader::loadChar(unsigned long charCode, unsigned int glyphIndex)
 {
-    FT_Load_Glyph(face, FT_Get_Char_Index(face, index), FT_LOAD_DEFAULT);
-    FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
+    FT_Load_Glyph(_face, glyphIndex, FT_LOAD_DEFAULT);
+    FT_Render_Glyph(_face->glyph, FT_RENDER_MODE_NORMAL);
 
-    FT_Bitmap* bitmap = &face->glyph->bitmap;
+    FT_Bitmap* bitmap = &_face->glyph->bitmap;
 
     int width = bitmap->width;
     int height = bitmap->rows;
 
-    _textureData[index] = new unsigned char[width * height];
-    ++_textureDataSize;
+    unsigned char* textureData = new unsigned char[width * height];
     for (int i = 0; i < height; ++i)
     {
         for (int j = 0; j < width; ++j)
         {
-            _textureData[index][i * width + j] = bitmap->buffer[(height - i - 1) * width + j];
+            textureData[i * width + j] = bitmap->buffer[(height - i - 1) * width + j];
         }
     }
+    _textureData.push_back(textureData);
 
-    font->_characterInfos[index].advX = face->glyph->advance.x >> 6;
-    font->_characterInfos[index].advY = (face->glyph->metrics.height - face->glyph->metrics.horiBearingY) >> 6;
-    font->_characterInfos[index].bearingX = face->glyph->metrics.horiBearingX >> 6;
-    font->_characterInfos[index].bearingY = face->glyph->metrics.horiBearingY >> 6;
-    font->_characterInfos[index].width = face->glyph->metrics.width >> 6;
-    font->_characterInfos[index].height = face->glyph->metrics.height >> 6;
+    if (_currentCharLineWidth + width + CHAR_MARGIN > MAX_TEXTURE_WIDTH)
+    {
+        _currentLineY += _linesHeights[_currentLineIndex] + CHAR_MARGIN;
+        ++_currentLineIndex;
+        _linesHeights.push_back(0);
+
+        _textureWidth = std::max(_textureWidth, _currentCharLineWidth);
+
+        _currentCharLineWidth = 0;
+    }
+
+    _font->_characterInfos[charCode].advX = _face->glyph->advance.x >> 6;
+    _font->_characterInfos[charCode].advY = (_face->glyph->metrics.height - _face->glyph->metrics.horiBearingY) >> 6;
+    _font->_characterInfos[charCode].bearingX = _face->glyph->metrics.horiBearingX >> 6;
+    _font->_characterInfos[charCode].bearingY = _face->glyph->metrics.horiBearingY >> 6;
+    _font->_characterInfos[charCode].width = _face->glyph->metrics.width >> 6;
+    _font->_characterInfos[charCode].height = _face->glyph->metrics.height >> 6;
+
+    _font->_characterInfos[charCode].x = _currentCharLineWidth;
+    _font->_characterInfos[charCode].y = _currentLineY;
+
+    _currentCharLineWidth += _font->_characterInfos[charCode].width + CHAR_MARGIN;
+    _linesHeights[_currentLineIndex] = std::max(_linesHeights[_currentLineIndex], _font->_characterInfos[charCode].height);
+}
 
 
-    _textureWidth += font->_characterInfos[index].width;
-    _textureHeight = std::max(_textureHeight, font->_characterInfos[index].height);
-
+void FontLoader::calculateTextureHeight()
+{
+    for (int i = 0; i < _linesHeights.size(); ++i)
+    {
+        _textureHeight += _linesHeights[i];
+    }
 }
 
 
 void FontLoader::releaseTextureData()
 {
-    for (int i = 0; i < _textureDataSize; ++i)
+    for (int i = 0; i < _textureData.size(); ++i)
     {
         delete[] _textureData[i];
     }
-
-    delete[] _textureData;
 }
 
 
-RFont* FontLoader::loadFont(const char* fontName, int pixelSize)
+RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
 {
-    bool result = FT_New_Face(library, fontName, 0, &face);
+    LOG_INFO("Loading font: " + fontName);
+
+    if (pixelSize <= 0)
+    {
+        LOG_ERROR("Invalid pixelSize");
+        return nullptr;
+    }
+
+    bool result = FT_New_Face(_library, fontName.c_str(), 0, &_face);
     if (result)
     {
-        return NULL;
+        LOG_ERROR("Cannot load font: " + fontName);
+        return nullptr;
     }
 
-    FT_Set_Pixel_Sizes(face, pixelSize, pixelSize);
+    FT_Select_Charmap(_face, FT_ENCODING_UNICODE);
+    FT_Set_Pixel_Sizes(_face, pixelSize, pixelSize);
 
-
-    font = new RFont(fontName);
-    font->_vbo = new VBO(1024 * sizeof(GUIVertex));
-
-    _textureData = new unsigned char*[256];
-    _textureDataSize = 0;
     _textureWidth = _textureHeight = 0;
+    _currentCharLineWidth = 0;
+    _currentLineIndex = 0;
+    _currentLineY = 0;
+    _linesHeights.push_back(0);
 
-    for (int i = 0; i < 256; ++i)
+    _font = new RFont(createFontResourceName(fontName.c_str(), pixelSize), pixelSize);
+
+    int charsCount = 0;
+    unsigned int glyphIndex;
+    unsigned long charCode = FT_Get_First_Char(_face, &glyphIndex);
+    while (glyphIndex != 0)
     {
-        loadChar(i);
+        loadChar(charCode, glyphIndex);
+
+        charCode = FT_Get_Next_Char(_face, charCode, &glyphIndex);
+        ++charsCount;
     }
+    LOG_INFO("Loaded " + Strings::toString(charsCount) + " chars");
+
+    calculateTextureHeight();
 
     // Create texture
+    GLint initialUnpackAlignment;
+    glGetIntegerv(GL_UNPACK_ALIGNMENT, &initialUnpackAlignment);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
     _textureWidth = next_p2(_textureWidth);
     _textureHeight = next_p2(_textureHeight);
-    font->_characterTexture = new RTexture2D(TF_DEPTH_COMPONENT, glm::uvec2(_textureWidth, _textureHeight));
-    font->_characterTexture->setFiltering(TFM_LINEAR, TFM_LINEAR);
-    font->_characterTexture->setClampMode(TCM_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, GL_LUMINANCE);
 
-    // Add data to texture and create vbo
-    int w = 0;
-    for (int i = 0; i < 128; ++i)
+    _font->_characterTexture = new RTexture2D(TF_DEPTH_COMPONENT, glm::uvec2(_textureWidth, _textureHeight));
+    _font->_characterTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
+    _font->_characterTexture->setClampMode(TCM_CLAMP_TO_EDGE);
+
+    _font->_vbo = new VBO(charsCount * 4 * sizeof(GUIVertex));
+
+    charCode = FT_Get_First_Char(_face, &glyphIndex);
+    int index = 0;
+    while (glyphIndex != 0)
     {
-        font->_characterTexture->setTexSubImage(_textureData[i], w, 0, font->_characterInfos[i].width, font->_characterInfos[i].height);
+        _font->_characterTexture->setTexSubImage(_textureData[index], _font->_characterInfos[charCode].x, _font->_characterInfos[charCode].y, _font->_characterInfos[charCode].width, _font->_characterInfos[charCode].height);
 
         GUIVertex vertices[4];
-        vertices[0].position = glm::vec3(0.0f, static_cast<float>(-font->_characterInfos[i].advY + font->_characterInfos[i].height), 0.0f);
-        vertices[1].position = glm::vec3(0.0f, static_cast<float>(-font->_characterInfos[i].advY), 0.0f);
-        vertices[2].position = glm::vec3(static_cast<float>(font->_characterInfos[i].width), static_cast<float>(-font->_characterInfos[i].advY + font->_characterInfos[i].height), 0.0f);
-        vertices[3].position = glm::vec3(static_cast<float>(font->_characterInfos[i].width), static_cast<float>(-font->_characterInfos[i].advY), 0.0f);
+        vertices[0].position = glm::vec3(0.0f, static_cast<float>(-_font->_characterInfos[charCode].advY + _font->_characterInfos[charCode].height), 0.0f);
+        vertices[1].position = glm::vec3(0.0f, static_cast<float>(-_font->_characterInfos[charCode].advY), 0.0f);
+        vertices[2].position = glm::vec3(static_cast<float>(_font->_characterInfos[charCode].width), static_cast<float>(-_font->_characterInfos[charCode].advY + _font->_characterInfos[charCode].height), 0.0f);
+        vertices[3].position = glm::vec3(static_cast<float>(_font->_characterInfos[charCode].width), static_cast<float>(-_font->_characterInfos[charCode].advY), 0.0f);
 
-        vertices[0].texCoord = glm::vec2(static_cast<float>(w) / _textureWidth, static_cast<float>(font->_characterInfos[i].height) / _textureHeight);
-        vertices[1].texCoord = glm::vec2(static_cast<float>(w) / _textureWidth, 0.0f);
-        vertices[2].texCoord = glm::vec2(static_cast<float>(w + font->_characterInfos[i].width) / _textureWidth, static_cast<float>(font->_characterInfos[i].height) / _textureHeight);
-        vertices[3].texCoord = glm::vec2(static_cast<float>(w + font->_characterInfos[i].width) / _textureWidth, 0.0f);
+        vertices[0].texCoord = glm::vec2(static_cast<float>(_font->_characterInfos[charCode].x) / _textureWidth, static_cast<float>(_font->_characterInfos[charCode].y + _font->_characterInfos[charCode].height) / _textureHeight);
+        vertices[1].texCoord = glm::vec2(static_cast<float>(_font->_characterInfos[charCode].x) / _textureWidth, static_cast<float>(_font->_characterInfos[charCode].y) / _textureHeight);
+        vertices[2].texCoord = glm::vec2(static_cast<float>(_font->_characterInfos[charCode].x + _font->_characterInfos[charCode].width) / _textureWidth, static_cast<float>(_font->_characterInfos[charCode].y + _font->_characterInfos[charCode].height) / _textureHeight);
+        vertices[3].texCoord = glm::vec2(static_cast<float>(_font->_characterInfos[charCode].x + _font->_characterInfos[charCode].width) / _textureWidth, static_cast<float>(_font->_characterInfos[charCode].y) / _textureHeight);
 
-        font->_vbo->addVertexData(vertices, 4);
+        _font->_vbo->addVertexData(vertices, 4);
 
-        w += font->_characterInfos[i].width;
+        _font->_characterInfos[charCode].vboOffset = index * 4;
+
+        charCode = FT_Get_Next_Char(_face, charCode, &glyphIndex);
+        ++index;
     }
 
 
-    FT_Done_Face(face);
+    FT_Done_Face(_face);
 
-    face = NULL;
+    _face = nullptr;
 
 
     releaseTextureData();
 
 
-    return font;
+    glPixelStorei(GL_UNPACK_ALIGNMENT, initialUnpackAlignment);
+
+
+    return _font;
+}
+
+
+std::string FontLoader::createFontResourceName(const char* fontName, int pixelSize)
+{
+    return std::string(fontName) + ";" + toString(pixelSize);
 }

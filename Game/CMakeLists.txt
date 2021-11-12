@@ -5,7 +5,12 @@ set (GAME_SOURCES
 	Game/GameConfig.cpp
 	Game/GameEnvironment.cpp
 	Game/GameLogicSystem.cpp
+	Game/GameScene.cpp
 	Game/Hud.cpp
+	Game/LoadingScreenScene.cpp
+	Game/MainGameScene.cpp
+	Game/MenuSelectBusScene.cpp
+	Game/TestScene.cpp
 )
 
 set (GAME_HEADERS 
@@ -16,7 +21,13 @@ set (GAME_HEADERS
 	Game/GameConfig.h
 	Game/GameEnvironment.h
 	Game/GameLogicSystem.h
+	Game/GameScene.h
+	Game/GameScenesNames.h
 	Game/Hud.h
+	Game/LoadingScreenScene.h
+	Game/MainGameScene.h
+	Game/MenuSelectBusScene.h
+	Game/TestScene.h
     
 )
 

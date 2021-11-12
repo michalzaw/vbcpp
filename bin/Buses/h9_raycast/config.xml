@@ -6,6 +6,18 @@
 	<Gearbox model="gbx_ikarus260" />
 	<Engine model="eng_wskmielec" />
 
+	<Variables> 
+		<Variable name="engine" displayName="Silnik" description="Silnik" >
+			<VariableValue value="Silnik 1" displayValue="Silnik 1" />
+			<VariableValue value="Silnik 2" displayValue="Silnik 2" default="true" />
+			<VariableValue value="Silnik 3" displayValue="Silnik 3" />
+		</Variable>
+		<Variable name="gearbox" displayName="Skrzynia biegów" description="Skrzynia biegow" >
+			<VariableValue value="Voitch" />
+			<VariableValue value="ZF" default="true" />
+		</Variable>
+	</Variables> 
+
 	<Module type="main" model="h9.fbx" mass="800" position="0,0,0" > <!-- mass in tons -->
 
 		<Wheel name="wheel1" side="right" steering="1" powered="0" handbrake="0" model="fwheel.fbx" position="1.0,-0.45,2.6" radius="0.5" suspensionRestLength="0.6" suspensionStiffness="35.0" dampingCompression="0.25" dampingRelaxation="0.3" frictionSlip="0.8" rollInfluence="0.1" brakeForce="40.0" />

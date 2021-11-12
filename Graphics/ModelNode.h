@@ -7,6 +7,27 @@
 #include "../Utils/RStaticModel.h"
 
 
+class RenderObject;
+
+
+struct ModelNodeMesh
+{
+    VBO* vbo;
+    IBO* ibo;
+
+    unsigned int firstVertex;
+    unsigned int firstVertexInVbo;
+    unsigned int indicesCount;
+
+    Material* material;
+
+    ModelNodeMesh(VBO* vbo, IBO* ibo, unsigned int firstVertex, unsigned int firstVertexInVbo, unsigned int indicesCount, Material* material)
+        : vbo(vbo), ibo(ibo), firstVertex(firstVertex), firstVertexInVbo(firstVertexInVbo), indicesCount(indicesCount), material(material)
+    {}
+
+};
+
+
 class ModelNode
 {
     private:
@@ -19,15 +40,13 @@ class ModelNode
         glm::mat4 _transformMatrix;
         glm::mat4 _normalMatrix;
 
-        StaticModelMesh*    _meshes;
-        unsigned int        _meshesCount;
+        std::vector<ModelNodeMesh*> _meshes;
 
         ModelNode*          _parent;
-        ModelNode**         _children;
-        unsigned int        _childrenCount;
+        std::vector<ModelNode*> _children;
 
     public:
-        ModelNode(StaticModelNode* staticModelNode, ModelNode* parent = NULL);
+        ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, ModelNode* parent = NULL);
         ~ModelNode();
 
         std::string getName();
@@ -37,12 +56,14 @@ class ModelNode
         glm::mat4& getTransformMatrix();
         glm::mat4& getNormalMatrix();
 
-        StaticModelMesh* getMesh(unsigned int i);
+        ModelNodeMesh* getMesh(unsigned int i);
         unsigned int getMeshesCount();
 
         ModelNode* getParent();
-        ModelNode** getChildren();
+        std::vector<ModelNode*>& getChildren();
         unsigned int getChildrenCount();
+
+        void replaceMaterialsByName(const std::vector<Material*>& materials);
 
 };
 

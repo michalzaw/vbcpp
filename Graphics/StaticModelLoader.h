@@ -35,8 +35,7 @@ class StaticModelLoader
         std::vector<std::string> _nodesToSkipNames;
         std::string _nodeToLoadName;
 
-        unsigned int _materialsCount;
-        Material* _materials;
+        std::vector<Material*> _materials;
 
         std::vector<glm::vec3> _collisionMesh;
 

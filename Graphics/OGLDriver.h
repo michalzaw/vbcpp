@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <mutex>
 
 #include <GL/glew.h>
 
@@ -41,10 +42,17 @@ class OGLDriver
         UBO* _currentUBO;
 
         Framebuffer* _defaultFramebuffer;
+        std::vector<Framebuffer*> _uninitializedFramebuffers;
 
 		float _maxAnisotropy;
 
+        std::mutex _uninitializedFramebuffersMutex;
+
         OGLDriver();
+
+        static void debugOutputCallback(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam);
+        bool isDebugContextEnabled();
+        void initializeDebugContext();
 
     public:
 
@@ -59,6 +67,7 @@ class OGLDriver
         IBO* createIBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         UBO* createUBO(unsigned int size);
         Framebuffer* createFramebuffer();
+        void registerFramebufferForInitialization(Framebuffer* framebuffer);
 
         void deleteVAO(VAO* vao);
         void deleteVBO(VBO* vbo);
@@ -103,6 +112,8 @@ class OGLDriver
 
             return ibos[shaderType].size() - 1;
         }
+
+        void update();
 
 };
 

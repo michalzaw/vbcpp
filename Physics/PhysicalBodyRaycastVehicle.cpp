@@ -23,8 +23,20 @@ PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(glm::vec3* vertices, unsi
 }
 
 
+PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, PhysicsManager* physicsManager)
+    : PhysicalBodyConvexHull(vertices, mass),
+    _physMgr(physicsManager)
+{
+    _rayCaster = new RayCasterWithCollisionGroups(_physMgr->getDynamicsWorld());
+
+    updateBody();
+}
+
+
 PhysicalBodyRaycastVehicle::~PhysicalBodyRaycastVehicle()
 {
+    _physMgr->getDynamicsWorld()->removeVehicle(_rayCastVehicle);
+
     delete _rayCastVehicle;
     delete _rayCaster;
 }

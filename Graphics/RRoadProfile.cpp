@@ -9,6 +9,18 @@ RRoadProfile::RRoadProfile(std::string path, std::string author, std::string nam
 }
 
 
+RRoadProfile::~RRoadProfile()
+{
+	for (RoadLane& roadLane : _roadLanes)
+	{
+		if (roadLane.material != nullptr)
+		{
+			delete roadLane.material;
+		}
+	}
+}
+
+
 std::string RRoadProfile::getAuthor()
 {
 	return _author;

@@ -8,6 +8,7 @@
 
 #include "../Utils/Gearbox.h"
 #include "../Utils/Engine.h"
+#include "../Utils/LocalizationSystem.h"
 
 #include "../Scene/SceneObject.h"
 
@@ -15,6 +16,7 @@
 #include "../Graphics/MirrorComponent.h"
 #include "../Graphics/DisplayComponent.h"
 
+#include "BusDescription.h"
 #include "Door.h"
 
 
@@ -39,6 +41,10 @@ class Bus : public RefCounter
 		SoundComponent* _engineSoundSource;
 		SoundComponent* _engineStartSoundSource;
 		SoundComponent* _engineStopSoundSource;
+
+        BusDescription _busDescription;
+
+        LocalizationSystem _texts;
 
     public:
         Bus()
@@ -94,6 +100,11 @@ class Bus : public RefCounter
 
         virtual void update(float deltaTime) = 0;
 
+        virtual void replaceMaterialsByName(std::vector<Material*>& altMaterials)
+        {
+
+        }
+
         void setNumberOfPassengers(unsigned int number)
         {
             _numberOfPassengers = number;
@@ -133,6 +144,26 @@ class Bus : public RefCounter
 		{
 			return _engineStopSoundSource;
 		}
+
+        BusDescription& getBusDescription()
+        {
+            return _busDescription;
+        }
+
+        LocalizationSystem& getTexts()
+        {
+            return _texts;
+        }
+
+        std::string getText(const std::string& textValueOrId)
+        {
+            if (startsWith(textValueOrId, "$"))
+            {
+                return _texts.getText(textValueOrId.substr(1));
+            }
+
+            return textValueOrId;
+        }
 
 };
 

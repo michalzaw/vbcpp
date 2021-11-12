@@ -20,6 +20,7 @@ class RRoadProfile : public Resource
 
 	public:
 		RRoadProfile(std::string path, std::string author, std::string name, std::string comment);
+		~RRoadProfile();
 
 		std::string getAuthor();
 		std::string getName();

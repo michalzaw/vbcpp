@@ -498,6 +498,7 @@ namespace vbEditor
 	int _windowWidth = 1024;
 	int _windowHeight = 768;
 
+	GraphicsManager* _graphicsManager = nullptr;
 	PhysicsManager* _physicsManager = nullptr;
 	SoundManager* _soundManager = nullptr;
 	SceneManager* _sceneManager = nullptr;
@@ -626,7 +627,7 @@ namespace vbEditor
 				SceneObject* selectedObject = nullptr;
 				float d = std::numeric_limits<float>::max();
 
-				std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+				std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
 				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
 				{
 					RenderObject* renderObject = *i;
@@ -702,7 +703,7 @@ namespace vbEditor
 
 	bool createWindow()
 	{
-		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true, true))
+		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true, false, true))
 		{
 			return false;
 		}
@@ -737,7 +738,13 @@ namespace vbEditor
 
 		OGLDriver::getInstance().initialize();
 
+		_graphicsManager = new GraphicsManager;
+		_physicsManager = new PhysicsManager;
+		_soundManager = new SoundManager;
+		_sceneManager = new SceneManager(_graphicsManager, _physicsManager, _soundManager);
+
 		Renderer& renderer = Renderer::getInstance();
+		renderer.setGraphicsManager(_graphicsManager);
 		renderer.setMsaaAntialiasing(true);
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
@@ -748,17 +755,13 @@ namespace vbEditor
 		renderer.setExposure(1.87022f);
 		renderer.t = 0;
 
-		_physicsManager = new PhysicsManager;
-		_soundManager = new SoundManager;
-		_sceneManager = new SceneManager(_physicsManager, _soundManager);
-
 		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
-		_camera = GraphicsManager::getInstance().addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
+		_camera = _graphicsManager->addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
 		_camera->setMoveSpeed(50.0f);
 
-		GraphicsManager::getInstance().setCurrentCamera(_camera);
+		_graphicsManager->setCurrentCamera(_camera);
 		_soundManager->setActiveCamera(_camera);
 
 		_availableMaps = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
@@ -859,7 +862,7 @@ namespace vbEditor
 				mapInfo.name = _availableMaps[currentSelection];
 				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
-				Renderer::getInstance().bakeStaticShadows();
+				Renderer::getInstance().rebuildStaticLighting();
 			}
 		}
 
@@ -890,7 +893,7 @@ namespace vbEditor
 				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
 				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 				roadRenderObject->setIsCastShadows(false);
 
 				setSelectedSceneObject(roadSceneObject);
@@ -910,7 +913,7 @@ namespace vbEditor
 				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
 				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = GraphicsManager::getInstance().addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 				roadRenderObject->setIsCastShadows(false);
 
 				setSelectedSceneObject(roadSceneObject);
@@ -940,7 +943,7 @@ namespace vbEditor
 
 		if (_showCameraSettingsWindow)
 		{
-			CameraFPS* cameraFPS = dynamic_cast<CameraFPS*>(GraphicsManager::getInstance().getCurrentCamera());
+			CameraFPS* cameraFPS = dynamic_cast<CameraFPS*>(_graphicsManager->getCurrentCamera());
 			if(cameraFPS)
 				CameraSettingsWindow(cameraFPS);
 		}
@@ -1069,7 +1072,8 @@ namespace vbEditor
 				lastXPos = xPos;
 				lastYPos = yPos;
 			}
-			
+
+			OGLDriver::getInstance().update();
 
 			// fixed update
 			while (accumulator > TIME_STEP)
@@ -1227,7 +1231,7 @@ namespace vbEditor
 
 	void createAvailableConnectionPointsList(std::vector<glm::vec3>& connectionPointsPositions, std::vector<RoadConnectionPoint>& connectionPoints)
 	{
-		const std::vector<CrossroadComponent*>& crossroadComponents = GraphicsManager::getInstance().getCrossroadComponents();
+		const std::vector<CrossroadComponent*>& crossroadComponents = _graphicsManager->getCrossroadComponents();
 		for (CrossroadComponent* crossroadComponent : crossroadComponents)
 		{
 			float distance = glm::length(crossroadComponent->getSceneObject()->getPosition() - _camera->getPosition());

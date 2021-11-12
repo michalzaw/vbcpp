@@ -26,11 +26,14 @@ class GUIRenderListElement
 
         ShaderType      _shaderType;
 
+        std::vector<std::pair<std::string, float>> _customUniforms;
+
     public:
         GUIRenderListElement(VBO* vbo, unsigned int firstVertex,
                              glm::mat4 verticesTransformMatrix, glm::mat4 texCoordTransformMatrix,
                              glm::vec4 color, RTexture* texture,
-                             ShaderType _shaderType);
+                             ShaderType _shaderType,
+                             const std::vector<std::pair<std::string, float>>& customUniforms = {});
 
         ~GUIRenderListElement();
 
@@ -55,6 +58,9 @@ class GUIRenderListElement
 
         inline ShaderType getShaderType()
         { return _shaderType; }
+
+        inline const std::vector<std::pair<std::string, float>>& getCustomUniforms()
+        { return _customUniforms; }
 
 };
 

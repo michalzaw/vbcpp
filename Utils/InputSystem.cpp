@@ -158,9 +158,14 @@ double InputSystem::getScrollOffsetY()
 }
 
 
-void InputSystem::getCursorPosition(double* x, double* y)
+void InputSystem::getCursorPosition(double* x, double* y, bool invertY)
 {
 	glfwGetCursorPos(_window->getWindow(), x, y);
+
+	if (invertY)
+	{
+		*y = _window->getHeight() - *y;
+	}
 }
 
 

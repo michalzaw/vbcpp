@@ -1,19 +1,20 @@
 #include "ConstraintBall.h"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger.h"
 
 ConstraintBall::ConstraintBall(PhysicalBody* bodyA, PhysicalBody* bodyB, btVector3 pivotA, btVector3 pivotB)
 : Constraint(bodyA, bodyB),
 _pivotA(pivotA), _pivotB(pivotB)
 {
-    std::cout << "Ball Constraint - Konstruktor" << std::endl;
+    LOG_DEBUG("Ball Constraint - Konstruktor");
     updateConstraint();
 }
 
 
 ConstraintBall::~ConstraintBall()
 {
-    std::cout << "Ball Constraint - Destruktor" << std::endl;
+    LOG_DEBUG("Ball Constraint - Destruktor");
 }
 
 

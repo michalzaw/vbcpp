@@ -18,13 +18,10 @@ struct ModelData
 {
 	RStaticModel* model;
 	ModelNode* modelRootNode;
-	Material* materials;
-	unsigned int  materialsCount;
 
 	ModelData()
 		: model(NULL),
-		modelRootNode(NULL),
-		materials(NULL), materialsCount(0)
+		modelRootNode(NULL)
 	{}
 };
 
@@ -33,6 +30,8 @@ class RenderObject : public Component
 {
     protected:
 		std::vector<ModelData> _modelsDatas;
+
+        std::vector<Material*> _mirrorMaterials;
 
         bool _isCastShadows;
 		bool _isDynamicObject;
@@ -46,16 +45,22 @@ class RenderObject : public Component
 
     public:
         RenderObject(RStaticModel* model = NULL, bool isDynamicObject = false);
+        RenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject = false);
+        RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject = false);
         virtual ~RenderObject();
 
         void setModel(RStaticModel* model, int lod = 0);
+        void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
+        void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
         RStaticModel* getModel(int lod = 0);
         ModelNode* getModelRootNode(int lod = 0);
         ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
 		void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
-        Material* getMaterial(unsigned int index, int lod = 0);
-		unsigned int getMaterialsCount(int lod = 0);
+        void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
+
+        void addMirrorMaterial(Material* material);
+        const std::vector<Material*>& getMirrorMaterials();
 
         void setIsCastShadows(bool isCastShadows);
         bool isCastShadows();

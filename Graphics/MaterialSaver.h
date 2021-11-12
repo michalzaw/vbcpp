@@ -3,15 +3,17 @@
 
 
 #include <string>
+#include <vector>
+
+#include "Material.h"
 
 
-struct Material;
 struct aiScene;
 
 
 namespace MaterialSaver
 {
-	void saveMaterials(std::string fileName, Material* materials, unsigned int materialsCount, std::string texPath);
+	void saveMaterials(std::string fileName, std::vector<Material*>& materials, std::string texPath);
 	void saveMaterialsFromAssimpModel(std::string fileName, const aiScene* _assimpScene);
 
 }

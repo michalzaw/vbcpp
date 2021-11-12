@@ -3,7 +3,6 @@
 #include "../Game/GameConfig.h"
 
 #include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/Logger.h"
 
 
 glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
@@ -141,7 +140,6 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 
 					glm::vec2 d = glm::normalize(glm::vec2(segmentEnd.x - segmentBegin.x, segmentEnd.z - segmentBegin.z));
 					v = glm::vec2(-d.y, d.x);
-					//std::cout << v.x << " " << v.y << std::endl;
 				}
 				else if (segments[k].type == RST_BEZIER_CURVE)
 				{
@@ -212,10 +210,10 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 				t[i] += glm::length(lastPoints[i] - centerPoint);
 				lastPoints[i] = centerPoint;
 
-				vertex1.s = 1.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;//
-				vertex1.t = t[i] * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;//
-				vertex2.s = 0.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;//
-				vertex2.t = t[i] * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;//
+				vertex1.s = 1.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;//
+				vertex1.t = t[i] * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;//
+				vertex2.s = 0.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;//
+				vertex2.t = t[i] * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;//
 
 				lanesVerticesArray[i].push_back(vertex1);   //lanesVerticesArray[i][j];
 				lanesVerticesArray[i].push_back(vertex2);   //lanesVerticesArray[i][j];
@@ -359,12 +357,12 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 		{
 			if (GameConfig::getInstance().mode == GM_GAME)
 			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader);
+				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader);
 			}
 			else // GM_EDITOR
 			{
 				// vbo for ~ 4600 vertices
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader, false, 1024 * 1024, 1024 * 1024, false);
+				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, false, 1024 * 1024, 1024 * 1024, false);
 			}
 		}
 		else
@@ -382,10 +380,10 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 	if (oldModel == NULL)
 	{
 		// materials
-		Material* materials = new Material[lanesCount];
+		std::vector<Material*> materials;
 		for (int i = 0; i < lanesCount; ++i)
 		{
-			materials[i] = roadLanes[i].material;
+			materials.push_back(new Material(*roadLanes[i].material));
 		}
 
 		StaticModelNode* modelNode = new StaticModelNode;
@@ -394,7 +392,7 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 		modelNode->meshesCount = lanesCount;
 		modelNode->parent = NULL;
 
-		model = new RStaticModel("", modelNode, materials, lanesCount, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
+		model = new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, indicesCountInAllMeshes);
 	}
 	else
 	{

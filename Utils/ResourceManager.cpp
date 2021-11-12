@@ -13,7 +13,7 @@ static std::unique_ptr<ResourceManager> rsInstance;
 
 ResourceManager::ResourceManager()
 {
-    std::cout << "ResourceManager: Konstruktor\n";
+    LOG_INFO("ResourceManager: Konstruktor");
 
 	_alternativeResourcePath = "";
 }
@@ -21,7 +21,7 @@ ResourceManager::ResourceManager()
 
 ResourceManager::~ResourceManager()
 {
-    std::cout << "ResourceManager: Destruktor\n";
+    LOG_INFO("ResourceManager: Destruktor");
 
 }
 
@@ -43,7 +43,7 @@ Resource* ResourceManager::findResource(std::string path)
     {
         if ( (*it)->getPath() == path )
         {
-            std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
+            LOG_INFO("Resource istnieje. Zwracam istniejacy zasob: " + (*it)->getPath());
             std::unique_ptr<Resource>& res = *it;
 
             return res.get();
@@ -57,7 +57,7 @@ Resource* ResourceManager::findResource(std::string path)
 	{
 		if ((*it)->getPath() == path)
 		{
-			std::cout << "Resource istnieje. Zwracam istniejacy zasob: " << (*it)->getPath() << std::endl;
+            LOG_INFO("Resource istnieje. Zwracam istniejacy zasob: " + (*it)->getPath());
 			std::unique_ptr<Resource>& res = *it;
 
 			return res.get();
@@ -99,7 +99,7 @@ RTexture2D* ResourceManager::loadTexture(std::string path, bool useCompression, 
 
         //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
         std::unique_ptr<RTexture> tex (texture);
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + tex.get()->getPath());
 
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
@@ -153,7 +153,7 @@ RTextureCubeMap* ResourceManager::loadTextureCubeMap(std::string* fileNames)
     {
         //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
         std::unique_ptr<RTexture> tex (texture);
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + tex.get()->getPath());
 
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
@@ -245,7 +245,7 @@ RTexture2D* ResourceManager::loadDefaultWhiteTexture()
     {
         //std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
         std::unique_ptr<RTexture> tex (texture);
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << tex.get()->getPath() << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + tex.get()->getPath());
 
         // Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
         // Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
@@ -289,7 +289,7 @@ RTexture2D* ResourceManager::loadOneColorTexture(glm::vec4 color)
 	{
 		//std::unique_ptr<RTexture> tex (new RTexture(path, tID, TT_2D, glm::uvec2(width, height)));
 		std::unique_ptr<RTexture> tex(texture);
-		std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << tex.get()->getPath() << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + tex.get()->getPath());
 
 		// Poniewaz std::move przenosi wartosc z pamieci obiektu 'tex' do pamiêci listy '_resources', nie mozna wiecej odwolac sie do obiektu 'tex'
 		// Dlatego kopiuje sobie ID textury przez przesunieciem wskaznika do listy
@@ -349,7 +349,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 
     std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
 
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << shader.get()->getPath() << std::endl;;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
 
     RShader* s = dynamic_cast<RShader*>( shader.get() );
 
@@ -429,7 +429,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 
     StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath) );
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
 
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
@@ -465,7 +465,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchy(std::string path, std::str
 
     StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchy(path, texturePath, nodesToSkipNames) );
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
 
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
@@ -497,7 +497,7 @@ RStaticModel* ResourceManager::loadModelWithHierarchyOnlyNode(std::string path, 
 
     StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodeToLoadName, loadedNodeTransformInModel) );
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
 
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
@@ -528,7 +528,7 @@ void ResourceManager::loadModelWithHierarchyOnlyNodes(std::string path, std::str
     for (int i = 0; i < nodesToLoadNames.size(); ++i)
     {
         RStaticModel* model = loader.loadModelWithHierarchyOnlyNode(path, texturePath, nodesToLoadNames[i], loadedNodesTransformsInModel[i]);
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << path << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + path);
 
         loadedNodes[i] = model;
     }
@@ -551,7 +551,7 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 
     StaticModelLoader loader(normalsSmoothing);
     std::unique_ptr<RStaticModel> model( loader.loadModel(path, texturePath) );
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << model.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
 
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
@@ -567,7 +567,7 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 
 RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 {
-    Resource* res = findResource(path);
+    Resource* res = findResource(FontLoader::createFontResourceName(path.c_str(), pixelSize));
     if (res != 0)
     {
         RFont* font = dynamic_cast<RFont*>(res);
@@ -581,12 +581,12 @@ RFont* ResourceManager::loadFont(std::string path, int  pixelSize)
 
     FontLoader loader;
 
-    RFont* mTemp = loader.loadFont(path.c_str(), pixelSize);
+    RFont* mTemp = loader.loadFont(path, pixelSize);
 
     if (mTemp)
     {
         std::unique_ptr<RFont> font(mTemp);
-        std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << font.get()->getPath() << std::endl;
+        LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + font.get()->getPath());
 
         RFont* f = dynamic_cast<RFont*>( font.get() );
 
@@ -618,7 +618,7 @@ RSound* ResourceManager::loadSound(std::string path)
 #endif // DEVELOPMENT_RESOURCES
 
     std::unique_ptr<RSound> sound( ::loadSound(path.c_str()) );
-    std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... "  << sound.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + sound.get()->getPath());
 
     RSound* s = dynamic_cast<RSound*>( sound.get() );
 
@@ -649,7 +649,7 @@ RObject* ResourceManager::loadRObject(std::string name)
 #endif // DEVELOPMENT_RESOURCES
 
 	std::unique_ptr<RObject> object(RObjectLoader::loadObject(dirPath));
-	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + object.get()->getPath());
 
 	RObject* o = dynamic_cast<RObject*>(object.get());
 
@@ -680,7 +680,7 @@ RRoadProfile* ResourceManager::loadRoadProfile(std::string name)
 #endif // DEVELOPMENT_RESOURCES
 
 	std::unique_ptr<RRoadProfile> object(RoadProfileLoader::loadRoadProfile(dirPath));
-	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + object.get()->getPath());
 
 	RRoadProfile* o = dynamic_cast<RRoadProfile*>(object.get());
 
@@ -711,7 +711,7 @@ RDisplayFont* ResourceManager::loadDisplayFont(std::string name)
 #endif // DEVELOPMENT_RESOURCES
 
 	std::unique_ptr<RDisplayFont> object(new RDisplayFont(dirPath));
-	std::cout << "Resource nie istnieje. Tworzenie nowego zasobu... " << object.get()->getPath() << std::endl;
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + object.get()->getPath());
 
 	RDisplayFont* o = dynamic_cast<RDisplayFont*>(object.get());
 
@@ -722,6 +722,44 @@ RDisplayFont* ResourceManager::loadDisplayFont(std::string name)
 	}
 	else
 		return 0;
+}
+
+
+RMaterialsCollection* ResourceManager::loadMaterialsCollection(std::string path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RMaterialsCollection* materialsCollection = dynamic_cast<RMaterialsCollection*>(res);
+        return materialsCollection;
+    }
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(path))
+        path = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
+    RMaterialsCollection* temp = new RMaterialsCollection(path);
+
+    MaterialLoader materialLoader;
+    materialLoader.openFile(path.c_str());
+
+    materialLoader.loadAllMaterials(temp->getMaterials(), FilesHelper::getPathToDirectoryFromFileName(path));
+
+    materialLoader.closeFile();
+
+    std::unique_ptr<RMaterialsCollection> materialsCollection(temp);
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + materialsCollection.get()->getPath());
+
+    RMaterialsCollection* mc = dynamic_cast<RMaterialsCollection*>(materialsCollection.get());
+
+    if (mc)
+    {
+        _resources.push_back(std::move(materialsCollection));
+        return mc;
+    }
+    else
+        return 0;
 }
 
 

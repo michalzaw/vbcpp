@@ -2,8 +2,10 @@
 
 #include <cstdio>
 
+#include "../Utils/Logger.h"
+
 Window::Window()
-: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _isFullscreen(false)
+: _width(1024), _height(768), _xPos(100), _yPos(100), _title("New GLFW window"), _fullscreenMode(0)
 {
     glfwSetErrorCallback(errorCallback);
 }
@@ -14,18 +16,18 @@ Window::~Window()
 }
 
 
-bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, bool verticalSync, bool isResizable)
+bool Window::createWindow(int w, int h, int posx, int posy, int fullscreenMode, bool verticalSync, bool debugContext, bool isResizable)
 {
     _width = w;
     _height = h;
     _xPos = posx;
     _yPos = posy;
-    _isFullscreen = isFullscreen;
+    _fullscreenMode = fullscreenMode;
 	_verticalSyncEnabled = verticalSync;
 
     if ( !glfwInit() )
     {
-        fprintf( stderr, "VIDEO: Failed to initialize GLFW!\n");
+        LOG_ERROR("VIDEO: Failed to initialize GLFW");
         //exit(EXIT_FAILURE);
         return false;
     }
@@ -36,10 +38,29 @@ bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, b
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	glfwWindowHint( GLFW_RESIZABLE, isResizable );
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, debugContext);
+
+	glfwWindowHint(GLFW_RESIZABLE, isResizable);
+
+    GLFWmonitor* monitor = NULL;
+    if (_fullscreenMode == 1)
+    {
+        monitor = glfwGetPrimaryMonitor();
+    }
+    else if (_fullscreenMode == 2)
+    {
+        monitor = glfwGetPrimaryMonitor();
+
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+    }
 
 	// Create window with given size and title
-	_win = glfwCreateWindow(_width, _height, _title.c_str(), _isFullscreen ? glfwGetPrimaryMonitor() : NULL, NULL);
+	_win = glfwCreateWindow(_width, _height, _title.c_str(), monitor, NULL);
 
 	if (!_win)
         return false;
@@ -56,6 +77,17 @@ bool Window::createWindow(int w, int h, int posx, int posy, bool isFullscreen, b
     //if (!initGLEW())
     //    return false;
 
+    return true;
+}
+
+bool Window::createInvisibleWindow(Window* mainWindow)
+{
+    glfwWindowHint(GLFW_VISIBLE, GL_FALSE);
+    _win = glfwCreateWindow(10, 10, "window2", NULL, mainWindow->getWindow());
+
+    if (!_win)
+        return false;
+    
     return true;
 }
 
@@ -126,7 +158,7 @@ bool Window::initGLEW()
     GLenum err = glewInit();
     if( err != GLEW_OK )
     {
-        fprintf( stderr, "VIDEO: Failed to initialize GLEW! Error: %s\n", glewGetErrorString(err));
+        LOG_ERROR("VIDEO: Failed to initialize GLEW! Error: " + std::string(reinterpret_cast<char const*>(glewGetErrorString(err))));
         //exit(EXIT_FAILURE);
         return false;
     }

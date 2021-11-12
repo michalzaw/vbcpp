@@ -12,7 +12,7 @@ _pivotA(pivotA), _pivotB(pivotB), _axisA(axisA), _axisB(axisB)
 
 ConstraintHinge::~ConstraintHinge()
 {
-    printf("Hinge - Destruktor\n");
+    LOG_DEBUG("Hinge - Destruktor");
     safe_delete<btTypedConstraint>(_constraint);
 }
 

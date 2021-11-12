@@ -59,6 +59,70 @@ OGLDriver& OGLDriver::getInstance()
 }
 
 
+void OGLDriver::debugOutputCallback(GLenum source, GLenum type, unsigned int id, GLenum severity, GLsizei length, const char* message, const void* userParam)
+{
+    if (id == 131169 || id == 131185 || id == 131218 || id == 131204)
+    {
+        return;
+    }
+
+    std::string sourceStr;
+    std::string typeStr;
+    std::string severityStr;
+    
+    switch (source)
+    {
+        case GL_DEBUG_SOURCE_API:             sourceStr = "Source: API"; break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   sourceStr = "Source: Window System"; break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER: sourceStr = "Source: Shader Compiler"; break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:     sourceStr = "Source: Third Party"; break;
+        case GL_DEBUG_SOURCE_APPLICATION:     sourceStr = "Source: Application"; break;
+        case GL_DEBUG_SOURCE_OTHER:           sourceStr = "Source: Other"; break;
+    }
+
+    switch (type)
+    {
+        case GL_DEBUG_TYPE_ERROR:               typeStr = "Type: Error"; break;
+        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: typeStr = "Type: Deprecated Behaviour"; break;
+        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  typeStr = "Type: Undefined Behaviour"; break;
+        case GL_DEBUG_TYPE_PORTABILITY:         typeStr = "Type: Portability"; break;
+        case GL_DEBUG_TYPE_PERFORMANCE:         typeStr = "Type: Performance"; break;
+        case GL_DEBUG_TYPE_MARKER:              typeStr = "Type: Marker"; break;
+        case GL_DEBUG_TYPE_PUSH_GROUP:          typeStr = "Type: Push Group"; break;
+        case GL_DEBUG_TYPE_POP_GROUP:           typeStr = "Type: Pop Group"; break;
+        case GL_DEBUG_TYPE_OTHER:               typeStr = "Type: Other"; break;
+    }
+
+    switch (severity)
+    {
+        case GL_DEBUG_SEVERITY_HIGH:         severityStr = "HIGH"; break;
+        case GL_DEBUG_SEVERITY_MEDIUM:       severityStr = "MEDIUM"; break;
+        case GL_DEBUG_SEVERITY_LOW:          severityStr = "LOW"; break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION: severityStr = "NOTIFICATION"; break;
+    }
+
+    LOG_INFO("[OpenGL][" + severityStr + " | " + sourceStr + " | " + typeStr + "](id=" + Strings::toString(id) + ") " + message);
+}
+
+
+bool OGLDriver::isDebugContextEnabled()
+{
+    int contextFlags;
+    glGetIntegerv(GL_CONTEXT_FLAGS, &contextFlags);
+
+    return contextFlags & GL_CONTEXT_FLAG_DEBUG_BIT;
+}
+
+
+void OGLDriver::initializeDebugContext()
+{
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+    glDebugMessageCallback(debugOutputCallback, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
+}
+
+
 bool OGLDriver::initialize()
 {
     glewExperimental = true;
@@ -67,6 +131,18 @@ bool OGLDriver::initialize()
 
     if (createVAO() == NULL)
         return false;
+
+
+    if (isDebugContextEnabled())
+    {
+        LOG_INFO("OpenGL debug context: on");
+        initializeDebugContext();
+    }
+    else
+    {
+        LOG_INFO("OpenGL debug context: off");
+    }
+
 
     glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
@@ -78,14 +154,15 @@ bool OGLDriver::initialize()
     glClearColor(0.7f, 0.7f, 1.0f, 1.0f);
 
     _defaultFramebuffer = new Framebuffer();
+    _defaultFramebuffer->_isCreated = true;
     _defaultFramebuffer->_fboBuffs.push_back(GL_BACK_LEFT);
 
 	glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
-	Logger::info("OpenGL initalized!");
+	LOG_INFO("OpenGL initalized!");
 
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropy);
-	Logger::info("- maxAnisotropy: " + toString(_maxAnisotropy));
+	LOG_INFO("- maxAnisotropy: " + Strings::toString(_maxAnisotropy));
 
     return true;
 }
@@ -146,11 +223,21 @@ UBO* OGLDriver::createUBO(unsigned int size)
 Framebuffer* OGLDriver::createFramebuffer()
 {
     Framebuffer* framebuffer = new Framebuffer;
-    framebuffer->init();
 
     _framebufferList.push_back(framebuffer);
 
     return framebuffer;
+}
+
+
+// inicjalizacja odbywa sie na glownym watku
+void OGLDriver::registerFramebufferForInitialization(Framebuffer* framebuffer)
+{
+    glFinish();
+
+    _uninitializedFramebuffersMutex.lock();
+    _uninitializedFramebuffers.push_back(framebuffer);
+    _uninitializedFramebuffersMutex.unlock();
 }
 
 
@@ -216,6 +303,18 @@ void OGLDriver::deleteUBO(UBO* ubo)
 
 void OGLDriver::deleteFramebuffer(Framebuffer* framebuffer)
 {
+    _uninitializedFramebuffersMutex.lock();
+    for (int i = 0; i < _uninitializedFramebuffers.size(); ++i)
+    {
+        if (_uninitializedFramebuffers[i] == framebuffer)
+        {
+            _uninitializedFramebuffers.erase(_uninitializedFramebuffers.begin() + i);
+
+            break;
+        }
+    }
+    _uninitializedFramebuffersMutex.unlock();
+
     for (int i = 0; i < _framebufferList.size(); ++i)
     {
         if (_framebufferList[i] == framebuffer)
@@ -262,4 +361,21 @@ Framebuffer* OGLDriver::getDefaultFramebuffer()
 float OGLDriver::getMaxAnisotropy()
 {
 	return _maxAnisotropy;
+}
+
+
+void OGLDriver::update()
+{
+    _uninitializedFramebuffersMutex.lock();
+    for (Framebuffer* framebuffer : _uninitializedFramebuffers)
+    {
+        if (!framebuffer->_isInitialized)
+        {
+            framebuffer->init();
+        }
+    }
+
+    _uninitializedFramebuffers.clear();
+
+    _uninitializedFramebuffersMutex.unlock();
 }

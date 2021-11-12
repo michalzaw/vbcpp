@@ -50,7 +50,7 @@ class SoundComponent : virtual public Component
 
             else
             {
-                fprintf (stderr, "Sound component not attached to any Scene Object! Using default values\n");
+                LOG_WARNING("Sound component not attached to any Scene Object! Using default values");
 
 
                 alSource3f( _source, AL_POSITION, 0., 1., 0. );

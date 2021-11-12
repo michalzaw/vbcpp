@@ -47,7 +47,7 @@ class InputSystem
 		double getScrollOffsetX();
 		double getScrollOffsetY();
 
-		void getCursorPosition(double* x, double* y);
+		void getCursorPosition(double* x, double* y, bool invertY = false);
 		void setCursorPosition(double x, double y);
 };
 

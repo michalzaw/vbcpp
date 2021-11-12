@@ -14,28 +14,25 @@ class Bus;
 class GameLogicSystem final
 {
 	private:
-		std::vector<Bus*> _buses;
+		//std::vector<Bus*> _buses;
 
 		std::vector<CameraControlComponent*> _cameraControlComponents;
 		// todo: Przeniesc obsluge przystankow do tego systemu
 		//std::vector<BusStopComponent*> _busStops;
 
-		GameLogicSystem();
-
 	public:
+		GameLogicSystem();
 		~GameLogicSystem();
 
-		static GameLogicSystem& getInstance();
-
-		Bus* addBus(Bus* bus);
+		//Bus* addBus(Bus* bus);
 		CameraControlComponent* addCameraControlComponent(CameraFPS* camera);
 		//BusStopComponent* addBusStopComponent(std::string name);
 
-		void removeBus(Bus* bus);
+		//void removeBus(Bus* bus);
 		void removeCameraControlComponent(CameraControlComponent* component);
 		//void removeBusStop(BusStopComponent* busStop);
 
-		Bus* getBus(unsigned int index);
+		//Bus* getBus(unsigned int index);
 
 		void update(float deltaTime);
 

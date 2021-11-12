@@ -2,14 +2,16 @@
 
 #include "GraphicsManager.h"
 
+#include "../Scene/SceneManager.h"
+
+#include "../Utils/Logger.h"
+
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isCalculatedAABB(false)
 {
-    #ifdef _DEBUG_MODE
-        printf("*** RenderObject: Konstruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Konstruktor");
 	
 	_modelsDatas.resize(1);
 
@@ -19,6 +21,39 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     }
 }
 
+
+RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject)
+    : Component(CT_RENDER_OBJECT),
+    _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isCalculatedAABB(false)
+{
+    LOG_DEBUG("*** RenderObject: Konstruktor");
+
+    _modelsDatas.resize(1);
+
+    if (model != NULL)
+    {
+        setModel(model, nodesToSkip, model->getRootNode());
+    }
+}
+
+
+RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject)
+    : Component(CT_RENDER_OBJECT),
+    _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isCalculatedAABB(false)
+{
+    LOG_DEBUG("*** RenderObject: Konstruktor");
+
+    _modelsDatas.resize(1);
+
+    if (model != NULL)
+    {
+        setModel(model, modelNode);
+    }
+}
+
+
 RenderObject::~RenderObject()
 {
 	for (ModelData& modelData : _modelsDatas)
@@ -27,15 +62,8 @@ RenderObject::~RenderObject()
 		{
 			delete modelData.modelRootNode;
 		}
-
-		if (modelData.materials)
-		{
-			delete[] modelData.materials;
-		}
 	}
-    #ifdef _DEBUG_MODE
-        printf("*** RenderObject: Destruktor\n");
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("*** RenderObject: Destruktor");
 }
 
 
@@ -86,20 +114,33 @@ void RenderObject::calculateNewAABB()
 
 void RenderObject::setModel(RStaticModel* model, int lod)
 {
-	if (lod <= _modelsDatas.size())
-	{
-		_modelsDatas.resize(lod + 1);
-	}
+    setModel(model, std::vector<std::string>{}, model->getRootNode(), lod);
+}
+
+
+void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, int lod)
+{
+    setModel(model, std::vector<std::string>{}, modelNode, lod);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setPosition(0.0f, 0.0f, 0.0f);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setRotation(0.0f, 0.0f, 0.0f);
+    _modelsDatas[lod].modelRootNode->getTransformNode().setScale(1.0f, 1.0f, 1.0f);
+}
+
+
+void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod)
+{
+    if (lod <= _modelsDatas.size())
+    {
+        _modelsDatas.resize(lod + 1);
+    }
 
     _modelsDatas[lod].model = model;
 
-    _modelsDatas[lod].modelRootNode = new ModelNode(model->getRootNode());
+    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this);
 
-	_modelsDatas[lod].materialsCount = model->getMaterialsCount();
-    _modelsDatas[lod].materials = new Material[model->getMaterialsCount()];
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
-		updateLocalMaterialFromModel(i, lod);
+        //updateLocalMaterialFromModel(i, lod);
     }
 }
 
@@ -146,32 +187,38 @@ ModelNode* RenderObject::getModelNodeByName(std::string name, int lod)
 
 void RenderObject::updateLocalMaterialFromModel(unsigned int index, int lod)
 {
-	_modelsDatas[lod].materials[index] = *(_modelsDatas[lod].model->getMaterial(index));
-
-	if (_modelsDatas[lod].materials[index].shader == MIRROR_MATERIAL)
+    Material* material = _modelsDatas[lod].model->getMaterial(index);
+	if (material->shader == MIRROR_MATERIAL)
 	{
-		MirrorComponent* mirrorComponent = GraphicsManager::getInstance().findMirrorComponent(getSceneObject(), _modelsDatas[lod].materials[index].mirrorName);
+        GraphicsManager* graphicsManager = getSceneObject()->getSceneManager()->getGraphicsManager();
+		MirrorComponent* mirrorComponent = graphicsManager->findMirrorComponent(getSceneObject(), material->mirrorName);
 		if (mirrorComponent != NULL)
 		{
-			_modelsDatas[lod].materials[index].diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+            material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
 		}
 		else
 		{
-			GraphicsManager::getInstance().registerPendingMaterialForMirrorComponent(&_modelsDatas[lod].materials[index]);
+            graphicsManager->registerPendingMaterialForMirrorComponent(material);
 		}
 	}
 }
 
 
-Material* RenderObject::getMaterial(unsigned int index, int lod)
+void RenderObject::replaceMaterialsByName(const std::vector<Material*>& materials, int lod)
 {
-    return &_modelsDatas[lod].materials[index];
+    _modelsDatas[lod].modelRootNode->replaceMaterialsByName(materials);
 }
 
 
-unsigned int RenderObject::getMaterialsCount(int lod)
+void RenderObject::addMirrorMaterial(Material* material)
 {
-	return _modelsDatas[lod].materialsCount;
+    _mirrorMaterials.push_back(material);
+}
+
+
+const std::vector<Material*>& RenderObject::getMirrorMaterials()
+{
+    return _mirrorMaterials;
 }
 
 

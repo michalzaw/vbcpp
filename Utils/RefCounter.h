@@ -1,6 +1,10 @@
 #ifndef REFCOUNTER_H_INCLUDED
 #define REFCOUNTER_H_INCLUDED
 
+
+#include "Logger.h"
+
+
 //! \brief Reference Counter class
 /*!
 	It counts references that other objects hold to specific object.
@@ -14,17 +18,13 @@ class RefCounter
 		//! CONSTRUCTOR
 		RefCounter() : _refCounter(1)
 		{
-		    #ifdef DEBUG_MODE
-               fprintf(stdout, "Creating Reference Counter\n");
-            #endif
+			LOG_DEBUG("Creating Reference Counter");
 		}
 
 		//! DESTRUCTOR
 		virtual ~RefCounter()
 		{
-		    #ifdef DEBUG_MODE
-               fprintf(stdout, "Destroying Reference Counter\n");
-            #endif
+			LOG_DEBUG("Destroying Reference Counter");
 		}
 
 		//! Grab a pointer

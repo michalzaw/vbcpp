@@ -37,6 +37,36 @@ Label* GUIManager::addLabel(RFont* font, std::string text)
 }
 
 
+Button* GUIManager::addButton(RTexture* texture, RTexture* textureHovered, RFont* font, std::string text)
+{
+    Button* button = new Button(texture, textureHovered, font, text);
+
+    _objects.push_back(button);
+
+    return button;
+}
+
+
+ProgressBar* GUIManager::addProgressBar(bool indeterminate)
+{
+    ProgressBar* progressBar = new ProgressBar(indeterminate);
+
+    _objects.push_back(progressBar);
+
+    return progressBar;
+}
+
+
+Picker* GUIManager::addPicker(RFont* font, const std::vector<std::string>& options, unsigned int width, unsigned int height)
+{
+    Picker* picker = new Picker(font, options, width, height);
+
+    _objects.push_back(picker);
+
+    return picker;
+}
+
+
 unsigned int GUIManager::getObjectsCount()
 {
     return _objects.size();
@@ -49,6 +79,28 @@ GUIObject* GUIManager::getObject(unsigned int index)
         return _objects[index];
 
     return NULL;
+}
+
+
+void GUIManager::removeObject(GUIObject* object)
+{
+    for (std::vector<GUIObject*>::iterator i = _objects.begin(); i != _objects.end(); ++i)
+    {
+        if (object == *i)
+        {
+            _objects.erase(i);
+            return;
+        }
+    }
+}
+
+
+void GUIManager::update(float deltaTime)
+{
+    for (GUIObject* guiObject : _objects)
+    {
+        guiObject->update(deltaTime);
+    }
 }
 
 

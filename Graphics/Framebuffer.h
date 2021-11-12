@@ -25,6 +25,7 @@ class Framebuffer
 
         UintRect _viewport;
 
+        bool _isCreated;
         bool _isInitialized;
 
         void checkFramebufferStatus();
@@ -46,6 +47,8 @@ class Framebuffer
 
         void setViewport(const UintRect& viewport);
         UintRect& getViewport();
+
+        void setTextureFiltering(int index, TextureFilterMode minFilter, TextureFilterMode magFilter);
 
 };
 

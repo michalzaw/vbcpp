@@ -2,6 +2,8 @@
 #define RFONT_H_INCLUDED
 
 
+#include <unordered_map>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 //#include <freetype/freetype.h>
@@ -21,6 +23,10 @@ struct CharacterInfo
     int width;
     int height;
 
+    int x;
+    int y;
+
+    int vboOffset;
 };
 
 
@@ -29,18 +35,21 @@ class RFont : virtual public Resource
     friend class FontLoader;
 
     private:
-        CharacterInfo _characterInfos[256];
+        std::unordered_map<unsigned int, CharacterInfo> _characterInfos;
         RTexture2D* _characterTexture;
 
         VBO* _vbo;
 
+        int _pixelSize;
+
     public:
-        RFont(std::string path);
+        RFont(const std::string& path, int pixelSize);
         virtual ~RFont();
 
-        const CharacterInfo& getCharacterInfo(char character);
+        const CharacterInfo& getCharacterInfo(unsigned int character);
         RTexture2D* getTexture();
         VBO* getVBO();
+        int getPixelSize();
 
 };
 
