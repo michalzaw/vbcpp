@@ -47,8 +47,8 @@ Button::~Button()
 void Button::setAllElementsPositions()
 {
 	_image->setPosition(_position);
-	_image->setScale((_width) / _image->getTexture()->getSize().x,
-					 (_height) / _image->getTexture()->getSize().y);
+	_image->setScale(static_cast<float>(_width) / _image->getTexture()->getSize().x,
+					 static_cast<float>(_height) / _image->getTexture()->getSize().y);
 
 	if (_label != nullptr)
 	{

@@ -24,9 +24,16 @@ class MenuSelectBusScene final : public GameScene
 
 		MenuSelectBusInterfaceWindow* _menuInterfaceWindow;
 
+		RFont* _fontBoldItalic32;
+		RFont* _fontRegular22;
+		RFont* _fontRegular18;
+		float _uiRatio;
+
+		std::vector<GUIObject*> _busLogoWindowElements;
 		std::vector<GUIObject*> _busDescriptionWindowElements;
 		std::vector<GUIObject*> _busConfigurationWindowElements;
 		std::vector<Picker*> _busConfigurationVariablesPickers;
+		std::vector<Button*> _busRepaintsButtons;
 
 		void loadAvailableBusesNames();
 
@@ -38,12 +45,14 @@ class MenuSelectBusScene final : public GameScene
 		void selectPreviousBus();
 		void showSelectedBus();
 
-		void showBusLogo();
+		void showBusLogo(glm::vec2 windowPosition, int windowWidth, int windowHeight);
 
+		void createBusLogoWindow();
 		void createBusDescriptionWindow();
 		void createConfigurationWindow();
 		void setValuesInVariablesPickers();
 		void createConfigurationPreviewWindow();
+		void createBusRepaintsWindow();
 
 		void startGame();
 

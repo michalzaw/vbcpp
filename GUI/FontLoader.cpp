@@ -134,7 +134,7 @@ RFont* FontLoader::loadFont(const std::string& fontName, int pixelSize)
     _textureHeight = next_p2(_textureHeight);
 
     _font->_characterTexture = new RTexture2D(TF_DEPTH_COMPONENT, glm::uvec2(_textureWidth, _textureHeight));
-    _font->_characterTexture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+    _font->_characterTexture->setFiltering(TFM_NEAREST, TFM_NEAREST);
     _font->_characterTexture->setClampMode(TCM_CLAMP_TO_EDGE);
 
     _font->_vbo = new VBO(charsCount * 4 * sizeof(GUIVertex));

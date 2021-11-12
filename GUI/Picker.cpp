@@ -8,10 +8,16 @@ Picker::Picker(RFont* font, const std::vector<std::string>& options, unsigned in
 	: _width(width), _height(height), _margin(5.0f, 5.0f), _backgroundColor(1.0f, 1.0f, 1.0f, 0.0f),
 	_options(options), _selectedOption(0)
 {
+	float arrowsScale = _height / 30.0f;
+
 	_imageBackground = new Image(ResourceManager::getInstance().loadOneColorTexture(_backgroundColor));
 
 	_buttonArrowBack = new Button(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"), ResourceManager::getInstance().loadTexture("Data/arrow_back2_2.png"));
 	_buttonArrowForward = new Button(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"), ResourceManager::getInstance().loadTexture("Data/arrow_forward2_2.png"));
+	_buttonArrowBack->setWidth(_buttonArrowBack->getWidth() * arrowsScale);
+	_buttonArrowBack->setHeight(_buttonArrowBack->getHeight() * arrowsScale);
+	_buttonArrowForward->setWidth(_buttonArrowForward->getWidth() * arrowsScale);
+	_buttonArrowForward->setHeight(_buttonArrowForward->getHeight() * arrowsScale);
 
 	_label = new Label(font);
 	_label->setText(_options[_selectedOption]);

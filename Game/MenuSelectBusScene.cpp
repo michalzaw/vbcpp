@@ -7,6 +7,7 @@
 #include "MainGameScene.h"
 
 #include "../Bus/BusPreviewLoader.h"
+#include "../Bus/BusRepaintLoader.h"
 
 #include "../Graphics/Renderer.h"
 
@@ -24,7 +25,11 @@ MenuSelectBusScene::MenuSelectBusScene(Window* window)
 	_selectedBus(0), _selectedBusConfigurationIndex(0), _selectedBusRepaintName(""),
 	_menuInterfaceWindow(nullptr)
 {
+	_uiRatio = _window->getHeight() / 1080.0f;
 
+	_fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32 * _uiRatio);
+	_fontRegular22 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 22 * _uiRatio);
+	_fontRegular18 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 18 * _uiRatio);
 }
 
 
@@ -140,10 +145,14 @@ void MenuSelectBusScene::showSelectedBus()
 
 	_buses2[_selectedBus]->setConfiguration(_selectedBusConfigurationVariables);
 
-	showBusLogo();
+	//showBusLogo();
 
 	_menuInterfaceWindow->setCurrentBusPreview(_buses2[_selectedBus]);
 
+	for (GUIObject* guiObject : _busLogoWindowElements)
+	{
+		_gui->removeObject(guiObject);
+	}
 	for (GUIObject* guiObject : _busDescriptionWindowElements)
 	{
 		_gui->removeObject(guiObject);
@@ -152,25 +161,38 @@ void MenuSelectBusScene::showSelectedBus()
 	{
 		_gui->removeObject(guiObject);
 	}
+	for (GUIObject* guiObject : _busRepaintsButtons)
+	{
+		_gui->removeObject(guiObject);
+	}
+	_busLogoWindowElements.clear();
 	_busDescriptionWindowElements.clear();
 	_busConfigurationWindowElements.clear();
 	_busConfigurationVariablesPickers.clear();
+	_busRepaintsButtons.clear();
+	createBusLogoWindow();
 	createBusDescriptionWindow();
 	createConfigurationWindow();
+	createBusRepaintsWindow();
 }
 
 
-void MenuSelectBusScene::showBusLogo()
+void MenuSelectBusScene::showBusLogo(glm::vec2 windowPosition, int windowWidth, int windowHeight)
 {
 	const std::string& logoFileName = _buses2[_selectedBus]->bus->getBusDescription().logo;
 	if (!logoFileName.empty())
 	{
 		_busLogo->setTexture(ResourceManager::getInstance().loadTexture(logoFileName));
 
-		float scale = _window->getWidth() / 10.0f / _busLogo->getSize().x;
+		float scale = windowWidth / _busLogo->getSize().x * 0.8;
+		if (_busLogo->getTexture()->getSize().y * scale > windowHeight)
+		{
+			scale = windowHeight / _busLogo->getSize().y * 0.8;
+		}
 
 		_busLogo->setScale(scale, scale);
-		_busLogo->setPosition(_window->getWidth() - _busLogo->getRealSize().x - 50.0f, _window->getHeight() - _busLogo->getRealSize().y - 50.0f);
+		//_busLogo->setPosition(_window->getWidth() - _busLogo->getRealSize().x - 50.0f, _window->getHeight() - _busLogo->getRealSize().y - 50.0f);
+		_busLogo->setPosition(windowPosition.x + (windowWidth - _busLogo->getRealSize().x) / 2.0f, windowPosition.y - (windowHeight + _busLogo->getRealSize().y) / 2.0f);
 		//_busLogo->setPosition(0.0f, _window->getHeight() - _busLogo->getRealSize().y);
 		_busLogo->setIsActive(true);
 	}
@@ -181,31 +203,50 @@ void MenuSelectBusScene::showBusLogo()
 }
 
 
-void MenuSelectBusScene::createBusDescriptionWindow()
+void MenuSelectBusScene::createBusLogoWindow()
 {
-	RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
-	RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 18);
+	int windowWidth = 440 * _uiRatio;
+	int windowHeight = 165 * _uiRatio;
 
-	int windowWidth = 440;
-	int windowHeight = 440;
-
-	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 325 + 40 + 30);
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50 * _uiRatio, windowHeight + (325 + 40 + 30 + 440 + 30) * _uiRatio);
 
 	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
-	imageBackground->setPosition(startPosition.x, startPosition.y - windowHeight);
+	imageBackground->setPosition(0, -windowHeight);
 
-	Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(BUS_DESCRIPTION));
-	labelTitle->setPosition(startPosition + glm::vec2(40, -40));
+	_busLogoWindowElements.push_back(imageBackground);
+
+	showBusLogo(startPosition, windowWidth, windowHeight);
+
+	for (auto guiElement : _busLogoWindowElements)
+	{
+		guiElement->move(startPosition);
+	}
+}
+
+
+void MenuSelectBusScene::createBusDescriptionWindow()
+{
+	int windowWidth = 440 * _uiRatio;
+	int windowHeight = 440 * _uiRatio;
+
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50 * _uiRatio, windowHeight + (325 + 40 + 30) * _uiRatio);
+
+	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
+	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
+	imageBackground->setPosition(0, -windowHeight);
+
+	Label* labelTitle = _gui->addLabel(_fontBoldItalic32, GET_TEXT(BUS_DESCRIPTION));
+	labelTitle->setPosition(40 * _uiRatio, -40 * _uiRatio);
 	labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	Image* imgLine = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-	imgLine->setPosition(startPosition + glm::vec2(20, -50));
-	imgLine->setScale(200, 1);
+	imgLine->setPosition(20 * _uiRatio, -50 * _uiRatio);
+	imgLine->setScale(200 * _uiRatio, 1);
 
-	Label* description = _gui->addLabel(fontRegular26);
-	description->setPosition(startPosition + glm::vec2(20, -90));
-	description->setMaxWidth(400);
+	Label* description = _gui->addLabel(_fontRegular18);
+	description->setPosition(20 * _uiRatio, -90 * _uiRatio);
+	description->setMaxWidth(400 * _uiRatio);
 	description->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	description->setText(_buses2[_selectedBus]->bus->getBusDescription().description);
 
@@ -214,39 +255,41 @@ void MenuSelectBusScene::createBusDescriptionWindow()
 	_busDescriptionWindowElements.push_back(imgLine);
 	_busDescriptionWindowElements.push_back(description);
 
+	for (auto guiElement : _busDescriptionWindowElements)
+	{
+		guiElement->move(startPosition);
+	}
 }
 
 
 void MenuSelectBusScene::createConfigurationWindow()
 {
-	RFont* fontBoldItalic32 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32);
-	RFont* fontRegular26 = ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", 22);
-	glm::vec2 pickerMargin = glm::vec2(5.0f, 7.5f);
+	glm::vec2 pickerMargin = glm::vec2(5.0f, 7.5f) * _uiRatio;
 	//glm::vec4 pickerBackgroundColor = glm::vec4(0.0f, 0.0f, 0.0f, 0.1f);
 	//glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.3f);
 	glm::vec4 pickerBackgroundColor = glm::vec4(1.0f, 1.0f, 1.0f, 0.0f);
 
-	int pickerHeight = 30;
-	int pickerYSpace = 5;
-	int windowWidth = 440;
-	int windowHeight = 90 + (pickerHeight + pickerYSpace) * 4 + 15;
+	int pickerHeight = 30 * _uiRatio;
+	int pickerYSpace = 5 * _uiRatio;
+	int windowWidth = 440 * _uiRatio;
+	int windowHeight = (90 * _uiRatio + (pickerHeight + pickerYSpace) * 4 + 15 * _uiRatio);
 
 	//glm::vec2 startPosition = glm::vec2(650, 340);
-	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50, windowHeight + 50 + 40 + 30);
+	glm::vec2 startPosition = glm::vec2(_window->getWidth() - windowWidth - 50 * _uiRatio, windowHeight + (50 + 40 + 30) * _uiRatio);
 
 	Image* imageBackground = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)));
 	imageBackground->setScale(windowWidth / imageBackground->getTexture()->getSize().x, windowHeight / imageBackground->getTexture()->getSize().y);
-	imageBackground->setPosition(startPosition.x, startPosition.y - windowHeight);
+	imageBackground->setPosition(0, -windowHeight);
 
-	Label* labelTitle = _gui->addLabel(fontBoldItalic32, GET_TEXT(CONFIGURATION));
-	labelTitle->setPosition(startPosition + glm::vec2(40, -40));
+	Label* labelTitle = _gui->addLabel(_fontBoldItalic32, GET_TEXT(CONFIGURATION));
+	labelTitle->setPosition(40 * _uiRatio, -40 * _uiRatio);
 	labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	Image* imgLine = _gui->addImage(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)));
-	imgLine->setPosition(startPosition + glm::vec2(20, -50));
-	imgLine->setScale(200, 1);
+	imgLine->setPosition(20 * _uiRatio, -50 * _uiRatio);
+	imgLine->setScale(200 * _uiRatio, 1);
 
-	int y = -90;
+	int y = -90 * _uiRatio;
 
 	std::vector<std::string> optionsConfigurations;
 	for (const auto& predefinedConfiguration : _buses2[_selectedBus]->predefinedConfigurations)
@@ -258,8 +301,8 @@ void MenuSelectBusScene::createConfigurationWindow()
 	{
 		optionsConfigurations.push_back(GET_TEXT(DEFAULT_BUS_CONFIGURATION));
 	}
-	Picker* picker1 = _gui->addPicker(fontRegular26, optionsConfigurations, 400, pickerHeight);
-	picker1->setPosition(startPosition + glm::vec2(20, y - pickerMargin.y));
+	Picker* picker1 = _gui->addPicker(_fontRegular22, optionsConfigurations, 400 * _uiRatio, pickerHeight);
+	picker1->setPosition(20 * _uiRatio, y - pickerMargin.y);
 	picker1->setBackgroundColor(pickerBackgroundColor);
 	picker1->setMargin(pickerMargin);
 
@@ -287,11 +330,11 @@ void MenuSelectBusScene::createConfigurationWindow()
 		const GameVariable& variable = _buses2[_selectedBus]->availableVariables[i];
 
 		y -= pickerHeight + pickerYSpace;
-		int pickerWidth = 150;
+		int pickerWidth = 150 * _uiRatio;
 
-		Label* label = _gui->addLabel(fontRegular26, _buses2[_selectedBus]->bus->getText(variable.displayName));
+		Label* label = _gui->addLabel(_fontRegular22, _buses2[_selectedBus]->bus->getText(variable.displayName));
 		label->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-		label->setPosition(startPosition + glm::vec2(20, y));
+		label->setPosition(20 * _uiRatio, y);
 
 		std::vector<std::string> optionsVariableValues;
 		for (const auto& variableValue : variable.values)
@@ -299,8 +342,8 @@ void MenuSelectBusScene::createConfigurationWindow()
 			const std::string& displayValue = _buses2[_selectedBus]->bus->getText(variableValue.displayValue);
 			optionsVariableValues.push_back(displayValue);
 		}
-		Picker* picker = _gui->addPicker(fontRegular26, optionsVariableValues, pickerWidth, pickerHeight);
-		picker->setPosition(startPosition + glm::vec2(windowWidth - pickerWidth - 20, y - pickerMargin.y));
+		Picker* picker = _gui->addPicker(_fontRegular22, optionsVariableValues, pickerWidth, pickerHeight);
+		picker->setPosition(windowWidth - pickerWidth - 20 * _uiRatio, y - pickerMargin.y);
 		picker->setBackgroundColor(pickerBackgroundColor);
 		picker->setMargin(pickerMargin);
 		picker->setOnValueChangedCallback([this, variable](int index, const std::string& value)
@@ -315,6 +358,11 @@ void MenuSelectBusScene::createConfigurationWindow()
 
 		_busConfigurationWindowElements.push_back(label);
 		_busConfigurationWindowElements.push_back(picker);
+	}
+
+	for (auto guiElement : _busConfigurationWindowElements)
+	{
+		guiElement->move(startPosition);
 	}
 
 	setValuesInVariablesPickers();
@@ -404,6 +452,39 @@ void MenuSelectBusScene::createConfigurationPreviewWindow()
 }
 
 
+void MenuSelectBusScene::createBusRepaintsWindow()
+{
+	int width = 64 * _buses2[_selectedBus]->availableRepaints.size() + 20 * (_buses2[_selectedBus]->availableRepaints.size() - 1);
+
+	int x = (50 * _uiRatio + (_window->getWidth() - (2 * 50 + 440 + 30 + width) * _uiRatio) / 2.0f);
+
+	for (const BusRepaintDescription& repaintDescription : _buses2[_selectedBus]->availableRepaints)
+	{
+		Button* button = _gui->addButton(repaintDescription.logo);
+		button->setWidth(64 * _uiRatio);
+		button->setHeight(64 * _uiRatio);
+
+		button->setPosition(x, 50 * _uiRatio);
+
+		button->setOnClickCallback([this, repaintDescription]()
+			{
+				std::vector<RMaterialsCollection*> altMaterialsCollections;
+				BusRepaintLoader::loadBusRepaint(_buses2[_selectedBus]->busName, repaintDescription.repainDirectorytName, altMaterialsCollections);
+				for (RMaterialsCollection* materialsCollection : altMaterialsCollections)
+				{
+					_buses2[_selectedBus]->bus->replaceMaterialsByName(materialsCollection->getMaterials());
+				}
+
+				_selectedBusRepaintName = repaintDescription.repainDirectorytName;
+			});
+
+		x += 84 * _uiRatio;
+
+		_busRepaintsButtons.push_back(button);
+	}
+}
+
+
 void MenuSelectBusScene::startGame()
 {
 	std::unordered_map<std::string, std::string> params;
@@ -425,13 +506,13 @@ void MenuSelectBusScene::initialize()
 	_busLogo = _gui->addImage(ResourceManager::getInstance().loadDefaultWhiteTexture());
 	_busLogo->setIsActive(false);
 
-	Label* description = _gui->addLabel(ResourceManager::getInstance().loadFont("Fonts/arial.ttf"));
+	/*Label* description = _gui->addLabel(ResourceManager::getInstance().loadFont("Fonts/arial.ttf"));
 	description->setPosition(0, 500);
 	description->setMaxWidth(800);
 	description->setMaxHeight(600);
 	description->setScale(0.4f, 0.4f);
 	description->setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.");
-
+	*/
 	/*RTexture2D* logoTexture = ResourceManager::getInstance().loadTexture("Data/logo.jpg");
 	Image* logoImage = _gui->addImage(logoTexture);
 
@@ -497,13 +578,13 @@ void MenuSelectBusScene::initialize()
 										  "START");*/
 	Button* buttonStart = _gui->addButton(ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.2f)),
 										  ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.1f)),
-										  ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 32),
+										  _fontBoldItalic32,
 										  "START");
-	buttonStart->setWidth(440);
-	buttonStart->setHeight(40);
+	buttonStart->setWidth(440 * _uiRatio);
+	buttonStart->setHeight(40 * _uiRatio);
 	buttonStart->setTextColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 	//buttonStart->setPosition((_window->getWidth() - buttonStart->getWidth()) / 2.0f, 50);
-	buttonStart->setPosition(_window->getWidth() - buttonStart->getWidth() - 50, 50);
+	buttonStart->setPosition(_window->getWidth() - buttonStart->getWidth() - 50 * _uiRatio, 50 * _uiRatio);
 	buttonStart->setOnClickCallback([this]()
 		{
 			startGame();
