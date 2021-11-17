@@ -495,12 +495,7 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 {
 	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		ImGui::Text(Strings::toString(component->getPoints().size()).c_str());
-
-		if (ImGui::Button("Generate One Triangle"))
-		{
-			component->buildAndCreateRenderObject();
-		}
+		ImGui::Text("Number of points: %d", component->getPoints().size());
 
 		if (ImGui::Button("Generate Triangle Mesh"))
 		{
@@ -644,20 +639,6 @@ void showObjectProperties()
 			if (roadComponent && roadComponent->getRoadType() == RoadType::BEZIER_CURVES)
 			{
 				showRoadComponentDetails(roadComponent);
-			}
-			if (roadComponent && roadComponent->getRoadType() == RoadType::TEST)
-			{
-				ImGui::Text(Strings::toString(roadComponent->getPoints().size()).c_str());
-
-				if (ImGui::Button("Generate One Triangle"))
-				{
-					roadComponent->buildPolygon();
-				}
-
-				if (ImGui::Button("Generate Triangle Mesh"))
-				{
-					roadComponent->buildPolygon(false);
-				}
 			}
 			if (roadComponent && roadComponent->getRoadType() == RoadType::LINES_AND_ARC)
 			{

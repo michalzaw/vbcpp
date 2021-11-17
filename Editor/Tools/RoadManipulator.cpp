@@ -255,7 +255,7 @@ namespace RoadManipulator
 
 	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
-		if (segments.size() == 0 && context.roadType != RoadType::ARC)
+		if (segments.size() == 0 || context.roadType != RoadType::ARC)
 			return;
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -418,7 +418,7 @@ namespace RoadManipulator
 				drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition);
 			}
 		}
-		else if (context.roadType == RoadType::TEST)
+		else if (context.roadType == RoadType::POLYGON)
 		{
 			// draw lines between two points
 			for (int i = 0; i < points.size(); ++i)

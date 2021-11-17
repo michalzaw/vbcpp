@@ -9,7 +9,6 @@
 
 #include "../Utils/BezierCurvesUtils.h"
 #include "../Utils/Logger.h"
-#include "../Utils/PolygonGenerator.h"
 
 
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
@@ -42,96 +41,8 @@ RoadObject::~RoadObject()
 }
 
 
-void RoadObject::buildPolygon(bool isOnePass)
-{
-	if (_points2.size() == 0)
-	{
-		//for (auto p : _points)
-		for (int i = 0; i < _points.size(); ++i)
-		{
-			_points2.push_back(true);
-		}
-
-		indices.clear();
-	}
-
-	Vertex* vertices;
-	if (_points.size() < 3)
-	{
-		vertices = new Vertex[3];
-		vertices[0].position = glm::vec3(0.0f, 0.0f, 0.0f);
-		vertices[1].position = glm::vec3(0.0f, 0.0f, 0.0f);
-		vertices[2].position = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		indices.push_back(2);
-		indices.push_back(1);
-		indices.push_back(0);
-	}
-	else
-	{
-		vertices = new Vertex[_points.size()];
-		for (int i = 0; i < _points.size(); ++i)
-		{
-			vertices[i].position = _points[i];
-		}
-
-		int numberOfPasses = isOnePass ? 1 : (_points.size() - 2);
-		for (int i = 0; i < numberOfPasses; ++i)
-		{
-			int earPoint = PolygonGenerator::findEar(_points, _points2);
-			LOG_DEBUG(LOG_VARIABLE(earPoint));
-
-			//unsigned int* indices = new unsigned int[3];
-			if (earPoint >= 0)
-			{
-				int i1 = PolygonGenerator::getPreviousPointIndex(_points, _points2, earPoint);
-				int i2 = earPoint;
-				int i3 = PolygonGenerator::getNextPointIndex(_points, _points2, earPoint);
-
-				LOG_DEBUG(LOG_VARIABLE(i1));
-				LOG_DEBUG(LOG_VARIABLE(i2));
-				LOG_DEBUG(LOG_VARIABLE(i3));
-
-				indices.push_back(i3);
-				indices.push_back(i2);
-				indices.push_back(i1);
-				//indices[0] = i3;
-				//indices[1] = i2;
-				//indices[2] = i1;
-			}
-
-			if (earPoint >= 0)
-			{
-				_points2[earPoint] = false;
-				//_points.erase(_points.begin() + earPoint);
-			}
-		}
-	}
-
-	std::vector<Material*> materials;
-	materials.push_back(new Material);
-	materials[0]->shader = WIREFRAME_MATERIAL;
-
-	StaticModelMesh* meshes = new StaticModelMesh[1];
-	meshes[0].setMeshData(vertices, _points.size() > 2 ? _points.size() : 3, indices.data(), indices.size() , 0, WIREFRAME_MATERIAL, false);
-
-	StaticModelNode* modelNode = new StaticModelNode;
-	modelNode->name = "road";
-	modelNode->meshes = meshes;
-	modelNode->meshesCount = 1;
-	modelNode->parent = nullptr;
-
-	setModel(new RStaticModel("", modelNode, materials, GL_TRIANGLES, nullptr, 0));
-}
-
-
 void RoadObject::buildModel(bool reuseExistingModel)
 {
-	if (_roadType == RoadType::TEST)
-	{
-		return;
-	}
-	
 	std::vector<RoadConnectionPointData*> connectionPointsData;
 	for (int i = 0; i < 2; ++i)
 	{
@@ -267,11 +178,7 @@ void RoadObject::setSegments(std::vector<RoadSegment> segments)
 
 void RoadObject::addPoint(glm::vec3 position)
 {
-	if (_roadType == RoadType::TEST)
-	{
-		_points.push_back(position);
-	}
-	else if (_roadType == RoadType::LINES_AND_ARC)
+	if (_roadType == RoadType::LINES_AND_ARC)
 	{
 		_points.push_back(position);
 

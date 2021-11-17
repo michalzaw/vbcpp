@@ -17,7 +17,7 @@ namespace RoadManipulator
 	{
 		ARC,
 		BEZIER_CURVE,
-		TEST
+		POLYGON
 	};
 
 	// call BeginFrame right after ImGui_XXXX_NewFrame();

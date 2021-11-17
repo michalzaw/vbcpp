@@ -525,7 +525,6 @@ namespace vbEditor
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
-	static bool _addRoad3DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
 	bool _showGenerateObjectsAlongRoadWindow = false;
 
@@ -816,7 +815,6 @@ namespace vbEditor
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
-				ImGui::MenuItem("Add new Road (TEST)..", NULL, &_addRoad3DialogWindow);
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
@@ -932,27 +930,6 @@ namespace vbEditor
 				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
 				RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 				roadRenderObject->setIsCastShadows(false);
-
-				setSelectedSceneObject(roadSceneObject);
-			}
-		}
-
-		static int currenProfiletSelection3 = 0;
-		if (_addRoad3DialogWindow)
-		{
-			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection3))
-			{
-				_addRoad3DialogWindow = false;
-
-				_clickMode = CM_ROAD_EDIT;
-
-				std::string profileName = _availableRoadProfiles[currenProfiletSelection3];
-				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
-
-				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RoadObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::TEST, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-				roadRenderObject->setIsCastShadows(false);
-				roadRenderObject->buildPolygon();
 
 				setSelectedSceneObject(roadSceneObject);
 			}
@@ -1341,7 +1318,7 @@ namespace vbEditor
 			_camera->getPosition(),
 			component->getPoints(),
 			segments,
-			RoadManipulator::RoadType::TEST);
+			RoadManipulator::RoadType::POLYGON);
 
 		if (RoadManipulator::IsModified())
 		{
