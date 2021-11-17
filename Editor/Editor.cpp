@@ -28,6 +28,8 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongRoadWindow.h"
 
+#include "../Graphics/ShapePolygonComponent.h"
+
 //std::list<Editor*> editorInstances;
 
 //Editor* editorInstance = nullptr;
@@ -523,6 +525,7 @@ namespace vbEditor
 	static bool _addSceneObject = false;
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
+	static bool _addRoad3DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
 	bool _showGenerateObjectsAlongRoadWindow = false;
 
@@ -542,9 +545,9 @@ namespace vbEditor
 		_selectedSceneObject = object;
 		centerGraphView();
 
-		if (object != nullptr && object->getComponent(CT_ROAD_OBJECT) != nullptr)
+		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr))
 		{
-			_clickMode = CM_ROAD_EDIT;
+			_clickMode = CM_ROAD_EDIT; // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
 		}
 
 		roadsToUpdate.clear();
@@ -618,6 +621,12 @@ namespace vbEditor
 						roadObject->addPoint(hitPosition);
 
 						isRoadModified = true;
+					}
+
+					ShapePolygonComponent* shapePolygonObject = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+					if (shapePolygonObject != nullptr)
+					{
+						shapePolygonObject->addPoint(hitPosition);
 					}
 				}
 			}
@@ -807,6 +816,14 @@ namespace vbEditor
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
+				ImGui::MenuItem("Add new Road (TEST)..", NULL, &_addRoad3DialogWindow);
+				if (ImGui::MenuItem("Add new custom polygon", NULL))
+				{
+					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
+					polygonSceneObject->addComponent(new ShapePolygonComponent);
+
+					setSelectedSceneObject(polygonSceneObject);
+				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
@@ -920,6 +937,27 @@ namespace vbEditor
 			}
 		}
 
+		static int currenProfiletSelection3 = 0;
+		if (_addRoad3DialogWindow)
+		{
+			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection3))
+			{
+				_addRoad3DialogWindow = false;
+
+				_clickMode = CM_ROAD_EDIT;
+
+				std::string profileName = _availableRoadProfiles[currenProfiletSelection3];
+				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+				RoadObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::TEST, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+				roadRenderObject->setIsCastShadows(false);
+				roadRenderObject->buildPolygon();
+
+				setSelectedSceneObject(roadSceneObject);
+			}
+		}
+
 		if (_saveMap)
 		{
 			//printf("Saving map\n");
@@ -978,9 +1016,12 @@ namespace vbEditor
 			//if (_showRoadTools)
 			//{
 				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
 
 				if (roadComponent)
 					showRoadTools();
+				else if (shapePolygonComponent)
+					showPolygonEditTool();
 				else
 					ShowTransformGizmo();
 			//}
@@ -1282,6 +1323,29 @@ namespace vbEditor
 		if (!isRoadModified)
 		{
 			isRoadModified = RoadManipulator::IsModified();
+		}
+	}
+
+	void showPolygonEditTool()
+	{
+		ShapePolygonComponent* component = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+
+		std::vector<RoadSegment> segments;
+		std::vector<glm::vec3> connectionPointsPositions;
+
+		ImGuiIO& io = ImGui::GetIO();
+		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
+			_selectedSceneObject->getLocalTransformMatrix(),
+			_camera->getPosition(),
+			component->getPoints(),
+			segments,
+			RoadManipulator::RoadType::TEST);
+
+		if (RoadManipulator::IsModified())
+		{
+			component->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
 		}
 	}
 

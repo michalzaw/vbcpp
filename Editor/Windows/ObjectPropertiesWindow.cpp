@@ -13,6 +13,9 @@
 
 #include "RoadTools.h"
 
+#include "../../Graphics/ShapePolygonComponent.h"
+
+
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
 {
@@ -488,6 +491,25 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 }
 
 
+void showShapePolygonComponentDetails(ShapePolygonComponent* component)
+{
+	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text(Strings::toString(component->getPoints().size()).c_str());
+
+		if (ImGui::Button("Generate One Triangle"))
+		{
+			component->buildAndCreateRenderObject();
+		}
+
+		if (ImGui::Button("Generate Triangle Mesh"))
+		{
+			component->buildAndCreateRenderObject();
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -533,6 +555,12 @@ void showObjectProperties()
 			if (grassComponent)
 			{
 				showRenderComponentDetails(grassComponent);
+			}
+
+			ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+			if (shapePolygonComponent)
+			{
+				showShapePolygonComponentDetails(shapePolygonComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -616,6 +644,20 @@ void showObjectProperties()
 			if (roadComponent && roadComponent->getRoadType() == RoadType::BEZIER_CURVES)
 			{
 				showRoadComponentDetails(roadComponent);
+			}
+			if (roadComponent && roadComponent->getRoadType() == RoadType::TEST)
+			{
+				ImGui::Text(Strings::toString(roadComponent->getPoints().size()).c_str());
+
+				if (ImGui::Button("Generate One Triangle"))
+				{
+					roadComponent->buildPolygon();
+				}
+
+				if (ImGui::Button("Generate Triangle Mesh"))
+				{
+					roadComponent->buildPolygon(false);
+				}
 			}
 			if (roadComponent && roadComponent->getRoadType() == RoadType::LINES_AND_ARC)
 			{

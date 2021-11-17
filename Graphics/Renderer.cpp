@@ -1102,6 +1102,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
+    // WIREFRAME_MATERIAL
+    _shaderList[WIREFRAME_MATERIAL] = _shaderList[SOLID_MATERIAL];
+
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NOTEXTURE_MATERIAL] = MIRROR_SOLID_MATERIAL;
@@ -1721,6 +1724,10 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDisable(GL_BLEND);
             }
+            else if (currentShader == WIREFRAME_MATERIAL)
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            }
 
             if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
@@ -1733,6 +1740,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
+            }
+            else if (material->shader == WIREFRAME_MATERIAL)
+            {
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
             else if (material->shader == EDITOR_AXIS_SHADER)
             {
@@ -1952,6 +1963,7 @@ void Renderer::renderScene(RenderData* renderData)
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB

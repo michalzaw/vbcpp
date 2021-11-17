@@ -97,6 +97,10 @@ SceneObject::~SceneObject()
 				_sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 				break;
 
+            case CT_SHAPE_POLYGON:
+                delete* i;
+                break;
+
         }
     }
 }
@@ -316,6 +320,10 @@ void SceneObject::removeComponent(Component* component)
 				case CT_CAMERA_CONTROL:
                     _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 					break;
+
+                case CT_SHAPE_POLYGON:
+                    delete* i;
+                    break;
 
             }
 

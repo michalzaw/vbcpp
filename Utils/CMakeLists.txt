@@ -8,6 +8,7 @@ set (UTILS_SOURCES
 	Utils/InputSystem.cpp
 	Utils/LocalizationSystem.cpp
 	Utils/Logger.cpp
+	Utils/PolygonGenerator.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
@@ -36,6 +37,7 @@ set (UTILS_HEADERS
 	Utils/LocalizationSystem.h
 	Utils/Logger.h
 	Utils/Math.h
+	Utils/PolygonGenerator.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h

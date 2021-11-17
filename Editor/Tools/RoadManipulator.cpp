@@ -255,7 +255,7 @@ namespace RoadManipulator
 
 	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
-		if (segments.size() == 0 || context.roadType == RoadType::BEZIER_CURVE)
+		if (segments.size() == 0 && context.roadType != RoadType::ARC)
 			return;
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -345,6 +345,31 @@ namespace RoadManipulator
 		}
 	}
 
+	void drawLine(int p1, int p2, const std::vector<glm::vec3>& points, const std::vector<ImVec2>& pointsTransformImGui, const std::vector<bool>& pointsVisibility, const glm::vec3& cameraPosition)
+	{
+		ImVec2 point1 = pointsTransformImGui[p1];
+		ImVec2 point2 = pointsTransformImGui[p2];
+
+		ImVec2 fixedPoint1 = point1;
+		ImVec2 fixedPoint2 = point2;
+
+		if (!pointsVisibility[p1] && !pointsVisibility[p2])
+		{
+			return;
+		}
+		if (!pointsVisibility[p1])
+		{
+			fixedPoint1 = fixPointOutsideCamera(point1, point2, cameraPosition, points[p1], context.height);
+		}
+		if (!pointsVisibility[p2])
+		{
+			fixedPoint2 = fixPointOutsideCamera(point2, point1, cameraPosition, points[p2], context.height);
+		}
+
+		ImDrawList* drawList = context.drawList;
+		drawList->AddLine(fixedPoint1, fixedPoint2, 0xFFFFFFFF);
+	}
+
 	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, glm::vec3 cameraPosition, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
 	{
 		ComputeContext(view, projection, matrix, points, segments, roadType);
@@ -390,27 +415,18 @@ namespace RoadManipulator
 					continue;
 				}
 
-				ImVec2 point1 = pointsTransformImGui[p1];
-				ImVec2 point2 = pointsTransformImGui[p2];
+				drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition);
+			}
+		}
+		else if (context.roadType == RoadType::TEST)
+		{
+			// draw lines between two points
+			for (int i = 0; i < points.size(); ++i)
+			{
+				int p1 = i;
+				int p2 = (i + 1) % points.size();
 
-				ImVec2 fixedPoint1 = point1;
-				ImVec2 fixedPoint2 = point2;
-
-				if (!pointsVisibility[p1] && !pointsVisibility[p2])
-				{
-					continue;
-				}
-				if (!pointsVisibility[p1])
-				{
-					fixedPoint1 = fixPointOutsideCamera(point1, point2, cameraPosition, points[p1], context.height);
-				}
-				if (!pointsVisibility[p2])
-				{
-					fixedPoint2 = fixPointOutsideCamera(point2, point1, cameraPosition, points[p2], context.height);
-				}
-
-				ImDrawList* drawList = context.drawList;
-				drawList->AddLine(fixedPoint1, fixedPoint2, 0xFFFFFFFF);
+				drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition);
 			}
 		}
 
