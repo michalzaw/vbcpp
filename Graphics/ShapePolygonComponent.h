@@ -7,10 +7,15 @@
 #include "../Scene/Component.h"
 
 
+class RStaticModel;
+
+
 class ShapePolygonComponent final : public Component
 {
 	private:
 		std::vector<glm::vec3> _points;
+
+		RStaticModel* _generatedModel;
 
 	public:
 		ShapePolygonComponent();

@@ -67,6 +67,7 @@ void RoadObject::buildModel(bool reuseExistingModel)
 	if (_modelsDatas[0].modelRootNode != nullptr)
 	{
 		delete _modelsDatas[0].modelRootNode;
+		_modelsDatas[0].modelRootNode = nullptr;
 	}
 
 	if (!reuseExistingModel && _modelsDatas[0].model != nullptr)

@@ -198,14 +198,17 @@ namespace RoadGenerator
 
 			if (oldMeshes != nullptr)
 			{
+				LOG_DEBUG("Build road object: update existing meshes");
 				meshes[i].updateMeshData(vertices, verticesCount, indices, indicesCount);
 			}
 			else if (isGame)
 			{
+				LOG_DEBUG("Build road object: create new meshes in Game Mode");
 				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader);
 			}
 			else
 			{
+				LOG_DEBUG("Build road object: create new meshes in Editor Mode");
 				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 			}
 		}

@@ -136,12 +136,18 @@ void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>&
 
     _modelsDatas[lod].model = model;
 
+    if (_modelsDatas[lod].modelRootNode != nullptr)
+    {
+        delete _modelsDatas[lod].modelRootNode;
+    }
     _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this);
 
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
         //updateLocalMaterialFromModel(i, lod);
     }
+
+    _isCalculatedAABB = false;
 }
 
 
