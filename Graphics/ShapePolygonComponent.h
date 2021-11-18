@@ -4,10 +4,13 @@
 
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "../Scene/Component.h"
 
 
 class RStaticModel;
+struct StaticModelMesh;
 
 
 class ShapePolygonComponent final : public Component
@@ -16,6 +19,8 @@ class ShapePolygonComponent final : public Component
 		std::vector<glm::vec3> _points;
 
 		RStaticModel* _generatedModel;
+
+		glm::vec3* generateCollistionMesh(StaticModelMesh* meshes, unsigned int meshesCount, unsigned int totalIndicesCount);
 
 	public:
 		ShapePolygonComponent();

@@ -40,6 +40,27 @@ ShapePolygonComponent::~ShapePolygonComponent()
 }
 
 
+glm::vec3* ShapePolygonComponent::generateCollistionMesh(StaticModelMesh* meshes, unsigned int meshesCount, unsigned int totalIndicesCount)
+{
+	glm::vec3* collisionMesh = new glm::vec3[totalIndicesCount];
+	int counter = 0;
+
+	for (int i = 0; i < meshesCount; ++i)
+	{
+		unsigned int indicesCount = meshes[i].indicesCount;
+
+		for (int j = 0; j < indicesCount; ++j)
+		{
+			collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
+		}
+
+		counter += indicesCount;
+	}
+
+	return collisionMesh;
+}
+
+
 std::vector<glm::vec3>& ShapePolygonComponent::getPoints()
 {
 	return _points;
@@ -66,10 +87,6 @@ void ShapePolygonComponent::setPointPostion(int index, glm::vec3 newPosition)
 void ShapePolygonComponent::buildAndCreateRenderObject()
 {
 	std::vector<bool> _points2(_points.size(), true);
-	/*for (int i = 0; i < _points.size(); ++i)
-	{
-		_points2.push_back(true);
-	}*/
 
 	int numberOfPasses = _points.size() - 2;
 	int numberOfIndices = numberOfPasses * 3;
@@ -80,6 +97,7 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	for (int i = 0; i < _points.size(); ++i)
 	{
 		vertices[i].position = _points[i];
+		vertices[i].normal = glm::vec3(0.0f, 1.0f, 0.0f);
 	}
 
 	for (int i = 0; i < numberOfPasses; ++i)
@@ -116,12 +134,6 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	{
 		LOG_DEBUG("Build custom polygon: update existing meshes");
 		meshes[0].updateMeshData(vertices, _points.size(), indices, numberOfIndices);
-
-		_generatedModel->recalculateAABB();
-		//_generatedModel->setNewCollisionMesh(collisionMesh, collistionMeshSize);
-
-		RenderObject* currentRenderComponent = static_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
-		currentRenderComponent->setModel(_generatedModel);
 	}
 	else if (isGame)
 	{
@@ -134,7 +146,20 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 		meshes[0].setMeshData(vertices, _points.size() > 2 ? _points.size() : 3, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 	}
 
-	if (!isModelExist)
+
+	unsigned int collisionMeshSize = meshes[0].indicesCount;
+	glm::vec3* collisionMesh = generateCollistionMesh(meshes, 1, collisionMeshSize);
+
+
+	if (isModelExist)
+	{
+		_generatedModel->recalculateAABB();
+		_generatedModel->setNewCollisionMesh(collisionMesh, collisionMeshSize);
+
+		RenderObject* currentRenderComponent = static_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
+		currentRenderComponent->setModel(_generatedModel);
+	}
+	else
 	{
 		std::vector<Material*> materials;
 		materials.push_back(new Material);
@@ -146,7 +171,7 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 		modelNode->meshesCount = 1;
 		modelNode->parent = nullptr;
 
-		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLES, nullptr, 0);
+		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, collisionMeshSize);
 
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
 	}
