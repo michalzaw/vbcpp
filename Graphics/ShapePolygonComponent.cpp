@@ -6,8 +6,8 @@
 #include "../Scene/SceneManager.h"
 
 #include "../Utils/PolygonGenerator.h"
+#include "../Utils/ResourceManager.h"
 
-const unsigned int DEFAULT_ROAD_BUFFER_SIZE = 1024 * 1024; // ~ 4600 vertices
 
 ShapePolygonComponent::ShapePolygonComponent()
 	: Component(CT_SHAPE_POLYGON),
@@ -97,7 +97,9 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	for (int i = 0; i < _points.size(); ++i)
 	{
 		vertices[i].position = _points[i];
-		vertices[i].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+		vertices[i].normal = glm::vec3(0.0f, 0.0f, 0.0f);
+
+		vertices[i].texCoord = glm::vec2(_points[i].x, _points[i].z);
 	}
 
 	for (int i = 0; i < numberOfPasses; ++i)
@@ -118,6 +120,19 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 			indices[i * 3 + 0] = i3;
 			indices[i * 3 + 1] = i2;
 			indices[i * 3 + 2] = i1;
+
+			// normals
+			glm::vec3 normal = glm::cross(glm::vec3(vertices[i1].position) - glm::vec3(vertices[i2].position),
+				glm::vec3(vertices[i3].position) - glm::vec3(vertices[i2].position));
+			normal = glm::normalize(normal);
+
+			vertices[i1].normal += normal;   vertices[i1].normal /= 2.0f;
+			vertices[i2].normal += normal;   vertices[i2].normal /= 2.0f;
+			vertices[i3].normal += normal;   vertices[i3].normal /= 2.0f;
+
+			vertices[i1].normal = glm::normalize(glm::vec3(vertices[i1].normal));
+			vertices[i2].normal = glm::normalize(glm::vec3(vertices[i2].normal));
+			vertices[i3].normal = glm::normalize(glm::vec3(vertices[i3].normal));
 		}
 
 		if (earPoint >= 0)
@@ -163,7 +178,9 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	{
 		std::vector<Material*> materials;
 		materials.push_back(new Material);
-		materials[0]->shader = WIREFRAME_MATERIAL;
+		materials[0]->shader = SOLID_MATERIAL;
+		materials[0]->shininess = 96.0f;
+		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/chodnik/PavingStones_col.jpg");
 
 		StaticModelNode* modelNode = new StaticModelNode;
 		modelNode->name = "road";

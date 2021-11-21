@@ -16,6 +16,8 @@ struct StaticModelMesh;
 class ShapePolygonComponent final : public Component
 {
 	private:
+		static const unsigned int DEFAULT_ROAD_BUFFER_SIZE = 1024 * 1024; // ~ 4600 vertices
+
 		std::vector<glm::vec3> _points;
 
 		RStaticModel* _generatedModel;
