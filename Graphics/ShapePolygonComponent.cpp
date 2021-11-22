@@ -84,23 +84,11 @@ void ShapePolygonComponent::setPointPostion(int index, glm::vec3 newPosition)
 }
 
 
-void ShapePolygonComponent::buildAndCreateRenderObject()
+void ShapePolygonComponent::triangulateAndGenerateMeshIndices(std::vector<unsigned int>& outIndices)
 {
 	std::vector<bool> _points2(_points.size(), true);
 
 	int numberOfPasses = _points.size() - 2;
-	int numberOfIndices = numberOfPasses * 3;
-
-	Vertex* vertices = new Vertex[_points.size()];
-	unsigned int* indices = new unsigned int[numberOfIndices];
-
-	for (int i = 0; i < _points.size(); ++i)
-	{
-		vertices[i].position = _points[i];
-		vertices[i].normal = glm::vec3(0.0f, 0.0f, 0.0f);
-
-		vertices[i].texCoord = glm::vec2(_points[i].x, _points[i].z);
-	}
 
 	for (int i = 0; i < numberOfPasses; ++i)
 	{
@@ -117,30 +105,98 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 			LOG_DEBUG(LOG_VARIABLE(i2));
 			LOG_DEBUG(LOG_VARIABLE(i3));
 
-			indices[i * 3 + 0] = i3;
-			indices[i * 3 + 1] = i2;
-			indices[i * 3 + 2] = i1;
-
-			// normals
-			glm::vec3 normal = glm::cross(glm::vec3(vertices[i1].position) - glm::vec3(vertices[i2].position),
-				glm::vec3(vertices[i3].position) - glm::vec3(vertices[i2].position));
-			normal = glm::normalize(normal);
-
-			vertices[i1].normal += normal;   vertices[i1].normal /= 2.0f;
-			vertices[i2].normal += normal;   vertices[i2].normal /= 2.0f;
-			vertices[i3].normal += normal;   vertices[i3].normal /= 2.0f;
-
-			vertices[i1].normal = glm::normalize(glm::vec3(vertices[i1].normal));
-			vertices[i2].normal = glm::normalize(glm::vec3(vertices[i2].normal));
-			vertices[i3].normal = glm::normalize(glm::vec3(vertices[i3].normal));
-		}
-
-		if (earPoint >= 0)
-		{
+			outIndices.push_back(i3);
+			outIndices.push_back(i2);
+			outIndices.push_back(i1);
+		
 			_points2[earPoint] = false;
 		}
 	}
+}
 
+
+void ShapePolygonComponent::calculateNormals(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices)
+{
+	for (int i = 0; i < indices.size(); i += 3)
+	{
+		int i1 = indices[i];
+		int i2 = indices[i + 1];
+		int i3 = indices[i + 2];
+
+		glm::vec3 normal = glm::cross(glm::vec3(vertices[i3].pos) - glm::vec3(vertices[i2].pos),
+									  glm::vec3(vertices[i1].pos) - glm::vec3(vertices[i2].pos));
+		normal = glm::normalize(normal);
+
+		vertices[i1].normal += normal;   vertices[i1].normal /= 2.0f;
+		vertices[i2].normal += normal;   vertices[i2].normal /= 2.0f;
+		vertices[i3].normal += normal;   vertices[i3].normal /= 2.0f;
+
+		vertices[i1].normal = glm::normalize(glm::vec3(vertices[i1].normal));
+		vertices[i2].normal = glm::normalize(glm::vec3(vertices[i2].normal));
+		vertices[i3].normal = glm::normalize(glm::vec3(vertices[i3].normal));
+	}
+}
+
+
+void ShapePolygonComponent::runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices)
+{
+	MeshMender mender;
+	std::vector<unsigned int> temp;
+	mender.Mend(vertices, indices, temp, 0.0, 0.7, 0.7, 1.0, MeshMender::DONT_CALCULATE_NORMALS, MeshMender::DONT_RESPECT_SPLITS, MeshMender::DONT_FIX_CYLINDRICAL);
+}
+
+
+Vertex* ShapePolygonComponent::mapVerticesToInternalVertexFormat(std::vector<MeshMender::Vertex>& vertices)
+{
+	Vertex* outVertices = new Vertex[vertices.size()];
+	for (int i = 0; i < vertices.size(); ++i)
+	{
+		outVertices[i].position = vertices[i].pos;
+		outVertices[i].texCoord = glm::vec2(vertices[i].s, vertices[i].t);
+		outVertices[i].normal = vertices[i].normal;
+		outVertices[i].tangent = vertices[i].tangent;
+		outVertices[i].bitangent = vertices[i].binormal;
+	}
+
+	return outVertices;
+}
+
+
+void ShapePolygonComponent::buildAndCreateRenderObject()
+{
+	// vertices
+	std::vector<MeshMender::Vertex> verticesVector(_points.size());
+
+	for (int i = 0; i < _points.size(); ++i)
+	{
+		verticesVector[i].pos = _points[i];
+		verticesVector[i].normal = glm::vec3(0.0f, 0.0f, 0.0f);
+		verticesVector[i].s = _points[i].x;
+		verticesVector[i].t = _points[i].z;
+	}
+
+	// indices
+	std::vector<unsigned int> indicesVector;
+	triangulateAndGenerateMeshIndices(indicesVector);
+
+	// normals
+	calculateNormals(verticesVector, indicesVector);
+
+	// tangents and bitangents
+	LOG_DEBUG("Before mesh mender. Number of vertices: " + Strings::toString(verticesVector.size()) + ", number of indices: " + Strings::toString(indicesVector.size()));
+	runMeshMender(verticesVector, indicesVector);
+	LOG_DEBUG("After mesh mender. Number of vertices: " + Strings::toString(verticesVector.size()) + ", number of indices: " + Strings::toString(indicesVector.size()));
+
+	Vertex* vertices = mapVerticesToInternalVertexFormat(verticesVector);
+
+	int numberOfIndices = indicesVector.size();
+	unsigned int* indices = new unsigned int[numberOfIndices];
+	for (int i = 0; i < numberOfIndices; ++i)
+	{
+		indices[i] = indicesVector[i];
+	}
+
+	// meshes
 	const bool isModelExist = _generatedModel != nullptr;
 	const bool isGame = GameConfig::getInstance().mode == GM_GAME;
 
@@ -161,11 +217,11 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 		meshes[0].setMeshData(vertices, _points.size() > 2 ? _points.size() : 3, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 	}
 
-
+	// collision mesh
 	unsigned int collisionMeshSize = meshes[0].indicesCount;
 	glm::vec3* collisionMesh = generateCollistionMesh(meshes, 1, collisionMeshSize);
 
-
+	// model
 	if (isModelExist)
 	{
 		_generatedModel->recalculateAABB();
@@ -178,9 +234,10 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	{
 		std::vector<Material*> materials;
 		materials.push_back(new Material);
-		materials[0]->shader = SOLID_MATERIAL;
+		materials[0]->shader = NORMALMAPPING_MATERIAL;
 		materials[0]->shininess = 96.0f;
-		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/chodnik/PavingStones_col.jpg");
+		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
+		materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
 
 		StaticModelNode* modelNode = new StaticModelNode;
 		modelNode->name = "road";

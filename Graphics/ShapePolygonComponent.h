@@ -6,11 +6,14 @@
 
 #include <glm/glm.hpp>
 
+#include "NVMeshMender/NVMeshMender.h"
+
 #include "../Scene/Component.h"
 
 
 class RStaticModel;
 struct StaticModelMesh;
+struct Vertex;
 
 
 class ShapePolygonComponent final : public Component
@@ -22,6 +25,10 @@ class ShapePolygonComponent final : public Component
 
 		RStaticModel* _generatedModel;
 
+		void triangulateAndGenerateMeshIndices(std::vector<unsigned int>& outIndices);
+		void calculateNormals(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices);
+		void runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices);
+		Vertex* mapVerticesToInternalVertexFormat(std::vector<MeshMender::Vertex>& vertices);
 		glm::vec3* generateCollistionMesh(StaticModelMesh* meshes, unsigned int meshesCount, unsigned int totalIndicesCount);
 
 	public:
