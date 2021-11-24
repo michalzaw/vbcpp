@@ -3,6 +3,8 @@
 #include "Tools/RoadManipulator.h"
 #include "Tools/AxisTool.h"
 
+#include "Utils/RoadPolygonsGenerator.h"
+
 //#include "../Bus/BusLoader.h"
 
 #include "../Game/Directories.h"
@@ -28,7 +30,6 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongRoadWindow.h"
 
-#include "../../Graphics/RoadGenerator.h"
 #include "../Graphics/ShapePolygonComponent.h"
 
 //std::list<Editor*> editorInstances;
@@ -850,33 +851,6 @@ namespace vbEditor
 	}
 
 
-	void generatePolygon(std::vector<RoadObject*>& roads)
-	{
-		std::vector<RoadConnectionPointData*> temp(2, nullptr);
-
-		std::vector<glm::vec3> points;
-
-		for (RoadObject* road : roads)
-		{
-			const std::vector<glm::vec3>& curvePoints = road->getCurvePoints();
-			for (int i = 0; i < curvePoints.size(); ++i)
-			{
-				glm::vec2 currentCurvePoint = glm::vec2(curvePoints[i].x, curvePoints[i].z);
-				glm::vec2 direction = RoadGenerator::calculateDirection(curvePoints, temp, i);
-				glm::vec2 rightVector = glm::vec2(-direction.y, direction.x);
-
-				glm::vec2 point = currentCurvePoint + road->getRoadProfile()->getEdges()[1].x * rightVector;
-
-				points.push_back(glm::vec3(point.x, curvePoints[i].y + road->getRoadProfile()->getEdges()[1].y, point.y));
-			}
-		}
-
-		SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
-		polygonSceneObject->addComponent(new ShapePolygonComponent(points));
-
-	}
-
-
 	void renderGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
@@ -1004,7 +978,7 @@ namespace vbEditor
 
 			if (ImGui::Button("Generate polygon"))
 			{
-				generatePolygon(_selectedRoads);
+				RoadPolygonsGenerator::generatePolygon(_selectedRoads, _sceneManager);
 			}
 		}
 
