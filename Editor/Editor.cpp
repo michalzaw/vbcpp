@@ -28,6 +28,7 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongRoadWindow.h"
 
+#include "../../Graphics/RoadGenerator.h"
 #include "../Graphics/ShapePolygonComponent.h"
 
 //std::list<Editor*> editorInstances;
@@ -514,6 +515,8 @@ namespace vbEditor
 	float roadModificationTimer = 0.0f;
 	std::vector<RoadObject*> roadsToUpdate;
 
+	std::vector<RoadObject*> _selectedRoads;
+
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
 	static bool _isCameraActive = false;
@@ -846,6 +849,34 @@ namespace vbEditor
 		}
 	}
 
+
+	void generatePolygon(std::vector<RoadObject*>& roads)
+	{
+		std::vector<RoadConnectionPointData*> temp(2, nullptr);
+
+		std::vector<glm::vec3> points;
+
+		for (RoadObject* road : roads)
+		{
+			const std::vector<glm::vec3>& curvePoints = road->getCurvePoints();
+			for (int i = 0; i < curvePoints.size(); ++i)
+			{
+				glm::vec2 currentCurvePoint = glm::vec2(curvePoints[i].x, curvePoints[i].z);
+				glm::vec2 direction = RoadGenerator::calculateDirection(curvePoints, temp, i);
+				glm::vec2 rightVector = glm::vec2(-direction.y, direction.x);
+
+				glm::vec2 point = currentCurvePoint + road->getRoadProfile()->getEdges()[1].x * rightVector;
+
+				points.push_back(glm::vec3(point.x, curvePoints[i].y + road->getRoadProfile()->getEdges()[1].y, point.y));
+			}
+		}
+
+		SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
+		polygonSceneObject->addComponent(new ShapePolygonComponent(points));
+
+	}
+
+
 	void renderGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
@@ -961,6 +992,20 @@ namespace vbEditor
 			CameraFPS* cameraFPS = dynamic_cast<CameraFPS*>(_graphicsManager->getCurrentCamera());
 			if(cameraFPS)
 				CameraSettingsWindow(cameraFPS);
+		}
+
+		// show selected roads
+		{
+			ImGui::Text("Selected roads: %d", _selectedRoads.size());
+			for (int i = 0; i < _selectedRoads.size(); ++i)
+			{
+				ImGui::Text("%d. %s", i, _selectedRoads[i]->getSceneObject()->getName());
+			}
+
+			if (ImGui::Button("Generate polygon"))
+			{
+				generatePolygon(_selectedRoads);
+			}
 		}
 
 		if (_showObjectPropertyEditor)

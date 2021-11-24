@@ -85,6 +85,7 @@ void SceneGraphWindow::centerGraphView()
 namespace vbEditor {
 
 	extern SceneObject* _selectedSceneObject;
+	extern std::vector<RoadObject*> _selectedRoads;
 
 
 	static int selectionMask = -1;
@@ -151,6 +152,22 @@ namespace vbEditor {
 			vbEditor::setSelectedSceneObject(object);
 			_centerGraph = false;
 			nodeClicked = nodeNumber;
+		}
+		if (ImGui::IsItemClicked(1))
+		{
+			RoadObject* roadObject = dynamic_cast<RoadObject*>(object->getComponent(CT_ROAD_OBJECT));
+			if (roadObject != nullptr)
+			{
+				if (!isVectorContains(_selectedRoads, roadObject))
+				{
+					_selectedRoads.push_back(roadObject);
+				}
+				else
+				{
+					auto element = std::find(_selectedRoads.begin(), _selectedRoads.end(), roadObject);
+					_selectedRoads.erase(element);
+				}
+			}
 		}
 
 		if (node_open)

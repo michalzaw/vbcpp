@@ -18,6 +18,8 @@ class RRoadProfile : public Resource
 
 		std::vector<RoadLane> _roadLanes;
 
+		std::vector<glm::vec2> _edges;
+
 	public:
 		RRoadProfile(std::string path, std::string author, std::string name, std::string comment);
 		~RRoadProfile();
@@ -27,6 +29,7 @@ class RRoadProfile : public Resource
 		std::string getComment();
 
 		std::vector<RoadLane>& getRoadLanes();
+		std::vector<glm::vec2>& getEdges();
 
 };
 

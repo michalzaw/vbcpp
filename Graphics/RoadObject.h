@@ -70,6 +70,11 @@ class RoadObject : public RenderObject
 		void setConnectedPointPosition(int connectionPointIndex);
 		void resetConnectedPointPositions();
 
+		const std::vector<glm::vec3>& getCurvePoints()
+		{
+			return _curvePoints;
+		}
+
 };
 
 

@@ -40,7 +40,7 @@ class ShapePolygonComponent final : public Component
 		void addPoint(const glm::vec3& point);
 		void setPointPostion(int index, glm::vec3 newPosition);
 
-		void buildAndCreateRenderObject();
+		void buildAndCreateRenderObject(bool useMeshMender);
 
 };
 

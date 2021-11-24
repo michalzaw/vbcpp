@@ -43,3 +43,9 @@ std::vector<RoadLane>& RRoadProfile::getRoadLanes()
 {
 	return _roadLanes;
 }
+
+
+std::vector<glm::vec2>& RRoadProfile::getEdges()
+{
+	return _edges;
+}

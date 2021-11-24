@@ -57,6 +57,7 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	if (lanesElement == nullptr)
 	{
 		LOG_ERROR("Lanes element not found");
+		delete roadProfile;
 		return nullptr;
 	}
 	else
@@ -74,6 +75,23 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 			roadProfile->getRoadLanes().push_back(lane);
 
 			laneElement = laneElement->NextSiblingElement("Lane");
+		}
+	}
+
+
+	XMLElement* edgesElement = profileElement->FirstChildElement("Edges");
+
+	if (edgesElement != nullptr)
+	{
+		XMLElement* edgeElement = edgesElement->FirstChildElement("Edge");
+		while (edgeElement != nullptr)
+		{
+			float x = toFloat(edgeElement->Attribute("x"));
+			float y = toFloat(edgeElement->Attribute("y"));
+
+			roadProfile->getEdges().push_back(glm::vec2(x, y));
+
+			edgeElement = edgeElement->NextSiblingElement("Edge");
 		}
 	}
 

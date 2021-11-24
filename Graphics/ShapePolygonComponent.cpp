@@ -162,7 +162,7 @@ Vertex* ShapePolygonComponent::mapVerticesToInternalVertexFormat(std::vector<Mes
 }
 
 
-void ShapePolygonComponent::buildAndCreateRenderObject()
+void ShapePolygonComponent::buildAndCreateRenderObject(bool useMeshMender)
 {
 	// vertices
 	std::vector<MeshMender::Vertex> verticesVector(_points.size());
@@ -184,7 +184,10 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 
 	// tangents and bitangents
 	LOG_DEBUG("Before mesh mender. Number of vertices: " + Strings::toString(verticesVector.size()) + ", number of indices: " + Strings::toString(indicesVector.size()));
-	runMeshMender(verticesVector, indicesVector);
+	if (useMeshMender)
+	{
+		runMeshMender(verticesVector, indicesVector);
+	}
 	LOG_DEBUG("After mesh mender. Number of vertices: " + Strings::toString(verticesVector.size()) + ", number of indices: " + Strings::toString(indicesVector.size()));
 
 	Vertex* vertices = mapVerticesToInternalVertexFormat(verticesVector);
@@ -204,17 +207,17 @@ void ShapePolygonComponent::buildAndCreateRenderObject()
 	if (isModelExist)
 	{
 		LOG_DEBUG("Build custom polygon: update existing meshes");
-		meshes[0].updateMeshData(vertices, _points.size(), indices, numberOfIndices);
+		meshes[0].updateMeshData(vertices, verticesVector.size(), indices, numberOfIndices);
 	}
 	else if (isGame)
 	{
 		LOG_DEBUG("Build custom polygon: create new meshes in Game Mode");
-		meshes[0].setMeshData(vertices, _points.size() > 2 ? _points.size() : 3, indices, numberOfIndices, 0, WIREFRAME_MATERIAL);
+		meshes[0].setMeshData(vertices, verticesVector.size(), indices, numberOfIndices, 0, WIREFRAME_MATERIAL);
 	}
 	else
 	{
 		LOG_DEBUG("Build custom polygon: create new meshes in Editor Mode");
-		meshes[0].setMeshData(vertices, _points.size() > 2 ? _points.size() : 3, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
+		meshes[0].setMeshData(vertices, verticesVector.size(), indices, numberOfIndices, 0, WIREFRAME_MATERIAL, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 	}
 
 	// collision mesh

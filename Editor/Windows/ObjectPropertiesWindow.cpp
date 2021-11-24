@@ -499,7 +499,11 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 
 		if (ImGui::Button("Generate Triangle Mesh"))
 		{
-			component->buildAndCreateRenderObject();
+			component->buildAndCreateRenderObject(true);
+		}
+		if (ImGui::Button("Generate Triangle Mesh (without mesh mender)"))
+		{
+			component->buildAndCreateRenderObject(false);
 		}
 	}
 }
