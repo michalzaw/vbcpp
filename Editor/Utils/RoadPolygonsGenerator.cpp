@@ -95,10 +95,11 @@ namespace RoadPolygonsGenerator
 		float sum = 0.0f;
 		for (int i = 0; i < points.size(); ++i)
 		{
-			float edge = (points[(i + 1) & points.size()].x - points[i].x) * (points[(i + 1) & points.size()].z + points[i].z);
+			float edge = (points[(i + 1) % points.size()].x - points[i].x) * (points[(i + 1) % points.size()].z + points[i].z);
 			sum += edge;
 		}
 
+		LOG_DEBUG(LOG_VARIABLE(sum));
 		if (sum < 0)
 		{
 			LOG_DEBUG("Clockwise order: YES");
