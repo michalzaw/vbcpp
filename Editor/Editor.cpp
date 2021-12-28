@@ -835,7 +835,7 @@ namespace vbEditor
 					Material* material = new Material;
 					material->shader = DECAL_MATERIAL;
 					material->shininess = 96.0f;
-					material->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/decal.png");
+					material->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/decal2.png");
 					material->diffuseTexture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
 
 					Cube* decal = new Cube(1, material);
@@ -868,46 +868,53 @@ namespace vbEditor
 				{
 					ResourceManager::getInstance().reloadAllTextures();
 				}
-				if (ImGui::MenuItem("AABB rendering", NULL))
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("AABB rendering", NULL, Renderer::getInstance().getAABBFlag()))
 				{
 					Renderer::getInstance().toogleRenderAABBFlag();
 				}
-				if (ImGui::MenuItem("OBB rendering", NULL))
+				if (ImGui::MenuItem("OBB rendering", NULL, Renderer::getInstance().getOBBFlag()))
 				{
 					Renderer::getInstance().toogleRenderOBBFlag();
 				}
-				if (ImGui::MenuItem("Alpha to coverage", NULL))
+				if (ImGui::MenuItem("Alpha to coverage", NULL, Renderer::getInstance().isAlphaToCoverageEnable()))
 				{
 					Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
 				}
-				if (ImGui::MenuItem("Bloom", NULL))
+				if (ImGui::MenuItem("Bloom", NULL, Renderer::getInstance().isBloomEnable()))
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 				}
-				if (ImGui::MenuItem("TEST!!!", NULL))
+				if (ImGui::MenuItem("TEST!!!", NULL, _graphicsManager->getGlobalEnvironmentCaptureComponent()->a))
 				{
 					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
 				}
+
+				ImGui::Separator();
+
 				if (ImGui::BeginMenu("Tone mapping"))
 				{
-					if (ImGui::MenuItem("Reinhard", NULL))
+					ToneMappingType toneMappingType = Renderer::getInstance().getToneMappingType();
+					if (ImGui::MenuItem("Reinhard", NULL, toneMappingType == TMT_REINHARD))
 					{
 						Renderer::getInstance().setToneMappingType(TMT_REINHARD);
 					}
-					if (ImGui::MenuItem("Classic", NULL))
+					if (ImGui::MenuItem("Classic", NULL, toneMappingType == TMT_CLASSIC))
 					{
 						Renderer::getInstance().setToneMappingType(TMT_CLASSIC);
 					}
-					if (ImGui::MenuItem("ACES", NULL))
+					if (ImGui::MenuItem("ACES", NULL, toneMappingType == TMT_ACES))
 					{
 						Renderer::getInstance().setToneMappingType(TMT_ACES);
 					}
 					ImGui::Separator();
-					if (ImGui::MenuItem("None", NULL))
+					if (ImGui::MenuItem("None", NULL, toneMappingType == TMT_NONE))
 					{
 						Renderer::getInstance().setToneMappingType(TMT_NONE);
 					}
-					if (ImGui::MenuItem("Depth", NULL))
+					if (ImGui::MenuItem("Depth", NULL, toneMappingType == TMT_DEPTH_RENDERING))
 					{
 						Renderer::getInstance().setToneMappingType(TMT_DEPTH_RENDERING);
 					}

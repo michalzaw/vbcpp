@@ -1385,6 +1385,18 @@ void Renderer::toogleRenderOBBFlag()
 }
 
 
+bool Renderer::getAABBFlag()
+{
+    return _renderObjectsAAABB;
+}
+
+
+bool Renderer::getOBBFlag()
+{
+    return _renderObjectsOBB;
+}
+
+
 VBO* Renderer::getQuadVbo()
 {
 	return _quadVBO;
@@ -1445,6 +1457,7 @@ void Renderer::renderAll()
         {
             Framebuffer* framebufer = _renderDataList[i]->framebuffer;
 
+            // depth renering - for decals
             _renderDataList[i]->framebuffer = _depthFramebuffer;
             renderDepth(_renderDataList[i]);
 

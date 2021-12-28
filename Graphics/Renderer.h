@@ -261,6 +261,8 @@ class Renderer
 
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
+		bool getAABBFlag();
+		bool getOBBFlag();
 
 		VBO* getQuadVbo();
 
