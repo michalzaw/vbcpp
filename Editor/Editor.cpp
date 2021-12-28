@@ -765,6 +765,7 @@ namespace vbEditor
 		renderer.setDayNightRatio(1.0f);
 		renderer.setAlphaToCoverage(true);
 		renderer.setExposure(1.87022f);
+		renderer.setToneMappingType(TMT_CLASSIC);
 		renderer.t = 0;
 
 		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
@@ -827,6 +828,23 @@ namespace vbEditor
 					setSelectedSceneObject(polygonSceneObject);
 				}
 				ImGui::Separator();
+				if (ImGui::MenuItem("Add new decal", NULL))
+				{
+					SceneObject* decalSceneObject = _sceneManager->addSceneObject("Decal");
+
+					Material* material = new Material;
+					material->shader = DECAL_MATERIAL;
+					material->shininess = 96.0f;
+					material->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/decal.png");
+					material->diffuseTexture->setFiltering(TFM_TRILINEAR, TFM_LINEAR);
+
+					Cube* decal = new Cube(1, material);
+					decal->init();
+					_graphicsManager->addRenderObject(decal, decalSceneObject);
+
+					setSelectedSceneObject(decalSceneObject);
+				}
+				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
 					Renderer::getInstance().bakeStaticShadows();
@@ -837,6 +855,64 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Settings"))
 			{
 				ImGui::MenuItem("Camera Settings", NULL, &_showCameraSettingsWindow);
+				ImGui::EndMenu();
+			}
+
+			if (ImGui::BeginMenu("Debug"))
+			{
+				if (ImGui::MenuItem("Reload all shaders", NULL))
+				{
+					ResourceManager::getInstance().reloadAllShaders();
+				}
+				if (ImGui::MenuItem("Reload all textures", NULL))
+				{
+					ResourceManager::getInstance().reloadAllTextures();
+				}
+				if (ImGui::MenuItem("AABB rendering", NULL))
+				{
+					Renderer::getInstance().toogleRenderAABBFlag();
+				}
+				if (ImGui::MenuItem("OBB rendering", NULL))
+				{
+					Renderer::getInstance().toogleRenderOBBFlag();
+				}
+				if (ImGui::MenuItem("Alpha to coverage", NULL))
+				{
+					Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
+				}
+				if (ImGui::MenuItem("Bloom", NULL))
+				{
+					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
+				}
+				if (ImGui::MenuItem("TEST!!!", NULL))
+				{
+					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
+				}
+				if (ImGui::BeginMenu("Tone mapping"))
+				{
+					if (ImGui::MenuItem("Reinhard", NULL))
+					{
+						Renderer::getInstance().setToneMappingType(TMT_REINHARD);
+					}
+					if (ImGui::MenuItem("Classic", NULL))
+					{
+						Renderer::getInstance().setToneMappingType(TMT_CLASSIC);
+					}
+					if (ImGui::MenuItem("ACES", NULL))
+					{
+						Renderer::getInstance().setToneMappingType(TMT_ACES);
+					}
+					ImGui::Separator();
+					if (ImGui::MenuItem("None", NULL))
+					{
+						Renderer::getInstance().setToneMappingType(TMT_NONE);
+					}
+					if (ImGui::MenuItem("Depth", NULL))
+					{
+						Renderer::getInstance().setToneMappingType(TMT_DEPTH_RENDERING);
+					}
+					ImGui::EndMenu();
+				}
 				ImGui::EndMenu();
 			}
 

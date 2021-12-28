@@ -949,6 +949,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
     _defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
+    _depthFramebuffer = OGLDriver::getInstance().createFramebuffer();
+    _depthFramebuffer->addTexture(TF_DEPTH_COMPONENT, _screenWidth, _screenHeight);
+    _depthFramebuffer->init();
+
     Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
@@ -1039,6 +1043,14 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     //defines.push_back("TRANSPARENCY");
     //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // DECAL_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("DECALS");
+    defines.push_back("ALPHA_TEST");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
@@ -1428,7 +1440,15 @@ void Renderer::renderAll()
         else if (_renderDataList[i]->renderPass == RP_MIRROR)
             renderToMirrorTexture(_renderDataList[i]);
         else // RP_NORMAL
+        {
+            Framebuffer* framebufer = _renderDataList[i]->framebuffer;
+
+            _renderDataList[i]->framebuffer = _depthFramebuffer;
+            renderDepth(_renderDataList[i]);
+
+            _renderDataList[i]->framebuffer = framebufer;
             renderScene(_renderDataList[i]);
+        }
     }
 
 
@@ -1439,6 +1459,7 @@ void Renderer::renderAll()
 	{
 		RTexture* input;
 		if (i == 0)
+            //input = _depthFramebuffer->getTexture(0);
 			input = _mainRenderData->framebuffer->getTexture(0);
 		else
 			input = _postProcessingFramebuffers[(i - 1) % 2]->getTexture(0);
@@ -1477,6 +1498,11 @@ void Renderer::renderDepth(RenderData* renderData)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
         else
             shaderType = SHADOWMAP_SHADER;
+
+        if (material->shader == DECAL_MATERIAL)
+        {
+            continue;
+        }
 
         if (shaderType != currentShader)
         {
@@ -1728,6 +1754,10 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             }
+            else if (currentShader == DECAL_MATERIAL)
+            {
+                glDepthMask(GL_TRUE);
+            }
 
             if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
@@ -1744,6 +1774,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == WIREFRAME_MATERIAL)
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            else if (material->shader == DECAL_MATERIAL)
+            {
+                glDepthMask(GL_FALSE);
             }
             else if (material->shader == EDITOR_AXIS_SHADER)
             {
@@ -1892,6 +1926,15 @@ void Renderer::renderScene(RenderData* renderData)
 			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
 			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 		}
+        if (material->shader == DECAL_MATERIAL)
+        {
+            glm::mat4 viewProjMatrixInv = glm::inverse(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
+            glm::mat4 modelMatrixInv = glm::inverse(modelMatrix);
+
+            shader->bindTexture(shader->getUniformLocation("depthMap"), _depthFramebuffer->getTexture(0));
+            shader->setUniform(shader->getUniformLocation("viewProjMatrixInv"), viewProjMatrixInv);
+            shader->setUniform(shader->getUniformLocation("modelMatrixInv"), modelMatrixInv);
+        }
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_1], color1);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_2], color2);
@@ -1964,6 +2007,7 @@ void Renderer::renderScene(RenderData* renderData)
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glDepthMask(GL_TRUE);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB

@@ -11,7 +11,9 @@ enum ToneMappingType
 {
 	TMT_REINHARD,
 	TMT_CLASSIC,
-	TMT_ACES
+	TMT_ACES,
+	TMT_DEPTH_RENDERING,
+	TMT_NONE
 };
 
 
@@ -40,6 +42,14 @@ class PostProcessingToneMapping : public PostProcessingEffect
 
 				case TMT_ACES:
 					defines.push_back("ACES");
+					break;
+
+				case TMT_DEPTH_RENDERING:
+					defines.push_back("DEPTH_RENDERING");
+					break;
+
+				case TMT_NONE:
+					defines.push_back("NONE");
 					break;
 			}
 

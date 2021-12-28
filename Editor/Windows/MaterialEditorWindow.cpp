@@ -124,6 +124,7 @@ namespace vbEditor
 			"GRASS_MATERIAL",
 			"SKY_MATERIAL",
 			"GLASS_MATERIAL",
+			"DECAL_MATERIAL",
 			"WIREFRAME_MATERIAL"
 		};
 

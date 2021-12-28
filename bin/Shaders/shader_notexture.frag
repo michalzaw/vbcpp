@@ -39,7 +39,7 @@ const int MAX_POINT_COUNT = 8;
 const int MAX_SPOT_COUNT = 8;
 
 
-in vec3 Position;
+in vec3 PositionVert;
 in vec2 TexCoord;
 in vec3 Normal;
 
@@ -74,7 +74,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
 	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;
 	
-	vec3 FragmentToEye = normalize(CameraPosition - Position);
+	vec3 FragmentToEye = normalize(CameraPosition - PositionVert);
 	vec3 LightReflect = normalize(reflect(dir, normal));
 	float SpecularFactor = max(dot(FragmentToEye, LightReflect), 0.0f);
 //	SpecularFactor = pow(SpecularFactor, SpecularPower);
@@ -87,7 +87,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
 
 vec4 CalculatePointLight(PointLight light, vec3 normal)
 {
-	vec3 Direction = Position - light.Position;
+	vec3 Direction = PositionVert - light.Position;
 	float Distance = length(Direction);
 	float Attenuation = light.Attenuation.constant + light.Attenuation.linear * Distance +
 						light.Attenuation.exp * Distance * Distance;
@@ -98,7 +98,7 @@ vec4 CalculatePointLight(PointLight light, vec3 normal)
 
 vec4 CalculateSpotLight(SpotLight light, vec3 normal)
 {
-	vec3 LightToPixel = normalize(Position - light.Base.Position);
+	vec3 LightToPixel = normalize(PositionVert - light.Base.Position);
 	float SpotFactor = dot(LightToPixel, light.Direction);
 	
 	if (SpotFactor > light.CutoffCos)

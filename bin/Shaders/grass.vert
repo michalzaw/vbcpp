@@ -26,7 +26,7 @@ uniform int grassTexturesCount;
 uniform float time;
 #endif
 
-out vec3 Position;
+out vec3 PositionVert;
 out vec2 TexCoord;
 out vec3 Normal;
 
@@ -107,7 +107,7 @@ void main()
 	
 	gl_Position = VP * vec4(vertexPositionWithRotationAndOffset, 1.0f);
 
-	Position = (/*ModelMatrix */ vec4(vertexPositionWithRotationAndOffset, 1.0f)).xyz;
+	PositionVert = (/*ModelMatrix */ vec4(vertexPositionWithRotationAndOffset, 1.0f)).xyz;
 	TexCoord = VertexUV;
 
 #ifdef SOLID

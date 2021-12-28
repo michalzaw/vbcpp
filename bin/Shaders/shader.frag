@@ -52,7 +52,7 @@ const int MAX_POINT_COUNT = 8;
 const int MAX_SPOT_COUNT = 8;
 
 
-in vec3 Position;
+in vec3 PositionVert;
 in vec2 TexCoord;
 in vec3 Normal;
 #ifdef NORMALMAPPING
@@ -61,6 +61,9 @@ in vec3 BitangentWorldspace;
 #endif
 in vec4 PositionLightSpace[CASCADES_COUNT];
 in float ClipSpacePositionZ;
+#ifdef DECALS
+in vec4 ClipSpacePosition;
+#endif
 
 //out vec4 FragmentColor;
 layout (location = 0) out vec4 FragmentColor;
@@ -107,6 +110,11 @@ uniform float dayNightRatio;
 #ifdef EMISSIVE
 uniform sampler2D emissiveTexture;
 #endif
+#ifdef DECALS
+uniform sampler2D depthMap;
+uniform mat4 viewProjMatrixInv;
+uniform mat4 modelMatrixInv;
+#endif
 
 uniform vec3 CameraPosition;
 
@@ -120,6 +128,8 @@ vec4 textureColor;
 vec4 ambient;
 vec4 diffuse;
 vec4 specular;
+
+vec3 Position;
 
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
@@ -168,8 +178,45 @@ vec4 CalculateSpotLight(SpotLight light, vec3 normal)
 }
 
 
+#ifdef DECALS
+// https://stackoverflow.com/questions/32227283/getting-world-position-from-depth-buffer-value
+vec4 depthToWorldPosition(float depth, vec2 depthUV)
+{
+    float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(depthUV * 2.0 - 1.0, z, 1.0);
+    vec4 worldSpacePosition = viewProjMatrixInv * clipSpacePosition;
+    worldSpacePosition /= worldSpacePosition.w;
+
+    return worldSpacePosition;
+}
+
+
+vec4 getDecalColor()
+{
+	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
+	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
+	float depth = texture(depthMap, depthUV).r;
+	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
+	vec4 positionLocalSpace = modelMatrixInv * positionWorldSpace;
+	if (abs(positionLocalSpace.x) < 0.5f && abs(positionLocalSpace.y) < 0.5f && abs(positionLocalSpace.z) < 0.5f)
+	{
+		vec4 color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		//FragmentColor = positionWorldSpace / vec4(50.0f, 2.0f, 50.0f, 1.0f);
+		return texture2D(Texture, positionLocalSpace.xz + vec2(0.5f));
+	}
+	else
+	{
+		return vec4(0.0f, 1.0f, 0.0f, 0.0f);
+	}
+}
+#endif
+
+
 void main()
 {
+	Position = PositionVert;
+
 	vec3 normal = normalize(Normal);
 	
 #ifdef NORMALMAPPING
@@ -189,6 +236,29 @@ void main()
 	ambient = textureColor;
 	diffuse = textureColor;
 	specular = matSpecular * textureColor;
+#endif
+
+#ifdef DECALS
+	textureColor = getDecalColor();
+	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
+	ambient = textureColor;
+	diffuse = textureColor;
+	specular = matSpecular * textureColor;
+
+
+	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
+	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
+	float depth = texture(depthMap, depthUV).r;
+	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
+	Position = positionWorldSpace.xyz;
+
+	// https://github.com/ColinLeung-NiloCat/UnityURPUnlitScreenSpaceDecalShader/blob/master/URP_NiloCatExtension_ScreenSpaceDecal_Unlit.shader
+	vec3 aaa = dFdx(positionWorldSpace.xyz);
+	vec3 bbb = dFdy(positionWorldSpace.xyz);
+	//normal = cross(normalize(aaa), normalize(bbb));
+	normal = normalize(cross(aaa, bbb));
+	//FragmentColor.rgb = normalize(cross(normalize(aaa), normalize(bbb)));
+	//FragmentColor.rgb = normal;
 #endif
 
 #ifdef GLASS
@@ -240,14 +310,14 @@ float isGrass = 0.0f;
 	
 	miFactor = mix(miFactor, 0, isGrass);
 	
-	diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
+	//diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
 	//diffuse.rgb = mix(diffuse.rgb, 1.5 * diffuse.rgb, miFactor);
 	//ambient.rgb = mix(ambient.rgb, 4 * vec3(ambient.g * 0.9, ambient.g * 1.0, ambient.g * 0.2), miFactor);
 	
 	float DiffuseFactor = dot(normal, -lightDir);
 	//if (miFactor > 0.0f)
-	normalFactor = mix(1, -1, miFactor);
-		normal = normalFactor * normal;
+	//normalFactor = mix(1, -1, miFactor);
+	//	normal = normalFactor * normal;
 #endif
 
 	
@@ -365,4 +435,37 @@ float isGrass = 0.0f;
 		BrightnessColor = vec4(FragmentColor.rgb, FragmentColor.a);
 	else
 		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+
+	// https://github.com/ColinLeung-NiloCat/UnityURPUnlitScreenSpaceDecalShader/blob/master/URP_NiloCatExtension_ScreenSpaceDecal_Unlit.shader
+	//vec3 aaa = dFdx(Position);
+	//vec3 bbb = dFdy(Position);
+	//FragmentColor.rgb = cross(normalize(aaa), normalize(bbb));
+	//FragmentColor.rgb = normalize(cross(aaa, bbb));
+	//FragmentColor.rgb = normalize(cross(normalize(aaa), normalize(bbb)));
+	//FragmentColor.rgb = normal;
+
+	//FragmentColor.rgb = Position / vec3(50.0f, 2.0f, 50.0f);
+/*#ifdef DECALS
+	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
+	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
+	float depth = texture(depthMap, depthUV).r;
+	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
+	vec4 positionLocalSpace = modelMatrixInv * positionWorldSpace;
+	if (abs(positionLocalSpace.x) < 0.5f && abs(positionLocalSpace.y) < 0.5f && abs(positionLocalSpace.z) < 0.5f)
+	{
+		FragmentColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		//FragmentColor = positionWorldSpace / vec4(50.0f, 2.0f, 50.0f, 1.0f);
+		FragmentColor = texture2D(Texture, positionLocalSpace.xz + vec2(0.5f));
+		FragmentColor.rgb = pow(FragmentColor.rgb, vec3(gamma));
+		if (FragmentColor.a < 0.1f)
+			discard;
+	}
+	else
+	{
+		FragmentColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
+		discard;
+	}
+#endif
+*/
 }
