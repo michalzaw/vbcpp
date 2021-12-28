@@ -1022,6 +1022,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    defines.push_back("SUBSURFACE_SCATTERING");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
 
@@ -1029,6 +1030,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
+    defines.push_back("SUBSURFACE_SCATTERING");
     defines.push_back("GRASS");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[GRASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);

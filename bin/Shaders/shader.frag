@@ -192,17 +192,12 @@ vec4 depthToWorldPosition(float depth, vec2 depthUV)
 }
 
 
-vec4 getDecalColor()
+vec4 getDecalColor(vec4 positionWorldSpace)
 {
-	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
-	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
-	float depth = texture(depthMap, depthUV).r;
-	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
 	vec4 positionLocalSpace = modelMatrixInv * positionWorldSpace;
 	if (abs(positionLocalSpace.x) < 0.5f && abs(positionLocalSpace.y) < 0.5f && abs(positionLocalSpace.z) < 0.5f)
 	{
 		vec4 color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		//FragmentColor = positionWorldSpace / vec4(50.0f, 2.0f, 50.0f, 1.0f);
 		return texture2D(Texture, positionLocalSpace.xz + vec2(0.5f));
 	}
 	else
@@ -239,26 +234,23 @@ void main()
 #endif
 
 #ifdef DECALS
-	textureColor = getDecalColor();
-	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
-	ambient = textureColor;
-	diffuse = textureColor;
-	specular = matSpecular * textureColor;
-
-
 	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
 	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
 	float depth = texture(depthMap, depthUV).r;
 	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
+
+	textureColor = getDecalColor(positionWorldSpace);
+	textureColor.rgb = pow(textureColor.rgb, vec3(gamma));
+	ambient = textureColor;
+	diffuse = textureColor;
+	specular = matSpecular * textureColor;
+	
 	Position = positionWorldSpace.xyz;
 
 	// https://github.com/ColinLeung-NiloCat/UnityURPUnlitScreenSpaceDecalShader/blob/master/URP_NiloCatExtension_ScreenSpaceDecal_Unlit.shader
-	vec3 aaa = dFdx(positionWorldSpace.xyz);
-	vec3 bbb = dFdy(positionWorldSpace.xyz);
-	//normal = cross(normalize(aaa), normalize(bbb));
-	normal = normalize(cross(aaa, bbb));
-	//FragmentColor.rgb = normalize(cross(normalize(aaa), normalize(bbb)));
-	//FragmentColor.rgb = normal;
+	vec3 dx = dFdx(positionWorldSpace.xyz);
+	vec3 dy = dFdy(positionWorldSpace.xyz);
+	normal = normalize(cross(dx, dy));
 #endif
 
 #ifdef GLASS
@@ -297,12 +289,14 @@ float isGrass = 0.0f;
 	float miFactor = 0;
 	float normalFactor = 1;
 #ifdef ALPHA_TEST
+	if (textureColor.a < 0.1f)
+		discard;
+#endif
+	
+#ifdef SUBSURFACE_SCATTERING
 	ambient /= 4.0f;
 	//diffuse /= 2.0f;
 
-	if (textureColor.a < 0.1f)
-		discard;
-	
 	vec3 eyeToFramgent = normalize(Position - CameraPosition);
 	vec3 lightDir = Lights.DirLights[0].Direction;
 	
@@ -310,14 +304,14 @@ float isGrass = 0.0f;
 	
 	miFactor = mix(miFactor, 0, isGrass);
 	
-	//diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
+	diffuse.rgb = mix(diffuse.rgb, 1 * vec3(diffuse.g * 0.9, diffuse.g * 1.0, diffuse.g * 0.2), miFactor);
 	//diffuse.rgb = mix(diffuse.rgb, 1.5 * diffuse.rgb, miFactor);
 	//ambient.rgb = mix(ambient.rgb, 4 * vec3(ambient.g * 0.9, ambient.g * 1.0, ambient.g * 0.2), miFactor);
 	
 	float DiffuseFactor = dot(normal, -lightDir);
 	//if (miFactor > 0.0f)
-	//normalFactor = mix(1, -1, miFactor);
-	//	normal = normalFactor * normal;
+	normalFactor = mix(1, -1, miFactor);
+		normal = normalFactor * normal;
 #endif
 
 	
@@ -435,37 +429,4 @@ float isGrass = 0.0f;
 		BrightnessColor = vec4(FragmentColor.rgb, FragmentColor.a);
 	else
 		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-
-
-	// https://github.com/ColinLeung-NiloCat/UnityURPUnlitScreenSpaceDecalShader/blob/master/URP_NiloCatExtension_ScreenSpaceDecal_Unlit.shader
-	//vec3 aaa = dFdx(Position);
-	//vec3 bbb = dFdy(Position);
-	//FragmentColor.rgb = cross(normalize(aaa), normalize(bbb));
-	//FragmentColor.rgb = normalize(cross(aaa, bbb));
-	//FragmentColor.rgb = normalize(cross(normalize(aaa), normalize(bbb)));
-	//FragmentColor.rgb = normal;
-
-	//FragmentColor.rgb = Position / vec3(50.0f, 2.0f, 50.0f);
-/*#ifdef DECALS
-	vec2 positionScreenSpace = ClipSpacePosition.xy / ClipSpacePosition.w;
-	vec2 depthUV = positionScreenSpace * vec2(0.5f, 0.5f) + vec2(0.5f, 0.5f);
-	float depth = texture(depthMap, depthUV).r;
-	vec4 positionWorldSpace = depthToWorldPosition(depth, depthUV);
-	vec4 positionLocalSpace = modelMatrixInv * positionWorldSpace;
-	if (abs(positionLocalSpace.x) < 0.5f && abs(positionLocalSpace.y) < 0.5f && abs(positionLocalSpace.z) < 0.5f)
-	{
-		FragmentColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
-		//FragmentColor = positionWorldSpace / vec4(50.0f, 2.0f, 50.0f, 1.0f);
-		FragmentColor = texture2D(Texture, positionLocalSpace.xz + vec2(0.5f));
-		FragmentColor.rgb = pow(FragmentColor.rgb, vec3(gamma));
-		if (FragmentColor.a < 0.1f)
-			discard;
-	}
-	else
-	{
-		FragmentColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
-		discard;
-	}
-#endif
-*/
 }
