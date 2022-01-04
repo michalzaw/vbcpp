@@ -101,6 +101,14 @@ SceneObject::~SceneObject()
                 delete* i;
                 break;
 
+            case CT_CROSSROAD:
+                _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(*i));
+                break;
+
+            case CT_ROAD_INTERSECTION:
+                _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                break;
+
         }
     }
 }
@@ -323,6 +331,14 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_SHAPE_POLYGON:
                     delete* i;
+                    break;
+
+                case CT_CROSSROAD:
+                    _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(*i));
+                    break;
+
+                case CT_ROAD_INTERSECTION:
+                    _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
                     break;
 
             }

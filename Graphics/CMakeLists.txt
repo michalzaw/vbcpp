@@ -70,6 +70,8 @@ set (GRAPHICS_SOURCES
 		Graphics/RMaterialsCollection.h
 		Graphics/RoadGenerator.cpp
 		Graphics/RoadGenerator.h
+		Graphics/RoadIntersectionComponent.cpp
+		Graphics/RoadIntersectionComponent.h
 		Graphics/RoadObject.cpp
 		Graphics/RoadObject.h
 		Graphics/RoadProfileLoader.cpp

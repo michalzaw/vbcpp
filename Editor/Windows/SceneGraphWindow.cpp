@@ -122,6 +122,26 @@ namespace vbEditor {
 	}
 
 
+	bool hasVisibleChildren(SceneObject* object)
+	{
+		if (object->getChildren().empty())
+		{
+			return false;
+		}
+		else
+		{
+			for (SceneObject* child : object->getChildren())
+			{
+				if (!startsWith(child->getName(), "editor#"))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	void inspectSceneObject(SceneObject* object)
 	{
 		if (startsWith(object->getName(), "editor#"))
@@ -129,7 +149,7 @@ namespace vbEditor {
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		if (object->getChildren().empty())
+		if (!hasVisibleChildren(object))
 			node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
 
 

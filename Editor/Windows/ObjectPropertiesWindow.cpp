@@ -509,6 +509,25 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 }
 
 
+void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
+{
+	if (ImGui::CollapsingHeader("Road intersection", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		for (const auto& connectedRoad : component->getConnectedRoads())
+		{
+			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
+		}
+
+		float length = component->getLength();
+		if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+		{
+			component->setLength(length);
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -541,6 +560,12 @@ void showObjectProperties()
 				showRenderComponentDetails(renderComponent);
 			}
 
+			Terrain* terrain = dynamic_cast<Terrain*>(vbEditor::_selectedSceneObject->getComponent(CT_TERRAIN));
+			if (terrain)
+			{
+				showRenderComponentDetails(terrain);
+			}
+
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
 			if (physicsComponent)
 			{
@@ -560,6 +585,12 @@ void showObjectProperties()
 			if (shapePolygonComponent)
 			{
 				showShapePolygonComponentDetails(shapePolygonComponent);
+			}
+
+			RoadIntersectionComponent* roadIntersectionComponent = dynamic_cast<RoadIntersectionComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_INTERSECTION));
+			if (roadIntersectionComponent)
+			{
+				showRoadIntersectionComponentDetails(roadIntersectionComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

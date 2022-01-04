@@ -246,6 +246,16 @@ CrossroadComponent* GraphicsManager::addCrossRoad(std::vector<CrossroadConnectio
 }
 
 
+RoadIntersectionComponent* GraphicsManager::addRoadIntersection()
+{
+    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent;
+
+    _roadIntersectionComponents.push_back(roadIntersection);
+
+    return roadIntersection;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -411,6 +421,22 @@ void GraphicsManager::removeCrossroadComponent(CrossroadComponent* crossroadComp
 }
 
 
+void GraphicsManager::removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent)
+{
+    for (std::vector<RoadIntersectionComponent*>::iterator i = _roadIntersectionComponents.begin(); i != _roadIntersectionComponents.end(); ++i)
+    {
+        if (*i == roadIntersectionComponent)
+        {
+            i = _roadIntersectionComponents.erase(i);
+
+            delete roadIntersectionComponent;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -475,6 +501,12 @@ std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 std::vector<CrossroadComponent*>& GraphicsManager::getCrossroadComponents()
 {
 	return _crossroadComponents;
+}
+
+
+std::vector<RoadIntersectionComponent*>& GraphicsManager::getRoadIntersectionComponents()
+{
+    return _roadIntersectionComponents;
 }
 
 
@@ -553,6 +585,11 @@ void GraphicsManager::update(float deltaTime)
     for (DisplayComponent* displayComponent : _displayComponents)
     {
         displayComponent->update(deltaTime);
+    }
+
+    for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
+    {
+        roadIntersectionComponent->update(deltaTime);
     }
 }
 

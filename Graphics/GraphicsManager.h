@@ -22,6 +22,7 @@
 #include "Sky.h"
 #include "DisplayComponent.h"
 #include "CrossroadComponent.h"
+#include "RoadIntersectionComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -50,6 +51,7 @@ class GraphicsManager
         std::list<ClickableObject*> _clickableObjects;
 		std::list<DisplayComponent*>_displayComponents;
 		std::vector<CrossroadComponent*> _crossroadComponents;
+        std::vector<RoadIntersectionComponent*> _roadIntersectionComponents;
 
 		Sky*						_sky;
 
@@ -92,6 +94,7 @@ class GraphicsManager
 		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
+        RoadIntersectionComponent* addRoadIntersection();
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -107,6 +110,7 @@ class GraphicsManager
 		void removeDisplayComponent(DisplayComponent* displayComponent);
 		void removeSky(Sky* sky);
 		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
+        void removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -125,6 +129,7 @@ class GraphicsManager
 
         std::list<RenderObject*>& getRenderObjects();
 		std::vector<CrossroadComponent*>& getCrossroadComponents();
+        std::vector<RoadIntersectionComponent*>& getRoadIntersectionComponents();
 
 		Sky* getSky();
 

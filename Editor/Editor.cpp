@@ -493,8 +493,14 @@ namespace vbEditor
 		CrossroadComponent* crossroadComponent;
 		int index;
 
+		RoadIntersectionComponent* roadIntersectionComponent;
+
 		RoadConnectionPoint(CrossroadComponent* crossroadComponent, int index)
-			: crossroadComponent(crossroadComponent), index(index)
+			: crossroadComponent(crossroadComponent), index(index), roadIntersectionComponent(nullptr)
+		{}
+
+		RoadConnectionPoint(RoadIntersectionComponent* roadIntersectionComponent)
+			: crossroadComponent(nullptr), index(-1), roadIntersectionComponent(roadIntersectionComponent)
 		{}
 	};
 
@@ -820,6 +826,27 @@ namespace vbEditor
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
+				if (ImGui::MenuItem("Add new road intersection", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
+					sceneObject->addComponent(_graphicsManager->addRoadIntersection());
+
+					setSelectedSceneObject(sceneObject);
+
+					SceneObject* placeholderSceneObject = _sceneManager->addSceneObject("editor#Road intersection helper");
+
+					Material* material = new Material;
+					material->shader = NOTEXTURE_MATERIAL;
+					material->shininess = 96.0f;
+					material->diffuseColor = glm::vec4(0.32f, 0.32f, 0.32f, 1.0f);
+
+					Cube* cube = new Cube(1, material);
+					cube->init();
+					cube->setIsCastShadows(false);
+					_graphicsManager->addRenderObject(cube, placeholderSceneObject);
+
+					sceneObject->addChild(placeholderSceneObject);
+				}
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
@@ -1200,6 +1227,7 @@ namespace vbEditor
 			{
 				accumulator -= TIME_STEP;
 
+				_graphicsManager->update(TIME_STEP);
 				updateRoads(TIME_STEP);
 			}
 
@@ -1347,6 +1375,15 @@ namespace vbEditor
 		{
 			isRoadModified = ImGuizmo::IsUsing();
 		}
+
+		Component* roadIntersectionComponent = _selectedSceneObject->getComponent(CT_ROAD_INTERSECTION);
+		if (roadIntersectionComponent != nullptr)
+		{
+			if (ImGuizmo::IsUsing())
+			{
+				dynamic_cast<RoadIntersectionComponent*>(roadIntersectionComponent)->needRebuildConnectedRoad();
+			}
+		}
 	}
 
 	void createAvailableConnectionPointsList(std::vector<glm::vec3>& connectionPointsPositions, std::vector<RoadConnectionPoint>& connectionPoints)
@@ -1362,6 +1399,17 @@ namespace vbEditor
 					connectionPointsPositions.push_back(crossroadComponent->getGlobalPositionOfConnectionPoint(i));
 					connectionPoints.push_back(RoadConnectionPoint(crossroadComponent, i));
 				}
+			}
+		}
+
+		const std::vector<RoadIntersectionComponent*>& roadIntersectionComponents = _graphicsManager->getRoadIntersectionComponents();
+		for (RoadIntersectionComponent* roadIntersectionComponent : roadIntersectionComponents)
+		{
+			float distance = glm::length(roadIntersectionComponent->getSceneObject()->getPosition() - _camera->getPosition());
+			if (distance < 500.0f) // todo: value
+			{
+				connectionPointsPositions.push_back(roadIntersectionComponent->getSceneObject()->getPosition());
+				connectionPoints.push_back(RoadConnectionPoint(roadIntersectionComponent));
 			}
 		}
 	}
@@ -1394,7 +1442,15 @@ namespace vbEditor
 		{
 			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
 			int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
-			roadComponent->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+
+			if (connectionPoints[newConnectionIndex].crossroadComponent != nullptr)
+			{
+				roadComponent->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+			}
+			else
+			{
+				roadComponent->setConnectionPointWithRoadIntersection(connectionPointIndex, connectionPoints[newConnectionIndex].roadIntersectionComponent);
+			}
 
 			isRoadModified = true;
 		}

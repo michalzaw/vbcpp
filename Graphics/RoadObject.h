@@ -8,6 +8,7 @@
 
 
 class CrossroadComponent;
+class RoadIntersectionComponent;
 
 
 enum class RoadType
@@ -19,11 +20,15 @@ enum class RoadType
 
 struct RoadConnectionPoint
 {
+	// connection with crossroad component
 	CrossroadComponent* crossroadComponent;
 	int index;
 
+	// connection with road intersection component
+	RoadIntersectionComponent* roadIntersectionComponent;
+
 	RoadConnectionPoint()
-		: crossroadComponent(nullptr), index(0)
+		: crossroadComponent(nullptr), index(0), roadIntersectionComponent(nullptr)
 	{
 
 	}
@@ -42,6 +47,9 @@ class RoadObject : public RenderObject
 
 		// fields for BEZIER_CURVES type
 		std::vector<glm::vec3> _curvePoints;
+
+		void cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoints);
+		bool isConnectionExist(int index);
 
 	public:
 		RoadObject(RoadType roadType, RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate);
@@ -65,6 +73,7 @@ class RoadObject : public RenderObject
 		void setPointPostion(int index, glm::vec3 newPosition);
 
 		void setConnectionPoint(int index, CrossroadComponent* crossroadComponent, int indexInCrossroad = 0);
+		void setConnectionPointWithRoadIntersection(int index, RoadIntersectionComponent* roadIntersectionComponent);
 		RoadConnectionPoint& getConnectionPoint(int index);
 
 		void setConnectedPointPosition(int connectionPointIndex);
