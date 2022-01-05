@@ -27,6 +27,9 @@ class RoadIntersectionComponent final : public Component
 		std::vector<RoadConnectedToIntersection> _roads;
 
 		float _length;
+		float _width;
+
+		std::vector<std::vector<glm::vec3>> _bezierCurves;
 
 		bool _needRebuildConnectedRoad;
 
@@ -40,7 +43,11 @@ class RoadIntersectionComponent final : public Component
 		const std::vector<RoadConnectedToIntersection>& getConnectedRoads();
 
 		void setLength(float length);
+		void setWidth(float width);
 		float getLength();
+		float getWidth();
+
+		void createPolygon();
 
 		void needRebuildConnectedRoad();
 

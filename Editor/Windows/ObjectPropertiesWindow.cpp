@@ -524,6 +524,16 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 		{
 			component->setLength(length);
 		}
+		float width = component->getWidth();
+		if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 100.0f))
+		{
+			component->setWidth(width);
+		}
+
+		if (ImGui::Button("Generate polygon"))
+		{
+			component->createPolygon();
+		}
 	}
 }
 
