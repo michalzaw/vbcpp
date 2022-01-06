@@ -6,10 +6,12 @@
 
 #include "../Scene/SceneObject.h"
 
+#include "../Utils/BezierCurvesUtils.h"
+
 
 RoadIntersectionComponent::RoadIntersectionComponent()
 	: Component(CT_ROAD_INTERSECTION),
-	_length(10.0f), _width(5.0f),
+	_length(10.0f), _width(5.0f), _arc(2.0f),
 	_needRebuildConnectedRoad(false)
 {
 
@@ -58,8 +60,12 @@ void RoadIntersectionComponent::setLength(float length)
 void RoadIntersectionComponent::setWidth(float width)
 {
 	_width = width;
+}
 
-	needRebuildConnectedRoad();
+
+void RoadIntersectionComponent::setArc(float arc)
+{
+	_arc = arc;
 }
 
 
@@ -72,6 +78,12 @@ float RoadIntersectionComponent::getLength()
 float RoadIntersectionComponent::getWidth()
 {
 	return _width;
+}
+
+
+float RoadIntersectionComponent::getArc()
+{
+	return _arc;
 }
 
 
@@ -112,11 +124,37 @@ void RoadIntersectionComponent::createPolygon()
 		{
 			rightVector2 = -rightVector2;
 		}
+
+
+		// krzywe beziera - krawêdzie
+		if (_roads[road1Index].connectionPointInRoadIndex == 0)
+		{
+			direction1 = -direction1;
+		}
+		if (_roads[road2Index].connectionPointInRoadIndex == 0)
+		{
+			direction2 = -direction2;
+		}
+		std::vector<glm::vec3> bezierCurve1(4);
+		bezierCurve1[0] = road1CenterPoint + glm::vec3(rightVector1.x, 0.0f, rightVector1.y) * _width;
+		bezierCurve1[3] = road2CenterPoint + glm::vec3(rightVector2.x, 0.0f, rightVector2.y) * _width;
+		bezierCurve1[1] = bezierCurve1[0] + glm::vec3(direction1.x, 0.0f, direction1.y) * _arc;
+		bezierCurve1[2] = bezierCurve1[3] + glm::vec3(direction2.x, 0.0f, direction2.y) * _arc;
+
+		std::vector<glm::vec3> bezierCurvePoints;
+		BezierCurvesUtils::generateBezierCurvePoints(bezierCurve1[0], bezierCurve1[1], bezierCurve1[2], bezierCurve1[3], 10, bezierCurvePoints);
 		
+
 		shapePolygonComponent->addPoint(centerPoint);
 		shapePolygonComponent->addPoint(road1CenterPoint);
-		shapePolygonComponent->addPoint(road1CenterPoint + glm::vec3(rightVector1.x, 0.0f, rightVector1.y) * _width);
-		shapePolygonComponent->addPoint(road2CenterPoint + glm::vec3(rightVector2.x, 0.0f, rightVector2.y) * _width);
+		//shapePolygonComponent->addPoint(road1CenterPoint + glm::vec3(rightVector1.x, 0.0f, rightVector1.y) * _width);
+		//shapePolygonComponent->addPoint(road2CenterPoint + glm::vec3(rightVector2.x, 0.0f, rightVector2.y) * _width);
+
+		for (int j = 0; j < bezierCurvePoints.size(); ++j)
+		{
+			shapePolygonComponent->addPoint(bezierCurvePoints[j]);
+		}
+
 		shapePolygonComponent->addPoint(road2CenterPoint);
 	}
 

@@ -1472,7 +1472,8 @@ namespace vbEditor
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
-			_selectedSceneObject->getLocalTransformMatrix(),
+			/*_selectedSceneObject->getLocalTransformMatrix(),*/
+			glm::mat4(1.0f),
 			_camera->getPosition(),
 			component->getPoints(),
 			segments,
