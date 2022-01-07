@@ -8,6 +8,7 @@
 #include "../Scene/SceneManager.h"
 
 #include "../Utils/BezierCurvesUtils.h"
+#include "../Utils/ResourceManager.h"
 
 
 RoadIntersectionComponent::RoadIntersectionComponent()
@@ -197,121 +198,52 @@ void RoadIntersectionComponent::createPolygon()
 		for (int j = 0; j < bezierCurves[i].size(); ++j)
 		{
 			vertices[i * _quality + j].position = bezierCurves[i][j];
+			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z);
+			vertices[i * _quality + j].normal = glm::vec3(0.0f, 1.0f, 0.0f);
 		}
 
 		for (int j = 0; j < pointsOnRoadAxis[i].size(); ++j)
 		{
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].position = pointsOnRoadAxis[i][j];
+			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z);
+			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].normal = glm::vec3(0.0f, 1.0f, 0.0f);
 		}
 	}
 
 	vertices[numberOfVertices - 1].position = centerPoint;
 
 	// indices
-	unsigned int numberOfIndices = _roads.size() * (_quality -1) * 6;
+	unsigned int numberOfIndices = _roads.size() * _quality * 2 + _roads.size();
 	unsigned int* indices = new unsigned int[numberOfIndices];
 
 	LOG_DEBUG(LOG_VARIABLE(numberOfIndices));
 
 	int index = 0;
 	for (int i = 0; i < _roads.size(); ++i)
-	//for (int i = 0; i < 1; ++i)
 	{
 		int i2 = (i + 1) % _roads.size();
-		for (int j = 0; j < _quality - 1; ++j)
+		for (int j = 0; j < _quality; ++j)
 		{
+			if (j < numberOfPointsOnRoadAxis)
+			{
+				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + j;
+			}
+			else if (j == numberOfPointsOnRoadAxis)
+			{
+				indices[index++] = numberOfVertices - 1;
+			}
+			else
+			{
+				int k = j - numberOfPointsOnRoadAxis - 1;
+				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i2 + numberOfPointsOnRoadAxis - k - 1;
+			}
+
 			indices[index++] = (i * _quality) + j;
-			indices[index++] = (i * _quality) + j + 1;
-			if (j < numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + j;
-			}
-			else if (j == numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfVertices - 1;
-			}
-			else
-			{
-				int k = j - numberOfPointsOnRoadAxis - 1;
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i2 + numberOfPointsOnRoadAxis - k - 1;
-			}
-
-
-
-			indices[index++] = (i * _quality) + j + 1;
-
-			//indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + j + 1;
-			int k = j + 1;
-			if (k < numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + k;
-			}
-			else if (k == numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfVertices - 1;
-			}
-			else
-			{
-				int l = k - numberOfPointsOnRoadAxis - 1;
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i2 + numberOfPointsOnRoadAxis - l - 1;
-			}
-
-			//indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + j;
-			if (j < numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i + j;
-			}
-			else if (j == numberOfPointsOnRoadAxis)
-			{
-				indices[index++] = numberOfVertices - 1;
-			}
-			else
-			{
-				int k = j - numberOfPointsOnRoadAxis - 1;
-				indices[index++] = numberOfPointsInAllBezierCurves + numberOfPointsOnRoadAxis * i2 + numberOfPointsOnRoadAxis - k - 1;
-			}
 		}
+		indices[index++] = OGLDriver::PRIMITIVE_RESTART_INDEX;
 	}
+
 	LOG_DEBUG(LOG_VARIABLE(index));
-
-
-
-
-	/*unsigned int numberOfVertices = bezierCurves[0].size() + pointsOnRoadAxis[0].size() + pointsOnRoadAxis[1].size() + 1;
-	unsigned int numberOfIndices = (numberOfVertices + 2) * 3;
-	Vertex* vertices = new Vertex[numberOfVertices];
-	unsigned int* indices = new unsigned int[numberOfIndices];
-
-	int index = 0;
-	for (int j = 0; j < bezierCurves[0].size(); ++j)
-	{
-		vertices[index++].position = bezierCurves[0][j];
-	}
-
-	for (int j = 0; j < pointsOnRoadAxis[0].size(); ++j)
-	{
-		vertices[index++].position = pointsOnRoadAxis[0][j];
-	}
-
-	vertices[index++].position = centerPoint;
-
-	for (int j = pointsOnRoadAxis[1].size() - 1; j >= 0; --j)
-	{
-		vertices[index++].position = pointsOnRoadAxis[1][j];
-	}
-
-	int a = bezierCurves[0].size();
-	index = 0;
-	for (int j = 0; j < a - 1; ++j)
-	{
-		indices[index++] = j;
-		indices[index++] = j + 1;
-		indices[index++] = a + j;
-
-		indices[index++] = j + 1;
-		indices[index++] = a + j;
-		indices[index++] = a + j + 1;
-	}*/
 
 	Component* cmp = getSceneObject()->getComponent(CT_RENDER_OBJECT);
 	if (cmp != nullptr)
@@ -320,11 +252,12 @@ void RoadIntersectionComponent::createPolygon()
 	}
 
 	StaticModelMesh* meshes = new StaticModelMesh[1];
-	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, true);
+	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, SOLID_MATERIAL, false, 1024 * 1024, 1024 * 1024, false);
 
 	std::vector<Material*> materials;
 	materials.push_back(new Material);
 	materials[0]->shader = WIREFRAME_MATERIAL;
+	materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
 
 	StaticModelNode* modelNode = new StaticModelNode;
 	modelNode->name = "road";
@@ -332,73 +265,9 @@ void RoadIntersectionComponent::createPolygon()
 	modelNode->meshesCount = 1;
 	modelNode->parent = nullptr;
 
-	RStaticModel* _generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLES);
+	RStaticModel* _generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP);
 
 	RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
-
-	/*for (int i = 0; i < _roads.size(); ++i)
-	//for (int i = 0; i < 1; ++i)
-	{
-		int road1Index = i;
-		int road2Index = (i + 1) % _roads.size();
-
-		const auto& road1CurvePoints = _roads[road1Index].road->getCurvePoints();
-		const auto& road2CurvePoints = _roads[road2Index].road->getCurvePoints();
-		int road1CenterPointIndex = _roads[road1Index].connectionPointInRoadIndex == 0 ? 0 : road1CurvePoints.size() - 1;
-		int road2CenterPointIndex = _roads[road2Index].connectionPointInRoadIndex == 0 ? 0 : road2CurvePoints.size() - 1;
-		glm::vec3 road1CenterPoint = road1CurvePoints[road1CenterPointIndex];
-		glm::vec3 road2CenterPoint = road2CurvePoints[road2CenterPointIndex];
-
-		glm::vec2 direction1 = RoadGenerator::calculateDirection(road1CurvePoints, temp, road1CenterPointIndex);
-		glm::vec2 rightVector1 = glm::vec2(-direction1.y, direction1.x);
-
-		glm::vec2 direction2 = RoadGenerator::calculateDirection(road2CurvePoints, temp, road2CenterPointIndex);
-		glm::vec2 rightVector2 = glm::vec2(-direction2.y, direction2.x);
-
-		if (_roads[road1Index].connectionPointInRoadIndex == 0)
-		{
-			rightVector1 = -rightVector1;
-		}
-		if (_roads[road2Index].connectionPointInRoadIndex == 1)
-		{
-			rightVector2 = -rightVector2;
-		}
-
-
-
-
-		// krzywe beziera - krawêdzie
-		if (_roads[road1Index].connectionPointInRoadIndex == 0)
-		{
-			direction1 = -direction1;
-		}
-		if (_roads[road2Index].connectionPointInRoadIndex == 0)
-		{
-			direction2 = -direction2;
-		}
-		std::vector<glm::vec3> bezierCurve1(4);
-		bezierCurve1[0] = road1CenterPoint + glm::vec3(rightVector1.x, 0.0f, rightVector1.y) * _width;
-		bezierCurve1[3] = road2CenterPoint + glm::vec3(rightVector2.x, 0.0f, rightVector2.y) * _width;
-		bezierCurve1[1] = bezierCurve1[0] + glm::vec3(direction1.x, 0.0f, direction1.y) * _arc;
-		bezierCurve1[2] = bezierCurve1[3] + glm::vec3(direction2.x, 0.0f, direction2.y) * _arc;
-
-		std::vector<glm::vec3> bezierCurvePoints;
-		BezierCurvesUtils::generateBezierCurvePoints(bezierCurve1[0], bezierCurve1[1], bezierCurve1[2], bezierCurve1[3], _quality, bezierCurvePoints);
-		
-
-		shapePolygonComponent->addPoint(centerPoint);
-		shapePolygonComponent->addPoint(road1CenterPoint);
-		//shapePolygonComponent->addPoint(road1CenterPoint + glm::vec3(rightVector1.x, 0.0f, rightVector1.y) * _width);
-		//shapePolygonComponent->addPoint(road2CenterPoint + glm::vec3(rightVector2.x, 0.0f, rightVector2.y) * _width);
-
-		for (int j = 0; j < bezierCurvePoints.size(); ++j)
-		{
-			shapePolygonComponent->addPoint(bezierCurvePoints[j]);
-		}
-
-		shapePolygonComponent->addPoint(road2CenterPoint);
-	}*/
-
 }
 
 

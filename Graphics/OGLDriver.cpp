@@ -164,6 +164,9 @@ bool OGLDriver::initialize()
 	glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &_maxAnisotropy);
 	LOG_INFO("- maxAnisotropy: " + Strings::toString(_maxAnisotropy));
 
+    glEnable(GL_PRIMITIVE_RESTART);
+    glPrimitiveRestartIndex(PRIMITIVE_RESTART_INDEX);
+
     return true;
 }
 
