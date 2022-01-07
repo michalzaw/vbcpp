@@ -426,7 +426,7 @@ namespace RoadManipulator
 				int p1 = i;
 				int p2 = (i + 1) % points.size();
 
-				drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition);
+				//drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition);
 			}
 		}
 

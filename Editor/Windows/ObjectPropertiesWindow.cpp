@@ -534,6 +534,11 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 		{
 			component->setArc(arc);
 		}
+		float quality = component->getQuality();
+		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
+		{
+			component->setQuality(quality);
+		}
 
 		if (ImGui::Button("Generate polygon"))
 		{

@@ -29,8 +29,7 @@ class RoadIntersectionComponent final : public Component
 		float _length;
 		float _width;
 		float _arc;
-
-		std::vector<std::vector<glm::vec3>> _bezierCurves;
+		int _quality;
 
 		bool _needRebuildConnectedRoad;
 
@@ -46,9 +45,11 @@ class RoadIntersectionComponent final : public Component
 		void setLength(float length);
 		void setWidth(float width);
 		void setArc(float arc);
+		void setQuality(int quality);
 		float getLength();
 		float getWidth();
 		float getArc();
+		int getQuality();
 
 		void createPolygon();
 
