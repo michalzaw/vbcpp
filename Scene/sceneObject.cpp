@@ -286,15 +286,15 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_PHYSICAL_BODY:
-                    _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                    _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(component));
                     break;
 
                 case CT_SOUND:
-                    _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(*i));
+                    _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(component));
                     break;
 
                 case CT_TREE_COMPONENT:
-                    delete *i;
+                    delete component;
                     break;
 
                 case CT_GRASS:
@@ -302,43 +302,43 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_BUS_STOP:
-                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
+                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(component));
                     break;
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:
-                    _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(component));
                     break;
 
                 case CT_MIRROR:
-                    _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(component));
                     break;
 
                 case CT_CLICKABLE_OBJECT:
-                    _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(*i));
+                    _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(component));
                     break;
 
 				case CT_SKY:
-                    _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(*i));
+                    _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(component));
 					break;
 
 				case CT_DISPLAY:
-                    _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(component));
 					break;
 
 				case CT_CAMERA_CONTROL:
-                    _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
+                    _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(component));
 					break;
 
                 case CT_SHAPE_POLYGON:
-                    delete* i;
+                    delete component;
                     break;
 
                 case CT_CROSSROAD:
-                    _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(component));
                     break;
 
                 case CT_ROAD_INTERSECTION:
-                    _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(component));
                     break;
 
             }
