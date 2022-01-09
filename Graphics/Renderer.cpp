@@ -1117,7 +1117,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
 
     // WIREFRAME_MATERIAL
-    _shaderList[WIREFRAME_MATERIAL] = _shaderList[SOLID_MATERIAL];
+    _shaderList[WIREFRAME_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
 
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;

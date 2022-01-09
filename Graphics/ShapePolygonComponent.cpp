@@ -1,6 +1,7 @@
 #include "ShapePolygonComponent.h"
 
 #include "GraphicsManager.h"
+#include "ModelGenerator.h"
 #include "RenderObject.h"
 
 #include "../Scene/SceneManager.h"
@@ -37,27 +38,6 @@ ShapePolygonComponent::~ShapePolygonComponent()
 	{
 		delete _generatedModel;
 	}
-}
-
-
-glm::vec3* ShapePolygonComponent::generateCollistionMesh(StaticModelMesh* meshes, unsigned int meshesCount, unsigned int totalIndicesCount)
-{
-	glm::vec3* collisionMesh = new glm::vec3[totalIndicesCount];
-	int counter = 0;
-
-	for (int i = 0; i < meshesCount; ++i)
-	{
-		unsigned int indicesCount = meshes[i].indicesCount;
-
-		for (int j = 0; j < indicesCount; ++j)
-		{
-			collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
-		}
-
-		counter += indicesCount;
-	}
-
-	return collisionMesh;
 }
 
 
@@ -204,25 +184,11 @@ void ShapePolygonComponent::buildAndCreateRenderObject(bool useMeshMender)
 	const bool isGame = GameConfig::getInstance().mode == GM_GAME;
 
 	StaticModelMesh* meshes = isModelExist ? _generatedModel->getRootNode()->meshes : new StaticModelMesh[1];
-	if (isModelExist)
-	{
-		LOG_DEBUG("Build custom polygon: update existing meshes");
-		meshes[0].updateMeshData(vertices, verticesVector.size(), indices, numberOfIndices);
-	}
-	else if (isGame)
-	{
-		LOG_DEBUG("Build custom polygon: create new meshes in Game Mode");
-		meshes[0].setMeshData(vertices, verticesVector.size(), indices, numberOfIndices, 0, WIREFRAME_MATERIAL);
-	}
-	else
-	{
-		LOG_DEBUG("Build custom polygon: create new meshes in Editor Mode");
-		meshes[0].setMeshData(vertices, verticesVector.size(), indices, numberOfIndices, 0, WIREFRAME_MATERIAL, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
-	}
+	meshes[0].setMeshData(vertices, verticesVector.size(), indices, numberOfIndices, 0, WIREFRAME_MATERIAL, isGame, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 
 	// collision mesh
 	unsigned int collisionMeshSize = meshes[0].indicesCount;
-	glm::vec3* collisionMesh = generateCollistionMesh(meshes, 1, collisionMeshSize);
+	glm::vec3* collisionMesh = ModelGenerator::generateCollistionMesh(meshes, 1, collisionMeshSize);
 
 	// model
 	if (isModelExist)

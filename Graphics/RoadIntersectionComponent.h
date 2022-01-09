@@ -8,6 +8,7 @@
 
 
 class RoadObject;
+class RStaticModel;
 
 
 struct RoadConnectedToIntersection final
@@ -24,6 +25,8 @@ struct RoadConnectedToIntersection final
 class RoadIntersectionComponent final : public Component
 {
 	private:
+		static const unsigned int DEFAULT_BUFFER_SIZE = 1024 * 1024; // ~ 4600 vertices
+
 		std::vector<RoadConnectedToIntersection> _roads;
 
 		float _length;
@@ -31,7 +34,12 @@ class RoadIntersectionComponent final : public Component
 		float _arc;
 		int _quality;
 
+		bool _needRebuildIntersectionModel;
 		bool _needRebuildConnectedRoad;
+
+		RStaticModel* _generatedModel;
+
+		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
 
 	public:
 		RoadIntersectionComponent();
@@ -53,6 +61,7 @@ class RoadIntersectionComponent final : public Component
 
 		void createPolygon();
 
+		void needRebuild();
 		void needRebuildConnectedRoad();
 
 		void changedTransform() override;

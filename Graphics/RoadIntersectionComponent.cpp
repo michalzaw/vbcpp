@@ -1,5 +1,6 @@
 #include "RoadIntersectionComponent.h"
 
+#include "ModelGenerator.h"
 #include "ShapePolygonComponent.h"
 #include "RoadGenerator.h"
 #include "RoadObject.h"
@@ -14,7 +15,8 @@
 RoadIntersectionComponent::RoadIntersectionComponent()
 	: Component(CT_ROAD_INTERSECTION),
 	_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
-	_needRebuildConnectedRoad(false)
+	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false),
+	_generatedModel(nullptr)
 {
 
 }
@@ -29,6 +31,11 @@ RoadIntersectionComponent::~RoadIntersectionComponent()
 void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
 	_roads.push_back(RoadConnectedToIntersection(roadObject, connectionPointInRoadIndex));
+
+	if (_roads.size() > 1)
+	{
+		needRebuildConnectedRoad();
+	}
 }
 
 
@@ -42,6 +49,8 @@ void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int conne
 			break;
 		}
 	}
+
+	needRebuildConnectedRoad();
 }
 
 
@@ -62,18 +71,24 @@ void RoadIntersectionComponent::setLength(float length)
 void RoadIntersectionComponent::setWidth(float width)
 {
 	_width = width;
+
+	_needRebuildIntersectionModel = true;
 }
 
 
 void RoadIntersectionComponent::setArc(float arc)
 {
 	_arc = arc;
+
+	_needRebuildIntersectionModel = true;
 }
 
 
 void RoadIntersectionComponent::setQuality(int quality)
 {
 	_quality = quality;
+
+	_needRebuildIntersectionModel = true;
 }
 
 
@@ -101,12 +116,42 @@ int RoadIntersectionComponent::getQuality()
 }
 
 
-void RoadIntersectionComponent::createPolygon()
+
+void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves)
 {
 	auto shapePolygonComponent = new ShapePolygonComponent;
 	getSceneObject()->removeComponent(getSceneObject()->getComponent(CT_SHAPE_POLYGON));
 	getSceneObject()->addComponent(shapePolygonComponent);
 
+	glm::vec3 centerPoint = getSceneObject()->getGlobalPosition();
+
+	for (int i = 0; i < _roads.size(); ++i)
+	{
+		int road1Index = i;
+		int road2Index = (i + 1) % _roads.size();
+
+		for (int j = 0; j < bezierCurves[i].size(); ++j)
+		{
+			shapePolygonComponent->addPoint(bezierCurves[i][j]);
+		}
+
+		for (int j = 0; j < pointsOnRoadAxis[road1Index].size(); ++j)
+		{
+			shapePolygonComponent->addPoint(pointsOnRoadAxis[road1Index][j]);
+		}
+
+		shapePolygonComponent->addPoint(centerPoint);
+
+		for (int j = 0; j < pointsOnRoadAxis[road2Index].size(); ++j)
+		{
+			shapePolygonComponent->addPoint(pointsOnRoadAxis[road2Index][j]);
+		}
+	}
+}
+
+
+void RoadIntersectionComponent::createPolygon()
+{
 	std::vector<RoadConnectionPointData*> temp(2, nullptr);
 
 	glm::vec3 centerPoint = getSceneObject()->getGlobalPosition();
@@ -161,28 +206,9 @@ void RoadIntersectionComponent::createPolygon()
 		bezierCurve1[2] = bezierCurve1[3] + roadsDirections[road2Index] * _arc;
 
 		BezierCurvesUtils::generateBezierCurvePoints(bezierCurve1[0], bezierCurve1[1], bezierCurve1[2], bezierCurve1[3], _quality, bezierCurves[i]);
-
-		// debug
-		// -----------
-		for (int j = 0; j < bezierCurves[i].size(); ++j)
-		{
-			shapePolygonComponent->addPoint(bezierCurves[i][j]);
-		}
-
-		for (int j = 0; j < pointsOnRoadAxis[road1Index].size(); ++j)
-		{
-			shapePolygonComponent->addPoint(pointsOnRoadAxis[road1Index][j]);
-		}
-
-		shapePolygonComponent->addPoint(centerPoint);
-
-		for (int j = 0; j < pointsOnRoadAxis[road2Index].size(); ++j)
-		{
-			shapePolygonComponent->addPoint(pointsOnRoadAxis[road2Index][j]);
-		}
-		// -----------
 	}
 
+	createDebugPolygonComponent(pointsOnRoadAxis, bezierCurves);
 
 	// vertices
 	unsigned int numberOfPointsInAllBezierCurves = _roads.size() * _quality;
@@ -245,34 +271,64 @@ void RoadIntersectionComponent::createPolygon()
 
 	LOG_DEBUG(LOG_VARIABLE(index));
 
-	Component* cmp = getSceneObject()->getComponent(CT_RENDER_OBJECT);
-	if (cmp != nullptr)
+	// meshes
+	const bool isModelExist = _generatedModel != nullptr;
+	const bool isGame = GameConfig::getInstance().mode == GM_GAME;
+
+	StaticModelMesh* meshes = isModelExist ? _generatedModel->getRootNode()->meshes : new StaticModelMesh[1];
+	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, isGame, DEFAULT_BUFFER_SIZE, DEFAULT_BUFFER_SIZE, false);
+
+	// collision mesh
+	//unsigned int collisionMeshSize = meshes[0].indicesCount;
+	//glm::vec3* collisionMesh = ModelGenerator::generateCollistionMesh(meshes, 1, collisionMeshSize);
+
+	// model
+	if (isModelExist)
 	{
-		getSceneObject()->removeComponent(cmp);
+		_generatedModel->recalculateAABB();
+		//_generatedModel->setNewCollisionMesh(collisionMesh, collisionMeshSize);
+
+		RenderObject* currentRenderComponent = static_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
+		currentRenderComponent->setModel(_generatedModel);
 	}
+	else
+	{
+		std::vector<Material*> materials;
+		materials.push_back(new Material);
+		materials[0]->shader = WIREFRAME_MATERIAL;
+		//materials[0]->shininess = 96.0f;
+		//materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
+		//materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
 
-	StaticModelMesh* meshes = new StaticModelMesh[1];
-	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, SOLID_MATERIAL, false, 1024 * 1024, 1024 * 1024, false);
+		StaticModelNode* modelNode = new StaticModelNode;
+		modelNode->name = "road intersection";
+		modelNode->meshes = meshes;
+		modelNode->meshesCount = 1;
+		modelNode->parent = nullptr;
 
-	std::vector<Material*> materials;
-	materials.push_back(new Material);
-	materials[0]->shader = WIREFRAME_MATERIAL;
-	materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
+		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP/*, collisionMesh, collisionMeshSize*/);
 
-	StaticModelNode* modelNode = new StaticModelNode;
-	modelNode->name = "road";
-	modelNode->meshes = meshes;
-	modelNode->meshesCount = 1;
-	modelNode->parent = nullptr;
+		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
+	}
+}
 
-	RStaticModel* _generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP);
 
-	RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
+void RoadIntersectionComponent::needRebuild()
+{
+	_needRebuildIntersectionModel = true;
+
+	LOG_DEBUG("needRebuild");
 }
 
 
 void RoadIntersectionComponent::needRebuildConnectedRoad()
 {
+	/*for (int i = 0; i < _roads.size(); ++i)
+	{
+		_roads[i].road->needRebuildRoad();
+	}*/
+
+	_needRebuildIntersectionModel = true;
 	_needRebuildConnectedRoad = true;
 
 	LOG_DEBUG("needRebuildConnectedRoad");
@@ -293,16 +349,26 @@ void RoadIntersectionComponent::update(float deltaTime)
 	static float roadModificationTimer = 0.0f;
 	roadModificationTimer += deltaTime;
 
-	if (roadModificationTimer >= 0.2f && _needRebuildConnectedRoad)
+	if (roadModificationTimer >= 0.2f)
 	{
-		LOG_DEBUG("BUILD ROAD: BEGIN");
-		for (int i = 0; i < _roads.size(); ++i)
+		if (_needRebuildConnectedRoad)
 		{
-			_roads[i].road->buildModel();
-		}
+			LOG_DEBUG("BUILD ROAD: BEGIN");
+			for (int i = 0; i < _roads.size(); ++i)
+			{
+				_roads[i].road->buildModel();
+			}
 
-		LOG_DEBUG("BUILD ROAD: END");
+			LOG_DEBUG("BUILD ROAD: END");
+
+			_needRebuildConnectedRoad = false;
+		}
+		if (_needRebuildIntersectionModel)
+		{
+			createPolygon();
+
+			_needRebuildIntersectionModel = false;
+		}
 		roadModificationTimer = 0.0f;
-		_needRebuildConnectedRoad = false;
 	}
 }

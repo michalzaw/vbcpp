@@ -28,6 +28,16 @@ struct StaticModelMesh
 
 	bool useSharedVboAndIbo;
 
+    StaticModelMesh()
+        : vertices(nullptr), verticesCount(0),
+        indices(nullptr), indicesCount(0),
+        vbo(nullptr), ibo(nullptr),
+        firstVertex(0), firstVertexInVbo(0), materialIndex(0),
+        useSharedVboAndIbo(false)
+    {
+
+    }
+
     ~StaticModelMesh()
     {
         if (vertices)
@@ -55,10 +65,22 @@ struct StaticModelMesh
 
     }
 
+    // shaderType, vboSize, iboSize, staticData - only used when useSharedVboAndIbo is false
     void setMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
                      unsigned int materialIndex, ShaderType shaderType,
 					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0, bool staticData = true)
     {
+        bool isInitialized = vbo != nullptr || ibo != nullptr;
+
+        if (vertices)
+        {
+            delete[] this->vertices;
+        }
+        if (indices)
+        {
+            delete[] this->indices;
+        }
+
         this->vertices = vertices;
         this->verticesCount = verticesCount;
         this->indices = indices;
@@ -68,39 +90,47 @@ struct StaticModelMesh
         this->materialIndex = materialIndex;
 		this->useSharedVboAndIbo = useSharedVboAndIbo;
 
-		if (useSharedVboAndIbo)
-		{
-			int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
-			int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
-			vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
-			ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
+        if (!isInitialized)
+        {
+            if (useSharedVboAndIbo)
+            {
+                int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
+                int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
+                vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
+                ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
 
-			firstVertexInVbo = vbo->getQuantumOfVertices();
-			for (unsigned int i = 0; i < this->indicesCount; ++i)
-			{
-				this->indices[i] += firstVertexInVbo;
-			}
+                firstVertexInVbo = vbo->getQuantumOfVertices();
+                for (unsigned int i = 0; i < this->indicesCount; ++i)
+                {
+                    this->indices[i] += firstVertexInVbo;
+                }
 
-			this->firstVertex = ibo->getIndicesCount();
-		}
-		else
-		{
-			GLenum usage = staticData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-			vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex), usage);
-			ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int), usage);
-		}
+                this->firstVertex = ibo->getIndicesCount();
+            }
+            else
+            {
+                GLenum usage = staticData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+                vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex), usage);
+                ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int), usage);
+            }
 
-        vbo->addVertexData(vertices, verticesCount);
-        ibo->addIndices(indices, indicesCount);
+            vbo->addVertexData(vertices, verticesCount);
+            ibo->addIndices(indices, indicesCount);
+        }
+        else
+        {
+            LOG_DEBUG("Update data in existing VBO and IBO");
+            vbo->updateVertexData(vertices, verticesCount);
+            ibo->updateIndices(indices, indicesCount);
+        }
     }
 
-	void updateMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount)
+	/*void updateMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount)
 	{
 		if (vertices)
 		{
 			delete[] this->vertices;
 		}
-
 		if (indices)
 		{
 			delete[] this->indices;
@@ -110,13 +140,12 @@ struct StaticModelMesh
 		this->verticesCount = verticesCount;
 		this->indices = indices;
 		this->indicesCount = indicesCount;
-
-		firstVertexInVbo = 0;
-		firstVertex = 0;
+        this->firstVertex = 0;
+		this->firstVertexInVbo = 0;
 
 		vbo->updateVertexData(vertices, verticesCount);
 		ibo->updateIndices(indices, indicesCount);
-	}
+	}*/
 
 };
 

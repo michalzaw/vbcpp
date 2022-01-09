@@ -413,6 +413,16 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 				_points[index + 2] = _points[index + 1] - direction * length;
 			}
 		}
+
+		//rebuild road intersections
+		if (_connectionPoints[0].roadIntersectionComponent != nullptr && index < 5)
+		{
+			_connectionPoints[0].roadIntersectionComponent->needRebuild();
+		}
+		if (_connectionPoints[1].roadIntersectionComponent != nullptr && index > static_cast<int>(_points.size()) - 6)
+		{
+			_connectionPoints[1].roadIntersectionComponent->needRebuild();
+		}
 	}
 
 	_points[index] = newPosition;
@@ -550,4 +560,10 @@ void RoadObject::resetConnectedPointPositions()
 			setConnectedPointPosition(i);
 		}
 	}
+}
+
+
+const std::vector<glm::vec3>& RoadObject::getCurvePoints()
+{
+	return _curvePoints;
 }

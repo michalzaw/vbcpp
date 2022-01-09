@@ -38,6 +38,8 @@ set (GRAPHICS_SOURCES
 		Graphics/MirrorComponent.h
 		Graphics/Model.cpp
 		Graphics/Model.h
+		Graphics/ModelGenerator.cpp
+		Graphics/ModelGenerator.h
 		Graphics/ModelNode.cpp
 		Graphics/ModelNode.h
 		Graphics/NVMeshMender/NVMeshMender.cpp
