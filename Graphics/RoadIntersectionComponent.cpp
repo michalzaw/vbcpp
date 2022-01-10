@@ -14,7 +14,8 @@
 
 RoadIntersectionComponent::RoadIntersectionComponent()
 	: Component(CT_ROAD_INTERSECTION),
-	_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
+	_quality(11),
+	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
 	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false),
 	_generatedModel(nullptr)
 {
@@ -32,22 +33,47 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 {
 	_roads.push_back(RoadConnectedToIntersection(roadObject, connectionPointInRoadIndex));
 
-	if (_roads.size() > 1)
+	if (_roads.size() == 1)
 	{
+		_length.push_back(0.0f);
+		_width.push_back(0.0f);
+		_arc.push_back(2.0f);
+	}
+	else
+	{
+		_length.push_back(_roads.size() == 2 ? 10.0f : _length[0]);
+		_width.push_back(_width[0]);
+		_arc.push_back(_arc[0]);
+
 		needRebuildConnectedRoad();
+	}
+
+	setLengthInternal(_roads.size() - 1, _length[_length.size() - 1]);
+
+	if (_roads.size() == 2)
+	{
+		setLengthInternal(0, _length[1]);
 	}
 }
 
 
 void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
+	int index = 0;
 	for (std::vector<RoadConnectedToIntersection>::iterator i = _roads.begin(); i != _roads.end(); ++i)
 	{
 		if (i->road == roadObject && i->connectionPointInRoadIndex == connectionPointInRoadIndex)
 		{
 			i = _roads.erase(i);
+
+			_length.erase(_length.begin() + index);
+			_width.erase(_width.begin() + index);
+			_arc.erase(_arc.begin() + index);
+
 			break;
 		}
+
+		++index;
 	}
 
 	needRebuildConnectedRoad();
@@ -60,9 +86,47 @@ const std::vector<RoadConnectedToIntersection>& RoadIntersectionComponent::getCo
 }
 
 
+void RoadIntersectionComponent::setLengthInternal(int index, float length)
+{
+	_length[index] = length;
+
+	if (_roads[index].connectionPointInRoadIndex == 0)
+	{
+		_roads[index].road->setMarginBegin(length);
+	}
+	else
+	{
+		_roads[index].road->setMarginEnd(length);
+	}
+}
+
+
 void RoadIntersectionComponent::setLength(float length)
 {
-	_length = length;
+	for (int i = 0; i < _length.size(); ++i)
+	{
+		setLengthInternal(i, length);
+	}
+
+	needRebuildConnectedRoad();
+}
+
+
+void RoadIntersectionComponent::setLength(int index, float length, bool modifyAll)
+{
+	if (modifyAll)
+	{
+		setLength(length);
+		return;
+	}
+
+	if (index >= _length.size())
+	{
+		LOG_ERROR("Error while calling setLength. Invalid road index!");
+		return;
+	}
+
+	setLengthInternal(index, length);
 
 	needRebuildConnectedRoad();
 }
@@ -70,7 +134,29 @@ void RoadIntersectionComponent::setLength(float length)
 
 void RoadIntersectionComponent::setWidth(float width)
 {
-	_width = width;
+	for (int i = 0; i < _width.size(); ++i)
+	{
+		_width[i] = width;
+	}
+
+	_needRebuildIntersectionModel = true;
+}
+
+
+void RoadIntersectionComponent::setWidth(int index, float width, bool modifyAll)
+{
+	if (modifyAll)
+	{
+		setWidth(width);
+		return;
+	}
+
+	if (index >= _length.size())
+	{
+		LOG_ERROR("Error while calling setWidth. Invalid road index!");
+		return;
+	}
+	_width[index] = width;
 
 	_needRebuildIntersectionModel = true;
 }
@@ -78,7 +164,29 @@ void RoadIntersectionComponent::setWidth(float width)
 
 void RoadIntersectionComponent::setArc(float arc)
 {
-	_arc = arc;
+	for (int i = 0; i < _arc.size(); ++i)
+	{
+		_arc[i] = arc;
+	}
+
+	_needRebuildIntersectionModel = true;
+}
+
+
+void RoadIntersectionComponent::setArc(int index, float arc, bool modifyAll)
+{
+	if (modifyAll)
+	{
+		setArc(arc);
+		return;
+	}
+
+	if (index >= _length.size())
+	{
+		LOG_ERROR("Error while calling setArc. Invalid road index!");
+		return;
+	}
+	_arc[index] = arc;
 
 	_needRebuildIntersectionModel = true;
 }
@@ -92,21 +200,36 @@ void RoadIntersectionComponent::setQuality(int quality)
 }
 
 
-float RoadIntersectionComponent::getLength()
+float RoadIntersectionComponent::getLength(int index)
 {
-	return _length;
+	if (index >= _length.size())
+	{
+		LOG_ERROR("Error while calling getLength. Invalid road index!");
+		return 0.0f;
+	}
+	return _length[index];
 }
 
 
-float RoadIntersectionComponent::getWidth()
+float RoadIntersectionComponent::getWidth(int index)
 {
-	return _width;
+	if (index >= _width.size())
+	{
+		LOG_ERROR("Error while calling getWidth. Invalid road index!");
+		return 0.0f;
+	}
+	return _width[index];
 }
 
 
-float RoadIntersectionComponent::getArc()
+float RoadIntersectionComponent::getArc(int index)
 {
-	return _arc;
+	if (index >= _arc.size())
+	{
+		LOG_ERROR("Error while calling getArc. Invalid road index!");
+		return 0.0f;
+	}
+	return _arc[index];
 }
 
 
@@ -114,7 +237,6 @@ int RoadIntersectionComponent::getQuality()
 {
 	return _quality;
 }
-
 
 
 void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves)
@@ -146,6 +268,21 @@ void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<st
 		{
 			shapePolygonComponent->addPoint(pointsOnRoadAxis[road2Index][j]);
 		}
+	}
+}
+
+
+float RoadIntersectionComponent::getRealWidth(int index)
+{
+	float width = _width[index];
+	if (width == 0.0f)
+	{
+		const auto& lanes = _roads[index].road->getRoadProfile()->getRoadLanes();
+		return fabs(lanes[lanes.size() - 1].r2) * 2;
+	}
+	else
+	{
+		return width;
 	}
 }
 
@@ -200,15 +337,15 @@ void RoadIntersectionComponent::createPolygon()
 		int road2Index = (i + 1) % _roads.size();
 
 		std::vector<glm::vec3> bezierCurve1(4);
-		bezierCurve1[0] = roadsCenterPoints[road1Index] + roadsRightVectors[road1Index] *_width;
-		bezierCurve1[3] = roadsCenterPoints[road2Index] - roadsRightVectors[road2Index] * _width;
-		bezierCurve1[1] = bezierCurve1[0] + roadsDirections[road1Index] * _arc;
-		bezierCurve1[2] = bezierCurve1[3] + roadsDirections[road2Index] * _arc;
+		bezierCurve1[0] = roadsCenterPoints[road1Index] + roadsRightVectors[road1Index] * getRealWidth(road1Index);
+		bezierCurve1[3] = roadsCenterPoints[road2Index] - roadsRightVectors[road2Index] * getRealWidth(road2Index);
+		bezierCurve1[1] = bezierCurve1[0] + roadsDirections[road1Index] * _arc[road1Index];
+		bezierCurve1[2] = bezierCurve1[3] + roadsDirections[road2Index] * _arc[road1Index];
 
 		BezierCurvesUtils::generateBezierCurvePoints(bezierCurve1[0], bezierCurve1[1], bezierCurve1[2], bezierCurve1[3], _quality, bezierCurves[i]);
 	}
 
-	createDebugPolygonComponent(pointsOnRoadAxis, bezierCurves);
+	//createDebugPolygonComponent(pointsOnRoadAxis, bezierCurves);
 
 	// vertices
 	unsigned int numberOfPointsInAllBezierCurves = _roads.size() * _quality;
@@ -232,7 +369,7 @@ void RoadIntersectionComponent::createPolygon()
 		{
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].position = pointsOnRoadAxis[i][j];
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z);
-			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 	}
 

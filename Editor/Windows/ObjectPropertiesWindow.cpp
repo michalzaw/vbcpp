@@ -519,26 +519,47 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
 		}
 
-		float length = component->getLength();
-		if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+		ImGui::Separator();
+
+		static bool modifyAllConnectedRoads = true;
+		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
+
+		int numberOfRoads = modifyAllConnectedRoads ? 1 : component->getConnectedRoads().size();
+		for (int i = 0; i < numberOfRoads; ++i)
 		{
-			component->setLength(length);
+			ImGui::PushID(i);
+
+			ImGui::Text("#%d", i + 1);
+
+			float length = component->getLength(i);
+			if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+			{
+				component->setLength(i, length, modifyAllConnectedRoads);
+			}
+			float width = component->getWidth(i);
+			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
+			{
+				component->setWidth(i, width, modifyAllConnectedRoads);
+			}
+			float arc = component->getArc(i);
+			if (ImGui::DragFloat("Arc", &arc, 0.1f, 0.0f, 20.0f))
+			{
+				component->setArc(i, arc, modifyAllConnectedRoads);
+			}
+
+			ImGui::PopID();
 		}
-		float width = component->getWidth();
-		if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
-		{
-			component->setWidth(width);
-		}
-		float arc = component->getArc();
-		if (ImGui::DragFloat("Arc", &arc, 1.0f, 0.0f, 20.0f))
-		{
-			component->setArc(arc);
-		}
+
+		ImGui::Separator();
+
 		float quality = component->getQuality();
 		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
 		{
 			component->setQuality(quality);
 		}
+
+		ImGui::Separator();
+
 
 		if (ImGui::Button("Generate polygon"))
 		{

@@ -45,6 +45,9 @@ class RoadObject : public RenderObject
 		std::vector<RoadSegment> _segments;
 		std::vector<RoadConnectionPoint> _connectionPoints;
 
+		float _marginBegin;
+		float _marginEnd;
+
 		// fields for BEZIER_CURVES type
 		std::vector<glm::vec3> _curvePoints;
 
@@ -75,6 +78,11 @@ class RoadObject : public RenderObject
 		void setConnectionPoint(int index, CrossroadComponent* crossroadComponent, int indexInCrossroad = 0);
 		void setConnectionPointWithRoadIntersection(int index, RoadIntersectionComponent* roadIntersectionComponent);
 		RoadConnectionPoint& getConnectionPoint(int index);
+
+		void setMarginBegin(float marginBegin);
+		void setMarginEnd(float marginEnd);
+		float getMarginBegin();
+		float getMarginEnd();
 
 		void setConnectedPointPosition(int connectionPointIndex);
 		void resetConnectedPointPositions();

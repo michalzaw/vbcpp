@@ -13,7 +13,7 @@
 
 
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
-	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2)
+	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 	
@@ -23,7 +23,7 @@ RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vecto
 
 
 RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate)
-	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2)
+	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -51,7 +51,7 @@ void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoint
 		for (i = 0; i < curvePoints.size() - 2; ++i)
 		{
 			length += glm::distance(curvePoints[i], curvePoints[i + 1]);
-			if (length >= _connectionPoints[0].roadIntersectionComponent->getLength())
+			if (length >= _marginBegin)
 			{
 				break;
 			}
@@ -67,7 +67,7 @@ void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoint
 		for (i = 0; i < curvePoints.size() - 2; ++i)
 		{
 			length += glm::distance(curvePoints[curvePoints.size() - i - 1], curvePoints[curvePoints.size() - i - 2]);
-			if (length >= _connectionPoints[1].roadIntersectionComponent->getLength())
+			if (length >= _marginEnd)
 			{
 				break;
 			}
@@ -492,6 +492,30 @@ void RoadObject::setConnectionPointWithRoadIntersection(int index, RoadIntersect
 RoadConnectionPoint& RoadObject::getConnectionPoint(int index)
 {
 	return _connectionPoints[index];
+}
+
+
+void RoadObject::setMarginBegin(float marginBegin)
+{
+	_marginBegin = marginBegin;
+}
+
+
+void RoadObject::setMarginEnd(float marginEnd)
+{
+	_marginEnd = marginEnd;
+}
+
+
+float RoadObject::getMarginBegin()
+{
+	return _marginBegin;
+}
+
+
+float RoadObject::getMarginEnd()
+{
+	return _marginEnd;
 }
 
 

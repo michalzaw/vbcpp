@@ -29,9 +29,9 @@ class RoadIntersectionComponent final : public Component
 
 		std::vector<RoadConnectedToIntersection> _roads;
 
-		float _length;
-		float _width;
-		float _arc;
+		std::vector<float> _length;
+		std::vector<float> _width;
+		std::vector<float> _arc;
 		int _quality;
 
 		bool _needRebuildIntersectionModel;
@@ -40,6 +40,8 @@ class RoadIntersectionComponent final : public Component
 		RStaticModel* _generatedModel;
 
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
+		float getRealWidth(int index);
+		void setLengthInternal(int index, float length);
 
 	public:
 		RoadIntersectionComponent();
@@ -51,12 +53,15 @@ class RoadIntersectionComponent final : public Component
 		const std::vector<RoadConnectedToIntersection>& getConnectedRoads();
 
 		void setLength(float length);
+		void setLength(int index, float length, bool modifyAll = false);
 		void setWidth(float width);
+		void setWidth(int index, float width, bool modifyAll = false);
 		void setArc(float arc);
+		void setArc(int index, float arc, bool modifyAll = false);
 		void setQuality(int quality);
-		float getLength();
-		float getWidth();
-		float getArc();
+		float getLength(int index = 0);
+		float getWidth(int index = 0);
+		float getArc(int index = 0);
 		int getQuality();
 
 		void createPolygon();
