@@ -265,6 +265,25 @@ void RoadIntersectionComponent::createPolygon()
 			}
 
 			indices[index++] = (i * _quality) + j;
+
+			if (j > 0)
+			{
+				unsigned int i0 = indices[index - 4];
+				unsigned int i1 = indices[index - 3];
+				unsigned int i2 = indices[index - 2];
+				unsigned int i3 = indices[index - 1];
+
+				glm::vec3 normal1 = glm::cross(glm::normalize(vertices[i1].position - vertices[i0].position), glm::normalize(vertices[i2].position - vertices[i0].position));
+				glm::vec3 normal2 = glm::cross(glm::normalize(vertices[i2].position - vertices[i3].position), glm::normalize(vertices[i1].position - vertices[i3].position));
+
+				vertices[i0].normal += normal1;		vertices[i0].normal /= 2.0f;
+				vertices[i1].normal += normal1;		vertices[i1].normal /= 2.0f;
+				vertices[i2].normal += normal1;		vertices[i2].normal /= 2.0f;
+
+				vertices[i1].normal += normal1;		vertices[i1].normal /= 2.0f;
+				vertices[i2].normal += normal1;		vertices[i2].normal /= 2.0f;
+				vertices[i3].normal += normal1;		vertices[i3].normal /= 2.0f;
+			}
 		}
 		indices[index++] = OGLDriver::PRIMITIVE_RESTART_INDEX;
 	}
@@ -296,9 +315,9 @@ void RoadIntersectionComponent::createPolygon()
 		std::vector<Material*> materials;
 		materials.push_back(new Material);
 		materials[0]->shader = WIREFRAME_MATERIAL;
-		//materials[0]->shininess = 96.0f;
-		//materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
-		//materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
+		materials[0]->shininess = 96.0f;
+		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
+		materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
 
 		StaticModelNode* modelNode = new StaticModelNode;
 		modelNode->name = "road intersection";
