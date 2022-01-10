@@ -24,6 +24,7 @@ RoadIntersectionComponent::RoadIntersectionComponent()
 	_quality(11),
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
 	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _modificationTimer(0.0f),
+	_inverseModelMatrix(1.0f), _inverseModelMatrixIsCalculated(false),
 	_generatedModel(nullptr)
 {
 
@@ -335,11 +336,38 @@ void RoadIntersectionComponent::sortConnectedRoads()
 }
 
 
+const glm::mat4& RoadIntersectionComponent::getInverseModelMatrix()
+{
+	if (!_inverseModelMatrixIsCalculated)
+	{
+		_inverseModelMatrix = glm::inverse(getSceneObject()->getGlobalTransformMatrix());
+
+		_inverseModelMatrixIsCalculated = true;
+	}
+
+	return _inverseModelMatrix;
+}
+
+
+glm::vec3 RoadIntersectionComponent::transformPointToLocalSpace(const glm::vec3& point)
+{
+	glm::vec4 p = getInverseModelMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
+	return glm::vec3(p.x, p.y, p.z);
+}
+
+
+glm::vec3 RoadIntersectionComponent::transformVectorToLocalSpace(const glm::vec3& point)
+{
+	glm::vec4 p = getInverseModelMatrix() * glm::vec4(point.x, point.y, point.z, 0.0f);
+	return glm::vec3(p.x, p.y, p.z);
+}
+
+
 void RoadIntersectionComponent::createPolygon()
 {
 	std::vector<RoadConnectionPointData*> temp(2, nullptr);
 
-	glm::vec3 centerPoint = getSceneObject()->getGlobalPosition();
+	glm::vec3 centerPoint = glm::vec3(0.0f, 0.0f, 0.0f);
 
 	std::vector<glm::vec3> roadsCenterPoints(_roads.size());
 	std::vector<glm::vec3> roadsDirections(_roads.size());
@@ -354,9 +382,10 @@ void RoadIntersectionComponent::createPolygon()
 		const auto& roadCurvePoints = _roads[i].road->getCurvePoints();
 		int road1CenterPointIndex = _roads[i].connectionPointInRoadIndex == 0 ? 0 : roadCurvePoints.size() - 1;
 
-		glm::vec3 roadCenterPoint = roadCurvePoints[road1CenterPointIndex];
-		glm::vec2 direction = RoadGenerator::calculateDirection(roadCurvePoints, temp, road1CenterPointIndex);
-		glm::vec2 rightVector = glm::vec2(-direction.y, direction.x);
+		glm::vec3 roadCenterPoint = transformPointToLocalSpace(roadCurvePoints[road1CenterPointIndex]);
+		glm::vec2 dir = RoadGenerator::calculateDirection(roadCurvePoints, temp, road1CenterPointIndex);
+		glm::vec3 direction = transformVectorToLocalSpace(glm::vec3(dir.x, 0.0f, dir.y));
+		glm::vec2 rightVector = glm::vec2(-direction.z, direction.x);
 
 		// jesli punkt poczatkowy drogi to odwracamy direction i rightVector (traktujemy kazda droge jak wchodzaca do skrzyzowania, wiec jej kierunek powinien byc w strone srodka skrzyzowania)
 		if (_roads[i].connectionPointInRoadIndex == 0)
@@ -366,7 +395,7 @@ void RoadIntersectionComponent::createPolygon()
 		}
 
 		roadsCenterPoints[i] = roadCenterPoint;
-		roadsDirections[i] = glm::vec3(direction.x, 0.0f, direction.y);
+		roadsDirections[i] = glm::vec3(direction.x, 0.0f, direction.z);
 		roadsRightVectors[i] = glm::vec3(rightVector.x, 0.0f, rightVector.y);
 
 		glm::vec3 roadToIntersectionCenterVector = centerPoint - roadsCenterPoints[i];
@@ -546,6 +575,8 @@ void RoadIntersectionComponent::changedTransform()
 	{
 		connectedRoad.road->resetConnectedPointPositions();
 	}
+
+	_inverseModelMatrixIsCalculated = false;
 }
 
 

@@ -39,12 +39,18 @@ class RoadIntersectionComponent final : public Component
 		bool _needSortRoads;
 		float _modificationTimer;
 
+		glm::mat4 _inverseModelMatrix;
+		mutable bool _inverseModelMatrixIsCalculated;
+
 		RStaticModel* _generatedModel;
 
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
 		float getRealWidth(int index);
 		void setLengthInternal(int index, float length);
 		void sortConnectedRoads();
+		const glm::mat4& getInverseModelMatrix();
+		glm::vec3 transformPointToLocalSpace(const glm::vec3& point);
+		glm::vec3 transformVectorToLocalSpace(const glm::vec3& point);
 
 	public:
 		RoadIntersectionComponent();
