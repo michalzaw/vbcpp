@@ -36,12 +36,15 @@ class RoadIntersectionComponent final : public Component
 
 		bool _needRebuildIntersectionModel;
 		bool _needRebuildConnectedRoad;
+		bool _needSortRoads;
+		float _modificationTimer;
 
 		RStaticModel* _generatedModel;
 
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
 		float getRealWidth(int index);
 		void setLengthInternal(int index, float length);
+		void sortConnectedRoads();
 
 	public:
 		RoadIntersectionComponent();

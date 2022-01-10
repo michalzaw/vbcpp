@@ -12,11 +12,18 @@
 #include "../Utils/ResourceManager.h"
 
 
+struct RoadWithAngle
+{
+	int roadIndex;
+	float roadAgle;
+};
+
+
 RoadIntersectionComponent::RoadIntersectionComponent()
 	: Component(CT_ROAD_INTERSECTION),
 	_quality(11),
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
-	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false),
+	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _modificationTimer(0.0f),
 	_generatedModel(nullptr)
 {
 
@@ -54,6 +61,8 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	{
 		setLengthInternal(0, _length[1]);
 	}
+
+	_needSortRoads = true;
 }
 
 
@@ -287,6 +296,45 @@ float RoadIntersectionComponent::getRealWidth(int index)
 }
 
 
+void RoadIntersectionComponent::sortConnectedRoads()
+{
+	glm::vec3 centerPoint = getSceneObject()->getGlobalPosition();
+
+	std::vector<RoadWithAngle> roadsAngles;
+	for (int i = 0; i < _roads.size(); ++i)
+	{
+		const auto& roadCurvePoints = _roads[i].road->getCurvePoints();
+		int road1CenterPointIndex = _roads[i].connectionPointInRoadIndex == 0 ? 0 : roadCurvePoints.size() - 1;
+		glm::vec3 roadCenterPoint = roadCurvePoints[road1CenterPointIndex];
+
+		glm::vec3 direction = glm::normalize(roadCenterPoint - centerPoint);
+
+		float angle = radToDeg(atan2(direction.z, direction.x));
+		roadsAngles.push_back({ i, angle });
+	}
+
+
+	std::sort(roadsAngles.begin(), roadsAngles.end(), [](const RoadWithAngle& r1, const RoadWithAngle& r2)
+		{
+			return r1.roadAgle > r2.roadAgle;
+		});
+
+	std::vector<RoadConnectedToIntersection> roads = _roads;
+	std::vector<float> length = _length;
+	std::vector<float> width = _width;
+	std::vector<float> arc = _arc;
+
+	for (int i = 0; i < roadsAngles.size(); ++i)
+	{
+		int roadIndex = roadsAngles[i].roadIndex;
+		_roads[i] = roads[roadIndex];
+		_length[i] = length[roadIndex];
+		_width[i] = width[roadIndex];
+		_arc[i] = arc[roadIndex];
+	}
+}
+
+
 void RoadIntersectionComponent::createPolygon()
 {
 	std::vector<RoadConnectionPointData*> temp(2, nullptr);
@@ -472,6 +520,7 @@ void RoadIntersectionComponent::createPolygon()
 void RoadIntersectionComponent::needRebuild()
 {
 	_needRebuildIntersectionModel = true;
+	_needSortRoads = true;
 
 	LOG_DEBUG("needRebuild");
 }
@@ -502,10 +551,9 @@ void RoadIntersectionComponent::changedTransform()
 
 void RoadIntersectionComponent::update(float deltaTime)
 {
-	static float roadModificationTimer = 0.0f;
-	roadModificationTimer += deltaTime;
+	_modificationTimer += deltaTime;
 
-	if (roadModificationTimer >= 0.2f)
+	if (_modificationTimer >= 0.2f)
 	{
 		if (_needRebuildConnectedRoad)
 		{
@@ -519,12 +567,18 @@ void RoadIntersectionComponent::update(float deltaTime)
 
 			_needRebuildConnectedRoad = false;
 		}
+		if (_needSortRoads)
+		{
+			sortConnectedRoads();
+
+			_needSortRoads = false;
+		}
 		if (_needRebuildIntersectionModel)
 		{
 			createPolygon();
 
 			_needRebuildIntersectionModel = false;
 		}
-		roadModificationTimer = 0.0f;
+		_modificationTimer = 0.0f;
 	}
 }
