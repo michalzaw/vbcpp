@@ -75,6 +75,8 @@ class RoadIntersectionComponent final : public Component
 
 		void createPolygon();
 
+		RStaticModel* getModel();
+
 		void needRebuild();
 		void needRebuildConnectedRoad();
 

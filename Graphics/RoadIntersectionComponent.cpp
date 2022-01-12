@@ -511,15 +511,10 @@ void RoadIntersectionComponent::createPolygon()
 	StaticModelMesh* meshes = isModelExist ? _generatedModel->getRootNode()->meshes : new StaticModelMesh[1];
 	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, isGame, DEFAULT_BUFFER_SIZE, DEFAULT_BUFFER_SIZE, false);
 
-	// collision mesh
-	//unsigned int collisionMeshSize = meshes[0].indicesCount;
-	//glm::vec3* collisionMesh = ModelGenerator::generateCollistionMesh(meshes, 1, collisionMeshSize);
-
 	// model
 	if (isModelExist)
 	{
 		_generatedModel->recalculateAABB();
-		//_generatedModel->setNewCollisionMesh(collisionMesh, collisionMeshSize);
 
 		RenderObject* currentRenderComponent = static_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
 		currentRenderComponent->setModel(_generatedModel);
@@ -539,10 +534,16 @@ void RoadIntersectionComponent::createPolygon()
 		modelNode->meshesCount = 1;
 		modelNode->parent = nullptr;
 
-		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP/*, collisionMesh, collisionMeshSize*/);
+		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP);
 
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
 	}
+}
+
+
+RStaticModel* RoadIntersectionComponent::getModel()
+{
+	return _generatedModel;
 }
 
 

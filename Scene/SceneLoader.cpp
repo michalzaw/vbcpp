@@ -322,7 +322,6 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 	const auto& roadObjects = _sceneManager->getGraphicsManager()->getRoadObjects();
 	for (const auto& roadObject : roadObjects)
 	{
-		//roadIntersection->sortConnectedRoads();
 		roadObject->buildModel();
 
 		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
@@ -336,6 +335,12 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 	{
 		//roadIntersection->sortConnectedRoads();
 		roadIntersection->createPolygon();
+
+		PhysicalBodyBvtTriangleMesh* roadIntersectionMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadIntersection->getModel(), COL_TERRAIN, _roadCollidesWith);
+		roadIntersectionMesh->setRestitution(0.9f);
+		roadIntersectionMesh->getRigidBody()->setFriction(1.0f);
+		//terrainMesh->getRigidBody()->setFriction(1.5f);
+		roadIntersection->getSceneObject()->addComponent(roadIntersectionMesh);
 	}
 
 	/*

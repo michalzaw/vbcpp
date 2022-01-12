@@ -14,7 +14,7 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
     LOG_INFO("BvtTriangleMeshShape - Destruktor");
 }
 
-
+ 
 void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform)
 {
     glm::mat4 nodeTransform = parentTransform * staticModelNode->transform.getTransformMatrix();
@@ -28,21 +28,49 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 
         unsigned int vertexCount = mesh->verticesCount;
 
-        for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
+        if (_model->getPrimitiveType() == GL_TRIANGLES)
         {
-            btVector3 tmp_vertices[3];
-
-            for (unsigned int k = 0; k < 3; k++)
+            for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
             {
-                unsigned index = indices[j+k] - mesh->firstVertexInVbo;
+                btVector3 tmp_vertices[3];
 
-                if (index > vertexCount) continue;
+                for (unsigned int k = 0; k < 3; k++)
+                {
+                    unsigned index = indices[j + k] - mesh->firstVertexInVbo;
 
-                glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
-                tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+                    if (index > vertexCount) continue;
+
+                    glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
+                    tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+                }
+
+                triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
             }
+        }
+        else if (_model->getPrimitiveType() == GL_TRIANGLE_STRIP)
+        {
+            for (int j = 2; j < mesh->indicesCount; ++j)
+            {
+                if (mesh->indices[j] == OGLDriver::PRIMITIVE_RESTART_INDEX)
+                {
+                    j += 2;
+                    continue;
+                }
 
-            triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
+                btVector3 tmp_vertices[3];
+
+                for (unsigned int k = 0; k < 3; ++k)
+                {
+                    unsigned index = indices[j - 2 + k] - mesh->firstVertexInVbo;
+
+                    if (index > vertexCount) continue;
+
+                    glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
+                    tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+                }
+
+                triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
+            }
         }
     }
 
