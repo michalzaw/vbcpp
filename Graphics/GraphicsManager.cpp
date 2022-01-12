@@ -96,6 +96,7 @@ RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* road
 	owner->addComponent(roadObject);
 
 	_renderObjects.push_back(roadObject);
+    _roadObjects.push_back(roadObject);
 
 	return roadObject;
 }
@@ -273,6 +274,16 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
 
 void GraphicsManager::removeRoadObject(RoadObject* object)
 {
+    for (std::vector<RoadObject*>::iterator i = _roadObjects.begin(); i != _roadObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _roadObjects.erase(i);
+
+            break;
+        }
+    }
+
 	removeRenderObject(object);
 }
 
@@ -507,6 +518,12 @@ std::vector<CrossroadComponent*>& GraphicsManager::getCrossroadComponents()
 std::vector<RoadIntersectionComponent*>& GraphicsManager::getRoadIntersectionComponents()
 {
     return _roadIntersectionComponents;
+}
+
+
+std::vector<RoadObject*>& GraphicsManager::getRoadObjects()
+{
+    return _roadObjects;
 }
 
 

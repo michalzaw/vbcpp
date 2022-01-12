@@ -42,16 +42,17 @@ class GraphicsManager
     friend class Renderer;
 
     private:
-        std::list<RenderObject*>    _renderObjects;
-        std::list<Grass*>           _grassComponents;
-        std::vector<CameraStatic*>  _cameras;
-        std::list<Light*>           _lights;
-        std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
-        std::vector<MirrorComponent*> _mirrorComponents;
-        std::list<ClickableObject*> _clickableObjects;
-		std::list<DisplayComponent*>_displayComponents;
-		std::vector<CrossroadComponent*> _crossroadComponents;
-        std::vector<RoadIntersectionComponent*> _roadIntersectionComponents;
+        std::list<RenderObject*>                    _renderObjects;
+        std::list<Grass*>                           _grassComponents;
+        std::vector<CameraStatic*>                  _cameras;
+        std::list<Light*>                           _lights;
+        std::list<EnvironmentCaptureComponent*>     _environmentCaptureComponents;
+        std::vector<MirrorComponent*>               _mirrorComponents;
+        std::list<ClickableObject*>                 _clickableObjects;
+		std::list<DisplayComponent*>                _displayComponents;
+		std::vector<CrossroadComponent*>            _crossroadComponents;
+        std::vector<RoadIntersectionComponent*>     _roadIntersectionComponents;
+        std::vector<RoadObject*>                    _roadObjects;
 
 		Sky*						_sky;
 
@@ -130,6 +131,7 @@ class GraphicsManager
         std::list<RenderObject*>& getRenderObjects();
 		std::vector<CrossroadComponent*>& getCrossroadComponents();
         std::vector<RoadIntersectionComponent*>& getRoadIntersectionComponents();
+        std::vector<RoadObject*>& getRoadObjects();
 
 		Sky* getSky();
 

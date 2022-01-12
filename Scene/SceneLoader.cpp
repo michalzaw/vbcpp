@@ -313,6 +313,31 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 			loadRoadV2(roadElement);
 	}
 
+	XMLElement* roadIntersectionElement = roadsElement->FirstChildElement("RoadIntersection");
+	if (roadIntersectionElement)
+	{
+		loadRoadIntersection(roadIntersectionElement);
+	}
+
+	const auto& roadObjects = _sceneManager->getGraphicsManager()->getRoadObjects();
+	for (const auto& roadObject : roadObjects)
+	{
+		//roadIntersection->sortConnectedRoads();
+		roadObject->buildModel();
+
+		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
+		roadMesh->setRestitution(0.9f);
+		roadMesh->getRigidBody()->setFriction(1.0f);
+		//terrainMesh->getRigidBody()->setFriction(1.5f);
+		roadObject->getSceneObject()->addComponent(roadMesh);
+	}
+	const auto& roadIntersections = _sceneManager->getGraphicsManager()->getRoadIntersectionComponents();
+	for (const auto& roadIntersection : roadIntersections)
+	{
+		//roadIntersection->sortConnectedRoads();
+		roadIntersection->createPolygon();
+	}
+
 	/*
 	while (roadElement != nullptr)
 	{
@@ -519,21 +544,59 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 			connectionElement = connectionElement->NextSiblingElement("Connection");
 		}
 
-		roadRenderObject->buildModel(false);
-
-		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
-		roadMesh->setRestitution(0.9f);
-		roadMesh->getRigidBody()->setFriction(1.0f);
-		//terrainMesh->getRigidBody()->setFriction(1.5f);
-		roadSceneObject->addComponent(roadMesh);
-
+		//roadRenderObject->buildModel(false);
 
 		roadElement = roadElement->NextSiblingElement("Road");
 	}
 }
 
 
-CrossroadComponent* SceneLoader::findCrossRoadComponentBySceneObjectName(std::string& name)
+void SceneLoader::loadRoadIntersection(tinyxml2::XMLElement* roadIntersectionElement)
+{
+	while (roadIntersectionElement)
+	{
+		std::string name = XmlUtils::getAttributeString(roadIntersectionElement, "name");
+		glm::vec3 position = XmlUtils::getAttributeVec3(roadIntersectionElement, "position");
+		int quality = XmlUtils::getAttributeIntOptional(roadIntersectionElement, "quality", 11);
+
+		LOG_INFO("==> SCENE OBJECT");
+		LOG_INFO("Name: " + name);
+		LOG_INFO("Position: " + Strings::toString(position));
+
+		SceneObject* roadIntersectionSceneObject = _sceneManager->addSceneObject(name);
+		roadIntersectionSceneObject->setPosition(position);
+
+		RoadIntersectionComponent* roadIntersectionComponent = _sceneManager->getGraphicsManager()->addRoadIntersection();
+		roadIntersectionComponent->setQuality(quality);
+
+		roadIntersectionSceneObject->addComponent(roadIntersectionComponent);
+
+		int i = 0;
+		for (tinyxml2::XMLElement* connectedRoad = roadIntersectionElement->FirstChildElement("ConnectedRoad");
+			 connectedRoad != nullptr;
+			 connectedRoad = connectedRoad->NextSiblingElement("ConnectedRoad"))
+		{
+			std::string name = XmlUtils::getAttributeString(connectedRoad, "name");
+			int index = XmlUtils::getAttributeInt(connectedRoad, "index");
+			float length = XmlUtils::getAttributeFloatOptional(connectedRoad, "length", 10.0f);
+			float width = XmlUtils::getAttributeFloatOptional(connectedRoad, "width", 0.0f);
+			float arc = XmlUtils::getAttributeFloat(connectedRoad, "arc");
+
+			findRoadObjectBySceneObjectName(name)->setConnectionPointWithRoadIntersection(index, roadIntersectionComponent);
+
+			roadIntersectionComponent->setLength(i, length);
+			roadIntersectionComponent->setWidth(i, width);
+			roadIntersectionComponent->setArc(i, arc);
+
+			++i;
+		}
+
+		roadIntersectionElement = roadIntersectionElement->NextSiblingElement("RoadIntersection");
+	}
+}
+
+
+CrossroadComponent* SceneLoader::findCrossRoadComponentBySceneObjectName(const std::string& name)
 {
 	SceneObject* crossroadSceneObject = _sceneManager->getSceneObject(name);
 	if (crossroadSceneObject != nullptr)
@@ -546,6 +609,30 @@ CrossroadComponent* SceneLoader::findCrossRoadComponentBySceneObjectName(std::st
 		else
 		{
 			LOG_ERROR("Cannot find Crossroad component in object: " + name);
+		}
+	}
+	else
+	{
+		LOG_ERROR("Cannot find object: " + name);
+	}
+
+	return nullptr;
+}
+
+
+RoadObject* SceneLoader::findRoadObjectBySceneObjectName(const std::string& name)
+{
+	SceneObject* roadSceneObject = _sceneManager->getSceneObject(name);
+	if (roadSceneObject != nullptr)
+	{
+		Component* roadObject = roadSceneObject->getComponent(CT_ROAD_OBJECT);
+		if (roadObject != nullptr)
+		{
+			return dynamic_cast<RoadObject*>(roadObject);
+		}
+		else
+		{
+			LOG_ERROR("Cannot find Road in object: " + name);
 		}
 	}
 	else

@@ -49,7 +49,7 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	}
 	else
 	{
-		_length.push_back(_roads.size() == 2 ? 10.0f : _length[0]);
+		_length.push_back(_roads.size() == 2 && _length[0] == 0.0f ? 10.0f : _length[0]);
 		_width.push_back(_width[0]);
 		_arc.push_back(_arc[0]);
 
@@ -58,7 +58,7 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 
 	setLengthInternal(_roads.size() - 1, _length[_length.size() - 1]);
 
-	if (_roads.size() == 2)
+	if (_roads.size() == 2 && _length[0] == 0.0f)
 	{
 		setLengthInternal(0, _length[1]);
 	}
@@ -582,6 +582,11 @@ void RoadIntersectionComponent::changedTransform()
 
 void RoadIntersectionComponent::update(float deltaTime)
 {
+	if (GameConfig::getInstance().mode == GM_GAME)
+	{
+		return;
+	}
+
 	_modificationTimer += deltaTime;
 
 	if (_modificationTimer >= 0.2f)

@@ -102,7 +102,10 @@ struct StaticModelMesh
                 firstVertexInVbo = vbo->getQuantumOfVertices();
                 for (unsigned int i = 0; i < this->indicesCount; ++i)
                 {
-                    this->indices[i] += firstVertexInVbo;
+                    if (this->indices[i] != OGLDriver::PRIMITIVE_RESTART_INDEX)
+                    {
+                        this->indices[i] += firstVertexInVbo;
+                    }
                 }
 
                 this->firstVertex = ibo->getIndicesCount();
