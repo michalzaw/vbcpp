@@ -39,6 +39,9 @@ RoadObject::~RoadObject()
 	{
 		delete _modelsDatas[0].model;
 	}
+
+	setConnectionPoint(0, nullptr);
+	setConnectionPoint(1, nullptr);
 }
 
 

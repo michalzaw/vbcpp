@@ -62,6 +62,7 @@ class SceneObject
         void addChild(SceneObject* child);
         bool removeChild(SceneObject* child);
         void removeAllChildren();
+        void removeAllChildrenFromScene();
         std::list<SceneObject*>& getChildren();
 
 

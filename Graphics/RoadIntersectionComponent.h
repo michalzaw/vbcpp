@@ -44,6 +44,8 @@ class RoadIntersectionComponent final : public Component
 
 		RStaticModel* _generatedModel;
 
+		bool _isCreated;
+
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
 		float getRealWidth(int index);
 		void setLengthInternal(int index, float length);

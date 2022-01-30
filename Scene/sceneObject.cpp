@@ -236,6 +236,17 @@ void SceneObject::removeAllChildren()
 }
 
 
+void SceneObject::removeAllChildrenFromScene()
+{
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        _sceneManager->removeChildSceneObject(*i);
+    }
+
+    _childrens.clear();
+}
+
+
 std::list<SceneObject*>& SceneObject::getChildren()
 {
     return _childrens;

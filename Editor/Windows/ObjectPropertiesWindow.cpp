@@ -871,6 +871,14 @@ void showObjectProperties()
 
 				}
 			}
+			
+			ImGui::Separator();
+
+			if (ImGui::Button("Delete"))
+			{
+				vbEditor::_sceneManager->removeSceneObject(vbEditor::_selectedSceneObject, true);
+				vbEditor::_selectedSceneObject = nullptr;
+			}
 		}
 	}
 	ImGui::End();

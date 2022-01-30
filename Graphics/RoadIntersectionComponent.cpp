@@ -25,7 +25,8 @@ RoadIntersectionComponent::RoadIntersectionComponent()
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
 	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _modificationTimer(0.0f),
 	_inverseModelMatrix(1.0f), _inverseModelMatrixIsCalculated(false),
-	_generatedModel(nullptr)
+	_generatedModel(nullptr),
+	_isCreated(true)
 {
 
 }
@@ -33,12 +34,22 @@ RoadIntersectionComponent::RoadIntersectionComponent()
 
 RoadIntersectionComponent::~RoadIntersectionComponent()
 {
+	_isCreated = false;
 
+	for (const auto& connectRoad : _roads)
+	{
+		connectRoad.road->setConnectionPoint(connectRoad.connectionPointInRoadIndex, nullptr);
+	}
 }
 
 
 void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
+	if (!_isCreated)
+	{
+		return;
+	}
+
 	_roads.push_back(RoadConnectedToIntersection(roadObject, connectionPointInRoadIndex));
 
 	if (_roads.size() == 1)
@@ -69,6 +80,11 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 
 void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
+	if (!_isCreated)
+	{
+		return;
+	}
+
 	int index = 0;
 	for (std::vector<RoadConnectedToIntersection>::iterator i = _roads.begin(); i != _roads.end(); ++i)
 	{
@@ -439,7 +455,7 @@ void RoadIntersectionComponent::createPolygon()
 		{
 			vertices[i * _quality + j].position = bezierCurves[i][j];
 			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z);
-			vertices[i * _quality + j].normal = glm::vec3(0.0f, 1.0f, 0.0f);
+			vertices[i * _quality + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 
 		for (int j = 0; j < pointsOnRoadAxis[i].size(); ++j)
@@ -509,7 +525,7 @@ void RoadIntersectionComponent::createPolygon()
 	const bool isGame = GameConfig::getInstance().mode == GM_GAME;
 
 	StaticModelMesh* meshes = isModelExist ? _generatedModel->getRootNode()->meshes : new StaticModelMesh[1];
-	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, WIREFRAME_MATERIAL, isGame, DEFAULT_BUFFER_SIZE, DEFAULT_BUFFER_SIZE, false);
+	meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, SOLID_MATERIAL, isGame, DEFAULT_BUFFER_SIZE, DEFAULT_BUFFER_SIZE, false);
 
 	// model
 	if (isModelExist)
@@ -523,7 +539,7 @@ void RoadIntersectionComponent::createPolygon()
 	{
 		std::vector<Material*> materials;
 		materials.push_back(new Material);
-		materials[0]->shader = WIREFRAME_MATERIAL;
+		materials[0]->shader = SOLID_MATERIAL;
 		materials[0]->shininess = 96.0f;
 		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
 		materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
@@ -538,6 +554,34 @@ void RoadIntersectionComponent::createPolygon()
 
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
 	}
+
+
+	getSceneObject()->removeAllChildrenFromScene();
+
+	RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile("asfalt");
+	std::vector<RoadLane> roadLanes = roadProfile->getRoadLanes();
+	for (int i = 0; i < roadLanes.size(); ++i)
+	{
+		roadLanes[i].r1 = -(5.5 - roadLanes[i].r1);
+		roadLanes[i].r2 = -(5.5 - roadLanes[i].r2);
+	}
+
+	temp[0] = new RoadConnectionPointData;
+	temp[1] = new RoadConnectionPointData;
+	for (int i = 0; i < _roads.size(); ++i)
+	{
+		temp[0]->direction = roadsDirections[i];
+		temp[1]->direction = roadsDirections[(i + 1) % _roads.size()];
+
+		RStaticModel* roadModel = RoadGenerator::createRoadModel(roadLanes, bezierCurves[i], temp);
+		SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("temp" + Strings::toString(i));
+		getSceneObject()->addChild(roadSceneObject);
+
+		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(roadModel), roadSceneObject);
+	}
+
+	delete temp[0];
+	delete temp[1];
 }
 
 
