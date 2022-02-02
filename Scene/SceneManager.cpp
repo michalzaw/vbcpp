@@ -80,9 +80,12 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
                     removeChildSceneObject(*j);
                 }
             }
+            else
+            {
+                object->removeAllChildren();
+            }
 
             object->removeParent();
-            object->removeAllChildren();
             delete object;
 
             return;
@@ -105,6 +108,10 @@ void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildr
                 {
                     removeChildSceneObject(*j);
                 }
+            }
+            else
+            {
+                object->removeAllChildren();
             }
 
             delete object;
