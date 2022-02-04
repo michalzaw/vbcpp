@@ -47,7 +47,7 @@ class RoadIntersectionComponent final : public Component
 		bool _isCreated;
 
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
-		float getRealWidth(int index);
+		float getRealWidth(int index, bool isRight);
 		void setLengthInternal(int index, float length);
 		void sortConnectedRoads();
 		const glm::mat4& getInverseModelMatrix();

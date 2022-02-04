@@ -298,13 +298,16 @@ void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<st
 }
 
 
-float RoadIntersectionComponent::getRealWidth(int index)
+float RoadIntersectionComponent::getRealWidth(int index, bool isRight)
 {
 	float width = _width[index];
 	if (width == 0.0f)
 	{
-		const auto& lanes = _roads[index].road->getRoadProfile()->getRoadLanes();
-		return fabs(lanes[lanes.size() - 1].r2) * 2;
+		if (isRight && _roads[index].connectionPointInRoadIndex == 1 ||
+			!isRight && _roads[index].connectionPointInRoadIndex == 0)
+			return _roads[index].road->getRoadProfile()->getMaxX();
+		else
+			return -_roads[index].road->getRoadProfile()->getMinX();
 	}
 	else
 	{
@@ -430,8 +433,8 @@ void RoadIntersectionComponent::createPolygon()
 		int road2Index = (i + 1) % _roads.size();
 
 		std::vector<glm::vec3> bezierCurve1(4);
-		bezierCurve1[0] = roadsCenterPoints[road1Index] + roadsRightVectors[road1Index] * getRealWidth(road1Index);
-		bezierCurve1[3] = roadsCenterPoints[road2Index] - roadsRightVectors[road2Index] * getRealWidth(road2Index);
+		bezierCurve1[0] = roadsCenterPoints[road1Index] + roadsRightVectors[road1Index] * getRealWidth(road1Index, true);
+		bezierCurve1[3] = roadsCenterPoints[road2Index] - roadsRightVectors[road2Index] * getRealWidth(road2Index, false);
 		bezierCurve1[1] = bezierCurve1[0] + roadsDirections[road1Index] * _arc[road1Index];
 		bezierCurve1[2] = bezierCurve1[3] + roadsDirections[road2Index] * _arc[road1Index];
 

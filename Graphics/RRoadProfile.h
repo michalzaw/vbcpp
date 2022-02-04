@@ -20,6 +20,9 @@ class RRoadProfile : public Resource
 
 		std::vector<glm::vec2> _edges;
 
+		float _maxX;			bool _maxXIsCalculated;
+		float _minX;			bool _minXIsCalculated;
+
 	public:
 		RRoadProfile(std::string path, std::string author, std::string name, std::string comment);
 		~RRoadProfile();
@@ -30,6 +33,9 @@ class RRoadProfile : public Resource
 
 		std::vector<RoadLane>& getRoadLanes();
 		std::vector<glm::vec2>& getEdges();
+
+		float getMaxX();
+		float getMinX();
 
 };
 
