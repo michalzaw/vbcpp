@@ -1,6 +1,7 @@
 #include "ObjectPropertiesWindow.h"
 
 #include <numeric>
+#include <stdarg.h>
 
 #include "../../ImGui/imGizmo.h"
 #include "glm/gtc/type_ptr.hpp"
@@ -12,8 +13,11 @@
 #include "../../ImGui/imgui_internal.h"
 
 #include "RoadTools.h"
+#include "../FileDialogs.h"
 
 #include "../../Graphics/ShapePolygonComponent.h"
+
+#include "../../Utils/FilesHelper.h"
 
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
@@ -569,6 +573,136 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 }
 
 
+typedef std::string str;
+typedef std::string path;
+
+
+#define IMGUI_INPUT_int(propertyName)																											\
+int value = component->get##propertyName();																										\
+bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_float(propertyName)																											\
+float value = component->get##propertyName();																									\
+bool result = ImGui::InputFloat("##value", &value, 0, 0, 2, ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_bool(propertyName)																											\
+bool value = component->is##propertyName();																										\
+bool result = ImGui::Checkbox("##value", &value);
+
+
+#define IMGUI_INPUT_str(propertyName)																											\
+char value[50];																																	\
+strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
+value[sizeof value - 1] = '\0';																													\
+																																				\
+bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_path(propertyName)																											\
+ImGui::SetNextItemWidth(-30);																													\
+																																				\
+char buffer[1024];																																\
+strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																			\
+buffer[sizeof buffer - 1] = '\0';																												\
+																																				\
+ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);																\
+																																				\
+ImGui::SameLine();																																\
+																																				\
+std::string value;																																\
+bool result = false;																															\
+																																				\
+if (ImGui::Button("...", ImVec2(20, 0)))																										\
+{																																				\
+	std::vector<std::string> dialogResult = FileDialogs::openFile("Choose file...");															\
+																																				\
+	if (dialogResult.size() == 1)																												\
+	{																																			\
+		LOG_INFO(dialogResult[0]);																												\
+		value = dialogResult[0];;																												\
+		result = true;																															\
+	}																																			\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback)												\
+{																																				\
+	ImGui::PushID(#propertyName);																												\
+																																				\
+	ImGui::AlignTextToFramePadding();																											\
+	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
+	ImGui::NextColumn();																														\
+	ImGui::SetNextItemWidth(-1);																												\
+																																				\
+	IMGUI_INPUT_##type(propertyName)																											\
+																																				\
+	if (result)																																	\
+	{																																			\
+		callback(type(value));																													\
+		component->set##propertyName(type(value));																								\
+	}																																			\
+																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){})
+
+
+bool newNode(const char* name, const char* descriptionFmt, ...)
+{
+	ImGui::PushID("name");
+	ImGui::AlignTextToFramePadding();
+	bool nodeOpen = ImGui::TreeNode(name, name);
+
+	ImGui::NextColumn();
+
+	ImGui::AlignTextToFramePadding();
+
+	va_list args;
+	va_start(args, descriptionFmt);
+	ImGui::TextV(descriptionFmt, args);
+	va_end(args);
+
+	ImGui::NextColumn();
+
+	return nodeOpen;
+}
+
+
+void showBusStopComponentDetails(BusStopComponent* component)
+{
+	if (ImGui::CollapsingHeader("Bus Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		//ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, Id, int, "Id")
+		COMPONENT_PROPERTY_EDIT(component, Name, str, "Name")
+		COMPONENT_PROPERTY_EDIT(component, AnnouncementFileName, path, "Announcement")
+		COMPONENT_PROPERTY_EDIT(component, Distance, float, "Distance")
+		COMPONENT_PROPERTY_EDIT(component, RequestStop, bool, "Request stop")
+
+		if (newNode("Number of passengers", "[%d, %d]", component->getNumberOfPassengersMin(), component->getNumberOfPassengersMax()))
+		{
+			COMPONENT_PROPERTY_EDIT(component, NumberOfPassengersMin, int, "Min")
+			COMPONENT_PROPERTY_EDIT(component, NumberOfPassengersMax, int, "Max")
+		}
+		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+		ImGui::End();
+	}
+}
+
+
 void showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -632,6 +766,12 @@ void showObjectProperties()
 			if (roadIntersectionComponent)
 			{
 				showRoadIntersectionComponentDetails(roadIntersectionComponent);
+			}
+
+			BusStopComponent* busStopComponent = dynamic_cast<BusStopComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_BUS_STOP));
+			if (busStopComponent)
+			{
+				showBusStopComponentDetails(busStopComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -715,6 +855,7 @@ void showObjectProperties()
 			if (roadComponent && roadComponent->getRoadType() == RoadType::BEZIER_CURVES)
 			{
 				showRoadComponentDetails(roadComponent);
+				showRenderComponentDetails(roadComponent);
 			}
 			if (roadComponent && roadComponent->getRoadType() == RoadType::LINES_AND_ARC)
 			{
