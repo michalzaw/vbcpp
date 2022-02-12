@@ -1,5 +1,7 @@
 #include "RoadIntersectionComponent.h"
 
+#include <iterator>
+
 #include "ModelGenerator.h"
 #include "ShapePolygonComponent.h"
 #include "RoadGenerator.h"
@@ -19,7 +21,7 @@ struct RoadWithAngle
 };
 
 
-RoadIntersectionComponent::RoadIntersectionComponent()
+RoadIntersectionComponent::RoadIntersectionComponent(RRoadProfile* roadProfile)
 	: Component(CT_ROAD_INTERSECTION),
 	_quality(11),
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
@@ -28,7 +30,14 @@ RoadIntersectionComponent::RoadIntersectionComponent()
 	_generatedModel(nullptr),
 	_isCreated(true)
 {
-
+	// copy of original road profile;
+	_roadProfile = new RRoadProfile(*roadProfile);
+	std::vector<RoadLane>& roadLanes = _roadProfile->getRoadLanes();
+	for (int i = 0; i < roadLanes.size(); ++i)
+	{
+		roadLanes[i].r1 = -(5.5 - roadLanes[i].r1);
+		roadLanes[i].r2 = -(5.5 - roadLanes[i].r2);
+	}
 }
 
 
@@ -40,6 +49,8 @@ RoadIntersectionComponent::~RoadIntersectionComponent()
 	{
 		connectRoad.road->setConnectionPoint(connectRoad.connectionPointInRoadIndex, nullptr);
 	}
+
+	delete _roadProfile;
 }
 
 
@@ -74,6 +85,11 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 		setLengthInternal(0, _length[1]);
 	}
 
+	SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("intersectionEdge");
+	getSceneObject()->addChild(roadSceneObject);
+	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _roadProfile, {}, {}, false, roadSceneObject);
+	roadSceneObject->setIsActive(false);
+
 	_needSortRoads = true;
 }
 
@@ -95,6 +111,10 @@ void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int conne
 			_length.erase(_length.begin() + index);
 			_width.erase(_width.begin() + index);
 			_arc.erase(_arc.begin() + index);
+
+			auto objectToRemoveIterator = std::next(getSceneObject()->getChildren().begin(), index);
+			if (GameConfig::getInstance().mode == GM_EDITOR) ++objectToRemoveIterator;
+			getSceneObject()->getChildren().erase(objectToRemoveIterator);
 
 			break;
 		}
@@ -265,6 +285,28 @@ int RoadIntersectionComponent::getQuality()
 }
 
 
+void RoadIntersectionComponent::onAttachedToScenObject()
+{
+	if (GameConfig::getInstance().mode == GM_EDITOR)
+	{
+		// create editor helper
+		SceneObject* helperSceneObject = getSceneObject()->getSceneManager()->addSceneObject("editor#Road intersection helper");
+
+		Material* material = new Material;
+		material->shader = NOTEXTURE_MATERIAL;
+		material->shininess = 96.0f;
+		material->diffuseColor = glm::vec4(0.32f, 0.32f, 0.32f, 1.0f);
+
+		Cube* cube = new Cube(1, material);
+		cube->init();
+		cube->setIsCastShadows(false);
+		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
+
+		getSceneObject()->addChild(helperSceneObject);
+	}
+}
+
+
 void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves)
 {
 	auto shapePolygonComponent = new ShapePolygonComponent;
@@ -413,7 +455,7 @@ void RoadIntersectionComponent::createPolygon()
 			rightVector = -rightVector;
 		}
 
-		roadsCenterPoints[i] = roadCenterPoint;
+		roadsCenterPoints[i] = roadCenterPoint + glm::vec3(0.0f, 0.0f, 0.0f);;
 		roadsDirections[i] = glm::vec3(direction.x, 0.0f, direction.z);
 		roadsRightVectors[i] = glm::vec3(rightVector.x, 0.0f, rightVector.y);
 
@@ -457,14 +499,14 @@ void RoadIntersectionComponent::createPolygon()
 		for (int j = 0; j < bezierCurves[i].size(); ++j)
 		{
 			vertices[i * _quality + j].position = bezierCurves[i][j];
-			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z);
+			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z) * 0.25f;
 			vertices[i * _quality + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 
 		for (int j = 0; j < pointsOnRoadAxis[i].size(); ++j)
 		{
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].position = pointsOnRoadAxis[i][j];
-			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z);
+			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z) * 0.25f;
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 	}
@@ -544,6 +586,7 @@ void RoadIntersectionComponent::createPolygon()
 		materials.push_back(new Material);
 		materials[0]->shader = SOLID_MATERIAL;
 		materials[0]->shininess = 96.0f;
+		materials[0]->specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
 		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
 		materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
 
@@ -558,33 +601,32 @@ void RoadIntersectionComponent::createPolygon()
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
 	}
 
-
-	getSceneObject()->removeAllChildrenFromScene();
-
-	RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile("asfalt");
-	std::vector<RoadLane> roadLanes = roadProfile->getRoadLanes();
-	for (int i = 0; i < roadLanes.size(); ++i)
 	{
-		roadLanes[i].r1 = -(5.5 - roadLanes[i].r1);
-		roadLanes[i].r2 = -(5.5 - roadLanes[i].r2);
+		int index = 0;
+		for (auto child : getSceneObject()->getChildren())
+		{
+			// update existing children
+			RoadObject* roadObject = dynamic_cast<RoadObject*>(child->getComponent(CT_ROAD_OBJECT));
+			if (roadObject != nullptr)
+			{
+				auto& roadObjectPoints = roadObject->getPoints();
+				roadObjectPoints.resize(bezierCurves[index].size());
+
+				for (int i = 0; i < bezierCurves[index].size(); ++i)
+				{
+					roadObjectPoints[i] = bezierCurves[index][i];
+				}
+
+				roadObject->setCustomConnectionPointData(0, glm::vec3(0.0f, 0.0f, 0.0f), roadsDirections[index]);
+				roadObject->setCustomConnectionPointData(1, glm::vec3(0.0f, 0.0f, 0.0f), roadsDirections[(index + 1) % _roads.size()]);
+				roadObject->buildModel();
+
+				child->setIsActive(true);
+
+				++index;
+			}
+		}
 	}
-
-	temp[0] = new RoadConnectionPointData;
-	temp[1] = new RoadConnectionPointData;
-	for (int i = 0; i < _roads.size(); ++i)
-	{
-		temp[0]->direction = roadsDirections[i];
-		temp[1]->direction = roadsDirections[(i + 1) % _roads.size()];
-
-		RStaticModel* roadModel = RoadGenerator::createRoadModel(roadLanes, bezierCurves[i], temp);
-		SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("temp" + Strings::toString(i));
-		getSceneObject()->addChild(roadSceneObject);
-
-		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(roadModel), roadSceneObject);
-	}
-
-	delete temp[0];
-	delete temp[1];
 }
 
 

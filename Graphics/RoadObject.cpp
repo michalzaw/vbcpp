@@ -12,8 +12,8 @@
 #include "../Utils/Logger.h"
 
 
-RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
-	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _marginBegin(0.0f), _marginEnd(0.0f)
+RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
+	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 	
@@ -22,8 +22,8 @@ RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vecto
 }
 
 
-RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate)
-	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _marginBegin(0.0f), _marginEnd(0.0f)
+RoadObject::RoadObject(RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, bool buildModelAfterCreate)
+	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -89,27 +89,6 @@ bool RoadObject::isConnectionExist(int index)
 
 void RoadObject::buildModel(bool reuseExistingModel)
 {
-	std::vector<RoadConnectionPointData*> connectionPointsData;
-	for (int i = 0; i < 2; ++i)
-	{
-		if (_connectionPoints[i].crossroadComponent != nullptr)
-		{
-			RoadConnectionPointData* data = new RoadConnectionPointData;
-
-			glm::vec3 pos = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).position;
-			data->position = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalPointToGlobal(pos);
-
-			glm::vec3 dir = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).direction;
-			data->direction = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalVectorToGlobal(dir);
-
-			connectionPointsData.push_back(data);
-		}
-		else
-		{
-			connectionPointsData.push_back(nullptr);
-		}
-	}
-
 	if (_modelsDatas[0].modelRootNode != nullptr)
 	{
 		delete _modelsDatas[0].modelRootNode;
@@ -124,28 +103,27 @@ void RoadObject::buildModel(bool reuseExistingModel)
 
 	if (_roadType == RoadType::LINES_AND_ARC)
 	{
-		buildModelLinesAndArcMode(connectionPointsData, reuseExistingModel);
+		buildModelLinesAndArcMode(_connectionPointsData);
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		buildModelBezierCurvesMode(connectionPointsData, reuseExistingModel);
+		buildModelBezierCurvesMode(_connectionPointsData);
 	}
-
-	for (int i = 0; i < 2; ++i)
+	else if (_roadType == RoadType::POINTS)
 	{
-		if (connectionPointsData[i] != nullptr)
-			delete connectionPointsData[i];
+		auto tempPoints = _points;
+		buildModelPoints(tempPoints, _connectionPointsData);
 	}
 }
 
 
-void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
 	setModel(createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _modelsDatas[0].model));
 }
 
 
-void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
@@ -183,9 +161,15 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 		}
 	}
 
-	cutCurvePointsToIntersection(_curvePoints);
+	buildModelPoints(_curvePoints, connectionPointsData);
+}
 
-	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), _curvePoints, connectionPointsData, _modelsDatas[0].model));
+
+void RoadObject::buildModelPoints(std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData)
+{
+	cutCurvePointsToIntersection(curvePoints);
+
+	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), curvePoints, connectionPointsData, _modelsDatas[0].model));
 }
 
 
@@ -459,6 +443,29 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 	{
 		setConnectedPointPosition(index);
 	}
+
+	// build connection point data
+	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		if (_connectionPointsData[index] == nullptr)
+		{
+			_connectionPointsData[index] = new RoadConnectionPointData;
+		}
+
+		glm::vec3 pos = _connectionPoints[index].crossroadComponent->getConnectionPoint(_connectionPoints[index].index).position;
+		_connectionPointsData[index]->position = _connectionPoints[index].crossroadComponent->getSceneObject()->transformLocalPointToGlobal(pos);
+
+		glm::vec3 dir = _connectionPoints[index].crossroadComponent->getConnectionPoint(_connectionPoints[index].index).direction;
+		_connectionPointsData[index]->direction = _connectionPoints[index].crossroadComponent->getSceneObject()->transformLocalVectorToGlobal(dir);
+	}
+	else
+	{
+		if (_connectionPointsData[index] != nullptr)
+		{
+			delete _connectionPointsData[index];
+		}
+		_connectionPointsData[index] = nullptr;
+	}
 }
 
 
@@ -495,6 +502,21 @@ void RoadObject::setConnectionPointWithRoadIntersection(int index, RoadIntersect
 RoadConnectionPoint& RoadObject::getConnectionPoint(int index)
 {
 	return _connectionPoints[index];
+}
+
+
+void RoadObject::setCustomConnectionPointData(int index, const glm::vec3 pos, const glm::vec3 dir)
+{
+	if (index >= 2)
+		return;
+
+	if (_connectionPointsData[index] == nullptr)
+	{
+		_connectionPointsData[index] = new RoadConnectionPointData;
+	}
+
+	_connectionPointsData[index]->position = pos;
+	_connectionPointsData[index]->direction = dir;
 }
 
 

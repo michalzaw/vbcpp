@@ -2,8 +2,6 @@
 
 #include "../Game/GameConfig.h"
 
-#include "ModelGenerator.h"
-
 
 namespace RoadGenerator
 {
@@ -204,7 +202,7 @@ namespace RoadGenerator
 		return meshes;
 	}
 
-	RStaticModel* generateModel(const std::vector<RoadLane>& roadLanes, StaticModelMesh* meshes, glm::vec3* collisionMesh, int collistionMeshSize)
+	RStaticModel* generateModel(const std::vector<RoadLane>& roadLanes, StaticModelMesh* meshes)
 	{
 		int lanesCount = roadLanes.size();
 
@@ -221,12 +219,11 @@ namespace RoadGenerator
 		modelNode->meshesCount = lanesCount;
 		modelNode->parent = nullptr;
 
-		return new RStaticModel("", modelNode, materials, GL_TRIANGLES, collisionMesh, collistionMeshSize);
+		return new RStaticModel("", modelNode, materials, GL_TRIANGLES);
 	}
 
-	RStaticModel* updateOldModel(RStaticModel* oldModel, glm::vec3* collisionMesh, int collistionMeshSize)
+	RStaticModel* updateOldModel(RStaticModel* oldModel)
 	{
-		oldModel->setNewCollisionMesh(collisionMesh, collistionMeshSize);
 		oldModel->recalculateAABB();
 
 		return oldModel;
@@ -250,16 +247,14 @@ namespace RoadGenerator
 		StaticModelMesh* meshes = createMeshes(lanesVerticesArray, lanesIndicesArray, roadLanes, totalIndicesCount, 
 											   isGame, oldModel == nullptr ? nullptr : oldModel->getRootNode()->meshes);
 
-		glm::vec3* collisionMesh = ModelGenerator::generateCollistionMesh(meshes, lanesCount, totalIndicesCount);
-
 		RStaticModel* model;
 		if (oldModel == nullptr)
 		{
-			model = generateModel(roadLanes, meshes, collisionMesh, totalIndicesCount);
+			model = generateModel(roadLanes, meshes);
 		}
 		else
 		{
-			model = updateOldModel(oldModel, collisionMesh, totalIndicesCount);
+			model = updateOldModel(oldModel);
 		}
 
 		delete[] lanesVerticesArray;

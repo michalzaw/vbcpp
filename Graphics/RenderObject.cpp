@@ -14,6 +14,8 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     LOG_DEBUG("*** RenderObject: Konstruktor");
 	
 	_modelsDatas.resize(1);
+    _modelsDatas[0].model = NULL;
+    _modelsDatas[0].modelRootNode = NULL;
 
     if (model != NULL)
     {

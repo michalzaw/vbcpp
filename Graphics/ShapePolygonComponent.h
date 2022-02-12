@@ -29,7 +29,6 @@ class ShapePolygonComponent final : public Component
 		void calculateNormals(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices);
 		void runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices);
 		Vertex* mapVerticesToInternalVertexFormat(std::vector<MeshMender::Vertex>& vertices);
-		glm::vec3* generateCollistionMesh(StaticModelMesh* meshes, unsigned int meshesCount, unsigned int totalIndicesCount);
 
 	public:
 		ShapePolygonComponent();

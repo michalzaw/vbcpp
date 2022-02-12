@@ -832,20 +832,6 @@ namespace vbEditor
 					sceneObject->addComponent(_graphicsManager->addRoadIntersection());
 
 					setSelectedSceneObject(sceneObject);
-
-					SceneObject* placeholderSceneObject = _sceneManager->addSceneObject("editor#Road intersection helper");
-
-					Material* material = new Material;
-					material->shader = NOTEXTURE_MATERIAL;
-					material->shininess = 96.0f;
-					material->diffuseColor = glm::vec4(0.32f, 0.32f, 0.32f, 1.0f);
-
-					Cube* cube = new Cube(1, material);
-					cube->init();
-					cube->setIsCastShadows(false);
-					_graphicsManager->addRenderObject(cube, placeholderSceneObject);
-
-					sceneObject->addChild(placeholderSceneObject);
 				}
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{

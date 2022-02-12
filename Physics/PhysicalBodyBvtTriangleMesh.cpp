@@ -1,10 +1,21 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
 PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
-: PhysicalBody(0),
-_model(model)
+    : PhysicalBody(0)
 {
     LOG_INFO("BvtTriangleMeshShape - Konstruktor");
+
+    _models.push_back(model);
+    updateBody();
+}
+
+
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& models)
+    : PhysicalBody(0),
+    _models(models)
+{
+    LOG_INFO("BvtTriangleMeshShape - Konstruktor");
+
     updateBody();
 }
 
@@ -15,7 +26,7 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
 }
 
  
-void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform)
+void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, unsigned int primitiveType, glm::mat4 parentTransform)
 {
     glm::mat4 nodeTransform = parentTransform * staticModelNode->transform.getTransformMatrix();
 
@@ -28,7 +39,7 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 
         unsigned int vertexCount = mesh->verticesCount;
 
-        if (_model->getPrimitiveType() == GL_TRIANGLES)
+        if (primitiveType == GL_TRIANGLES)
         {
             for (unsigned int j = 0; j < mesh->indicesCount; j += 3)
             {
@@ -47,7 +58,7 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
                 triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
             }
         }
-        else if (_model->getPrimitiveType() == GL_TRIANGLE_STRIP)
+        else if (primitiveType == GL_TRIANGLE_STRIP)
         {
             for (int j = 2; j < mesh->indicesCount; ++j)
             {
@@ -76,7 +87,7 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 
     for (int i = 0; i < staticModelNode->children.size(); ++i)
     {
-        addModelNodeToTriangleMesh(triMesh, staticModelNode->children[i], nodeTransform);
+        addModelNodeToTriangleMesh(triMesh, staticModelNode->children[i], primitiveType, nodeTransform);
     }
 }
 
@@ -85,9 +96,9 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
 {
     btTriangleMesh* triMesh = new btTriangleMesh(true, false);
 
-    if (_model)
+    for (auto model : _models)
     {
-        addModelNodeToTriangleMesh(triMesh, _model->getRootNode(), glm::mat4(1.0f));
+        addModelNodeToTriangleMesh(triMesh, model->getRootNode(), model->getPrimitiveType(), glm::mat4(1.0f));
     }
 
     if (!triMesh)

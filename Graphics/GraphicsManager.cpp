@@ -89,7 +89,7 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
+RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
 {
 	RoadObject* roadObject = new RoadObject(roadType, roadProfile, points, segments, buildModelAfterCreate);
 
@@ -249,7 +249,7 @@ CrossroadComponent* GraphicsManager::addCrossRoad(std::vector<CrossroadConnectio
 
 RoadIntersectionComponent* GraphicsManager::addRoadIntersection()
 {
-    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent;
+    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent(ResourceManager::getInstance().loadRoadProfile("asfalt"));
 
     _roadIntersectionComponents.push_back(roadIntersection);
 

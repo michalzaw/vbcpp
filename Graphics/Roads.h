@@ -46,6 +46,32 @@ struct RoadLane
     float height1;      // y1
     float height2;      // y2
 
+    RoadLane() {}
+
+    RoadLane(const RoadLane& other)
+    {
+        material = new Material(*other.material);
+        r1 = other.r1;
+        r2 = other.r2;
+        height1 = other.height1;
+        height2 = other.height2;
+    }
+
+    RoadLane& operator=(const RoadLane& other)
+    {
+        material = new Material(*other.material);
+        r1 = other.r1;
+        r2 = other.r2;
+        height1 = other.height1;
+        height2 = other.height2;
+
+        return *this;
+    }
+
+    ~RoadLane()
+    {
+        delete material;
+    }
 };
 
 

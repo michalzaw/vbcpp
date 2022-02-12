@@ -14,7 +14,8 @@ class RoadIntersectionComponent;
 enum class RoadType
 {
 	LINES_AND_ARC,
-	BEZIER_CURVES
+	BEZIER_CURVES,
+	POINTS
 };
 
 
@@ -44,6 +45,7 @@ class RoadObject : public RenderObject
 		std::vector<glm::vec3> _points;
 		std::vector<RoadSegment> _segments;
 		std::vector<RoadConnectionPoint> _connectionPoints;
+		std::vector<RoadConnectionPointData*> _connectionPointsData;
 
 		float _marginBegin;
 		float _marginEnd;
@@ -55,13 +57,14 @@ class RoadObject : public RenderObject
 		bool isConnectionExist(int index);
 
 	public:
-		RoadObject(RoadType roadType, RRoadProfile*_roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate);
-		RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate); // BEZIER_CURVES
+		RoadObject(RoadType roadType, RRoadProfile*_roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate);
+		RoadObject(RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, bool buildModelAfterCreate); // BEZIER_CURVES
 		virtual ~RoadObject();
 
 		void buildModel(bool reuseExistingModel = true);
-		void buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel);
-		void buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel);
+		void buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData);
+		void buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData);
+		void buildModelPoints(std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData);
 
 		RoadType getRoadType();
 		RRoadProfile* getRoadProfile();
@@ -78,6 +81,8 @@ class RoadObject : public RenderObject
 		void setConnectionPoint(int index, CrossroadComponent* crossroadComponent, int indexInCrossroad = 0);
 		void setConnectionPointWithRoadIntersection(int index, RoadIntersectionComponent* roadIntersectionComponent);
 		RoadConnectionPoint& getConnectionPoint(int index);
+
+		void setCustomConnectionPointData(int index, const glm::vec3 pos, const glm::vec3 dir);
 
 		void setMarginBegin(float marginBegin);
 		void setMarginEnd(float marginEnd);

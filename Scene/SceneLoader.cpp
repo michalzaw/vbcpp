@@ -322,13 +322,16 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 	const auto& roadObjects = _sceneManager->getGraphicsManager()->getRoadObjects();
 	for (const auto& roadObject : roadObjects)
 	{
-		roadObject->buildModel();
+		if (roadObject->getSceneObject()->getParent() == nullptr)
+		{
+			roadObject->buildModel();
 
-		PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
-		roadMesh->setRestitution(0.9f);
-		roadMesh->getRigidBody()->setFriction(1.0f);
-		//terrainMesh->getRigidBody()->setFriction(1.5f);
-		roadObject->getSceneObject()->addComponent(roadMesh);
+			PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
+			roadMesh->setRestitution(0.9f);
+			roadMesh->getRigidBody()->setFriction(1.0f);
+			//terrainMesh->getRigidBody()->setFriction(1.5f);
+			roadObject->getSceneObject()->addComponent(roadMesh);
+		}
 	}
 	const auto& roadIntersections = _sceneManager->getGraphicsManager()->getRoadIntersectionComponents();
 	for (const auto& roadIntersection : roadIntersections)
@@ -336,7 +339,18 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		//roadIntersection->sortConnectedRoads();
 		roadIntersection->createPolygon();
 
-		PhysicalBodyBvtTriangleMesh* roadIntersectionMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadIntersection->getModel(), COL_TERRAIN, _roadCollidesWith);
+		std::list<RStaticModel*> models;
+		models.push_back(roadIntersection->getModel());
+		for (auto child : roadIntersection->getSceneObject()->getChildren())
+		{
+			RoadObject* childRoadObject = dynamic_cast<RoadObject*>(child->getComponent(CT_ROAD_OBJECT));
+			if (childRoadObject != nullptr)
+			{
+				models.push_back(childRoadObject->getModel());
+			}
+		}
+
+		PhysicalBodyBvtTriangleMesh* roadIntersectionMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(models, COL_TERRAIN, _roadCollidesWith);
 		roadIntersectionMesh->setRestitution(0.9f);
 		roadIntersectionMesh->getRigidBody()->setFriction(1.0f);
 		//terrainMesh->getRigidBody()->setFriction(1.5f);

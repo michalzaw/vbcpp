@@ -9,6 +9,7 @@
 
 class RoadObject;
 class RStaticModel;
+class RRoadProfile;
 
 
 struct RoadConnectedToIntersection final
@@ -34,6 +35,8 @@ class RoadIntersectionComponent final : public Component
 		std::vector<float> _arc;
 		int _quality;
 
+		RRoadProfile* _roadProfile;
+
 		bool _needRebuildIntersectionModel;
 		bool _needRebuildConnectedRoad;
 		bool _needSortRoads;
@@ -46,6 +49,8 @@ class RoadIntersectionComponent final : public Component
 
 		bool _isCreated;
 
+		void onAttachedToScenObject() override;
+
 		void createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves);
 		float getRealWidth(int index, bool isRight);
 		void setLengthInternal(int index, float length);
@@ -55,7 +60,7 @@ class RoadIntersectionComponent final : public Component
 		glm::vec3 transformVectorToLocalSpace(const glm::vec3& point);
 
 	public:
-		RoadIntersectionComponent();
+		RoadIntersectionComponent(RRoadProfile* roadProfile);
 		virtual ~RoadIntersectionComponent();
 
 		void connectRoad(RoadObject* roadObject, int connectionPointInRoadIndex);
