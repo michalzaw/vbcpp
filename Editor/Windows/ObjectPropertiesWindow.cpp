@@ -573,6 +573,11 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 		{
 			component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
 		}
+		int numberOfLanesToRemove = component->getEdgeRoadProfileNumberOfLanesToRemove();
+		if (ImGui::DragInt("Lanes to remove", &numberOfLanesToRemove, 1.0f, 1, 20))
+		{
+			component->setEdgeRoadProfileNumberOfLanesToRemove(numberOfLanesToRemove);
+		}
 
 		ImGui::Separator();
 

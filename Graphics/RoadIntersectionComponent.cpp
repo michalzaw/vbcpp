@@ -631,9 +631,31 @@ void RoadIntersectionComponent::createPolygon()
 				vertices[i1].normal += normal1;		vertices[i1].normal /= 2.0f;
 				vertices[i2].normal += normal1;		vertices[i2].normal /= 2.0f;
 
-				vertices[i1].normal += normal1;		vertices[i1].normal /= 2.0f;
-				vertices[i2].normal += normal1;		vertices[i2].normal /= 2.0f;
-				vertices[i3].normal += normal1;		vertices[i3].normal /= 2.0f;
+				vertices[i1].normal += normal2;		vertices[i1].normal /= 2.0f;
+				vertices[i2].normal += normal2;		vertices[i2].normal /= 2.0f;
+				vertices[i3].normal += normal2;		vertices[i3].normal /= 2.0f;
+
+				glm::vec3 tangent1 = glm::normalize(vertices[i1].position - vertices[i0].position);
+				glm::vec3 tangent2 = glm::normalize(vertices[i3].position - vertices[i2].position);
+
+				vertices[i0].tangent += tangent1;	vertices[i0].tangent /= 2.0f;
+				vertices[i1].tangent += tangent1;	vertices[i1].tangent /= 2.0f;
+				vertices[i2].tangent += tangent1;	vertices[i2].tangent /= 2.0f;
+
+				vertices[i1].tangent += tangent2;	vertices[i1].tangent /= 2.0f;
+				vertices[i2].tangent += tangent2;	vertices[i2].tangent /= 2.0f;
+				vertices[i3].tangent += tangent2;	vertices[i3].tangent /= 2.0f;
+
+				glm::vec3 bitangent1 = glm::normalize(glm::cross(normal1, tangent1));
+				glm::vec3 bitangent2 = glm::normalize(glm::cross(normal2, tangent2));
+
+				vertices[i0].bitangent += bitangent1;	vertices[i0].bitangent /= 2.0f;
+				vertices[i1].bitangent += bitangent1;	vertices[i1].bitangent /= 2.0f;
+				vertices[i2].bitangent += bitangent1;	vertices[i2].bitangent /= 2.0f;
+
+				vertices[i1].bitangent += bitangent2;	vertices[i1].bitangent /= 2.0f;
+				vertices[i2].bitangent += bitangent2;	vertices[i2].bitangent /= 2.0f;
+				vertices[i3].bitangent += bitangent2;	vertices[i3].bitangent /= 2.0f;
 			}
 		}
 		indices[index++] = OGLDriver::PRIMITIVE_RESTART_INDEX;
