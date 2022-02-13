@@ -5,8 +5,9 @@
 
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
-	: _parent(parent),
-	_id(0), _name(name), _isActive(true),
+    : _parent(parent),
+    _id(0), _name(name), _isActive(true),
+    _flags(0),
 	_objectDefinition(objectDefinition),
     _sceneManager(sceneManager),
     _rotationMode(RM_QUATERNION),
@@ -410,6 +411,24 @@ bool SceneObject::isActive()
         return _parent->isActive() && _isActive;
 
     return _isActive;
+}
+
+
+void SceneObject::setFlags(unsigned int flags)
+{
+    _flags = flags;
+}
+
+
+void SceneObject::addFlag(SceneObjectFlags flag)
+{
+    _flags = _flags | flag;
+}
+
+
+unsigned int SceneObject::getFlags()
+{
+    return _flags;
 }
 
 

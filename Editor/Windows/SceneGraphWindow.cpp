@@ -132,7 +132,7 @@ namespace vbEditor {
 		{
 			for (SceneObject* child : object->getChildren())
 			{
-				if (!startsWith(child->getName(), "editor#"))
+				if (!(child->getFlags() & SOF_NOT_SELECTABLE))
 				{
 					return true;
 				}
@@ -144,7 +144,7 @@ namespace vbEditor {
 
 	void inspectSceneObject(SceneObject* object)
 	{
-		if (startsWith(object->getName(), "editor#"))
+		if (object->getFlags() & SOF_NOT_SELECTABLE)
 			return;
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;

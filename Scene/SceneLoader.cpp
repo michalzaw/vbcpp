@@ -62,6 +62,7 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	LOG_INFO("Material: " + materialName);
 
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
+	terrainObject->setFlags(SOF_NOT_SELECTABLE_ON_SCENE);
 	Terrain* terrainObj = _sceneManager->getGraphicsManager()->addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
 	terrainObj->setIsCastShadows(false);
 	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);

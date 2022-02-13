@@ -80,6 +80,7 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	}
 
 	SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("intersectionEdge");
+	roadSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
 	getSceneObject()->addChild(roadSceneObject);
 	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
 	roadSceneObject->setIsActive(false);
@@ -368,6 +369,7 @@ void RoadIntersectionComponent::onAttachedToScenObject()
 	{
 		// create editor helper
 		SceneObject* helperSceneObject = getSceneObject()->getSceneManager()->addSceneObject("editor#Road intersection helper");
+		helperSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
 
 		Material* material = new Material;
 		material->shader = NOTEXTURE_MATERIAL;

@@ -16,6 +16,15 @@
 class SceneManager;
 
 
+enum SceneObjectFlags
+{
+    SOF_NONE                        = 0,
+    SOF_NOT_SELECTABLE              = 1 << 0,       // Object is not selectable and is not visible in SceneGraphWindow
+    SOF_NOT_SELECTABLE_ON_SCENE     = 1 << 1,       // Object is not selectable on scene
+    SOF_NOT_SERIALIZABLE            = 1 << 2        // Object is not saved in SceneSaver
+};
+
+
 class SceneObject
 {
     private:
@@ -27,6 +36,8 @@ class SceneObject
         std::string     _name;
         unsigned int    _id;
         bool            _isActive;
+
+        unsigned int    _flags;
 
 		RObject*		_objectDefinition;
 
@@ -76,6 +87,10 @@ class SceneObject
         std::string     getName();
         unsigned int    getId();
         bool            isActive();
+
+        void            setFlags(unsigned int flags);
+        void            addFlag(SceneObjectFlags flag);
+        unsigned int    getFlags();
 
 		RObject*		getObjectDefinition();
 

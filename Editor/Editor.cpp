@@ -654,7 +654,7 @@ namespace vbEditor
 					float distance;
 					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
 					{
-						if (distance > 0.0f && distance < d && renderObject->getSceneObject()->getName() != "terrain")
+						if (distance > 0.0f && distance < d && !(renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
 						{
 							selectedObject = renderObject->getSceneObject();
 							d = distance;
@@ -775,6 +775,7 @@ namespace vbEditor
 		renderer.t = 0;
 
 		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
+		_cameraObject->setFlags(SOF_NOT_SELECTABLE);
 		_camera = _graphicsManager->addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
