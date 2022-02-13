@@ -575,14 +575,14 @@ void RoadIntersectionComponent::createPolygon()
 		for (int j = 0; j < bezierCurves[i].size(); ++j)
 		{
 			vertices[i * _quality + j].position = bezierCurves[i][j];
-			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z) * 0.25f;
+			vertices[i * _quality + j].texCoord = glm::vec2(bezierCurves[i][j].x, bezierCurves[i][j].z) * _edgeRoadProfile->getIntersectionMaterial()->scale;
 			vertices[i * _quality + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 
 		for (int j = 0; j < pointsOnRoadAxis[i].size(); ++j)
 		{
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].position = pointsOnRoadAxis[i][j];
-			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z) * 0.25f;
+			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].texCoord = glm::vec2(pointsOnRoadAxis[i][j].x, pointsOnRoadAxis[i][j].z) * _edgeRoadProfile->getIntersectionMaterial()->scale;
 			vertices[numberOfPointsInAllBezierCurves + i * numberOfPointsOnRoadAxis + j].normal = glm::vec3(0.0f, 0.0f, 0.0f);
 		}
 	}
