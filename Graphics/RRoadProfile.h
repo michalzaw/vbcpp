@@ -20,11 +20,14 @@ class RRoadProfile : public Resource
 
 		std::vector<glm::vec2> _edges;
 
+		Material* _intersectionMaterial;
+		float _intersectionRoadY;
+
 		float _maxX;			bool _maxXIsCalculated;
 		float _minX;			bool _minXIsCalculated;
 
 	public:
-		RRoadProfile(std::string path, std::string author, std::string name, std::string comment);
+		RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial = nullptr, float intersectionRoadY = 0.0f);
 		~RRoadProfile();
 
 		std::string getAuthor();
@@ -33,6 +36,8 @@ class RRoadProfile : public Resource
 
 		std::vector<RoadLane>& getRoadLanes();
 		std::vector<glm::vec2>& getEdges();
+		Material* getIntersectionMaterial();
+		float getIntersectionRoadY();
 
 		float getMaxX();
 		float getMinX();

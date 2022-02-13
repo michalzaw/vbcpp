@@ -1,9 +1,10 @@
 #include "RRoadProfile.h"
 
 
-RRoadProfile::RRoadProfile(std::string path, std::string author, std::string name, std::string comment)
+RRoadProfile::RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial, float intersectionRoadY)
 	: Resource(RT_ROAD_PROFILE, path),
 	_author(author), _name(name), _comment(comment),
+	_intersectionMaterial(intersectionMaterial), _intersectionRoadY(intersectionRoadY),
 	_maxX(0.0f), _minX(0.0f), _maxXIsCalculated(false), _minXIsCalculated(false)
 {
 
@@ -43,6 +44,18 @@ std::vector<RoadLane>& RRoadProfile::getRoadLanes()
 std::vector<glm::vec2>& RRoadProfile::getEdges()
 {
 	return _edges;
+}
+
+
+Material* RRoadProfile::getIntersectionMaterial()
+{
+	return _intersectionMaterial;
+}
+
+
+float RRoadProfile::getIntersectionRoadY()
+{
+	return _intersectionRoadY;
 }
 
 

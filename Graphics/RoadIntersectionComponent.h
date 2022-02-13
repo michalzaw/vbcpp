@@ -10,6 +10,7 @@
 class RoadObject;
 class RStaticModel;
 class RRoadProfile;
+class Material;
 
 
 struct RoadConnectedToIntersection final
@@ -35,11 +36,14 @@ class RoadIntersectionComponent final : public Component
 		std::vector<float> _arc;
 		int _quality;
 
-		RRoadProfile* _roadProfile;
+		RRoadProfile* _originalEdgeRoadProfile;
+		RRoadProfile* _edgeRoadProfile;
+		unsigned int _edgeRoadProfileNumberOfLanesToRemove;		// liczba lane ktore beda odrzucane przy tworzeniu krawedzi skrzyzowania, patrzac od osi jezdni. Default = 1
 
 		bool _needRebuildIntersectionModel;
 		bool _needRebuildConnectedRoad;
 		bool _needSortRoads;
+		bool _needRecreateModel;
 		float _modificationTimer;
 
 		glm::mat4 _inverseModelMatrix;
@@ -58,6 +62,7 @@ class RoadIntersectionComponent final : public Component
 		const glm::mat4& getInverseModelMatrix();
 		glm::vec3 transformPointToLocalSpace(const glm::vec3& point);
 		glm::vec3 transformVectorToLocalSpace(const glm::vec3& point);
+		void updateEdgeRoadProfile();
 
 	public:
 		RoadIntersectionComponent(RRoadProfile* roadProfile);
@@ -79,6 +84,11 @@ class RoadIntersectionComponent final : public Component
 		float getWidth(int index = 0);
 		float getArc(int index = 0);
 		int getQuality();
+
+		void setEdgeRoadProfile(RRoadProfile* roadProfile);
+		void setEdgeRoadProfileNumberOfLanesToRemove(unsigned int edgeRoadProfileNumberOfLanesToRemove);
+		RRoadProfile* getEdgeRoadProfile();
+		unsigned int getEdgeRoadProfileNumberOfLanesToRemove();
 
 		void createPolygon();
 

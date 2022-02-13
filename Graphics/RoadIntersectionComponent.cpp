@@ -21,23 +21,17 @@ struct RoadWithAngle
 };
 
 
-RoadIntersectionComponent::RoadIntersectionComponent(RRoadProfile* roadProfile)
+RoadIntersectionComponent::RoadIntersectionComponent(RRoadProfile* edgeRadProfile)
 	: Component(CT_ROAD_INTERSECTION),
 	_quality(11),
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
-	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _modificationTimer(0.0f),
+	_originalEdgeRoadProfile(nullptr), _edgeRoadProfile(nullptr), _edgeRoadProfileNumberOfLanesToRemove(1),
+	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _needRecreateModel(false), _modificationTimer(0.0f),
 	_inverseModelMatrix(1.0f), _inverseModelMatrixIsCalculated(false),
 	_generatedModel(nullptr),
 	_isCreated(true)
 {
-	// copy of original road profile;
-	_roadProfile = new RRoadProfile(*roadProfile);
-	std::vector<RoadLane>& roadLanes = _roadProfile->getRoadLanes();
-	for (int i = 0; i < roadLanes.size(); ++i)
-	{
-		roadLanes[i].r1 = -(5.5 - roadLanes[i].r1);
-		roadLanes[i].r2 = -(5.5 - roadLanes[i].r2);
-	}
+	setEdgeRoadProfile(edgeRadProfile);
 }
 
 
@@ -50,7 +44,7 @@ RoadIntersectionComponent::~RoadIntersectionComponent()
 		connectRoad.road->setConnectionPoint(connectRoad.connectionPointInRoadIndex, nullptr);
 	}
 
-	delete _roadProfile;
+	delete _edgeRoadProfile;
 }
 
 
@@ -87,7 +81,7 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 
 	SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("intersectionEdge");
 	getSceneObject()->addChild(roadSceneObject);
-	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _roadProfile, {}, {}, false, roadSceneObject);
+	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
 	roadSceneObject->setIsActive(false);
 
 	_needSortRoads = true;
@@ -285,6 +279,89 @@ int RoadIntersectionComponent::getQuality()
 }
 
 
+void RoadIntersectionComponent::setEdgeRoadProfile(RRoadProfile* roadProfile)
+{
+	_originalEdgeRoadProfile = roadProfile;
+
+	updateEdgeRoadProfile();
+}
+
+
+void RoadIntersectionComponent::updateEdgeRoadProfile()
+{
+	if (_edgeRoadProfile != nullptr)
+	{
+		delete _edgeRoadProfile;
+	}
+
+	// copy of original road profile;
+	_edgeRoadProfile = new RRoadProfile(_originalEdgeRoadProfile->getPath(), _originalEdgeRoadProfile->getAuthor(), _originalEdgeRoadProfile->getName(), _originalEdgeRoadProfile->getComment(),
+										_originalEdgeRoadProfile->getIntersectionMaterial(), _originalEdgeRoadProfile->getIntersectionRoadY());
+
+	const std::vector<RoadLane>& roadLanes = _originalEdgeRoadProfile->getRoadLanes();
+	int numberOfRemovedLane = 0;
+	float offset = 0.0f;
+
+	for (int i = 0; i < roadLanes.size(); ++i)
+	{
+		if (roadLanes[i].r1 < 0.0f && roadLanes[i].r2 < 0.0f)
+		{
+			continue;
+		}
+		else if (numberOfRemovedLane < _edgeRoadProfileNumberOfLanesToRemove)
+		{
+			++numberOfRemovedLane;
+			continue;
+		}
+
+		if (offset == 0.0f)
+		{
+			offset = roadLanes[i].r1;
+		}
+
+		RoadLane newLane = roadLanes[i];
+		newLane.r1 = newLane.r1 - offset;
+		newLane.r2 = newLane.r2 - offset;
+		_edgeRoadProfile->getRoadLanes().push_back(newLane);
+	}
+
+	if (getSceneObject() != nullptr)
+	{
+		for (auto childObject : getSceneObject()->getChildren())
+		{
+			RoadObject* roadObject = dynamic_cast<RoadObject*>(childObject->getComponent(CT_ROAD_OBJECT));
+			if (roadObject != nullptr)
+			{
+				roadObject->setRoadProfile(_edgeRoadProfile);
+			}
+		}
+
+		_needRebuildIntersectionModel = true;
+		_needRecreateModel = true;
+	}
+}
+
+
+void RoadIntersectionComponent::setEdgeRoadProfileNumberOfLanesToRemove(unsigned int edgeRoadProfileNumberOfLanesToRemove)
+{
+	_edgeRoadProfileNumberOfLanesToRemove = edgeRoadProfileNumberOfLanesToRemove;
+
+	updateEdgeRoadProfile();
+}
+
+
+RRoadProfile* RoadIntersectionComponent::getEdgeRoadProfile()
+{
+	return _edgeRoadProfile;
+}
+
+
+unsigned int RoadIntersectionComponent::getEdgeRoadProfileNumberOfLanesToRemove()
+{
+	return _edgeRoadProfileNumberOfLanesToRemove;
+}
+
+
 void RoadIntersectionComponent::onAttachedToScenObject()
 {
 	if (GameConfig::getInstance().mode == GM_EDITOR)
@@ -343,18 +420,17 @@ void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<st
 float RoadIntersectionComponent::getRealWidth(int index, bool isRight)
 {
 	float width = _width[index];
+	float realWidth = width;
 	if (width == 0.0f)
 	{
 		if (isRight && _roads[index].connectionPointInRoadIndex == 1 ||
 			!isRight && _roads[index].connectionPointInRoadIndex == 0)
-			return _roads[index].road->getRoadProfile()->getMaxX();
+			realWidth = _roads[index].road->getRoadProfile()->getMaxX();
 		else
-			return -_roads[index].road->getRoadProfile()->getMinX();
+			realWidth = -_roads[index].road->getRoadProfile()->getMinX();
 	}
-	else
-	{
-		return width;
-	}
+
+	return realWidth - _edgeRoadProfile->getMaxX();
 }
 
 
@@ -565,6 +641,14 @@ void RoadIntersectionComponent::createPolygon()
 
 	LOG_DEBUG(LOG_VARIABLE(index));
 
+	if (_needRecreateModel)
+	{
+		delete _generatedModel;
+		_generatedModel = nullptr;
+
+		getSceneObject()->removeComponent(getSceneObject()->getComponent(CT_RENDER_OBJECT));
+	}
+
 	// meshes
 	const bool isModelExist = _generatedModel != nullptr;
 	const bool isGame = GameConfig::getInstance().mode == GM_GAME;
@@ -583,12 +667,7 @@ void RoadIntersectionComponent::createPolygon()
 	else
 	{
 		std::vector<Material*> materials;
-		materials.push_back(new Material);
-		materials[0]->shader = SOLID_MATERIAL;
-		materials[0]->shininess = 96.0f;
-		materials[0]->specularColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-		materials[0]->diffuseTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_col.jpg");
-		materials[0]->normalmapTexture = ResourceManager::getInstance().loadTexture("RoadProfiles/Road1/PavingStones_normal.jpg");
+		materials.push_back(new Material(*(_edgeRoadProfile->getIntersectionMaterial())));
 
 		StaticModelNode* modelNode = new StaticModelNode;
 		modelNode->name = "road intersection";
@@ -619,13 +698,15 @@ void RoadIntersectionComponent::createPolygon()
 
 				roadObject->setCustomConnectionPointData(0, glm::vec3(0.0f, 0.0f, 0.0f), roadsDirections[index]);
 				roadObject->setCustomConnectionPointData(1, glm::vec3(0.0f, 0.0f, 0.0f), roadsDirections[(index + 1) % _roads.size()]);
-				roadObject->buildModel();
+				roadObject->buildModel(!_needRecreateModel);
 
 				child->setIsActive(true);
 
 				++index;
 			}
 		}
+
+		_needRecreateModel = false;
 	}
 }
 

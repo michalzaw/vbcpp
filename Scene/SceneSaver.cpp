@@ -299,7 +299,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		{
 			saveObject(objectsElement, doc, sceneObject, objectDefinition);
 		}
-		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
+		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr && sceneObject->getParent() == nullptr)
 		{
 			saveRoad(roadsElement, doc, sceneObject);
 		}

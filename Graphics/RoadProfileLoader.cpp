@@ -46,11 +46,23 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	LOG_INFO("Comment: " + comment);
 
 
-	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment);
-
-
 	MaterialLoader matLoader;
 	matLoader.openFile(materialFullPath.c_str());
+
+
+	XMLElement* intersectionDataElement = profileElement->FirstChildElement("IntersectionData");
+
+	Material* intersectionMaterial = nullptr;
+	float intersectionRoadY = 0.0f;
+	if (intersectionDataElement != nullptr)
+	{
+		intersectionMaterial = matLoader.loadMaterial(intersectionDataElement->Attribute("material"), dirPath);
+		intersectionRoadY = toFloat(intersectionDataElement->Attribute("y"));
+	}
+
+
+	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment, intersectionMaterial, intersectionRoadY);
+
 
 	XMLElement* lanesElement = profileElement->FirstChildElement("Lanes");
 
