@@ -247,9 +247,9 @@ CrossroadComponent* GraphicsManager::addCrossRoad(std::vector<CrossroadConnectio
 }
 
 
-RoadIntersectionComponent* GraphicsManager::addRoadIntersection()
+RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode)
 {
-    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent(ResourceManager::getInstance().loadRoadProfile("Road1"));
+    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent(edgeRoadProfile, interactiveMode);
 
     _roadIntersectionComponents.push_back(roadIntersection);
 

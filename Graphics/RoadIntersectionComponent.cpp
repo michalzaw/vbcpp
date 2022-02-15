@@ -21,11 +21,12 @@ struct RoadWithAngle
 };
 
 
-RoadIntersectionComponent::RoadIntersectionComponent(RRoadProfile* edgeRadProfile)
+RoadIntersectionComponent::RoadIntersectionComponent(RRoadProfile* edgeRadProfile, bool interactiveMode)
 	: Component(CT_ROAD_INTERSECTION),
 	_quality(11),
 	//_length(10.0f), _width(5.0f), _arc(2.0f), _quality(11),
 	_originalEdgeRoadProfile(nullptr), _edgeRoadProfile(nullptr), _edgeRoadProfileNumberOfLanesToRemove(1),
+	_interactiveMode(interactiveMode),
 	_needRebuildIntersectionModel(false), _needRebuildConnectedRoad(false), _needSortRoads(false), _needRecreateModel(false), _modificationTimer(0.0f),
 	_inverseModelMatrix(1.0f), _inverseModelMatrixIsCalculated(false),
 	_generatedModel(nullptr),
@@ -85,7 +86,10 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
 	roadSceneObject->setIsActive(false);
 
-	_needSortRoads = true;
+	if (_interactiveMode)
+	{
+		_needSortRoads = true;
+	}
 }
 
 
@@ -180,7 +184,10 @@ void RoadIntersectionComponent::setWidth(float width)
 		_width[i] = width;
 	}
 
-	_needRebuildIntersectionModel = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+	}
 }
 
 
@@ -199,7 +206,10 @@ void RoadIntersectionComponent::setWidth(int index, float width, bool modifyAll)
 	}
 	_width[index] = width;
 
-	_needRebuildIntersectionModel = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+	}
 }
 
 
@@ -210,7 +220,10 @@ void RoadIntersectionComponent::setArc(float arc)
 		_arc[i] = arc;
 	}
 
-	_needRebuildIntersectionModel = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+	}
 }
 
 
@@ -229,7 +242,10 @@ void RoadIntersectionComponent::setArc(int index, float arc, bool modifyAll)
 	}
 	_arc[index] = arc;
 
-	_needRebuildIntersectionModel = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+	}
 }
 
 
@@ -237,7 +253,10 @@ void RoadIntersectionComponent::setQuality(int quality)
 {
 	_quality = quality;
 
-	_needRebuildIntersectionModel = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+	}
 }
 
 
@@ -337,8 +356,11 @@ void RoadIntersectionComponent::updateEdgeRoadProfile()
 			}
 		}
 
-		_needRebuildIntersectionModel = true;
-		_needRecreateModel = true;
+		if (_interactiveMode)
+		{
+			_needRebuildIntersectionModel = true;
+			_needRecreateModel = true;
+		}
 	}
 }
 
@@ -360,6 +382,18 @@ RRoadProfile* RoadIntersectionComponent::getEdgeRoadProfile()
 unsigned int RoadIntersectionComponent::getEdgeRoadProfileNumberOfLanesToRemove()
 {
 	return _edgeRoadProfileNumberOfLanesToRemove;
+}
+
+
+void RoadIntersectionComponent::setInteractiveMode(bool interactiveMode)
+{
+	_interactiveMode = interactiveMode;
+}
+
+
+bool RoadIntersectionComponent::isInteractiveMode()
+{
+	return _interactiveMode;
 }
 
 
@@ -504,6 +538,7 @@ glm::vec3 RoadIntersectionComponent::transformVectorToLocalSpace(const glm::vec3
 
 void RoadIntersectionComponent::createPolygon()
 {
+	LOG_DEBUG("create polygon");
 	std::vector<RoadConnectionPointData*> temp(2, nullptr);
 
 	glm::vec3 centerPoint = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -743,8 +778,11 @@ RStaticModel* RoadIntersectionComponent::getModel()
 
 void RoadIntersectionComponent::needRebuild()
 {
-	_needRebuildIntersectionModel = true;
-	_needSortRoads = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+		_needSortRoads = true;
+	}
 
 	LOG_DEBUG("needRebuild");
 }
@@ -757,8 +795,11 @@ void RoadIntersectionComponent::needRebuildConnectedRoad()
 		_roads[i].road->needRebuildRoad();
 	}*/
 
-	_needRebuildIntersectionModel = true;
-	_needRebuildConnectedRoad = true;
+	if (_interactiveMode)
+	{
+		_needRebuildIntersectionModel = true;
+		_needRebuildConnectedRoad = true;
+	}
 
 	LOG_DEBUG("needRebuildConnectedRoad");
 }
@@ -777,7 +818,7 @@ void RoadIntersectionComponent::changedTransform()
 
 void RoadIntersectionComponent::update(float deltaTime)
 {
-	if (GameConfig::getInstance().mode == GM_GAME)
+	if (!_interactiveMode)
 	{
 		return;
 	}

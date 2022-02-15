@@ -339,6 +339,10 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 	{
 		//roadIntersection->sortConnectedRoads();
 		roadIntersection->createPolygon();
+		if (GameConfig::getInstance().mode == GM_EDITOR)
+		{
+			roadIntersection->setInteractiveMode(true);
+		}
 
 		std::list<RStaticModel*> models;
 		models.push_back(roadIntersection->getModel());
@@ -586,7 +590,7 @@ void SceneLoader::loadRoadIntersection(tinyxml2::XMLElement* roadIntersectionEle
 		SceneObject* roadIntersectionSceneObject = _sceneManager->addSceneObject(name);
 		roadIntersectionSceneObject->setPosition(position);
 
-		RoadIntersectionComponent* roadIntersectionComponent = _sceneManager->getGraphicsManager()->addRoadIntersection();
+		RoadIntersectionComponent* roadIntersectionComponent = _sceneManager->getGraphicsManager()->addRoadIntersection(ResourceManager::getInstance().loadRoadProfile("Road1"));
 		roadIntersectionComponent->setQuality(quality);
 
 		roadIntersectionSceneObject->addComponent(roadIntersectionComponent);

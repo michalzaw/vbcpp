@@ -830,7 +830,7 @@ namespace vbEditor
 				if (ImGui::MenuItem("Add new road intersection", NULL))
 				{
 					SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
-					sceneObject->addComponent(_graphicsManager->addRoadIntersection());
+					sceneObject->addComponent(_graphicsManager->addRoadIntersection(ResourceManager::getInstance().loadRoadProfile("Road1"), true));
 
 					setSelectedSceneObject(sceneObject);
 				}

@@ -40,6 +40,8 @@ class RoadIntersectionComponent final : public Component
 		RRoadProfile* _edgeRoadProfile;
 		unsigned int _edgeRoadProfileNumberOfLanesToRemove;		// liczba lane ktore beda odrzucane przy tworzeniu krawedzi skrzyzowania, patrzac od osi jezdni. Default = 1
 
+		bool _interactiveMode;
+
 		bool _needRebuildIntersectionModel;
 		bool _needRebuildConnectedRoad;
 		bool _needSortRoads;
@@ -65,7 +67,7 @@ class RoadIntersectionComponent final : public Component
 		void updateEdgeRoadProfile();
 
 	public:
-		RoadIntersectionComponent(RRoadProfile* roadProfile);
+		RoadIntersectionComponent(RRoadProfile* edgeRadProfile, bool interactiveMode);
 		virtual ~RoadIntersectionComponent();
 
 		void connectRoad(RoadObject* roadObject, int connectionPointInRoadIndex);
@@ -89,6 +91,9 @@ class RoadIntersectionComponent final : public Component
 		void setEdgeRoadProfileNumberOfLanesToRemove(unsigned int edgeRoadProfileNumberOfLanesToRemove);
 		RRoadProfile* getEdgeRoadProfile();
 		unsigned int getEdgeRoadProfileNumberOfLanesToRemove();
+
+		void setInteractiveMode(bool interactiveMode);
+		bool isInteractiveMode();
 
 		void createPolygon();
 

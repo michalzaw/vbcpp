@@ -95,7 +95,7 @@ class GraphicsManager
 		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
-        RoadIntersectionComponent* addRoadIntersection();
+        RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
