@@ -10,12 +10,14 @@
 struct RoadSegment;
 
 
+// todo: zmienic nazwe - juz nie tylko road
 namespace RoadManipulator
 {
 	enum class RoadType
 	{
 		ARC,
-		BEZIER_CURVE
+		BEZIER_CURVE,
+		POLYGON
 	};
 
 	// call BeginFrame right after ImGui_XXXX_NewFrame();

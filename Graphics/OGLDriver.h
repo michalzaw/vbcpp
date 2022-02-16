@@ -29,6 +29,7 @@ class OGLDriver
         //std::vector<RShader*> _shaderList;
 
         static const int VBO_SIZE = 12582912;       // 12MB = 12 * 1024 * 1024B
+        static const GLuint PRIMITIVE_RESTART_INDEX = 0xFFFFFF;
 
         std::vector<VAO*> _vaoList;
         std::vector<VBO*> _vboList;

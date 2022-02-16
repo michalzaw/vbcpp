@@ -17,7 +17,7 @@ uniform mat4 LightSpaceMatrix[CASCADES_COUNT];
 
 uniform float time;
 
-out vec3 Position;
+out vec3 PositionVert;
 out vec2 TexCoord;
 out vec3 Normal;
 #ifdef NORMALMAPPING
@@ -26,6 +26,9 @@ out vec3 Normal;
 #endif
 out vec4 PositionLightSpace[CASCADES_COUNT];
 out float ClipSpacePositionZ;
+#ifdef DECALS
+out vec4 ClipSpacePosition;
+#endif
 
 void main()
 {
@@ -40,7 +43,7 @@ void main()
 
 	gl_Position = MVP * vec4(pos, 1.0f);
 
-	Position = (ModelMatrix * vec4(pos, 1.0f)).xyz;
+	PositionVert = (ModelMatrix * vec4(pos, 1.0f)).xyz;
 	TexCoord = VertexUV;
 
 //#ifdef SOLID
@@ -58,4 +61,8 @@ void main()
 	}
 	
 	ClipSpacePositionZ = gl_Position.z;
+
+#ifdef DECALS
+	ClipSpacePosition = gl_Position;
+#endif
 }

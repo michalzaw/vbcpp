@@ -1,28 +1,10 @@
 #include "Roads.h"
 
+#include "ModelGenerator.h"
+
 #include "../Game/GameConfig.h"
 
 #include "../Utils/BezierCurvesUtils.h"
-
-
-glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int indicesCountInAllMeshes, unsigned int lanesCount)
-{
-	glm::vec3* collisionMesh = new glm::vec3[indicesCountInAllMeshes];
-	int counter = 0;
-	for (int i = 0; i < lanesCount; ++i)
-	{
-		unsigned int indicesCount = lanesIndicesArray[i].size();
-
-		for (int j = 0; j < indicesCount; ++j)
-		{
-			collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
-		}
-
-		counter += indicesCount;
-	}
-
-	return collisionMesh;
-}
 
 
 // Current stable
@@ -353,27 +335,13 @@ RStaticModel* createRoadModel(std::vector<RoadLane>& roadLanes, std::vector<glm:
 			indices[j] = lanesIndicesArray[i][j];
 		}
 
-		if (oldModel == NULL)
-		{
-			if (GameConfig::getInstance().mode == GM_GAME)
-			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader);
-			}
-			else // GM_EDITOR
-			{
-				// vbo for ~ 4600 vertices
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, false, 1024 * 1024, 1024 * 1024, false);
-			}
-		}
-		else
-		{
-			meshes[i].updateMeshData(vertices, verticesCount, indices, indicesCount);
-		}
+		// vbo for ~ 4600 vertices in GM_EDITOR or shared vbo in GM_GAME
+		meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, GameConfig::getInstance().mode == GM_GAME, 1024 * 1024, 1024 * 1024, false);
 	}
 
 
 	// collistion mesh
-	glm::vec3* collisionMesh = generateCollistionMesh(lanesIndicesArray, meshes, indicesCountInAllMeshes, lanesCount);
+	glm::vec3* collisionMesh = ModelGenerator::generateCollistionMesh(meshes, lanesCount, indicesCountInAllMeshes);
 
 
 	RStaticModel* model;

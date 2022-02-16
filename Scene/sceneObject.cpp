@@ -5,8 +5,9 @@
 
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
-	: _parent(parent),
-	_id(0), _name(name), _isActive(true),
+    : _parent(parent),
+    _id(0), _name(name), _isActive(true),
+    _flags(0),
 	_objectDefinition(objectDefinition),
     _sceneManager(sceneManager),
     _rotationMode(RM_QUATERNION),
@@ -96,6 +97,18 @@ SceneObject::~SceneObject()
 			case CT_CAMERA_CONTROL:
 				_sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
 				break;
+
+            case CT_SHAPE_POLYGON:
+                delete* i;
+                break;
+
+            case CT_CROSSROAD:
+                _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(*i));
+                break;
+
+            case CT_ROAD_INTERSECTION:
+                _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                break;
 
         }
     }
@@ -224,6 +237,17 @@ void SceneObject::removeAllChildren()
 }
 
 
+void SceneObject::removeAllChildrenFromScene()
+{
+    for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
+    {
+        _sceneManager->removeChildSceneObject(*i);
+    }
+
+    _childrens.clear();
+}
+
+
 std::list<SceneObject*>& SceneObject::getChildren()
 {
     return _childrens;
@@ -274,15 +298,15 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_PHYSICAL_BODY:
-                    _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(*i));
+                    _sceneManager->getPhysicsManager()->removePhysicalBody(static_cast<PhysicalBody*>(component));
                     break;
 
                 case CT_SOUND:
-                    _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(*i));
+                    _sceneManager->getSoundManager()->removeSoundComponent(dynamic_cast<SoundComponent*>(component));
                     break;
 
                 case CT_TREE_COMPONENT:
-                    delete *i;
+                    delete component;
                     break;
 
                 case CT_GRASS:
@@ -290,32 +314,44 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_BUS_STOP:
-                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
+                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(component));
                     break;
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:
-                    _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeEnvironmetnCaptureComponent(static_cast<EnvironmentCaptureComponent*>(component));
                     break;
 
                 case CT_MIRROR:
-                    _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeMirrorComponent(static_cast<MirrorComponent*>(component));
                     break;
 
                 case CT_CLICKABLE_OBJECT:
-                    _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(*i));
+                    _sceneManager->getGraphicsManager()->removeClickableObject(static_cast<ClickableObject*>(component));
                     break;
 
 				case CT_SKY:
-                    _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(*i));
+                    _sceneManager->getGraphicsManager()->removeSky(static_cast<Sky*>(component));
 					break;
 
 				case CT_DISPLAY:
-                    _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(*i));
+                    _sceneManager->getGraphicsManager()->removeDisplayComponent(static_cast<DisplayComponent*>(component));
 					break;
 
 				case CT_CAMERA_CONTROL:
-                    _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(*i));
+                    _sceneManager->getGameLogicSystem()->removeCameraControlComponent(static_cast<CameraControlComponent*>(component));
 					break;
+
+                case CT_SHAPE_POLYGON:
+                    delete component;
+                    break;
+
+                case CT_CROSSROAD:
+                    _sceneManager->getGraphicsManager()->removeCrossroadComponent(static_cast<CrossroadComponent*>(component));
+                    break;
+
+                case CT_ROAD_INTERSECTION:
+                    _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(component));
+                    break;
 
             }
 
@@ -375,6 +411,24 @@ bool SceneObject::isActive()
         return _parent->isActive() && _isActive;
 
     return _isActive;
+}
+
+
+void SceneObject::setFlags(unsigned int flags)
+{
+    _flags = flags;
+}
+
+
+void SceneObject::addFlag(SceneObjectFlags flag)
+{
+    _flags = _flags | flag;
+}
+
+
+unsigned int SceneObject::getFlags()
+{
+    return _flags;
 }
 
 

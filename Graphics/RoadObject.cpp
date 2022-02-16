@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "CrossroadComponent.h"
+#include "RoadIntersectionComponent.h"
 #include "RoadGenerator.h"
 
 #include "../Scene/SceneObject.h"
@@ -11,8 +12,8 @@
 #include "../Utils/Logger.h"
 
 
-RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
-	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2)
+RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
+	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 	
@@ -21,8 +22,8 @@ RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, std::vecto
 }
 
 
-RoadObject::RoadObject(RRoadProfile* _roadProfile, std::vector<glm::vec3>& points, bool buildModelAfterCreate)
-	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2)
+RoadObject::RoadObject(RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, bool buildModelAfterCreate)
+	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 
@@ -38,36 +39,60 @@ RoadObject::~RoadObject()
 	{
 		delete _modelsDatas[0].model;
 	}
+
+	setConnectionPoint(0, nullptr);
+	setConnectionPoint(1, nullptr);
+}
+
+
+void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoints)
+{
+	if (_connectionPoints[0].roadIntersectionComponent != nullptr)
+	{
+		float length = 0.0f;
+		int i;
+		for (i = 0; i < curvePoints.size() - 2; ++i)
+		{
+			length += glm::distance(curvePoints[i], curvePoints[i + 1]);
+			if (length >= _marginBegin)
+			{
+				break;
+			}
+		}
+
+		curvePoints.erase(curvePoints.begin(), curvePoints.begin() + i);
+	}
+
+	if (_connectionPoints[1].roadIntersectionComponent != nullptr)
+	{
+		float length = 0.0f;
+		int i;
+		for (i = 0; i < curvePoints.size() - 2; ++i)
+		{
+			length += glm::distance(curvePoints[curvePoints.size() - i - 1], curvePoints[curvePoints.size() - i - 2]);
+			if (length >= _marginEnd)
+			{
+				break;
+			}
+		}
+
+		curvePoints.erase(curvePoints.end() - i, curvePoints.end());
+	}
+}
+
+
+bool RoadObject::isConnectionExist(int index)
+{
+	return _connectionPoints[index].crossroadComponent != nullptr || _connectionPoints[index].roadIntersectionComponent != nullptr;
 }
 
 
 void RoadObject::buildModel(bool reuseExistingModel)
 {
-	
-	std::vector<RoadConnectionPointData*> connectionPointsData;
-	for (int i = 0; i < 2; ++i)
-	{
-		if (_connectionPoints[i].crossroadComponent != nullptr)
-		{
-			RoadConnectionPointData* data = new RoadConnectionPointData;
-
-			glm::vec3 pos = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).position;
-			data->position = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalPointToGlobal(pos);
-
-			glm::vec3 dir = _connectionPoints[i].crossroadComponent->getConnectionPoint(_connectionPoints[i].index).direction;
-			data->direction = _connectionPoints[i].crossroadComponent->getSceneObject()->transformLocalVectorToGlobal(dir);
-
-			connectionPointsData.push_back(data);
-		}
-		else
-		{
-			connectionPointsData.push_back(nullptr);
-		}
-	}
-
 	if (_modelsDatas[0].modelRootNode != nullptr)
 	{
 		delete _modelsDatas[0].modelRootNode;
+		_modelsDatas[0].modelRootNode = nullptr;
 	}
 
 	if (!reuseExistingModel && _modelsDatas[0].model != nullptr)
@@ -78,28 +103,27 @@ void RoadObject::buildModel(bool reuseExistingModel)
 
 	if (_roadType == RoadType::LINES_AND_ARC)
 	{
-		buildModelLinesAndArcMode(connectionPointsData, reuseExistingModel);
+		buildModelLinesAndArcMode(_connectionPointsData);
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		buildModelBezierCurvesMode(connectionPointsData, reuseExistingModel);
+		buildModelBezierCurvesMode(_connectionPointsData);
 	}
-
-	for (int i = 0; i < 2; ++i)
+	else if (_roadType == RoadType::POINTS)
 	{
-		if (connectionPointsData[i] != nullptr)
-			delete connectionPointsData[i];
+		auto tempPoints = _points;
+		buildModelPoints(tempPoints, _connectionPointsData);
 	}
 }
 
 
-void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
 	setModel(createRoadModel(_roadProfile->getRoadLanes(), _points, _segments, connectionPointsData, _modelsDatas[0].model));
 }
 
 
-void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData, bool reuseExistingModel)
+void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
@@ -137,7 +161,15 @@ void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*
 		}
 	}
 
-	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), _curvePoints, connectionPointsData, _modelsDatas[0].model));
+	buildModelPoints(_curvePoints, connectionPointsData);
+}
+
+
+void RoadObject::buildModelPoints(std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData)
+{
+	cutCurvePointsToIntersection(curvePoints);
+
+	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), curvePoints, connectionPointsData, _modelsDatas[0].model));
 }
 
 
@@ -327,8 +359,8 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 
 	if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		if (index == 0 && _connectionPoints[0].crossroadComponent != nullptr ||
-			index == _points.size() - 1 && _connectionPoints[1].crossroadComponent != nullptr)
+		if (index == 0 && isConnectionExist(0) ||
+			index == _points.size() - 1 && isConnectionExist(1))
 		{
 			return;
 		}
@@ -368,6 +400,16 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 				_points[index + 2] = _points[index + 1] - direction * length;
 			}
 		}
+
+		//rebuild road intersections
+		if (_connectionPoints[0].roadIntersectionComponent != nullptr && index < 5)
+		{
+			_connectionPoints[0].roadIntersectionComponent->needRebuild();
+		}
+		if (_connectionPoints[1].roadIntersectionComponent != nullptr && index > static_cast<int>(_points.size()) - 6)
+		{
+			_connectionPoints[1].roadIntersectionComponent->needRebuild();
+		}
 	}
 
 	_points[index] = newPosition;
@@ -383,16 +425,74 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 	{
 		_connectionPoints[index].crossroadComponent->disconnectRoad(_connectionPoints[index].index, this);
 	}
+	if (_connectionPoints[index].roadIntersectionComponent != nullptr)
+	{
+		_connectionPoints[index].roadIntersectionComponent->disconnectRoad(this, index);
+	}
 
 	if (crossroadComponent != nullptr)
 	{
 		crossroadComponent->connectRoad(indexInCrossroad, this);
 	}
 
+	_connectionPoints[index].roadIntersectionComponent = nullptr;
 	_connectionPoints[index].crossroadComponent = crossroadComponent;
 	_connectionPoints[index].index = indexInCrossroad;
 
 	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		setConnectedPointPosition(index);
+	}
+
+	// build connection point data
+	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		if (_connectionPointsData[index] == nullptr)
+		{
+			_connectionPointsData[index] = new RoadConnectionPointData;
+		}
+
+		glm::vec3 pos = _connectionPoints[index].crossroadComponent->getConnectionPoint(_connectionPoints[index].index).position;
+		_connectionPointsData[index]->position = _connectionPoints[index].crossroadComponent->getSceneObject()->transformLocalPointToGlobal(pos);
+
+		glm::vec3 dir = _connectionPoints[index].crossroadComponent->getConnectionPoint(_connectionPoints[index].index).direction;
+		_connectionPointsData[index]->direction = _connectionPoints[index].crossroadComponent->getSceneObject()->transformLocalVectorToGlobal(dir);
+	}
+	else
+	{
+		if (_connectionPointsData[index] != nullptr)
+		{
+			delete _connectionPointsData[index];
+		}
+		_connectionPointsData[index] = nullptr;
+	}
+}
+
+
+void RoadObject::setConnectionPointWithRoadIntersection(int index, RoadIntersectionComponent* roadIntersectionComponent)
+{
+	if (index >= 2)
+		return;
+
+	if (_connectionPoints[index].crossroadComponent != nullptr)
+	{
+		_connectionPoints[index].crossroadComponent->disconnectRoad(_connectionPoints[index].index, this);
+	}
+	if (_connectionPoints[index].roadIntersectionComponent != nullptr)
+	{
+		_connectionPoints[index].roadIntersectionComponent->disconnectRoad(this, index);
+	}
+
+	if (roadIntersectionComponent != nullptr)
+	{
+		roadIntersectionComponent->connectRoad(this, index);
+	}
+
+	_connectionPoints[index].roadIntersectionComponent = roadIntersectionComponent;
+	_connectionPoints[index].crossroadComponent = nullptr;
+	_connectionPoints[index].index = 0;
+
+	if (_connectionPoints[index].roadIntersectionComponent != nullptr)
 	{
 		setConnectedPointPosition(index);
 	}
@@ -405,10 +505,51 @@ RoadConnectionPoint& RoadObject::getConnectionPoint(int index)
 }
 
 
+void RoadObject::setCustomConnectionPointData(int index, const glm::vec3 pos, const glm::vec3 dir)
+{
+	if (index >= 2)
+		return;
+
+	if (_connectionPointsData[index] == nullptr)
+	{
+		_connectionPointsData[index] = new RoadConnectionPointData;
+	}
+
+	_connectionPointsData[index]->position = pos;
+	_connectionPointsData[index]->direction = dir;
+}
+
+
+void RoadObject::setMarginBegin(float marginBegin)
+{
+	_marginBegin = marginBegin;
+}
+
+
+void RoadObject::setMarginEnd(float marginEnd)
+{
+	_marginEnd = marginEnd;
+}
+
+
+float RoadObject::getMarginBegin()
+{
+	return _marginBegin;
+}
+
+
+float RoadObject::getMarginEnd()
+{
+	return _marginEnd;
+}
+
+
 void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 {
 	CrossroadComponent* crossroadComponent = _connectionPoints[connectionPointIndex].crossroadComponent;
 	int indexInCrossroad = _connectionPoints[connectionPointIndex].index;
+
+	RoadIntersectionComponent* roadIntersectionComponent = _connectionPoints[connectionPointIndex].roadIntersectionComponent;
 
 	if (_roadType == RoadType::LINES_AND_ARC)
 	{
@@ -422,7 +563,9 @@ void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 			pointIndex = _points.size() - 1;
 		}
 
-		_points[pointIndex] = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
+		_points[pointIndex] = crossroadComponent != nullptr ?
+			crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad) :
+			roadIntersectionComponent->getSceneObject()->getPosition();
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
@@ -439,13 +582,20 @@ void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 			controlPointIndex = pointIndex - 1;
 		}
 
-		glm::vec3 newPosition = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
-		glm::vec3 direction = crossroadComponent->getGlobalDirectionOfConnectionPoint(indexInCrossroad);
+		if (crossroadComponent != nullptr)
+		{
+			glm::vec3 newPosition = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
+			glm::vec3 direction = crossroadComponent->getGlobalDirectionOfConnectionPoint(indexInCrossroad);
 
-		float length = glm::length(_points[pointIndex] - _points[controlPointIndex]);
+			float length = glm::length(_points[pointIndex] - _points[controlPointIndex]);
 
-		_points[pointIndex] = newPosition;
-		_points[controlPointIndex] = _points[pointIndex] + length * direction;
+			_points[pointIndex] = newPosition;
+			_points[controlPointIndex] = _points[pointIndex] + length * direction;
+		}
+		else
+		{
+			_points[pointIndex] = roadIntersectionComponent->getSceneObject()->getPosition();
+		}
 	}
 }
 
@@ -454,9 +604,15 @@ void RoadObject::resetConnectedPointPositions()
 {
 	for (int i = 0; i < 2; ++i)
 	{
-		if (_connectionPoints[i].crossroadComponent != nullptr)
+		if (isConnectionExist(i))
 		{
 			setConnectedPointPosition(i);
 		}
 	}
+}
+
+
+const std::vector<glm::vec3>& RoadObject::getCurvePoints()
+{
+	return _curvePoints;
 }

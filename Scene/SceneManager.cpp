@@ -77,8 +77,41 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
             {
                 for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
-                    removeSceneObject(*j);
+                    removeChildSceneObject(*j);
                 }
+            }
+            else
+            {
+                object->removeAllChildren();
+            }
+
+            object->removeParent();
+            delete object;
+
+            return;
+        }
+    }
+}
+
+
+void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren)
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _sceneObjects.erase(i);
+
+            if (removeChildren)
+            {
+                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                {
+                    removeChildSceneObject(*j);
+                }
+            }
+            else
+            {
+                object->removeAllChildren();
             }
 
             delete object;
@@ -102,7 +135,7 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
             {
                 for (std::list<SceneObject*>::iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
                 {
-                    removeSceneObject(*j);
+                    removeChildSceneObject(*j);
                 }
             }
 

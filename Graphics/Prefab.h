@@ -73,7 +73,7 @@ class Cube : public Prefab
             {
                 vertices[i].position = positions[i];
                 vertices[i].texCoord = texCoords[i % 4];
-                vertices[i].normal = normals[i / 5];
+                vertices[i].normal = normals[i / 4];
             }
 
 

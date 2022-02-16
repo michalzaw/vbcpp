@@ -14,6 +14,8 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     LOG_DEBUG("*** RenderObject: Konstruktor");
 	
 	_modelsDatas.resize(1);
+    _modelsDatas[0].model = NULL;
+    _modelsDatas[0].modelRootNode = NULL;
 
     if (model != NULL)
     {
@@ -136,12 +138,18 @@ void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>&
 
     _modelsDatas[lod].model = model;
 
+    if (_modelsDatas[lod].modelRootNode != nullptr)
+    {
+        delete _modelsDatas[lod].modelRootNode;
+    }
     _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this);
 
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
         //updateLocalMaterialFromModel(i, lod);
     }
+
+    _isCalculatedAABB = false;
 }
 
 

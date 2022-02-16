@@ -13,6 +13,9 @@
 
 #include "RoadTools.h"
 
+#include "../../Graphics/ShapePolygonComponent.h"
+
+
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
 {
@@ -488,6 +491,105 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 }
 
 
+void showShapePolygonComponentDetails(ShapePolygonComponent* component)
+{
+	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of points: %d", component->getPoints().size());
+
+		if (ImGui::Button("Generate Triangle Mesh"))
+		{
+			component->buildAndCreateRenderObject(true);
+		}
+		if (ImGui::Button("Generate Triangle Mesh (without mesh mender)"))
+		{
+			component->buildAndCreateRenderObject(false);
+		}
+	}
+}
+
+
+void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
+{
+	if (ImGui::CollapsingHeader("Road intersection", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		for (const auto& connectedRoad : component->getConnectedRoads())
+		{
+			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
+		}
+
+		ImGui::Separator();
+
+		static bool modifyAllConnectedRoads = true;
+		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
+
+		int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
+		for (int i = 0; i < numberOfRoads; ++i)
+		{
+			ImGui::PushID(i);
+
+			ImGui::Text("#%d", i + 1);
+
+			float length = component->getLength(i);
+			if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+			{
+				component->setLength(i, length, modifyAllConnectedRoads);
+			}
+			float width = component->getWidth(i);
+			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
+			{
+				component->setWidth(i, width, modifyAllConnectedRoads);
+			}
+			float arc = component->getArc(i);
+			if (ImGui::DragFloat("Arc", &arc, 0.1f, 0.0f, 20.0f))
+			{
+				component->setArc(i, arc, modifyAllConnectedRoads);
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::Separator();
+
+		float quality = component->getQuality();
+		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
+		{
+			component->setQuality(quality);
+		}
+
+		ImGui::Separator();
+
+		int roadProfilesCurrentItem = 0;
+		std::vector<const char*> roadProfilesComboItems;
+		for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
+		{
+			roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+
+			if (vbEditor::_availableRoadProfiles[i] == component->getEdgeRoadProfile()->getName())
+				roadProfilesCurrentItem = i;
+		}
+		if (ImGui::Combo("Edge road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
+		{
+			component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
+		}
+		int numberOfLanesToRemove = component->getEdgeRoadProfileNumberOfLanesToRemove();
+		if (ImGui::DragInt("Lanes to remove", &numberOfLanesToRemove, 1.0f, 1, 20))
+		{
+			component->setEdgeRoadProfileNumberOfLanesToRemove(numberOfLanesToRemove);
+		}
+
+		ImGui::Separator();
+
+
+		if (ImGui::Button("Generate polygon"))
+		{
+			component->createPolygon();
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
@@ -520,6 +622,12 @@ void showObjectProperties()
 				showRenderComponentDetails(renderComponent);
 			}
 
+			Terrain* terrain = dynamic_cast<Terrain*>(vbEditor::_selectedSceneObject->getComponent(CT_TERRAIN));
+			if (terrain)
+			{
+				showRenderComponentDetails(terrain);
+			}
+
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
 			if (physicsComponent)
 			{
@@ -533,6 +641,18 @@ void showObjectProperties()
 			if (grassComponent)
 			{
 				showRenderComponentDetails(grassComponent);
+			}
+
+			ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+			if (shapePolygonComponent)
+			{
+				showShapePolygonComponentDetails(shapePolygonComponent);
+			}
+
+			RoadIntersectionComponent* roadIntersectionComponent = dynamic_cast<RoadIntersectionComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_INTERSECTION));
+			if (roadIntersectionComponent)
+			{
+				showRoadIntersectionComponentDetails(roadIntersectionComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -771,6 +891,14 @@ void showObjectProperties()
 
 
 				}
+			}
+			
+			ImGui::Separator();
+
+			if (ImGui::Button("Delete"))
+			{
+				vbEditor::_sceneManager->removeSceneObject(vbEditor::_selectedSceneObject, true);
+				vbEditor::_selectedSceneObject = nullptr;
 			}
 		}
 	}

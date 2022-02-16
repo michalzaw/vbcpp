@@ -219,6 +219,38 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 }
 
 
+void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject)
+{
+	XMLElement* objectElement = doc.NewElement("RoadIntersection");
+
+	objectElement->SetAttribute("name", sceneObject->getName().c_str());
+	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
+
+	RoadIntersectionComponent* roadIntersectionComponent = static_cast<RoadIntersectionComponent*>(sceneObject->getComponent(CT_ROAD_INTERSECTION));
+	const auto& connectedRoads = roadIntersectionComponent->getConnectedRoads();
+
+	objectElement->SetAttribute("quality", roadIntersectionComponent->getQuality());
+	objectElement->SetAttribute("profile", roadIntersectionComponent->getEdgeRoadProfile()->getName().c_str());
+
+	for (int i = 0; i < connectedRoads.size(); ++i)
+	{
+		const auto& road = connectedRoads[i];
+
+		XMLElement* roadElement = doc.NewElement("ConnectedRoad");
+
+		roadElement->SetAttribute("name", road.road->getSceneObject()->getName().c_str());
+		roadElement->SetAttribute("index", road.connectionPointInRoadIndex);
+		roadElement->SetAttribute("length", roadIntersectionComponent->getLength(i));
+		roadElement->SetAttribute("width", roadIntersectionComponent->getWidth(i));
+		roadElement->SetAttribute("arc", roadIntersectionComponent->getArc(i));
+
+		objectElement->InsertEndChild(roadElement);
+	}
+
+	roadsElement->InsertEndChild(objectElement);
+}
+
+
 void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
@@ -263,6 +295,11 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
+		if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
+		{
+			continue;
+		}
+
 		RObject* objectDefinition = sceneObject->getObjectDefinition();
 		if (objectDefinition != nullptr)
 		{
@@ -271,6 +308,10 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
 		{
 			saveRoad(roadsElement, doc, sceneObject);
+		}
+		else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
+		{
+			saveRoadIntersection(roadsElement, doc, sceneObject);
 		}
 		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
 		{

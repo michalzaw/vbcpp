@@ -25,7 +25,7 @@
 #include "../GUI/GUIRenderListElement.h"
 
 
-//#define DRAW_AABB
+#define DRAW_AABB
 
 
 enum UniformName
@@ -134,6 +134,7 @@ class Renderer
         bool _bloom;
 
 		Framebuffer* _defaultFramebuffer;
+		Framebuffer* _depthFramebuffer;
 
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
@@ -260,6 +261,8 @@ class Renderer
 
         void toogleRenderAABBFlag();
         void toogleRenderOBBFlag();
+		bool getAABBFlag();
+		bool getOBBFlag();
 
 		VBO* getQuadVbo();
 
