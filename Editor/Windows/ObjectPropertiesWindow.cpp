@@ -524,7 +524,7 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 		static bool modifyAllConnectedRoads = true;
 		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
 
-		int numberOfRoads = modifyAllConnectedRoads ? 1 : component->getConnectedRoads().size();
+		int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
 		for (int i = 0; i < numberOfRoads; ++i)
 		{
 			ImGui::PushID(i);
