@@ -650,12 +650,16 @@ namespace vbEditor
 				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
 				{
 					RenderObject* renderObject = *i;
+					if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
+					{
+						continue;
+					}
 					AABB* aabb = renderObject->getModel()->getAABB();
 					glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
 					float distance;
 					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
 					{
-						if (distance > 0.0f && distance < d && !(renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+						if (distance > 0.0f && distance < d)
 						{
 							selectedObject = renderObject->getSceneObject();
 							d = distance;

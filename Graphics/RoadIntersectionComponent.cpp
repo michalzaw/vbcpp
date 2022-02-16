@@ -51,6 +51,8 @@ RoadIntersectionComponent::~RoadIntersectionComponent()
 
 void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
+	LOG_DEBUG("Connect road");
+
 	if (!_isCreated)
 	{
 		return;
@@ -96,6 +98,8 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 
 void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int connectionPointInRoadIndex)
 {
+	LOG_DEBUG("Disconnect road");
+
 	if (!_isCreated)
 	{
 		return;
@@ -114,7 +118,7 @@ void RoadIntersectionComponent::disconnectRoad(RoadObject* roadObject, int conne
 
 			auto objectToRemoveIterator = std::next(getSceneObject()->getChildren().begin(), index);
 			if (GameConfig::getInstance().mode == GM_EDITOR) ++objectToRemoveIterator;
-			getSceneObject()->getChildren().erase(objectToRemoveIterator);
+			getSceneObject()->getSceneManager()->removeSceneObject(*objectToRemoveIterator);
 
 			break;
 		}
