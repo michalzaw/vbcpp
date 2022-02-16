@@ -526,6 +526,7 @@ namespace vbEditor
 
 	static bool _showDemoWindow = false;
 	static bool _showOpenDialogWindow = true;
+	static bool _addRoadIntersectionDialogWindow = false;
 	static bool _isCameraActive = false;
 	static bool _showObjectPropertyEditor = true;
 	static bool _showRoadTools = true;
@@ -827,13 +828,7 @@ namespace vbEditor
 				ImGui::Separator();
 				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
 				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
-				if (ImGui::MenuItem("Add new road intersection", NULL))
-				{
-					SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
-					sceneObject->addComponent(_graphicsManager->addRoadIntersection(ResourceManager::getInstance().loadRoadProfile("Road1"), true));
-
-					setSelectedSceneObject(sceneObject);
-				}
+				ImGui::MenuItem("Add new road intersection", NULL, &_addRoadIntersectionDialogWindow);
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
@@ -1034,6 +1029,23 @@ namespace vbEditor
 				roadRenderObject->setIsCastShadows(false);
 
 				setSelectedSceneObject(roadSceneObject);
+			}
+		}
+
+		static int currenProfiletSelection3 = 0;
+		if (_addRoadIntersectionDialogWindow)
+		{
+			if (openMapDialog("Add Road Intersection...", "Add", _availableRoadProfiles, currenProfiletSelection3))
+			{
+				_addRoadIntersectionDialogWindow = false;
+
+				std::string profileName = _availableRoadProfiles[currenProfiletSelection3];
+				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+
+				SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
+				sceneObject->addComponent(_graphicsManager->addRoadIntersection(roadProfile, true));
+
+				setSelectedSceneObject(sceneObject);
 			}
 		}
 
