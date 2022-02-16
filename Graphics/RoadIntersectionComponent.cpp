@@ -83,7 +83,8 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	SceneObject* roadSceneObject = getSceneObject()->getSceneManager()->addSceneObject("intersectionEdge");
 	roadSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
 	getSceneObject()->addChild(roadSceneObject);
-	getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
+	RoadObject* edgeRoadObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
+	edgeRoadObject->setIsCastShadows(false);
 	roadSceneObject->setIsActive(false);
 
 	if (_interactiveMode)
@@ -737,6 +738,7 @@ void RoadIntersectionComponent::createPolygon()
 		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP);
 
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
+		renderObject->setIsCastShadows(false);
 	}
 
 	{

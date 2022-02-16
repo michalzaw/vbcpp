@@ -230,6 +230,7 @@ void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxm
 	const auto& connectedRoads = roadIntersectionComponent->getConnectedRoads();
 
 	objectElement->SetAttribute("quality", roadIntersectionComponent->getQuality());
+	objectElement->SetAttribute("profile", roadIntersectionComponent->getEdgeRoadProfile()->getName().c_str());
 
 	for (int i = 0; i < connectedRoads.size(); ++i)
 	{

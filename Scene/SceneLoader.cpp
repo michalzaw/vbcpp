@@ -582,6 +582,7 @@ void SceneLoader::loadRoadIntersection(tinyxml2::XMLElement* roadIntersectionEle
 		std::string name = XmlUtils::getAttributeString(roadIntersectionElement, "name");
 		glm::vec3 position = XmlUtils::getAttributeVec3(roadIntersectionElement, "position");
 		int quality = XmlUtils::getAttributeIntOptional(roadIntersectionElement, "quality", 11);
+		std::string profileName = XmlUtils::getAttributeString(roadIntersectionElement, "profile");
 
 		LOG_INFO("==> SCENE OBJECT");
 		LOG_INFO("Name: " + name);
@@ -590,7 +591,8 @@ void SceneLoader::loadRoadIntersection(tinyxml2::XMLElement* roadIntersectionEle
 		SceneObject* roadIntersectionSceneObject = _sceneManager->addSceneObject(name);
 		roadIntersectionSceneObject->setPosition(position);
 
-		RoadIntersectionComponent* roadIntersectionComponent = _sceneManager->getGraphicsManager()->addRoadIntersection(ResourceManager::getInstance().loadRoadProfile("Road1"));
+		RRoadProfile* profile = ResourceManager::getInstance().loadRoadProfile(profileName);
+		RoadIntersectionComponent* roadIntersectionComponent = _sceneManager->getGraphicsManager()->addRoadIntersection(profile);
 		roadIntersectionComponent->setQuality(quality);
 
 		roadIntersectionSceneObject->addComponent(roadIntersectionComponent);
