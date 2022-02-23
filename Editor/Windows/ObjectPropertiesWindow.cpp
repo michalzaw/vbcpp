@@ -2,14 +2,14 @@
 
 #include <numeric>
 
-#include "../../ImGui/imGizmo.h"
+#include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
-#include "../../ImGui/imgui.h"
+#include "imgui.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
-#include "../../ImGui/imgui_internal.h"
+#include "imgui_internal.h"
 
 #include "RoadTools.h"
 
@@ -592,20 +592,10 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 
 void showObjectProperties()
 {
-	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
-
-	ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSizeConstraints(ImVec2(100, mainWindowSize.y - 18), ImVec2(500, mainWindowSize.y - 18));
-
-	ImGuiWindow* window = ImGui::GetCurrentWindow();
-
 	bool isOpened = true;
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 	if (ImGui::Begin("Object Properties", &isOpened, windowFlags))
 	{
-		ImVec2 windowSize = ImGui::GetWindowSize();
-		ImGui::SetWindowPos(ImVec2(mainWindowSize.x - windowSize.x, 18));
-
 		if (vbEditor::_selectedSceneObject)
 		{
 			showObjectNameEdit();

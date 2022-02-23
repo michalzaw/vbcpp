@@ -15,11 +15,10 @@
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
 
-#include "../ImGui/imgui.h"
-#include "../ImGui/imgui_impl_glfw.h"
-#include "../ImGui/imgui_impl_opengl3.h"
-#include "../ImGui/imGizmo.h"
-#include "../ImGui/imRoadTools.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
 #include "EditorContext.h"
@@ -753,6 +752,8 @@ namespace vbEditor
 		io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
 		io.Fonts->AddFontDefault();
 
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 		LoggerWindow::init();
 
 		return true;
@@ -955,6 +956,34 @@ namespace vbEditor
 	}
 
 
+	void drawMainDockSpace()
+	{
+		const ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
+		window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+		window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		window_flags |= ImGuiWindowFlags_NoBackground;
+
+		ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_PassthruCentralNode;
+
+		ImGui::Begin("DockSpace Window", nullptr, window_flags);
+
+		ImGui::PopStyleVar(3);
+
+		ImGuiID dockspace_id = ImGui::GetID("MainDockSpace");
+		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+
+		ImGui::End();
+	}
+
+
 	void renderGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
@@ -962,17 +991,18 @@ namespace vbEditor
 		ImGui::NewFrame();
 
 		ImGuizmo::BeginFrame();
-		ImRoadTools::BeginFrame();
 		RoadManipulator::BeginFrame();
 		AxisTool::BeginFrame();
 
 		if (_clickMode == CM_ADD_OBJECT)
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
+		drawMainDockSpace();
+
 		drawMainMenu();
 
 		if (_showDemoWindow)
-			ImGui::ShowTestWindow();
+			ImGui::ShowDemoWindow();
 
 		static int currentSelection = 0;
 		if (_showOpenDialogWindow)

@@ -281,7 +281,8 @@ namespace vbEditor
 
 		isOpen = true;
 
-		if (ImGui::Begin("Material editor", &isOpen))
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
+		if (ImGui::Begin("Material editor", &isOpen, windowFlags))
 		{
 			ImGui::PushID(currentMaterial);
 

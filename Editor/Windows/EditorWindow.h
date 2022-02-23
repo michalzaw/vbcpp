@@ -2,9 +2,9 @@
 #define EDITORWINDOW_H_INCLUDED
 
 
-#include "../../ImGui/imgui.h"
-#include "../../ImGui/imgui_impl_glfw.h"
-#include "../../ImGui/imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 
 #include "../EditorEvent.h"
 
