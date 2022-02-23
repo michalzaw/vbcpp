@@ -12,6 +12,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/MapInfoWindow.cpp
 	Editor/Windows/MaterialEditorWindow.cpp
 	Editor/Windows/GenerateObjectsAlongRoadWindow.cpp
+	Editor/Windows/LoggerWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
 	Editor/Utils/ObjectsGenerator.cpp
@@ -34,6 +35,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/MapInfoWindow.h
 	Editor/Windows/MaterialEditorWindow.h
 	Editor/Windows/GenerateObjectsAlongRoadWindow.h
+	Editor/Windows/LoggerWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
 	Editor/Utils/ObjectsGenerator.h

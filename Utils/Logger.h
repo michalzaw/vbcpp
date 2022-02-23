@@ -4,6 +4,7 @@
 
 #include <string>
 #include <fstream>
+#include <functional>
 
 #include "Strings.h"
 
@@ -34,6 +35,8 @@ class Logger final
 
         static std::ofstream* _logFile;
 
+        static std::vector<std::function<void(LogLevel, const std::string&)>> _customAppenders;
+
         static inline tm* getTime()
         {
             const time_t now = time(0);
@@ -46,6 +49,8 @@ class Logger final
 
         static void setLogLevel(LogLevel newLogLevel);
         static LogLevel getLogLevel();
+
+        static void addCustomAppender(const std::function<void(LogLevel, const std::string&)>& appender);
 
         static void logMessage(LogLevel level, const char* fileName, unsigned int line, const std::string& message);
 

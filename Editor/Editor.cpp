@@ -29,6 +29,7 @@
 #include "Windows/MapInfoWindow.h"
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongRoadWindow.h"
+#include "Windows/LoggerWindow.h"
 
 #include "../Graphics/ShapePolygonComponent.h"
 
@@ -726,6 +727,11 @@ namespace vbEditor
 
 	bool createWindow()
 	{
+		Logger::addCustomAppender([](LogLevel level, const std::string& logMessage)
+			{
+				LoggerWindow::addLog(level, logMessage + "\n");
+			});
+
 		if (!window.createWindow(_windowWidth, _windowHeight, 10, 40, false, true, false, true))
 		{
 			return false;
@@ -746,6 +752,8 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
 		io.Fonts->AddFontDefault();
+
+		LoggerWindow::init();
 
 		return true;
 	}
@@ -1146,6 +1154,7 @@ namespace vbEditor
 		AxisTool::SetRect(x, y, width, height);
 		AxisTool::Show(viewMatrix, _camera->getProjectionMatrix(), _camera->getDirection());
 
+		LoggerWindow::drawWindow();
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
