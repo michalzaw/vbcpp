@@ -1004,91 +1004,77 @@ namespace vbEditor
 		if (_showDemoWindow)
 			ImGui::ShowDemoWindow();
 
-		static int currentSelection = 0;
 		if (_showOpenDialogWindow)
 		{
-			if (openMapDialog("Open map...", "Open", _availableMaps, currentSelection))
-			{
-				_showOpenDialogWindow = false;
-				SceneLoader sceneLoader(_sceneManager);
-				sceneLoader.loadMap(_availableMaps[currentSelection]);
+			_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)
+				{
+					SceneLoader sceneLoader(_sceneManager);
+					sceneLoader.loadMap(_availableMaps[currentSelection]);
 
-				mapInfo.name = _availableMaps[currentSelection];
-				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+					mapInfo.name = _availableMaps[currentSelection];
+					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
-				Renderer::getInstance().rebuildStaticLighting();
-			}
+					Renderer::getInstance().rebuildStaticLighting();
+			});
 		}
 
-		static int currentObjectSelection = 0;
 		if (_addSceneObject)
 		{
-			if (openMapDialog("Add Scene Object...", "Add", _availableObjects, currentObjectSelection))
-			{
-				_addSceneObject = false;
+			_addSceneObject = openDialogWindow("Add Scene Object...", "Add", _availableObjects, [](int currentSelection)
+				{
+					std::string objName = _availableObjects[currentSelection];
 
-				std::string objName = _availableObjects[currentObjectSelection];
-				
-				_clickMode = CM_ADD_OBJECT;
-				_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
-			}
+					_clickMode = CM_ADD_OBJECT;
+					_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
+				});
 		}
 
-		static int currenProfiletSelection = 0;
 		if (_addRoadDialogWindow)
 		{
-			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection))
-			{
-				_addRoadDialogWindow = false;
+			_addRoadDialogWindow = openDialogWindow("Add Road...", "Add", _availableRoadProfiles, [](int currentSelection)
+				{
+					_clickMode = CM_ROAD_EDIT;
 
-				_clickMode = CM_ROAD_EDIT;
+					std::string profileName = _availableRoadProfiles[currentSelection];
+					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
-				std::string profileName = _availableRoadProfiles[currenProfiletSelection];
-				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+					SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+					RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+					roadRenderObject->setIsCastShadows(false);
 
-				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-				roadRenderObject->setIsCastShadows(false);
-
-				setSelectedSceneObject(roadSceneObject);
-			}
+					setSelectedSceneObject(roadSceneObject);
+				});
 		}
 
-		static int currenProfiletSelection2 = 0;
 		if (_addRoad2DialogWindow)
 		{
-			if (openMapDialog("Add Road...", "Add", _availableRoadProfiles, currenProfiletSelection2))
-			{
-				_addRoad2DialogWindow = false;
+			_addRoad2DialogWindow = openDialogWindow("Add Road...", "Add", _availableRoadProfiles, [](int currentSelection)
+				{
+					_clickMode = CM_ROAD_EDIT;
 
-				_clickMode = CM_ROAD_EDIT;
+					std::string profileName = _availableRoadProfiles[currentSelection];
+					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
-				std::string profileName = _availableRoadProfiles[currenProfiletSelection2];
-				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+					SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+					RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+					roadRenderObject->setIsCastShadows(false);
 
-				SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-				RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-				roadRenderObject->setIsCastShadows(false);
-
-				setSelectedSceneObject(roadSceneObject);
-			}
+					setSelectedSceneObject(roadSceneObject);
+				});
 		}
 
-		static int currenProfiletSelection3 = 0;
 		if (_addRoadIntersectionDialogWindow)
 		{
-			if (openMapDialog("Add Road Intersection...", "Add", _availableRoadProfiles, currenProfiletSelection3))
-			{
-				_addRoadIntersectionDialogWindow = false;
+			_addRoadIntersectionDialogWindow = openDialogWindow("Add Road Intersection...", "Add", _availableRoadProfiles, [](int currentSelection)
+				{
+					std::string profileName = _availableRoadProfiles[currentSelection];
+					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
 
-				std::string profileName = _availableRoadProfiles[currenProfiletSelection3];
-				RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
+					sceneObject->addComponent(_graphicsManager->addRoadIntersection(roadProfile, true));
 
-				SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
-				sceneObject->addComponent(_graphicsManager->addRoadIntersection(roadProfile, true));
-
-				setSelectedSceneObject(sceneObject);
-			}
+					setSelectedSceneObject(sceneObject);
+				});
 		}
 
 		if (_saveMap)

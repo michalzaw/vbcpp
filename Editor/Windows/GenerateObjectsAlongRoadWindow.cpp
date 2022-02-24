@@ -66,17 +66,15 @@ namespace vbEditor
 		ImGui::DragFloat3("Range of random rotation offset", glm::value_ptr(_generatorData.rotationOffset), 0.1f, 0.0f, 360.0f);
 	}
 
-	bool showAddObjectWindow(const std::vector<std::string>& availableObjects)
+	void showAddObjectWindow(const std::vector<std::string>& availableObjects)
 	{
 		static int currentItem = 0;
-		if (openMapDialog("Add Object...", "Add", availableObjects, currentItem))
-		{
-			_generatorData.objectsNames.push_back(availableObjects[currentItem]);
+		openDialogWindow("Add Object...", "Add", availableObjects, [availableObjects](int currentItem)
+			{
+				_generatorData.objectsNames.push_back(availableObjects[currentItem]);
 
-			return false;
-		}
-
-		return true;
+				_showAddObjectWindow = false;
+			});
 	}
 
 	bool generateObjectsAlongRoadWindow(const std::vector<std::string>& availableObjects, RoadObject* roadComponent)
@@ -104,7 +102,7 @@ namespace vbEditor
 
 		if (_showAddObjectWindow)
 		{
-			_showAddObjectWindow = showAddObjectWindow(availableObjects);
+			showAddObjectWindow(availableObjects);
 		}
 
 		return isOpen;
