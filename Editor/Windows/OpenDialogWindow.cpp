@@ -24,9 +24,10 @@ bool openDialogWindow(const std::string& title, const std::string& buttonOkTitle
 		map_list.push_back(items[i].c_str());
 	}
 
+	bool isOpend = true;
 	if (ImGui::BeginPopupModal(title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
-		ImGui::ListBox("", &currentItem, map_list.data(), items_count, 5);
+		ImGui::ListBox("##listBox", &currentItem, map_list.data(), items_count, 5);
 
 		if (ImGui::Button(buttonOkTitle.c_str(), ImVec2(120, 0)))
 		{
@@ -36,7 +37,7 @@ bool openDialogWindow(const std::string& title, const std::string& buttonOkTitle
 
 			currentItem = -1;
 
-			return false;
+			isOpend = false;
 		}
 
 		ImGui::SameLine();
@@ -46,10 +47,10 @@ bool openDialogWindow(const std::string& title, const std::string& buttonOkTitle
 			ImGui::CloseCurrentPopup();
 			currentItem = -1;
 
-			return false;
+			isOpend = false;
 		}
-		ImGui::EndPopup();
 	}
+	ImGui::EndPopup();
 
-	return true;
+	return isOpend;
 }

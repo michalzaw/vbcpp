@@ -173,7 +173,7 @@ namespace LoggerWindow
 
             ImGui::EndChild();
 
-            ImGui::End();
         }
+        ImGui::End();
     }
 }

@@ -826,7 +826,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("File"))
 			{
 				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
-				ImGui::MenuItem("Open map...", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Open map...", NULL, &_showOpenDialogWindow);
 				ImGui::MenuItem("Save", NULL, &_saveMap);
 				//ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
 				ImGui::Separator();
@@ -1350,7 +1350,7 @@ namespace vbEditor
 
 		if (ImGui::IsKeyPressed(80))
 			useSnap = !useSnap;
-		ImGui::Checkbox("", &useSnap);
+		ImGui::Checkbox("##usesnapCheckBox", &useSnap);
 
 		ImGui::SameLine();
 
