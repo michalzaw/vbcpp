@@ -101,6 +101,7 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 		ImGui::OpenPopup(title.c_str());
 		currentItem = 0;
 		rootFile = File(rootPath, rootPath);
+		selectedFile = nullptr;
 	}
 
 	bool isOpend = true;
@@ -137,13 +138,16 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 
 		if (ImGui::Button(buttonOkTitle.c_str(), ImVec2(0, 0)))
 		{
-			ImGui::CloseCurrentPopup();
+			if (selectedFile != nullptr)
+			{
+				ImGui::CloseCurrentPopup();
 
-			onOkClickCallback(selectedFile->path.substr(rootFile.path.length() + 1));
-			
-			currentItem = -1;
+				onOkClickCallback(selectedFile->path.substr(rootFile.path.length() + 1));
 
-			isOpend = false;
+				currentItem = -1;
+
+				isOpend = false;
+			}
 		}
 
 		ImGui::SameLine();
