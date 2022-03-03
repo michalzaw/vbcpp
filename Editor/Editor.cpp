@@ -1006,7 +1006,33 @@ namespace vbEditor
 
 		if (_showOpenDialogWindow)
 		{
-			_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)
+			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", "Maps",
+				[](const std::string& currentSelection)
+				{
+					LOG_DEBUG(LOG_VARIABLE(currentSelection));
+
+					SceneLoader sceneLoader(_sceneManager);
+					sceneLoader.loadMap(currentSelection);
+
+					mapInfo.name = currentSelection;
+					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+
+					Renderer::getInstance().rebuildStaticLighting();
+				},
+				[](const std::string& directoryPath)
+				{
+					std::vector<std::string> children = FilesHelper::getFilesList(directoryPath + "/");
+					for (const auto& fileName : children)
+					{
+						if (fileName == "scene.xml")
+						{
+							return true;
+						}
+					}
+					return false;
+				});
+				
+			/*_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)
 				{
 					SceneLoader sceneLoader(_sceneManager);
 					sceneLoader.loadMap(_availableMaps[currentSelection]);
@@ -1015,7 +1041,7 @@ namespace vbEditor
 					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
 					Renderer::getInstance().rebuildStaticLighting();
-			});
+			});*/
 		}
 
 		if (_addSceneObject)
