@@ -14,6 +14,7 @@
 
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
+#include "../Utils/ResourceDescription.h"
 
 #include <imgui.h>
 #include <backends/imgui_impl_glfw.h>
@@ -545,7 +546,7 @@ namespace vbEditor
 	std::vector<std::string> _availableObjects;
 	std::vector<std::string> _availableRoadProfiles;
 
-	MapInfo mapInfo = {"Unknown", "Unknown"};
+	ResourceDescription mapInfo = {"Unknown", "Unknown", "Unknown"};
 
 	ClickMode _clickMode = CM_PICK_OBJECT;
 	RObject* _objectToAdd = nullptr;
@@ -1030,6 +1031,10 @@ namespace vbEditor
 						}
 					}
 					return false;
+				},
+				[](const std::string& directoryPath, ResourceDescription& outDescription)
+				{
+					ResourceDescriptionUtils::loadResourceDescription(directoryPath + "/scene.xml", "Scene", outDescription);
 				});
 				
 			/*_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)
@@ -1107,7 +1112,7 @@ namespace vbEditor
 		{
 			//printf("Saving map\n");
 			SceneSaver sceneSaver(_sceneManager);
-			sceneSaver.saveMap(mapInfo.name, SceneDescription(mapInfo.author));
+			sceneSaver.saveMap(mapInfo.name, mapInfo);
 			_saveMap = false;
 		}
 

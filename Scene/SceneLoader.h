@@ -8,6 +8,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../Utils/ResourceDescriptionUtils.h"
+
 
 namespace tinyxml2
 {
@@ -22,18 +24,6 @@ struct CrossroadComponent;
 class RoadObject;
 
 
-struct SceneDescription
-{
-	std::string author;
-
-	SceneDescription() {}
-	SceneDescription(const std::string& author)
-	{
-		this->author = author;
-	}
-};
-
-
 class SceneLoader
 {
 	private:
@@ -46,7 +36,7 @@ class SceneLoader
 
 		std::string _dirPath;
 
-		SceneDescription _sceneDescription;
+		ResourceDescription _sceneDescription;
 
 		void loadStartPosition(tinyxml2::XMLElement* );
 		bool loadTerrain(tinyxml2::XMLElement* );
@@ -68,7 +58,7 @@ class SceneLoader
 
 		void loadMap(std::string name);
 
-		SceneDescription& getLoadedSceneDescription();
+		ResourceDescription& getLoadedSceneDescription();
 
 };
 

@@ -11,6 +11,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
+#include "../Utils/ResourceDescriptionUtils.h"
 #include "../Utils/Strings.h"
 
 
@@ -36,12 +37,6 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 						 FilesHelper::getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
 
 	return result;
-}
-
-
-void SceneSaver::saveDescription(XMLElement* descriptionElement, const SceneDescription& sceneDescription)
-{
-	descriptionElement->SetAttribute("author", sceneDescription.author.c_str());
 }
 
 
@@ -251,7 +246,7 @@ void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxm
 }
 
 
-void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescription)
+void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
@@ -290,7 +285,7 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	roadsElement->SetAttribute("version", "2");
 	rootNode->InsertEndChild(roadsElement);
 	
-	saveDescription(descriptionElement, sceneDescription);
+	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
 	saveStartPosition(startPositionElement);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())

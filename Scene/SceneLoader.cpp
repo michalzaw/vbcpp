@@ -697,10 +697,7 @@ void SceneLoader::loadMap(std::string name)
 	}
 
 	XMLElement* descriptionElement = scnElement->FirstChildElement("Description");
-	if (descriptionElement != nullptr)
-	{
-		_sceneDescription.author = descriptionElement->Attribute("author");
-	}
+	ResourceDescriptionUtils::loadResourceDescription(descriptionElement, _sceneDescription);
 
 	LOG_INFO("Load map: " + name);
 
@@ -731,7 +728,7 @@ void SceneLoader::loadMap(std::string name)
 }
 
 
-SceneDescription& SceneLoader::getLoadedSceneDescription()
+ResourceDescription& SceneLoader::getLoadedSceneDescription()
 {
 	return _sceneDescription;
 }

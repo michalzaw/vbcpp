@@ -18,6 +18,7 @@ set (UTILS_SOURCES
 	Utils/RTexture.cpp
 	Utils/RTexture2D.cpp
 	Utils/RTextureCubeMap.cpp
+	Utils/ResourceDescriptionUtils.cpp
 	Utils/ResourceManager.cpp
 	Utils/SoundLoader.cpp
 	Utils/stb_image.cpp
@@ -50,6 +51,8 @@ set (UTILS_HEADERS
 	Utils/RTextureCubeMap.h
 	Utils/RefCounter.h
 	Utils/Resource.h
+	Utils/ResourceDescription.h
+	Utils/ResourceDescriptionUtils.h
 	Utils/ResourceManager.h
 	Utils/SoundLoader.h
 	Utils/Strings.h

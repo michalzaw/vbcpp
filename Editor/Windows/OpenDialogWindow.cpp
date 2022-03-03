@@ -5,6 +5,7 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include "../../Utils/FilesHelper.h"
+#include "../../Utils/ResourceDescription.h"
 #include "../../Utils/Strings.h"
 
 
@@ -18,8 +19,11 @@ struct File
 	bool isSelectable;
 	bool isChildrenInitialized;
 
+	ResourceDescription description;
+	bool isDescriptionInitialized;
+
 	File(const std::string& name = "", const std::string& path = "")
-		: name(name), path(path), isSelectable(true), isChildrenInitialized(false)
+		: name(name), path(path), isSelectable(true), isChildrenInitialized(false), isDescriptionInitialized(false)
 	{}
 };
 
@@ -28,7 +32,8 @@ File rootFile;
 File* selectedFile;
 
 
-void inspectPath(File& file, const std::function<bool(const std::string&)>& directoryFilter)
+void inspectPath(File& file, const std::function<bool(const std::string&)>& directoryFilter,
+				 const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
 {
 	if (!file.isChildrenInitialized)
 	{
@@ -68,13 +73,18 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 	if (ImGui::IsItemClicked() && file.isSelectable)
 	{
 		selectedFile = &file;
+		if (!file.isDescriptionInitialized && descriptionLoader != nullptr)
+		{
+			descriptionLoader(file.path, file.description);
+			file.isDescriptionInitialized = true;
+		}
 	}
 
 	if (isNodeOpen)
 	{
 		for (auto& child : file.children)
 		{
-			inspectPath(child, directoryFilter);
+			inspectPath(child, directoryFilter, descriptionLoader);
 		}
 
 		ImGui::TreePop();
@@ -83,7 +93,8 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 
 
 bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::string& rootPath, const std::function<void(const std::string&)>& onOkClickCallback,
-					   const std::function<bool(const std::string&)>& directoryFilter)
+					   const std::function<bool(const std::string&)>& directoryFilter,
+					   const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
 {
 	if (currentItem < 0)
 	{
@@ -99,7 +110,7 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 			ImGui::BeginGroup();
 			if (ImGui::BeginChild("tree", ImVec2(200.0f, 300.0f), true))
 			{
-				inspectPath(rootFile, directoryFilter);
+				inspectPath(rootFile, directoryFilter, descriptionLoader);
 			}
 			ImGui::EndChild();
 			ImGui::EndGroup();
@@ -113,9 +124,12 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 			ImGui::BeginGroup();
 			if (ImGui::BeginChild("details", ImVec2(200.0f, 300.0f), true))
 			{
-				ImGui::Text("Name: %s", "TODO");
-				ImGui::Text("Description: %s", "TODO");
-				ImGui::Text("Author: %s", "TODO");
+				if (selectedFile != nullptr)
+				{
+					ImGui::Text("Name: %s", selectedFile->description.name.c_str());
+					ImGui::Text("Author: %s", selectedFile->description.author.c_str());
+					ImGui::Text("Description: %s", selectedFile->description.comment.c_str());
+				}
 			}
 			ImGui::EndChild();
 			ImGui::EndGroup();
