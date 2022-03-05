@@ -28,7 +28,9 @@ struct File
 };
 
 
-File rootFile;
+std::vector<File> rootFiles;
+int currentRootFileIndex = 0;
+
 File* selectedFile;
 
 
@@ -63,7 +65,7 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 	{
 		nodeFlags |= ImGuiTreeNodeFlags_Selected;
 	}
-	if (&file == &rootFile)
+	if (&file == &rootFiles[currentRootFileIndex])
 	{
 		nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 	}
@@ -92,7 +94,25 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 }
 
 
-bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::string& rootPath, const std::function<void(const std::string&)>& onOkClickCallback,
+void showBasePathCombo()
+{
+	if (rootFiles.size() > 1)
+	{
+		std::vector<const char*> comboItems;
+		for (int i = 0; i < rootFiles.size(); ++i)
+		{
+			comboItems.push_back(rootFiles[i].path.c_str());
+		}
+
+		ImGui::Text("Base path:");
+		ImGui::SameLine();
+		ImGui::Combo("##basePathCombo", &currentRootFileIndex, comboItems.data(), comboItems.size());
+	}
+}
+
+
+bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& rootPaths,
+					   const std::function<void(const std::string&)>& onOkClickCallback,
 					   const std::function<bool(const std::string&)>& directoryFilter,
 					   const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
 {
@@ -100,18 +120,27 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 	{
 		ImGui::OpenPopup(title.c_str());
 		currentItem = 0;
-		rootFile = File(rootPath, rootPath);
+
+		rootFiles.clear();
+		for (const auto& path : rootPaths)
+		{
+			rootFiles.push_back(File(path, path));
+		}
+		currentRootFileIndex = 0;
+
 		selectedFile = nullptr;
 	}
 
 	bool isOpend = true;
 	if (ImGui::BeginPopupModal(title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
+		showBasePathCombo();
+
 		{
 			ImGui::BeginGroup();
 			if (ImGui::BeginChild("tree", ImVec2(200.0f, 300.0f), true))
 			{
-				inspectPath(rootFile, directoryFilter, descriptionLoader);
+				inspectPath(rootFiles[currentRootFileIndex], directoryFilter, descriptionLoader);
 			}
 			ImGui::EndChild();
 			ImGui::EndGroup();
@@ -142,7 +171,7 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 			{
 				ImGui::CloseCurrentPopup();
 
-				onOkClickCallback(selectedFile->path.substr(rootFile.path.length() + 1));
+				onOkClickCallback(selectedFile->path.substr(rootFiles[currentRootFileIndex].path.length() + 1));
 
 				currentItem = -1;
 

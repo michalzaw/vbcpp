@@ -1007,7 +1007,7 @@ namespace vbEditor
 
 		if (_showOpenDialogWindow)
 		{
-			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", "Maps",
+			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" },
 				[](const std::string& currentSelection)
 				{
 					LOG_DEBUG(LOG_VARIABLE(currentSelection));
