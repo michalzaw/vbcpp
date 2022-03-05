@@ -1007,7 +1007,7 @@ namespace vbEditor
 
 		if (_showOpenDialogWindow)
 		{
-			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" },
+			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" }, "scene.xml", "Scene",
 				[](const std::string& currentSelection)
 				{
 					LOG_DEBUG(LOG_VARIABLE(currentSelection));
@@ -1019,22 +1019,6 @@ namespace vbEditor
 					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
 					Renderer::getInstance().rebuildStaticLighting();
-				},
-				[](const std::string& directoryPath)
-				{
-					std::vector<std::string> children = FilesHelper::getFilesList(directoryPath + "/");
-					for (const auto& fileName : children)
-					{
-						if (fileName == "scene.xml")
-						{
-							return true;
-						}
-					}
-					return false;
-				},
-				[](const std::string& directoryPath, ResourceDescription& outDescription)
-				{
-					ResourceDescriptionUtils::loadResourceDescription(directoryPath + "/scene.xml", "Scene", outDescription);
 				});
 				
 			/*_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)

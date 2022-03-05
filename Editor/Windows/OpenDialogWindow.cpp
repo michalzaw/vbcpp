@@ -5,7 +5,7 @@
 #include <backends/imgui_impl_opengl3.h>
 
 #include "../../Utils/FilesHelper.h"
-#include "../../Utils/ResourceDescription.h"
+#include "../../Utils/ResourceDescriptionUtils.h"
 #include "../../Utils/Strings.h"
 
 
@@ -192,6 +192,30 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 	ImGui::EndPopup();
 
 	return isOpend;
+}
+
+
+bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& rootPaths,
+					   const std::string& resourceFileName, const std::string& rootElementName,
+					   const std::function<void(const std::string&)>& onOkClickCallback)
+{
+	return openDialogWindow2(title, buttonOkTitle, rootPaths, onOkClickCallback,
+		[resourceFileName](const std::string& directoryPath)
+		{
+			std::vector<std::string> children = FilesHelper::getFilesList(directoryPath + "/");
+			for (const auto& fileName : children)
+			{
+				if (fileName == resourceFileName)
+				{
+					return true;
+				}
+			}
+			return false;
+		},
+		[resourceFileName, rootElementName](const std::string& directoryPath, ResourceDescription& outDescription)
+		{
+			ResourceDescriptionUtils::loadResourceDescription(directoryPath + "/" + resourceFileName, rootElementName, outDescription);
+		});
 }
 
 
