@@ -1,5 +1,5 @@
-#ifndef EDITORWINDOW_H_INCLUDED
-#define EDITORWINDOW_H_INCLUDED
+#ifndef IMGUIWINDOW_H_INCLUDED
+#define IMGUIWINDOW_H_INCLUDED
 
 
 #include <imgui.h>
@@ -30,4 +30,4 @@ class ImGuiWindow
 };
 
 
-#endif // EDITORWINDOW_H_INCLUDED
+#endif // IMGUIWINDOW_H_INCLUDED

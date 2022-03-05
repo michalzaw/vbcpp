@@ -67,3 +67,15 @@ void ImGuiInterface::draw()
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 }
+
+
+void ImGuiInterface::drawOnlyWindows()
+{
+	if (_isOpen)
+	{
+		for (ImGuiWindow* window : _windows)
+		{
+			window->draw();
+		}
+	}
+}

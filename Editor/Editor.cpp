@@ -9,6 +9,9 @@
 
 #include "../Game/Directories.h"
 
+#include "../ImGuiInterface/ImGuiInterface.h"
+#include "../ImGuiInterface/VariablesWindow.h"
+
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
@@ -526,7 +529,6 @@ namespace vbEditor
 	std::vector<RoadObject*> _selectedRoads;
 
 	static bool _showDemoWindow = false;
-	static bool _showOpenDialogWindow = true;
 	static bool _addRoadIntersectionDialogWindow = false;
 	static bool _isCameraActive = false;
 	static bool _showObjectPropertyEditor = true;
@@ -550,6 +552,9 @@ namespace vbEditor
 
 	ClickMode _clickMode = CM_PICK_OBJECT;
 	RObject* _objectToAdd = nullptr;
+
+	ImGuiInterface* _imGuiInterface = nullptr;
+	OpenDialogWindow* _openDialogWindow = nullptr;
 
 	void setSelectedSceneObject(SceneObject* object)
 	{
@@ -812,7 +817,28 @@ namespace vbEditor
 		_availableRoadProfiles.insert(_availableRoadProfiles.end(), availableRoadProfilesDev.begin(), availableRoadProfilesDev.end());
 #endif // DEVELOPMENT_RESOURCES
 
-		_showOpenDialogWindow = true;
+		_imGuiInterface = new ImGuiInterface(_sceneManager);
+		_imGuiInterface->setIsOpen(true);
+		_imGuiInterface->addWindow(new VariablesWindow(_sceneManager, true));
+
+		_openDialogWindow = new OpenDialogWindow("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" }, _sceneManager);
+		_openDialogWindow->setDefaultDirectoryFilter("scene.xml");
+		_openDialogWindow->setDefaultDescriptionLoader("scene.xml", "Scene");
+		_openDialogWindow->setOnOkClickCallback([](const std::string& currentSelection)
+			{
+				LOG_DEBUG(LOG_VARIABLE(currentSelection));
+
+				SceneLoader sceneLoader(_sceneManager);
+				sceneLoader.loadMap(currentSelection);
+
+				mapInfo.name = currentSelection;
+				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+
+				Renderer::getInstance().rebuildStaticLighting();
+			});
+		_imGuiInterface->addWindow(_openDialogWindow);
+
+		*(_openDialogWindow->getOpenFlagPointer()) = true;
 	}
 
 	void clearScene()
@@ -827,7 +853,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("File"))
 			{
 				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
-				ImGui::MenuItem("Open map...", NULL, &_showOpenDialogWindow);
+				ImGui::MenuItem("Open map...", NULL, _openDialogWindow->getOpenFlagPointer());
 				ImGui::MenuItem("Save", NULL, &_saveMap);
 				//ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
 				ImGui::Separator();
@@ -1002,10 +1028,12 @@ namespace vbEditor
 
 		drawMainMenu();
 
+		_imGuiInterface->drawOnlyWindows();
+
 		if (_showDemoWindow)
 			ImGui::ShowDemoWindow();
 
-		if (_showOpenDialogWindow)
+		/*if (_showOpenDialogWindow)
 		{
 			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" }, "scene.xml", "Scene",
 				[](const std::string& currentSelection)
@@ -1020,29 +1048,17 @@ namespace vbEditor
 
 					Renderer::getInstance().rebuildStaticLighting();
 				});
-				
-			/*_showOpenDialogWindow = openDialogWindow("Open map...", "Open", _availableMaps, [](int currentSelection)
-				{
-					SceneLoader sceneLoader(_sceneManager);
-					sceneLoader.loadMap(_availableMaps[currentSelection]);
+		}*/
 
-					mapInfo.name = _availableMaps[currentSelection];
-					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
-
-					Renderer::getInstance().rebuildStaticLighting();
-			});*/
-		}
-
-		if (_addSceneObject)
+		/*if (_addSceneObject)
 		{
-			_addSceneObject = openDialogWindow("Add Scene Object...", "Add", _availableObjects, [](int currentSelection)
+			_addSceneObject = openDialogWindow2("Add Scene Object...", "Add", { "Objects", ResourceManager::getInstance().getAlternativeResourcePath() + "Objects" }, "object.xml", "Object",
+				[](const std::string& objName)
 				{
-					std::string objName = _availableObjects[currentSelection];
-
 					_clickMode = CM_ADD_OBJECT;
 					_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
 				});
-		}
+		}*/
 
 		if (_addRoadDialogWindow)
 		{
@@ -1289,6 +1305,8 @@ namespace vbEditor
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
 		ImGui::DestroyContext();
+
+		delete _imGuiInterface;
 
 		_physicsManager->stop();
 

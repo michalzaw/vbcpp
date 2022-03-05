@@ -37,6 +37,7 @@ class ImGuiInterface
         void addWindow(ImGuiWindow* window);
 
         void draw();
+        void drawOnlyWindows();
 };
 
 

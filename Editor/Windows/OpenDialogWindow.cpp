@@ -9,33 +9,33 @@
 #include "../../Utils/Strings.h"
 
 
-int currentItem = -1;
-
-struct File
+OpenDialogWindow::OpenDialogWindow(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& rootPaths, SceneManager* sceneManager, bool isOpen)
+	: ImGuiWindow(nullptr, isOpen),
+	_title(title), _buttonOkTitle(buttonOkTitle), _rootPaths(rootPaths),
+	_currentItem(-1), _currentRootFileIndex(0), _selectedFile(nullptr)
 {
-	std::string name;
-	std::string path;
-	std::vector<File> children;
-	bool isSelectable;
-	bool isChildrenInitialized;
 
-	ResourceDescription description;
-	bool isDescriptionInitialized;
-
-	File(const std::string& name = "", const std::string& path = "")
-		: name(name), path(path), isSelectable(true), isChildrenInitialized(false), isDescriptionInitialized(false)
-	{}
-};
+}
 
 
-std::vector<File> rootFiles;
-int currentRootFileIndex = 0;
+void OpenDialogWindow::showBasePathCombo()
+{
+	if (_rootFiles.size() > 1)
+	{
+		std::vector<const char*> comboItems;
+		for (int i = 0; i < _rootFiles.size(); ++i)
+		{
+			comboItems.push_back(_rootFiles[i].path.c_str());
+		}
 
-File* selectedFile;
+		ImGui::Text("Base path:");
+		ImGui::SameLine();
+		ImGui::Combo("##basePathCombo", &_currentRootFileIndex, comboItems.data(), comboItems.size());
+	}
+}
 
 
-void inspectPath(File& file, const std::function<bool(const std::string&)>& directoryFilter,
-				 const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
+void OpenDialogWindow::inspectPath(File& file)
 {
 	if (!file.isChildrenInitialized)
 	{
@@ -46,9 +46,9 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 
 			File& childFile = file.children[file.children.size() - 1];
 
-			if (directoryFilter != nullptr)
+			if (_directoryFilter)
 			{
-				childFile.isSelectable = directoryFilter(childFile.path);
+				childFile.isSelectable = _directoryFilter(childFile.path);
 			}
 		}
 
@@ -61,11 +61,11 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 	{
 		nodeFlags |= ImGuiTreeNodeFlags_Leaf;
 	}
-	if (&file == selectedFile)
+	if (&file == _selectedFile)
 	{
 		nodeFlags |= ImGuiTreeNodeFlags_Selected;
 	}
-	if (&file == &rootFiles[currentRootFileIndex])
+	if (&file == &_rootFiles[_currentRootFileIndex])
 	{
 		nodeFlags |= ImGuiTreeNodeFlags_DefaultOpen;
 	}
@@ -74,10 +74,10 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 
 	if (ImGui::IsItemClicked() && file.isSelectable)
 	{
-		selectedFile = &file;
-		if (!file.isDescriptionInitialized && descriptionLoader != nullptr)
+		_selectedFile = &file;
+		if (!file.isDescriptionInitialized && _descriptionLoader)
 		{
-			descriptionLoader(file.path, file.description);
+			_descriptionLoader(file.path, file.description);
 			file.isDescriptionInitialized = true;
 		}
 	}
@@ -86,7 +86,7 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 	{
 		for (auto& child : file.children)
 		{
-			inspectPath(child, directoryFilter, descriptionLoader);
+			inspectPath(child);
 		}
 
 		ImGui::TreePop();
@@ -94,45 +94,24 @@ void inspectPath(File& file, const std::function<bool(const std::string&)>& dire
 }
 
 
-void showBasePathCombo()
+void OpenDialogWindow::drawWindow()
 {
-	if (rootFiles.size() > 1)
+	if (_currentItem < 0)
 	{
-		std::vector<const char*> comboItems;
-		for (int i = 0; i < rootFiles.size(); ++i)
+		ImGui::OpenPopup(_title.c_str());
+		_currentItem = 0;
+
+		_rootFiles.clear();
+		for (const auto& path : _rootPaths)
 		{
-			comboItems.push_back(rootFiles[i].path.c_str());
+			_rootFiles.push_back(File(path, path));
 		}
+		_currentRootFileIndex = 0;
 
-		ImGui::Text("Base path:");
-		ImGui::SameLine();
-		ImGui::Combo("##basePathCombo", &currentRootFileIndex, comboItems.data(), comboItems.size());
-	}
-}
-
-
-bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& rootPaths,
-					   const std::function<void(const std::string&)>& onOkClickCallback,
-					   const std::function<bool(const std::string&)>& directoryFilter,
-					   const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
-{
-	if (currentItem < 0)
-	{
-		ImGui::OpenPopup(title.c_str());
-		currentItem = 0;
-
-		rootFiles.clear();
-		for (const auto& path : rootPaths)
-		{
-			rootFiles.push_back(File(path, path));
-		}
-		currentRootFileIndex = 0;
-
-		selectedFile = nullptr;
+		_selectedFile = nullptr;
 	}
 
-	bool isOpend = true;
-	if (ImGui::BeginPopupModal(title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
+	if (ImGui::BeginPopupModal(_title.c_str(), NULL, ImGuiWindowFlags_AlwaysAutoResize))
 	{
 		showBasePathCombo();
 
@@ -140,7 +119,7 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 			ImGui::BeginGroup();
 			if (ImGui::BeginChild("tree", ImVec2(200.0f, 300.0f), true))
 			{
-				inspectPath(rootFiles[currentRootFileIndex], directoryFilter, descriptionLoader);
+				inspectPath(_rootFiles[_currentRootFileIndex]);
 			}
 			ImGui::EndChild();
 			ImGui::EndGroup();
@@ -154,28 +133,31 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 			ImGui::BeginGroup();
 			if (ImGui::BeginChild("details", ImVec2(200.0f, 300.0f), true))
 			{
-				if (selectedFile != nullptr)
+				if (_selectedFile != nullptr)
 				{
-					ImGui::Text("Name: %s", selectedFile->description.name.c_str());
-					ImGui::Text("Author: %s", selectedFile->description.author.c_str());
-					ImGui::Text("Description: %s", selectedFile->description.comment.c_str());
+					ImGui::Text("Name: %s", _selectedFile->description.name.c_str());
+					ImGui::Text("Author: %s", _selectedFile->description.author.c_str());
+					ImGui::Text("Description: %s", _selectedFile->description.comment.c_str());
 				}
 			}
 			ImGui::EndChild();
 			ImGui::EndGroup();
 		}
 
-		if (ImGui::Button(buttonOkTitle.c_str(), ImVec2(0, 0)))
+		if (ImGui::Button(_buttonOkTitle.c_str(), ImVec2(0, 0)))
 		{
-			if (selectedFile != nullptr)
+			if (_selectedFile != nullptr)
 			{
 				ImGui::CloseCurrentPopup();
 
-				onOkClickCallback(selectedFile->path.substr(rootFiles[currentRootFileIndex].path.length() + 1));
+				if (_onOkClickCallback)
+				{
+					_onOkClickCallback(_selectedFile->path.substr(_rootFiles[_currentRootFileIndex].path.length() + 1));
+				}
 
-				currentItem = -1;
+				_currentItem = -1;
 
-				isOpend = false;
+				_isOpen = false;
 			}
 		}
 
@@ -184,23 +166,36 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 		if (ImGui::Button("Cancel", ImVec2(0, 0)))
 		{
 			ImGui::CloseCurrentPopup();
-			currentItem = -1;
+			_currentItem = -1;
 
-			isOpend = false;
+			_isOpen = false;
 		}
 	}
 	ImGui::EndPopup();
-
-	return isOpend;
 }
 
 
-bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& rootPaths,
-					   const std::string& resourceFileName, const std::string& rootElementName,
-					   const std::function<void(const std::string&)>& onOkClickCallback)
+void OpenDialogWindow::setOnOkClickCallback(const std::function<void(const std::string&)>& onOkClickCallback)
 {
-	return openDialogWindow2(title, buttonOkTitle, rootPaths, onOkClickCallback,
-		[resourceFileName](const std::string& directoryPath)
+	_onOkClickCallback = onOkClickCallback;
+}
+
+
+void OpenDialogWindow::setDirectoryFilter(const std::function<bool(const std::string&)>& directoryFilter)
+{
+	_directoryFilter = directoryFilter;
+}
+
+
+void OpenDialogWindow::setDescriptionLoader(const std::function<void(const std::string&, ResourceDescription&)>& descriptionLoader)
+{
+	_descriptionLoader = descriptionLoader;
+}
+
+
+void OpenDialogWindow::setDefaultDirectoryFilter(const std::string& resourceFileName)
+{
+	setDirectoryFilter([resourceFileName](const std::string& directoryPath)
 		{
 			std::vector<std::string> children = FilesHelper::getFilesList(directoryPath + "/");
 			for (const auto& fileName : children)
@@ -211,12 +206,20 @@ bool openDialogWindow2(const std::string& title, const std::string& buttonOkTitl
 				}
 			}
 			return false;
-		},
-		[resourceFileName, rootElementName](const std::string& directoryPath, ResourceDescription& outDescription)
+		});
+}
+
+
+void OpenDialogWindow::setDefaultDescriptionLoader(const std::string& resourceFileName, const std::string& rootElementName)
+{
+	setDescriptionLoader([resourceFileName, rootElementName](const std::string& directoryPath, ResourceDescription& outDescription)
 		{
 			ResourceDescriptionUtils::loadResourceDescription(directoryPath + "/" + resourceFileName, rootElementName, outDescription);
 		});
 }
+
+
+int currentItem = 0;
 
 
 bool openDialogWindow(const std::string& title, const std::string& buttonOkTitle, const std::vector<std::string>& items, const std::function<void(int)> onOkClickCallback)
