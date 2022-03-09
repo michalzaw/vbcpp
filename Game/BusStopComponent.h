@@ -20,6 +20,10 @@ class BusStopComponent : public Component
         std::string _name;
         int _id;
         std::string _announcementFileName;
+        float _distance;
+        bool _requestStop;
+        unsigned int _numberOfPassengersMin;
+        unsigned int _numberOfPassengersMax;
         RSound* _announcementSound;
         bool _announcementIsPlay;
         unsigned int _numberOfPassengers;
@@ -75,6 +79,46 @@ class BusStopComponent : public Component
         std::string getAnnouncementFileName()
         {
             return _announcementFileName;
+        }
+
+        void setDistance(float distance)
+        {
+            _distance = distance;
+        }
+
+        float getDistance()
+        {
+            return _distance;
+        }
+
+        void setRequestStop(bool requestStop)
+        {
+            _requestStop = requestStop;
+        }
+
+        bool isRequestStop()
+        {
+            return _requestStop;
+        }
+
+        void setNumberOfPassengersMin(unsigned int numberOfPassengersMin)
+        {
+            _numberOfPassengersMin = numberOfPassengersMin;
+        }
+
+        unsigned int getNumberOfPassengersMin()
+        {
+            return _numberOfPassengersMin;
+        }
+
+        void setNumberOfPassengersMax(unsigned int numberOfPassengersMax)
+        {
+            _numberOfPassengersMax = numberOfPassengersMax;
+        }
+
+        unsigned int getNumberOfPassengersMax()
+        {
+            return _numberOfPassengersMax;
         }
 
         bool getAnnouncementIsPlay()
