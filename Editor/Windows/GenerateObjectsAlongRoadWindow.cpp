@@ -17,10 +17,9 @@ class SceneManager;
 namespace vbEditor
 {
 	extern SceneManager* _sceneManager;
+	extern OpenDialogWindow* _addSceneObjectDialogWindow;
 
 	int _objectsNamesCurrentItem;
-
-	bool _showAddObjectWindow;
 
 	ObjectsGenerator::ObjectsAlongRoadGeneratorData _generatorData;
 
@@ -38,7 +37,12 @@ namespace vbEditor
 
 		if (ImGui::Button("Add object"))
 		{
-			_showAddObjectWindow = true;
+			*(_addSceneObjectDialogWindow->getOpenFlagPointer()) = true;
+			_addSceneObjectDialogWindow->setOnOkClickCallback([](const std::string& selectedObjectName)
+				{
+					_generatorData.objectsNames.push_back(selectedObjectName);
+
+				});
 		}
 
 		ImGui::SameLine();
@@ -66,18 +70,7 @@ namespace vbEditor
 		ImGui::DragFloat3("Range of random rotation offset", glm::value_ptr(_generatorData.rotationOffset), 0.1f, 0.0f, 360.0f);
 	}
 
-	void showAddObjectWindow(const std::vector<std::string>& availableObjects)
-	{
-		static int currentItem = 0;
-		openDialogWindow("Add Object...", "Add", availableObjects, [availableObjects](int currentItem)
-			{
-				_generatorData.objectsNames.push_back(availableObjects[currentItem]);
-
-				_showAddObjectWindow = false;
-			});
-	}
-
-	bool generateObjectsAlongRoadWindow(const std::vector<std::string>& availableObjects, RoadObject* roadComponent)
+	bool generateObjectsAlongRoadWindow(RoadObject* roadComponent)
 	{
 		bool isOpen = true;
 
@@ -99,11 +92,6 @@ namespace vbEditor
 			}
 		}
 		ImGui::End();
-
-		if (_showAddObjectWindow)
-		{
-			showAddObjectWindow(availableObjects);
-		}
 
 		return isOpen;
 	}

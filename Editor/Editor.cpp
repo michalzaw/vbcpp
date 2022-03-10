@@ -544,17 +544,15 @@ namespace vbEditor
 
 	std::string windowTitle = "VBCPP - World Editor";
 
-	std::vector<std::string> _availableMaps;// { "Demo", "Demo2", "Coœtam jeszcze" };
-	std::vector<std::string> _availableObjects;
-	std::vector<std::string> _availableRoadProfiles;
-
 	ResourceDescription mapInfo = {"Unknown", "Unknown", "Unknown"};
 
 	ClickMode _clickMode = CM_PICK_OBJECT;
 	RObject* _objectToAdd = nullptr;
 
 	ImGuiInterface* _imGuiInterface = nullptr;
-	OpenDialogWindow* _openDialogWindow = nullptr;
+	OpenDialogWindow* _openMapDialogWindow = nullptr;
+	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
+	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
 
 	void setSelectedSceneObject(SceneObject* object)
 	{
@@ -804,27 +802,24 @@ namespace vbEditor
 		_graphicsManager->setCurrentCamera(_camera);
 		_soundManager->setActiveCamera(_camera);
 
-		_availableMaps = FilesHelper::getDirectoriesList(GameDirectories::MAPS);
-		_availableObjects = FilesHelper::getDirectoriesList(GameDirectories::OBJECTS);
-		_availableRoadProfiles = FilesHelper::getDirectoriesList(GameDirectories::ROAD_PROFILES);
+		std::vector<std::string> mapsPaths = { GameDirectories::MAPS };
+		std::vector<std::string> objectsPaths = { GameDirectories::OBJECTS };
+		std::vector<std::string> roadProfilesPaths = { GameDirectories::ROAD_PROFILES };
 
 #ifdef DEVELOPMENT_RESOURCES
-		std::vector<std::string> availableMapsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::MAPS);
-		std::vector<std::string> availableObjectsDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::OBJECTS);
-		std::vector<std::string> availableRoadProfilesDev = FilesHelper::getDirectoriesList(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::ROAD_PROFILES);
-		_availableMaps.insert(_availableMaps.end(), availableMapsDev.begin(), availableMapsDev.end());
-		_availableObjects.insert(_availableObjects.end(), availableObjectsDev.begin(), availableObjectsDev.end());
-		_availableRoadProfiles.insert(_availableRoadProfiles.end(), availableRoadProfilesDev.begin(), availableRoadProfilesDev.end());
+		mapsPaths.push_back(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::MAPS);
+		objectsPaths.push_back(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::OBJECTS);
+		roadProfilesPaths.push_back(GameConfig::getInstance().alternativeResourcesPath + GameDirectories::ROAD_PROFILES);
 #endif // DEVELOPMENT_RESOURCES
 
 		_imGuiInterface = new ImGuiInterface(_sceneManager);
 		_imGuiInterface->setIsOpen(true);
 		_imGuiInterface->addWindow(new VariablesWindow(_sceneManager, true));
 
-		_openDialogWindow = new OpenDialogWindow("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" }, _sceneManager);
-		_openDialogWindow->setDefaultDirectoryFilter("scene.xml");
-		_openDialogWindow->setDefaultDescriptionLoader("scene.xml", "Scene");
-		_openDialogWindow->setOnOkClickCallback([](const std::string& currentSelection)
+		_openMapDialogWindow = new OpenDialogWindow("Open map...", "Open", mapsPaths, _sceneManager);
+		_openMapDialogWindow->setDefaultDirectoryFilter("scene.xml");
+		_openMapDialogWindow->setDefaultDescriptionLoader("scene.xml", "Scene");
+		_openMapDialogWindow->setOnOkClickCallback([](const std::string& currentSelection)
 			{
 				LOG_DEBUG(LOG_VARIABLE(currentSelection));
 
@@ -836,9 +831,60 @@ namespace vbEditor
 
 				Renderer::getInstance().rebuildStaticLighting();
 			});
-		_imGuiInterface->addWindow(_openDialogWindow);
+		_imGuiInterface->addWindow(_openMapDialogWindow);
 
-		*(_openDialogWindow->getOpenFlagPointer()) = true;
+		*(_openMapDialogWindow->getOpenFlagPointer()) = true;
+
+
+		_addSceneObjectDialogWindow = new OpenDialogWindow("Add Scene Object...", "Add", objectsPaths, _sceneManager);
+		_addSceneObjectDialogWindow->setDefaultDirectoryFilter("object.xml");
+		_addSceneObjectDialogWindow->setDefaultDescriptionLoader("object.xml", "Object");
+		_imGuiInterface->addWindow(_addSceneObjectDialogWindow);
+
+
+		_selectRoadProfileDialogWindow = new OpenDialogWindow("Select Road Profile...", "Select", roadProfilesPaths, _sceneManager);
+		_selectRoadProfileDialogWindow->setDefaultDirectoryFilter("profile.xml");
+		_selectRoadProfileDialogWindow->setDefaultDescriptionLoader("profile.xml", "Profile");
+		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
+	}
+
+	void addObject(const std::string& objectName)
+	{
+		_clickMode = CM_ADD_OBJECT;
+		_objectToAdd = ResourceManager::getInstance().loadRObject(objectName);
+	}
+
+	void addRoad(const std::string& roadProfileName, RoadType roadType)
+	{
+		_clickMode = CM_ROAD_EDIT;
+
+		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(roadProfileName);
+
+		SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+		RenderObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+		roadRenderObject->setIsCastShadows(false);
+
+		setSelectedSceneObject(roadSceneObject);
+	}
+
+	void addRoadLinesAndArc(const std::string& roadProfileName)
+	{
+		addRoad(roadProfileName, RoadType::LINES_AND_ARC);
+	}
+
+	void addRoadBezierCurve(const std::string& roadProfileName)
+	{
+		addRoad(roadProfileName, RoadType::BEZIER_CURVES);
+	}
+
+	void addRoadIntersection(const std::string& roadProfileName)
+	{
+		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(roadProfileName);
+
+		SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
+		sceneObject->addComponent(_graphicsManager->addRoadIntersection(roadProfile, true));
+
+		setSelectedSceneObject(sceneObject);
 	}
 
 	void clearScene()
@@ -853,7 +899,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("File"))
 			{
 				ImGui::MenuItem("New map...", NULL, &_showDemoWindow);
-				ImGui::MenuItem("Open map...", NULL, _openDialogWindow->getOpenFlagPointer());
+				ImGui::MenuItem("Open map...", NULL, _openMapDialogWindow->getOpenFlagPointer());
 				ImGui::MenuItem("Save", NULL, &_saveMap);
 				//ImGui::MenuItem("Save as...", "CTRL+SHIFT+S");
 				ImGui::Separator();
@@ -864,11 +910,23 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Map"))
 			{
 				ImGui::MenuItem("Map Description", NULL, &_showMapInfoWindow);
-				ImGui::MenuItem("Add new Scene Object..", NULL, &_addSceneObject);
+				if (ImGui::MenuItem("Add new Scene Object..", NULL, _addSceneObjectDialogWindow->getOpenFlagPointer()))
+				{
+					_addSceneObjectDialogWindow->setOnOkClickCallback(addObject);
+				}
 				ImGui::Separator();
-				ImGui::MenuItem("Add new Road..", NULL, &_addRoadDialogWindow);
-				ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, &_addRoad2DialogWindow);
-				ImGui::MenuItem("Add new road intersection", NULL, &_addRoadIntersectionDialogWindow);
+				if (ImGui::MenuItem("Add new Road..", NULL, _selectRoadProfileDialogWindow->getOpenFlagPointer()))
+				{
+					_selectRoadProfileDialogWindow->setOnOkClickCallback(addRoadLinesAndArc);
+				}
+				if (ImGui::MenuItem("Add new Road (Bezier curves)..", NULL, _selectRoadProfileDialogWindow->getOpenFlagPointer()))
+				{
+					_selectRoadProfileDialogWindow->setOnOkClickCallback(addRoadBezierCurve);
+				}
+				if (ImGui::MenuItem("Add new road intersection", NULL, _selectRoadProfileDialogWindow->getOpenFlagPointer()))
+				{
+					_selectRoadProfileDialogWindow->setOnOkClickCallback(addRoadIntersection);
+				}
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
@@ -1033,81 +1091,6 @@ namespace vbEditor
 		if (_showDemoWindow)
 			ImGui::ShowDemoWindow();
 
-		/*if (_showOpenDialogWindow)
-		{
-			_showOpenDialogWindow = openDialogWindow2("Open map...", "Open", { "Maps", ResourceManager::getInstance().getAlternativeResourcePath() + "Maps" }, "scene.xml", "Scene",
-				[](const std::string& currentSelection)
-				{
-					LOG_DEBUG(LOG_VARIABLE(currentSelection));
-
-					SceneLoader sceneLoader(_sceneManager);
-					sceneLoader.loadMap(currentSelection);
-
-					mapInfo.name = currentSelection;
-					mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
-
-					Renderer::getInstance().rebuildStaticLighting();
-				});
-		}*/
-
-		/*if (_addSceneObject)
-		{
-			_addSceneObject = openDialogWindow2("Add Scene Object...", "Add", { "Objects", ResourceManager::getInstance().getAlternativeResourcePath() + "Objects" }, "object.xml", "Object",
-				[](const std::string& objName)
-				{
-					_clickMode = CM_ADD_OBJECT;
-					_objectToAdd = ResourceManager::getInstance().loadRObject(objName);
-				});
-		}*/
-
-		if (_addRoadDialogWindow)
-		{
-			_addRoadDialogWindow = openDialogWindow("Add Road...", "Add", _availableRoadProfiles, [](int currentSelection)
-				{
-					_clickMode = CM_ROAD_EDIT;
-
-					std::string profileName = _availableRoadProfiles[currentSelection];
-					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
-
-					SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-					RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-					roadRenderObject->setIsCastShadows(false);
-
-					setSelectedSceneObject(roadSceneObject);
-				});
-		}
-
-		if (_addRoad2DialogWindow)
-		{
-			_addRoad2DialogWindow = openDialogWindow("Add Road...", "Add", _availableRoadProfiles, [](int currentSelection)
-				{
-					_clickMode = CM_ROAD_EDIT;
-
-					std::string profileName = _availableRoadProfiles[currentSelection];
-					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
-
-					SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-					RenderObject* roadRenderObject = _graphicsManager->addRoadObject(RoadType::BEZIER_CURVES, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-					roadRenderObject->setIsCastShadows(false);
-
-					setSelectedSceneObject(roadSceneObject);
-				});
-		}
-
-		if (_addRoadIntersectionDialogWindow)
-		{
-			_addRoadIntersectionDialogWindow = openDialogWindow("Add Road Intersection...", "Add", _availableRoadProfiles, [](int currentSelection)
-				{
-					std::string profileName = _availableRoadProfiles[currentSelection];
-					RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(profileName);
-
-					SceneObject* sceneObject = _sceneManager->addSceneObject("Road intersection");
-					sceneObject->addComponent(_graphicsManager->addRoadIntersection(roadProfile, true));
-
-					setSelectedSceneObject(sceneObject);
-				});
-		}
-
 		if (_saveMap)
 		{
 			//printf("Saving map\n");
@@ -1167,7 +1150,7 @@ namespace vbEditor
 		if (_showGenerateObjectsAlongRoadWindow)
 		{
 			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (!generateObjectsAlongRoadWindow(_availableObjects, roadComponent))
+			if (!generateObjectsAlongRoadWindow(roadComponent))
 			{
 				_showGenerateObjectsAlongRoadWindow = false;
 			}
