@@ -1,5 +1,7 @@
 #include "Editor.h"
 
+#include <future>
+
 #include "Tools/RoadManipulator.h"
 #include "Tools/AxisTool.h"
 
@@ -554,6 +556,11 @@ namespace vbEditor
 	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
 	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
 
+	Window* _backgroundWindow = nullptr;
+	std::future<void> _loadingSceneFuture;
+	bool _isLoading = false;
+	SceneManager* _newSceneManager = nullptr;
+
 	void setSelectedSceneObject(SceneObject* object)
 	{
 		_selectedSceneObject = object;
@@ -763,6 +770,72 @@ namespace vbEditor
 		return true;
 	}
 
+	void asyncLoadScene(const std::string& mapName, SceneManager* sceneManager, Window* backgroundWindow)
+	{
+		glfwMakeContextCurrent(backgroundWindow->getWindow());
+
+		_cameraObject = sceneManager->addSceneObject("editor#CameraFPS");
+		_cameraObject->setFlags(SOF_NOT_SELECTABLE);
+		_camera = sceneManager->getGraphicsManager()->addCameraFPS(window.getWidth(), window.getHeight(), degToRad(58.0f), 0.1f, 1000);
+		_cameraObject->addComponent(_camera);
+		_camera->setRotationSpeed(0.01f);
+		_camera->setMoveSpeed(50.0f);
+
+		sceneManager->getGraphicsManager()->setCurrentCamera(_camera);
+		sceneManager->getSoundManager()->setActiveCamera(_camera);
+
+
+		SceneLoader sceneLoader(sceneManager);
+		sceneLoader.loadMap(mapName);
+
+		mapInfo.name = mapName;
+		mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
+
+		glFinish();
+
+		glfwMakeContextCurrent(nullptr);
+	}
+
+	void openMap(const std::string& mapName)
+	{
+		GraphicsManager* graphicsManager = new GraphicsManager;
+		PhysicsManager* physicsManager = new PhysicsManager;
+		SoundManager* soundManager = new SoundManager;
+		_newSceneManager = new SceneManager(graphicsManager, physicsManager, soundManager);
+
+		if (_backgroundWindow == nullptr)
+		{
+			_backgroundWindow = new Window;
+			_backgroundWindow->createInvisibleWindow(&window);
+		}
+
+		_selectedSceneObject = nullptr;
+		roadsToUpdate.clear();
+		_selectedRoads.clear();
+
+		_clickMode = CM_PICK_OBJECT;
+		_objectToAdd = nullptr;
+		
+		_isLoading = true;
+		_loadingSceneFuture = std::async(std::launch::async, &asyncLoadScene, mapName, _newSceneManager, _backgroundWindow);
+	}
+
+	void swapScenes(SceneManager* newSceneManager)
+	{
+		Renderer::getInstance().setGraphicsManager(newSceneManager->getGraphicsManager());
+		Renderer::getInstance().rebuildStaticLighting();
+
+		_physicsManager->stop();
+		_soundManager->drop();
+		_physicsManager->drop();
+		delete _sceneManager;
+
+		_graphicsManager = newSceneManager->getGraphicsManager();
+		_physicsManager = newSceneManager->getPhysicsManager();
+		_soundManager = newSceneManager->getSoundManager();
+		_sceneManager = newSceneManager;
+	}
+
 	void initializeEngineSubsystems()
 	{
 #ifdef DEVELOPMENT_RESOURCES
@@ -814,7 +887,6 @@ namespace vbEditor
 
 		_imGuiInterface = new ImGuiInterface(_sceneManager);
 		_imGuiInterface->setIsOpen(true);
-		_imGuiInterface->addWindow(new VariablesWindow(_sceneManager, true));
 
 		_openMapDialogWindow = new OpenDialogWindow("Open map...", "Open", mapsPaths, _sceneManager);
 		_openMapDialogWindow->setDefaultDirectoryFilter("scene.xml");
@@ -822,14 +894,7 @@ namespace vbEditor
 		_openMapDialogWindow->setOnOkClickCallback([](const std::string& currentSelection)
 			{
 				LOG_DEBUG(LOG_VARIABLE(currentSelection));
-
-				SceneLoader sceneLoader(_sceneManager);
-				sceneLoader.loadMap(currentSelection);
-
-				mapInfo.name = currentSelection;
-				mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
-
-				Renderer::getInstance().rebuildStaticLighting();
+				openMap(currentSelection);
 			});
 		_imGuiInterface->addWindow(_openMapDialogWindow);
 
@@ -1280,6 +1345,14 @@ namespace vbEditor
 
 			window.swapBuffers();
 			window.updateEvents();
+
+
+			if (_isLoading && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+			{
+				swapScenes(_newSceneManager);
+				_isLoading = false;
+				_newSceneManager = nullptr;
+			}
 		}
 	}
 
@@ -1296,6 +1369,11 @@ namespace vbEditor
 		_soundManager->drop();
 		_physicsManager->drop();
 		delete _sceneManager;
+
+		if (_backgroundWindow != nullptr)
+		{
+			delete _backgroundWindow;
+		}
 	}
 
 	bool getGUIhasFocus()
