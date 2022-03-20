@@ -43,8 +43,8 @@ class SceneLoader
 		void loadGrass(tinyxml2::XMLElement* );
 		void loadSunLight(tinyxml2::XMLElement* );
 		void loadSky(tinyxml2::XMLElement* );
-		void loadObjects(tinyxml2::XMLElement* );
-		void loadObject(tinyxml2::XMLElement* );
+		void loadObjects(tinyxml2::XMLElement* , SceneObject* parent = nullptr);
+		void loadObject(tinyxml2::XMLElement* , SceneObject* parent = nullptr);
 		void loadRoads(tinyxml2::XMLElement* );
 		void loadRoad(tinyxml2::XMLElement*);
 		void loadRoadV2(tinyxml2::XMLElement*);

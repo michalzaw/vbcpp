@@ -775,7 +775,7 @@ namespace vbEditor
 		glfwMakeContextCurrent(backgroundWindow->getWindow());
 
 		_cameraObject = sceneManager->addSceneObject("editor#CameraFPS");
-		_cameraObject->setFlags(SOF_NOT_SELECTABLE);
+		_cameraObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 		_camera = sceneManager->getGraphicsManager()->addCameraFPS(window.getWidth(), window.getHeight(), degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
@@ -866,7 +866,7 @@ namespace vbEditor
 		renderer.t = 0;
 
 		_cameraObject = _sceneManager->addSceneObject("editor#CameraFPS");
-		_cameraObject->setFlags(SOF_NOT_SELECTABLE);
+		_cameraObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 		_camera = _graphicsManager->addCameraFPS(_windowWidth, _windowHeight, degToRad(58.0f), 0.1f, 1000);
 		_cameraObject->addComponent(_camera);
 		_camera->setRotationSpeed(0.01f);
@@ -1140,14 +1140,14 @@ namespace vbEditor
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		drawMainDockSpace();
+
 		ImGuizmo::BeginFrame();
 		RoadManipulator::BeginFrame();
 		AxisTool::BeginFrame();
 
 		if (_clickMode == CM_ADD_OBJECT)
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
-
-		drawMainDockSpace();
 
 		drawMainMenu();
 
@@ -1212,7 +1212,7 @@ namespace vbEditor
 			}
 		}
 
-		if (_showGenerateObjectsAlongRoadWindow)
+		if (_showGenerateObjectsAlongRoadWindow && _selectedSceneObject != nullptr)
 		{
 			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 			if (!generateObjectsAlongRoadWindow(roadComponent))

@@ -117,19 +117,18 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	if (objectElement)
-	{
-		objectElement->SetAttribute("name", objectDefinition->getName().c_str());
+	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getName() : "";
 
-		if (objectDefinition->getName() != sceneObject->getName())
-			objectElement->SetAttribute("id", sceneObject->getName().c_str());
+	objectElement->SetAttribute("name", objectDefinitionName.c_str());
 
-		objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
-		glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
-			radToDeg(sceneObject->getRotation().y),
-			radToDeg(sceneObject->getRotation().z));
-		objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
-	}
+	if (objectDefinitionName != sceneObject->getName())
+		objectElement->SetAttribute("id", sceneObject->getName().c_str());
+
+	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
+	glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
+								   radToDeg(sceneObject->getRotation().y),
+								   radToDeg(sceneObject->getRotation().z));
+	objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
 
 	BusStopComponent* busStopComponent = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
 	if (busStopComponent)
@@ -145,6 +144,11 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	}
 
 	objectsElement->InsertEndChild(objectElement);
+
+	for (SceneObject* child : sceneObject->getChildren())
+	{
+		saveObject(objectElement, doc, child, child->getObjectDefinition());
+	}
 }
 
 
@@ -292,41 +296,49 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	{
 		if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
 		{
+			LOG_DEBUG("Skip object: " + sceneObject->getName());
 			continue;
 		}
 
 		RObject* objectDefinition = sceneObject->getObjectDefinition();
-		if (objectDefinition != nullptr)
+		if (objectDefinition == nullptr)
 		{
-			saveObject(objectsElement, doc, sceneObject, objectDefinition);
-		}
-		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
-		{
-			saveRoad(roadsElement, doc, sceneObject);
-		}
-		else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
-		{
-			saveRoadIntersection(roadsElement, doc, sceneObject);
-		}
-		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
-		{
-			if (grassElement)
+			if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
 			{
-				rootNode->InsertAfterChild(startPositionElement, grassElement);
-				saveGrass(grassElement, doc, sceneObject);
+				saveRoad(roadsElement, doc, sceneObject);
+			}
+			else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
+			{
+				saveRoadIntersection(roadsElement, doc, sceneObject);
+			}
+			else if (sceneObject->getComponent(CT_GRASS) != nullptr)
+			{
+				if (grassElement)
+				{
+					rootNode->InsertAfterChild(startPositionElement, grassElement);
+					saveGrass(grassElement, doc, sceneObject);
+				}
+			}
+			else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+			{
+				saveTerrain(terrainElement, grassElement, sceneObject);
+			}
+			else if (sceneObject->getName() == "sky")
+			{
+				saveSky(skyElement, sceneObject);
+			}
+			else if (sceneObject->getName() == "sun")
+			{
+				saveSunLight(sunElement, sceneObject);
+			}
+			else if (sceneObject->getParent() == nullptr)
+			{
+				saveObject(objectsElement, doc, sceneObject, nullptr);
 			}
 		}
-		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+		else if (sceneObject->getParent() == nullptr)
 		{
-			saveTerrain(terrainElement, grassElement, sceneObject);
-		}
-		else if (sceneObject->getName() == "sky")
-		{
-			saveSky(skyElement, sceneObject);
-		}
-		else if (sceneObject->getName() == "sun")
-		{
-			saveSunLight(sunElement, sceneObject);
+			saveObject(objectsElement, doc, sceneObject, objectDefinition);
 		}
 	}
 

@@ -23,6 +23,20 @@ namespace vbEditor
 
 	ObjectsGenerator::ObjectsAlongRoadGeneratorData _generatorData;
 
+	void showObjectsCollectionName()
+	{
+		char buffer[50];
+
+		strncpy(buffer, _generatorData.objectsCollectionName.c_str(), sizeof buffer);
+
+		buffer[sizeof buffer - 1] = '\0';
+
+		if (ImGui::InputText("Generated objects collection name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			_generatorData.objectsCollectionName = buffer;
+		}
+	}
+
 	void showObjectsList()
 	{
 		int itemsCount = _generatorData.objectsNames.size();
@@ -76,6 +90,10 @@ namespace vbEditor
 
 		if (ImGui::Begin("Generate objects along the road...", &isOpen))
 		{
+			showObjectsCollectionName();
+
+			ImGui::Separator();
+
 			showObjectsList();
 
 			ImGui::Separator();
