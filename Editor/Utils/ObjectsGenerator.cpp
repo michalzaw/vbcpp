@@ -4,6 +4,8 @@
 
 #include "../../Graphics/RoadObject.h"
 
+#include "../../Scene/SceneManager.h"
+
 #include "../../Utils/BezierCurvesUtils.h"
 #include "../../Utils/Logger.h"
 #include "../../Utils/ResourceManager.h"
@@ -14,6 +16,20 @@ namespace ObjectsGenerator
 {
 	std::random_device randomDevice;
 	std::mt19937 randomGenerator(randomDevice());
+
+	SceneObject* getExistingCollectionSceneObject(RoadObject* roadComponent, const std::string& collectionName)
+	{
+		const auto& children = roadComponent->getSceneObject()->getChildren();
+		for (SceneObject* child : children)
+		{
+			if (child->getName() == collectionName)
+			{
+				return child;
+			}
+		}
+
+		return nullptr;
+	}
 
 	void generateRoadPoints(RoadObject* roadComponent, float distance, std::vector<glm::vec3>& outPoints)
 	{
@@ -121,10 +137,26 @@ namespace ObjectsGenerator
 			return;
 		}
 
+		const std::string& objectsCollectionName = generatorData->objectsCollectionName;
+
 		std::vector<glm::vec3> roadPoints;
 		generateRoadPoints(roadComponent, 1.0f, roadPoints);
+		LOG_INFO("Generate objects: " + objectsCollectionName);
 		LOG_INFO("Number of road points: " + Strings::toString(roadPoints.size()) + " with distance: 1.0");
 		LOG_INFO("Number of objects: " + Strings::toString(generatorData->objectsNames.size()));
+
+		
+		SceneObject* rootObject = getExistingCollectionSceneObject(roadComponent, objectsCollectionName);
+		if (rootObject != nullptr)
+		{
+			rootObject->removeAllChildrenFromScene();
+		}
+		else
+		{
+			rootObject = sceneManager->addSceneObject(roadComponent->getSceneObject()->getName() + " - " + objectsCollectionName);
+			// todo: attach object to roadObject. Support in map file
+			//roadComponent->getSceneObject()->addChild(rootObject);
+		}
 
 		int objectsCounter = 0;
 		for (int i = 0; i < roadPoints.size(); i += generatorData->distance)
@@ -163,6 +195,8 @@ namespace ObjectsGenerator
 
 				SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, sceneManager);
 
+				rootObject->addChild(sceneObject);
+
 				++objectsCounter;
 			}
 			if (generatorData->leftSide)
@@ -180,6 +214,8 @@ namespace ObjectsGenerator
 				LOG_INFO("Index=" + Strings::toString(i) + ", " + LOG_VARIABLE(objectName) + ", " + LOG_VARIABLE(position) + ", " + LOG_VARIABLE(rotation));
 
 				SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, sceneManager);
+
+				rootObject->addChild(sceneObject);
 
 				++objectsCounter;
 			}

@@ -72,6 +72,29 @@ SET_TARGET_PROPERTIES(alut PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_version PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
 
+set (IMGUI_SOURCES
+	libs/imgui/imgui.cpp
+	libs/imgui/imgui_demo.cpp
+	libs/imgui/imgui_draw.cpp
+	libs/imgui/imgui_tables.cpp
+	libs/imgui/imgui_widgets.cpp
+	libs/imgui/backends/imgui_impl_glfw.cpp
+	libs/imgui/backends/imgui_impl_opengl3.cpp
+	libs/ImGuizmo/ImGuizmo.cpp
+)
+
+set (IMGUI_HEADERS 
+	libs/imgui/imconfig.h
+	libs/imgui/imgui.h
+	libs/imgui/imgui_internal.h
+	libs/imgui/imstb_rectpack.h
+	libs/imgui/imstb_textedit.h
+	libs/imgui/imstb_truetype.h
+	libs/imgui/backends/imgui_impl_glfw.h
+	libs/imgui/backends/imgui_impl_opengl3.h
+	libs/ImGuizmo/ImGuizmo.h
+)
+
 add_subdirectory(Bus)
 source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
 
@@ -87,7 +110,7 @@ source_group("Graphics" FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
 add_subdirectory(GUI)
 source_group("GUI" FILES ${GUI_SOURCES} ${GUI_HEADERS})
 
-add_subdirectory(ImGui)
+#add_subdirectory(ImGui)
 source_group("ImGui" FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 
 add_subdirectory(ImGuiInterface)
@@ -152,6 +175,9 @@ include_directories (libs/freealut/include)
 include_directories (libs/stb_image)
 
 include_directories (libs/PortableFileDialogs)
+
+include_directories (libs/imgui)
+include_directories (libs/ImGuizmo)
 
 add_executable(${BIN_NAME}
                     ${BUS_SOURCES}

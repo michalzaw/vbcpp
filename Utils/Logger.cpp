@@ -12,6 +12,7 @@ LogLevel Logger::_logLevel = LL_DISABLED;
 bool Logger::_consoleOutput = false;
 bool Logger::_fileOutput = false;
 std::ofstream* Logger::_logFile = nullptr;
+std::vector<std::function<void(LogLevel, const std::string&)>> Logger::_customAppenders = {};
 
 
 const std::string logLevelsNames[] =
@@ -96,6 +97,12 @@ LogLevel Logger::getLogLevel()
 }
 
 
+void Logger::addCustomAppender(const std::function<void(LogLevel level, const std::string&)>& appender)
+{
+    _customAppenders.push_back(appender);
+}
+
+
 void Logger::logMessage(LogLevel level, const char* fileName, unsigned int line, const std::string& message)
 {
     if (level < _logLevel)
@@ -115,7 +122,7 @@ void Logger::logMessage(LogLevel level, const char* fileName, unsigned int line,
     stream
         << std::setfill('0') << std::right << std::setw(2) << time->tm_hour << ":" << std::setw(2) << time->tm_min << ":" << std::setw(2) << time->tm_sec << " "
         << "[" << std::setfill(' ') << std::setw(7) << logLevelsNames[level] << "]"
-        << "[" << std::setw(30) << fileNameWithoutPath << ": "
+        << "[" << std::setw(31) << fileNameWithoutPath << ": "
         << std::left << std::setw(4) << line << "]: "
         << message;
 
@@ -136,5 +143,10 @@ void Logger::logMessage(LogLevel level, const char* fileName, unsigned int line,
     {
 
         *_logFile << logLine << std::endl;
+    }
+
+    for (const auto& appender : _customAppenders)
+    {
+        appender(level, logLine);
     }
 }

@@ -1,6 +1,7 @@
 set (EDITOR_SOURCES
     Editor/Editor.cpp
 	Editor/EditorGUI.cpp
+	Editor/FileDialogs.cpp
 	Editor/Windows/CameraSettingsWindow.cpp
 	Editor/Windows/EditorWindow.cpp
 	Editor/Windows/NewDialogWindow.cpp
@@ -12,6 +13,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/MapInfoWindow.cpp
 	Editor/Windows/MaterialEditorWindow.cpp
 	Editor/Windows/GenerateObjectsAlongRoadWindow.cpp
+	Editor/Windows/LoggerWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
 	Editor/Utils/ObjectsGenerator.cpp
@@ -23,6 +25,7 @@ set (EDITOR_HEADERS
 	Editor/EditorContext.h
 	Editor/EditorEvent.h
 	Editor/EditorGUI.h
+	Editor/FileDialogs.h
 	Editor/Windows/CameraSettingsWindow.h
 	Editor/Windows/EditorWindow.h
 	Editor/Windows/NewDialogWindow.h
@@ -34,6 +37,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/MapInfoWindow.h
 	Editor/Windows/MaterialEditorWindow.h
 	Editor/Windows/GenerateObjectsAlongRoadWindow.h
+	Editor/Windows/LoggerWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
 	Editor/Utils/ObjectsGenerator.h

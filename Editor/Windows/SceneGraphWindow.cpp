@@ -96,13 +96,8 @@ namespace vbEditor {
 	void SceneGraphWindow(std::list<SceneObject*> sceneRoot)
 	{
 		nodeNumber = 0;
-		glm::uvec2 windowSize(Renderer::getInstance().getWindowDimensions());
 
-		ImGui::SetNextWindowSize(ImVec2(200, windowSize.y - 18), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(100, windowSize.y - 18), ImVec2(500, windowSize.y - 18));
-		ImGui::SetNextWindowPos(ImVec2(0, 18));
-
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 		if (ImGui::Begin("Scene Graph", nullptr, windowFlags))
 		{
 			for (std::list<SceneObject*>::iterator i = sceneRoot.begin(); i != sceneRoot.end(); ++i)

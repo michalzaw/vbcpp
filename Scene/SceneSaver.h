@@ -21,7 +21,7 @@ class SceneManager;
 struct RoadLane;
 class RObject;
 class SceneObject;
-class SceneDescription;
+struct ResourceDescription;
 
 
 class SceneSaver
@@ -34,7 +34,6 @@ class SceneSaver
 
 		std::string createSkyTextureAttribute(std::string path);
 
-		void saveDescription(tinyxml2::XMLElement* descriptionElement, const SceneDescription& sceneDescription);
 		void saveStartPosition(tinyxml2::XMLElement* startPositionElement);
 		void saveTerrain(tinyxml2::XMLElement* terrainElement, tinyxml2::XMLElement* grassElement, SceneObject* sceneObject);
 		void saveGrass(tinyxml2::XMLElement* grassElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
@@ -47,7 +46,7 @@ class SceneSaver
 	public:
 		SceneSaver(SceneManager* sceneManager);
 
-		void saveMap(std::string name, const SceneDescription& sceneDescription);
+		void saveMap(std::string name, const ResourceDescription& sceneDescription);
 
 };
 

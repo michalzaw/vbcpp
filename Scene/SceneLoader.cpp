@@ -199,11 +199,11 @@ void SceneLoader::loadSky(XMLElement* skyElement)
 }
 
 
-void SceneLoader::loadObjects(XMLElement* objectsElement)
+void SceneLoader::loadObjects(XMLElement* objectsElement, SceneObject* parent)
 {
 	XMLElement* objectElement = objectsElement->FirstChildElement("Object");
 	if (objectElement)
-		loadObject(objectElement);
+		loadObject(objectElement, parent);
 
 	//XMLElement* objects = sceneElement->FirstChildElement("Objects");
 
@@ -253,7 +253,7 @@ void SceneLoader::loadObjects(XMLElement* objectsElement)
 	*/
 }
 
-void SceneLoader::loadObject(XMLElement* objectElement)
+void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
 	{
@@ -267,9 +267,24 @@ void SceneLoader::loadObject(XMLElement* objectElement)
 		LOG_INFO("Position: " + Strings::toString(position));
 		LOG_INFO("Rotation: " + Strings::toString(rotation));
 
-		RObject* rObject = ResourceManager::getInstance().loadRObject(name);
+		SceneObject* sceneObject;
+		if (!name.empty())
+		{
+			RObject* rObject = ResourceManager::getInstance().loadRObject(name);
 
-		SceneObject* sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, _sceneManager);
+			sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, _sceneManager);
+		}
+		else
+		{
+			sceneObject = _sceneManager->addSceneObject(objectName);
+			sceneObject->setPosition(position);
+			sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z));
+		}
+
+		if (parent != nullptr)
+		{
+			parent->addChild(sceneObject);
+		}
 
 		// Components properties defined per instance
 		XMLElement* componentElement = objectElement->FirstChildElement("Component");
@@ -293,6 +308,8 @@ void SceneLoader::loadObject(XMLElement* objectElement)
 			componentElement = componentElement->NextSiblingElement("Component");
 		}
 
+		// children
+		loadObjects(objectElement, sceneObject);
 
 		objectElement = objectElement->NextSiblingElement("Object");
 	}
@@ -697,10 +714,7 @@ void SceneLoader::loadMap(std::string name)
 	}
 
 	XMLElement* descriptionElement = scnElement->FirstChildElement("Description");
-	if (descriptionElement != nullptr)
-	{
-		_sceneDescription.author = descriptionElement->Attribute("author");
-	}
+	ResourceDescriptionUtils::loadResourceDescription(descriptionElement, _sceneDescription);
 
 	LOG_INFO("Load map: " + name);
 
@@ -731,7 +745,7 @@ void SceneLoader::loadMap(std::string name)
 }
 
 
-SceneDescription& SceneLoader::getLoadedSceneDescription()
+ResourceDescription& SceneLoader::getLoadedSceneDescription()
 {
 	return _sceneDescription;
 }

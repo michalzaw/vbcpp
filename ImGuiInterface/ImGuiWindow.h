@@ -1,10 +1,10 @@
-#ifndef EDITORWINDOW_H_INCLUDED
-#define EDITORWINDOW_H_INCLUDED
+#ifndef IMGUIWINDOW_H_INCLUDED
+#define IMGUIWINDOW_H_INCLUDED
 
 
-#include "../../ImGui/imgui.h"
-#include "../../ImGui/imgui_impl_glfw.h"
-#include "../../ImGui/imgui_impl_opengl3.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
 
 #include "../../Graphics/Renderer.h"
 
@@ -30,4 +30,4 @@ class ImGuiWindow
 };
 
 
-#endif // EDITORWINDOW_H_INCLUDED
+#endif // IMGUIWINDOW_H_INCLUDED

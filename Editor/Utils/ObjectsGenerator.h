@@ -16,6 +16,8 @@ namespace ObjectsGenerator
 {
 	struct ObjectsAlongRoadGeneratorData
 	{
+		std::string objectsCollectionName;
+		
 		std::vector<std::string> objectsNames;
 
 		int distance;

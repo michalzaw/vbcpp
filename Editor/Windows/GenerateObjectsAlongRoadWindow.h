@@ -11,7 +11,7 @@ class RoadObject;
 
 namespace vbEditor
 {
-	bool generateObjectsAlongRoadWindow(const std::vector<std::string>& availableObjects, RoadObject* roadComponent);
+	bool generateObjectsAlongRoadWindow(RoadObject* roadComponent);
 }
 
 
