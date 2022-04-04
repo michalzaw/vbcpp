@@ -38,6 +38,8 @@ enum ComponentType
     CT_BUS_STOP,
 	CT_DISPLAY,
 	CT_CAMERA_CONTROL,
+    CT_PATH,
+    CT_AI_AGENT,
 
     COMPONENTS_TYPE_SIZE
 };

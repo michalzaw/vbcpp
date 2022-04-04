@@ -2,8 +2,11 @@
 
 #include <memory>
 
+#include "AIAgent.h"
+#include "AIAgentPhysicalVechicle.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
+#include "PathComponent.h"
 
 #include "../Graphics/CameraFPS.hpp"
 
@@ -36,6 +39,36 @@ CameraControlComponent* GameLogicSystem::addCameraControlComponent(CameraFPS* ca
 
 	return component;
 
+}
+
+
+PathComponent* GameLogicSystem::addPathComponent()
+{
+	PathComponent* component = new PathComponent;
+
+	_pathComponents.push_back(component);
+
+	return component;
+}
+
+
+AIAgent* GameLogicSystem::addAIAgent()
+{
+	AIAgent* component = new AIAgent;
+
+	_aiAgents.push_back(component);
+
+	return component;
+}
+
+
+AIAgent* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
+{
+	AIAgent* component = new AIAgentPhysicalVechicle(vechicle);
+
+	_aiAgents.push_back(component);
+
+	return component;
 }
 
 
@@ -81,6 +114,38 @@ void GameLogicSystem::removeCameraControlComponent(CameraControlComponent* compo
 }
 
 
+void GameLogicSystem::removePathComponent(PathComponent* component)
+{
+	for (std::vector<PathComponent*>::iterator i = _pathComponents.begin(); i != _pathComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _pathComponents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
+void GameLogicSystem::removeAIAgent(AIAgent* component)
+{
+	for (std::vector<AIAgent*>::iterator i = _aiAgents.begin(); i != _aiAgents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _aiAgents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
 /*void GameLogicSystem::removeBusStop(BusStopComponent* busStop)
 {
 	for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
@@ -110,6 +175,16 @@ void GameLogicSystem::update(float deltaTime)
 		component->update(deltaTime);
 	}
 
+	for (PathComponent* component : _pathComponents)
+	{
+		component->update(deltaTime);
+	}
+
+	for (AIAgent* component : _aiAgents)
+	{
+		component->update(deltaTime);
+	}
+
 	/*for (BusStopComponent* component : _busStops)
 	{
 		component->update(deltaTime);
@@ -132,6 +207,20 @@ void GameLogicSystem::destroy()
 	}
 
 	_cameraControlComponents.clear();
+
+	for (std::vector<PathComponent*>::iterator i = _pathComponents.begin(); i != _pathComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_pathComponents.clear();
+
+	for (std::vector<AIAgent*>::iterator i = _aiAgents.begin(); i != _aiAgents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_aiAgents.clear();
 
 	/*for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
 	{

@@ -11,6 +11,7 @@ set (UTILS_SOURCES
 	Utils/LocalizationSystem.cpp
 	Utils/Logger.cpp
 	Utils/PolygonGenerator.cpp
+	Utils/QuaternionUtils.cpp
 	Utils/RAnimatedModel.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
@@ -44,6 +45,7 @@ set (UTILS_HEADERS
 	Utils/Logger.h
 	Utils/Math.h
 	Utils/PolygonGenerator.h
+	Utils/QuaternionUtils.h
 	Utils/RAnimatedModel.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h

@@ -1,9 +1,12 @@
 #include "MainGameScene.h"
 
+#include "AIAgent.h"
+#include "AIAgentPhysicalVechicle.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
+#include "PathComponent.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -196,9 +199,14 @@ void MainGameScene::loadScene()
 	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
-	Bus* bus2 = busLoader.loadBus(busModel, busVariables);
-	_buses.push_back(bus2);
+	for (int i = 0; i < 1; ++i)
+	{
+		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
+		Bus* bus2 = busLoader.loadBus(busModel, busVariables);
+		_buses.push_back(bus2);
+
+		bus2->getSceneObject()->setPosition(glm::vec3((i + 2) * 5.0f, 1.0f, 0.0f));
+	}
 
 	_activeBus = bus;
 
@@ -210,10 +218,6 @@ void MainGameScene::loadScene()
 		degToRad(_sceneManager->getBusStart().rotation.y),
 		degToRad(_sceneManager->getBusStart().rotation.z));
 
-	bus2->getSceneObject()->setPosition(_sceneManager->getBusStart().position + vec3(20.0f, 0.0f, 0.0f));
-	bus2->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-		degToRad(_sceneManager->getBusStart().rotation.y),
-		degToRad(_sceneManager->getBusStart().rotation.z));
 
 	bus->getSceneObject()->addChild(_cameras[GC_DRIVER]->getSceneObject());
 	_cameras[GC_DRIVER]->getSceneObject()->setPosition(_activeBus->getDriverPosition());
@@ -226,6 +230,42 @@ void MainGameScene::loadScene()
 	camera->getSceneObject()->setRotation(degToRad(-5.0f),
 										  degToRad(60.0f),
 										  degToRad(0.0f));*/
+
+
+	PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent();
+	//path->getCurvePoints().push_back(glm::vec3(10.0f, 0.0f, -50.0f));
+	//path->getCurvePoints().push_back(glm::vec3(20.0f, 0.0f, 0.0f));
+	//path->getCurvePoints().push_back(glm::vec3(0.0f, 0.0f, 50.0f));
+	path->getCurvePoints() = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getCurvePoints();
+	path->recalculate();
+
+	SceneObject* pathObject = _sceneManager->addSceneObject("path1");
+	pathObject->addComponent(path);
+
+
+	SceneObject* agentObject = _sceneManager->addSceneObject("agent1");
+
+	_aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent(((BusRaycast*)_buses[1])->getModule(0).rayCastVehicle);
+	_aiAgent->setCurrentPath(path);
+	agentObject->addComponent(_aiAgent);
+
+	Material* cubeMaterial = new Material;
+	cubeMaterial->shader = NOTEXTURE_MATERIAL;
+	cubeMaterial->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	Prefab* cube = new Cube(2.0f, cubeMaterial);
+	cube->init();
+	_sceneManager->getGraphicsManager()->addRenderObject(cube, agentObject);
+
+	//agentObject->addChild(_cameras[GC_DRIVER]->getSceneObject());
+	//_cameras[GC_DRIVER]->getSceneObject()->move(0.0f, 1.0f, 0.0f);
+
+	GameEnvironment::Variables::floatVaribles["agentSpeed"] = _aiAgent->getSpeed();
+
+	//RStaticModel* model = ResourceManager::getInstance().loadModel("Buses/neoplan/neoplan.fbx", "Buses/neoplan/");
+	//_sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(model), agentObject);
+
+	//agentObject->setScale(1.0f, 1.0f, 2.0f);
+
 
 
 	if (!busRepaint.empty())
@@ -313,6 +353,8 @@ void MainGameScene::initialize()
 
 void MainGameScene::fixedStepUpdate(double deltaTime)
 {
+	_aiAgent->setSpeed(GameEnvironment::Variables::floatVaribles["agentSpeed"]);
+
 	_activeBus->update(deltaTime);
 
 	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
