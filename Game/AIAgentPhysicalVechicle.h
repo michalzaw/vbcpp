@@ -13,6 +13,8 @@ class AIAgentPhysicalVechicle final : public AIAgent
 	private:
 		PhysicalBodyRaycastVehicle* _vechicle;
 
+		glm::vec3 _centerPoint;
+
 	public:
 		AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle);
 
