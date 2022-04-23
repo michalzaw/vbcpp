@@ -597,26 +597,33 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 }
 
 
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
 typedef std::string str;
 typedef std::string path;
 
 
-#define IMGUI_INPUT_int(propertyName)																											\
+#define IMGUI_INPUT_int(component, propertyName)																								\
 int value = component->get##propertyName();																										\
 bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_float(propertyName)																											\
+#define IMGUI_INPUT_float(component, propertyName)																								\
 float value = component->get##propertyName();																									\
 bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_bool(propertyName)																											\
+#define IMGUI_INPUT_vec2(component, propertyName)																								\
+glm::vec2 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_bool(component, propertyName)																								\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
 
 
-#define IMGUI_INPUT_str(propertyName)																											\
+#define IMGUI_INPUT_str(component, propertyName)																								\
 char value[50];																																	\
 strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
 value[sizeof value - 1] = '\0';																													\
@@ -624,7 +631,7 @@ value[sizeof value - 1] = '\0';																													\
 bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_path(propertyName)																											\
+#define IMGUI_INPUT_path(component, propertyName)																								\
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
@@ -660,12 +667,12 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
 																																				\
-	IMGUI_INPUT_##type(propertyName)																											\
+	IMGUI_INPUT_##type(component, propertyName)																									\
 																																				\
 	if (result)																																	\
 	{																																			\
-		callback(type(value));																													\
 		component->set##propertyName(type(value));																								\
+		callback(type(value));																													\
 	}																																			\
 																																				\
 	ImGui::NextColumn();																														\
@@ -722,6 +729,83 @@ void showBusStopComponentDetails(BusStopComponent* component)
 		}
 		ImGui::PopID();
 		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+std::string getPrefabTypeName(PrefabType prefabType)
+{
+	switch (prefabType)
+	{
+		case PrefabType::PLANE:
+			return "Plane";
+
+		case PrefabType::CUBE:
+			return "Cube";
+
+		case PrefabType::SPHERE:
+			return "Sphere";
+
+		case PrefabType::CYLINDER:
+			return "Cylinder";
+
+		default:
+			return "";
+	}
+}
+
+
+void showPrefabComponentDetails(Prefab* component)
+{
+	if (ImGui::CollapsingHeader(getPrefabTypeName(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		//ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		if (component->getPrefabType() == PrefabType::PLANE)
+		{
+			PlanePrefab* plane = static_cast<PlanePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(plane, Size, vec2, "Size", [plane](glm::vec2 newValue)
+				{
+					plane->init();
+				})
+		}
+
+		if (component->getPrefabType() == PrefabType::CUBE)
+		{
+			Cube* cube = static_cast<Cube*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cube, Size, float, "Size", [cube](float newValue)
+				{
+					cube->init();
+				})
+		}
+
+		if (component->getPrefabType() == PrefabType::CYLINDER)
+		{
+			CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Radius, float, "Radius", [cylinder](float newValue)
+				{
+					cylinder->init();
+				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Height, float, "Height", [cylinder](float newValue)
+				{
+					cylinder->init();
+				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Axis, int, "Axis", [cylinder](int newValue)
+				{
+					cylinder->init();
+				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](int newValue)
+				{
+					cylinder->init();
+				})
+		}
+
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -788,6 +872,13 @@ void showObjectProperties()
 			if (busStopComponent)
 			{
 				showBusStopComponentDetails(busStopComponent);
+			}
+
+			Prefab* prefabComponent = dynamic_cast<Prefab*>(vbEditor::_selectedSceneObject->getComponent(CT_PREFAB));
+			if (prefabComponent)
+			{
+				showPrefabComponentDetails(prefabComponent);
+				showRenderComponentDetails(prefabComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

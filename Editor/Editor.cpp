@@ -1052,7 +1052,16 @@ namespace vbEditor
 					}
 					if (ImGui::MenuItem("Cylinder", NULL))
 					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cylinder");
 
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						CylinderPrefab* cylinder = new CylinderPrefab(0.5f, 2.0f, material);
+						cylinder->init();
+						_graphicsManager->addRenderObject(cylinder, sceneObject);
 					}
 					ImGui::EndMenu();
 				}
