@@ -1017,6 +1017,47 @@ namespace vbEditor
 					setSelectedSceneObject(decalSceneObject);
 				}
 				ImGui::Separator();
+
+				if (ImGui::BeginMenu("Add mesh"))
+				{
+					if (ImGui::MenuItem("Plane", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Plane");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						PlanePrefab* plane = new PlanePrefab(glm::vec2(1, 1), material);
+						plane->init();
+						_graphicsManager->addRenderObject(plane, sceneObject);
+					}
+					if (ImGui::MenuItem("Cube", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cube");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						Cube* cube = new Cube(1, material);
+						cube->init();
+						_graphicsManager->addRenderObject(cube, sceneObject);
+					}
+					if (ImGui::MenuItem("Sphere", NULL))
+					{
+
+					}
+					if (ImGui::MenuItem("Cylinder", NULL))
+					{
+
+					}
+					ImGui::EndMenu();
+				}
+
+				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
 					Renderer::getInstance().bakeStaticShadows();

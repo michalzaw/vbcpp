@@ -54,6 +54,7 @@ set (GRAPHICS_SOURCES
 		Graphics/PostProcessingEffect.h
 		Graphics/PostProcessingToneMapping.h
 		Graphics/Prefab.h
+		Graphics/Prefab.cpp
 		Graphics/QuadTree.cpp
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp

@@ -30,6 +30,7 @@ enum ComponentType
     CT_MIRROR,
     CT_CLICKABLE_OBJECT,
     CT_SHAPE_POLYGON,
+    CT_PREFAB,
 
     CT_BUS_STOP,
 	CT_DISPLAY,
