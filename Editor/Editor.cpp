@@ -1048,7 +1048,16 @@ namespace vbEditor
 					}
 					if (ImGui::MenuItem("Sphere", NULL))
 					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Sphere");
 
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						SpherePrefab* sphere = new SpherePrefab(1.0f, material);
+						sphere->init();
+						_graphicsManager->addRenderObject(sphere, sceneObject);
 					}
 					if (ImGui::MenuItem("Cylinder", NULL))
 					{

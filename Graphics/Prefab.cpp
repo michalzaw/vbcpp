@@ -425,3 +425,127 @@ int CylinderPrefab::getQuality()
 {
     return _quality;
 }
+
+
+// ------------------------------------------------------------------------------------------------
+// Sphere
+// ------------------------------------------------------------------------------------------------
+
+
+SpherePrefab::SpherePrefab(float radius, Material* material)
+    : Prefab(PrefabType::SPHERE),
+    _radius(radius), _quality(15), _material(material)
+{
+
+}
+
+
+SpherePrefab::~SpherePrefab()
+{
+    delete _material;
+}
+
+
+// http://www.songho.ca/opengl/gl_sphere.html
+RStaticModel* SpherePrefab::generateModel()
+{
+    int stacksCount = _quality;
+    int sectorsCount = _quality;
+
+    float sectorStep = 2.0f * PI / sectorsCount;
+    float stackStep = PI / stacksCount;
+
+
+    unsigned int numberOfVertices = (stacksCount + 1) * sectorsCount;
+    Vertex* vertices = new Vertex[numberOfVertices];
+    for (int i = 0; i <= stacksCount; ++i)
+    {
+        float stackAngle = PI / 2.0f - i * stackStep;
+        float xz = _radius * cos(stackAngle);
+        float y = _radius * sin(stackAngle);
+
+        for (int j = 0; j < sectorsCount; ++j)
+        {
+            float sectorAngle = j * sectorStep;
+
+            float x = xz * cos(sectorAngle);
+            float z = xz * sin(sectorAngle);
+
+            vertices[i * sectorsCount + j].position = glm::vec3(x, y, z);
+            vertices[i * sectorsCount + j].normal = glm::normalize(vertices[i * sectorsCount + j].position);
+            vertices[i * sectorsCount + j].texCoord = glm::vec2(static_cast<float>(j) / sectorsCount, static_cast<float>(i) / stacksCount);
+        }
+    }
+
+
+    unsigned int numberOfIndices = (stacksCount + 1) * (sectorsCount - 1) * 6;
+    unsigned int* indices = new unsigned int[numberOfIndices];
+
+    int index = 0;
+    for (int i = 0; i < stacksCount; ++i)
+    {
+        float k1 = i * sectorsCount;
+        float k2 = (i + 1) * sectorsCount;
+
+        for (int j = 0; j < sectorsCount; ++j)
+        {
+            // 2 triangles per sector excluding first and last stacks
+
+            if (i != 0)
+            {
+                indices[index++] = k2 + j;
+                indices[index++] = k1 + j;
+                indices[index++] = k1 + (j + 1) % sectorsCount;
+            }
+
+            if (i != stacksCount - 1)
+            {
+                indices[index++] = k2 + j;
+                indices[index++] = k1 + (j + 1) % sectorsCount;
+                indices[index++] = k2 + (j + 1) % sectorsCount;
+            }
+        }
+    }
+
+
+
+    bool isGame = GameConfig::getInstance().mode == GM_GAME;
+
+    StaticModelMesh* meshes = new StaticModelMesh[1];
+    std::vector<Material*> materials;
+    materials.push_back(new Material(*_material));
+    meshes[0].setMeshData(vertices, numberOfVertices, indices, numberOfIndices, 0, materials[0]->shader, isGame);
+
+    StaticModelNode* modelNode = new StaticModelNode;
+    modelNode->name = "object";
+    modelNode->meshes = meshes;
+    modelNode->meshesCount = 1;
+    modelNode->parent = NULL;
+
+    return new RStaticModel("", modelNode, materials);
+    return nullptr;
+}
+
+
+void SpherePrefab::setRadius(float radius)
+{
+    _radius = radius;
+}
+
+
+float SpherePrefab::getRadius()
+{
+    return _radius;
+}
+
+
+void SpherePrefab::setQuality(int quality)
+{
+    _quality = quality;
+}
+
+
+int SpherePrefab::getQuality()
+{
+    return _quality;
+}

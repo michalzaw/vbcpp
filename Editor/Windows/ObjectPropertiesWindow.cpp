@@ -770,40 +770,29 @@ void showPrefabComponentDetails(Prefab* component)
 		if (component->getPrefabType() == PrefabType::PLANE)
 		{
 			PlanePrefab* plane = static_cast<PlanePrefab*>(component);
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(plane, Size, vec2, "Size", [plane](glm::vec2 newValue)
-				{
-					plane->init();
-				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(plane, Size, vec2, "Size", [plane](glm::vec2 newValue) { plane->init(); })
 		}
 
 		if (component->getPrefabType() == PrefabType::CUBE)
 		{
 			Cube* cube = static_cast<Cube*>(component);
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cube, Size, float, "Size", [cube](float newValue)
-				{
-					cube->init();
-				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cube, Size, float, "Size", [cube](float newValue) { cube->init(); })
+		}
+
+		if (component->getPrefabType() == PrefabType::SPHERE)
+		{
+			SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Radius, float, "Radius", [sphere](float newValue) { sphere->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Quality, float, "Quality", [sphere](float newValue) { sphere->init(); })
 		}
 
 		if (component->getPrefabType() == PrefabType::CYLINDER)
 		{
 			CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Radius, float, "Radius", [cylinder](float newValue)
-				{
-					cylinder->init();
-				})
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Height, float, "Height", [cylinder](float newValue)
-				{
-					cylinder->init();
-				})
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Axis, int, "Axis", [cylinder](int newValue)
-				{
-					cylinder->init();
-				})
-			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](int newValue)
-				{
-					cylinder->init();
-				})
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Radius, float, "Radius", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Height, float, "Height", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Axis, int, "Axis", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](float newValue) { cylinder->init(); })
 		}
 
 		ImGui::Columns(1);

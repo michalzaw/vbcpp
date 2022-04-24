@@ -98,4 +98,25 @@ class CylinderPrefab final : public Prefab
 };
 
 
+class SpherePrefab final : public Prefab
+{
+    protected:
+        float _radius;
+        int _quality;
+        Material* _material;
+
+        RStaticModel* generateModel() override;
+
+    public:
+        SpherePrefab(float radius, Material* material);
+        ~SpherePrefab();
+
+        void setRadius(float radius);
+        float getRadius();
+        void setQuality(int quality);
+        int getQuality();
+
+};
+
+
 #endif // PREFAB_H_INCLUDED
