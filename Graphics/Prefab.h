@@ -10,9 +10,15 @@ enum class PrefabType
     PLANE,
     CUBE,
     SPHERE,
-    CYLINDER
+    CYLINDER,
 
+    COUNT
 };
+
+
+const std::string prefabTypesStrings[] = { "Plane", "Cube", "Sphere", "Cylinder" };
+std::string convertPrefabTypeToString(PrefabType prefabType);
+PrefabType getPrefabTypeFromString(const std::string& name);
 
 
 class Prefab : public RenderObject

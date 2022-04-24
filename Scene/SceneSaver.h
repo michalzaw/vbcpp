@@ -22,6 +22,7 @@ struct RoadLane;
 class RObject;
 class SceneObject;
 struct ResourceDescription;
+class Prefab;
 
 
 class SceneSaver
@@ -42,6 +43,8 @@ class SceneSaver
 		void saveObject(tinyxml2::XMLElement* objectsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition);
 		void saveRoad(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
 		void saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
+
+		void savePrefabComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, Prefab* prefab);
 
 	public:
 		SceneSaver(SceneManager* sceneManager);

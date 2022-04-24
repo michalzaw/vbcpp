@@ -760,7 +760,7 @@ std::string getPrefabTypeName(PrefabType prefabType)
 
 void showPrefabComponentDetails(Prefab* component)
 {
-	if (ImGui::CollapsingHeader(getPrefabTypeName(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader(convertPrefabTypeToString(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		//ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));

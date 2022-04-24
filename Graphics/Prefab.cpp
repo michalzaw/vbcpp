@@ -5,6 +5,22 @@
 #include "../Utils/Math.h"
 
 
+std::string convertPrefabTypeToString(PrefabType prefabType)
+{
+    return prefabTypesStrings[static_cast<int>(prefabType)];
+}
+
+
+PrefabType getPrefabTypeFromString(const std::string& name)
+{
+    for (int i = 0; i < static_cast<int>(PrefabType::COUNT); ++i)
+    {
+        if (prefabTypesStrings[i] == name)
+            return static_cast<PrefabType>(i);
+    }
+}
+
+
 Prefab::Prefab(PrefabType type)
     : _prefabType(type),
     _generatedModel(nullptr)
