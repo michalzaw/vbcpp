@@ -736,24 +736,56 @@ void showBusStopComponentDetails(BusStopComponent* component)
 }
 
 
-std::string getPrefabTypeName(PrefabType prefabType)
+void createPhysicalBodyForPrefab(Prefab* component)
 {
-	switch (prefabType)
+	if (component->getPrefabType() == PrefabType::PLANE)
 	{
-		case PrefabType::PLANE:
-			return "Plane";
+		PlanePrefab* plane = static_cast<PlanePrefab*>(component);
 
-		case PrefabType::CUBE:
-			return "Cube";
+		glm::vec2 size = plane->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size.x, 0.1f, size.y), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
 
-		case PrefabType::SPHERE:
-			return "Sphere";
+	if (component->getPrefabType() == PrefabType::CUBE)
+	{
+		Cube* cube = static_cast<Cube*>(component);
 
-		case PrefabType::CYLINDER:
-			return "Cylinder";
+		float size = cube->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size, size, size), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
 
-		default:
-			return "";
+	if (component->getPrefabType() == PrefabType::SPHERE)
+	{
+		SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+
+		PhysicalBodySphere* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodySphere(sphere->getRadius(), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::CYLINDER)
+	{
+		CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+
+		int axis = cylinder->getAxis();
+		float radius2 = cylinder->getRadius() * 2.0f;
+		float height = cylinder->getHeight();
+		btVector3 dimensions;
+		if (axis == 0)
+		{
+			dimensions = btVector3(height, radius2, radius2);
+		}
+		else if (axis == 1)
+		{
+			dimensions = btVector3(radius2, height, radius2);
+		}
+		else if (axis == 2)
+		{
+			dimensions = btVector3(radius2, radius2, height);
+		}
+		PhysicalBodyCylinder* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyCylinder(dimensions, 1.0f, (ShapeAlign) axis, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
 	}
 }
 
@@ -762,7 +794,6 @@ void showPrefabComponentDetails(Prefab* component)
 {
 	if (ImGui::CollapsingHeader(convertPrefabTypeToString(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		//ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
@@ -798,6 +829,14 @@ void showPrefabComponentDetails(Prefab* component)
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
+
+		if (component->getSceneObject()->getComponent(CT_PHYSICAL_BODY) == nullptr)
+		{
+			if (ImGui::Button("Add physical body"))
+			{
+				createPhysicalBodyForPrefab(component);
+			}
+		}
 	}
 }
 
