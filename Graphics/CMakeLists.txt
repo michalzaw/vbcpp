@@ -98,6 +98,7 @@ set (GRAPHICS_SOURCES
 		Graphics/UBO.h
 		Graphics/VAO.h
 		Graphics/VBO.cpp
+		Graphics/Vertex.cpp
 )
 
 set (GRAPHICS_HEADERS

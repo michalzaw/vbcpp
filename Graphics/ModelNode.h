@@ -19,10 +19,12 @@ struct ModelNodeMesh
     unsigned int firstVertexInVbo;
     unsigned int indicesCount;
 
+    unsigned int vertexSize;
+
     Material* material;
 
-    ModelNodeMesh(VBO* vbo, IBO* ibo, unsigned int firstVertex, unsigned int firstVertexInVbo, unsigned int indicesCount, Material* material)
-        : vbo(vbo), ibo(ibo), firstVertex(firstVertex), firstVertexInVbo(firstVertexInVbo), indicesCount(indicesCount), material(material)
+    ModelNodeMesh(VBO* vbo, IBO* ibo, unsigned int firstVertex, unsigned int firstVertexInVbo, unsigned int indicesCount, unsigned int vertexSize, Material* material)
+        : vbo(vbo), ibo(ibo), firstVertex(firstVertex), firstVertexInVbo(firstVertexInVbo), indicesCount(indicesCount), vertexSize(vertexSize), material(material)
     {}
 
 };

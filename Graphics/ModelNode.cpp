@@ -27,7 +27,7 @@ ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode
                 renderObject->addMirrorMaterial(material);
             }
         }
-        _meshes.push_back(new ModelNodeMesh(mesh.vbo, mesh.ibo, mesh.firstVertex, mesh.firstVertexInVbo, mesh.indicesCount, material));
+        _meshes.push_back(new ModelNodeMesh(mesh.vbo, mesh.ibo, mesh.firstVertex, mesh.firstVertexInVbo, mesh.indicesCount, mesh.vertexSize, material));
     }
 
     _parent = parent;

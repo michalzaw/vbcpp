@@ -1547,12 +1547,12 @@ void Renderer::renderDepth(RenderData* renderData)
         mesh->vbo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         if (isAlphaTest)
         {
             glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
 
@@ -1694,13 +1694,13 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
@@ -1897,21 +1897,21 @@ void Renderer::renderScene(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
         if (material->normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 8));
 
             glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 11));
 
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
         }

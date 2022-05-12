@@ -117,7 +117,7 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 		cubeMesh->ibo->bind();
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cubeMesh->vertexSize, (void*)0);
 
 		glDrawElements(GL_TRIANGLES,
 			cubeMesh->indicesCount,
@@ -180,7 +180,7 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 			cubeMesh->ibo->bind();
 
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cubeMesh->vertexSize, (void*)0);
 
 			glDrawElements(GL_TRIANGLES,
 				cubeMesh->indicesCount,
