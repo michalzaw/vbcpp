@@ -1,5 +1,6 @@
 set (GRAPHICS_SOURCES
 		Graphics/AABB.h
+		Graphics/AnimatedModelLoader.cpp
 		Graphics/Camera.cpp
 		Graphics/Camera.h
 		Graphics/CameraFPS.cpp
@@ -102,6 +103,7 @@ set (GRAPHICS_SOURCES
 )
 
 set (GRAPHICS_HEADERS
+		Graphics/AnimatedModelLoader.h
 		Graphics/VBO.h
 		Graphics/Vector3.h
 		Graphics/Vertex.h

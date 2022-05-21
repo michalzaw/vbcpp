@@ -4,6 +4,7 @@
 #include "../Graphics/LoadTexture.h"
 #include "../Graphics/LoadShader.h"
 #include "../Graphics/StaticModelLoader.h"
+#include "../Graphics/AnimatedModelLoader.h"
 #include "../GUI/FontLoader.h"
 #include "../Game/Directories.h"
 #include "../Game/GameConfig.h"
@@ -556,6 +557,38 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
     RStaticModel* m = dynamic_cast<RStaticModel*>( model.get() );
 
     if ( m )
+    {
+        _resources.push_back(std::move(model));
+        return m;
+    }
+    else
+        return 0;
+}
+
+
+RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, const std::string& texturePath)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RAnimatedModel* model = dynamic_cast<RAnimatedModel*>(res);
+        return model;
+    }
+
+    std::string finalPath = path;
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(path))
+        finalPath = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
+    AnimatedModelLoader loader;
+    std::unique_ptr<RAnimatedModel> model(loader.loadAnimatedModelWithHierarchy(finalPath, texturePath));
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
+
+    RAnimatedModel* m = dynamic_cast<RAnimatedModel*>(model.get());
+
+    if (m)
     {
         _resources.push_back(std::move(model));
         return m;

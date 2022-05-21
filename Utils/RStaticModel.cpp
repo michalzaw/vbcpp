@@ -1,7 +1,7 @@
 #include "RStaticModel.h"
 
 
-RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
+RStaticModel::RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
                            GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize)
     : Resource(RT_MODEL, path)
 {

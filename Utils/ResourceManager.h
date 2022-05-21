@@ -8,6 +8,7 @@
 #include "../Graphics/RoadProfileLoader.h"
 #include "../Graphics/RDisplayFont.h"
 #include "../Graphics/RMaterialsCollection.h"
+#include "RAnimatedModel.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -59,6 +60,8 @@ class ResourceManager
                                              std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes,
 											 bool normalsSmoothing = true);
         RStaticModel* loadModel(std::string path, std::string texturePath, bool normalsSmoothing = true);
+
+        RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 

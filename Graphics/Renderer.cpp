@@ -1054,6 +1054,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // SOLID_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
 

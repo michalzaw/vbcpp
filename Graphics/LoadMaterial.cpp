@@ -270,6 +270,8 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 		sMaterial->shader = NEW_TREE_MATERIAL;
 	else if (strcmp(type, "new_tree2") == 0)
 		sMaterial->shader = NEW_TREE_2_MATERIAL;
+	else if (strcmp(type, "solid_animated") == 0)
+		sMaterial->shader = SOLID_ANIMATED_MATERIAL;
 
 
     if (sMaterial->shader == GLASS_MATERIAL && sMaterial->glassTexture == NULL)

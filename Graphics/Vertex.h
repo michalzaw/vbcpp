@@ -54,6 +54,12 @@ struct AnimatedVertex
         normal = meshMenderVertex.normal.GLMvec();
         tangent = meshMenderVertex.tangent.GLMvec();
         bitangent = meshMenderVertex.binormal.GLMvec();
+
+        for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
+        {
+            boneIds[i] = -1;
+            weights[i] = -1;
+        }
     }
 
 };

@@ -94,6 +94,77 @@ void StaticModelLoader::runMeshMender(std::vector<MeshMender::Vertex>& vertices,
 }
 
 
+bool StaticModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMesh& mesh, bool isLoadingSingleNode, const glm::mat4& globalNodeTransform)
+{
+    std::vector<MeshMender::Vertex> meshVertices;
+    std::vector<unsigned int> meshIndices;
+
+    unsigned int materialIndexInScene = assimpMesh->mMaterialIndex;
+
+    // ----------------------------------------
+    aiString materialName;
+    _assimpScene->mMaterials[materialIndexInScene]->Get(AI_MATKEY_NAME, materialName);
+    if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
+    {
+        for (int j = 0; j < assimpMesh->mNumVertices; ++j)
+        {
+            const aiVector3D* position = &(assimpMesh->mVertices[j]);
+
+            glm::vec4 v;
+            if (!isLoadingSingleNode)
+                v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
+            else
+                v = glm::vec4(position->x, position->y, position->z, 1.0f);
+
+            _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
+        }
+
+        return false;
+    }
+    // ----------------------------------------
+
+    // meshes vertices
+    for (int j = 0; j < assimpMesh->mNumVertices; ++j)
+    {
+        MeshMender::Vertex vertex;
+        getMeshMenderVertexFromAssimpMesh(assimpMesh, j, vertex);
+
+        meshVertices.push_back(vertex);
+    }
+
+    // meshes indices
+    for (int j = 0; j < assimpMesh->mNumFaces; ++j)
+    {
+        const aiFace& face = assimpMesh->mFaces[j];
+        assert(face.mNumIndices == 3);
+        meshIndices.push_back(face.mIndices[0]);
+        meshIndices.push_back(face.mIndices[1]);
+        meshIndices.push_back(face.mIndices[2]);
+    }
+
+    // Mesh mender pass
+    runMeshMender(meshVertices, meshIndices);
+
+    // vertices and indices array
+    Vertex* vertices = new Vertex[meshVertices.size()];
+    for (unsigned int j = 0; j < meshVertices.size(); ++j)
+    {
+        vertices[j] = meshVertices[j];
+    }
+
+    unsigned int* indices = new unsigned int[meshIndices.size()];
+    for (unsigned int j = 0; j < meshIndices.size(); ++j)
+    {
+        indices[j] = meshIndices[j];
+    }
+
+    // create mesh
+    mesh.setMeshData(vertices, meshVertices.size(), indices, meshIndices.size(), materialIndexInScene, _materials[materialIndexInScene]->shader);
+
+    return true;
+}
+
+
 StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat4 parentTransform, StaticModelNode* parent)
 {
     Transform nodeTransform;
@@ -126,73 +197,10 @@ StaticModelNode* StaticModelLoader::createModelNode(aiNode* assimpNode, glm::mat
 
     for (int i = 0; i < assimpNode->mNumMeshes; ++i)
     {
-        std::vector<MeshMender::Vertex> meshVertices;
-        std::vector<unsigned int> meshIndices;
+        bool result = loadMeshFromNode(_assimpScene->mMeshes[assimpNode->mMeshes[i]], meshes[meshesIndex], isLoadingSingleNode, globalNodeTransform);
 
-        const aiMesh* assimpMesh = _assimpScene->mMeshes[assimpNode->mMeshes[i]];
-        unsigned int materialIndexInScene = assimpMesh->mMaterialIndex;
-
-        // ----------------------------------------
-        aiString materialName;
-        _assimpScene->mMaterials[materialIndexInScene]->Get(AI_MATKEY_NAME, materialName);
-        if (strcmp(materialName.C_Str(), COLLISION_MATERIAL_NAME) == 0)
-        {
-            for (int j = 0; j < assimpMesh->mNumVertices; ++j)
-            {
-                const aiVector3D* position = &(assimpMesh->mVertices[j]);
-
-                glm::vec4 v;
-                if (!isLoadingSingleNode)
-                    v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
-                else
-                    v = glm::vec4(position->x, position->y, position->z, 1.0f);
-
-                _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
-            }
-
-            continue;
-        }
-        // ----------------------------------------
-
-        // meshes vertices
-        for (int j = 0; j < assimpMesh->mNumVertices; ++j)
-        {
-            MeshMender::Vertex vertex;
-            getMeshMenderVertexFromAssimpMesh(assimpMesh, j, vertex);
-
-            meshVertices.push_back(vertex);
-        }
-
-        // meshes indices
-        for (int j = 0; j < assimpMesh->mNumFaces; ++j)
-        {
-            const aiFace& face = assimpMesh->mFaces[j];
-            assert(face.mNumIndices == 3);
-            meshIndices.push_back(face.mIndices[0]);
-            meshIndices.push_back(face.mIndices[1]);
-            meshIndices.push_back(face.mIndices[2]);
-        }
-
-        // Mesh mender pass
-        runMeshMender(meshVertices, meshIndices);
-
-        // vertices and indices array
-        Vertex* vertices = new Vertex[meshVertices.size()];
-        for (unsigned int j = 0; j < meshVertices.size(); ++j)
-        {
-            vertices[j] = meshVertices[j];
-        }
-
-        unsigned int* indices = new unsigned int[meshIndices.size()];
-        for (unsigned int j = 0; j < meshIndices.size(); ++j)
-        {
-            indices[j] = meshIndices[j];
-        }
-
-        // create mesh
-        meshes[meshesIndex].setMeshData(vertices, meshVertices.size(), indices, meshIndices.size(), materialIndexInScene, _materials[materialIndexInScene]->shader);
-
-        meshesIndex++;
+        if (result)
+            meshesIndex++;
     }
 
     // create model node

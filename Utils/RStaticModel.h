@@ -80,12 +80,6 @@ struct StaticModelMesh
                      unsigned int materialIndex, ShaderType shaderType,
 					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0, bool staticData = true)
     {
-        float* ffff = (float*)(vertices);
-
-        for (int i = 0; i < 20; ++i)
-        {
-            LOG_DEBUG(LOG_VARIABLE(ffff[i]));
-        }
         bool isInitialized = vbo != nullptr || ibo != nullptr;
 
         if (vertices)
@@ -314,7 +308,7 @@ class RStaticModel : public Resource
         void calculateAABB();
 
     public:
-        RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
+        RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
                      GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
@@ -323,7 +317,7 @@ class RStaticModel : public Resource
 
             _collisionMeshSize = 0;
         }
-        ~RStaticModel();
+        virtual ~RStaticModel();
 
         StaticModelNode* getRootNode();
         StaticModelNode* getNodeByName(const std::string& name);

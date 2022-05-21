@@ -1,4 +1,5 @@
 set (UTILS_SOURCES
+	Utils/RAnimatedModel.cpp
 	Utils/BezierCurvesUtils.cpp
 	Utils/Collision.cpp
 	Utils/Engine.cpp
@@ -28,6 +29,7 @@ set (UTILS_SOURCES
 )
 
 set (UTILS_HEADERS
+	Utils/RAnimatedModel.h
 	Utils/BezierCurvesUtils.h
 	Utils/Collision.h
 	Utils/Engine.h
