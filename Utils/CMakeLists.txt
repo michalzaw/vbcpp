@@ -1,5 +1,5 @@
 set (UTILS_SOURCES
-	Utils/RAnimatedModel.cpp
+	Utils/AssimpGlmConverter.cpp
 	Utils/BezierCurvesUtils.cpp
 	Utils/Collision.cpp
 	Utils/Engine.cpp
@@ -10,6 +10,7 @@ set (UTILS_SOURCES
 	Utils/LocalizationSystem.cpp
 	Utils/Logger.cpp
 	Utils/PolygonGenerator.cpp
+	Utils/RAnimatedModel.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
@@ -29,7 +30,7 @@ set (UTILS_SOURCES
 )
 
 set (UTILS_HEADERS
-	Utils/RAnimatedModel.h
+	Utils/AssimpGlmConverter.h
 	Utils/BezierCurvesUtils.h
 	Utils/Collision.h
 	Utils/Engine.h
@@ -41,6 +42,7 @@ set (UTILS_HEADERS
 	Utils/Logger.h
 	Utils/Math.h
 	Utils/PolygonGenerator.h
+	Utils/RAnimatedModel.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h

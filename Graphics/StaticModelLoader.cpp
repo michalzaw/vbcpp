@@ -4,6 +4,7 @@
 
 #include "MaterialSaver.h"
 
+#include "../Utils/AssimpGlmConverter.h"
 #include "../Utils/Logger.h"
 
 
@@ -108,13 +109,13 @@ bool StaticModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMe
     {
         for (int j = 0; j < assimpMesh->mNumVertices; ++j)
         {
-            const aiVector3D* position = &(assimpMesh->mVertices[j]);
+            const aiVector3D& position = assimpMesh->mVertices[j];
 
             glm::vec4 v;
             if (!isLoadingSingleNode)
-                v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
+                v = globalNodeTransform * AssimpGlmConverter::toVec4(position);
             else
-                v = glm::vec4(position->x, position->y, position->z, 1.0f);
+                v = AssimpGlmConverter::toVec4(position);
 
             _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
         }

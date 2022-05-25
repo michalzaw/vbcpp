@@ -2,6 +2,8 @@
 
 #include "MaterialSaver.h"
 
+#include "../Utils/AssimpGlmConverter.h"
+
 
 AnimatedModelLoader::AnimatedModelLoader()
 	: StaticModelLoader(false),
@@ -14,18 +16,6 @@ AnimatedModelLoader::AnimatedModelLoader()
 AnimatedModelLoader::~AnimatedModelLoader()
 {
 
-}
-
-
-glm::mat4 AnimatedModelLoader::convertMatrixToGLMFormat(const aiMatrix4x4& assimpMatrix)
-{
-    glm::mat4 result;
-    result[0][0] = assimpMatrix.a1; result[1][0] = assimpMatrix.a2; result[2][0] = assimpMatrix.a3; result[3][0] = assimpMatrix.a4;
-    result[0][1] = assimpMatrix.b1; result[1][1] = assimpMatrix.b2; result[2][1] = assimpMatrix.b3; result[3][1] = assimpMatrix.b4;
-    result[0][2] = assimpMatrix.c1; result[1][2] = assimpMatrix.c2; result[2][2] = assimpMatrix.c3; result[3][2] = assimpMatrix.c4;
-    result[0][3] = assimpMatrix.d1; result[1][3] = assimpMatrix.d2; result[2][3] = assimpMatrix.d3; result[3][3] = assimpMatrix.d4;
-
-    return result;
 }
 
 
@@ -57,7 +47,7 @@ void AnimatedModelLoader::extractBoneWeights(AnimatedVertex* vertices, unsigned 
 
             BoneInfo boneInfo;
             boneInfo.id = boneId;
-            boneInfo.offset = convertMatrixToGLMFormat(assimpMesh->mBones[i]->mOffsetMatrix);
+            boneInfo.offset = AssimpGlmConverter::toMat4(assimpMesh->mBones[i]->mOffsetMatrix);
 
             _boneInfos[boneName] = boneInfo;
         }
@@ -99,13 +89,13 @@ bool AnimatedModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModel
     {
         for (int j = 0; j < assimpMesh->mNumVertices; ++j)
         {
-            const aiVector3D* position = &(assimpMesh->mVertices[j]);
+            const aiVector3D& position = assimpMesh->mVertices[j];
 
             glm::vec4 v;
             if (!isLoadingSingleNode)
-                v = globalNodeTransform * glm::vec4(position->x, position->y, position->z, 1.0f);
+                v = globalNodeTransform * AssimpGlmConverter::toVec4(position);
             else
-                v = glm::vec4(position->x, position->y, position->z, 1.0f);
+                v = AssimpGlmConverter::toVec4(position);
 
             _collisionMesh.push_back(glm::vec3(v.x, v.y, v.z));
         }

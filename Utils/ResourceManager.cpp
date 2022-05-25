@@ -5,6 +5,7 @@
 #include "../Graphics/LoadShader.h"
 #include "../Graphics/StaticModelLoader.h"
 #include "../Graphics/AnimatedModelLoader.h"
+#include "../Graphics/AnimationLoader.h"
 #include "../GUI/FontLoader.h"
 #include "../Game/Directories.h"
 #include "../Game/GameConfig.h"
@@ -592,6 +593,38 @@ RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, cons
     {
         _resources.push_back(std::move(model));
         return m;
+    }
+    else
+        return 0;
+}
+
+
+RAnimation* ResourceManager::loadAnimation(const std::string& path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RAnimation* animation = dynamic_cast<RAnimation*>(res);
+        return animation;
+    }
+
+    std::string finalPath = path;
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(path))
+        finalPath = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
+    AnimationLoader loader;
+    std::unique_ptr<RAnimation> animation(loader.loadAnimation(finalPath));
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + animation.get()->getPath());
+
+    RAnimation* a = dynamic_cast<RAnimation*>(animation.get());
+
+    if (a)
+    {
+        _resources.push_back(std::move(animation));
+        return a;
     }
     else
         return 0;

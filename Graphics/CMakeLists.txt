@@ -1,6 +1,7 @@
 set (GRAPHICS_SOURCES
 		Graphics/AABB.h
 		Graphics/AnimatedModelLoader.cpp
+		Graphics/AnimationLoader.cpp
 		Graphics/Camera.cpp
 		Graphics/Camera.h
 		Graphics/CameraFPS.cpp
@@ -59,6 +60,7 @@ set (GRAPHICS_SOURCES
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp
 		Graphics/QuadTreeNode.h
+		Graphics/RAnimation.cpp
 		Graphics/RDisplayFont.cpp
 		Graphics/RDisplayFont.h
 		Graphics/RRoadProfile.cpp
@@ -104,6 +106,8 @@ set (GRAPHICS_SOURCES
 
 set (GRAPHICS_HEADERS
 		Graphics/AnimatedModelLoader.h
+		Graphics/AnimationLoader.h
+		Graphics/RAnimation.h
 		Graphics/VBO.h
 		Graphics/Vector3.h
 		Graphics/Vertex.h

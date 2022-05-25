@@ -13,7 +13,6 @@ class AnimatedModelLoader : public StaticModelLoader
 		std::map<std::string, BoneInfo> _boneInfos;
 		int _boneCounter;
 
-		glm::mat4 AnimatedModelLoader::convertMatrixToGLMFormat(const aiMatrix4x4& assimpMatrix);
 		void setBoneDataInVertex(AnimatedVertex& vertex, int boneId, float weight);
 
 		void extractBoneWeights(AnimatedVertex* vertices, unsigned int verticesCount, const aiMesh* assimpMesh);
