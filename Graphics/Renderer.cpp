@@ -1058,7 +1058,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.clear();
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
 
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
@@ -1911,15 +1911,34 @@ void Renderer::renderScene(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
-        if (material->normalmapTexture != NULL)
-        {
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 8));
 
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 11));
 
+        if (material->normalmapTexture != NULL)
+        {
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
+        }
+
+        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            for (int i = 0; i < 100; ++i) // todo: animation zmieniæ na sta³¹
+            {
+                SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+                const glm::mat4& matrix = skeletatlAnimation->getFinalBoneMatrices()[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
         }
 
         if (material->diffuseTexture != NULL)
@@ -2022,6 +2041,11 @@ void Renderer::renderScene(RenderData* renderData)
         {
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
+        }
+        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
         }
     }
     glEnable(GL_CULL_FACE);

@@ -64,7 +64,7 @@ void AnimatedModelLoader::extractBoneWeights(AnimatedVertex* vertices, unsigned 
 
             if (vertexId < verticesCount)
             {
-                setBoneDataInVertex(vertices[j], boneId, weight);
+                setBoneDataInVertex(vertices[vertexId], boneId, weight);
             }
             else
             {
@@ -156,7 +156,7 @@ RAnimatedModel* AnimatedModelLoader::loadAnimatedModelWithHierarchy(const std::s
 
     if (_assimpScene == nullptr)
     {
-        _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY);
+        _assimpScene = _assimpImporter.ReadFile(fileName.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_CalcTangentSpace | aiProcess_FlipUVs);
     }
     if (_assimpScene == nullptr)
     {

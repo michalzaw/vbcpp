@@ -90,6 +90,7 @@ set (GRAPHICS_SOURCES
 		Graphics/ShadowMap.h
 		Graphics/ShapePolygonComponent.cpp
 		Graphics/ShapePolygonComponent.h
+		Graphics/SkeletalAnimationComponent.cpp
 		Graphics/Sky.h
 		Graphics/StaticModelLoader.cpp
 		Graphics/StaticModelLoader.h
@@ -108,6 +109,7 @@ set (GRAPHICS_HEADERS
 		Graphics/AnimatedModelLoader.h
 		Graphics/AnimationLoader.h
 		Graphics/RAnimation.h
+		Graphics/SkeletalAnimationComponent.h
 		Graphics/VBO.h
 		Graphics/Vector3.h
 		Graphics/Vertex.h

@@ -34,14 +34,14 @@ CameraFPS* TestScene::createCameraFPSGlobal()
 	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(0, 0, 0);
-	cameraObject->setPosition(0, 0.5f, -15);
+	cameraFPS->setMoveSpeed(50);
+	cameraObject->setRotation(0, degToRad(180), 0);
+	cameraObject->setPosition(0, 1.5f, 5);
 
 	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 
-	cameraControlComponent->setIsActive(false);
+	cameraControlComponent->setIsActive(true);
 
 	return cameraFPS;
 }
@@ -114,9 +114,14 @@ void TestScene::initialize()
 	Bus* bus = busLoader.loadBus("neoplan");
 	bus->getSceneObject()->move(1.0f, 0.0f, 0.0f);*/
 
+	//initGui();
+	initAnimation();
+}
 
+void TestScene::initGui()
+{
 	{
-		Label* labelTitle = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Italic.ttf", 64), "START");
+		Label* labelTitle = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 64), "START");
 		labelTitle->setPosition(500, 500);
 		labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -161,10 +166,10 @@ void TestScene::initialize()
 		label->setScale(0.8, 0.8);
 		label->setPosition(680 + (400 - label->getWidth()) / 2.0f, 250);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680, 250);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 250);
 	}
 
@@ -179,10 +184,10 @@ void TestScene::initialize()
 		label2->setPosition(680 + label->getWidth() + 50 + (400 - label->getWidth() - 50 - label2->getWidth()) / 2.0f, 200);
 		label2->setScale(0.8, 0.8);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680 + label->getWidth() + 50, 200);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 200);
 	}
 
@@ -197,10 +202,10 @@ void TestScene::initialize()
 		label2->setPosition(680 + label->getWidth() + 50 + (400 - label->getWidth() - 50 - label2->getWidth()) / 2.0f, 150);
 		label2->setScale(0.8, 0.8);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680 + label->getWidth() + 50, 150);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 150);
 	}
 
@@ -290,6 +295,208 @@ void TestScene::initialize()
 		Label* label = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", size), "Font: " + toString(size));
 		label->setPosition(10, y);
 	}*/
+}
+
+
+void TestScene::initAnimation()
+{
+	/*SceneObject* animatedObject = _sceneManager->addSceneObject("Krystian");
+
+	RStaticModel* animatedModel = ResourceManager::getInstance().loadModelWithHierarchy("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
+	RenderObject* animatedRenderObject = _graphicsManager->addRenderObject(new RenderObject(animatedModel), animatedObject);*/
+
+	SceneObject* animatedObject = _sceneManager->addSceneObject("Krystian");
+
+	RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
+	//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/people4.dae", "Objects/peoples/Krystian/");
+	RenderObject* animatedRenderObject = _graphicsManager->addRenderObject(new RenderObject(animatedModel), animatedObject);
+
+	//RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian/Krystian2.dae");
+	//RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian/02_01.bvh");
+	RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
+	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation(animation);
+	animatedObject->addComponent(skeletalAnimation);
+
+
+
+	// people4.dae
+	/*skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_head"] = "head";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_neck_01"] = "neck";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_clavicle_r"] = "rCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_upperarm_r"] = "rShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_lowerarm_r"] = "rForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_hand_r"] = "rHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_01_r"] = "rThumb1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_02_r"] = "rThumb1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_03_r"] = "rThumb2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_01_r"] = "rIndex1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_02_r"] = "rIndex1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_03_r"] = "rIndex2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_01_r"] = "rMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_02_r"] = "rMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_03_r"] = "rMid2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_01_r"] = "rRing1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_02_r"] = "rRing1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_03_r"] = "rRing2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_01_r"] = "rPinky1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_02_r"] = "rPinky1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_03_r"] = "rPinky2";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_clavicle_l"] = "lCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_upperarm_l"] = "lShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_lowerarm_l"] = "lForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_hand_l"] = "lHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_01_l"] = "lThumb1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_02_l"] = "lThumb1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thumb_03_l"] = "lThumb2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_01_l"] = "lIndex1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_02_l"] = "lIndex1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_index_03_l"] = "lIndex2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_01_l"] = "lMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_02_l"] = "lMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_middle_03_l"] = "lMid2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_01_l"] = "lRing1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_02_l"] = "lRing1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ring_03_l"] = "lRing2";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_01_l"] = "lPinky1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_02_l"] = "lPinky1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pinky_03_l"] = "lPinky2";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_spine_03"] = "chest";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_spine_02"] = "abdomen";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_spine_01"] = "abdomen";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_pelvis"] = "hip";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thigh_r"] = "rThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_calf_r"] = "rShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_foot_r"] = "rFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ball_r"] = "rFoot";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_thigh_l"] = "lThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_calf_l"] = "lShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_foot_l"] = "lFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["people4_ball_l"] = "lFoot";*/
+
+
+
+
+	// Krystian.dae
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Head"] = "head";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Neck1"] = "neck";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Neck"] = "neck";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightShoulder"] = "rCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightArm"] = "rShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightForeArm"] = "rForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightHand"] = "rHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightFingerBase"] = "rHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightHandFinger1"] = "rMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RThumb"] = "rThumb1";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftShoulder"] = "lCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftArm"] = "lShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftForeArm"] = "lForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftHand"] = "lHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftFingerBase"] = "lHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftHandFinger1"] = "lMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LThumb"] = "lThumb1";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Spine1"] = "chest";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Spine"] = "abdomen";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LowerBack"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_Hips"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RHipJoint"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LHipJoint"] = "hip";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightUpLeg"] = "rThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightLeg"] = "rShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightFoot"] = "rFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_RightToeBase"] = "rFoot";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftUpLeg"] = "lThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftLeg"] = "lShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftFoot"] = "lFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
+	
+
+
+	/*skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Head"] = "head";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Neck1"] = "neck";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Neck"] = "neck";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightShoulder"] = "rCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightArm"] = "rShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightForeArm"] = "rForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightHand"] = "rHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightFingerBase"] = "rHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightHandFinger1"] = "rMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RThumb"] = "rThumb1";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftShoulder"] = "lCollar";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftArm"] = "lShldr";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftForeArm"] = "lForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftHand"] = "lHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftFingerBase"] = "lHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftHandFinger1"] = "lMid1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LThumb"] = "lThumb1";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Spine1"] = "chest";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Spine"] = "abdomen";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LowerBack"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Hips"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RHipJoint"] = "hip";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LHipJoint"] = "hip";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightUpLeg"] = "rThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightLeg"] = "rShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightFoot"] = "rFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightToeBase"] = "rFoot";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftUpLeg"] = "lThigh";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftLeg"] = "lShin";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftFoot"] = "lFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftToeBase"] = "lFoot";*/
+
+
+
+
+	/*skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Head"] = "Head";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Neck1"] = "Neck1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Neck"] = "Neck";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightShoulder"] = "RightShoulder";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightArm"] = "RightArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightForeArm"] = "RightForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightHand"] = "RightHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightFingerBase"] = "RightFingerBase";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightHandFinger1"] = "RightHandFinger1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RThumb"] = "RThumb";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftShoulder"] = "LeftShoulder";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftArm"] = "LeftArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftForeArm"] = "LeftForeArm";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftHand"] = "LeftHand";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftFingerBase"] = "LeftFingerBase";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftHandFinger1"] = "LeftHandFinger1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LThumb"] = "LThumb";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Spine1"] = "Spine1";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Spine"] = "Spine";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LowerBack"] = "LowerBack";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["Hips"] = "Hips";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RHipJoint"] = "RHipJoint";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LHipJoint"] = "LHipJoint";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightUpLeg"] = "RightUpLeg";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightLeg"] = "RightLeg";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightFoot"] = "RightFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["RightToeBase"] = "RightToeBase";
+
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftUpLeg"] = "LeftUpLeg";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftLeg"] = "LeftLeg";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftFoot"] = "LeftFoot";
+	skeletalAnimation->_animationNodeNameToBoneNameInModelMap["LeftToeBase"] = "LeftToeBase";*/
 }
 
 

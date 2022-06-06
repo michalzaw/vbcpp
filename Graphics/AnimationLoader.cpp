@@ -56,7 +56,7 @@ void AnimationLoader::loadBones(const aiAnimation* assimpAnimation, std::vector<
 	{
 		const auto& chanel = assimpAnimation->mChannels[i];
 
-		Bone bone(0, chanel->mNodeName.C_Str());
+		Bone bone(0, chanel->mNodeName.C_Str()); // todo: animation ustawianie id zamiast 0
 		loadBone(chanel, bone);
 		outBones.push_back(bone);
 	}

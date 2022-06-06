@@ -28,7 +28,7 @@ class Bone final
 	friend class AnimationLoader;
 
 	private:
-		int	_id;
+		int	_id; // todo: animation - prawdopodobnie niepotrzebne
 		std::string _name;
 		glm::mat4 _localTransform;
 
@@ -36,11 +36,24 @@ class Bone final
 		std::vector<KeyRotation> _rotations;
 		std::vector<KeyScale>	 _scales;
 
+		float getTimeFactor(float lastKeyframeTimestamp, float nextKeyframeTimestamp, float animationTime);
+
+		int getPositionIndex(float animationTime);
+		int getRotationIndex(float animationTime);
+		int getScaleIndex(float animationTime);
+
+		glm::mat4 interpolatePosition(float animationTime);
+		glm::mat4 interpolateRotation(float animationTime);
+		glm::mat4 interpolateScale(float animationTime);
+
 	public:
 		Bone(int id, const std::string& name);
 		~Bone();
 
-		void update();
+		inline const std::string& getName() { return _name; }
+		inline const glm::mat4 getLocalTransform() { return _localTransform; }
+
+		void update(float animationTime);
 
 };
 
@@ -68,6 +81,13 @@ class RAnimation final : public Resource
 	public:
 		RAnimation(const std::string& path);
 		~RAnimation();
+
+		Bone* findBone(const std::string& name); // todo: animation u¿ycie mapy z Bone zamiast vectora
+
+		inline float getDuration() { return _duration; }
+		inline float getTicksPerSecond() { return _ticksPerSecond; }
+
+		inline AnimationNodeData* getRootNode() { return &_rootNode; }
 
 };
 

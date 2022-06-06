@@ -23,6 +23,7 @@
 #include "DisplayComponent.h"
 #include "CrossroadComponent.h"
 #include "RoadIntersectionComponent.h"
+#include "SkeletalAnimationComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -53,6 +54,7 @@ class GraphicsManager
 		std::vector<CrossroadComponent*>            _crossroadComponents;
         std::vector<RoadIntersectionComponent*>     _roadIntersectionComponents;
         std::vector<RoadObject*>                    _roadObjects;
+        std::vector<SkeletalAnimationComponent*>    _skeletalAnimations;
 
 		Sky*						_sky;
 
@@ -96,6 +98,7 @@ class GraphicsManager
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
         RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
+        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -112,6 +115,7 @@ class GraphicsManager
 		void removeSky(Sky* sky);
 		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
         void removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent);
+        void removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent);
 
 
         void setCurrentCamera(CameraStatic* camera);

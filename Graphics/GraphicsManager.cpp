@@ -257,6 +257,16 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
+{
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
+
+    _skeletalAnimations.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -448,6 +458,22 @@ void GraphicsManager::removeRoadIntersectionComponent(RoadIntersectionComponent*
 }
 
 
+void GraphicsManager::removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -607,6 +633,11 @@ void GraphicsManager::update(float deltaTime)
     for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
     {
         roadIntersectionComponent->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)
+    {
+        skeletalAnimation->update(deltaTime);
     }
 }
 
