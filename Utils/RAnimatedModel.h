@@ -8,6 +8,8 @@
 
 #include "RStaticModel.h"
 
+#include "../Graphics/AnimationNodeData.h"
+
 
 struct BoneInfo final
 {
@@ -29,6 +31,9 @@ class RAnimatedModel : public RStaticModel
 		virtual ~RAnimatedModel();
 
 		inline const std::map<std::string, BoneInfo>& getBoneInfos() { return _boneInfos; }
+
+		// todo: animation - private
+		AnimationNodeData _bonesRootNode;
 
 };
 

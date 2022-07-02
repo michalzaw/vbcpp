@@ -257,9 +257,9 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
-SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap)
 {
-    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation, animationNodeNameToBoneNameInModelMap);
 
     _skeletalAnimations.push_back(skeletalAnimation);
 

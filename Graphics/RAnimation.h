@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "AnimationNodeData.h"
+
 #include "../Utils/Resource.h"
 
 
@@ -54,15 +56,6 @@ class Bone final
 		inline const glm::mat4 getLocalTransform() { return _localTransform; }
 
 		void update(float animationTime);
-
-};
-
-
-struct AnimationNodeData final
-{
-	glm::mat4 transformation;
-	std::string name;
-	std::vector<AnimationNodeData> children;
 
 };
 

@@ -17,6 +17,8 @@ class AnimatedModelLoader : public StaticModelLoader
 
 		void extractBoneWeights(AnimatedVertex* vertices, unsigned int verticesCount, const aiMesh* assimpMesh);
 
+		void loadNode(const aiNode* assimpNode, AnimationNodeData& outNode); // todo: animation - ta sama funkcja co w AnimationLoader
+
 		bool loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMesh& mesh, bool isLoadingSingleNode, const glm::mat4& globalNodeTransform) override;
 
 	public:

@@ -109,6 +109,7 @@ set (GRAPHICS_HEADERS
 		Graphics/AnimatedModelLoader.h
 		Graphics/AnimationLoader.h
 		Graphics/RAnimation.h
+		Graphics/AnimationNodeData.h
 		Graphics/SkeletalAnimationComponent.h
 		Graphics/VBO.h
 		Graphics/Vector3.h

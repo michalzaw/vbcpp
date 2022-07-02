@@ -98,7 +98,7 @@ class GraphicsManager
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
         RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
-        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
+        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie

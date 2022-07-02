@@ -75,6 +75,20 @@ void AnimatedModelLoader::extractBoneWeights(AnimatedVertex* vertices, unsigned 
 }
 
 
+void AnimatedModelLoader::loadNode(const aiNode* assimpNode, AnimationNodeData& outNode)
+{
+    outNode.name = std::string(assimpNode->mName.C_Str());
+    outNode.transformation = AssimpGlmConverter::toMat4(assimpNode->mTransformation);
+
+    for (unsigned int i = 0; i < assimpNode->mNumChildren; ++i)
+    {
+        AnimationNodeData child;
+        loadNode(assimpNode->mChildren[i], child);
+        outNode.children.push_back(child);
+    }
+}
+
+
 bool AnimatedModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMesh& mesh, bool isLoadingSingleNode, const glm::mat4& globalNodeTransform)
 {
     std::vector<MeshMender::Vertex> meshVertices;
@@ -124,7 +138,7 @@ bool AnimatedModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModel
     }
 
     // Mesh mender pass
-    runMeshMender(meshVertices, meshIndices);
+    //runMeshMender(meshVertices, meshIndices);
 
     // vertices and indices array
     AnimatedVertex* vertices = new AnimatedVertex[meshVertices.size()];
@@ -184,6 +198,8 @@ RAnimatedModel* AnimatedModelLoader::loadAnimatedModelWithHierarchy(const std::s
     }
 
     RAnimatedModel* model = new RAnimatedModel(fileName, rootNode, _materials, _boneInfos, GL_TRIANGLES, colMesh, _collisionMesh.size());
+
+    loadNode(_assimpScene->mRootNode, model->_bonesRootNode);
 
     _materialLoader->closeFile();
     _collisionMesh.clear();
