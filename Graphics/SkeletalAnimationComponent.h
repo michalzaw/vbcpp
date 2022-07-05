@@ -36,7 +36,9 @@ class SkeletalAnimationComponent final : public Component
 		void onAttachedToScenObject() override;
 
 		void createDebugBoneObjects();
-		void createDebugBoneObjectForBone(AnimationNodeData* nodeData, SceneObject* parent = nullptr);
+		SceneObject* createDebugBoneObject(AnimationNodeData* nodeData, const glm::vec4& color);
+		void createDebugBoneObjectForModel(AnimationNodeData* nodeData, const glm::vec4& color, SceneObject* parent = nullptr);
+		void createDebugBoneObjectForAnimation(AnimationNodeData* nodeData, const glm::vec4& color, SceneObject* parent = nullptr);
 
 		std::string mapAnimationNodeNameToBoneNameInModel(const std::string& animationNodeName);
 
@@ -46,7 +48,7 @@ class SkeletalAnimationComponent final : public Component
 
 
 		void calculateBoneTransformInModel(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
-		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
+		void calculateBoneTransform(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
 		SkeletalAnimationComponent(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);

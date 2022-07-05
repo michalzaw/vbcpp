@@ -101,7 +101,7 @@ void SkeletalAnimationComponent::onAttachedToScenObject()
 		glm::mat4 rot2 = glm::mat4_cast(getRotation(_boneTransformMatricesInAnimation[i]));
 
 		//_boneTransformOffsetsMatrices[i] = glm::translate(offset) * rot2 * glm::inverse(rot1);
-		_boneTransformOffsetsMatrices[i] = glm::inverse(_boneTransformMatricesInAnimation[i]) * _boneTransformMatricesInModel[i];
+		//_boneTransformOffsetsMatrices[i] = glm::inverse(_boneTransformMatricesInAnimation[i]) * _boneTransformMatricesInModel[i];
 	}
 
 	createDebugBoneObjects();
@@ -111,13 +111,36 @@ void SkeletalAnimationComponent::onAttachedToScenObject()
 // todo: animation przeniesc do osobnego pliku
 void SkeletalAnimationComponent::createDebugBoneObjects()
 {
-	createDebugBoneObjectForBone(&_animatedModel->_bonesRootNode, getSceneObject());
+	createDebugBoneObjectForModel(&_animatedModel->_bonesRootNode, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f), getSceneObject());
+	createDebugBoneObjectForAnimation(_animation->getRootNode(), glm::vec4(0.0f, 1.0f, 0.0f, 1.0f), getSceneObject());
 }
 
 
-void SkeletalAnimationComponent::createDebugBoneObjectForBone(AnimationNodeData* nodeData, SceneObject* parent)
+SceneObject* SkeletalAnimationComponent::createDebugBoneObject(AnimationNodeData* nodeData, const glm::vec4& color)
 {
 	SceneObject* sceneObject = getSceneObject()->getSceneManager()->addSceneObject(nodeData->name);
+
+	Material* material = new Material;
+	material->diffuseColor = color;
+	material->shader = NOTEXTURE_ALWAYS_VISIBLE_MATERIAL;
+
+	Cube* cube = new Cube(2.0f, material);
+	cube->init();
+
+	getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, sceneObject);
+
+	nodeData->_helperSceneObject = sceneObject;
+
+	return sceneObject;
+}
+
+
+void SkeletalAnimationComponent::createDebugBoneObjectForModel(AnimationNodeData* nodeData, const glm::vec4& color, SceneObject* parent)
+{
+	SceneObject* sceneObject = createDebugBoneObject(nodeData, color);
+
+	parent->addChild(sceneObject);
+
 	sceneObject->setPosition(getTranslation(nodeData->transformation));
 
 	//glm::vec3 rotationEulerAngles = glm::eulerAngles(getRotation(nodeData->transformation));
@@ -135,22 +158,32 @@ void SkeletalAnimationComponent::createDebugBoneObjectForBone(AnimationNodeData*
 	sceneObject->setRotationQuaternion(glm::conjugate(getRotation(nodeData->transformation)));
 	sceneObject->setScale(getScale(nodeData->transformation));
 
+	for (AnimationNodeData& child : nodeData->children)
+	{
+		createDebugBoneObjectForModel(&child, color, sceneObject);
+	}
+}
+
+
+void SkeletalAnimationComponent::createDebugBoneObjectForAnimation(AnimationNodeData* nodeData, const glm::vec4& color, SceneObject* parent)
+{
+	SceneObject* sceneObject = createDebugBoneObject(nodeData, color);
+
 	parent->addChild(sceneObject);
 
-	Material* material = new Material;
-	material->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	material->shader = NOTEXTURE_ALWAYS_VISIBLE_MATERIAL;
+	Bone* bone = _animation->findBone(nodeData->name);
+	if (bone != nullptr)
+	{
+		bone->update(0.0f);
 
-	Cube* cube = new Cube(2.0f, material);
-	cube->init();
-
-	getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, sceneObject);
-
-	nodeData->_helperSceneObject = sceneObject;
+		sceneObject->setPosition(getTranslation(bone->getLocalTransform()));
+		sceneObject->setRotationQuaternion(glm::conjugate(getRotation(bone->getLocalTransform())));
+		sceneObject->setScale(getScale(bone->getLocalTransform()));
+	}
 
 	for (AnimationNodeData& child : nodeData->children)
 	{
-		createDebugBoneObjectForBone(&child, sceneObject);
+		createDebugBoneObjectForAnimation(&child, color, sceneObject);
 	}
 }
 
@@ -185,7 +218,7 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInModel(const Anim
 		const glm::mat4& offset = boneInfo->second.offset;
 
 		//_finalBoneMatrices[index] = globalTransform * offset;
-		_boneTransformMatricesInModel[index] = nodeTransform;// globalTransform;// *offset;
+		_boneTransformMatricesInModel[index] = globalTransform;// *offset;
 	}
 	// ------------------------------------------------------------
 
@@ -220,7 +253,7 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInAnimation(const 
 				const glm::mat4& offset = boneInfo->second.offset;
 
 				//_finalBoneMatrices[index] = globalTransform * offset;
-				_boneTransformMatricesInAnimation[index] = nodeTransform;// globalTransform;// *offset;
+				_boneTransformMatricesInAnimation[index] = globalTransform;// *offset;
 			}
 		}
 	}
@@ -234,6 +267,7 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInAnimation(const 
 }
 
 
+// todo: animation - add const to param
 void SkeletalAnimationComponent::calculateBoneTransformInModel(AnimationNodeData* node, const glm::mat4& parentTransform)
 {
 	const std::string& nodeName = node->name;
@@ -264,17 +298,23 @@ void SkeletalAnimationComponent::calculateBoneTransformInModel(AnimationNodeData
 }
 
 
-void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform)
+// todo: animation - add const to param
+void SkeletalAnimationComponent::calculateBoneTransform(AnimationNodeData* node, const glm::mat4& parentTransform)
 {
 	const std::string& nodeName = node->name;
 	glm::mat4 nodeTransform = node->transformation;
 
-	Bone* bone = _animation->findBone(nodeName);
+	if (node->_helperSceneObject != nullptr)
+	{
+		node->transformation = node->_helperSceneObject->getLocalTransformMatrix();
+	}
+
+	/*Bone* bone = _animation->findBone(nodeName);
 	if (bone != nullptr)
 	{
 		bone->update(_currentTime);
 		nodeTransform = bone->getLocalTransform(); // todo: animation lepiej ¿eby update zwraca³ t¹ transformacjê, zamiast zapisywaæ j¹ wewn¹trz bone
-	}
+	}*/
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
 
@@ -295,7 +335,7 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 				int index = boneInfo->second.id;
 				const glm::mat4& offset = boneInfo->second.offset;
 
-				_finalBoneMatrices[index] = parentTransform * _boneTransformOffsetsMatrices[index] * nodeTransform * offset;
+				_finalBoneMatrices[index] = globalTransform * _boneTransformOffsetsMatrices[index] * offset;
 			}
 		}
 	}
@@ -312,7 +352,7 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 
 	for (int i = 0; i < node->children.size(); ++i)
 	{
-		calculateBoneTransform(&node->children[i], parentTransform * _boneTransformOffsetsMatrices[index] * nodeTransform);
+		calculateBoneTransform(&node->children[i], globalTransform);
 	}
 }
 
@@ -325,8 +365,8 @@ void SkeletalAnimationComponent::update(float deltaTime)
 	//_currentTime = 2.5f;
 	_currentTime = fmod(_currentTime, _animation->getDuration());
 
-	//calculateBoneTransform(_animation->getRootNode());
-	calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
+	calculateBoneTransform(_animation->getRootNode());
+	//calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
 	//calculateBoneTransform(_animatedModel->getRootNode());
 	//calculateBoneTransform(&_animatedModel->_bonesRootNode);
 }
