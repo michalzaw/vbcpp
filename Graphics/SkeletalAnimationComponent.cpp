@@ -5,6 +5,7 @@
 #include "RAnimation.h"
 #include "RenderObject.h"
 
+#include "../Scene/SceneManager.h"
 #include "../Scene/SceneObject.h"
 
 #include "../Utils/Math.h"
@@ -31,6 +32,7 @@ SkeletalAnimationComponent::~SkeletalAnimationComponent()
 }
 
 
+// todo: animation przeniesc do osobnego pliku
 glm::vec3 getTranslation(const glm::mat4& transformMatrix)
 {
 	glm::vec3 scale;
@@ -54,6 +56,19 @@ glm::quat getRotation(const glm::mat4& transformMatrix)
 	glm::decompose(transformMatrix, scale, orientation, translation, skew, perspective);
 
 	return orientation;
+}
+
+
+glm::vec3 getScale(const glm::mat4& transformMatrix)
+{
+	glm::vec3 scale;
+	glm::quat orientation;
+	glm::vec3 translation;
+	glm::vec3 skew;
+	glm::vec4 perspective;
+	glm::decompose(transformMatrix, scale, orientation, translation, skew, perspective);
+
+	return scale;
 }
 
 
@@ -85,8 +100,57 @@ void SkeletalAnimationComponent::onAttachedToScenObject()
 		glm::mat4 rot1 = glm::mat4_cast(getRotation(_boneTransformMatricesInModel[i]));
 		glm::mat4 rot2 = glm::mat4_cast(getRotation(_boneTransformMatricesInAnimation[i]));
 
-		_boneTransformOffsetsMatrices[i] = glm::translate(offset) * rot2 * glm::inverse(rot1);
-		//_boneTransformOffsetsMatrices[i] = glm::inverse(_boneTransformMatricesInAnimation[i]) * _boneTransformMatricesInModel[i];
+		//_boneTransformOffsetsMatrices[i] = glm::translate(offset) * rot2 * glm::inverse(rot1);
+		_boneTransformOffsetsMatrices[i] = glm::inverse(_boneTransformMatricesInAnimation[i]) * _boneTransformMatricesInModel[i];
+	}
+
+	createDebugBoneObjects();
+}
+
+
+// todo: animation przeniesc do osobnego pliku
+void SkeletalAnimationComponent::createDebugBoneObjects()
+{
+	createDebugBoneObjectForBone(&_animatedModel->_bonesRootNode, getSceneObject());
+}
+
+
+void SkeletalAnimationComponent::createDebugBoneObjectForBone(AnimationNodeData* nodeData, SceneObject* parent)
+{
+	SceneObject* sceneObject = getSceneObject()->getSceneManager()->addSceneObject(nodeData->name);
+	sceneObject->setPosition(getTranslation(nodeData->transformation));
+
+	//glm::vec3 rotationEulerAngles = glm::eulerAngles(getRotation(nodeData->transformation));
+	//rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
+	//sceneObject->setRotation(rotationEulerAngles);
+
+	// https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
+	// funkcja glm::decompose zwraca niepoprawny kwaternion
+	// aby otrzymaæ prawid³ow¹ rotacjê nale¿y wykonaæ glm::conjugate
+	// conjugate tworzy tak naprawdê rotacjê odwrotn¹
+	// dlatego te¿ w ObjectPropertiesWindow dzia³a³ poni¿szy kod:
+	// glm::vec3 rotationEulerAngles = glm::eulerAngles(getRotation(nodeData->transformation));
+	// rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
+	// jeœli jednak chcemy operowaæ na kwaternionie, to lepiej wykonaæ glm::conjugate(orientation);
+	sceneObject->setRotationQuaternion(glm::conjugate(getRotation(nodeData->transformation)));
+	sceneObject->setScale(getScale(nodeData->transformation));
+
+	parent->addChild(sceneObject);
+
+	Material* material = new Material;
+	material->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	material->shader = NOTEXTURE_ALWAYS_VISIBLE_MATERIAL;
+
+	Cube* cube = new Cube(2.0f, material);
+	cube->init();
+
+	getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, sceneObject);
+
+	nodeData->_helperSceneObject = sceneObject;
+
+	for (AnimationNodeData& child : nodeData->children)
+	{
+		createDebugBoneObjectForBone(&child, sceneObject);
 	}
 }
 
@@ -121,7 +185,7 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInModel(const Anim
 		const glm::mat4& offset = boneInfo->second.offset;
 
 		//_finalBoneMatrices[index] = globalTransform * offset;
-		_boneTransformMatricesInModel[index] = globalTransform;// *offset;
+		_boneTransformMatricesInModel[index] = nodeTransform;// globalTransform;// *offset;
 	}
 	// ------------------------------------------------------------
 
@@ -156,7 +220,7 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInAnimation(const 
 				const glm::mat4& offset = boneInfo->second.offset;
 
 				//_finalBoneMatrices[index] = globalTransform * offset;
-				_boneTransformMatricesInAnimation[index] = globalTransform;// *offset;
+				_boneTransformMatricesInAnimation[index] = nodeTransform;// globalTransform;// *offset;
 			}
 		}
 	}
@@ -170,16 +234,21 @@ void SkeletalAnimationComponent::calculateDefaultBoneTransformInAnimation(const 
 }
 
 
-void SkeletalAnimationComponent::calculateBoneTransform(const StaticModelNode* node, const glm::mat4& parentTransform)
+void SkeletalAnimationComponent::calculateBoneTransformInModel(AnimationNodeData* node, const glm::mat4& parentTransform)
 {
 	const std::string& nodeName = node->name;
-	glm::mat4 nodeTransform = node->transform.getTransformMatrix();
+
+	if (node->_helperSceneObject != nullptr)
+	{
+		node->transformation = node->_helperSceneObject->getLocalTransformMatrix();
+	}
+
+	glm::mat4 nodeTransform = node->transformation;
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
 
 
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
-
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
 		int index = boneInfo->second.id;
@@ -188,28 +257,9 @@ void SkeletalAnimationComponent::calculateBoneTransform(const StaticModelNode* n
 		_finalBoneMatrices[index] = globalTransform * offset;
 	}
 
-
-	/*for (const auto& pair : _animationNodeNameToBoneNameInModelMap)
-	{
-		if (pair.second == nodeName)
-		{
-			const std::string& boneName = pair.first;
-			auto boneInfo = _animatedModel->getBoneInfos().find(boneName);
-
-
-			if (boneInfo != _animatedModel->getBoneInfos().end())
-			{
-				int index = boneInfo->second.id;
-				const glm::mat4& offset = boneInfo->second.offset;
-
-				_finalBoneMatrices[index] = globalTransform * offset;
-			}
-		}
-	}*/
-
 	for (int i = 0; i < node->children.size(); ++i)
 	{
-		calculateBoneTransform(node->children[i], globalTransform);
+		calculateBoneTransformInModel(&node->children[i], globalTransform);
 	}
 }
 
@@ -231,6 +281,7 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 
 	//std::string boneName = mapAnimationNodeNameToBoneNameInModel(nodeName);
 	//auto boneInfo = _animatedModel->getBoneInfos().find(boneName);
+	int index = 0;
 	for (const auto& pair : _animationNodeNameToBoneNameInModelMap)
 	{
 		if (pair.second == nodeName)
@@ -244,24 +295,24 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 				int index = boneInfo->second.id;
 				const glm::mat4& offset = boneInfo->second.offset;
 
-				_finalBoneMatrices[index] = globalTransform * /*_boneTransformOffsetsMatrices[index] */ offset;
+				_finalBoneMatrices[index] = parentTransform * _boneTransformOffsetsMatrices[index] * nodeTransform * offset;
 			}
 		}
 	}
 
-	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
+	/*auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
 		int index = boneInfo->second.id;
 		const glm::mat4& offset = boneInfo->second.offset;
 
 		_finalBoneMatrices[index] = globalTransform * offset;
-	}
+	}*/
 
 
 	for (int i = 0; i < node->children.size(); ++i)
 	{
-		calculateBoneTransform(&node->children[i], globalTransform);
+		calculateBoneTransform(&node->children[i], parentTransform * _boneTransformOffsetsMatrices[index] * nodeTransform);
 	}
 }
 
@@ -270,11 +321,12 @@ void SkeletalAnimationComponent::update(float deltaTime)
 {
 	_deltaTime = deltaTime;
 
-	_currentTime += _deltaTime * _animation->getTicksPerSecond();
+	//_currentTime += _deltaTime * _animation->getTicksPerSecond();
 	//_currentTime = 2.5f;
 	_currentTime = fmod(_currentTime, _animation->getDuration());
 
-	calculateBoneTransform(_animation->getRootNode());
+	//calculateBoneTransform(_animation->getRootNode());
+	calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
 	//calculateBoneTransform(_animatedModel->getRootNode());
 	//calculateBoneTransform(&_animatedModel->_bonesRootNode);
 }

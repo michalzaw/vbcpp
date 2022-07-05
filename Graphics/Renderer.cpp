@@ -1060,6 +1060,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
 
+    // NOTEXTURE_MATERIAL
+    _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
+
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
 
@@ -1779,6 +1782,10 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDepthMask(GL_TRUE);
             }
+            else if (currentShader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glEnable(GL_DEPTH_TEST);
+            }
 
             if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
@@ -1799,6 +1806,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == DECAL_MATERIAL)
             {
                 glDepthMask(GL_FALSE);
+            }
+            else if (material->shader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glDisable(GL_DEPTH_TEST);
             }
             else if (material->shader == EDITOR_AXIS_SHADER)
             {
@@ -2053,6 +2064,7 @@ void Renderer::renderScene(RenderData* renderData)
     glDisable(GL_BLEND);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB

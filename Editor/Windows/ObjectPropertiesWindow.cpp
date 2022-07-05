@@ -728,6 +728,95 @@ void showBusStopComponentDetails(BusStopComponent* component)
 	}
 }
 
+AnimationNodeData* selectedAnimationNode = nullptr;
+void inspectAnimationNode(AnimationNodeData& animationNode, std::function<bool(AnimationNodeData&)> isBoneFunction)
+{
+	ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+	if (animationNode.children.size() == 0)
+	{
+		node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
+	}
+
+	if (&animationNode == selectedAnimationNode)
+	{
+		node_flags |= ImGuiTreeNodeFlags_Selected;
+	}
+
+	if (isBoneFunction(animationNode))
+	{
+		node_flags |= ImGuiTreeNodeFlags_Framed;
+	}
+
+	//ImGui::PushID(object);
+	bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)&animationNode, node_flags, animationNode.name.c_str());
+
+	if (ImGui::IsItemClicked())
+	{
+		selectedAnimationNode = &animationNode;
+	}
+
+	if (node_open)
+	{
+		for (AnimationNodeData& child : animationNode.children)
+		{
+			inspectAnimationNode(child, isBoneFunction);
+		}
+		ImGui::TreePop();
+	}
+}
+
+
+void showNodeTransformEdit(AnimationNodeData* animationNode)
+{
+	ImGui::PushID("AnimationNodeTransform");
+
+	ImGui::Text("Bone Transformation: %s", animationNode != nullptr ? animationNode->name.c_str() : "");
+
+	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+
+	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(animationNode != nullptr ? animationNode->transformation : glm::mat4(1.0f)), matrixTranslation, matrixRotation, matrixScale);
+
+	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
+	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
+	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
+
+	if (animationNode != nullptr)
+	{
+		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(animationNode->transformation));
+	}
+
+	ImGui::PopID();
+}
+
+
+void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		RenderObject* renderObject = dynamic_cast<RenderObject*>(component->getSceneObject()->getComponent(CT_RENDER_OBJECT));
+		RAnimatedModel* animatedModel = dynamic_cast<RAnimatedModel*>(renderObject->getModel());
+
+		AnimationNodeData& modelRootNode = animatedModel->_bonesRootNode;
+		AnimationNodeData& animationRootNode = *(component->getAnimiation()->getRootNode());
+
+		showNodeTransformEdit(selectedAnimationNode);
+
+		ImGui::Separator();
+
+		ImGui::Text("Animated model:");
+		inspectAnimationNode(modelRootNode, [animatedModel](AnimationNodeData& animationNode)
+			{
+
+				return animatedModel->getBoneInfos().find(animationNode.name) != animatedModel->getBoneInfos().end();
+			});
+
+		ImGui::Separator();
+		ImGui::Text("Animation:");
+		inspectAnimationNode(animationRootNode, [](AnimationNodeData& animationNode) { return false; });
+	}
+}
+
 
 void showObjectProperties()
 {
@@ -788,6 +877,12 @@ void showObjectProperties()
 			if (busStopComponent)
 			{
 				showBusStopComponentDetails(busStopComponent);
+			}
+
+			SkeletalAnimationComponent* skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION));
+			if (skeletalAnimationComponent)
+			{
+				showSkeletalAnimationComponentDetails(skeletalAnimationComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

@@ -8,11 +8,16 @@
 #include <glm/glm.hpp>
 
 
+class SceneObject;
+
+
 struct AnimationNodeData final
 {
 	glm::mat4 transformation;
 	std::string name;
 	std::vector<AnimationNodeData> children;
+
+	SceneObject* _helperSceneObject; // todo: animation - refactor
 
 };
 

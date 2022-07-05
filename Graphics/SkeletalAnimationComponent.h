@@ -35,6 +35,9 @@ class SkeletalAnimationComponent final : public Component
 
 		void onAttachedToScenObject() override;
 
+		void createDebugBoneObjects();
+		void createDebugBoneObjectForBone(AnimationNodeData* nodeData, SceneObject* parent = nullptr);
+
 		std::string mapAnimationNodeNameToBoneNameInModel(const std::string& animationNodeName);
 
 
@@ -42,7 +45,7 @@ class SkeletalAnimationComponent final : public Component
 		void calculateDefaultBoneTransformInAnimation(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 
-		void calculateBoneTransform(const StaticModelNode* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
+		void calculateBoneTransformInModel(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
@@ -52,6 +55,7 @@ class SkeletalAnimationComponent final : public Component
 		void update(float deltaTime) override;
 
 		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
+		inline RAnimation* getAnimiation() { return _animation; }
 
 		std::unordered_map<std::string, std::string> _animationNodeNameToBoneNameInModelMap; // todo: animation - pirvate
 

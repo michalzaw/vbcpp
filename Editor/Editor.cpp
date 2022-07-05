@@ -788,6 +788,60 @@ namespace vbEditor
 		SceneLoader sceneLoader(sceneManager);
 		sceneLoader.loadMap(mapName);
 
+
+		SceneObject* animatedObject = sceneManager->addSceneObject("Krystian");
+
+		//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking.fbx", "C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\tex\\");
+		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
+		RenderObject* animatedRenderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
+
+		// Krystian.dae
+		std::unordered_map<std::string, std::string> _animationNodeNameToBoneNameInModelMap;
+		_animationNodeNameToBoneNameInModelMap["krystian_Head"] = "head";
+		_animationNodeNameToBoneNameInModelMap["krystian_Neck1"] = "neck";
+		_animationNodeNameToBoneNameInModelMap["krystian_Neck"] = "neck";
+
+		_animationNodeNameToBoneNameInModelMap["krystian_RightShoulder"] = "rCollar";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightArm"] = "rShldr";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightForeArm"] = "rForeArm";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightHand"] = "rHand";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightFingerBase"] = "rHand";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightHandFinger1"] = "rMid1";
+		_animationNodeNameToBoneNameInModelMap["krystian_RThumb"] = "rThumb1";
+
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftShoulder"] = "lCollar";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftArm"] = "lShldr";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftForeArm"] = "lForeArm";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftHand"] = "lHand";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftFingerBase"] = "lHand";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftHandFinger1"] = "lMid1";
+		_animationNodeNameToBoneNameInModelMap["krystian_LThumb"] = "lThumb1";
+
+		_animationNodeNameToBoneNameInModelMap["krystian_Spine1"] = "chest";
+		_animationNodeNameToBoneNameInModelMap["krystian_Spine"] = "abdomen";
+		_animationNodeNameToBoneNameInModelMap["krystian_LowerBack"] = "hip";
+		_animationNodeNameToBoneNameInModelMap["krystian_Hips"] = "hip";
+		_animationNodeNameToBoneNameInModelMap["krystian_RHipJoint"] = "hip";
+		_animationNodeNameToBoneNameInModelMap["krystian_LHipJoint"] = "hip";
+
+		_animationNodeNameToBoneNameInModelMap["krystian_RightUpLeg"] = "rThigh";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightLeg"] = "rShin";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightFoot"] = "rFoot";
+		_animationNodeNameToBoneNameInModelMap["krystian_RightToeBase"] = "rFoot";
+
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftUpLeg"] = "lThigh";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftLeg"] = "lShin";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftFoot"] = "lFoot";
+		_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
+
+		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
+		RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
+		SkeletalAnimationComponent* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation, _animationNodeNameToBoneNameInModelMap);
+		animatedObject->addComponent(skeletalAnimation);
+
+		//animatedObject->setScale(0.01);
+
+
 		mapInfo.name = mapName;
 		mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
@@ -1482,9 +1536,15 @@ namespace vbEditor
 			ImGui::PopID();
 		}
 
+		glm::mat4 viewMatrix = _camera->getViewMatrix();
+		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
+		{
+			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
+		}
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
 			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
 			NULL,
