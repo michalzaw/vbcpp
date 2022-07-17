@@ -32,6 +32,8 @@ class SkeletalAnimationComponent final : public Component
 		std::vector<glm::mat4> _boneTransformMatricesInModel;
 		std::vector<glm::mat4> _boneTransformMatricesInAnimation;
 		std::vector<glm::mat4> _boneTransformOffsetsMatrices;
+		std::vector<glm::mat4> _boneTransformOffsetsRotMatrices;
+		std::vector<bool>		_boneTransformMatricesInAnimationExist;
 
 		void onAttachedToScenObject() override;
 

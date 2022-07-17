@@ -799,13 +799,13 @@ namespace vbEditor
 		std::unordered_map<std::string, std::string> _animationNodeNameToBoneNameInModelMap;
 		_animationNodeNameToBoneNameInModelMap["krystian_Head"] = "head";
 		_animationNodeNameToBoneNameInModelMap["krystian_Neck1"] = "neck";
-		_animationNodeNameToBoneNameInModelMap["krystian_Neck"] = "neck";
+		//_animationNodeNameToBoneNameInModelMap["krystian_Neck"] = "neck";
 
 		_animationNodeNameToBoneNameInModelMap["krystian_RightShoulder"] = "rCollar";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightArm"] = "rShldr";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightForeArm"] = "rForeArm";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightHand"] = "rHand";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightFingerBase"] = "rHand";
+		//_animationNodeNameToBoneNameInModelMap["krystian_RightFingerBase"] = "rHand";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightHandFinger1"] = "rMid1";
 		_animationNodeNameToBoneNameInModelMap["krystian_RThumb"] = "rThumb1";
 
@@ -813,26 +813,26 @@ namespace vbEditor
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftArm"] = "lShldr";
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftForeArm"] = "lForeArm";
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftHand"] = "lHand";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftFingerBase"] = "lHand";
+		//_animationNodeNameToBoneNameInModelMap["krystian_LeftFingerBase"] = "lHand";
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftHandFinger1"] = "lMid1";
 		_animationNodeNameToBoneNameInModelMap["krystian_LThumb"] = "lThumb1";
 
 		_animationNodeNameToBoneNameInModelMap["krystian_Spine1"] = "chest";
 		_animationNodeNameToBoneNameInModelMap["krystian_Spine"] = "abdomen";
-		_animationNodeNameToBoneNameInModelMap["krystian_LowerBack"] = "hip";
+		//_animationNodeNameToBoneNameInModelMap["krystian_LowerBack"] = "hip";
 		_animationNodeNameToBoneNameInModelMap["krystian_Hips"] = "hip";
-		_animationNodeNameToBoneNameInModelMap["krystian_RHipJoint"] = "hip";
-		_animationNodeNameToBoneNameInModelMap["krystian_LHipJoint"] = "hip";
+		//_animationNodeNameToBoneNameInModelMap["krystian_RHipJoint"] = "hip";
+		//_animationNodeNameToBoneNameInModelMap["krystian_LHipJoint"] = "hip";
 
 		_animationNodeNameToBoneNameInModelMap["krystian_RightUpLeg"] = "rThigh";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightLeg"] = "rShin";
 		_animationNodeNameToBoneNameInModelMap["krystian_RightFoot"] = "rFoot";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightToeBase"] = "rFoot";
+		//_animationNodeNameToBoneNameInModelMap["krystian_RightToeBase"] = "rFoot";
 
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftUpLeg"] = "lThigh";
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftLeg"] = "lShin";
 		_animationNodeNameToBoneNameInModelMap["krystian_LeftFoot"] = "lFoot";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
+		//_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
 
 		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
 		RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");

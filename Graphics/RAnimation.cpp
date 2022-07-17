@@ -122,11 +122,11 @@ glm::mat4 Bone::interpolateScale(float animationTime)
 
 void Bone::update(float animationTime)
 {
-	glm::mat4 translation = interpolatePosition(animationTime);
-	glm::mat4 rotation = interpolateRotation(animationTime);
-	glm::mat4 scale = interpolateScale(animationTime);
+	_translation = interpolatePosition(animationTime);
+	_rotation = interpolateRotation(animationTime);
+	_scale = interpolateScale(animationTime);
 	
-	_localTransform = translation * rotation * scale;
+	_localTransform = _translation * _rotation * _scale;
 }
 
 

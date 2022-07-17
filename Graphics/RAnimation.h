@@ -57,6 +57,11 @@ class Bone final
 
 		void update(float animationTime);
 
+
+		glm::mat4 _translation;
+		glm::mat4 _rotation;
+		glm::mat4 _scale;
+
 };
 
 
