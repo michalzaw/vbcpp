@@ -38,6 +38,11 @@
 //#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
+
+class SkeletalAnimationComponent2;
+class SkeletalAnimationHelperComponent;
+
+
 class GraphicsManager
 {
     friend class Renderer;
@@ -55,6 +60,8 @@ class GraphicsManager
         std::vector<RoadIntersectionComponent*>     _roadIntersectionComponents;
         std::vector<RoadObject*>                    _roadObjects;
         std::vector<SkeletalAnimationComponent*>    _skeletalAnimations;
+        std::vector<SkeletalAnimationComponent2*>   _skeletalAnimations2;
+        std::vector<SkeletalAnimationHelperComponent*>_skeletalAnimationHelpers;
 
 		Sky*						_sky;
 
@@ -99,6 +106,8 @@ class GraphicsManager
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
         RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
         SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
+        SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
+        SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie

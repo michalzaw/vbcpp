@@ -17,7 +17,7 @@ struct AnimationNodeData final
 	std::string name;
 	std::vector<AnimationNodeData> children;
 
-	SceneObject* _helperSceneObject; // todo: animation - refactor
+	SceneObject* _helperSceneObject = nullptr; // todo: animation - refactor
 
 };
 

@@ -16,6 +16,7 @@
 #include "../FileDialogs.h"
 
 #include "../../Graphics/ShapePolygonComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent2.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -608,7 +609,8 @@ bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_Enter
 
 #define IMGUI_INPUT_float(propertyName)																											\
 float value = component->get##propertyName();																									\
-bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
+//bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
 #define IMGUI_INPUT_bool(propertyName)																											\
@@ -818,6 +820,26 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 }
 
 
+void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -883,6 +905,12 @@ void showObjectProperties()
 			if (skeletalAnimationComponent)
 			{
 				showSkeletalAnimationComponentDetails(skeletalAnimationComponent);
+			}
+
+			SkeletalAnimationComponent2* skeletalAnimationComponent2 = dynamic_cast<SkeletalAnimationComponent2*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+			if (skeletalAnimationComponent2)
+			{
+				showSkeletalAnimationComponent2Details(skeletalAnimationComponent2);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

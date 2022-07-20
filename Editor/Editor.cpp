@@ -37,6 +37,7 @@
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/ShapePolygonComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -836,7 +837,7 @@ namespace vbEditor
 
 		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
 		RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
-		SkeletalAnimationComponent* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation, _animationNodeNameToBoneNameInModelMap);
+		SkeletalAnimationComponent2* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation2(animation, _animationNodeNameToBoneNameInModelMap);
 		animatedObject->addComponent(skeletalAnimation);
 
 		//animatedObject->setScale(0.01);

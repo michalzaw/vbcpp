@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+#include "SkeletalAnimationComponent2.h"
+
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/Timer.h"
@@ -1733,6 +1735,24 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 }
 
 
+const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject)
+{
+    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+    if (skeletatlAnimation != nullptr)
+    {
+        return skeletatlAnimation->getFinalBoneMatrices();
+    }
+
+    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+    if (skeletatlAnimation2 != nullptr)
+    {
+        return skeletatlAnimation2->getFinalBoneMatrices();
+    }
+
+    return {};
+}
+
+
 // UBO
 void Renderer::renderScene(RenderData* renderData)
 {
@@ -1943,10 +1963,11 @@ void Renderer::renderScene(RenderData* renderData)
 
             SceneObject* sceneObject = i->object;
 
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
             for (int i = 0; i < 100; ++i) // todo: animation zmieniæ na sta³¹
             {
-                SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
-                const glm::mat4& matrix = skeletatlAnimation->getFinalBoneMatrices()[i];
+                const glm::mat4& matrix = finalMatrices[i];
 
                 shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
             }

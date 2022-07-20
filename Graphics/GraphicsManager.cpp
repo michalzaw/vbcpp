@@ -1,6 +1,8 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "SkeletalAnimationComponent2.h"
+#include "SkeletalAnimationHelperComponent.h"
 
 #include "../Scene/SceneObject.h"
 
@@ -265,6 +267,24 @@ SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* an
 
     return skeletalAnimation;
 }
+
+
+SkeletalAnimationComponent2* GraphicsManager::addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap)
+{
+    SkeletalAnimationComponent2* skeletalAnimation = new SkeletalAnimationComponent2(animation, animationNodeNameToBoneNameInModelMap);
+
+    _skeletalAnimations2.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
+SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    _skeletalAnimationHelpers.push_back(component);
+    return component;
+}
+
 
 
 void GraphicsManager::removeRenderObject(RenderObject* object)
@@ -638,6 +658,16 @@ void GraphicsManager::update(float deltaTime)
     for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)
     {
         skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent2* skeletalAnimation : _skeletalAnimations2)
+    {
+        skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationHelperComponent* skeletalAnimationHelper : _skeletalAnimationHelpers)
+    {
+        skeletalAnimationHelper->update(deltaTime);
     }
 }
 
