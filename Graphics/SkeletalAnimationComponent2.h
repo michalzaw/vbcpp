@@ -18,7 +18,7 @@ struct StaticModelNode;
 
 class SkeletalAnimationComponent2 final : public Component
 {
-	private:
+	public:
 		static const int MAX_BONES = 100;
 
 		RAnimation* _animation;
@@ -33,7 +33,14 @@ class SkeletalAnimationComponent2 final : public Component
 
 		RAnimatedModel* _animatedModel;
 
+		std::unordered_map<std::string, std::string> _boneMap;
+		std::vector<glm::mat4> _defaultTranslationBoneMatrices;
+		std::vector<glm::mat4> _defaultRotationBoneMatrices;
+		std::vector<AnimationNodeData*> _cachedModelNodes;
+
 		void onAttachedToScenObject() override;
+
+		void calculateDefaultRotationInModel(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 		void calculateBoneTransformInModel(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 		void calculateBoneTransformInAnimation(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));

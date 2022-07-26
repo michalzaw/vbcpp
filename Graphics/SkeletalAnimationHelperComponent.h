@@ -19,6 +19,10 @@ struct BoneHelperData final
 };
 
 
+glm::vec3 getTranslationFromMatrix(const glm::mat4& transformMatrix);
+glm::quat getRotationFromMatrix(const glm::mat4& transformMatrix);
+
+
 class SkeletalAnimationHelperComponent final : public Component
 {
 	private:
@@ -27,12 +31,14 @@ class SkeletalAnimationHelperComponent final : public Component
 
 		std::vector<BoneHelperData> _modelBoneHelperDatas;
 		std::vector<BoneHelperData> _animationBoneHelperDatas;
+		std::vector<SceneObject*>	_finalBonesHelperObjects;
 
 		void onAttachedToScenObject() override;
 
 		SceneObject* createBoneObject(AnimationNodeData* nodeData, const glm::vec4& color);
 		void createBoneObjectForModel(AnimationNodeData* nodeData, SceneObject* parent);
 		void createBoneObjectForAnimation(AnimationNodeData* nodeData, SceneObject* parent);
+		void createFinalBoneObject(AnimationNodeData* nodeData, SceneObject* parent);
 
 	public:
 		SkeletalAnimationHelperComponent(RAnimation* animation, RAnimatedModel* animatedModel);

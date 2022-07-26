@@ -1,6 +1,7 @@
 #include "SkeletalAnimationHelperComponent.h"
 
 #include "RAnimation.h"
+#include "SkeletalAnimationComponent2.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -9,7 +10,8 @@
 
 SkeletalAnimationHelperComponent::SkeletalAnimationHelperComponent(RAnimation* animation, RAnimatedModel* animatedModel)
 	: Component(CT_SKELETAL_ANIMATION_HELPER),
-	_animation(animation), _animatedModel(animatedModel)
+	_animation(animation), _animatedModel(animatedModel),
+	_finalBonesHelperObjects(100)
 {
 
 }
@@ -72,12 +74,15 @@ void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 {
 	SceneObject* modelSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Model");
 	SceneObject* animationSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Animation");
+	SceneObject* finalBonesSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final bones");
 
 	getSceneObject()->addChild(modelSceneObject);
 	getSceneObject()->addChild(animationSceneObject);
+	getSceneObject()->addChild(finalBonesSceneObject);
 
 	createBoneObjectForModel(&_animatedModel->_bonesRootNode, modelSceneObject);
 	createBoneObjectForAnimation(_animation->getRootNode(), animationSceneObject);
+	createFinalBoneObject(&_animatedModel->_bonesRootNode, finalBonesSceneObject);
 }
 
 
@@ -142,6 +147,26 @@ void SkeletalAnimationHelperComponent::createBoneObjectForAnimation(AnimationNod
 }
 
 
+void SkeletalAnimationHelperComponent::createFinalBoneObject(AnimationNodeData* nodeData, SceneObject* parent)
+{
+	auto boneInfo = _animatedModel->getBoneInfos().find(nodeData->name);
+	if (boneInfo != _animatedModel->getBoneInfos().end())
+	{
+		int index = boneInfo->second.id;
+
+		SceneObject* sceneObject = createBoneObject(nodeData, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		parent->addChild(sceneObject);
+
+		_finalBonesHelperObjects[index] = sceneObject;
+	}
+
+	for (AnimationNodeData& child : nodeData->children)
+	{
+		createFinalBoneObject(&child, parent);
+	}
+}
+
+
 void SkeletalAnimationHelperComponent::update(float deltaTime)
 {
 	for (const auto& data : _modelBoneHelperDatas)
@@ -154,7 +179,6 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 		Bone* bone = _animation->findBone(data.animationNode->name);
 		if (bone != nullptr)
 		{
-
 			data.helperObject->setPosition(getTranslationFromMatrix(bone->getLocalTransform()));
 			data.helperObject->setRotationQuaternion(getRotationFromMatrix(bone->getLocalTransform()));
 			data.helperObject->setScale(getScaleFromMatrix(bone->getLocalTransform()));
@@ -163,5 +187,16 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 		//data.helperObject->setPosition(getTranslationFromMatrix(data.animationNode->transformation));
 		//data.helperObject->setRotationQuaternion(getRotationFromMatrix(data.animationNode->transformation));
 		//data.helperObject->setScale(getScaleFromMatrix(data.animationNode->transformation));
+	}
+
+	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
+	for (int i = 0; i < 100; ++i)
+	{
+		if (_finalBonesHelperObjects[i] != nullptr)
+		{
+			_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+			_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+			//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+		}
 	}
 }
