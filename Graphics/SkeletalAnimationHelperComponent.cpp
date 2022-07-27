@@ -11,7 +11,10 @@
 SkeletalAnimationHelperComponent::SkeletalAnimationHelperComponent(RAnimation* animation, RAnimatedModel* animatedModel)
 	: Component(CT_SKELETAL_ANIMATION_HELPER),
 	_animation(animation), _animatedModel(animatedModel),
-	_finalBonesHelperObjects(100)
+	_modelRootSceneObject(nullptr), _animationRootSceneObject(nullptr), _finalBonesRootSceneObject(nullptr), _finalSkeletonRootSceneObject(nullptr),
+	_finalBonesHelperObjects(100),
+	_showModelBones(true), _showAnimationBones(true), _showFinalBones(true), _showFinalSkeletonBones(true),
+	_animationBonesTransformFromAnimation(true), _animationBonesTransformDefault(false), _animationBonesTransformCustom(false)
 {
 
 }
@@ -72,17 +75,19 @@ glm::vec3 getScaleFromMatrix(const glm::mat4& transformMatrix)
 
 void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 {
-	SceneObject* modelSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Model");
-	SceneObject* animationSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Animation");
-	SceneObject* finalBonesSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final bones");
+	_modelRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Model");
+	_animationRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Animation");
+	_finalBonesRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final bones");
+	_finalSkeletonRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final skeleton");
 
-	getSceneObject()->addChild(modelSceneObject);
-	getSceneObject()->addChild(animationSceneObject);
-	getSceneObject()->addChild(finalBonesSceneObject);
+	getSceneObject()->addChild(_modelRootSceneObject);
+	getSceneObject()->addChild(_animationRootSceneObject);
+	getSceneObject()->addChild(_finalBonesRootSceneObject);
+	getSceneObject()->addChild(_finalSkeletonRootSceneObject);
 
-	createBoneObjectForModel(&_animatedModel->_bonesRootNode, modelSceneObject);
-	createBoneObjectForAnimation(_animation->getRootNode(), animationSceneObject);
-	createFinalBoneObject(&_animatedModel->_bonesRootNode, finalBonesSceneObject);
+	createBoneObjectForModel(&_animatedModel->_bonesRootNode, _modelRootSceneObject);
+	createBoneObjectForAnimation(_animation->getRootNode(), _animationRootSceneObject);
+	createFinalBoneObject(&_animatedModel->_bonesRootNode, _finalBonesRootSceneObject);
 }
 
 
@@ -174,19 +179,27 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 		data.animationNode->transformation = data.helperObject->getLocalTransformMatrix();
 	}
 
-	for (const auto& data : _animationBoneHelperDatas)
+	if (_animationBonesTransformFromAnimation)
 	{
-		Bone* bone = _animation->findBone(data.animationNode->name);
-		if (bone != nullptr)
+		for (const auto& data : _animationBoneHelperDatas)
 		{
-			data.helperObject->setPosition(getTranslationFromMatrix(bone->getLocalTransform()));
-			data.helperObject->setRotationQuaternion(getRotationFromMatrix(bone->getLocalTransform()));
-			data.helperObject->setScale(getScaleFromMatrix(bone->getLocalTransform()));
+			Bone* bone = _animation->findBone(data.animationNode->name);
+			if (bone != nullptr)
+			{
+				data.helperObject->setPosition(getTranslationFromMatrix(bone->getLocalTransform()));
+				data.helperObject->setRotationQuaternion(getRotationFromMatrix(bone->getLocalTransform()));
+				data.helperObject->setScale(getScaleFromMatrix(bone->getLocalTransform()));
+			}
 		}
-
-		//data.helperObject->setPosition(getTranslationFromMatrix(data.animationNode->transformation));
-		//data.helperObject->setRotationQuaternion(getRotationFromMatrix(data.animationNode->transformation));
-		//data.helperObject->setScale(getScaleFromMatrix(data.animationNode->transformation));
+	}
+	else if (_animationBonesTransformDefault)
+	{
+		for (const auto& data : _animationBoneHelperDatas)
+		{
+			data.helperObject->setPosition(getTranslationFromMatrix(data.animationNode->transformation));
+			data.helperObject->setRotationQuaternion(getRotationFromMatrix(data.animationNode->transformation));
+			data.helperObject->setScale(getScaleFromMatrix(data.animationNode->transformation));
+		}
 	}
 
 	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
@@ -198,5 +211,84 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 			_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
 			//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
 		}
+	}
+}
+
+void SkeletalAnimationHelperComponent::setShowModelBones(bool showModelBones)
+{
+	_showModelBones = showModelBones;
+	
+	if (_modelRootSceneObject != nullptr)
+	{
+		_modelRootSceneObject->setIsActive(showModelBones);
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setShowAnimationBones(bool showAnimationBones)
+{
+	_showAnimationBones = showAnimationBones;
+
+	if (_animationRootSceneObject != nullptr)
+	{
+		_animationRootSceneObject->setIsActive(showAnimationBones);
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setShowFinalBones(bool showFinalBones)
+{
+	_showFinalBones = showFinalBones;
+
+	if (_finalBonesRootSceneObject != nullptr)
+	{
+		_finalBonesRootSceneObject->setIsActive(showFinalBones);
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setShowFinalSkeletonBones(bool showFinalSkeletonBones)
+{
+	_showFinalSkeletonBones = showFinalSkeletonBones;
+
+	if (_finalSkeletonRootSceneObject != nullptr)
+	{
+		_finalSkeletonRootSceneObject->setIsActive(showFinalSkeletonBones);
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setAnimationBonesTransformFromAnimation(bool animationBonesTransformFromAnimation)
+{
+	_animationBonesTransformFromAnimation = animationBonesTransformFromAnimation;
+
+	if (_animationBonesTransformFromAnimation)
+	{
+		_animationBonesTransformDefault = false;
+		_animationBonesTransformCustom = false;
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setAnimationBonesTransformDefault(bool animationBonesTransformDefault)
+{
+	_animationBonesTransformDefault = animationBonesTransformDefault;
+
+	if (_animationBonesTransformDefault)
+	{
+		_animationBonesTransformFromAnimation = false;
+		_animationBonesTransformCustom = false;
+	}
+}
+
+
+void SkeletalAnimationHelperComponent::setAnimationBonesTransformCustom(bool animationBonesTransformCustom)
+{
+	_animationBonesTransformCustom = animationBonesTransformCustom;
+
+	if (_animationBonesTransformCustom)
+	{
+		_animationBonesTransformFromAnimation = false;
+		_animationBonesTransformDefault = false;
 	}
 }

@@ -202,7 +202,7 @@ void SkeletalAnimationComponent2::calculateBoneTransformInAnimation(AnimationNod
 			}
 		}
 
-		_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+		//_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
 	}
 
 	for (int i = 0; i < node->children.size(); ++i)
@@ -222,5 +222,5 @@ void SkeletalAnimationComponent2::update(float deltaTime)
 
 	calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
 	//calculateBoneTransformInAnimation(_animation->getRootNode());
-	//calculateBoneTransformInAnimation(&_animatedModel->_bonesRootNode);
+	calculateBoneTransformInAnimation(&_animatedModel->_bonesRootNode);
 }

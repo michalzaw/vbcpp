@@ -16,6 +16,16 @@ class RAnimatedModel;
 struct StaticModelNode;
 
 
+struct FinalSkeletonNode final
+{
+	AnimationNodeData* modelNode = nullptr;
+	AnimationNodeData* animationNode = nullptr;
+
+	FinalSkeletonNode* parent;
+	std::vector<FinalSkeletonNode*> children;
+};
+
+
 class SkeletalAnimationComponent2 final : public Component
 {
 	public:
@@ -32,6 +42,8 @@ class SkeletalAnimationComponent2 final : public Component
 		bool _play;
 
 		RAnimatedModel* _animatedModel;
+
+		FinalSkeletonNode* _finalSkeletonRootNode;
 
 		std::unordered_map<std::string, std::string> _boneMap;
 		std::vector<glm::mat4> _defaultTranslationBoneMatrices;

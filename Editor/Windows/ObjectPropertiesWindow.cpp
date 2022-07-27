@@ -17,6 +17,7 @@
 
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
+#include "../../Graphics/SkeletalAnimationHelperComponent.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -840,6 +841,37 @@ void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* compone
 }
 
 
+void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation Helper", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowModelBones, bool, "Show model bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowAnimationBones, bool, "Show animation bones")
+
+		if (newNode("Animation bones transform", ""))
+		{
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformFromAnimation, bool, "Transform from animation")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformDefault, bool, "Default transform")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformCustom, bool, "Custom transform")
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalBones, bool, "Show final bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalSkeletonBones, bool, "Show final skeleton bones")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -911,6 +943,12 @@ void showObjectProperties()
 			if (skeletalAnimationComponent2)
 			{
 				showSkeletalAnimationComponent2Details(skeletalAnimationComponent2);
+			}
+
+			SkeletalAnimationHelperComponent* skeletalAnimationHelperComponent = dynamic_cast<SkeletalAnimationHelperComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_HELPER));
+			if (skeletalAnimationHelperComponent)
+			{
+				showSkeletalAnimationHelperComponentDetails(skeletalAnimationHelperComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
