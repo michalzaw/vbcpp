@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <string>
 
 #include "../Scene/Component.h"
 
@@ -56,10 +57,11 @@ class SkeletalAnimationHelperComponent final : public Component
 
 		void onAttachedToScenObject() override;
 
-		SceneObject* createBoneObject(AnimationNodeData* nodeData, const glm::vec4& color);
+		SceneObject* createBoneObject(const std::string& nodeName, const glm::vec4& color);
 		void createBoneObjectForModel(AnimationNodeData* nodeData, SceneObject* parent);
 		void createBoneObjectForAnimation(AnimationNodeData* nodeData, SceneObject* parent);
 		void createFinalBoneObject(AnimationNodeData* nodeData, SceneObject* parent);
+		void createFinalSkeletonBoneObject(FinalSkeletonNode* nodeData, SceneObject* parent);
 
 	public:
 		SkeletalAnimationHelperComponent(RAnimation* animation, RAnimatedModel* animatedModel);

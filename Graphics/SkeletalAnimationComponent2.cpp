@@ -29,6 +29,118 @@ SkeletalAnimationComponent2::~SkeletalAnimationComponent2()
 }
 
 
+FinalSkeletonNode* createFinalSkeletonProcessNodeFromModel(AnimationNodeData* node, FinalSkeletonNode* parent = nullptr)
+{
+	FinalSkeletonNode* finalSkeletonNode = new FinalSkeletonNode;
+	finalSkeletonNode->modelNode = node;
+	finalSkeletonNode->parent = parent;
+
+	for (AnimationNodeData& child : node->children)
+	{
+		finalSkeletonNode->children.push_back(createFinalSkeletonProcessNodeFromModel(&child, finalSkeletonNode));
+	}
+
+	return finalSkeletonNode;
+}
+
+
+FinalSkeletonNode* createFinalSkeletonProcessNodeFromAnimation(AnimationNodeData* node, FinalSkeletonNode* parent = nullptr)
+{
+	FinalSkeletonNode* finalSkeletonNode = new FinalSkeletonNode;
+	finalSkeletonNode->animationNode = node;
+	finalSkeletonNode->parent = parent;
+
+	for (AnimationNodeData& child : node->children)
+	{
+		finalSkeletonNode->children.push_back(createFinalSkeletonProcessNodeFromAnimation(&child, finalSkeletonNode));
+	}
+
+	return finalSkeletonNode;
+}
+
+
+// mode: 0 - model nodes, 1 - animation nodes, 2 - model and animation nodes
+FinalSkeletonNode* findNodeByName(FinalSkeletonNode* skeletonNode, const std::string& nodeName, int mode)
+{
+	if (mode == 0 && skeletonNode->modelNode != nullptr && skeletonNode->modelNode->name == nodeName)
+	{
+		return skeletonNode;
+	}
+	else if (mode == 1 && skeletonNode->animationNode != nullptr && skeletonNode->animationNode->name == nodeName)
+	{
+		return skeletonNode;
+	}
+	else if (skeletonNode->modelNode != nullptr && skeletonNode->modelNode->name == nodeName ||
+			 skeletonNode->animationNode != nullptr && skeletonNode->animationNode->name == nodeName)
+	{
+		return skeletonNode;
+	}
+
+	for (FinalSkeletonNode* child : skeletonNode->children)
+	{
+		FinalSkeletonNode* result = findNodeByName(child, nodeName, mode);
+		if (result != nullptr)
+		{
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
+
+void inserModelNodeToSkeleton(FinalSkeletonNode* animationSkeletonRootNode, FinalSkeletonNode* modelSkeletonNode, const std::unordered_map<std::string, std::string>& boneMap)
+{
+	auto animationBoneName = boneMap.find(modelSkeletonNode->modelNode->name);
+	if (animationBoneName != boneMap.end())
+	{
+		FinalSkeletonNode* result = findNodeByName(animationSkeletonRootNode, animationBoneName->second, 1);
+		if (result != nullptr)
+		{
+			result->modelNode = modelSkeletonNode->modelNode;
+		}
+	}
+	else
+	{
+		if (modelSkeletonNode->parent != nullptr)
+		{
+			FinalSkeletonNode* result = findNodeByName(animationSkeletonRootNode, modelSkeletonNode->parent->modelNode->name, 0);
+			if (result != nullptr)
+			{
+				FinalSkeletonNode* newNode = new FinalSkeletonNode;
+				newNode->modelNode = modelSkeletonNode->modelNode;
+
+				result->children.push_back(newNode);
+			}
+		}
+	}
+
+	for (FinalSkeletonNode* child : modelSkeletonNode->children)
+	{
+		inserModelNodeToSkeleton(animationSkeletonRootNode, child, boneMap);
+	}
+}
+
+
+void setTransformInSkeleton(FinalSkeletonNode* skeletonNode)
+{
+	if (skeletonNode->animationNode != nullptr)
+	{
+		skeletonNode->position = getTranslationFromMatrix(skeletonNode->animationNode->transformation);
+		skeletonNode->orientation = getRotationFromMatrix(skeletonNode->animationNode->transformation);
+	}
+	if (skeletonNode->modelNode != nullptr)
+	{
+		skeletonNode->position = getTranslationFromMatrix(skeletonNode->modelNode->transformation);
+	}
+
+	for (FinalSkeletonNode* child : skeletonNode->children)
+	{
+		setTransformInSkeleton(child);
+	}
+}
+
+
 void SkeletalAnimationComponent2::onAttachedToScenObject()
 {
 	RenderObject* renderObject = static_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
@@ -40,6 +152,17 @@ void SkeletalAnimationComponent2::onAttachedToScenObject()
 		return;
 	}
 
+	FinalSkeletonNode* modelSkeleton = createFinalSkeletonProcessNodeFromModel(&_animatedModel->_bonesRootNode);
+	FinalSkeletonNode* animationSkeleton = createFinalSkeletonProcessNodeFromAnimation(_animation->getRootNode());
+
+	inserModelNodeToSkeleton(animationSkeleton, modelSkeleton, _boneMap);
+
+	_finalSkeletonRootNode = animationSkeleton;
+
+	setTransformInSkeleton(_finalSkeletonRootNode);
+
+	//createFinalSkeletonProcessNodeFromAnimation(_animation->getRootNode(), _finalSkeletonRootNode);
+
 	// todo: animation usuwanie componentu
 	SkeletalAnimationHelperComponent* helper = getSceneObject()->getSceneManager()->getGraphicsManager()->addSkeletalAnimationHelper(new SkeletalAnimationHelperComponent(_animation, _animatedModel));;
 	getSceneObject()->addComponent(helper);
@@ -48,6 +171,129 @@ void SkeletalAnimationComponent2::onAttachedToScenObject()
 	calculateDefaultRotationInModel(&_animatedModel->_bonesRootNode);
 }
 
+
+/*FinalSkeletonNode* foo(AnimationNodeData* node, const std::string& animationNodeName)
+{
+	if (node->name == animationNodeName)
+	{
+		FinalSkeletonNode* result = new FinalSkeletonNode;
+		result->animationNode = node;
+
+		return result;
+	}
+
+	for (AnimationNodeData& child : node->children)
+	{
+		FinalSkeletonNode* result = foo(node, animationNodeName);
+		if (result != nullptr)
+		{
+			FinalSkeletonNode* resultNode = new FinalSkeletonNode;
+			resultNode->children.push_back(result);
+			resultNode->animationNode = &child;
+
+			result->parent = resultNode;
+
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
+
+void SkeletalAnimationComponent2::createFinalSkeletonProcessNodeFromAnimation(AnimationNodeData* node, FinalSkeletonNode* currentNodeInFinalSkeleton)
+{
+	if (currentNodeInFinalSkeleton->modelNode != nullptr)
+	{
+		auto animationBoneName = _boneMap.find(currentNodeInFinalSkeleton->modelNode->name);
+		if (animationBoneName != _boneMap.end())
+		{
+			if (node->name == animationBoneName->second)
+			{
+				// aktualny node animacji odpowiada node z modelu
+				currentNodeInFinalSkeleton->animationNode = node;
+			}
+			else
+			{
+				// aktualny node animacji nie odpowiada node z modelu - szukamy wsrod jego children
+				FinalSkeletonNode* result = foo(node, animationBoneName->second);
+
+				if (result != nullptr)
+				{
+					auto currentParent = currentNodeInFinalSkeleton->parent;
+					currentNodeInFinalSkeleton->parent = result;
+				}
+			}
+
+			for (FinalSkeletonNode* child : currentNodeInFinalSkeleton->children)
+			{
+				createFinalSkeletonProcessNodeFromAnimation(node, child);
+			}
+		}
+		else
+		{
+			// danemu node z modelu nie odpowiada ¿aden node z animacji - zostawiamy go jako leaf i wracamy do gory drzewa
+		}
+	}
+}*/
+
+
+/*FinalSkeletonNode* findByModelNodeName(FinalSkeletonNode* node, const std::string& expectedNodeName)
+{
+	if (node->modelNode != nullptr && node->modelNode->name == expectedNodeName)
+	{
+		return node;
+	}
+
+	for (FinalSkeletonNode* child : node->children)
+	{
+		FinalSkeletonNode* result = findByModelNodeName(child, expectedNodeName);
+		if (result != nullptr)
+		{
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
+
+void SkeletalAnimationComponent2::createFinalSkeletonProcessNodeFromAnimation(AnimationNodeData* node, FinalSkeletonNode* parent)
+{
+	std::string nodeNameInModel = "";
+	for (const auto& pair : _boneMap)
+	{
+		if (pair.second == node->name)
+		{
+			nodeNameInModel = pair.first;
+			break;
+		}
+	}
+
+	FinalSkeletonNode* result = nullptr;
+	if (nodeNameInModel != "")
+	{
+		result = findByModelNodeName(parent, nodeNameInModel);
+	}
+
+	if (result != nullptr)
+	{
+		result->animationNode = node;
+	}
+	else
+	{
+		result = new FinalSkeletonNode;
+		result->animationNode = node;
+		result->parent = parent;
+
+		parent->children.push_back(result);
+	}
+
+	for (AnimationNodeData& child : node->children)
+	{
+		createFinalSkeletonProcessNodeFromAnimation(&child, result);
+	}
+}*/
 
 
 void SkeletalAnimationComponent2::calculateDefaultRotationInModel(AnimationNodeData* node, const glm::mat4& parentTransform)

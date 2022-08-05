@@ -258,9 +258,9 @@ void SceneObject::addComponent(Component* component)
 {
     if (component != NULL)
     {
-        component->setSceneObject(this);
-
         _components.push_back(component);
+
+        component->setSceneObject(this);
 
         component->changedTransform();
     }

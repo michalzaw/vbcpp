@@ -21,6 +21,10 @@ struct FinalSkeletonNode final
 	AnimationNodeData* modelNode = nullptr;
 	AnimationNodeData* animationNode = nullptr;
 
+	glm::vec3 position;
+	glm::quat orientation;
+	glm::vec3 scale;
+
 	FinalSkeletonNode* parent;
 	std::vector<FinalSkeletonNode*> children;
 };
@@ -51,6 +55,9 @@ class SkeletalAnimationComponent2 final : public Component
 		std::vector<AnimationNodeData*> _cachedModelNodes;
 
 		void onAttachedToScenObject() override;
+
+		//FinalSkeletonNode* createFinalSkeletonProcessNodeFromModel(AnimationNodeData* node, FinalSkeletonNode* parent = nullptr);
+		//void createFinalSkeletonProcessNodeFromAnimation(AnimationNodeData* node, FinalSkeletonNode* currentNodeInFinalSkeleton);
 
 		void calculateDefaultRotationInModel(AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 

@@ -88,12 +88,18 @@ void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 	createBoneObjectForModel(&_animatedModel->_bonesRootNode, _modelRootSceneObject);
 	createBoneObjectForAnimation(_animation->getRootNode(), _animationRootSceneObject);
 	createFinalBoneObject(&_animatedModel->_bonesRootNode, _finalBonesRootSceneObject);
+
+	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
+	if (skeletalAnimationComponent != nullptr)
+	{
+		createFinalSkeletonBoneObject(skeletalAnimationComponent->_finalSkeletonRootNode, _finalSkeletonRootSceneObject);
+	}
 }
 
 
-SceneObject* SkeletalAnimationHelperComponent::createBoneObject(AnimationNodeData* nodeData, const glm::vec4& color)
+SceneObject* SkeletalAnimationHelperComponent::createBoneObject(const std::string& nodeName, const glm::vec4& color)
 {
-	SceneObject* sceneObject = getSceneObject()->getSceneManager()->addSceneObject(nodeData->name);
+	SceneObject* sceneObject = getSceneObject()->getSceneManager()->addSceneObject(nodeName);
 
 	Material* material = new Material;
 	material->diffuseColor = color;
@@ -110,7 +116,7 @@ SceneObject* SkeletalAnimationHelperComponent::createBoneObject(AnimationNodeDat
 
 void SkeletalAnimationHelperComponent::createBoneObjectForModel(AnimationNodeData* nodeData, SceneObject* parent)
 {
-	SceneObject* sceneObject = createBoneObject(nodeData, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	SceneObject* sceneObject = createBoneObject(nodeData->name, glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
 	parent->addChild(sceneObject);
 
@@ -129,7 +135,7 @@ void SkeletalAnimationHelperComponent::createBoneObjectForModel(AnimationNodeDat
 
 void SkeletalAnimationHelperComponent::createBoneObjectForAnimation(AnimationNodeData* nodeData, SceneObject* parent)
 {
-	SceneObject* sceneObject = createBoneObject(nodeData, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
+	SceneObject* sceneObject = createBoneObject(nodeData->name, glm::vec4(0.0f, 1.0f, 0.0f, 1.0f));
 
 	parent->addChild(sceneObject);
 
@@ -159,7 +165,7 @@ void SkeletalAnimationHelperComponent::createFinalBoneObject(AnimationNodeData* 
 	{
 		int index = boneInfo->second.id;
 
-		SceneObject* sceneObject = createBoneObject(nodeData, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+		SceneObject* sceneObject = createBoneObject(nodeData->name, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		parent->addChild(sceneObject);
 
 		_finalBonesHelperObjects[index] = sceneObject;
@@ -169,6 +175,48 @@ void SkeletalAnimationHelperComponent::createFinalBoneObject(AnimationNodeData* 
 	{
 		createFinalBoneObject(&child, parent);
 	}
+}
+
+
+void SkeletalAnimationHelperComponent::createFinalSkeletonBoneObject(FinalSkeletonNode* nodeData, SceneObject* parent)
+{
+	std::string nodeName = "";
+	if (nodeData->modelNode != nullptr)
+	{
+		nodeName += nodeData->modelNode->name + " (M) ";
+	}
+	if (nodeData->animationNode != nullptr)
+	{
+		nodeName += nodeData->animationNode->name + " (A) ";
+	}
+
+	SceneObject* sceneObject = createBoneObject(nodeName, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
+
+	parent->addChild(sceneObject);
+
+	/*if (nodeData->modelNode != nullptr)
+	{
+		sceneObject->setPosition(getTranslationFromMatrix(nodeData->modelNode->transformation));
+		sceneObject->setRotationQuaternion(getRotationFromMatrix(nodeData->modelNode->transformation));
+		sceneObject->setScale(getScaleFromMatrix(nodeData->modelNode->transformation));
+	}
+	if (nodeData->animationNode != nullptr)
+	{
+		sceneObject->setPosition(getTranslationFromMatrix(nodeData->animationNode->transformation));
+		sceneObject->setRotationQuaternion(getRotationFromMatrix(nodeData->animationNode->transformation));
+		sceneObject->setScale(getScaleFromMatrix(nodeData->animationNode->transformation));
+	}*/
+
+	sceneObject->setPosition(nodeData->position);
+	sceneObject->setRotationQuaternion(nodeData->orientation);
+
+	_finalSkeletonHelperObjects.push_back({ sceneObject, nodeData });
+
+	for (FinalSkeletonNode* child : nodeData->children)
+	{
+		createFinalSkeletonBoneObject(child, sceneObject);
+	}
+
 }
 
 
