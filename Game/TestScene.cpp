@@ -7,6 +7,7 @@
 #include "../Bus/BusLoader.h"
 
 #include "../Graphics/Renderer.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
@@ -395,7 +396,7 @@ void TestScene::initAnimation()
 	//RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian/Krystian2.dae");
 	//RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian/02_01.bvh");
 	RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
-	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation(animation, _animationNodeNameToBoneNameInModelMap);
+	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation(animation);
 	animatedObject->addComponent(skeletalAnimation);
 
 

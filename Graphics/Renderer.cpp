@@ -1,5 +1,6 @@
 #include "Renderer.h"
 
+#include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 
 #include "../Utils/Helpers.hpp"
@@ -19,7 +20,7 @@ Renderer::Renderer()
     _bloom(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
-    _renderObjectsAAABB(true), _renderObjectsOBB(false),
+    _renderObjectsAAABB(false), _renderObjectsOBB(false),
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
     _requiredRebuildStaticLighting(false)

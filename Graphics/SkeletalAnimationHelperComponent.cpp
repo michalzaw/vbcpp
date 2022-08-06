@@ -13,7 +13,7 @@ SkeletalAnimationHelperComponent::SkeletalAnimationHelperComponent(RAnimation* a
 	_animation(animation), _animatedModel(animatedModel),
 	_modelRootSceneObject(nullptr), _animationRootSceneObject(nullptr), _finalBonesRootSceneObject(nullptr), _finalSkeletonRootSceneObject(nullptr),
 	_finalBonesHelperObjects(100),
-	_showModelBones(true), _showAnimationBones(true), _showFinalBones(true), _showFinalSkeletonBones(true),
+	_showModelBones(false), _showAnimationBones(false), _showFinalBones(false), _showFinalSkeletonBones(false),
 	_animationBonesTransformFromAnimation(true), _animationBonesTransformDefault(false), _animationBonesTransformCustom(false)
 {
 
@@ -75,15 +75,25 @@ glm::vec3 getScaleFromMatrix(const glm::mat4& transformMatrix)
 
 void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 {
-	_modelRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Model");
-	_animationRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Animation");
-	_finalBonesRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final bones");
-	_finalSkeletonRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final skeleton");
+	_modelRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Bones (model)");
+	_animationRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Bones (animation)");
+	_finalBonesRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final bones (unused)");
+	_finalSkeletonRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Final skeleton (unused)");
 
 	getSceneObject()->addChild(_modelRootSceneObject);
 	getSceneObject()->addChild(_animationRootSceneObject);
 	getSceneObject()->addChild(_finalBonesRootSceneObject);
 	getSceneObject()->addChild(_finalSkeletonRootSceneObject);
+
+	_modelRootSceneObject->setIsActive(_showModelBones);
+	_animationRootSceneObject->setIsActive(_showAnimationBones);
+	_finalBonesRootSceneObject->setIsActive(_showFinalBones);
+	_finalSkeletonRootSceneObject->setIsActive(_showFinalSkeletonBones);
+
+	_modelRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
+	_animationRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
+	_finalBonesRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
+	_finalSkeletonRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
 
 	createBoneObjectForModel(&_animatedModel->_bonesRootNode, _modelRootSceneObject);
 	createBoneObjectForAnimation(_animation->getRootNode(), _animationRootSceneObject);
@@ -251,13 +261,16 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 	}
 
 	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
-	for (int i = 0; i < 100; ++i)
+	if (skeletalAnimationComponent != nullptr)
 	{
-		if (_finalBonesHelperObjects[i] != nullptr)
+		for (int i = 0; i < 100; ++i)
 		{
-			_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
-			_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
-			//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+			if (_finalBonesHelperObjects[i] != nullptr)
+			{
+				_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+				_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+				//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+			}
 		}
 	}
 }

@@ -37,6 +37,7 @@
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/ShapePolygonComponent.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
 
 //std::list<Editor*> editorInstances;
@@ -792,55 +793,11 @@ namespace vbEditor
 
 		SceneObject* animatedObject = sceneManager->addSceneObject("Krystian");
 
-		//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking.fbx", "C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\tex\\");
-		//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
-		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian2/");
+		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian3/");
 		RenderObject* animatedRenderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
 
-		// Krystian.dae
-		std::unordered_map<std::string, std::string> _animationNodeNameToBoneNameInModelMap;
-		_animationNodeNameToBoneNameInModelMap["krystian_Head"] = "head";
-		_animationNodeNameToBoneNameInModelMap["krystian_Neck1"] = "neck";
-		//_animationNodeNameToBoneNameInModelMap["krystian_Neck"] = "neck";
-
-		_animationNodeNameToBoneNameInModelMap["krystian_RightShoulder"] = "rCollar";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightArm"] = "rShldr";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightForeArm"] = "rForeArm";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightHand"] = "rHand";
-		//_animationNodeNameToBoneNameInModelMap["krystian_RightFingerBase"] = "rHand";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightHandFinger1"] = "rMid1";
-		_animationNodeNameToBoneNameInModelMap["krystian_RThumb"] = "rThumb1";
-
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftShoulder"] = "lCollar";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftArm"] = "lShldr";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftForeArm"] = "lForeArm";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftHand"] = "lHand";
-		//_animationNodeNameToBoneNameInModelMap["krystian_LeftFingerBase"] = "lHand";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftHandFinger1"] = "lMid1";
-		_animationNodeNameToBoneNameInModelMap["krystian_LThumb"] = "lThumb1";
-
-		_animationNodeNameToBoneNameInModelMap["krystian_Spine1"] = "chest";
-		_animationNodeNameToBoneNameInModelMap["krystian_Spine"] = "abdomen";
-		//_animationNodeNameToBoneNameInModelMap["krystian_LowerBack"] = "hip";
-		_animationNodeNameToBoneNameInModelMap["krystian_Hips"] = "hip";
-		//_animationNodeNameToBoneNameInModelMap["krystian_RHipJoint"] = "hip";
-		//_animationNodeNameToBoneNameInModelMap["krystian_LHipJoint"] = "hip";
-
-		_animationNodeNameToBoneNameInModelMap["krystian_RightUpLeg"] = "rThigh";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightLeg"] = "rShin";
-		_animationNodeNameToBoneNameInModelMap["krystian_RightFoot"] = "rFoot";
-		//_animationNodeNameToBoneNameInModelMap["krystian_RightToeBase"] = "rFoot";
-
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftUpLeg"] = "lThigh";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftLeg"] = "lShin";
-		_animationNodeNameToBoneNameInModelMap["krystian_LeftFoot"] = "lFoot";
-		//_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
-
-		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
-		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
-		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\krystian2_2.bvh");
-		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_walk2.fbx");
-		SkeletalAnimationComponent2* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation2(animation, _animationNodeNameToBoneNameInModelMap);
+		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
+		SkeletalAnimationComponent* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation);
 		animatedObject->addComponent(skeletalAnimation);
 
 		animatedObject->setScale(0.01);
@@ -853,7 +810,7 @@ namespace vbEditor
 		RenderObject* animatedRenderObject2 = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel2), animatedObject2);
 
 		RAnimation* animation2 = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_running.fbx");
-		SkeletalAnimationComponent2* skeletalAnimation2 = sceneManager->getGraphicsManager()->addSkeletalAnimation2(animation2, _animationNodeNameToBoneNameInModelMap);
+		SkeletalAnimationComponent* skeletalAnimation2 = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation2);
 		animatedObject2->addComponent(skeletalAnimation2);
 
 		animatedObject2->setScale(0.01);

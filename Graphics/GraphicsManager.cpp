@@ -1,6 +1,7 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 #include "SkeletalAnimationHelperComponent.h"
 
@@ -259,9 +260,9 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
-SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap)
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
 {
-    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation, animationNodeNameToBoneNameInModelMap);
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
 
     _skeletalAnimations.push_back(skeletalAnimation);
 

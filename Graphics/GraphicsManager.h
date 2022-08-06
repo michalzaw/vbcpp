@@ -23,7 +23,6 @@
 #include "DisplayComponent.h"
 #include "CrossroadComponent.h"
 #include "RoadIntersectionComponent.h"
-#include "SkeletalAnimationComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -39,8 +38,10 @@
 //#define QUAD_TREE
 
 
+class SkeletalAnimationComponent;
 class SkeletalAnimationComponent2;
 class SkeletalAnimationHelperComponent;
+class RAnimation;
 
 
 class GraphicsManager
@@ -105,7 +106,7 @@ class GraphicsManager
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
         RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
-        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
+        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
         SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
         SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
 
