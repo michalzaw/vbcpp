@@ -419,36 +419,69 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 
 
 // iteracja po koœciach modelu
+//void SkeletalAnimationComponent2::calculateBoneTransformInAnimation(AnimationNodeData* node, const glm::mat4& parentTransform)
+//{
+//	const std::string& nodeName = node->name;
+//
+//	glm::mat4 nodeTransform = node->transformation;
+//
+//	glm::mat4 globalTransform = parentTransform;
+//
+//
+//	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
+//	if (boneInfo != _animatedModel->getBoneInfos().end())
+//	{
+//		int index = boneInfo->second.id;
+//
+//		globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * _defaultRotationBoneMatrices[index];
+//
+//		auto animationBoneName = _boneMap.find(nodeName);
+//		if (animationBoneName != _boneMap.end())
+//		{
+//			auto animationBone = _animation->findBone(animationBoneName->second);
+//			if (animationBone != nullptr)
+//			{
+//				animationBone->update(_currentTime);
+//
+//				//globalTransform = globalTransform * animationBone->_rotation;
+//				globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * _defaultRotationBoneMatrices[index] * animationBone->_rotation;
+//			}
+//		}
+//
+//		//_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+//	}
+//
+//	for (int i = 0; i < node->children.size(); ++i)
+//	{
+//		calculateBoneTransformInAnimation(&node->children[i], globalTransform);
+//	}
+//}
+
+
+// wersja bez retargetingu
 void SkeletalAnimationComponent2::calculateBoneTransformInAnimation(AnimationNodeData* node, const glm::mat4& parentTransform)
 {
 	const std::string& nodeName = node->name;
 
 	glm::mat4 nodeTransform = node->transformation;
 
-	glm::mat4 globalTransform = parentTransform;
+	auto animationBone = _animation->findBone(nodeName);
+	if (animationBone != nullptr)
+	{
+		animationBone->update(_currentTime);
 
+		nodeTransform = animationBone->getLocalTransform();
+	}
 
-	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
+	glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+	auto boneInfo = _animatedModel->getBoneInfos().find(/*"krystian_" + */nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
 		int index = boneInfo->second.id;
 
-		globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * _defaultRotationBoneMatrices[index];
-
-		auto animationBoneName = _boneMap.find(nodeName);
-		if (animationBoneName != _boneMap.end())
-		{
-			auto animationBone = _animation->findBone(animationBoneName->second);
-			if (animationBone != nullptr)
-			{
-				animationBone->update(_currentTime);
-
-				//globalTransform = globalTransform * animationBone->_rotation;
-				globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * _defaultRotationBoneMatrices[index] * animationBone->_rotation;
-			}
-		}
-
-		//_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+		_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+		//_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second.offset;
 	}
 
 	for (int i = 0; i < node->children.size(); ++i)
@@ -466,7 +499,11 @@ void SkeletalAnimationComponent2::update(float deltaTime)
 		_currentTime = fmod(_currentTime, _animationDuration);
 	}
 
+	/*
 	calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
 	//calculateBoneTransformInAnimation(_animation->getRootNode());
 	calculateBoneTransformInAnimation(&_animatedModel->_bonesRootNode);
+	*/
+
+	calculateBoneTransformInAnimation(_animation->getRootNode());
 }

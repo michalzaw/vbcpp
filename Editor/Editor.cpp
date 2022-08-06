@@ -793,7 +793,8 @@ namespace vbEditor
 		SceneObject* animatedObject = sceneManager->addSceneObject("Krystian");
 
 		//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking.fbx", "C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\tex\\");
-		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
+		//RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian/Krystian.dae", "Objects/peoples/Krystian/");
+		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian2/");
 		RenderObject* animatedRenderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
 
 		// Krystian.dae
@@ -836,11 +837,27 @@ namespace vbEditor
 		//_animationNodeNameToBoneNameInModelMap["krystian_LeftToeBase"] = "lFoot";
 
 		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\55-rp_nathan_animated_003_walking_fbx\\rp_nathan_animated_003_walking2.fbx");
-		RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
+		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\02_01.bvh");
+		//RAnimation* animation = ResourceManager::getInstance().loadAnimation("C:\\Users\\Michal\\Downloads\\bvh\\02\\krystian2_2.bvh");
+		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_walk2.fbx");
 		SkeletalAnimationComponent2* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation2(animation, _animationNodeNameToBoneNameInModelMap);
 		animatedObject->addComponent(skeletalAnimation);
 
-		//animatedObject->setScale(0.01);
+		animatedObject->setScale(0.01);
+		animatedObject->setPosition(0.7f, 0.1f, 0.0f);
+
+
+		SceneObject* animatedObject2 = sceneManager->addSceneObject("Genowefa");
+		
+		RAnimatedModel* animatedModel2 = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/GenowefaAnimated/genowefa.fbx", "Objects/peoples/GenowefaAnimated/");
+		RenderObject* animatedRenderObject2 = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel2), animatedObject2);
+
+		RAnimation* animation2 = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_running.fbx");
+		SkeletalAnimationComponent2* skeletalAnimation2 = sceneManager->getGraphicsManager()->addSkeletalAnimation2(animation2, _animationNodeNameToBoneNameInModelMap);
+		animatedObject2->addComponent(skeletalAnimation2);
+
+		animatedObject2->setScale(0.01);
+		animatedObject2->setPosition(-0.1f, 0.3f, 0.0f);
 
 
 		mapInfo.name = mapName;

@@ -152,7 +152,7 @@ Bone* RAnimation::findBone(const std::string& name)
 
 	if (result == _bones.end())
 	{
-		LOG_DEBUG("Invalid bone name: " + name);
+		//LOG_DEBUG("Invalid bone name: " + name);
 		return nullptr;
 	}
 
