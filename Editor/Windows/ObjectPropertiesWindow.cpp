@@ -1142,6 +1142,7 @@ void showObjectNameEdit()
 }
 
 
+// todo: wykorzystanie funkcji z GlmUtils i setTransformFromMatrix z SceneObject + refactor
 void showObjectTransformEdit()
 {
 	ImGui::Text("Transformation");

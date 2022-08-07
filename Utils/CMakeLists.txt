@@ -5,6 +5,7 @@ set (UTILS_SOURCES
 	Utils/Engine.cpp
 	Utils/FilesHelper.cpp
 	Utils/Gearbox.cpp
+	Utils/GlmUtils.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp
 	Utils/LocalizationSystem.cpp
@@ -36,6 +37,7 @@ set (UTILS_HEADERS
 	Utils/Engine.h
 	Utils/FilesHelper.h
 	Utils/Gearbox.h
+	Utils/GlmUtils.h
 	Utils/Helpers.hpp
 	Utils/InputSystem.h
 	Utils/LocalizationSystem.h

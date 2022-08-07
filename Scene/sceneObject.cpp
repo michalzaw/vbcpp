@@ -7,6 +7,7 @@
 #include "../Graphics/SkeletalAnimationComponent2.h"
 #include "../Graphics/SkeletalAnimationHelperComponent.h"
 
+#include "../Utils/GlmUtils.h"
 
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
@@ -673,6 +674,7 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     return _globalNormalMatrix;
 }
 
+// todo: wykorzystanie funkcji z GlmUtils + refactor
 void SceneObject::updateFromLocalMatrix()
 {
 	glm::vec3 scale;
@@ -689,4 +691,26 @@ void SceneObject::updateFromLocalMatrix()
 	setRotation(rotationEulerAngles);
 	setScale(scale);
 	changedTransform();
+}
+
+
+void SceneObject::setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions/* = true*/)
+{
+    glm::vec3 translation;
+    glm::quat orientation;
+    glm::vec3 scale;
+    GlmUtils::decomposeMatrix(transformMatrix, translation, orientation, scale);
+
+    setPosition(translation);
+    setScale(scale);
+
+    if (_rotationMode == RM_QUATERNION || forceQuaternions)
+    {
+        setRotationQuaternion(orientation);
+    }
+    else
+    {
+        glm::vec3 rotationEulerAngles = glm::eulerAngles(orientation);
+        setRotation(rotationEulerAngles);
+    }
 }

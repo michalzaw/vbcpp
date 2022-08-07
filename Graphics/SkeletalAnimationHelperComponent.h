@@ -27,10 +27,6 @@ struct BoneHelperData2 final
 };
 
 
-glm::vec3 getTranslationFromMatrix(const glm::mat4& transformMatrix);
-glm::quat getRotationFromMatrix(const glm::mat4& transformMatrix);
-
-
 class SkeletalAnimationHelperComponent final : public Component
 {
 	private:

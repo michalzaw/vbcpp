@@ -6,6 +6,7 @@
 
 #include "../Scene/SceneManager.h"
 
+#include "../Utils/GlmUtils.h"
 #include "../Utils/RAnimatedModel.h"
 
 
@@ -126,12 +127,12 @@ void setTransformInSkeleton(FinalSkeletonNode* skeletonNode)
 {
 	if (skeletonNode->animationNode != nullptr)
 	{
-		skeletonNode->position = getTranslationFromMatrix(skeletonNode->animationNode->transformation);
-		skeletonNode->orientation = getRotationFromMatrix(skeletonNode->animationNode->transformation);
+		skeletonNode->position = GlmUtils::getTranslationFromMatrix(skeletonNode->animationNode->transformation);
+		skeletonNode->orientation = GlmUtils::getRotationFromMatrix(skeletonNode->animationNode->transformation);
 	}
 	if (skeletonNode->modelNode != nullptr)
 	{
-		skeletonNode->position = getTranslationFromMatrix(skeletonNode->modelNode->transformation);
+		skeletonNode->position = GlmUtils::getTranslationFromMatrix(skeletonNode->modelNode->transformation);
 	}
 
 	for (FinalSkeletonNode* child : skeletonNode->children)
@@ -300,8 +301,8 @@ void SkeletalAnimationComponent2::calculateDefaultRotationInModel(AnimationNodeD
 	const std::string& nodeName = node->name;
 
 	glm::mat4 nodeTransform = node->transformation;
-	glm::vec3 nodeTranslation = getTranslationFromMatrix(nodeTransform);
-	glm::quat nodeRotation = getRotationFromMatrix(nodeTransform);
+	glm::vec3 nodeTranslation = GlmUtils::getTranslationFromMatrix(nodeTransform);
+	glm::quat nodeRotation = GlmUtils::getRotationFromMatrix(nodeTransform);
 
 	glm::mat4 nodeTranslationMatrix = glm::translate(nodeTranslation);
 	glm::mat4 nodeRotationMatrix = glm::mat4_cast(nodeRotation);

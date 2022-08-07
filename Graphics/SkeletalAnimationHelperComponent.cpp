@@ -26,54 +26,6 @@ SkeletalAnimationHelperComponent::~SkeletalAnimationHelperComponent()
 }
 
 
-// todo: animation przeniesc do osobnego pliku
-glm::vec3 getTranslationFromMatrix(const glm::mat4& transformMatrix)
-{
-	glm::vec3 scale;
-	glm::quat orientation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(transformMatrix, scale, orientation, translation, skew, perspective);
-
-	return translation;
-}
-
-
-glm::quat getRotationFromMatrix(const glm::mat4& transformMatrix)
-{
-	glm::vec3 scale;
-	glm::quat orientation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(transformMatrix, scale, orientation, translation, skew, perspective);
-
-	// https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
-	// funkcja glm::decompose zwraca niepoprawny kwaternion
-	// aby otrzymaæ prawid³ow¹ rotacjê nale¿y wykonaæ glm::conjugate
-	// conjugate tworzy tak naprawdê rotacjê odwrotn¹
-	// dlatego te¿ w ObjectPropertiesWindow dzia³a³ poni¿szy kod:
-	// glm::vec3 rotationEulerAngles = glm::eulerAngles(getRotation(nodeData->transformation));
-	// rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
-	// jeœli jednak chcemy operowaæ na kwaternionie, to lepiej wykonaæ glm::conjugate(orientation);
-	return glm::conjugate(orientation);
-}
-
-
-glm::vec3 getScaleFromMatrix(const glm::mat4& transformMatrix)
-{
-	glm::vec3 scale;
-	glm::quat orientation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(transformMatrix, scale, orientation, translation, skew, perspective);
-
-	return scale;
-}
-
-
 void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 {
 	_modelRootSceneObject = getSceneObject()->getSceneManager()->addSceneObject("Bones (model)");
@@ -131,9 +83,7 @@ void SkeletalAnimationHelperComponent::createBoneObjectForModel(AnimationNodeDat
 
 	parent->addChild(sceneObject);
 
-	sceneObject->setPosition(getTranslationFromMatrix(nodeData->transformation));
-	sceneObject->setRotationQuaternion(getRotationFromMatrix(nodeData->transformation));
-	sceneObject->setScale(getScaleFromMatrix(nodeData->transformation));
+	sceneObject->setTransformFromMatrix(nodeData->transformation);
 
 	_modelBoneHelperDatas.push_back({ sceneObject, nodeData });
 
@@ -156,9 +106,7 @@ void SkeletalAnimationHelperComponent::createBoneObjectForAnimation(AnimationNod
 		Bone* bone = animationBone->second;
 		glm::mat4 boneTransform = bone->calculateLocalTransform(0.0f * _animation->getTicksPerSecond());
 
-		sceneObject->setPosition(getTranslationFromMatrix(boneTransform));
-		sceneObject->setRotationQuaternion(getRotationFromMatrix(boneTransform));
-		sceneObject->setScale(getScaleFromMatrix(boneTransform));
+		sceneObject->setTransformFromMatrix(boneTransform);
 	}
 
 	_animationBoneHelperDatas.push_back({ sceneObject, nodeData });
@@ -263,9 +211,7 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 
 				glm::mat4 boneTransform = bone->calculateLocalTransform(currentTime);
 
-				data.helperObject->setPosition(getTranslationFromMatrix(boneTransform));
-				data.helperObject->setRotationQuaternion(getRotationFromMatrix(boneTransform));
-				data.helperObject->setScale(getScaleFromMatrix(boneTransform));
+				data.helperObject->setTransformFromMatrix(boneTransform);
 			}
 		}
 	}
@@ -273,9 +219,7 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 	{
 		for (const auto& data : _animationBoneHelperDatas)
 		{
-			data.helperObject->setPosition(getTranslationFromMatrix(data.animationNode->transformation));
-			data.helperObject->setRotationQuaternion(getRotationFromMatrix(data.animationNode->transformation));
-			data.helperObject->setScale(getScaleFromMatrix(data.animationNode->transformation));
+			data.helperObject->setTransformFromMatrix(data.animationNode->transformation);
 		}
 	}
 
@@ -285,9 +229,7 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 		{
 			if (_finalBonesHelperObjects[i] != nullptr)
 			{
-				_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent2->_finalBoneMatrices[i]));
-				_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent2->_finalBoneMatrices[i]));
-				//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+				_finalBonesHelperObjects[i]->setTransformFromMatrix(skeletalAnimationComponent2->_finalBoneMatrices[i]);
 			}
 		}
 	}
