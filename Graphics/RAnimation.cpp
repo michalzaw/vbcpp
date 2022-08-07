@@ -5,8 +5,8 @@
 #include <glm/gtx/quaternion.hpp>
 
 
-Bone::Bone(int id, const std::string& name)
-	: _id(id), _name(name), _localTransform(1.0f)
+Bone::Bone(const std::string& name)
+	:  _name(name)
 {
 
 }
@@ -120,18 +120,19 @@ glm::mat4 Bone::interpolateScale(float animationTime)
 }
 
 
-void Bone::update(float animationTime)
+glm::mat4 Bone::calculateLocalTransform(float animationTime)
 {
-	_translation = interpolatePosition(animationTime);
-	_rotation = interpolateRotation(animationTime);
-	_scale = interpolateScale(animationTime);
+	glm::mat4 translation = interpolatePosition(animationTime);
+	glm::mat4 rotation = interpolateRotation(animationTime);
+	glm::mat4 scale = interpolateScale(animationTime);
 	
-	_localTransform = _translation * _rotation * _scale;
+	return translation * rotation * scale;
 }
 
 
 RAnimation::RAnimation(const std::string& path)
-	: Resource(RT_ANIMATION, path)
+	: Resource(RT_ANIMATION, path),
+	_duration(0.0f), _ticksPerSecond(0)
 {
 
 }
@@ -139,22 +140,8 @@ RAnimation::RAnimation(const std::string& path)
 
 RAnimation::~RAnimation()
 {
-
-}
-
-
-Bone* RAnimation::findBone(const std::string& name)
-{
-	auto result = std::find_if(_bones.begin(), _bones.end(), [&name](Bone& bone)
-		{
-			return bone.getName() == name;
-		});
-
-	if (result == _bones.end())
+	for (auto& pair : _bones)
 	{
-		//LOG_DEBUG("Invalid bone name: " + name);
-		return nullptr;
+		delete pair.second;
 	}
-
-	return &(*result);
 }

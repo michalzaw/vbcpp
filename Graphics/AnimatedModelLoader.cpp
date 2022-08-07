@@ -45,15 +45,15 @@ void AnimatedModelLoader::extractBoneWeights(AnimatedVertex* vertices, unsigned 
         {
             boneId = _boneCounter++;
 
-            BoneInfo boneInfo;
-            boneInfo.id = boneId;
-            boneInfo.offset = AssimpGlmConverter::toMat4(assimpMesh->mBones[i]->mOffsetMatrix);
+            BoneInfo* boneInfo = new BoneInfo;
+            boneInfo->id = boneId;
+            boneInfo->offset = AssimpGlmConverter::toMat4(assimpMesh->mBones[i]->mOffsetMatrix);
 
             _boneInfos[boneName] = boneInfo;
         }
         else
         {
-            boneId = _boneInfos[boneName].id;
+            boneId = _boneInfos[boneName]->id;
         }
 
         auto weights = assimpMesh->mBones[i]->mWeights;
@@ -86,6 +86,15 @@ void AnimatedModelLoader::loadNode(const aiNode* assimpNode, AnimationNodeData& 
         loadNode(assimpNode->mChildren[i], child);
         outNode.children.push_back(child);
     }
+}
+
+
+void AnimatedModelLoader::getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform)
+{
+    // w animacji nie uwzgledniamy transformacji z nodow modelu - transformacja bedzie pochodzic z kosci
+    transform.setPosition(0.0f, 0.0f, 0.0f);
+    transform.setRotation(0.0f, 0.0f, 0.0f);
+    transform.setScale(1.0f, 1.0f, 1.0f);
 }
 
 

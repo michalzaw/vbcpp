@@ -126,6 +126,8 @@ class GraphicsManager
 		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
         void removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent);
         void removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent);
+        void removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent);
+        void removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
 
 
         void setCurrentCamera(CameraStatic* camera);

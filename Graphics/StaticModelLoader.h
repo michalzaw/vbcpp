@@ -47,7 +47,7 @@ class StaticModelLoader
 
         void loadAllMaterials();
 
-        void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);
+        virtual void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);
         bool isNodeContainsCollisionMesh(aiNode* assimpNode);
 
         void getMeshMenderVertexFromAssimpMesh(const aiMesh* assimpMesh, unsigned int vertexIndex, MeshMender::Vertex& outVertex);

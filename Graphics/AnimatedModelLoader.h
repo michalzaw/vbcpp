@@ -10,7 +10,7 @@
 class AnimatedModelLoader : public StaticModelLoader
 {
 	private:
-		std::map<std::string, BoneInfo> _boneInfos;
+		std::unordered_map<std::string, BoneInfo*> _boneInfos;
 		int _boneCounter;
 
 		void setBoneDataInVertex(AnimatedVertex& vertex, int boneId, float weight);
@@ -19,6 +19,7 @@ class AnimatedModelLoader : public StaticModelLoader
 
 		void loadNode(const aiNode* assimpNode, AnimationNodeData& outNode); // todo: animation - ta sama funkcja co w AnimationLoader
 
+		void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform) override;
 		bool loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMesh& mesh, bool isLoadingSingleNode, const glm::mat4& globalNodeTransform) override;
 
 	public:

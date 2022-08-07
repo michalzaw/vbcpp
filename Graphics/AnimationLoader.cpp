@@ -19,15 +19,17 @@ void AnimationLoader::loadNode(const aiNode* assimpNode, AnimationNodeData& outN
 }
 
 
-void AnimationLoader::loadBone(const aiNodeAnim* chanel, Bone& outBone)
+Bone* AnimationLoader::loadBone(const aiNodeAnim* chanel)
 {
+	Bone* bone = new Bone(chanel->mNodeName.C_Str());
+
 	for (unsigned int i = 0; i < chanel->mNumPositionKeys; ++i)
 	{
 		KeyPosition keyPosition;
 		keyPosition.value = AssimpGlmConverter::toVec3(chanel->mPositionKeys[i].mValue);
 		keyPosition.timestamp = chanel->mPositionKeys[i].mTime;
 
-		outBone._positions.push_back(keyPosition);
+		bone->_positions.push_back(keyPosition);
 	}
 
 	for (unsigned int i = 0; i < chanel->mNumRotationKeys; ++i)
@@ -36,7 +38,7 @@ void AnimationLoader::loadBone(const aiNodeAnim* chanel, Bone& outBone)
 		keyRotation.value = AssimpGlmConverter::toQuat(chanel->mRotationKeys[i].mValue);
 		keyRotation.timestamp = chanel->mRotationKeys[i].mTime;
 
-		outBone._rotations.push_back(keyRotation);
+		bone->_rotations.push_back(keyRotation);
 	}
 
 	for (unsigned int i = 0; i < chanel->mNumScalingKeys; ++i)
@@ -45,20 +47,21 @@ void AnimationLoader::loadBone(const aiNodeAnim* chanel, Bone& outBone)
 		keyScale.value = AssimpGlmConverter::toVec3(chanel->mScalingKeys[i].mValue);
 		keyScale.timestamp = chanel->mScalingKeys[i].mTime;
 
-		outBone._scales.push_back(keyScale);
+		bone->_scales.push_back(keyScale);
 	}
+
+	return bone;
 }
 
 
-void AnimationLoader::loadBones(const aiAnimation* assimpAnimation, std::vector<Bone>& outBones)
+void AnimationLoader::loadBones(const aiAnimation* assimpAnimation, std::unordered_map<std::string, Bone*>& outBones)
 {
 	for (unsigned int i = 0; i < assimpAnimation->mNumChannels; ++i)
 	{
 		const auto& chanel = assimpAnimation->mChannels[i];
 
-		Bone bone(0, chanel->mNodeName.C_Str()); // todo: animation ustawianie id zamiast 0
-		loadBone(chanel, bone);
-		outBones.push_back(bone);
+		Bone* bone = loadBone(chanel);
+		outBones.insert(std::make_pair(bone->getName(), bone));
 	}
 }
 

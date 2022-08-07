@@ -152,7 +152,7 @@ void SkeletalAnimationComponent2::onAttachedToScenObject()
 		return;
 	}
 
-	FinalSkeletonNode* modelSkeleton = createFinalSkeletonProcessNodeFromModel(&_animatedModel->_bonesRootNode);
+	FinalSkeletonNode* modelSkeleton = createFinalSkeletonProcessNodeFromModel(_animatedModel->getBonesRootNode());
 	FinalSkeletonNode* animationSkeleton = createFinalSkeletonProcessNodeFromAnimation(_animation->getRootNode());
 
 	inserModelNodeToSkeleton(animationSkeleton, modelSkeleton, _boneMap);
@@ -163,12 +163,11 @@ void SkeletalAnimationComponent2::onAttachedToScenObject()
 
 	//createFinalSkeletonProcessNodeFromAnimation(_animation->getRootNode(), _finalSkeletonRootNode);
 
-	// todo: animation usuwanie componentu
 	SkeletalAnimationHelperComponent* helper = getSceneObject()->getSceneManager()->getGraphicsManager()->addSkeletalAnimationHelper(new SkeletalAnimationHelperComponent(_animation, _animatedModel));;
 	getSceneObject()->addComponent(helper);
 
 
-	calculateDefaultRotationInModel(&_animatedModel->_bonesRootNode);
+	calculateDefaultRotationInModel(_animatedModel->getBonesRootNode());
 }
 
 
@@ -312,7 +311,7 @@ void SkeletalAnimationComponent2::calculateDefaultRotationInModel(AnimationNodeD
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
-		int index = boneInfo->second.id;
+		int index = boneInfo->second->id;
 
 		_defaultTranslationBoneMatrices[index] = nodeTranslationMatrix;
 		_defaultRotationBoneMatrices[index] = nodeRotationMatrix;
@@ -345,8 +344,8 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
-		int index = boneInfo->second.id;
-		const glm::mat4& offset = boneInfo->second.offset;
+		int index = boneInfo->second->id;
+		const glm::mat4& offset = boneInfo->second->offset;
 
 		_finalBoneMatrices[index] = globalTransform * offset;
 	}
@@ -367,11 +366,11 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 //
 //	glm::mat4 globalTransform = parentTransform;
 //
-//	Bone* bone = _animation->findBone(nodeName);
-//	if (bone != nullptr)
+//	auto animationBone = _animation->getBones().find(nodeName);
+//	if (animationBone != _animation->getBones().end())
 //	{
-//		bone->update(_currentTime);
-//		//nodeTransform = bone->getLocalTransform(); // todo: animation lepiej ¿eby update zwraca³ t¹ transformacjê, zamiast zapisywaæ j¹ wewn¹trz bone
+//		Bone* bone = animationBone->second;
+//		//nodeTransform = bone->calculateLocalTransform(_currentTime);
 //		nodeTransform = bone->_rotation;
 //		globalTransform = parentTransform * nodeTransform;
 //
@@ -386,11 +385,11 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 //
 //				if (boneInfo != _animatedModel->getBoneInfos().end())
 //				{
-//					int index = boneInfo->second.id;
+//					int index = boneInfo->second->id;
 //
 //					globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * nodeTransform;
 //
-//					_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second.offset;
+//					_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second->offset;
 //
 //
 //
@@ -398,7 +397,7 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 //
 //					//globalTransform = parentTransform * _defaultTranslationBoneMatrices[index];
 //
-//					//_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second.offset;
+//					//_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second->offset;
 //
 //					for (int i = 0; i < _cachedModelNodes[index]->children.size(); ++i)
 //					{
@@ -431,7 +430,7 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 //	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 //	if (boneInfo != _animatedModel->getBoneInfos().end())
 //	{
-//		int index = boneInfo->second.id;
+//		int index = boneInfo->second->id;
 //
 //		globalTransform = parentTransform * _defaultTranslationBoneMatrices[index] * _defaultRotationBoneMatrices[index];
 //
@@ -448,7 +447,7 @@ void SkeletalAnimationComponent2::calculateBoneTransformInModel(AnimationNodeDat
 //			}
 //		}
 //
-//		//_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+//		//_finalBoneMatrices[index] = globalTransform * boneInfo->second->offset;
 //	}
 //
 //	for (int i = 0; i < node->children.size(); ++i)
@@ -465,12 +464,12 @@ void SkeletalAnimationComponent2::calculateBoneTransformInAnimation(AnimationNod
 
 	glm::mat4 nodeTransform = node->transformation;
 
-	auto animationBone = _animation->findBone(nodeName);
-	if (animationBone != nullptr)
+	auto animationBone = _animation->getBones().find(nodeName);
+	if (animationBone != _animation->getBones().end())
 	{
-		animationBone->update(_currentTime);
+		Bone* bone = animationBone->second;
 
-		nodeTransform = animationBone->getLocalTransform();
+		nodeTransform = bone->calculateLocalTransform(_currentTime);
 	}
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
@@ -478,9 +477,9 @@ void SkeletalAnimationComponent2::calculateBoneTransformInAnimation(AnimationNod
 	auto boneInfo = _animatedModel->getBoneInfos().find(/*"krystian_" + */nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
-		int index = boneInfo->second.id;
+		int index = boneInfo->second->id;
 
-		_finalBoneMatrices[index] = globalTransform * boneInfo->second.offset;
+		_finalBoneMatrices[index] = globalTransform * boneInfo->second->offset;
 		//_finalBoneMatrices[index] = globalTransform * _defaultRotationBoneMatrices[index] * boneInfo->second.offset;
 	}
 
@@ -500,9 +499,9 @@ void SkeletalAnimationComponent2::update(float deltaTime)
 	}
 
 	/*
-	calculateBoneTransformInModel(&_animatedModel->_bonesRootNode);
+	calculateBoneTransformInModel(_animatedModel->getBonesRootNode());
 	//calculateBoneTransformInAnimation(_animation->getRootNode());
-	calculateBoneTransformInAnimation(&_animatedModel->_bonesRootNode);
+	calculateBoneTransformInAnimation(_animatedModel->getBonesRootNode());
 	*/
 
 	calculateBoneTransformInAnimation(_animation->getRootNode());

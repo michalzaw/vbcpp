@@ -58,6 +58,31 @@ GraphicsManager::~GraphicsManager()
 		delete* i;
 	}
 
+    for (std::vector<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<RoadIntersectionComponent*>::iterator i = _roadIntersectionComponents.begin(); i != _roadIntersectionComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        delete* i;
+    }
+
 	if (_sky != NULL)
 	{
 		delete _sky;
@@ -488,6 +513,38 @@ void GraphicsManager::removeSkeletalAnimation(SkeletalAnimationComponent* skelet
             i = _skeletalAnimations.erase(i);
 
             delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations2.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        if (*i == component)
+        {
+            i = _skeletalAnimationHelpers.erase(i);
+
+            delete component;
 
             return;
         }

@@ -46,25 +46,27 @@ void SkeletalAnimationComponent::onAttachedToScenObject()
 		return;
 	}
 
-	// todo: animation usuwanie componentu
-	SkeletalAnimationHelperComponent* helper = getSceneObject()->getSceneManager()->getGraphicsManager()->addSkeletalAnimationHelper(new SkeletalAnimationHelperComponent(_animation, _animatedModel));;
-	getSceneObject()->addComponent(helper);
+	if (GameConfig::getInstance().mode == GM_EDITOR)
+	{
+		// create editor helper
+		SkeletalAnimationHelperComponent* helper = getSceneObject()->getSceneManager()->getGraphicsManager()->addSkeletalAnimationHelper(new SkeletalAnimationHelperComponent(_animation, _animatedModel));;
+		getSceneObject()->addComponent(helper);
+	}
 }
 
 
-// wersja bez retargetingu
 void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
 {
 	const std::string& nodeName = node->name;
 
 	glm::mat4 nodeTransform = node->transformation;
 
-	auto animationBone = _animation->findBone(nodeName);
-	if (animationBone != nullptr)
+	auto animationBone = _animation->getBones().find(nodeName);
+	if (animationBone != _animation->getBones().end())
 	{
-		animationBone->update(_currentTime);
+		Bone* bone = animationBone->second;
 
-		nodeTransform = animationBone->getLocalTransform();
+		nodeTransform = bone->calculateLocalTransform(_currentTime);
 	}
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
@@ -72,8 +74,8 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
-		int index = boneInfo->second.id;
-		const glm::mat4& offset = boneInfo->second.offset;
+		int index = boneInfo->second->id;
+		const glm::mat4& offset = boneInfo->second->offset;
 
 		_finalBoneMatrices[index] = globalTransform * offset;
 	}

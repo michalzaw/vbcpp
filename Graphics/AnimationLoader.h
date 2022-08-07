@@ -15,8 +15,8 @@ class AnimationLoader final
 		static const unsigned int IMPORT_FLAGS = aiProcess_Triangulate;
 
 		void loadNode(const aiNode* assimpNode, AnimationNodeData& outNode);
-		void loadBone(const aiNodeAnim* chanel, Bone& outBone);
-		void loadBones(const aiAnimation* assimpAnimation, std::vector<Bone>& outBones);
+		Bone* loadBone(const aiNodeAnim* chanel);
+		void loadBones(const aiAnimation* assimpAnimation, std::unordered_map<std::string, Bone*>& outBones);
 
 	public:
 		RAnimation* loadAnimation(const std::string& fileName);

@@ -14,6 +14,7 @@ struct AnimationNodeData;
 class RAnimatedModel;
 
 
+// animation without retargeting
 class SkeletalAnimationComponent final : public Component
 {
 	private:

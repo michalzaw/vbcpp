@@ -683,9 +683,9 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
 {
-	ImGui::PushID("node %s", name);
+	ImGui::PushID(name);
 	ImGui::AlignTextToFramePadding();
-	bool nodeOpen = ImGui::TreeNode(name, name);
+	bool nodeOpen = ImGui::TreeNode("treeNode", name);
 
 	ImGui::NextColumn();
 

@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -30,9 +31,7 @@ class Bone final
 	friend class AnimationLoader;
 
 	private:
-		int	_id; // todo: animation - prawdopodobnie niepotrzebne
 		std::string _name;
-		glm::mat4 _localTransform;
 
 		std::vector<KeyPosition> _positions;
 		std::vector<KeyRotation> _rotations;
@@ -49,18 +48,12 @@ class Bone final
 		glm::mat4 interpolateScale(float animationTime);
 
 	public:
-		Bone(int id, const std::string& name);
+		Bone(const std::string& name);
 		~Bone();
 
 		inline const std::string& getName() { return _name; }
-		inline const glm::mat4 getLocalTransform() { return _localTransform; }
 
-		void update(float animationTime);
-
-
-		glm::mat4 _translation;
-		glm::mat4 _rotation;
-		glm::mat4 _scale;
+		glm::mat4 calculateLocalTransform(float animationTime);
 
 };
 
@@ -73,18 +66,17 @@ class RAnimation final : public Resource
 		float _duration;
 		int _ticksPerSecond;
 
-		std::vector<Bone> _bones;
+		std::unordered_map<std::string, Bone*> _bones;
 		AnimationNodeData _rootNode;
 
 	public:
 		RAnimation(const std::string& path);
 		~RAnimation();
 
-		Bone* findBone(const std::string& name); // todo: animation u¿ycie mapy z Bone zamiast vectora
-
 		inline float getDuration() { return _duration; }
 		inline float getTicksPerSecond() { return _ticksPerSecond; }
 
+		inline std::unordered_map<std::string, Bone*>& getBones() { return _bones; }
 		inline AnimationNodeData* getRootNode() { return &_rootNode; }
 
 };

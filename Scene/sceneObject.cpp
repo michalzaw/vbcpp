@@ -3,6 +3,11 @@
 #include "../Game/GameLogicSystem.h"
 #include "../Game/CameraControlComponent.h"
 
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
+#include "../Graphics/SkeletalAnimationHelperComponent.h"
+
+
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
     : _parent(parent),
@@ -108,6 +113,18 @@ SceneObject::~SceneObject()
 
             case CT_ROAD_INTERSECTION:
                 _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_2:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_HELPER:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
                 break;
 
         }
@@ -351,6 +368,18 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_ROAD_INTERSECTION:
                     _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_2:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_HELPER:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
                     break;
 
             }

@@ -1,6 +1,7 @@
 #include "SkeletalAnimationHelperComponent.h"
 
 #include "RAnimation.h"
+#include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 
 #include "../Scene/SceneManager.h"
@@ -95,9 +96,9 @@ void SkeletalAnimationHelperComponent::onAttachedToScenObject()
 	_finalBonesRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
 	_finalSkeletonRootSceneObject->setFlags(SOF_NOT_SERIALIZABLE);
 
-	createBoneObjectForModel(&_animatedModel->_bonesRootNode, _modelRootSceneObject);
+	createBoneObjectForModel(_animatedModel->getBonesRootNode(), _modelRootSceneObject);
 	createBoneObjectForAnimation(_animation->getRootNode(), _animationRootSceneObject);
-	createFinalBoneObject(&_animatedModel->_bonesRootNode, _finalBonesRootSceneObject);
+	createFinalBoneObject(_animatedModel->getBonesRootNode(), _finalBonesRootSceneObject);
 
 	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
 	if (skeletalAnimationComponent != nullptr)
@@ -149,14 +150,15 @@ void SkeletalAnimationHelperComponent::createBoneObjectForAnimation(AnimationNod
 
 	parent->addChild(sceneObject);
 
-	Bone* bone = _animation->findBone(nodeData->name);
-	if (bone != nullptr)
+	auto animationBone = _animation->getBones().find(nodeData->name);
+	if (animationBone != _animation->getBones().end())
 	{
-		bone->update(0.0f * _animation->getTicksPerSecond());
+		Bone* bone = animationBone->second;
+		glm::mat4 boneTransform = bone->calculateLocalTransform(0.0f * _animation->getTicksPerSecond());
 
-		sceneObject->setPosition(getTranslationFromMatrix(bone->getLocalTransform()));
-		sceneObject->setRotationQuaternion(getRotationFromMatrix(bone->getLocalTransform()));
-		sceneObject->setScale(getScaleFromMatrix(bone->getLocalTransform()));
+		sceneObject->setPosition(getTranslationFromMatrix(boneTransform));
+		sceneObject->setRotationQuaternion(getRotationFromMatrix(boneTransform));
+		sceneObject->setScale(getScaleFromMatrix(boneTransform));
 	}
 
 	_animationBoneHelperDatas.push_back({ sceneObject, nodeData });
@@ -173,7 +175,7 @@ void SkeletalAnimationHelperComponent::createFinalBoneObject(AnimationNodeData* 
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeData->name);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
-		int index = boneInfo->second.id;
+		int index = boneInfo->second->id;
 
 		SceneObject* sceneObject = createBoneObject(nodeData->name, glm::vec4(1.0f, 0.0f, 0.0f, 1.0f));
 		parent->addChild(sceneObject);
@@ -232,6 +234,9 @@ void SkeletalAnimationHelperComponent::createFinalSkeletonBoneObject(FinalSkelet
 
 void SkeletalAnimationHelperComponent::update(float deltaTime)
 {
+	SkeletalAnimationComponent* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION));
+	SkeletalAnimationComponent2* skeletalAnimationComponent2 = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
+
 	for (const auto& data : _modelBoneHelperDatas)
 	{
 		data.animationNode->transformation = data.helperObject->getLocalTransformMatrix();
@@ -241,12 +246,26 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 	{
 		for (const auto& data : _animationBoneHelperDatas)
 		{
-			Bone* bone = _animation->findBone(data.animationNode->name);
-			if (bone != nullptr)
+			auto animationBone = _animation->getBones().find(data.animationNode->name);
+			if (animationBone != _animation->getBones().end())
 			{
-				data.helperObject->setPosition(getTranslationFromMatrix(bone->getLocalTransform()));
-				data.helperObject->setRotationQuaternion(getRotationFromMatrix(bone->getLocalTransform()));
-				data.helperObject->setScale(getScaleFromMatrix(bone->getLocalTransform()));
+				Bone* bone = animationBone->second;
+
+				float currentTime;
+				if (skeletalAnimationComponent != nullptr)
+				{
+					currentTime = skeletalAnimationComponent->getCurrentTime();
+				}
+				else if (skeletalAnimationComponent2 != nullptr)
+				{
+					currentTime = skeletalAnimationComponent2->getCurrentTime();
+				}
+
+				glm::mat4 boneTransform = bone->calculateLocalTransform(currentTime);
+
+				data.helperObject->setPosition(getTranslationFromMatrix(boneTransform));
+				data.helperObject->setRotationQuaternion(getRotationFromMatrix(boneTransform));
+				data.helperObject->setScale(getScaleFromMatrix(boneTransform));
 			}
 		}
 	}
@@ -260,15 +279,14 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 		}
 	}
 
-	SkeletalAnimationComponent2* skeletalAnimationComponent = static_cast<SkeletalAnimationComponent2*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION_2));
-	if (skeletalAnimationComponent != nullptr)
+	if (skeletalAnimationComponent2 != nullptr)
 	{
 		for (int i = 0; i < 100; ++i)
 		{
 			if (_finalBonesHelperObjects[i] != nullptr)
 			{
-				_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
-				_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
+				_finalBonesHelperObjects[i]->setPosition(getTranslationFromMatrix(skeletalAnimationComponent2->_finalBoneMatrices[i]));
+				_finalBonesHelperObjects[i]->setRotationQuaternion(getRotationFromMatrix(skeletalAnimationComponent2->_finalBoneMatrices[i]));
 				//_finalBonesHelperObjects[i]->setScale(getScaleFromMatrix(skeletalAnimationComponent->_finalBoneMatrices[i]));
 			}
 		}

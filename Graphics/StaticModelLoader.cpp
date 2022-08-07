@@ -38,14 +38,9 @@ void StaticModelLoader::getTransformFromAssimpNode(aiNode* assimpNode, Transform
     aiVector3t<ai_real> scale;
     assimpNode->mTransformation.Decompose(scale, rotation, position);
     
-    // todo: animation 
-    //transform.setPosition(position.x, position.y, position.z);
-    //transform.setRotation(rotation.x, rotation.y, rotation.z);
-    //transform.setScale(scale.x, scale.y, scale.z);
-
-    transform.setPosition(0.0f, 0.0f, 0.0f);
-    transform.setRotation(0.0f, 0.0f, 0.0f);
-    transform.setScale(1.0f, 1.0f, 1.0f);
+    transform.setPosition(position.x, position.y, position.z);
+    transform.setRotation(rotation.x, rotation.y, rotation.z);
+    transform.setScale(scale.x, scale.y, scale.z);
 }
 
 
