@@ -791,32 +791,6 @@ namespace vbEditor
 		sceneLoader.loadMap(mapName);
 
 
-		SceneObject* animatedObject = sceneManager->addSceneObject("Krystian");
-
-		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian3/");
-		RenderObject* animatedRenderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
-
-		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
-		SkeletalAnimationComponent* skeletalAnimation = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation);
-		animatedObject->addComponent(skeletalAnimation);
-
-		animatedObject->setScale(0.01);
-		animatedObject->setPosition(0.7f, 0.1f, 0.0f);
-
-
-		SceneObject* animatedObject2 = sceneManager->addSceneObject("Genowefa");
-		
-		RAnimatedModel* animatedModel2 = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/GenowefaAnimated/genowefa.fbx", "Objects/peoples/GenowefaAnimated/");
-		RenderObject* animatedRenderObject2 = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel2), animatedObject2);
-
-		RAnimation* animation2 = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_running.fbx");
-		SkeletalAnimationComponent* skeletalAnimation2 = sceneManager->getGraphicsManager()->addSkeletalAnimation(animation2);
-		animatedObject2->addComponent(skeletalAnimation2);
-
-		animatedObject2->setScale(0.01);
-		animatedObject2->setPosition(-0.1f, 0.3f, 0.0f);
-
-
 		mapInfo.name = mapName;
 		mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
@@ -981,6 +955,34 @@ namespace vbEditor
 		setSelectedSceneObject(sceneObject);
 	}
 
+	void createAnimatedObjects()
+	{
+		SceneObject* animatedObject = _sceneManager->addSceneObject("Krystian");
+
+		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian3/");
+		RenderObject* animatedRenderObject = _sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
+
+		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
+		SkeletalAnimationComponent* skeletalAnimation = _sceneManager->getGraphicsManager()->addSkeletalAnimation(animation);
+		animatedObject->addComponent(skeletalAnimation);
+
+		animatedObject->setScale(0.01);
+		animatedObject->setPosition(0.7f, 0.1f, 0.0f);
+
+
+		SceneObject* animatedObject2 = _sceneManager->addSceneObject("Genowefa");
+
+		RAnimatedModel* animatedModel2 = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/GenowefaAnimated/genowefa.fbx", "Objects/peoples/GenowefaAnimated/");
+		RenderObject* animatedRenderObject2 = _sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel2), animatedObject2);
+
+		RAnimation* animation2 = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_running.fbx");
+		SkeletalAnimationComponent* skeletalAnimation2 = _sceneManager->getGraphicsManager()->addSkeletalAnimation(animation2);
+		animatedObject2->addComponent(skeletalAnimation2);
+
+		animatedObject2->setScale(0.01);
+		animatedObject2->setPosition(-0.1f, 0.3f, 0.0f);
+	}
+
 	void clearScene()
 	{
 
@@ -1044,6 +1046,10 @@ namespace vbEditor
 					_graphicsManager->addRenderObject(decal, decalSceneObject);
 
 					setSelectedSceneObject(decalSceneObject);
+				}
+				if (ImGui::MenuItem("Add animated objects (TEST)", NULL))
+				{
+					createAnimatedObjects();
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
