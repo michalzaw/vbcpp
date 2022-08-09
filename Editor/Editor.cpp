@@ -790,7 +790,6 @@ namespace vbEditor
 		SceneLoader sceneLoader(sceneManager);
 		sceneLoader.loadMap(mapName);
 
-
 		mapInfo.name = mapName;
 		mapInfo.author = sceneLoader.getLoadedSceneDescription().author;
 
@@ -1094,10 +1093,6 @@ namespace vbEditor
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 				}
-				/*if (ImGui::MenuItem("TEST!!!", NULL, _graphicsManager->getGlobalEnvironmentCaptureComponent()->a))
-				{
-					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
-				}*/
 
 				ImGui::Separator();
 

@@ -1063,7 +1063,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
 
-    // NOTEXTURE_MATERIAL
+    // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
     _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
 
     // GUI_IMAGE_SHADER

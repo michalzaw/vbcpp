@@ -156,6 +156,6 @@ void CameraControlComponent::update(float deltaTime)
 
 	if (_camera->getSceneObject()->getParent() == nullptr && minPositionOffset == 0.0f && maxPositionOffset == 0.0f)
 	{
-		//moveCameraAboveTerrain();
+		moveCameraAboveTerrain();
 	}
 }
