@@ -1,5 +1,8 @@
 #include "Renderer.h"
 
+#include "SkeletalAnimationComponent.h"
+#include "SkeletalAnimationComponent2.h"
+
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/Timer.h"
@@ -17,7 +20,7 @@ Renderer::Renderer()
     _bloom(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
-    _renderObjectsAAABB(true), _renderObjectsOBB(false),
+    _renderObjectsAAABB(false), _renderObjectsOBB(false),
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
     _requiredRebuildStaticLighting(false)
@@ -1054,6 +1057,15 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // SOLID_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
+
+    // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
+    _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
+
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
 
@@ -1547,12 +1559,12 @@ void Renderer::renderDepth(RenderData* renderData)
         mesh->vbo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         if (isAlphaTest)
         {
             glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
 
@@ -1694,13 +1706,13 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
@@ -1721,6 +1733,24 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
+}
+
+
+const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject)
+{
+    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+    if (skeletatlAnimation != nullptr)
+    {
+        return skeletatlAnimation->getFinalBoneMatrices();
+    }
+
+    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+    if (skeletatlAnimation2 != nullptr)
+    {
+        return skeletatlAnimation2->getFinalBoneMatrices();
+    }
+
+    return {};
 }
 
 
@@ -1773,6 +1803,10 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDepthMask(GL_TRUE);
             }
+            else if (currentShader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glEnable(GL_DEPTH_TEST);
+            }
 
             if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
@@ -1793,6 +1827,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == DECAL_MATERIAL)
             {
                 glDepthMask(GL_FALSE);
+            }
+            else if (material->shader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glDisable(GL_DEPTH_TEST);
             }
             else if (material->shader == EDITOR_AXIS_SHADER)
             {
@@ -1897,23 +1935,43 @@ void Renderer::renderScene(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
         if (material->normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 8));
 
             glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 11));
 
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
+        }
+
+        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
         }
 
         if (material->diffuseTexture != NULL)
@@ -2017,12 +2075,18 @@ void Renderer::renderScene(RenderData* renderData)
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
         }
+        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
+        }
     }
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB

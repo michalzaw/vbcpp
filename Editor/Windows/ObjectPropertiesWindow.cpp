@@ -16,6 +16,9 @@
 #include "../FileDialogs.h"
 
 #include "../../Graphics/ShapePolygonComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent2.h"
+#include "../../Graphics/SkeletalAnimationHelperComponent.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -608,7 +611,8 @@ bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_Enter
 
 #define IMGUI_INPUT_float(propertyName)																											\
 float value = component->get##propertyName();																									\
-bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
+//bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
 #define IMGUI_INPUT_bool(propertyName)																											\
@@ -679,9 +683,9 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
 {
-	ImGui::PushID("node %s", name);
+	ImGui::PushID(name);
 	ImGui::AlignTextToFramePadding();
-	bool nodeOpen = ImGui::TreeNode(name, name);
+	bool nodeOpen = ImGui::TreeNode("treeNode", name);
 
 	ImGui::NextColumn();
 
@@ -722,6 +726,77 @@ void showBusStopComponentDetails(BusStopComponent* component)
 		}
 		ImGui::PopID();
 		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation Helper", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowModelBones, bool, "Show model bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowAnimationBones, bool, "Show animation bones")
+
+		if (newNode("Animation bones transform", ""))
+		{
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformFromAnimation, bool, "Transform from animation")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformDefault, bool, "Default transform")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformCustom, bool, "Custom transform")
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalBones, bool, "Show final bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalSkeletonBones, bool, "Show final skeleton bones")
+
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -788,6 +863,24 @@ void showObjectProperties()
 			if (busStopComponent)
 			{
 				showBusStopComponentDetails(busStopComponent);
+			}
+
+			SkeletalAnimationComponent* skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION));
+			if (skeletalAnimationComponent)
+			{
+				showSkeletalAnimationComponentDetails(skeletalAnimationComponent);
+			}
+
+			SkeletalAnimationComponent2* skeletalAnimationComponent2 = dynamic_cast<SkeletalAnimationComponent2*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+			if (skeletalAnimationComponent2)
+			{
+				showSkeletalAnimationComponent2Details(skeletalAnimationComponent2);
+			}
+
+			SkeletalAnimationHelperComponent* skeletalAnimationHelperComponent = dynamic_cast<SkeletalAnimationHelperComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_HELPER));
+			if (skeletalAnimationHelperComponent)
+			{
+				showSkeletalAnimationHelperComponentDetails(skeletalAnimationHelperComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -1049,6 +1142,7 @@ void showObjectNameEdit()
 }
 
 
+// todo: wykorzystanie funkcji z GlmUtils i setTransformFromMatrix z SceneObject + refactor
 void showObjectTransformEdit()
 {
 	ImGui::Text("Transformation");

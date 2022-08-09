@@ -8,6 +8,8 @@
 #include "../Graphics/RoadProfileLoader.h"
 #include "../Graphics/RDisplayFont.h"
 #include "../Graphics/RMaterialsCollection.h"
+#include "../Graphics/RAnimation.h"
+#include "RAnimatedModel.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -19,7 +21,7 @@
 #include <memory>
 #include <sstream>
 
-//#define DEVELOPMENT_RESOURCES
+#define DEVELOPMENT_RESOURCES
 
 typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
@@ -59,6 +61,9 @@ class ResourceManager
                                              std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes,
 											 bool normalsSmoothing = true);
         RStaticModel* loadModel(std::string path, std::string texturePath, bool normalsSmoothing = true);
+
+        RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath);
+        RAnimation* loadAnimation(const std::string& path);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 

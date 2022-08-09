@@ -37,6 +37,8 @@
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/ShapePolygonComponent.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -952,6 +954,34 @@ namespace vbEditor
 		setSelectedSceneObject(sceneObject);
 	}
 
+	void createAnimatedObjects()
+	{
+		SceneObject* animatedObject = _sceneManager->addSceneObject("Krystian");
+
+		RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian3/");
+		RenderObject* animatedRenderObject = _sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel), animatedObject);
+
+		RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
+		SkeletalAnimationComponent* skeletalAnimation = _sceneManager->getGraphicsManager()->addSkeletalAnimation(animation);
+		animatedObject->addComponent(skeletalAnimation);
+
+		animatedObject->setScale(0.01);
+		animatedObject->setPosition(0.7f, 0.1f, 0.0f);
+
+
+		SceneObject* animatedObject2 = _sceneManager->addSceneObject("Genowefa");
+
+		RAnimatedModel* animatedModel2 = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/GenowefaAnimated/genowefa.fbx", "Objects/peoples/GenowefaAnimated/");
+		RenderObject* animatedRenderObject2 = _sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(animatedModel2), animatedObject2);
+
+		RAnimation* animation2 = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation_running.fbx");
+		SkeletalAnimationComponent* skeletalAnimation2 = _sceneManager->getGraphicsManager()->addSkeletalAnimation(animation2);
+		animatedObject2->addComponent(skeletalAnimation2);
+
+		animatedObject2->setScale(0.01);
+		animatedObject2->setPosition(-0.1f, 0.3f, 0.0f);
+	}
+
 	void clearScene()
 	{
 
@@ -1016,6 +1046,10 @@ namespace vbEditor
 
 					setSelectedSceneObject(decalSceneObject);
 				}
+				if (ImGui::MenuItem("Add animated objects (TEST)", NULL))
+				{
+					createAnimatedObjects();
+				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
@@ -1058,10 +1092,6 @@ namespace vbEditor
 				if (ImGui::MenuItem("Bloom", NULL, Renderer::getInstance().isBloomEnable()))
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
-				}
-				if (ImGui::MenuItem("TEST!!!", NULL, _graphicsManager->getGlobalEnvironmentCaptureComponent()->a))
-				{
-					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
 				}
 
 				ImGui::Separator();
@@ -1482,9 +1512,15 @@ namespace vbEditor
 			ImGui::PopID();
 		}
 
+		glm::mat4 viewMatrix = _camera->getViewMatrix();
+		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
+		{
+			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
+		}
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
 			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
 			NULL,

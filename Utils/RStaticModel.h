@@ -13,8 +13,10 @@
 
 struct StaticModelMesh
 {
-    Vertex*         vertices;
+    unsigned char*  vertices;
     unsigned int    verticesCount;
+    unsigned int    vertexSize;
+    VertexType      vertexType;
 
     unsigned int*   indices;
     unsigned int    indicesCount;
@@ -42,7 +44,14 @@ struct StaticModelMesh
     {
         if (vertices)
         {
-            delete[] vertices;
+            if (vertexType == VertexType::STANDARD)
+            {
+                delete[](reinterpret_cast<Vertex*>(this->vertices));
+            }
+            else if (vertexType == VertexType::ANIMATED)
+            {
+                delete[](reinterpret_cast<AnimatedVertex*>(this->vertices));
+            }
         }
 
         if (indices)
@@ -66,7 +75,8 @@ struct StaticModelMesh
     }
 
     // shaderType, vboSize, iboSize, staticData - only used when useSharedVboAndIbo is false
-    void setMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
+    template <typename VertType>
+    void setMeshData(VertType* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount,
                      unsigned int materialIndex, ShaderType shaderType,
 					 bool useSharedVboAndIbo = true, unsigned int vboSize = 0, unsigned int iboSize = 0, bool staticData = true)
     {
@@ -74,15 +84,33 @@ struct StaticModelMesh
 
         if (vertices)
         {
-            delete[] this->vertices;
+            if (vertexType == VertexType::STANDARD)
+            {
+                delete[](reinterpret_cast<Vertex*>(this->vertices));
+            }
+            else if (vertexType == VertexType::ANIMATED)
+            {
+                delete[](reinterpret_cast<AnimatedVertex*>(this->vertices));
+            }
         }
         if (indices)
         {
             delete[] this->indices;
         }
 
-        this->vertices = vertices;
+        this->vertexSize = sizeof(VertType);
+        this->vertexType = VerticesUtils::getVertexType<VertType>();
         this->verticesCount = verticesCount;
+        //this->vertices = new unsigned char[this->vertexSize * this->verticesCount];
+        //memccpy(this->vertices, vertices, this->vertexSize * this->verticesCount);
+        this->vertices = reinterpret_cast<unsigned char*>(vertices);
+
+        if (this->vertexType == VertexType::VERTEX_TYPES_COUNT)
+        {
+            LOG_ERROR("Invalid vertex type!");
+            return;
+        }
+
         this->indices = indices;
         this->indicesCount = indicesCount;
         this->firstVertex = 0;
@@ -94,7 +122,7 @@ struct StaticModelMesh
         {
             if (useSharedVboAndIbo)
             {
-                int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, sizeof(vertices[0]));
+                int vboIndex = OGLDriver::getInstance().getVboIndexForVertices(shaderType, verticesCount, this->vertexSize);
                 int iboIndex = OGLDriver::getInstance().getIboIndexForIndices(shaderType, indicesCount);
                 vbo = OGLDriver::getInstance().vbos[shaderType][vboIndex];// createVBO(verticesCount * sizeof(Vertex));
                 ibo = OGLDriver::getInstance().ibos[shaderType][iboIndex];//createIBO(indicesCount * sizeof(unsigned int));
@@ -113,20 +141,43 @@ struct StaticModelMesh
             else
             {
                 GLenum usage = staticData ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-                vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * sizeof(Vertex), usage);
+                vbo = OGLDriver::getInstance().createVBO(vboSize != 0 ? vboSize : verticesCount * this->vertexSize, usage);
                 ibo = OGLDriver::getInstance().createIBO(iboSize != 0 ? iboSize : indicesCount * sizeof(unsigned int), usage);
             }
 
-            vbo->addVertexData(vertices, verticesCount);
-            ibo->addIndices(indices, indicesCount);
+            int result = vbo->addVertexData(vertices, verticesCount);
+            if (result < 0)
+            {
+                LOG_ERROR("Failed to add vertices to VBO");
+            }
+            result = ibo->addIndices(indices, indicesCount);
+            if (result < 0)
+            {
+                LOG_ERROR("Failed to add indices to IBO");
+            }
         }
         else
         {
             LOG_DEBUG("Update data in existing VBO and IBO");
-            vbo->updateVertexData(vertices, verticesCount);
-            ibo->updateIndices(indices, indicesCount);
+            int result = vbo->updateVertexData(vertices, verticesCount);
+            if (result < 0)
+            {
+                LOG_ERROR("Failed to add vertices to VBO");
+            }
+            result = ibo->updateIndices(indices, indicesCount);
+            if (result < 0)
+            {
+                LOG_ERROR("Failed to add indices to IBO");
+            }
         }
     }
+
+    template <typename VertType>
+    VertType* getVertices()
+    {
+        return reinterpret_cast<VertType*>(vertices);
+    }
+    
 
 	/*void updateMeshData(Vertex* vertices, unsigned int verticesCount, unsigned int* indices, unsigned int indicesCount)
 	{
@@ -193,7 +244,7 @@ struct StaticModelNode
     {
         return meshesCount;
     }
-    StaticModelMesh*getMesh(unsigned int i)
+    StaticModelMesh* getMesh(unsigned int i)
     {
         if (i < meshesCount)
             return &meshes[i];
@@ -226,9 +277,13 @@ struct StaticModelNode
     {
         for (int i = 0; i < meshesCount; ++i)
         {
-            for (int j = 0; j < meshes[i].verticesCount; ++j)
+            if (meshes[i].vertexType == VertexType::STANDARD)
             {
-                vertices.push_back(meshes[i].vertices[j].position);
+                VerticesUtils::getVerticesPositionsArray<Vertex>(meshes[i].vertices, meshes[i].verticesCount, vertices);
+            }
+            else if (meshes[i].vertexType == VertexType::ANIMATED)
+            {
+                VerticesUtils::getVerticesPositionsArray<AnimatedVertex>(meshes[i].vertices, meshes[i].verticesCount, vertices);
             }
         }
     }
@@ -238,7 +293,7 @@ struct StaticModelNode
 class RStaticModel : public Resource
 {
     private:
-        StaticModelNode*_rootNode;
+        StaticModelNode* _rootNode;
 
         std::vector<Material*> _materials;
 
@@ -253,7 +308,7 @@ class RStaticModel : public Resource
         void calculateAABB();
 
     public:
-        RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
+        RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
                      GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
         RStaticModel()
             : Resource(RT_MODEL, "")
@@ -262,7 +317,7 @@ class RStaticModel : public Resource
 
             _collisionMeshSize = 0;
         }
-        ~RStaticModel();
+        virtual ~RStaticModel();
 
         StaticModelNode* getRootNode();
         StaticModelNode* getNodeByName(const std::string& name);

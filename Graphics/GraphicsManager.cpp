@@ -1,6 +1,9 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "SkeletalAnimationComponent.h"
+#include "SkeletalAnimationComponent2.h"
+#include "SkeletalAnimationHelperComponent.h"
 
 #include "../Scene/SceneObject.h"
 
@@ -54,6 +57,31 @@ GraphicsManager::~GraphicsManager()
 	{
 		delete* i;
 	}
+
+    for (std::vector<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<RoadIntersectionComponent*>::iterator i = _roadIntersectionComponents.begin(); i != _roadIntersectionComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        delete* i;
+    }
 
 	if (_sky != NULL)
 	{
@@ -257,6 +285,34 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
+{
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
+
+    _skeletalAnimations.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
+SkeletalAnimationComponent2* GraphicsManager::addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap)
+{
+    SkeletalAnimationComponent2* skeletalAnimation = new SkeletalAnimationComponent2(animation, animationNodeNameToBoneNameInModelMap);
+
+    _skeletalAnimations2.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
+SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    _skeletalAnimationHelpers.push_back(component);
+    return component;
+}
+
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -448,6 +504,54 @@ void GraphicsManager::removeRoadIntersectionComponent(RoadIntersectionComponent*
 }
 
 
+void GraphicsManager::removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations2.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        if (*i == component)
+        {
+            i = _skeletalAnimationHelpers.erase(i);
+
+            delete component;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -607,6 +711,21 @@ void GraphicsManager::update(float deltaTime)
     for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
     {
         roadIntersectionComponent->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)
+    {
+        skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent2* skeletalAnimation : _skeletalAnimations2)
+    {
+        skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationHelperComponent* skeletalAnimationHelper : _skeletalAnimationHelpers)
+    {
+        skeletalAnimationHelper->update(deltaTime);
     }
 }
 

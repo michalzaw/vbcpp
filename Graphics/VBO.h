@@ -47,7 +47,7 @@ class VBO
 
         template <typename VertexType>
         // Return new data offset in buffer or -1
-        unsigned int addVertexData(VertexType* vertices, unsigned int quantumOfVertices)
+        int addVertexData(VertexType* vertices, unsigned int quantumOfVertices)
         {
             if (_vertexSize == 0)
                 _vertexSize = sizeof(VertexType);
@@ -70,7 +70,7 @@ class VBO
         }
 
 		template <typename VertexType>
-		unsigned int updateVertexData(VertexType* vertices, unsigned int quantumOfVertices, unsigned int offset = 0)
+		int updateVertexData(VertexType* vertices, unsigned int quantumOfVertices, unsigned int offset = 0)
 		{
 			if (sizeof(VertexType) != _vertexSize)
 				return -1;
