@@ -14,12 +14,13 @@ struct AnimationNodeData;
 class RAnimatedModel;
 
 
+const int MAX_BONES = 100;
+
+
 // animation without retargeting
 class SkeletalAnimationComponent final : public Component
 {
 	private:
-		static const int MAX_BONES = 100;
-
 		RAnimation* _animation;
 		RAnimatedModel* _animatedModel;
 

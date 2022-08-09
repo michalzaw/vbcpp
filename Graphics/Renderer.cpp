@@ -1943,14 +1943,14 @@ void Renderer::renderScene(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
+        if (material->normalmapTexture != NULL)
+        {
             glEnableVertexAttribArray(3);
             glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 8));
 
             glEnableVertexAttribArray(4);
             glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 11));
 
-        if (material->normalmapTexture != NULL)
-        {
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
         }
 
@@ -1966,7 +1966,7 @@ void Renderer::renderScene(RenderData* renderData)
 
             const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
 
-            for (int i = 0; i < 100; ++i) // todo: animation zmieniæ na sta³¹
+            for (int i = 0; i < MAX_BONES; ++i)
             {
                 const glm::mat4& matrix = finalMatrices[i];
 
