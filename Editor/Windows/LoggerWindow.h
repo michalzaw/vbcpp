@@ -5,7 +5,7 @@
 #include <string>
 
 
-enum LogLevel;
+enum LogLevel : int;
 
 
 namespace LoggerWindow

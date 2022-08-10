@@ -32,6 +32,9 @@ struct DisplayText
 };
 
 
+class Framebuffer;
+
+
 class DisplayComponent : public Component
 {
 	private:
