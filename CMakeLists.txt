@@ -243,7 +243,7 @@ set_target_properties(${BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIR
 #VS working dir
 set_target_properties(${BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
 
 #set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 #set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -254,7 +254,7 @@ set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUT
 #VS working dir
 set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
 
 
 
