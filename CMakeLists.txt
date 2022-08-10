@@ -5,7 +5,7 @@ project(VBCPP)
 set(BIN_NAME vbcpp)
 set(EDITOR_BIN_NAME editor)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 #bin in project main dir
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)

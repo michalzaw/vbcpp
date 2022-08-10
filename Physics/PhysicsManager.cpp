@@ -239,7 +239,7 @@ PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(glm::vec3* 
     return b;
 }
 
-PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
+PhysicalBodyConvexHull* PhysicsManager::createPhysicalBodyConvexHull(const std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 {
     PhysicalBodyConvexHull* b = new PhysicalBodyConvexHull(vertices, mass, centerOfMassOffset, centerOfMassOffsetValue);
 

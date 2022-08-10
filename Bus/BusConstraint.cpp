@@ -833,7 +833,7 @@ int BusConstraint::getMirrorsCount()
 
 DisplayText& BusConstraint::getDisplayText()
 {
-	return DisplayText();
+	return _displayText;
 }
 
 

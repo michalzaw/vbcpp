@@ -4,7 +4,7 @@
 
 #include <portable-file-dialogs.h>
 
-#include "../..//ImGui/imgui.h"
+#include <imgui.h>
 
 #include "../../Graphics/Material.h"
 #include "../../Graphics/MaterialSaver.h"
