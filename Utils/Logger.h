@@ -12,7 +12,7 @@
 #define VB_ENABLE_LOGGER
 
 
-enum LogLevel
+enum LogLevel : int
 {
     LL_DEBUG,
     LL_INFO,

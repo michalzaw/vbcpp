@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 
 project(VBCPP)
 
 set(BIN_NAME vbcpp)
 set(EDITOR_BIN_NAME editor)
 
-set(CMAKE_CXX_STANDARD 11)
+# https://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
+# subfolders in VS
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+set(CMAKE_CXX_STANDARD 14)
 
 #bin in project main dir
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -36,7 +40,9 @@ add_subdirectory(libs/freealut)
 #SET_TARGET_PROPERTIES(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(assimp PROPERTIES FOLDER "Libs/assimp")
 SET_TARGET_PROPERTIES(IrrXML PROPERTIES FOLDER "Libs/assimp")
-SET_TARGET_PROPERTIES(zlibstatic PROPERTIES FOLDER "Libs/assimp")
+IF( TARGET zlibstatic )
+	SET_TARGET_PROPERTIES(zlibstatic PROPERTIES FOLDER "Libs/assimp")
+ENDIF(TARGET zlibstatic)
 SET_TARGET_PROPERTIES(ConvexDecomposition PROPERTIES FOLDER "Libs/Bullet")
 SET_TARGET_PROPERTIES(GIMPACTUtils PROPERTIES FOLDER "Libs/Bullet")
 SET_TARGET_PROPERTIES(HACD PROPERTIES FOLDER "Libs/Bullet")
@@ -98,37 +104,37 @@ set (IMGUI_HEADERS
 )
 
 add_subdirectory(Bus)
-source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${BUS_SOURCES} ${BUS_HEADERS})
 
 add_subdirectory(Editor)
-source_group("Editor" FILES ${EDITOR_SOURCES} ${EDITOR_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${EDITOR_SOURCES} ${EDITOR_HEADERS})
 
 add_subdirectory(Game)
-source_group("Game" FILES ${GAME_SOURCES} ${GAME_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GAME_SOURCES} ${GAME_HEADERS})
 
 add_subdirectory(Graphics)
-source_group("Graphics" FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
 
 add_subdirectory(GUI)
-source_group("GUI" FILES ${GUI_SOURCES} ${GUI_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GUI_SOURCES} ${GUI_HEADERS})
 
 #add_subdirectory(ImGui)
-source_group("ImGui" FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 
 add_subdirectory(ImGuiInterface)
-source_group("ImGuiInterface" FILES ${IMGUI_INTERFACE_SOURCES} ${IMGUI_INTERFACE_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${IMGUI_INTERFACE_SOURCES} ${IMGUI_INTERFACE_HEADERS})
 
 add_subdirectory(Physics)
-source_group("Physics" FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
 
 add_subdirectory(Scene)
-source_group("Scene" FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
 
 add_subdirectory(Utils)
-source_group("Utils" FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
 
 add_subdirectory(Window)
-source_group("Window" FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
 set (SOURCES 
     main.cpp
@@ -241,7 +247,7 @@ set_target_properties(${BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIR
 #VS working dir
 set_target_properties(${BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
 
 #set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 #set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -252,7 +258,7 @@ set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUT
 #VS working dir
 set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletCollision BulletDynamics BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
 
 
 
