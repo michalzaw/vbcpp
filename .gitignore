@@ -1,5 +1,9 @@
 # EXECUTABLES
 bin/vbcpp*
+bin/alrecord*
+bin/altonegen*
+bin/makehrtf*
+bin/openal-info*
 
 # FILES
 *.layout
@@ -11,6 +15,9 @@ bin/vbcpp*
 # DIRECTORIES
 obj
 doc
+
+# VS CODE FILES
+.vscode
 
 
 #ImGui
