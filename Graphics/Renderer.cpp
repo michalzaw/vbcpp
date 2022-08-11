@@ -1029,6 +1029,20 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
 
+    // DECAL_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("DECALS");
+    defines.push_back("ALPHA_TEST");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // SOLID_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
+
     // GRASS_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -1048,20 +1062,6 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     //defines.push_back("TRANSPARENCY");
     //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-
-    // DECAL_MATERIAL
-    defines.clear();
-    defines.push_back("SOLID");
-    defines.push_back("DECALS");
-    defines.push_back("ALPHA_TEST");
-    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
-
-    // SOLID_ANIMATED_MATERIAL
-    defines.clear();
-    defines.push_back("SOLID");
-    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
 
     // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
     _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];

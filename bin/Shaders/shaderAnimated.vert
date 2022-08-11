@@ -47,7 +47,7 @@ void main()
 	//pos += (0.065 * sin(2.650 * (pos.x + pos.y + pos.z + time))) * vec3(1, 0.35, 1);
 #endif
 
-	vec4 totalPosition = vec4(0.0f);
+	mat4 boneTransform = mat4(0.0f);
 	for (int i = 0; i < MAX_BONE_INFLUENCE; ++i)
 	{
 		if (boneIds[i] == -1)
@@ -55,13 +55,13 @@ void main()
 
 		if (boneIds[i] >= MAX_BONES)
 		{
-			totalPosition = vec4(VertexPosition, 1.0f);
+			boneTransform = mat4(1.0f);
 			break;
 		}
 
-		vec4 localPosition = finalBonesMatrices[boneIds[i]] * vec4(VertexPosition, 1.0f);
-		totalPosition += localPosition * weights[i];
+		boneTransform += finalBonesMatrices[boneIds[i]] * weights[i];
 	}
+	vec4 totalPosition = boneTransform * vec4(VertexPosition, 1.0f);
 
 	gl_Position = MVP * totalPosition;
 
@@ -69,7 +69,7 @@ void main()
 	TexCoord = VertexUV;
 
 //#ifdef SOLID
-	Normal = (NormalMatrix * vec4(VertexNormal, 0.0f)).xyz;
+	Normal = (NormalMatrix * boneTransform * vec4(VertexNormal, 0.0f)).xyz;
 //#endif
 #ifdef NORMALMAPPING
 	mat3 NM = mat3(NormalMatrix);
