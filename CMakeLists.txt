@@ -1,9 +1,13 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.8)
 
 project(VBCPP)
 
 set(BIN_NAME vbcpp)
 set(EDITOR_BIN_NAME editor)
+
+# https://stackoverflow.com/questions/31422680/how-to-set-visual-studio-filters-for-nested-sub-directory-using-cmake
+# subfolders in VS
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -100,37 +104,37 @@ set (IMGUI_HEADERS
 )
 
 add_subdirectory(Bus)
-source_group("Bus" FILES ${BUS_SOURCES} ${BUS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${BUS_SOURCES} ${BUS_HEADERS})
 
 add_subdirectory(Editor)
-source_group("Editor" FILES ${EDITOR_SOURCES} ${EDITOR_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${EDITOR_SOURCES} ${EDITOR_HEADERS})
 
 add_subdirectory(Game)
-source_group("Game" FILES ${GAME_SOURCES} ${GAME_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GAME_SOURCES} ${GAME_HEADERS})
 
 add_subdirectory(Graphics)
-source_group("Graphics" FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GRAPHICS_SOURCES} ${GRAPHICS_HEADERS})
 
 add_subdirectory(GUI)
-source_group("GUI" FILES ${GUI_SOURCES} ${GUI_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${GUI_SOURCES} ${GUI_HEADERS})
 
 #add_subdirectory(ImGui)
-source_group("ImGui" FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${IMGUI_SOURCES} ${IMGUI_HEADERS})
 
 add_subdirectory(ImGuiInterface)
-source_group("ImGuiInterface" FILES ${IMGUI_INTERFACE_SOURCES} ${IMGUI_INTERFACE_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${IMGUI_INTERFACE_SOURCES} ${IMGUI_INTERFACE_HEADERS})
 
 add_subdirectory(Physics)
-source_group("Physics" FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PHYSICS_SOURCES} ${PHYSICS_HEADERS})
 
 add_subdirectory(Scene)
-source_group("Scene" FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
 
 add_subdirectory(Utils)
-source_group("Utils" FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
 
 add_subdirectory(Window)
-source_group("Window" FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${WINDOW_SOURCES} ${WINDOW_HEADERS})
 
 set (SOURCES 
     main.cpp
