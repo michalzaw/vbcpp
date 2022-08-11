@@ -1103,6 +1103,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
 
+    // SHADOWMAP_ANIMATED_SHADER
+    defines.clear();
+    defines.push_back("ANIMATED");
+    _shaderList[SHADOWMAP_ANIMATED_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
     // MIRROR_SOLID_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -1520,6 +1525,24 @@ void Renderer::renderAll()
 }
 
 
+const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject)
+{
+    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+    if (skeletatlAnimation != nullptr)
+    {
+        return skeletatlAnimation->getFinalBoneMatrices();
+    }
+
+    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+    if (skeletatlAnimation2 != nullptr)
+    {
+        return skeletatlAnimation2->getFinalBoneMatrices();
+    }
+
+    return {};
+}
+
+
 void Renderer::renderDepth(RenderData* renderData)
 {
     renderData->framebuffer->bind();
@@ -1538,8 +1561,11 @@ void Renderer::renderDepth(RenderData* renderData)
 
         ShaderType shaderType;
         bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL;
+        bool isAnimated = material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL;
         if (isAlphaTest)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
+        else if (isAnimated)
+            shaderType = SHADOWMAP_ANIMATED_SHADER;
         else
             shaderType = SHADOWMAP_SHADER;
 
@@ -1588,6 +1614,25 @@ void Renderer::renderDepth(RenderData* renderData)
 			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
 			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEST_THRESHOLD], material->shadowmappingAlphaTestThreshold);
         }
+        if (isAnimated)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
+        }
 
         mesh->ibo->bind();
         glDrawElements(model->getPrimitiveType(),
@@ -1599,6 +1644,11 @@ void Renderer::renderDepth(RenderData* renderData)
         if (isAlphaTest)
         {
             glDisableVertexAttribArray(1);
+        }
+        if (isAnimated)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
         }
     }
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -1750,24 +1800,6 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
-}
-
-
-const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject)
-{
-    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
-    if (skeletatlAnimation != nullptr)
-    {
-        return skeletatlAnimation->getFinalBoneMatrices();
-    }
-
-    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
-    if (skeletatlAnimation2 != nullptr)
-    {
-        return skeletatlAnimation2->getFinalBoneMatrices();
-    }
-
-    return {};
 }
 
 
