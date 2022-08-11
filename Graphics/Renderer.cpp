@@ -1040,8 +1040,25 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // SOLID_ANIMATED_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shaderAnimated.vert", "Shaders/shader.frag", defines);
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // NORMALMAPPING_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("NORMALMAPPING");
+    defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[NORMALMAPPING_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // ALPHA_TEST_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("ANIMATED");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    _shaderList[ALPHA_TEST_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // GRASS_MATERIAL
     defines.clear();
@@ -1787,7 +1804,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL)
+            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1812,7 +1829,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL) && _alphaToCoverage)
+            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1954,7 +1971,7 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
         }
 
-        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
         {
             glEnableVertexAttribArray(5);
             glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
