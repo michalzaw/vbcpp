@@ -600,27 +600,46 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 }
 
 
+template<typename TYPE>
+void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex)
+{
+	outItemsString += " ";
+	outItemsString += '\0';
+
+	for (int i = 0; i < items.size(); ++i)
+	{
+		outItemsString += Strings::toString(items[i]) + '\0';
+
+		if (items[i] == selectedItemValue)
+		{
+			outSelectedItemIndex = i + 1;
+		}
+	}
+}
+
+
 typedef std::string str;
 typedef std::string path;
+typedef std::string str_combo;
 
 
-#define IMGUI_INPUT_int(propertyName)																											\
+#define IMGUI_INPUT_int(propertyName, additionalParams)																							\
 int value = component->get##propertyName();																										\
 bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_float(propertyName)																											\
+#define IMGUI_INPUT_float(propertyName, additionalParams)																						\
 float value = component->get##propertyName();																									\
 bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
 //bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_bool(propertyName)																											\
+#define IMGUI_INPUT_bool(propertyName, additionalParams)																						\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
 
 
-#define IMGUI_INPUT_str(propertyName)																											\
+#define IMGUI_INPUT_str(propertyName, additionalParams)																							\
 char value[50];																																	\
 strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
 value[sizeof value - 1] = '\0';																													\
@@ -628,7 +647,7 @@ value[sizeof value - 1] = '\0';																													\
 bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_path(propertyName)																											\
+#define IMGUI_INPUT_path(propertyName, additionalParams)																						\
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
@@ -655,7 +674,23 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback)												\
+#define IMGUI_INPUT_str_combo(propertyName, additionalParams)																					\
+const std::vector<std::string>& bonesNames = additionalParams;																					\
+std::string bonesNamesComboItems;																												\
+int selectedBoneNameIndex = 0;																													\
+convertVectorToComboData(bonesNames, component->get##propertyName(), bonesNamesComboItems, selectedBoneNameIndex);								\
+																																				\
+bool result = false;																															\
+std::string value = "";																															\
+if (ImGui::Combo("##value", &selectedBoneNameIndex, bonesNamesComboItems.c_str()))																\
+{																																				\
+	result = true;																																\
+	if (selectedBoneNameIndex > 0)																												\
+		value = bonesNames[selectedBoneNameIndex - 1];																							\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
 {																																				\
 	ImGui::PushID(#propertyName);																												\
 																																				\
@@ -664,7 +699,7 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
 																																				\
-	IMGUI_INPUT_##type(propertyName)																											\
+	IMGUI_INPUT_##type(propertyName, additionalParams)																							\
 																																				\
 	if (result)																																	\
 	{																																			\
@@ -678,7 +713,8 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){})
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
@@ -742,9 +778,11 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::Separator();
 
 		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
-		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
+		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimiation()->getBonesNames())
 
 		ImGui::Columns(1);
 		ImGui::Separator();

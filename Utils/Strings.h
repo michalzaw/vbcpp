@@ -126,6 +126,12 @@ namespace Strings
 				std::is_same<T, glm::mat4>::value;
 		};
 
+		template<typename T> struct IsStringTypeForToString
+		{
+			static bool const value =
+				std::is_same<T, std::string>::value;
+		};
+
 		template <typename T>
 		class HasToStringMethod
 		{
@@ -149,6 +155,12 @@ namespace Strings
 		std::string toString(const std::enable_if_t<IsGlmTypeForToString<TYPE>::value, TYPE>& value)
 		{
 			return glm::to_string(value);
+		}
+
+		template<typename TYPE>
+		std::string toString(const std::enable_if_t<IsStringTypeForToString<TYPE>::value, TYPE>& value)
+		{
+			return value;
 		}
 
 		template<typename TYPE>

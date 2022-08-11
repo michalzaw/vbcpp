@@ -69,7 +69,7 @@ int Bone::getScaleIndex(float animationTime)
 }
 
 
-glm::mat4 Bone::interpolatePosition(float animationTime)
+glm::mat4 Bone::calculatePosition(float animationTime)
 {
 	if (_positions.size() == 1)
 	{
@@ -86,7 +86,7 @@ glm::mat4 Bone::interpolatePosition(float animationTime)
 }
 
 
-glm::mat4 Bone::interpolateRotation(float animationTime)
+glm::mat4 Bone::calculateRotation(float animationTime)
 {
 	if (_rotations.size() == 1)
 	{
@@ -103,7 +103,7 @@ glm::mat4 Bone::interpolateRotation(float animationTime)
 }
 
 
-glm::mat4 Bone::interpolateScale(float animationTime)
+glm::mat4 Bone::calculateScale(float animationTime)
 {
 	if (_scales.size() == 1)
 	{
@@ -122,10 +122,10 @@ glm::mat4 Bone::interpolateScale(float animationTime)
 
 glm::mat4 Bone::calculateLocalTransform(float animationTime)
 {
-	glm::mat4 translation = interpolatePosition(animationTime);
-	glm::mat4 rotation = interpolateRotation(animationTime);
-	glm::mat4 scale = interpolateScale(animationTime);
-	
+	glm::mat4 translation = calculatePosition(animationTime);
+	glm::mat4 rotation = calculateRotation(animationTime);
+	glm::mat4 scale = calculateScale(animationTime);
+
 	return translation * rotation * scale;
 }
 
@@ -144,4 +144,18 @@ RAnimation::~RAnimation()
 	{
 		delete pair.second;
 	}
+}
+
+
+const std::vector<std::string>& RAnimation::getBonesNames()
+{
+	if (_bones.size() > 0 && _boneNames.size() == 0)
+	{
+		for (auto bone : _bones)
+		{
+			_boneNames.push_back(bone.first);
+		}
+	}
+
+	return _boneNames;
 }
