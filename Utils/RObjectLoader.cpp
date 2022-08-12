@@ -82,7 +82,7 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["lowPolyModel"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModel");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
-	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows");
+	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows", "true");
 	object->getComponents()[componentIndex]["normalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "normalsSmoothing", "true");
 	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
 	object->getComponents()[componentIndex]["animated"] = XmlUtils::getAttributeStringOptional(componentElement, "animated");
@@ -196,9 +196,9 @@ RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::
 }
 
 
-RObject* RObjectLoader::loadObject(std::string dirPath)
+RObject* RObjectLoader::loadObject(const std::string& dirPath, const std::string& originalName)
 {
-	std::string fullPath = dirPath + OBJECT_FILE_NAME;
+	const std::string& fullPath = dirPath + OBJECT_FILE_NAME;
 
 	XMLDocument doc;
 	XMLError result = doc.LoadFile(fullPath.c_str());
@@ -233,7 +233,7 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 	LOG_INFO("Comment: " + comment);
 
 
-	RObject* object = new RObject(dirPath, author, objectName, comment);
+	RObject* object = new RObject(dirPath, author, objectName, comment, originalName);
 
 
 	loadComponents(objElement, object);
@@ -243,8 +243,8 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 }
 
 
-SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefinition, std::string name,
-														 glm::vec3 position, glm::vec3 rotation, SceneManager* sceneManager)
+SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefinition, const std::string& name,
+														 const glm::vec3& position, const glm::vec3& rotation, SceneManager* sceneManager)
 {
 	std::string objectDirPath = objectDefinition->getPath();
 

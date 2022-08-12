@@ -714,7 +714,7 @@ RObject* ResourceManager::loadRObject(std::string name)
 		dirPath = _alternativeResourcePath + dirPath;
 #endif // DEVELOPMENT_RESOURCES
 
-	std::unique_ptr<RObject> object(RObjectLoader::loadObject(dirPath));
+	std::unique_ptr<RObject> object(RObjectLoader::loadObject(dirPath, name));
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + object.get()->getPath());
 
 	RObject* o = dynamic_cast<RObject*>(object.get());

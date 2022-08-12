@@ -117,7 +117,7 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getName() : "";
+	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getOriginalName() : "";
 
 	objectElement->SetAttribute("name", objectDefinitionName.c_str());
 
