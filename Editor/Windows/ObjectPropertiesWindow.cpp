@@ -675,18 +675,18 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 
 
 #define IMGUI_INPUT_str_combo(propertyName, additionalParams)																					\
-const std::vector<std::string>& bonesNames = additionalParams;																					\
-std::string bonesNamesComboItems;																												\
-int selectedBoneNameIndex = 0;																													\
-convertVectorToComboData(bonesNames, component->get##propertyName(), bonesNamesComboItems, selectedBoneNameIndex);								\
+const std::vector<std::string>& itemsNames = additionalParams;																					\
+std::string comboItems;																															\
+int selectedItemIndex = 0;																														\
+convertVectorToComboData(itemsNames, component->get##propertyName(), comboItems, selectedItemIndex);											\
 																																				\
 bool result = false;																															\
 std::string value = "";																															\
-if (ImGui::Combo("##value", &selectedBoneNameIndex, bonesNamesComboItems.c_str()))																\
+if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))																			\
 {																																				\
 	result = true;																																\
-	if (selectedBoneNameIndex > 0)																												\
-		value = bonesNames[selectedBoneNameIndex - 1];																							\
+	if (selectedItemIndex > 0)																													\
+		value = itemsNames[selectedItemIndex - 1];																								\
 }
 
 

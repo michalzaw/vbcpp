@@ -15,6 +15,7 @@ namespace tinyxml2
 
 class SceneManager;
 class SceneObject;
+class RStaticModel;
 
 
 class RObjectLoader
@@ -30,6 +31,9 @@ class RObjectLoader
 		static void loadBusStopComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadEnvironmentCaptureComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadCrossroadComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
+		static void loadSkeletalAnimation(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
+
+		static RStaticModel* loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing);
 	
 	public:
 		static RObject* loadObject(std::string dirPath);

@@ -147,7 +147,7 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 
 	for (SceneObject* child : sceneObject->getChildren())
 	{
-		saveObject(objectElement, doc, child, child->getObjectDefinition());
+		saveSceneObject(doc, objectElement, child, sceneObject);
 	}
 }
 
@@ -250,6 +250,57 @@ void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxm
 }
 
 
+void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject/* = nullptr*/)
+{
+	if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
+	{
+		LOG_DEBUG("Skip object: " + sceneObject->getName());
+		return;
+	}
+
+	RObject* objectDefinition = sceneObject->getObjectDefinition();
+	if (objectDefinition == nullptr)
+	{
+		if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
+		{
+			saveRoad(_roadsElement, doc, sceneObject);
+		}
+		else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
+		{
+			saveRoadIntersection(_roadsElement, doc, sceneObject);
+		}
+		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
+		{
+			if (_grassElement)
+			{
+				_rootNode->InsertAfterChild(_startPositionElement, _grassElement);
+				saveGrass(_grassElement, doc, sceneObject);
+			}
+		}
+		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+		{
+			saveTerrain(_terrainElement, _grassElement, sceneObject);
+		}
+		else if (sceneObject->getName() == "sky")
+		{
+			saveSky(_skyElement, sceneObject);
+		}
+		else if (sceneObject->getName() == "sun")
+		{
+			saveSunLight(_sunElement, sceneObject);
+		}
+		else if (sceneObject->getParent() == nullptr)
+		{
+			saveObject(_objectsElement, doc, sceneObject, nullptr);
+		}
+	}
+	else if (sceneObject->getParent() == parentObject)
+	{
+		saveObject(parentElement, doc, sceneObject, objectDefinition);
+	}
+}
+
+
 void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
@@ -268,78 +319,33 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	XMLElement* descriptionElement = doc.NewElement("Description");
 	rootNode->InsertEndChild(descriptionElement);
 
-	XMLElement* terrainElement = doc.NewElement("Terrain");
-	rootNode->InsertEndChild(terrainElement);
+	_terrainElement = doc.NewElement("Terrain");
+	rootNode->InsertEndChild(_terrainElement);
 
-	XMLElement* startPositionElement = doc.NewElement("Start");
-	rootNode->InsertEndChild(startPositionElement);
+	_startPositionElement = doc.NewElement("Start");
+	rootNode->InsertEndChild(_startPositionElement);
 
-	XMLElement* grassElement = doc.NewElement("Grass");
+	_grassElement = doc.NewElement("Grass");
 
-	XMLElement* sunElement = doc.NewElement("Light");
-	rootNode->InsertEndChild(sunElement);
+	_sunElement = doc.NewElement("Light");
+	rootNode->InsertEndChild(_sunElement);
 
-	XMLElement* skyElement = doc.NewElement("Sky");
-	rootNode->InsertEndChild(skyElement);
+	_skyElement = doc.NewElement("Sky");
+	rootNode->InsertEndChild(_skyElement);
 
-	XMLElement* objectsElement = doc.NewElement("Objects");
-	rootNode->InsertEndChild(objectsElement);
+	_objectsElement = doc.NewElement("Objects");
+	rootNode->InsertEndChild(_objectsElement);
 
-	XMLElement* roadsElement = doc.NewElement("Roads");
-	roadsElement->SetAttribute("version", "2");
-	rootNode->InsertEndChild(roadsElement);
+	_roadsElement = doc.NewElement("Roads");
+	_roadsElement->SetAttribute("version", "2");
+	rootNode->InsertEndChild(_roadsElement);
 	
 	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
-	saveStartPosition(startPositionElement);
+	saveStartPosition(_startPositionElement);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
-		if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
-		{
-			LOG_DEBUG("Skip object: " + sceneObject->getName());
-			continue;
-		}
-
-		RObject* objectDefinition = sceneObject->getObjectDefinition();
-		if (objectDefinition == nullptr)
-		{
-			if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
-			{
-				saveRoad(roadsElement, doc, sceneObject);
-			}
-			else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
-			{
-				saveRoadIntersection(roadsElement, doc, sceneObject);
-			}
-			else if (sceneObject->getComponent(CT_GRASS) != nullptr)
-			{
-				if (grassElement)
-				{
-					rootNode->InsertAfterChild(startPositionElement, grassElement);
-					saveGrass(grassElement, doc, sceneObject);
-				}
-			}
-			else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
-			{
-				saveTerrain(terrainElement, grassElement, sceneObject);
-			}
-			else if (sceneObject->getName() == "sky")
-			{
-				saveSky(skyElement, sceneObject);
-			}
-			else if (sceneObject->getName() == "sun")
-			{
-				saveSunLight(sunElement, sceneObject);
-			}
-			else if (sceneObject->getParent() == nullptr)
-			{
-				saveObject(objectsElement, doc, sceneObject, nullptr);
-			}
-		}
-		else if (sceneObject->getParent() == nullptr)
-		{
-			saveObject(objectsElement, doc, sceneObject, objectDefinition);
-		}
+		saveSceneObject(doc, _objectsElement, sceneObject);
 	}
 
 	XMLError errorCode = doc.SaveFile(fullPath.c_str());
