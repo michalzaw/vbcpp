@@ -1125,6 +1125,19 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MIRROR_SOLID_ANIMATED_MATRIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
+    _shaderList[MIRROR_SOLID_ANIMATED_MATRIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_ALPHA_TEST_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("ANIMATED");
+    _shaderList[MIRROR_ALPHA_TEST_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
 	// PBR_MATERIAL
 	defines.clear();
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
@@ -1167,6 +1180,9 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
 	_shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
 	_shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
+    _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
+    _shaderListForMirrorRendering[ALPHA_TEST_ANIMATED_MATERIAL] = MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
 
 
 	initUniformLocations();
@@ -1679,7 +1695,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1692,7 +1708,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            else if (shaderType == MIRROR_ALPHA_TEST_MATERIAL || shaderType == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1781,6 +1797,27 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         glEnableVertexAttribArray(2);
         glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
+        bool isAnimated = currentShader == MIRROR_SOLID_ANIMATED_MATRIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
+        if (isAnimated)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
+        }
+
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
 
@@ -1796,6 +1833,11 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
+        if (isAnimated)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
+        }
     }
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
