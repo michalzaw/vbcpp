@@ -601,18 +601,20 @@ RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, cons
 
 RAnimation* ResourceManager::loadAnimation(const std::string& path)
 {
-    Resource* res = findResource(path);
+    std::string animationPath = GameDirectories::ANIMATIONS + path;
+
+    Resource* res = findResource(animationPath);
     if (res != 0)
     {
         RAnimation* animation = dynamic_cast<RAnimation*>(res);
         return animation;
     }
 
-    std::string finalPath = path;
+    std::string finalPath = animationPath;
 
 #ifdef DEVELOPMENT_RESOURCES
-    if (!FilesHelper::isFileExists(path))
-        finalPath = _alternativeResourcePath + path;
+    if (!FilesHelper::isFileExists(animationPath))
+        finalPath = _alternativeResourcePath + animationPath;
 #endif // DEVELOPMENT_RESOURCES
 
     AnimationLoader loader;

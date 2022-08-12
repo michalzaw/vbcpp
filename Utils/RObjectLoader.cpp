@@ -398,14 +398,13 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
 
 			const std::string& animationFile = components[i]["animation"];
-			const std::string& animationPath = objectDirPath + animationFile;
 
 			int startFrame = toInt(components[i]["startFrame"]);
 			int endFrame = toInt(components[i]["endFrame"]);
 			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
 			const std::string& boneWithLockedTranslation = components[i]["boneWithLockedTranslation"];
 
-			RAnimation* animation = ResourceManager::getInstance().loadAnimation(animationPath);
+			RAnimation* animation = ResourceManager::getInstance().loadAnimation(animationFile);
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
 			sceneObject->addComponent(skeletalAnimation);
 			sceneObject->setScale(0.01);
