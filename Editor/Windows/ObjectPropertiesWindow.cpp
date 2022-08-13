@@ -782,7 +782,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
-		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimiation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimation()->getBonesNames())
 
 		ImGui::Columns(1);
 		ImGui::Separator();
