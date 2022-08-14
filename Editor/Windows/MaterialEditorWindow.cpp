@@ -4,7 +4,7 @@
 
 #include <portable-file-dialogs.h>
 
-#include "../..//ImGui/imgui.h"
+#include <imgui.h>
 
 #include "../../Graphics/Material.h"
 #include "../../Graphics/MaterialSaver.h"
@@ -121,11 +121,15 @@ namespace vbEditor
 			"PBR_MATERIAL",
 			"PBR_TREE_MATERIAL",
 			"TREE_MATERIAL",
+			"DECAL_MATERIAL",
+			"SOLID_ANIMATED_MATERIAL",
+			"NORMALMAPPING_ANIMATED_MATERIAL",
+			"ALPHA_TEST_ANIMATED_MATERIAL",
 			"GRASS_MATERIAL",
 			"SKY_MATERIAL",
 			"GLASS_MATERIAL",
-			"DECAL_MATERIAL",
-			"WIREFRAME_MATERIAL"
+			"WIREFRAME_MATERIAL",
+			"NOTEXTURE_ALWAYS_VISIBLE_MATERIAL"
 		};
 
 		if (ImGui::Combo("Material type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))

@@ -47,8 +47,6 @@ class EnvironmentCaptureComponent : public Component
 
         virtual void changedTransform();
 
-		bool a;
-
 };
 
 

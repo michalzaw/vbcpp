@@ -14,6 +14,9 @@
 using namespace tinyxml2;
 
 
+const glm::vec3 DISPLAY_DEFAULT_TEXT_COLOR = glm::vec3(1.92, 0.536, 0.044);
+
+
 BusLoader::BusLoader(SceneManager* sceneManager, GraphicsManager* gmgr, PhysicsManager* physicsManager, SoundManager* soundManager)
     : _sMgr(sceneManager), _gMgr(gmgr), _pMgr(physicsManager), _sndMgr(soundManager),
     _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
@@ -1176,7 +1179,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
 		std::string fontName = std::string(displayElement->Attribute("font"));
 		int type = XmlUtils::getAttributeIntOptional(displayElement, "type");
-        glm::vec3 textColor = XmlUtils::getAttributeVec3Optional(displayElement, "textColor", DisplayComponent::DEFAULT_TEXT_COLOR);
+        glm::vec3 textColor = XmlUtils::getAttributeVec3Optional(displayElement, "textColor", DISPLAY_DEFAULT_TEXT_COLOR);
 
 		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
 		displaySceneObject->setPosition(position);

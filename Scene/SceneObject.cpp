@@ -3,6 +3,12 @@
 #include "../Game/GameLogicSystem.h"
 #include "../Game/CameraControlComponent.h"
 
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
+#include "../Graphics/SkeletalAnimationHelperComponent.h"
+
+#include "../Utils/GlmUtils.h"
+
 
 SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
     : _parent(parent),
@@ -109,6 +115,18 @@ SceneObject::~SceneObject()
 
             case CT_ROAD_INTERSECTION:
                 _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_2:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_HELPER:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
                 break;
 
         }
@@ -259,9 +277,9 @@ void SceneObject::addComponent(Component* component)
 {
     if (component != NULL)
     {
-        component->setSceneObject(this);
-
         _components.push_back(component);
+
+        component->setSceneObject(this);
 
         component->changedTransform();
     }
@@ -353,6 +371,18 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_ROAD_INTERSECTION:
                     _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_2:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_HELPER:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
                     break;
 
             }
@@ -646,6 +676,7 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     return _globalNormalMatrix;
 }
 
+// todo: wykorzystanie funkcji z GlmUtils + refactor
 void SceneObject::updateFromLocalMatrix()
 {
 	glm::vec3 scale;
@@ -662,4 +693,26 @@ void SceneObject::updateFromLocalMatrix()
 	setRotation(rotationEulerAngles);
 	setScale(scale);
 	changedTransform();
+}
+
+
+void SceneObject::setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions/* = true*/)
+{
+    glm::vec3 translation;
+    glm::quat orientation;
+    glm::vec3 scale;
+    GlmUtils::decomposeMatrix(transformMatrix, translation, orientation, scale);
+
+    setPosition(translation);
+    setScale(scale);
+
+    if (_rotationMode == RM_QUATERNION || forceQuaternions)
+    {
+        setRotationQuaternion(orientation);
+    }
+    else
+    {
+        glm::vec3 rotationEulerAngles = glm::eulerAngles(orientation);
+        setRotation(rotationEulerAngles);
+    }
 }

@@ -1,9 +1,10 @@
 #include "DisplayComponent.h"
 
-#include "../Scene/SceneObject.h"
+#include "Framebuffer.h"
+#include "RenderObject.h"
+#include "Renderer.h"
 
-#include "../Graphics/RenderObject.h"
-#include "../Graphics/Renderer.h"
+#include "../Scene/SceneObject.h"
 
 
 DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)

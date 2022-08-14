@@ -1,6 +1,6 @@
 #include "LoggerWindow.h"
 
-#include "../../ImGui/imgui.h"
+#include <imgui.h>
 
 #include "../../Utils/Logger.h"
 

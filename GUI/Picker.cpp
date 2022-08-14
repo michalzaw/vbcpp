@@ -1,5 +1,7 @@
 #include "Picker.h"
 
+#include <algorithm>
+
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceManager.h"
 
@@ -220,7 +222,7 @@ void Picker::setSelectedOption(int selectedOptionIndex)
 
 void Picker::setSelectedOption(const std::string& selectedOption)
 {
-	auto f = find(_options.begin(), _options.end(), selectedOption);
+	auto f = std::find(_options.begin(), _options.end(), selectedOption);
 	if (f != _options.end())
 	{
 		_selectedOption = f - _options.begin();

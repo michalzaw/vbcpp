@@ -12,6 +12,10 @@ class TestScene final : public GameScene
 
 		CameraFPS* createCameraFPSGlobal();
 
+
+		void initGui();
+		void initAnimation();
+
 	public:
 		explicit TestScene(Window* window);
 		~TestScene();

@@ -1,24 +1,24 @@
 set (IMGUI_INTERFACE_SOURCES
-	ImguiInterface/ImguiInterface.cpp
-	ImguiInterface/ImguiWindow.cpp
-	ImguiInterface/BusLineAndDirectionWindow.cpp
-	ImguiInterface/ColorsWindow.cpp
-	ImguiInterface/MenuBar.cpp
-	ImguiInterface/MenuSelectBusInterfaceWindow.cpp
-	ImguiInterface/PhysicsDebuggerWindow.cpp
-	ImguiInterface/VariablesWindow.cpp
+	ImGuiInterface/ImGuiInterface.cpp
+	ImGuiInterface/ImGuiWindow.cpp
+	ImGuiInterface/BusLineAndDirectionWindow.cpp
+	ImGuiInterface/ColorsWindow.cpp
+	ImGuiInterface/MenuBar.cpp
+	ImGuiInterface/MenuSelectBusInterfaceWindow.cpp
+	ImGuiInterface/PhysicsDebuggerWindow.cpp
+	ImGuiInterface/VariablesWindow.cpp
 )
 
 set (IMGUI_INTERFACE_HEADERS
-	ImguiInterface/ImguiInterface.h
+	ImGuiInterface/ImGuiInterface.h
 	ImGuiInterface/ImGuiInterfaceContext.h
-	ImguiInterface/ImguiWindow.h
-	ImguiInterface/BusLineAndDirectionWindow.h
-	ImguiInterface/ColorsWindow.h
-	ImguiInterface/MenuBar.h
-	ImguiInterface/MenuSelectBusInterfaceWindow.h
-	ImguiInterface/PhysicsDebuggerWindow.h
-	ImguiInterface/VariablesWindow.h
+	ImGuiInterface/ImGuiWindow.h
+	ImGuiInterface/BusLineAndDirectionWindow.h
+	ImGuiInterface/ColorsWindow.h
+	ImGuiInterface/MenuBar.h
+	ImGuiInterface/MenuSelectBusInterfaceWindow.h
+	ImGuiInterface/PhysicsDebuggerWindow.h
+	ImGuiInterface/VariablesWindow.h
 )
 
 set (IMGUI_INTERFACE_SOURCES ${IMGUI_INTERFACE_SOURCES} PARENT_SCOPE)

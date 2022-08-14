@@ -1,14 +1,17 @@
 set (UTILS_SOURCES
+	Utils/AssimpGlmConverter.cpp
 	Utils/BezierCurvesUtils.cpp
 	Utils/Collision.cpp
 	Utils/Engine.cpp
 	Utils/FilesHelper.cpp
 	Utils/Gearbox.cpp
+	Utils/GlmUtils.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp
 	Utils/LocalizationSystem.cpp
 	Utils/Logger.cpp
 	Utils/PolygonGenerator.cpp
+	Utils/RAnimatedModel.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
@@ -28,17 +31,20 @@ set (UTILS_SOURCES
 )
 
 set (UTILS_HEADERS
+	Utils/AssimpGlmConverter.h
 	Utils/BezierCurvesUtils.h
 	Utils/Collision.h
 	Utils/Engine.h
 	Utils/FilesHelper.h
 	Utils/Gearbox.h
+	Utils/GlmUtils.h
 	Utils/Helpers.hpp
 	Utils/InputSystem.h
 	Utils/LocalizationSystem.h
 	Utils/Logger.h
 	Utils/Math.h
 	Utils/PolygonGenerator.h
+	Utils/RAnimatedModel.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h

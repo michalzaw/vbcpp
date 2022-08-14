@@ -15,16 +15,19 @@ class RObject : public Resource
 		std::string _name;
 		std::string _comment;
 
+		std::string _originalName;	// path relative to "Objects" directory
+
 		std::vector<std::unordered_map<std::string, std::string>> _components;
 
 	public:
-		RObject(std::string path, std::string author, std::string name, std::string comment);
+		RObject(const std::string& path, const std::string& author, const std::string& name, const std::string& comment, const std::string& originalName);
 
 		std::vector<std::unordered_map<std::string, std::string>>& getComponents();
 
-		std::string getAuthor();
-		std::string getName();
-		std::string getComment();
+		const std::string& getAuthor();
+		const std::string& getName();
+		const std::string& getComment();
+		const std::string& getOriginalName();
 };
 
 

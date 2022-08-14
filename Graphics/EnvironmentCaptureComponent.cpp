@@ -16,7 +16,7 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent()
     : Component(CT_ENVIRONMENT_CAPTURE_COMPONENT),
     _environmentMap(NULL), _irradianceMap(NULL), _specularIrradianceMap(NULL),
     _rotationMatrix(1.0f),
-	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
+	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL)
 {
 	if (GameConfig::getInstance().pbrSupport)
 	{
@@ -29,7 +29,7 @@ EnvironmentCaptureComponent::EnvironmentCaptureComponent(RTextureCubeMap* enviro
     : Component(CT_ENVIRONMENT_CAPTURE_COMPONENT),
     _environmentMap(environmentMap), _irradianceMap(irradianceMap), _specularIrradianceMap(specularIrradianceMap),
     _rotationMatrix(1.0f),
-	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL), a(false)
+	_irradianceFramebuffer(NULL), _irradianceShader(NULL), _cube(NULL)
 {
 
 	if (GameConfig::getInstance().pbrSupport)
@@ -117,7 +117,7 @@ void EnvironmentCaptureComponent::generateIrradianceMap()
 		cubeMesh->ibo->bind();
 
 		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cubeMesh->vertexSize, (void*)0);
 
 		glDrawElements(GL_TRIANGLES,
 			cubeMesh->indicesCount,
@@ -180,7 +180,7 @@ void EnvironmentCaptureComponent::generatePrefilteredEnvMap()
 			cubeMesh->ibo->bind();
 
 			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, cubeMesh->vertexSize, (void*)0);
 
 			glDrawElements(GL_TRIANGLES,
 				cubeMesh->indicesCount,

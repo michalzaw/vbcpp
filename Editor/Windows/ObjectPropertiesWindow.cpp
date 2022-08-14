@@ -6,7 +6,7 @@
 #include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
-#include "imgui.h"
+#include <imgui.h>
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
@@ -16,6 +16,9 @@
 #include "../FileDialogs.h"
 
 #include "../../Graphics/ShapePolygonComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent2.h"
+#include "../../Graphics/SkeletalAnimationHelperComponent.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -597,33 +600,53 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 }
 
 
+template<typename TYPE>
+void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex)
+{
+	outItemsString += " ";
+	outItemsString += '\0';
+
+	for (int i = 0; i < items.size(); ++i)
+	{
+		outItemsString += Strings::toString(items[i]) + '\0';
+
+		if (items[i] == selectedItemValue)
+		{
+			outSelectedItemIndex = i + 1;
+		}
+	}
+}
+
+
 typedef glm::vec2 vec2;
 typedef glm::vec3 vec3;
 typedef std::string str;
 typedef std::string path;
+typedef std::string str_combo;
 
 
-#define IMGUI_INPUT_int(component, propertyName)																								\
+#define IMGUI_INPUT_int(component, propertyName, additionalParams)																				\
 int value = component->get##propertyName();																										\
 bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_float(component, propertyName)																								\
+#define IMGUI_INPUT_float(component, propertyName, additionalParams)																			\
 float value = component->get##propertyName();																									\
-bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
+//bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_vec2(component, propertyName)																								\
+#define IMGUI_INPUT_vec2(component, propertyName, additionalParams)																				\
 glm::vec2 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 
 
-#define IMGUI_INPUT_bool(component, propertyName)																								\
+#define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
 
 
-#define IMGUI_INPUT_str(component, propertyName)																								\
+#define IMGUI_INPUT_str(component, propertyName, additionalParams)																				\
 char value[50];																																	\
 strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
 value[sizeof value - 1] = '\0';																													\
@@ -631,7 +654,7 @@ value[sizeof value - 1] = '\0';																													\
 bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_path(component, propertyName)																								\
+#define IMGUI_INPUT_path(component, propertyName, additionalParams)																				\
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
@@ -658,7 +681,23 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback)												\
+#define IMGUI_INPUT_str_combo(component, propertyName, additionalParams)																		\
+const std::vector<std::string>& itemsNames = additionalParams;																					\
+std::string comboItems;																															\
+int selectedItemIndex = 0;																														\
+convertVectorToComboData(itemsNames, component->get##propertyName(), comboItems, selectedItemIndex);											\
+																																				\
+bool result = false;																															\
+std::string value = "";																															\
+if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))																			\
+{																																				\
+	result = true;																																\
+	if (selectedItemIndex > 0)																													\
+		value = itemsNames[selectedItemIndex - 1];																								\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
 {																																				\
 	ImGui::PushID(#propertyName);																												\
 																																				\
@@ -667,7 +706,7 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
 																																				\
-	IMGUI_INPUT_##type(component, propertyName)																									\
+	IMGUI_INPUT_##type(component, propertyName, additionalParams)																				\
 																																				\
 	if (result)																																	\
 	{																																			\
@@ -681,14 +720,15 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){})
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
 {
-	ImGui::PushID("node %s", name);
+	ImGui::PushID(name);
 	ImGui::AlignTextToFramePadding();
-	bool nodeOpen = ImGui::TreeNode(name, name);
+	bool nodeOpen = ImGui::TreeNode("treeNode", name);
 
 	ImGui::NextColumn();
 
@@ -729,6 +769,79 @@ void showBusStopComponentDetails(BusStopComponent* component)
 		}
 		ImGui::PopID();
 		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
+		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimation()->getBonesNames())
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation Helper", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowModelBones, bool, "Show model bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowAnimationBones, bool, "Show animation bones")
+
+		if (newNode("Animation bones transform", ""))
+		{
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformFromAnimation, bool, "Transform from animation")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformDefault, bool, "Default transform")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformCustom, bool, "Custom transform")
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalBones, bool, "Show final bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalSkeletonBones, bool, "Show final skeleton bones")
+
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -900,6 +1013,24 @@ void showObjectProperties()
 			if (busStopComponent)
 			{
 				showBusStopComponentDetails(busStopComponent);
+			}
+
+			SkeletalAnimationComponent* skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION));
+			if (skeletalAnimationComponent)
+			{
+				showSkeletalAnimationComponentDetails(skeletalAnimationComponent);
+			}
+
+			SkeletalAnimationComponent2* skeletalAnimationComponent2 = dynamic_cast<SkeletalAnimationComponent2*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+			if (skeletalAnimationComponent2)
+			{
+				showSkeletalAnimationComponent2Details(skeletalAnimationComponent2);
+			}
+
+			SkeletalAnimationHelperComponent* skeletalAnimationHelperComponent = dynamic_cast<SkeletalAnimationHelperComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_HELPER));
+			if (skeletalAnimationHelperComponent)
+			{
+				showSkeletalAnimationHelperComponentDetails(skeletalAnimationHelperComponent);
 			}
 
 			Prefab* prefabComponent = dynamic_cast<Prefab*>(vbEditor::_selectedSceneObject->getComponent(CT_PREFAB));
@@ -1168,6 +1299,7 @@ void showObjectNameEdit()
 }
 
 
+// todo: wykorzystanie funkcji z GlmUtils i setTransformFromMatrix z SceneObject + refactor
 void showObjectTransformEdit()
 {
 	ImGui::Text("Transformation");

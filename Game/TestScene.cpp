@@ -7,6 +7,7 @@
 #include "../Bus/BusLoader.h"
 
 #include "../Graphics/Renderer.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/InputSystem.h"
@@ -34,14 +35,14 @@ CameraFPS* TestScene::createCameraFPSGlobal()
 	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(0, 0, 0);
-	cameraObject->setPosition(0, 0.5f, -15);
+	cameraFPS->setMoveSpeed(50);
+	cameraObject->setRotation(0, degToRad(180), 0);
+	cameraObject->setPosition(0, 1.5f, 5);
 
 	CameraControlComponent* cameraControlComponent = _sceneManager->getGameLogicSystem()->addCameraControlComponent(cameraFPS);
 	cameraObject->addComponent(cameraControlComponent);
 
-	cameraControlComponent->setIsActive(false);
+	cameraControlComponent->setIsActive(true);
 
 	return cameraFPS;
 }
@@ -114,9 +115,14 @@ void TestScene::initialize()
 	Bus* bus = busLoader.loadBus("neoplan");
 	bus->getSceneObject()->move(1.0f, 0.0f, 0.0f);*/
 
+	//initGui();
+	initAnimation();
+}
 
+void TestScene::initGui()
+{
 	{
-		Label* labelTitle = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Italic.ttf", 64), "START");
+		Label* labelTitle = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-BoldItalic.ttf", 64), "START");
 		labelTitle->setPosition(500, 500);
 		labelTitle->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
 
@@ -161,10 +167,10 @@ void TestScene::initialize()
 		label->setScale(0.8, 0.8);
 		label->setPosition(680 + (400 - label->getWidth()) / 2.0f, 250);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680, 250);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 250);
 	}
 
@@ -179,10 +185,10 @@ void TestScene::initialize()
 		label2->setPosition(680 + label->getWidth() + 50 + (400 - label->getWidth() - 50 - label2->getWidth()) / 2.0f, 200);
 		label2->setScale(0.8, 0.8);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680 + label->getWidth() + 50, 200);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 200);
 	}
 
@@ -197,10 +203,10 @@ void TestScene::initialize()
 		label2->setPosition(680 + label->getWidth() + 50 + (400 - label->getWidth() - 50 - label2->getWidth()) / 2.0f, 150);
 		label2->setScale(0.8, 0.8);
 
-		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back2.png"));
+		Button* b1 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_back3.png"));
 		b1->setPosition(680 + label->getWidth() + 50, 150);
 
-		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward2.png"));
+		Button* b2 = _gui->addButton(ResourceManager::getInstance().loadTexture("Data/arrow_forward3.png"));
 		b2->setPosition(680 + 400 - b2->getRealSize().x, 150);
 	}
 
@@ -290,6 +296,19 @@ void TestScene::initialize()
 		Label* label = _gui->addLabel(ResourceManager::getInstance().loadFont("fonts/Roboto/Roboto-Regular.ttf", size), "Font: " + toString(size));
 		label->setPosition(10, y);
 	}*/
+}
+
+
+void TestScene::initAnimation()
+{
+	SceneObject* animatedObject = _sceneManager->addSceneObject("Krystian");
+
+	RAnimatedModel* animatedModel = ResourceManager::getInstance().loadAnimatedModel("Objects/peoples/Krystian3/Krystian.fbx", "Objects/peoples/Krystian3/");
+	RenderObject* animatedRenderObject = _graphicsManager->addRenderObject(new RenderObject(animatedModel), animatedObject);
+
+	RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
+	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation(animation);
+	animatedObject->addComponent(skeletalAnimation);
 }
 
 

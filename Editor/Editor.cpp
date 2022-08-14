@@ -37,6 +37,8 @@
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/ShapePolygonComponent.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -1118,10 +1120,6 @@ namespace vbEditor
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 				}
-				if (ImGui::MenuItem("TEST!!!", NULL, _graphicsManager->getGlobalEnvironmentCaptureComponent()->a))
-				{
-					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
-				}
 
 				ImGui::Separator();
 
@@ -1541,9 +1539,15 @@ namespace vbEditor
 			ImGui::PopID();
 		}
 
+		glm::mat4 viewMatrix = _camera->getViewMatrix();
+		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
+		{
+			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
+		}
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
 			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
 			NULL,

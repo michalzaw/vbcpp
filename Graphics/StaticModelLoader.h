@@ -19,7 +19,7 @@
 
 class StaticModelLoader
 {
-    private:
+    protected:
         static constexpr const char* COLLISION_MATERIAL_NAME = "Collision";
 
         static const unsigned int IMPORT_FLAGS_FOR_LOADING_WITH_HIERARCHY = aiProcess_Triangulate | aiProcess_JoinIdenticalVertices |
@@ -47,17 +47,20 @@ class StaticModelLoader
 
         void loadAllMaterials();
 
-        void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);
+        virtual void getTransformFromAssimpNode(aiNode* assimpNode, Transform& transform);
         bool isNodeContainsCollisionMesh(aiNode* assimpNode);
 
         void getMeshMenderVertexFromAssimpMesh(const aiMesh* assimpMesh, unsigned int vertexIndex, MeshMender::Vertex& outVertex);
         void runMeshMender(std::vector<MeshMender::Vertex>& vertices, std::vector<unsigned int>& indices);
 
+        // return true if mesh is loaded and false otherwise
+        virtual bool loadMeshFromNode(const aiMesh* assimpMesh, StaticModelMesh& mesh, bool isLoadingSingleNode, const glm::mat4& globalNodeTransform);
+
         StaticModelNode* createModelNode(aiNode* node, glm::mat4 parentTransform = glm::mat4(1.0f), StaticModelNode* parent = NULL);
 
     public:
         StaticModelLoader(bool normalsSmoothing = true);
-		~StaticModelLoader()
+		virtual ~StaticModelLoader()
 		{
 			delete _materialLoader;
 		}

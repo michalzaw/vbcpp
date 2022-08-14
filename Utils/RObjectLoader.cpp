@@ -11,6 +11,8 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
+#include "../Graphics/SkeletalAnimationComponent.h"
+
 #include "../Scene/SceneManager.h"
 
 #include "../Utils/ResourceManager.h"
@@ -63,6 +65,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		{
 			loadCrossroadComponent(componentElement, object, componentIndex);
 		}
+		else if (componentType == "skeletalAnimation")
+		{
+			loadSkeletalAnimation(componentElement, object, componentIndex);
+		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
 	}
@@ -76,8 +82,10 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["lowPolyModel"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModel");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
+	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows", "true");
 	object->getComponents()[componentIndex]["normalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "normalsSmoothing", "true");
 	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
+	object->getComponents()[componentIndex]["animated"] = XmlUtils::getAttributeStringOptional(componentElement, "animated");
 }
 
 
@@ -164,9 +172,33 @@ void RObjectLoader::loadCrossroadComponent(tinyxml2::XMLElement* componentElemen
 }
 
 
-RObject* RObjectLoader::loadObject(std::string dirPath)
+void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
-	std::string fullPath = dirPath + OBJECT_FILE_NAME;
+	object->getComponents()[componentIndex]["animation"] = componentElement->Attribute("animation");
+	object->getComponents()[componentIndex]["startFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "startFrame", "0");
+	object->getComponents()[componentIndex]["endFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "endFrame", "0");
+	object->getComponents()[componentIndex]["animationTicksPerSecond"] = XmlUtils::getAttributeStringOptional(componentElement, "animationTicksPerSecond", "0");
+	object->getComponents()[componentIndex]["boneWithLockedTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "boneWithLockedTranslation", "");
+}
+
+
+// flag normalSmoothing only for non animated objects
+RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing)
+{
+	if (isAnimated)
+	{
+		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath);
+	}
+	else
+	{
+		return ResourceManager::getInstance().loadModel(modelPath, objectDirPath, normalSmoothing);
+	}
+}
+
+
+RObject* RObjectLoader::loadObject(const std::string& dirPath, const std::string& originalName)
+{
+	const std::string& fullPath = dirPath + OBJECT_FILE_NAME;
 
 	XMLDocument doc;
 	XMLError result = doc.LoadFile(fullPath.c_str());
@@ -201,7 +233,7 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 	LOG_INFO("Comment: " + comment);
 
 
-	RObject* object = new RObject(dirPath, author, objectName, comment);
+	RObject* object = new RObject(dirPath, author, objectName, comment, originalName);
 
 
 	loadComponents(objElement, object);
@@ -211,8 +243,8 @@ RObject* RObjectLoader::loadObject(std::string dirPath)
 }
 
 
-SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefinition, std::string name,
-														 glm::vec3 position, glm::vec3 rotation, SceneManager* sceneManager)
+SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefinition, const std::string& name,
+														 const glm::vec3& position, const glm::vec3& rotation, SceneManager* sceneManager)
 {
 	std::string objectDirPath = objectDefinition->getPath();
 
@@ -232,20 +264,22 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		{
 			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
 
-			std::string modelFile = components[i]["model"];
+			const std::string& modelFile = components[i]["model"];
+			const std::string& modelPath = objectDirPath + modelFile;
+			bool isAnimated = toBool(components[i]["animated"]);
 
-			std::string modelPath = objectDirPath + modelFile;
+			model = loadModel(modelPath, objectDirPath, isAnimated, toBool(components[i]["normalsSmoothing"]));
 
-			model = ResourceManager::getInstance().loadModel(modelPath, objectDirPath, toBool(components[i]["normalsSmoothing"]));
 			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
 			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
+			renderObject->setIsCastShadows(toBool(components[i]["castShadows"]));
 
 			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
 			if (!lowPolyModeFile.empty())
 			{
 				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
 
-				RStaticModel* lowPolyModel = ResourceManager::getInstance().loadModel(lowPolyModelPath, objectDirPath, toBool(components[i]["lowPolyModelNormalsSmoothing"]));
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]));
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
@@ -358,6 +392,40 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			CrossroadComponent* crossroad = graphicsManager->addCrossRoad(connectionPoints);
 			sceneObject->addComponent(crossroad);
+		}
+		else if (componentType == "skeletalAnimation")
+		{
+			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
+
+			const std::string& animationFile = components[i]["animation"];
+
+			int startFrame = toInt(components[i]["startFrame"]);
+			int endFrame = toInt(components[i]["endFrame"]);
+			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
+			const std::string& boneWithLockedTranslation = components[i]["boneWithLockedTranslation"];
+
+			RAnimation* animation = ResourceManager::getInstance().loadAnimation(animationFile);
+			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
+			sceneObject->addComponent(skeletalAnimation);
+			sceneObject->setScale(0.01);
+
+			if (startFrame != 0)
+			{
+				skeletalAnimation->setStartFrame(startFrame);
+			}
+			if (endFrame != 0)
+			{
+				skeletalAnimation->setEndFrame(endFrame);
+			}
+			if (animationTicksPerSecond != 0)
+			{
+				skeletalAnimation->setAnimationTicksPerSecond(animationTicksPerSecond);
+			}
+			if (!boneWithLockedTranslation.empty())
+			{
+				skeletalAnimation->setBoneWithLockedTranslation(boneWithLockedTranslation);
+			}
+			
 		}
 	}
 

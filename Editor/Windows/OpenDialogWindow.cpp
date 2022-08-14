@@ -137,7 +137,7 @@ void OpenDialogWindow::drawWindow()
 				{
 					ImGui::Text("Name: %s", _selectedFile->description.name.c_str());
 					ImGui::Text("Author: %s", _selectedFile->description.author.c_str());
-					ImGui::Text("Description: %s", _selectedFile->description.comment.c_str());
+					ImGui::TextWrapped("Description: %s", _selectedFile->description.comment.c_str());
 				}
 			}
 			ImGui::EndChild();
