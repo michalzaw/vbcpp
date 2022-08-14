@@ -17,7 +17,8 @@ SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
 	_animation(animation),
 	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)),
 	_currentTime(0.0f),
-	_animationDuration(animation->getDuration()), _animationTicksPerSecond(animation->getTicksPerSecond()), _play(true),
+	_startFrame(0), _endFrame(animation->getDuration()), _animationTicksPerSecond(animation->getTicksPerSecond()), _play(true),
+	_boneWithLockedTranslation(""), _boneWithLockedTranslationIndex(-1),
 	_animatedModel(nullptr)
 {
 
@@ -62,16 +63,29 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 	glm::mat4 nodeTransform = node->transformation;
 
 	auto animationBone = _animation->getBones().find(nodeName);
+	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
+
 	if (animationBone != _animation->getBones().end())
 	{
 		Bone* bone = animationBone->second;
 
-		nodeTransform = bone->calculateLocalTransform(_currentTime);
+		//nodeTransform = bone->calculateLocalTransform(_currentTime + _startFrame);
+		glm::mat4 nodeTranslation = bone->calculatePosition(_currentTime + _startFrame);
+		glm::mat4 nodeRotation = bone->calculateRotation(_currentTime + _startFrame);
+		glm::mat4 nodeScale = bone->calculateScale(_currentTime + _startFrame);
+
+		if (boneInfo != _animatedModel->getBoneInfos().end() && boneInfo->second->id == _boneWithLockedTranslationIndex)
+		{
+			nodeTransform = nodeRotation * nodeScale;
+		}
+		else
+		{
+			nodeTransform = nodeTranslation * nodeRotation * nodeScale;
+		}
 	}
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
 
-	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 	if (boneInfo != _animatedModel->getBoneInfos().end())
 	{
 		int index = boneInfo->second->id;
@@ -92,8 +106,34 @@ void SkeletalAnimationComponent::update(float deltaTime)
 	if (_play)
 	{
 		_currentTime += deltaTime * _animationTicksPerSecond;
-		_currentTime = fmod(_currentTime, _animationDuration);
+
+		float animationDuration = getAnimationDuration();
+
+		_currentTime = fmod(_currentTime, animationDuration);
 	}
 
 	calculateBoneTransform(_animation->getRootNode());
+}
+
+
+void SkeletalAnimationComponent::setBoneWithLockedTranslation(const std::string& boneName)
+{
+	if (boneName.empty())
+	{
+		_boneWithLockedTranslation = "";
+		_boneWithLockedTranslationIndex = -1;
+
+		return;
+	}
+
+	auto boneInfo = _animatedModel->getBoneInfos().find(boneName);
+	if (boneInfo != _animatedModel->getBoneInfos().end())
+	{
+		_boneWithLockedTranslation = boneName;
+		_boneWithLockedTranslationIndex = boneInfo->second->id;
+	}
+	else
+	{
+		LOG_WARNING("Invalid bone name");
+	}
 }

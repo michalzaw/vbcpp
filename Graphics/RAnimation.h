@@ -43,15 +43,15 @@ class Bone final
 		int getRotationIndex(float animationTime);
 		int getScaleIndex(float animationTime);
 
-		glm::mat4 interpolatePosition(float animationTime);
-		glm::mat4 interpolateRotation(float animationTime);
-		glm::mat4 interpolateScale(float animationTime);
-
 	public:
 		Bone(const std::string& name);
 		~Bone();
 
 		inline const std::string& getName() { return _name; }
+
+		glm::mat4 calculatePosition(float animationTime);
+		glm::mat4 calculateRotation(float animationTime);
+		glm::mat4 calculateScale(float animationTime);
 
 		glm::mat4 calculateLocalTransform(float animationTime);
 
@@ -69,6 +69,8 @@ class RAnimation final : public Resource
 		std::unordered_map<std::string, Bone*> _bones;
 		AnimationNodeData _rootNode;
 
+		std::vector<std::string> _boneNames;
+
 	public:
 		RAnimation(const std::string& path);
 		~RAnimation();
@@ -78,6 +80,8 @@ class RAnimation final : public Resource
 
 		inline std::unordered_map<std::string, Bone*>& getBones() { return _bones; }
 		inline AnimationNodeData* getRootNode() { return &_rootNode; }
+
+		const std::vector<std::string>& getBonesNames();
 
 };
 

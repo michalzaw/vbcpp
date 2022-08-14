@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <string>
 
 #include <glm/glm.hpp>
 
@@ -27,10 +28,14 @@ class SkeletalAnimationComponent final : public Component
 		std::vector<glm::mat4> _finalBoneMatrices;
 		float _currentTime;
 
-		float _animationDuration;
+		int _startFrame;
+		int _endFrame;
 		int _animationTicksPerSecond;
 
 		bool _play;
+
+		std::string _boneWithLockedTranslation;
+		int _boneWithLockedTranslationIndex;
 
 		void onAttachedToScenObject() override;
 
@@ -43,17 +48,23 @@ class SkeletalAnimationComponent final : public Component
 		void update(float deltaTime) override;
 
 		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
-		inline RAnimation* getAnimiation() { return _animation; }
+		inline RAnimation* getAnimation() { return _animation; }
 
 		inline const float getCurrentTime() { return _currentTime; }
-		inline const float getAnimationDuration() { return _animationDuration; }
+		inline const int getStartFrame() { return _startFrame; }
+		inline const int getEndFrame() { return _endFrame; }
 		inline const int getAnimationTicksPerSecond() { return _animationTicksPerSecond; }
 		inline const bool isPlay() { return _play; }
+		inline const std::string& getBoneWithLockedTranslation() { return _boneWithLockedTranslation; }
 
-		void setCurrentTime(float currentTime) { _currentTime = currentTime; }
-		void setAnimationDuration(float animationDuration) { _animationDuration = animationDuration; }
-		void setAnimationTicksPerSecond(int animationTicksPerSecond) { _animationTicksPerSecond = animationTicksPerSecond; }
-		void setPlay(bool play) { _play = play; }
+		inline const float getAnimationDuration() { return _endFrame - _startFrame; }
+
+		inline void setCurrentTime(float currentTime) { _currentTime = currentTime; }
+		inline void setStartFrame(int startFrame) { _startFrame = startFrame; }
+		inline void setEndFrame(int endFrame) { _endFrame = endFrame; }
+		inline void setAnimationTicksPerSecond(int animationTicksPerSecond) { _animationTicksPerSecond = animationTicksPerSecond; }
+		inline void setPlay(bool play) { _play = play; }
+		void setBoneWithLockedTranslation(const std::string& boneName);
 
 };
 
