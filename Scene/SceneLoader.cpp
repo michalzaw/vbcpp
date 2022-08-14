@@ -253,6 +253,62 @@ void SceneLoader::loadObjects(XMLElement* objectsElement, SceneObject* parent)
 	*/
 }
 
+
+void SceneLoader::loadPrefabComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	PrefabType prefabType = getPrefabTypeFromString(XmlUtils::getAttributeString(componentElement, "prefabType"));
+
+	Material* material = new Material;
+	material->shader = SOLID_MATERIAL;
+	material->shininess = 96.0f;
+	material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+	if (prefabType == PrefabType::PLANE)
+	{
+		glm::vec2 size = XmlUtils::getAttributeVec2(componentElement, "size");
+
+		PlanePrefab* plane = new PlanePrefab(size, material);
+		plane->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(plane, sceneObject);
+	}
+	else if (prefabType == PrefabType::CUBE)
+	{
+		float size = XmlUtils::getAttributeFloat(componentElement, "size");
+
+		Cube* cube = new Cube(size, material);
+		cube->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(cube, sceneObject);
+	}
+	else if (prefabType == PrefabType::SPHERE)
+	{
+		float radius = XmlUtils::getAttributeFloat(componentElement, "radius");
+		int quality = XmlUtils::getAttributeInt(componentElement, "quality");
+
+		SpherePrefab* sphere = new SpherePrefab(radius, material);
+		sphere->setQuality(quality);
+		sphere->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(sphere, sceneObject);
+	}
+	else if (prefabType == PrefabType::CYLINDER)
+	{
+		float radius = XmlUtils::getAttributeFloat(componentElement, "radius");
+		float height = XmlUtils::getAttributeFloat(componentElement, "height");
+		int axis = XmlUtils::getAttributeInt(componentElement, "axis");
+		int quality = XmlUtils::getAttributeInt(componentElement, "quality");
+
+		CylinderPrefab* cylinder = new CylinderPrefab(radius, height, material);
+		cylinder->setAxis(axis);
+		cylinder->setQuality(quality);
+		cylinder->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(cylinder, sceneObject);
+	}
+	else
+	{
+		delete material;
+	}
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -303,6 +359,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 				component->setName(busStopName);
 				component->setId(busStopId);
 				component->setAnnouncementFileName(announcementFileName);
+			}
+
+			if (componentType == "prefab")
+			{
+				loadPrefabComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");

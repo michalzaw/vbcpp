@@ -21,8 +21,14 @@ std::string toString(TYPE Number)
 	return Stream.str();
 }
 
+inline std::string vec2ToString(const glm::vec2& vector)
+{
+	std::ostringstream Stream;
+	Stream << vector.x << "," << vector.y;
+	return Stream.str();
+}
 
-inline std::string vec3ToString(glm::vec3 vector)
+inline std::string vec3ToString(const glm::vec3& vector)
 {
 	std::ostringstream Stream;
 	Stream << vector.x << "," << vector.y << "," << vector.z;
@@ -30,7 +36,7 @@ inline std::string vec3ToString(glm::vec3 vector)
 }
 
 
-inline std::string vec4ToString(glm::vec4 vector)
+inline std::string vec4ToString(const glm::vec4& vector)
 {
 	std::ostringstream Stream;
 	Stream << vector.x << "," << vector.y << "," << vector.z << "," << vector.w;

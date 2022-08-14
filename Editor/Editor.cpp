@@ -1019,6 +1019,65 @@ namespace vbEditor
 					setSelectedSceneObject(decalSceneObject);
 				}
 				ImGui::Separator();
+
+				if (ImGui::BeginMenu("Add mesh"))
+				{
+					if (ImGui::MenuItem("Plane", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Plane");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						PlanePrefab* plane = new PlanePrefab(glm::vec2(1, 1), material);
+						plane->init();
+						_graphicsManager->addRenderObject(plane, sceneObject);
+					}
+					if (ImGui::MenuItem("Cube", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cube");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						Cube* cube = new Cube(1, material);
+						cube->init();
+						_graphicsManager->addRenderObject(cube, sceneObject);
+					}
+					if (ImGui::MenuItem("Sphere", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Sphere");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						SpherePrefab* sphere = new SpherePrefab(1.0f, material);
+						sphere->init();
+						_graphicsManager->addRenderObject(sphere, sceneObject);
+					}
+					if (ImGui::MenuItem("Cylinder", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cylinder");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						CylinderPrefab* cylinder = new CylinderPrefab(0.5f, 2.0f, material);
+						cylinder->init();
+						_graphicsManager->addRenderObject(cylinder, sceneObject);
+					}
+					ImGui::EndMenu();
+				}
+
+				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
 					Renderer::getInstance().bakeStaticShadows();

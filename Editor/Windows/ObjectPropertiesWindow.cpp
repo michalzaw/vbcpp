@@ -618,28 +618,35 @@ void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& select
 }
 
 
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
 typedef std::string str;
 typedef std::string path;
 typedef std::string str_combo;
 
 
-#define IMGUI_INPUT_int(propertyName, additionalParams)																							\
+#define IMGUI_INPUT_int(component, propertyName, additionalParams)																				\
 int value = component->get##propertyName();																										\
 bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_float(propertyName, additionalParams)																						\
+#define IMGUI_INPUT_float(component, propertyName, additionalParams)																			\
 float value = component->get##propertyName();																									\
 bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
 //bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_bool(propertyName, additionalParams)																						\
+#define IMGUI_INPUT_vec2(component, propertyName, additionalParams)																				\
+glm::vec2 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
 
 
-#define IMGUI_INPUT_str(propertyName, additionalParams)																							\
+#define IMGUI_INPUT_str(component, propertyName, additionalParams)																				\
 char value[50];																																	\
 strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
 value[sizeof value - 1] = '\0';																													\
@@ -647,7 +654,7 @@ value[sizeof value - 1] = '\0';																													\
 bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_path(propertyName, additionalParams)																						\
+#define IMGUI_INPUT_path(component, propertyName, additionalParams)																				\
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
@@ -674,7 +681,7 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define IMGUI_INPUT_str_combo(propertyName, additionalParams)																					\
+#define IMGUI_INPUT_str_combo(component, propertyName, additionalParams)																		\
 const std::vector<std::string>& itemsNames = additionalParams;																					\
 std::string comboItems;																															\
 int selectedItemIndex = 0;																														\
@@ -699,12 +706,12 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
 																																				\
-	IMGUI_INPUT_##type(propertyName, additionalParams)																							\
+	IMGUI_INPUT_##type(component, propertyName, additionalParams)																				\
 																																				\
 	if (result)																																	\
 	{																																			\
-		callback(type(value));																													\
 		component->set##propertyName(type(value));																								\
+		callback(type(value));																													\
 	}																																			\
 																																				\
 	ImGui::NextColumn();																														\
@@ -842,6 +849,111 @@ void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponen
 }
 
 
+void createPhysicalBodyForPrefab(Prefab* component)
+{
+	if (component->getPrefabType() == PrefabType::PLANE)
+	{
+		PlanePrefab* plane = static_cast<PlanePrefab*>(component);
+
+		glm::vec2 size = plane->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size.x, 0.1f, size.y), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::CUBE)
+	{
+		Cube* cube = static_cast<Cube*>(component);
+
+		float size = cube->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size, size, size), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::SPHERE)
+	{
+		SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+
+		PhysicalBodySphere* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodySphere(sphere->getRadius(), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::CYLINDER)
+	{
+		CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+
+		int axis = cylinder->getAxis();
+		float radius2 = cylinder->getRadius() * 2.0f;
+		float height = cylinder->getHeight();
+		btVector3 dimensions;
+		if (axis == 0)
+		{
+			dimensions = btVector3(height, radius2, radius2);
+		}
+		else if (axis == 1)
+		{
+			dimensions = btVector3(radius2, height, radius2);
+		}
+		else if (axis == 2)
+		{
+			dimensions = btVector3(radius2, radius2, height);
+		}
+		PhysicalBodyCylinder* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyCylinder(dimensions, 1.0f, (ShapeAlign) axis, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+}
+
+
+void showPrefabComponentDetails(Prefab* component)
+{
+	if (ImGui::CollapsingHeader(convertPrefabTypeToString(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		if (component->getPrefabType() == PrefabType::PLANE)
+		{
+			PlanePrefab* plane = static_cast<PlanePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(plane, Size, vec2, "Size", [plane](glm::vec2 newValue) { plane->init(); })
+		}
+
+		if (component->getPrefabType() == PrefabType::CUBE)
+		{
+			Cube* cube = static_cast<Cube*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cube, Size, float, "Size", [cube](float newValue) { cube->init(); })
+		}
+
+		if (component->getPrefabType() == PrefabType::SPHERE)
+		{
+			SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Radius, float, "Radius", [sphere](float newValue) { sphere->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Quality, float, "Quality", [sphere](float newValue) { sphere->init(); })
+		}
+
+		if (component->getPrefabType() == PrefabType::CYLINDER)
+		{
+			CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Radius, float, "Radius", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Height, float, "Height", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Axis, int, "Axis", [cylinder](float newValue) { cylinder->init(); })
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](float newValue) { cylinder->init(); })
+		}
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		if (component->getSceneObject()->getComponent(CT_PHYSICAL_BODY) == nullptr)
+		{
+			if (ImGui::Button("Add physical body"))
+			{
+				createPhysicalBodyForPrefab(component);
+			}
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -919,6 +1031,13 @@ void showObjectProperties()
 			if (skeletalAnimationHelperComponent)
 			{
 				showSkeletalAnimationHelperComponentDetails(skeletalAnimationHelperComponent);
+			}
+
+			Prefab* prefabComponent = dynamic_cast<Prefab*>(vbEditor::_selectedSceneObject->getComponent(CT_PREFAB));
+			if (prefabComponent)
+			{
+				showPrefabComponentDetails(prefabComponent);
+				showRenderComponentDetails(prefabComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

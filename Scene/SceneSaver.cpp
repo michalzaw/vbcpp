@@ -113,6 +113,45 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 }
 
 
+void SceneSaver::savePrefabComponent(XMLElement* objectElement, XMLDocument& doc, Prefab* prefab)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "prefab");
+	componentElement->SetAttribute("prefabType", convertPrefabTypeToString(prefab->getPrefabType()).c_str());
+
+	if (prefab->getPrefabType() == PrefabType::PLANE)
+	{
+		PlanePrefab* plane = static_cast<PlanePrefab*>(prefab);
+		componentElement->SetAttribute("size", vec2ToString(plane->getSize()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::CUBE)
+	{
+		Cube* cube = static_cast<Cube*>(prefab);
+		componentElement->SetAttribute("size", toString(cube->getSize()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::SPHERE)
+	{
+		SpherePrefab* sphere = static_cast<SpherePrefab*>(prefab);
+		componentElement->SetAttribute("radius", toString(sphere->getRadius()).c_str());
+		componentElement->SetAttribute("quality", toString(sphere->getQuality()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::CYLINDER)
+	{
+		CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(prefab);
+		componentElement->SetAttribute("radius", toString(cylinder->getRadius()).c_str());
+		componentElement->SetAttribute("height", toString(cylinder->getHeight()).c_str());
+		componentElement->SetAttribute("axis", toString(cylinder->getAxis()).c_str());
+		componentElement->SetAttribute("quality", toString(cylinder->getQuality()).c_str());
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -141,6 +180,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 		componentElement->SetAttribute("announcement", busStopComponent->getAnnouncementFileName().c_str());
 
 		objectElement->InsertEndChild(componentElement);
+	}
+
+	Prefab* prefab = static_cast<Prefab*>(sceneObject->getComponent(CT_PREFAB));
+	if (prefab)
+	{
+		savePrefabComponent(objectElement, doc, prefab);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

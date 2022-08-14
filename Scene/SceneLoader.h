@@ -53,6 +53,8 @@ class SceneLoader
 		CrossroadComponent* findCrossRoadComponentBySceneObjectName(const std::string& name);
 		RoadObject* findRoadObjectBySceneObjectName(const std::string& name);
 
+		void loadPrefabComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
+
 	public:
 		SceneLoader(SceneManager* sceneManager);
 

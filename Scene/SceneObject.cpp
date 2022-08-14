@@ -41,6 +41,7 @@ SceneObject::~SceneObject()
         switch ((*i)->getType())
         {
             case CT_RENDER_OBJECT:
+            case CT_PREFAB:
                 _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
                 break;
 
@@ -296,6 +297,7 @@ void SceneObject::removeComponent(Component* component)
 			switch (component->getType())
             {
                 case CT_RENDER_OBJECT:
+                case CT_PREFAB:
                     _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(component));
                     break;
 
