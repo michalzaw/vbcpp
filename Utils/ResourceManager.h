@@ -62,7 +62,7 @@ class ResourceManager
 											 bool normalsSmoothing = true);
         RStaticModel* loadModel(std::string path, std::string texturePath, bool normalsSmoothing = true);
 
-        RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath);
+        RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath, const std::unordered_map<std::string, BoneInfo*>& boneInfosFromExistingModel = {});
         RAnimation* loadAnimation(const std::string& path);
 
         RFont* loadFont(std::string path, int pixelSize = 32);

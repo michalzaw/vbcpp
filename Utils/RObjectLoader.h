@@ -33,7 +33,7 @@ class RObjectLoader
 		static void loadCrossroadComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadSkeletalAnimation(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 
-		static RStaticModel* loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing);
+		static RStaticModel* loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, RStaticModel* hightPollyModel = nullptr);
 	
 	public:
 		static RObject* loadObject(const std::string& dirPath, const std::string& originalName);

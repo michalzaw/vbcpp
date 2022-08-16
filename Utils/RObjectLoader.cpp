@@ -185,11 +185,12 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 
 
 // flag normalSmoothing only for non animated objects
-RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing)
+RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, RStaticModel* hightPollyModel/* = nullptr*/)
 {
 	if (isAnimated)
 	{
-		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath);
+		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath,
+																hightPollyModel != nullptr ? static_cast<RAnimatedModel*>(hightPollyModel)->getBoneInfos() : std::unordered_map<std::string, BoneInfo*>());
 	}
 	else
 	{
@@ -281,7 +282,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			{
 				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
 
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]));
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]), model);
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
