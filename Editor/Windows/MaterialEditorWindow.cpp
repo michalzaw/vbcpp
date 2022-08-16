@@ -128,8 +128,8 @@ namespace vbEditor
 			"GRASS_MATERIAL",
 			"SKY_MATERIAL",
 			"GLASS_MATERIAL",
-			"WIREFRAME_MATERIAL",
 			"NOTEXTURE_ALWAYS_VISIBLE_MATERIAL"
+			"WIREFRAME_MATERIAL",
 		};
 
 		if (ImGui::Combo("Material type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
