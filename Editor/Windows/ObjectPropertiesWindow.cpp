@@ -720,6 +720,28 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 }
 
 
+#define COMPONENT_RESOURCE_EDIT(component, propertyName, displayName, pathToResourceMapper)														\
+{																																				\
+	ImGui::PushID(#propertyName);																												\
+																																				\
+	ImGui::AlignTextToFramePadding();																											\
+	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
+	ImGui::NextColumn();																														\
+	ImGui::SetNextItemWidth(-1);																												\
+																																				\
+	IMGUI_INPUT_path(component->get##propertyName(), Path, additionalParams)																	\
+																																				\
+	if (result)																																	\
+	{																																			\
+		component->set##propertyName(pathToResourceMapper(value));																				\
+	}																																			\
+																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
 #define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
 #define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
@@ -784,6 +806,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::Columns(2);
 		ImGui::Separator();
 
+		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
 		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
 		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
 		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")

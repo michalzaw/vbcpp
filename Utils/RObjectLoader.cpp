@@ -11,6 +11,8 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
+#include "../Game/Directories.h"
+
 #include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Scene/SceneManager.h"
@@ -404,7 +406,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
 			const std::string& boneWithLockedTranslation = components[i]["boneWithLockedTranslation"];
 
-			RAnimation* animation = ResourceManager::getInstance().loadAnimation(animationFile);
+			RAnimation* animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
 			sceneObject->addComponent(skeletalAnimation);
 			sceneObject->setScale(0.01);

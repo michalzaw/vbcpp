@@ -14,14 +14,13 @@
 
 SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
 	: Component(CT_SKELETAL_ANIMATION),
-	_animation(animation),
 	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)),
 	_currentTime(0.0f),
-	_startFrame(0), _endFrame(animation->getDuration()), _animationTicksPerSecond(animation->getTicksPerSecond()), _play(true),
+	_play(true),
 	_boneWithLockedTranslation(""), _boneWithLockedTranslationIndex(-1),
 	_animatedModel(nullptr)
 {
-
+	setAnimation(animation);
 }
 
 
@@ -113,6 +112,15 @@ void SkeletalAnimationComponent::update(float deltaTime)
 	}
 
 	calculateBoneTransform(_animation->getRootNode());
+}
+
+
+void SkeletalAnimationComponent::setAnimation(RAnimation* animation)
+{
+	_animation = animation;
+	_startFrame = 0;
+	_endFrame = animation->getDuration();
+	_animationTicksPerSecond = animation->getTicksPerSecond();
 }
 
 

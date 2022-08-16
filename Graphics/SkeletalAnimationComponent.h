@@ -47,8 +47,10 @@ class SkeletalAnimationComponent final : public Component
 
 		void update(float deltaTime) override;
 
-		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
 		inline RAnimation* getAnimation() { return _animation; }
+		void setAnimation(RAnimation* animation);
+
+		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
 
 		inline const float getCurrentTime() { return _currentTime; }
 		inline const int getStartFrame() { return _startFrame; }
