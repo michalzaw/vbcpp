@@ -916,6 +916,24 @@ void Renderer::clearRenderDatasForShadowMap()
 }
 
 
+const std::vector<glm::mat4>& Renderer::getFinalMatrices(SceneObject* sceneObject)
+{
+    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+    if (skeletatlAnimation != nullptr)
+    {
+        return skeletatlAnimation->getFinalBoneMatrices();
+    }
+
+    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+    if (skeletatlAnimation2 != nullptr)
+    {
+        return skeletatlAnimation2->getFinalBoneMatrices();
+    }
+
+    return {};
+}
+
+
 void Renderer::rebuildStaticLightingInternal()
 {
     clearRenderDatasForShadowMap();
@@ -1538,24 +1556,6 @@ void Renderer::renderAll()
 
 
     glEnable(GL_DEPTH_TEST);
-}
-
-
-const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject)
-{
-    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
-    if (skeletatlAnimation != nullptr)
-    {
-        return skeletatlAnimation->getFinalBoneMatrices();
-    }
-
-    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
-    if (skeletatlAnimation2 != nullptr)
-    {
-        return skeletatlAnimation2->getFinalBoneMatrices();
-    }
-
-    return {};
 }
 
 
