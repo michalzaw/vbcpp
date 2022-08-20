@@ -274,8 +274,8 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			model = loadModel(modelPath, objectDirPath, isAnimated, toBool(components[i]["normalsSmoothing"]));
 
 			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
-			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
-			renderObject->setIsCastShadows(toBool(components[i]["castShadows"]));
+			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
+			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
 
 			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
 			if (!lowPolyModeFile.empty())

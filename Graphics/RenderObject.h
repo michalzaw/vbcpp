@@ -62,9 +62,9 @@ class RenderObject : public Component
         void addMirrorMaterial(Material* material);
         const std::vector<Material*>& getMirrorMaterials();
 
-        void setIsCastShadows(bool isCastShadows);
+        void setCastShadows(bool isCastShadows);
         bool isCastShadows();
-		void setIsDynamicObject(bool isDynamic);
+		void setDynamicObject(bool isDynamic);
 		bool isDynamicObject();
 
         AABB* getAABB();

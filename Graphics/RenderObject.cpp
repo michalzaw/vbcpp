@@ -230,7 +230,7 @@ const std::vector<Material*>& RenderObject::getMirrorMaterials()
 }
 
 
-void RenderObject::setIsCastShadows(bool isCastShadows)
+void RenderObject::setCastShadows(bool isCastShadows)
 {
     _isCastShadows = isCastShadows;
 }
@@ -242,7 +242,7 @@ bool RenderObject::isCastShadows()
 }
 
 
-void RenderObject::setIsDynamicObject(bool isDynamic)
+void RenderObject::setDynamicObject(bool isDynamic)
 {
 	_isDynamicObject = isDynamic;
 }

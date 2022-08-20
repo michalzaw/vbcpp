@@ -395,7 +395,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         std::string modelPath = _busPath + wheelModel;
         RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         RenderObject* wheelRenderObject = _gMgr->addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
-		wheelRenderObject->setIsDynamicObject(true);
+		wheelRenderObject->setDynamicObject(true);
 
 
         btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
@@ -495,7 +495,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
         std::string modelPath = _busPath + modelFile;
         RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         RenderObject* renderObject = _gMgr->addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
-		renderObject->setIsDynamicObject(true);
+		renderObject->setDynamicObject(true);
 
         busModule.sceneObject->addChild(steeringWheelObject);
 
@@ -575,7 +575,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
         _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel), desktopObject);
-		_bus->_desktopRenderObject->setIsDynamicObject(true);
+		_bus->_desktopRenderObject->setDynamicObject(true);
 
 
         busModule.sceneObject->addChild(desktopObject);
@@ -826,7 +826,7 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 
 
     RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
-	doorRenderObject->setIsDynamicObject(true);
+	doorRenderObject->setDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
     doorObj->addComponent(doorBody);
@@ -872,7 +872,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 
     RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath, _normalsSmoothing);
     RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(arm), armObj);
-	armRenderObject->setIsDynamicObject(true);
+	armRenderObject->setDynamicObject(true);
 
     btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
 
@@ -903,7 +903,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 
     RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath, _normalsSmoothing);
     RenderObject* arm2RenderObject = _gMgr->addRenderObject(new RenderObject(arm2), arm2Obj);
-	arm2RenderObject->setIsDynamicObject(true);
+	arm2RenderObject->setDynamicObject(true);
 
     btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
 
@@ -921,7 +921,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     btVector3 doorPivotB = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
 
     RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
-	doorRenderObject->setIsDynamicObject(true);
+	doorRenderObject->setDynamicObject(true);
 
     //btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
 
@@ -1009,7 +1009,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     armObject->setRotation(armRotation);
 
     RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode), armObject);
-	armRenderObject->setIsDynamicObject(true);
+	armRenderObject->setDynamicObject(true);
 
     PhysicalBody* armBody;
 
@@ -1041,7 +1041,7 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
 
     // door object
     RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode), doorObj);
-	doorRenderObject->setIsDynamicObject(true);
+	doorRenderObject->setDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody;
     if (doorCollisionNode == nullptr)
@@ -1191,7 +1191,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		material->shader = SOLID_EMISSIVE_MATERIAL;
 		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
 		displayRenderObject->init();
-		displayRenderObject->setIsDynamicObject(true);
+		displayRenderObject->setDynamicObject(true);
         _gMgr->addRenderObject(displayRenderObject, displaySceneObject);
 
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);

@@ -64,7 +64,7 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
 	terrainObject->setFlags(SOF_NOT_SELECTABLE_ON_SCENE);
 	Terrain* terrainObj = _sceneManager->getGraphicsManager()->addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
-	terrainObj->setIsCastShadows(false);
+	terrainObj->setCastShadows(false);
 	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);
 	terrainMesh->setRestitution(0.9f);
 	terrainMesh->getRigidBody()->setFriction(1.0f);
@@ -487,7 +487,7 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
 		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadProfile, segments, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		roadRenderObject->setCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
@@ -556,7 +556,7 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
 		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		roadRenderObject->setCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
@@ -628,7 +628,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
 		RoadObject* roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		roadRenderObject->setCastShadows(false);
 
 
 		XMLElement* connectionElement = roadElement->FirstChildElement("Connection");
