@@ -879,12 +879,13 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::Separator();
 
 		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
-		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); })
 		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
 		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
-		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
 
 		ImGui::Columns(1);
 		ImGui::Separator();

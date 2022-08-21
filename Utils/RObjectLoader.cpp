@@ -180,7 +180,8 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 	object->getComponents()[componentIndex]["startFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "startFrame", "0");
 	object->getComponents()[componentIndex]["endFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "endFrame", "0");
 	object->getComponents()[componentIndex]["animationTicksPerSecond"] = XmlUtils::getAttributeStringOptional(componentElement, "animationTicksPerSecond", "0");
-	object->getComponents()[componentIndex]["boneWithLockedTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "boneWithLockedTranslation", "");
+	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
+	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
 }
 
 
@@ -405,7 +406,8 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			int startFrame = toInt(components[i]["startFrame"]);
 			int endFrame = toInt(components[i]["endFrame"]);
 			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
-			const std::string& boneWithLockedTranslation = components[i]["boneWithLockedTranslation"];
+			const std::string& rootBone = components[i]["rootBone"];
+			bool lockRootBoneTranslation = toBool(components[i]["lockRootBoneTranslation"]);
 
 			RAnimation* animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
@@ -424,11 +426,11 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			{
 				skeletalAnimation->setAnimationTicksPerSecond(animationTicksPerSecond);
 			}
-			if (!boneWithLockedTranslation.empty())
+			if (!rootBone.empty())
 			{
-				skeletalAnimation->setBoneWithLockedTranslation(boneWithLockedTranslation);
+				skeletalAnimation->setRootBone(rootBone);
 			}
-			
+			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
 		}
 	}
 
