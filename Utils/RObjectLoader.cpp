@@ -182,6 +182,7 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 	object->getComponents()[componentIndex]["animationTicksPerSecond"] = XmlUtils::getAttributeStringOptional(componentElement, "animationTicksPerSecond", "0");
 	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
 	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
+	object->getComponents()[componentIndex]["scale"] = XmlUtils::getAttributeStringOptional(componentElement, "scale", "1");
 }
 
 
@@ -408,11 +409,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
 			const std::string& rootBone = components[i]["rootBone"];
 			bool lockRootBoneTranslation = toBool(components[i]["lockRootBoneTranslation"]);
+			float scale = toFloat(components[i]["scale"]);
 
 			RAnimation* animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
 			sceneObject->addComponent(skeletalAnimation);
-			sceneObject->setScale(0.01);
+			sceneObject->setScale(scale);
 
 			if (startFrame != 0)
 			{
@@ -431,6 +433,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				skeletalAnimation->setRootBone(rootBone);
 			}
 			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
+			skeletalAnimation->setScale(scale);
 		}
 	}
 

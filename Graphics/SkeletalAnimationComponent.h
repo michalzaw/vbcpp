@@ -41,6 +41,8 @@ class SkeletalAnimationComponent final : public Component
 		std::string _rootBoneName;
 		int _rootNodeIndex;
 
+		float _scale;
+
 		std::vector<glm::mat4> _translationMatrices;
 
 		void onAttachedToScenObject() override;
@@ -69,8 +71,9 @@ class SkeletalAnimationComponent final : public Component
 		inline const int getEndFrame() { return _endFrame; }
 		inline const int getAnimationTicksPerSecond() { return _animationTicksPerSecond; }
 		inline const bool isPlay() { return _play; }
-		inline const std::string& getRootBone() { return _rootBoneName; }
 		inline const bool isLockRootBoneTranslation() { return _lockRootBoneTranslation; }
+		inline const std::string& getRootBone() { return _rootBoneName; }
+		inline const float getScale() { return _scale; }
 
 		inline const float getAnimationDuration() { return _endFrame - _startFrame; }
 
@@ -81,6 +84,7 @@ class SkeletalAnimationComponent final : public Component
 		inline void setPlay(bool play) { _play = play; }
 		inline void setLockRootBoneTranslation(bool isLock) { _lockRootBoneTranslation = isLock; }
 		void setRootBone(const std::string& boneName);
+		inline void setScale(float scale) { _scale = scale; }
 
 };
 

@@ -19,6 +19,7 @@ SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
 	_currentTime(0.0f),
 	_play(true),
 	_lockRootBoneTranslation(true), _rootBoneName(""), _rootNodeIndex(-1),
+	_scale(1.0f),
 	_animatedModel(nullptr),
 	_translationMatrices(MAX_BONES, glm::mat4(1.0f))
 {
