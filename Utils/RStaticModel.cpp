@@ -2,7 +2,7 @@
 
 
 RStaticModel::RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
-                           GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize)
+                           GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize, float aabbScaleFactor)
     : Resource(RT_MODEL, path)
 {
     _rootNode = rootNode;
@@ -13,6 +13,8 @@ RStaticModel::RStaticModel(const std::string& path, StaticModelNode* rootNode, c
     _collisionMeshSize = collisionMeshSize;
 
     _primitiveType = primitiveType;
+
+    _aabbScaleFactor = aabbScaleFactor;
 
 
     calculateAABB();
@@ -105,7 +107,7 @@ void RStaticModel::calculateAABB()
 
     findMinAndMaxVertices(_rootNode, glm::mat4(1.0f), min, max);
 
-    _aabb.setSize(min, max);
+    _aabb.setSize(_aabbScaleFactor * min, _aabbScaleFactor * max);
 }
 
 
