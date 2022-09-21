@@ -929,7 +929,7 @@ namespace vbEditor
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
 		RenderObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		roadRenderObject->setCastShadows(false);
 
 		setSelectedSceneObject(roadSceneObject);
 	}

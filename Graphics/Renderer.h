@@ -208,6 +208,8 @@ class Renderer
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
 		void clearRenderDatasForShadowMap();
 
+		const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject);
+
 
 		void rebuildStaticLightingInternal();
 

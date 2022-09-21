@@ -171,11 +171,15 @@ bool AnimatedModelLoader::loadMeshFromNode(const aiMesh* assimpMesh, StaticModel
 }
 
 
-RAnimatedModel* AnimatedModelLoader::loadAnimatedModelWithHierarchy(const std::string& fileName, const std::string& texturesPath)
+RAnimatedModel* AnimatedModelLoader::loadAnimatedModelWithHierarchy(const std::string& fileName, const std::string& texturesPath, const std::unordered_map<std::string, BoneInfo*>& boneInfosFromExistingModel/* = {}*/)
 {
     LOG_INFO("Load animated model: " + fileName);
 
     _texturesPath = texturesPath;
+    for (auto pair : boneInfosFromExistingModel)
+    {
+        _boneInfos[pair.first] = new BoneInfo(*pair.second);
+    }
 
     if (_assimpScene == nullptr)
     {

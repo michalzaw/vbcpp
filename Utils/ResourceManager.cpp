@@ -567,7 +567,7 @@ RStaticModel* ResourceManager::loadModel(std::string path, std::string texturePa
 }
 
 
-RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, const std::string& texturePath)
+RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, const std::string& texturePath, const std::unordered_map<std::string, BoneInfo*>& boneInfosFromExistingModel/* = {}*/)
 {
     Resource* res = findResource(path);
     if (res != 0)
@@ -584,7 +584,7 @@ RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, cons
 #endif // DEVELOPMENT_RESOURCES
 
     AnimatedModelLoader loader;
-    std::unique_ptr<RAnimatedModel> model(loader.loadAnimatedModelWithHierarchy(finalPath, texturePath));
+    std::unique_ptr<RAnimatedModel> model(loader.loadAnimatedModelWithHierarchy(finalPath, texturePath, boneInfosFromExistingModel));
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + model.get()->getPath());
 
     RAnimatedModel* m = dynamic_cast<RAnimatedModel*>(model.get());
@@ -601,20 +601,18 @@ RAnimatedModel* ResourceManager::loadAnimatedModel(const std::string& path, cons
 
 RAnimation* ResourceManager::loadAnimation(const std::string& path)
 {
-    std::string animationPath = GameDirectories::ANIMATIONS + path;
-
-    Resource* res = findResource(animationPath);
+    Resource* res = findResource(path);
     if (res != 0)
     {
         RAnimation* animation = dynamic_cast<RAnimation*>(res);
         return animation;
     }
 
-    std::string finalPath = animationPath;
+    std::string finalPath = path;
 
 #ifdef DEVELOPMENT_RESOURCES
-    if (!FilesHelper::isFileExists(animationPath))
-        finalPath = _alternativeResourcePath + animationPath;
+    if (!FilesHelper::isFileExists(path))
+        finalPath = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
     AnimationLoader loader;

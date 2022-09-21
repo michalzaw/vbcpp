@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
@@ -13,6 +14,8 @@
 class RAnimation;
 struct AnimationNodeData;
 class RAnimatedModel;
+class Bone;
+struct BoneInfo;
 
 
 const int MAX_BONES = 100;
@@ -26,6 +29,7 @@ class SkeletalAnimationComponent final : public Component
 		RAnimatedModel* _animatedModel;
 
 		std::vector<glm::mat4> _finalBoneMatrices;
+		bool _finalBoneMatricesIsCalculated;
 		float _currentTime;
 
 		int _startFrame;
@@ -34,10 +38,19 @@ class SkeletalAnimationComponent final : public Component
 
 		bool _play;
 
-		std::string _boneWithLockedTranslation;
-		int _boneWithLockedTranslationIndex;
+		bool _lockRootBoneTranslation;
+		std::string _rootBoneName;
+		int _rootNodeIndex;
+
+		float _scale;
+
+		std::vector<glm::mat4> _translationMatrices;
 
 		void onAttachedToScenObject() override;
+
+		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
+
+		glm::mat4 calculateBoneTranslation(Bone* bone, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
 
 		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
@@ -47,15 +60,21 @@ class SkeletalAnimationComponent final : public Component
 
 		void update(float deltaTime) override;
 
-		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
+		void recalculateAllBonesTransform();
+
 		inline RAnimation* getAnimation() { return _animation; }
+		void setAnimation(RAnimation* animation);
+
+		const std::vector<glm::mat4>& getFinalBoneMatrices();
 
 		inline const float getCurrentTime() { return _currentTime; }
 		inline const int getStartFrame() { return _startFrame; }
 		inline const int getEndFrame() { return _endFrame; }
 		inline const int getAnimationTicksPerSecond() { return _animationTicksPerSecond; }
 		inline const bool isPlay() { return _play; }
-		inline const std::string& getBoneWithLockedTranslation() { return _boneWithLockedTranslation; }
+		inline const bool isLockRootBoneTranslation() { return _lockRootBoneTranslation; }
+		inline const std::string& getRootBone() { return _rootBoneName; }
+		inline const float getScale() { return _scale; }
 
 		inline const float getAnimationDuration() { return _endFrame - _startFrame; }
 
@@ -64,7 +83,9 @@ class SkeletalAnimationComponent final : public Component
 		inline void setEndFrame(int endFrame) { _endFrame = endFrame; }
 		inline void setAnimationTicksPerSecond(int animationTicksPerSecond) { _animationTicksPerSecond = animationTicksPerSecond; }
 		inline void setPlay(bool play) { _play = play; }
-		void setBoneWithLockedTranslation(const std::string& boneName);
+		inline void setLockRootBoneTranslation(bool isLock) { _lockRootBoneTranslation = isLock; }
+		void setRootBone(const std::string& boneName);
+		inline void setScale(float scale) { _scale = scale; }
 
 };
 

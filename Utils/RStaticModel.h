@@ -302,14 +302,15 @@ class RStaticModel : public Resource
 
         GLenum          _primitiveType;
 
-        AABB _aabb;
+        float           _aabbScaleFactor;
+        AABB            _aabb;
 
         void findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parentTransform, glm::vec3& min, glm::vec3& max);
-        void calculateAABB();
+        virtual void calculateAABB();
 
     public:
         RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
-                     GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0);
+                     GLenum primitiveType = GL_TRIANGLES, glm::vec3* collisionMesh = NULL, unsigned int collisionMeshSize = 0, float aabbScaleFactor = 1.0f);
         RStaticModel()
             : Resource(RT_MODEL, "")
         {

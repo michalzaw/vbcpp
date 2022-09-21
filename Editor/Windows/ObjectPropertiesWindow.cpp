@@ -269,93 +269,6 @@ namespace vbEditor
 }
 
 
-void showRenderComponentDetails(RenderObject* renderComponent)
-{
-	if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
-		{
-			char id[50];
-			sprintf(id, "Lod %d", i);
-
-			ImGui::PushID(id);
-
-			ImGui::Text(id);
-
-			RStaticModel* model = renderComponent->getModel(i);
-
-			char buffer[1024] = { '\0' };
-			strncpy(buffer, model->getPath().c_str(), sizeof buffer);
-			buffer[sizeof buffer - 1] = '\0';
-
-			ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("..."))
-			{
-				/*std::vector<std::string> result = pfd::open_file("Choose texture...").result();
-
-				if (result.size() == 1)
-				{
-					LOG_INFO(result[0]);
-
-					std::string path = result[0];
-					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
-
-					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
-					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
-					{
-						FilesHelper::copyFile(path, newPath);
-					}
-					texture = ResourceManager::getInstance().loadTexture(newPath);
-
-					isMaterialModified = true;
-				}*/
-			}
-
-			ImGui::Text("Materials");
-
-			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
-
-			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
-			{
-				Material* material = renderComponent->getModel(i)->getMaterial(j);
-
-				if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
-				{
-					if (ImGui::IsMouseDoubleClicked(0))
-					{
-						LOG_INFO(material->name);
-						vbEditor::_showMaterialEditorWindow = true;
-						vbEditor::currentRenderObject = renderComponent;
-						vbEditor::currentStaticModel = renderComponent->getModel(i);
-						vbEditor::currentModelLod = i;
-						vbEditor::currentMaterialIndex = j;
-					}
-				}
-			}
-
-			ImGui::Separator();
-
-			ImGui::PopID();
-		}
-
-		bool isCastShadows = renderComponent->isCastShadows();
-		if (ImGui::Checkbox("Cast shadows", &isCastShadows))
-		{
-			renderComponent->setIsCastShadows(isCastShadows);
-		}
-
-		bool isDynamicObject = renderComponent->isDynamicObject();
-		if (ImGui::Checkbox("Dynamic object", &isDynamicObject))
-		{
-			renderComponent->setIsDynamicObject(isDynamicObject);
-		}
-	}
-}
-
-
 void shwoRoadProfileEdit(const std::string& roadProfileName, const std::function<void(const std::string&)>& onRoadProfileSelectedCallback)
 {
 	char buffer[1024] = { '\0' };
@@ -720,6 +633,28 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 }
 
 
+#define COMPONENT_RESOURCE_EDIT(component, propertyName, displayName, pathToResourceMapper)														\
+{																																				\
+	ImGui::PushID(#propertyName);																												\
+																																				\
+	ImGui::AlignTextToFramePadding();																											\
+	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
+	ImGui::NextColumn();																														\
+	ImGui::SetNextItemWidth(-1);																												\
+																																				\
+	IMGUI_INPUT_path(component->get##propertyName(), Path, additionalParams)																	\
+																																				\
+	if (result)																																	\
+	{																																			\
+		component->set##propertyName(pathToResourceMapper(value));																				\
+	}																																			\
+																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
 #define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
 #define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
@@ -742,6 +677,165 @@ bool newNode(const char* name, const char* descriptionFmt, ...)
 	ImGui::NextColumn();
 
 	return nodeOpen;
+}
+
+
+void showRenderComponentDetails(RenderObject* renderComponent)
+{
+	if (ImGui::CollapsingHeader("Render Component"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
+	{
+		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
+		{
+			char id[50];
+			sprintf(id, "Lod %d", i);
+
+			ImGui::PushID(id);
+
+			ImGui::Text(id);
+
+			RStaticModel* model = renderComponent->getModel(i);
+
+			char buffer[1024] = { '\0' };
+			strncpy(buffer, model->getPath().c_str(), sizeof buffer);
+			buffer[sizeof buffer - 1] = '\0';
+
+			ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("..."))
+			{
+				/*std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+
+				if (result.size() == 1)
+				{
+					LOG_INFO(result[0]);
+
+					std::string path = result[0];
+					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
+
+					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
+					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
+					{
+						FilesHelper::copyFile(path, newPath);
+					}
+					texture = ResourceManager::getInstance().loadTexture(newPath);
+
+					isMaterialModified = true;
+				}*/
+			}
+
+			ImGui::Text("Materials");
+
+			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+
+			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
+			{
+				Material* material = renderComponent->getModel(i)->getMaterial(j);
+
+				if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+				{
+					if (ImGui::IsMouseDoubleClicked(0))
+					{
+						LOG_INFO(material->name);
+						vbEditor::_showMaterialEditorWindow = true;
+						vbEditor::currentRenderObject = renderComponent;
+						vbEditor::currentStaticModel = renderComponent->getModel(i);
+						vbEditor::currentModelLod = i;
+						vbEditor::currentMaterialIndex = j;
+					}
+				}
+			}
+
+			ImGui::Separator();
+
+			ImGui::PopID();
+		}
+
+		bool isCastShadows = renderComponent->isCastShadows();
+		if (ImGui::Checkbox("Cast shadows", &isCastShadows))
+		{
+			renderComponent->setCastShadows(isCastShadows);
+		}
+
+		bool isDynamicObject = renderComponent->isDynamicObject();
+		if (ImGui::Checkbox("Dynamic object", &isDynamicObject))
+		{
+			renderComponent->setDynamicObject(isDynamicObject);
+		}
+	}
+
+
+	if (ImGui::CollapsingHeader("Render Component (WIP)", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+
+		ImGui::PushID("Models");
+		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
+		{
+			ImGui::PushID(i);
+			if (newNode("LOD", "%d", i))
+			{
+				COMPONENT_RESOURCE_EDIT(renderComponent, Model, "Model", [renderComponent](const std::string& path) { return ResourceManager::getInstance().loadModel(path, renderComponent->getSceneObject()->getObjectDefinition()->getPath()); })
+
+				if (newNode("Materials", ""))
+				{
+					static RTexture* whiteTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+					for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
+					{
+						Material* material = renderComponent->getModel(i)->getMaterial(j);
+
+						ImGui::PushID(material->name.c_str());
+						ImGui::AlignTextToFramePadding();
+						ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+						ImGui::NextColumn();
+						ImGui::SetNextItemWidth(-1);
+
+						RTexture* texture = material->diffuseTexture != nullptr
+							? material->diffuseTexture
+							: whiteTexture;
+
+						if (ImGui::ImageButton((ImTextureID)texture->getID(), ImVec2(48, 48)))
+						{
+							LOG_DEBUG(material->name);
+							vbEditor::_showMaterialEditorWindow = true;
+							vbEditor::currentRenderObject = renderComponent;
+							vbEditor::currentStaticModel = renderComponent->getModel(i);
+							vbEditor::currentModelLod = i;
+							vbEditor::currentMaterialIndex = j;
+						}
+
+						ImGui::SameLine();
+						ImGui::Text(material->name.c_str());
+
+						ImGui::NextColumn();
+
+						ImGui::PopID();
+					}
+
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+
+			ImGui::PopID(); // i
+		}
+		ImGui::PopID(); // Models
+
+		COMPONENT_PROPERTY_EDIT(renderComponent, CastShadows, bool, "Cast shadows")
+		COMPONENT_PROPERTY_EDIT(renderComponent, DynamicObject, bool, "Dynamic object")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
 }
 
 
@@ -784,12 +878,14 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::Columns(2);
 		ImGui::Separator();
 
-		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
+		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); })
 		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
 		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
-		COMPONENT_PROPERTY_EDIT(component, BoneWithLockedTranslation, str_combo, "Lock translation", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
 
 		ImGui::Columns(1);
 		ImGui::Separator();

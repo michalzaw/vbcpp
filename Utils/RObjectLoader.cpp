@@ -11,6 +11,8 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
+#include "../Game/Directories.h"
+
 #include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Scene/SceneManager.h"
@@ -178,16 +180,19 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 	object->getComponents()[componentIndex]["startFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "startFrame", "0");
 	object->getComponents()[componentIndex]["endFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "endFrame", "0");
 	object->getComponents()[componentIndex]["animationTicksPerSecond"] = XmlUtils::getAttributeStringOptional(componentElement, "animationTicksPerSecond", "0");
-	object->getComponents()[componentIndex]["boneWithLockedTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "boneWithLockedTranslation", "");
+	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
+	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
+	object->getComponents()[componentIndex]["scale"] = XmlUtils::getAttributeStringOptional(componentElement, "scale", "1");
 }
 
 
 // flag normalSmoothing only for non animated objects
-RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing)
+RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, RStaticModel* hightPollyModel/* = nullptr*/)
 {
 	if (isAnimated)
 	{
-		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath);
+		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath,
+																hightPollyModel != nullptr ? static_cast<RAnimatedModel*>(hightPollyModel)->getBoneInfos() : std::unordered_map<std::string, BoneInfo*>());
 	}
 	else
 	{
@@ -271,15 +276,15 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			model = loadModel(modelPath, objectDirPath, isAnimated, toBool(components[i]["normalsSmoothing"]));
 
 			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
-			renderObject->setIsDynamicObject(toBool(components[i]["dynamic"]));
-			renderObject->setIsCastShadows(toBool(components[i]["castShadows"]));
+			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
+			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
 
 			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
 			if (!lowPolyModeFile.empty())
 			{
 				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
 
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]));
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]), model);
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
@@ -402,12 +407,14 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			int startFrame = toInt(components[i]["startFrame"]);
 			int endFrame = toInt(components[i]["endFrame"]);
 			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
-			const std::string& boneWithLockedTranslation = components[i]["boneWithLockedTranslation"];
+			const std::string& rootBone = components[i]["rootBone"];
+			bool lockRootBoneTranslation = toBool(components[i]["lockRootBoneTranslation"]);
+			float scale = toFloat(components[i]["scale"]);
 
-			RAnimation* animation = ResourceManager::getInstance().loadAnimation(animationFile);
+			RAnimation* animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation);
 			sceneObject->addComponent(skeletalAnimation);
-			sceneObject->setScale(0.01);
+			sceneObject->setScale(scale);
 
 			if (startFrame != 0)
 			{
@@ -421,11 +428,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			{
 				skeletalAnimation->setAnimationTicksPerSecond(animationTicksPerSecond);
 			}
-			if (!boneWithLockedTranslation.empty())
+			if (!rootBone.empty())
 			{
-				skeletalAnimation->setBoneWithLockedTranslation(boneWithLockedTranslation);
+				skeletalAnimation->setRootBone(rootBone);
 			}
-			
+			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
+			skeletalAnimation->setScale(scale);
 		}
 	}
 
