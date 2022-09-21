@@ -29,6 +29,7 @@ class SkeletalAnimationComponent final : public Component
 		RAnimatedModel* _animatedModel;
 
 		std::vector<glm::mat4> _finalBoneMatrices;
+		bool _finalBoneMatricesIsCalculated;
 		float _currentTime;
 
 		int _startFrame;
@@ -64,7 +65,7 @@ class SkeletalAnimationComponent final : public Component
 		inline RAnimation* getAnimation() { return _animation; }
 		void setAnimation(RAnimation* animation);
 
-		inline const std::vector<glm::mat4>& getFinalBoneMatrices() { return _finalBoneMatrices; }
+		const std::vector<glm::mat4>& getFinalBoneMatrices();
 
 		inline const float getCurrentTime() { return _currentTime; }
 		inline const int getStartFrame() { return _startFrame; }

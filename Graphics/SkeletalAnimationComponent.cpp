@@ -15,7 +15,7 @@
 
 SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
 	: Component(CT_SKELETAL_ANIMATION),
-	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)),
+	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)), _finalBoneMatricesIsCalculated(false),
 	_currentTime(0.0f),
 	_play(true),
 	_lockRootBoneTranslation(true), _rootBoneName(""), _rootNodeIndex(-1),
@@ -141,14 +141,14 @@ void SkeletalAnimationComponent::update(float deltaTime)
 
 		_currentTime = fmod(_currentTime, animationDuration);
 
-		calculateBoneTransform(_animation->getRootNode());
+		_finalBoneMatricesIsCalculated = false;
 	}
 }
 
 
 void SkeletalAnimationComponent::recalculateAllBonesTransform()
 {
-	calculateBoneTransform(_animation->getRootNode());
+	_finalBoneMatricesIsCalculated = false;
 }
 
 
@@ -158,6 +158,19 @@ void SkeletalAnimationComponent::setAnimation(RAnimation* animation)
 	_startFrame = 0;
 	_endFrame = animation->getDuration();
 	_animationTicksPerSecond = animation->getTicksPerSecond();
+}
+
+
+const std::vector<glm::mat4>& SkeletalAnimationComponent::getFinalBoneMatrices()
+{
+	if (!_finalBoneMatricesIsCalculated)
+	{
+		calculateBoneTransform(_animation->getRootNode());
+
+		_finalBoneMatricesIsCalculated = true;
+	}
+
+	return _finalBoneMatrices;
 }
 
 
