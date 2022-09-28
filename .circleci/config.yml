@@ -12,7 +12,7 @@ jobs:
     # See: https://circleci.com/docs/using-windows
     executor:
       name: win/default
-      size: medium
+      size: large
       
     # Add steps to the job
     # See: https://circleci.com/docs/2.0/configuration-reference/#steps
@@ -63,8 +63,14 @@ jobs:
       - run:
           name: Show build artifacts
           command: |
-              cd build/Release
+              cd bin/Release
               Get-ChildItem
+      # See: https://circleci.com/docs/artifacts
+      - store_artifacts:
+          path: bin/Release/vbcpp.exe
+          destination: vbcpp
+      - store_artifacts:
+          path: bin/Release
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
