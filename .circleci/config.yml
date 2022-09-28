@@ -57,11 +57,13 @@ jobs:
               popd
       - run:
           name: Build project
-          command: msbuild VBCPP.sln /property:Configuration=Release
+          command: |
+              cd build
+              msbuild VBCPP.sln /property:Configuration=Release
       - run:
           name: Show build artifacts
           command: |
-              cd Release
+              cd build/Release
               Get-ChildItem
 
 # Invoke jobs via workflows
