@@ -32,10 +32,10 @@ jobs:
           name: Install CMake
           command: |
               choco install cmake -y
-              $env:Path+=";$Env:ProgramFiles\CMake\bin";
       - run:
           name: Generate VS Project files
           command: |
+              $env:Path+=";C:\Program Files\CMake\bin";
               New-Item -Path 'build' -ItemType Directory
               cmake -G"Visual Studio 16 2019" -B build
       - run:
