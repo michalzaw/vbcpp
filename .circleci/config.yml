@@ -21,6 +21,26 @@ jobs:
       - run:
           name: "Say hello"
           command: Write-Host 'Hello, Windows'
+      - run:
+          name: Show environment
+          command: Get-ChildItem -Recurse
+      - run:
+          name: Show environment details
+          command: Get-ChildItem
+      # See: https://discuss.circleci.com/t/windows-build-with-cmake/34652/2
+      - run:
+          name: Install CMake
+          command: choco install cmake -y
+      - run:
+          name: Generate VS Project files
+          command: \
+              New-Item -Path 'build' -ItemType Directory
+              cmake -G"Visual Studio 16 2019" -B build
+      - run:
+          name: Show generated VS Project files
+          command: \
+              cd  build
+              Get-ChildItem
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
