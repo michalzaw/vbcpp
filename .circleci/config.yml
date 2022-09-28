@@ -30,7 +30,9 @@ jobs:
       # See: https://discuss.circleci.com/t/windows-build-with-cmake/34652/2
       - run:
           name: Install CMake
-          command: choco install cmake -y
+          command: |
+              choco install cmake -y
+              $env:Path+=";$Env:ProgramFiles\CMake\bin";
       - run:
           name: Generate VS Project files
           command: |
