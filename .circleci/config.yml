@@ -32,6 +32,12 @@ jobs:
               cmake -version
               make -version
       - run:
+          name: Prepare environment
+          command: |
+              sudo apt-get update
+              sudo apt-get install libgl1-mesa-dev
+              sudo apt-get install xorg-dev libglu1-mesa-dev
+      - run:
           name: Run CMake
           command: |
               mkdir build
