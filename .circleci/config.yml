@@ -31,7 +31,6 @@ jobs:
           command: |
               cmake -version
               make -version
-              glxinfo | grep "OpenGL version"
       - run:
           name: Run CMake
           command: |
