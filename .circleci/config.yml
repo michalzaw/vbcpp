@@ -65,12 +65,35 @@ jobs:
           command: |
               cd bin/Release
               Get-ChildItem
+      - run:
+          name: Prepare final files
+          command: |
+              New-Item -Path 'vbcpp-bin' -ItemType Directory
+
+              Copy-Item bin\Buses -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Data -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Displays -Destination vbcpp-bin -Recurse
+              Copy-Item bin\fonts -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Maps -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Objects -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Parts -Destination vbcpp-bin -Recurse
+              Copy-Item bin\RoadProfiles -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Shaders -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Skybox -Destination vbcpp-bin -Recurse
+              Copy-Item bin\Release\*.dll -Destination vbcpp-bin
+              Copy-Item bin\Release\vbcpp.exe -Destination vbcpp-bin
+              Copy-Item bin\Release\editor.exe -Destination vbcpp-bin
+              Copy-Item bin\brdfLut.png -Destination vbcpp-bin
+              Copy-Item bin\doroff.bmp -Destination vbcpp-bin
+              Copy-Item bin\game.xml -Destination vbcpp-bin
+              Copy-Item bin\matryca16.csv -Destination vbcpp-bin
+
+              Compress-Archive -Path vbcpp-bin\* -Destination vbcpp.zip
+
       # See: https://circleci.com/docs/artifacts
       - store_artifacts:
-          path: bin/Release/vbcpp.exe
-          destination: vbcpp
-      - store_artifacts:
-          path: bin/Release
+          path: vbcpp.zip
+          destination: vbcpp.zip
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
