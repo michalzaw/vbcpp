@@ -22,15 +22,66 @@ jobs:
           command: echo 'Hello, Linux'
       - run:
           name: Show environment
-          command: ls
+          command: ls -l
       - run:
           name: Show environment details
-          command: ls -l
+          command: ls -lR
       - run:
           name: Show system info
           command: |
               cmake -version
               make -version
+              glxinfo | grep "OpenGL version"
+      - run:
+          name: Run CMake
+          command: |
+              mkdir build
+              cd build
+              cmake ..
+      - run:
+          name: Show generated project files
+          command: |
+              cd  build
+              ls -l
+      - run:
+          name: Build project
+          command: |
+              cd build
+              make
+      - run:
+          name: Show build artifacts
+          command: |
+              cd bin
+              ls -l
+      - run:
+          name: Prepare final files
+          command: |
+              mkdir vbcpp
+
+              cp -r bin/Buses vbcpp
+              cp -r bin/Buses vbcpp
+              cp -r bin/Data vbcpp
+              cp -r bin/Displays vbcpp
+              cp -r bin/fonts vbcpp
+              cp -r bin/Maps vbcpp
+              cp -r bin/Objects vbcpp
+              cp -r bin/Parts vbcpp
+              cp -r bin/RoadProfiles vbcpp
+              cp -r bin/Shaders vbcpp
+              cp -r bin/Skybox vbcpp
+              cp bin/vbcpp vbcpp
+              cp bin/editor vbcpp
+              cp bin/brdfLut.png vbcpp
+              cp bin/doroff.bmp vbcpp
+              cp bin/game.xml vbcpp
+              cp bin/matryca16.csv vbcpp
+
+              tar -zcvf vbcpp.tar.gz vbcpp
+
+      # See: https://circleci.com/docs/artifacts
+      - store_artifacts:
+          path: vbcpp.tar.gz
+          destination: vbcpp.tar.gz
 
   build-on-windows:
     # See: https://circleci.com/docs/using-windows
