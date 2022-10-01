@@ -64,9 +64,9 @@ class BusConstraint : public Bus
         void turnLeft(float dt);
         void turnRight(float dt);
         void centerSteringWheel(float dt);
-        void accelerate();
-        void idle();
-        void brakeOn();
+        void accelerate(float dt);
+        void idle(float dt);
+        void brakeOn(float dt);
         void brakeOff();
         void toggleHandbrake();
 

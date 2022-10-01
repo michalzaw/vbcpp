@@ -306,30 +306,30 @@ void BusRaycast::centerSteringWheel(float dt)
 }
 
 
-void BusRaycast::accelerate()
+void BusRaycast::accelerate(float dt)
 {
     _accelerate = true;
     _brake = false;
 
-    _engine->throttleUp();
+    _engine->throttleUp(dt);
 }
 
 
-void BusRaycast::idle()
+void BusRaycast::idle(float dt)
 {
     _accelerate = false;
     _brake = false;
 
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
-void BusRaycast::brakeOn()
+void BusRaycast::brakeOn(float dt)
 {
     _accelerate = false;
     _brake = true;
 
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
@@ -540,7 +540,7 @@ void BusRaycast::update(float deltaTime)
             if ( wheel->powered )
             {
                 //wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * 0.32f);;
-				wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * _engine->getDifferentialRatio() * 0.7f * 0.1f);; // * 0.1f because, the bus mass is 10 x smaller than than real mass
+				wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * _engine->getDifferentialRatio() * 0.95f * 0.1f);; // * 0.1f because, the bus mass is 10 x smaller than than real mass
             }
         }
     }

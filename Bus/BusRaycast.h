@@ -72,9 +72,9 @@ class BusRaycast : public Bus
         void turnLeft(float dt) override;
         void turnRight(float dt) override;
         void centerSteringWheel(float dt) override;
-        void accelerate() override;
-        void idle() override;
-        void brakeOn() override;
+        void accelerate(float dt) override;
+        void idle(float dt) override;
+        void brakeOn(float dt) override;
         void brakeOff() override;
         void toggleHandbrake() override;
         bool getHandbrakeState() override;

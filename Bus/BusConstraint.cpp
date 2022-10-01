@@ -739,21 +739,21 @@ void BusConstraint::centerSteringWheel(float dt)
 }
 
 
-void BusConstraint::accelerate()
+void BusConstraint::accelerate(float dt)
 {
     _accelerate = true;
     _brake = false;
 
-    _engine->throttleUp();
+    _engine->throttleUp(dt);
 }
 
 
-void BusConstraint::brakeOn()
+void BusConstraint::brakeOn(float dt)
 {
     _accelerate = false;
     _brake = true;
 
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
@@ -794,13 +794,13 @@ void BusConstraint::stopEngine()
 }
 
 
-void BusConstraint::idle()
+void BusConstraint::idle(float dt)
 {
     _accelerate = false;
     _brake = false;
 
     //_engine->setThrottle(0.0f);
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
