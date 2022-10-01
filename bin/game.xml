@@ -2,7 +2,7 @@
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
 <Game>
-	<Resolution x="1920" y="1080" />
+	<Resolution x="1280" y="768" />
 
 
 	<Map name="Demo" />
@@ -11,7 +11,7 @@
 	
 	<Configuration>
 		<Fullscreen>0</Fullscreen><!-- 0 - window, 1 - fullscreen, 2 - windowed fullscreen -->
-		<VerticalSync>false</VerticalSync>
+		<VerticalSync>true</VerticalSync>
 		
 		<HdrQuality>16</HdrQuality>
 		<MsaaAntialiasing>true</MsaaAntialiasing>
@@ -33,7 +33,7 @@
 		<AnisotropicFiltering>false</AnisotropicFiltering>
 		<AnisotropySamples>4</AnisotropySamples>
 		
-		<PbrSupport>true</PbrSupport>
+		<PbrSupport>false</PbrSupport>
 
 		<OpenGlDebugContext>false</OpenGlDebugContext>
 
