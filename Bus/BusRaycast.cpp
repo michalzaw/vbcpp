@@ -273,6 +273,7 @@ void BusRaycast::centerSteringWheel(float dt)
     if (_steerAngle > DEAD_ZONE)
     {
         _steerAngle -= dt * STEER_STEP;
+        _steerAngle = clamp(_steerAngle, 0.0f, _maxSteerAngle);
 
         if (_steeringWheelObject)
         {
@@ -282,6 +283,7 @@ void BusRaycast::centerSteringWheel(float dt)
     else if (_steerAngle < -DEAD_ZONE)
     {
         _steerAngle += dt * STEER_STEP;
+        _steerAngle = clamp(_steerAngle, -_maxSteerAngle, 0.0f);
 
         if (_steeringWheelObject)
         {

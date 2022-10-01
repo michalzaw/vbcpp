@@ -370,17 +370,17 @@ void MainGameScene::readInput(double deltaTime)
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 		{
-			_activeBus->accelerate();
+			_activeBus->accelerate(deltaTime);
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
 		{
-			_activeBus->idle();
+			_activeBus->idle(deltaTime);
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
 		{
-			_activeBus->brakeOn();
+			_activeBus->brakeOn(deltaTime);
 		}
 
 		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
