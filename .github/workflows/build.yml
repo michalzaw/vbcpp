@@ -1,0 +1,45 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build-on-windows:
+    # See: 
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Show environment
+      run: Get-ChildItem
+    
+    - name: Show environment details
+      run: Get-ChildItem -Recurse
+
+    - name: Configure CMake
+      run: |
+          New-Item -Path 'build' -ItemType Directory
+          cmake -G"Visual Studio 16 2019" -B build
+    
+    - name: Show generated VS Project files
+      run: |
+          cd  build
+          Get-ChildItem
+    
+    - name: Build project
+      run: |
+          cd build
+          msbuild VBCPP.sln /property:Configuration=Release
+    
+    - name: Show build artifact
+      run: |
+          cd bin/Release
+          Get-ChildItem
