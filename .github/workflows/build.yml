@@ -59,25 +59,25 @@ jobs:
           cd ..
           New-Item -Path 'vbcpp-bin' -ItemType Directory
           
-          Copy-Item bin\Buses -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Data -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Displays -Destination vbcpp-bin -Recurse
-          Copy-Item bin\fonts -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Maps -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Objects -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Parts -Destination vbcpp-bin -Recurse
-          Copy-Item bin\RoadProfiles -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Shaders -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Skybox -Destination vbcpp-bin -Recurse
-          Copy-Item bin\Release\*.dll -Destination vbcpp-bin
-          Copy-Item bin\Release\vbcpp.exe -Destination vbcpp-bin
-          Copy-Item bin\Release\editor.exe -Destination vbcpp-bin
-          Copy-Item bin\brdfLut.png -Destination vbcpp-bin
-          Copy-Item bin\doroff.bmp -Destination vbcpp-bin
-          Copy-Item bin\game.xml -Destination vbcpp-bin
-          Copy-Item bin\matryca16.csv -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\Buses -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Data -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Displays -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\fonts -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Maps -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Objects -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Parts -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\RoadProfiles -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Shaders -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Skybox -Destination vbcpp-bin -Recurse
+          Copy-Item vbcpp\bin\Release\*.dll -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\Release\vbcpp.exe -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\Release\editor.exe -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\brdfLut.png -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\doroff.bmp -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\game.xml -Destination vbcpp-bin
+          Copy-Item vbcpp\bin\matryca16.csv -Destination vbcpp-bin
 
-          Compress-Archive -Path vbcpp-bin\* -Destination ..\vbcpp.zip
+          Compress-Archive -Path vbcpp-bin\* -Destination vbcpp.zip
           
     - name: Show prepared files
       run: |
