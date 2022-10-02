@@ -19,7 +19,10 @@ jobs:
     - uses: actions/checkout@v3
     
     - name: Show environment
-      run: Get-ChildItem
+      run: |
+          Get-ChildItem
+          cd ..
+          Get-ChildItem
     
     - name: Show environment details
       run: Get-ChildItem -Recurse
@@ -33,6 +36,17 @@ jobs:
       run: |
           cd  build
           Get-ChildItem
+    
+    - name: Prepare VS Build Tools
+      run: |
+          pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build"
+          cmd /c "vcvars64.bat&set" |
+          foreach {
+            if ($_ -match "=") {
+              $v = $_.split("="); set-item -force -path "ENV:\$($v[0])"  -value "$($v[1])"
+            }
+          }
+          popd
     
     - name: Build project
       run: |
