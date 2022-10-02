@@ -37,7 +37,7 @@ jobs:
           cd  build
           Get-ChildItem
     
-    - name: Prepare VS Build Tools
+    - name: Build project
       run: |
           pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build"
           cmd /c "vcvars64.bat&set" |
@@ -47,9 +47,6 @@ jobs:
             }
           }
           popd
-    
-    - name: Build project
-      run: |
           cd build
           msbuild VBCPP.sln /property:Configuration=Release
     
