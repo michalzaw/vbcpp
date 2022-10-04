@@ -1,4 +1,4 @@
-name: CMake
+name: Build
 
 on:
   push:
@@ -88,5 +88,5 @@ jobs:
     - name: Archive production artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: vbcpp.zip
+        name: vbcpp
         path: vbcpp-bin\*
