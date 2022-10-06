@@ -1,0 +1,96 @@
+name: Build
+
+on:
+  push:
+    branches: [ "master", "develop" ]
+  pull_request:
+    branches: [ "master", "develop", "feature/**" ]
+  # See: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
+  workflow_dispatch:
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build-on-windows:
+    # See: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    
+    - name: Show environment
+      run: |
+          Get-ChildItem
+          cd ..
+          Get-ChildItem
+    
+    - name: Show environment details
+      run: Get-ChildItem -Recurse
+
+    - name: Configure CMake
+      run: |
+          New-Item -Path 'build' -ItemType Directory
+          cmake -G"Visual Studio 16 2019" -B build
+    
+    - name: Show generated VS Project files
+      run: |
+          cd  build
+          Get-ChildItem
+    
+    - name: Build project
+      run: |
+          pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build"
+          cmd /c "vcvars64.bat&set" |
+          foreach {
+            if ($_ -match "=") {
+              $v = $_.split("="); set-item -force -path "ENV:\$($v[0])"  -value "$($v[1])"
+            }
+          }
+          popd
+          cd build
+          msbuild VBCPP.sln /property:Configuration=Release
+    
+    - name: Show build artifact
+      run: |
+          cd bin/Release
+          Get-ChildItem
+    - name: Prepare final files
+      run: |
+          New-Item -Path 'vbcpp-bin' -ItemType Directory
+          
+          Copy-Item bin\Buses -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Data -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Displays -Destination vbcpp-bin -Recurse
+          Copy-Item bin\fonts -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Maps -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Objects -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Parts -Destination vbcpp-bin -Recurse
+          Copy-Item bin\RoadProfiles -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Shaders -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Skybox -Destination vbcpp-bin -Recurse
+          Copy-Item bin\Release\*.dll -Destination vbcpp-bin
+          Copy-Item bin\Release\vbcpp.exe -Destination vbcpp-bin
+          Copy-Item bin\Release\editor.exe -Destination vbcpp-bin
+          Copy-Item bin\brdfLut.png -Destination vbcpp-bin
+          Copy-Item bin\doroff.bmp -Destination vbcpp-bin
+          Copy-Item bin\game.xml -Destination vbcpp-bin
+          Copy-Item bin\matryca16.csv -Destination vbcpp-bin
+
+          Compress-Archive -Path vbcpp-bin\* -Destination vbcpp.zip
+          
+    - name: Show prepared files
+      run: |
+          Get-ChildItem
+          cd vbcpp-bin
+          Get-ChildItem
+    
+    # See: https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: vbcpp
+        path: vbcpp-bin\*
