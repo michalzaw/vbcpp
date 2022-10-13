@@ -180,4 +180,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: vbcpp2
-        path: vbcpp-bin\*
+        path: vbcpp-bin/*
