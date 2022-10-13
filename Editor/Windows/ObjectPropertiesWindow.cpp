@@ -656,7 +656,7 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 
 
 #define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
-#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
+#define COMPONENT_PROPERTY_EDIT_2(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
@@ -884,7 +884,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
-		COMPONENT_PROPERTY_EDIT(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT_2(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
 		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
 
 		ImGui::Columns(1);
