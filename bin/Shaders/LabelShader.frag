@@ -12,5 +12,5 @@ uniform sampler2D Texture;
 void main()
 {
 	vec4 c = texture2D(Texture, TexCoord);
-	FragmentColor = vec4(c.r, c.r, c.r, c.r) * color;
+	FragmentColor = vec4(1.0, 1.0, 1.0, c.r) * color;
 }

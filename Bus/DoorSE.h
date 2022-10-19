@@ -17,8 +17,6 @@ class DoorSE : public Door
 
 		void removeObjectsAndConstraint(SceneManager* sceneManager) override;
 
-		void open() override;
-		void close() override;
 		void setLoose() override;
 
     protected:
@@ -30,6 +28,9 @@ class DoorSE : public Door
 		ConstraintHinge*		_constraintArm2ToDoor;
 
 		RotationDir             _rotationDir;
+
+		void openImpl() override;
+		void closeImpl() override;
 
 };
 

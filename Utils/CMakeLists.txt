@@ -6,6 +6,9 @@ set (UTILS_SOURCES
 	Utils/Gearbox.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp
+	Utils/LocalizationSystem.cpp
+	Utils/Logger.cpp
+	Utils/PolygonGenerator.cpp
 	Utils/RaycastingUtils.cpp
 	Utils/RFont.cpp
 	Utils/RModel.cpp
@@ -15,6 +18,7 @@ set (UTILS_SOURCES
 	Utils/RTexture.cpp
 	Utils/RTexture2D.cpp
 	Utils/RTextureCubeMap.cpp
+	Utils/ResourceDescriptionUtils.cpp
 	Utils/ResourceManager.cpp
 	Utils/SoundLoader.cpp
 	Utils/stb_image.cpp
@@ -31,8 +35,10 @@ set (UTILS_HEADERS
 	Utils/Gearbox.h
 	Utils/Helpers.hpp
 	Utils/InputSystem.h
+	Utils/LocalizationSystem.h
 	Utils/Logger.h
 	Utils/Math.h
+	Utils/PolygonGenerator.h
 	Utils/RaycastingUtils.h
 	Utils/RFont.h
 	Utils/RModel.h
@@ -45,6 +51,8 @@ set (UTILS_HEADERS
 	Utils/RTextureCubeMap.h
 	Utils/RefCounter.h
 	Utils/Resource.h
+	Utils/ResourceDescription.h
+	Utils/ResourceDescriptionUtils.h
 	Utils/ResourceManager.h
 	Utils/SoundLoader.h
 	Utils/Strings.h

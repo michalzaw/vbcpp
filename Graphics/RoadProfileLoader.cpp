@@ -17,21 +17,21 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	XMLError result = doc.LoadFile(fullPath.c_str());
 	if (result != XML_SUCCESS)
 	{
-		Logger::error("Cannot read xml file: " + fullPath + "! Result: " + toString(result));
+		LOG_ERROR("Cannot read xml file: " + fullPath + "! Result: " + Strings::toString((int)result));
 	}
 
 	// Search for main element - Profile
 	XMLElement* profileElement = doc.FirstChildElement("Profile");
 	if (profileElement == nullptr)
 	{
-		Logger::error("Profile element not found!");
+		LOG_ERROR("Profile element not found!");
 		return nullptr;
 	}
 
 	XMLElement* profileDesc = profileElement->FirstChildElement("Description");
 	if (profileDesc == nullptr)
 	{
-		Logger::error("Description element not found!");
+		LOG_ERROR("Description element not found!");
 		return nullptr;
 	}
 
@@ -40,23 +40,36 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	std::string profName(profileDesc->Attribute("name"));
 	std::string comment(profileDesc->Attribute("comment"));
 
-	Logger::info("*** PROFILE DATA ***");
-	Logger::info("Author: " + author);
-	Logger::info("Name: " + profName);
-	Logger::info("Comment: " + comment);
-
-
-	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment);
+	LOG_INFO("*** PROFILE DATA ***");
+	LOG_INFO("Author: " + author);
+	LOG_INFO("Name: " + profName);
+	LOG_INFO("Comment: " + comment);
 
 
 	MaterialLoader matLoader;
 	matLoader.openFile(materialFullPath.c_str());
 
+
+	XMLElement* intersectionDataElement = profileElement->FirstChildElement("IntersectionData");
+
+	Material* intersectionMaterial = nullptr;
+	float intersectionRoadY = 0.0f;
+	if (intersectionDataElement != nullptr)
+	{
+		intersectionMaterial = matLoader.loadMaterial(intersectionDataElement->Attribute("material"), dirPath);
+		intersectionRoadY = toFloat(intersectionDataElement->Attribute("y"));
+	}
+
+
+	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment, intersectionMaterial, intersectionRoadY);
+
+
 	XMLElement* lanesElement = profileElement->FirstChildElement("Lanes");
 
 	if (lanesElement == nullptr)
 	{
-		Logger::error("Lanes element not found");
+		LOG_ERROR("Lanes element not found");
+		delete roadProfile;
 		return nullptr;
 	}
 	else
@@ -74,6 +87,23 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 			roadProfile->getRoadLanes().push_back(lane);
 
 			laneElement = laneElement->NextSiblingElement("Lane");
+		}
+	}
+
+
+	XMLElement* edgesElement = profileElement->FirstChildElement("Edges");
+
+	if (edgesElement != nullptr)
+	{
+		XMLElement* edgeElement = edgesElement->FirstChildElement("Edge");
+		while (edgeElement != nullptr)
+		{
+			float x = toFloat(edgeElement->Attribute("x"));
+			float y = toFloat(edgeElement->Attribute("y"));
+
+			roadProfile->getEdges().push_back(glm::vec2(x, y));
+
+			edgeElement = edgeElement->NextSiblingElement("Edge");
 		}
 	}
 

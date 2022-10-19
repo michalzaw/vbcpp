@@ -1,6 +1,7 @@
 #include "GameConfig.h"
 
 #include "../Utils/Strings.h"
+#include "../Utils/XmlUtils.h"
 
 
 void GameConfig::loadGameConfig(const char* filename)
@@ -31,6 +32,8 @@ void GameConfig::loadGameConfig(const char* filename)
         if (strcmp(ename,"Bus") == 0)
         {
             busModel = std::string(child->Attribute("model"));
+            busRepaint = XmlUtils::getAttributeStringOptional(child, "repaint");
+            busConfiguration = XmlUtils::getAttributeStringOptional(child, "configuration");
         }
         else
         if (strcmp(ename,"Configuration") == 0)
@@ -41,7 +44,7 @@ void GameConfig::loadGameConfig(const char* filename)
 
                 if (strcmp(ename,"Fullscreen") == 0)
                 {
-                    isFullscreen = toBool(configElement->GetText());
+                    fullscreenMode = toInt(configElement->GetText());
                 }
 				if (strcmp(ename, "VerticalSync") == 0)
 				{
@@ -107,6 +110,30 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					pbrSupport = toBool(configElement->GetText());
 				}
+                else if (strcmp(ename, "OpenGlDebugContext") == 0)
+                {
+                    openGlDebugContext = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename, "LoggerLevel") == 0)
+                {
+                    loggerLevel = std::string(configElement->GetText());
+                }
+                else if (strcmp(ename, "LoggerConsoleOutput") == 0)
+                {
+                    loggerConsoleOutput = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename, "LoggerFileOutput") == 0)
+                {
+                    const char* text = configElement->GetText();
+                    if (text != nullptr)
+                    {
+                        loggerFileOutput = std::string(text);
+                    }
+                }
+                else if (strcmp(ename, "Language") == 0)
+                {
+                    language = std::string(configElement->GetText());
+                }
             }
         }
     }
@@ -132,6 +159,14 @@ void GameConfig::loadDevelopmentConfig(const char* filename)
 		{
 			developmentMode = toBool(child->GetText());
 		}
+        else if (strcmp(ename, "firstScene") == 0)
+        {
+            firstScene = std::string(child->GetText());
+        }
+        else if (strcmp(ename, "useLoadingScreen") == 0)
+        {
+            useLoadingScreen = toBool(child->GetText());
+        }
 	}
 }
 

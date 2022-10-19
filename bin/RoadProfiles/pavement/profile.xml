@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Profile>
+	<Description author="mich" name="pavement" comment="Test profile" />
+
+	<Lanes>
+		<Lane material="kostka2" x1="-1" x2="-1" y1="0.05" y2="0.15" />
+		<Lane material="kostka" x1="-1" x2="1" y1="0.15" y2="0.15" />
+		<Lane material="kostka2" x1="1" x2="1" y1="0.15" y2="0.05" />
+	</Lanes>
+	
+	<Edges>
+		<Edge x="-1" y="0.05" />
+		<Edge x="1" y="0.05" />
+	</Edges>
+	
+</Profile>

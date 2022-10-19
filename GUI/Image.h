@@ -52,6 +52,7 @@ class Image : public GUIObject
         UintRect& getTextureRect();
 
         glm::vec2 getSize();
+        glm::vec2 getRealSize();
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
         virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0);

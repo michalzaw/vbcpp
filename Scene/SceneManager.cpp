@@ -11,15 +11,17 @@ using namespace tinyxml2;
 #include "../Graphics/LoadTerrainModel.h"
 
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
 
-SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _physicsManager(pMgr), _soundManager(sndMgr)
+SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
+    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Create SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
     _soundManager->grab();
+
+    _gameLogicSystem = new GameLogicSystem;
+    _busStopSystem = new BusStopSystem;
 
     _busStart.position = glm::vec3(0,3,0);
     _busStart.rotation = glm::vec3(0,0,0);
@@ -33,9 +35,7 @@ SceneManager::SceneManager(PhysicsManager* pMgr, SoundManager* sndMgr)
 
 SceneManager::~SceneManager()
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Destroy SceneManager\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Destroy SceneManager");
 
 
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
@@ -45,6 +45,10 @@ SceneManager::~SceneManager()
 
     _physicsManager->drop();
     _soundManager->drop();
+    delete _graphicsManager;
+
+    delete _gameLogicSystem;
+    delete _busStopSystem;
 
     //delete _graphicsManager;
     //delete _physicsManager;
@@ -73,8 +77,41 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
             {
                 for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
-                    removeSceneObject(*j);
+                    removeChildSceneObject(*j);
                 }
+            }
+            else
+            {
+                object->removeAllChildren();
+            }
+
+            object->removeParent();
+            delete object;
+
+            return;
+        }
+    }
+}
+
+
+void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren)
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _sceneObjects.erase(i);
+
+            if (removeChildren)
+            {
+                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                {
+                    removeChildSceneObject(*j);
+                }
+            }
+            else
+            {
+                object->removeAllChildren();
             }
 
             delete object;
@@ -98,7 +135,7 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
             {
                 for (std::list<SceneObject*>::iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
                 {
-                    removeSceneObject(*j);
+                    removeChildSceneObject(*j);
                 }
             }
 

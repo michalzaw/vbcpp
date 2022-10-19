@@ -23,19 +23,15 @@ void DoorSimple::removeObjectsAndConstraint(SceneManager* sceneManager)
 }
 
 
-void DoorSimple::open()
+void DoorSimple::openImpl()
 {
 	_hingeConstraint->getBulletConstraint()->enableAngularMotor(true, -2.1f, 0.15f);
-
-	Door::open();
 }
 
 
-void DoorSimple::close()
+void DoorSimple::closeImpl()
 {
 	_hingeConstraint->getBulletConstraint()->enableAngularMotor(true, 2.1f, 0.15f);
-
-	Door::close();
 }
 
 

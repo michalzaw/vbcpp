@@ -2,52 +2,27 @@
 
 #include "../Graphics/Renderer.h"
 
-#include "../ImGui/imgui.h"
-#include "../ImGui/imgui_impl_glfw.h"
-#include "../ImGui/imgui_impl_opengl3.h"
-#include "../ImGui/imGizmo.h"
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_opengl3.h>
+#include <ImGuizmo.h>
 
 #include "glm/gtc/type_ptr.hpp"
 
-ImGuiInterface::ImGuiInterface(Window* window, SceneManager* sceneManager, std::vector<Bus*>* buses)
-	: _window(window), _sceneManager(sceneManager), _buses(buses),
-    _styleDark(true), _isOpen(false)
+ImGuiInterface::ImGuiInterface(SceneManager* sceneManager)
+	: _sceneManager(sceneManager),
+    _isOpen(false)
 {
-    initializeImGui();
-
-	_busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, _buses);
-	_colorsWindow = new ColorsWindow(_sceneManager, _buses);
-	_physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, _buses, false);
+    
 }
 
 
 ImGuiInterface::~ImGuiInterface()
 {
-	delete _busLineAndDirectionWindow;
-	delete _colorsWindow;
-	delete _physicsDebuggerWindow;
-
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplGlfw_Shutdown();
-    ImGui::DestroyContext();
-}
-
-
-void ImGuiInterface::initializeImGui()
-{
-    ImGui::CreateContext();
-
-    if (_styleDark)
-        ImGui::StyleColorsDark();
-    else
-        ImGui::StyleColorsLight();
-
-    ImGui_ImplGlfw_InitForOpenGL(_window->getWindow(), true);
-    ImGui_ImplOpenGL3_Init("#version 130");
-
-    ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontFromFileTTF("fonts/arial.ttf", 13.0f);
-    io.Fonts->AddFontDefault();
+    for (int i = 0; i < _windows.size(); ++i)
+    {
+        delete _windows[i];
+    }
 }
 
 
@@ -69,6 +44,12 @@ bool ImGuiInterface::isOpen()
 }
 
 
+void ImGuiInterface::addWindow(ImGuiWindow* window)
+{
+    _windows.push_back(window);
+}
+
+
 void ImGuiInterface::draw()
 {
 	if (_isOpen)
@@ -77,14 +58,10 @@ void ImGuiInterface::draw()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-		drawMainMenu();
-
-		_busLineAndDirectionWindow->draw();
-		if (GameConfig::getInstance().developmentMode)
-		{
-			_colorsWindow->draw();
-			_physicsDebuggerWindow->draw();
-		}
+        for (ImGuiWindow* window : _windows)
+        {
+            window->draw();
+        }
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -92,17 +69,13 @@ void ImGuiInterface::draw()
 }
 
 
-void ImGuiInterface::drawMainMenu()
+void ImGuiInterface::drawOnlyWindows()
 {
-    if( ImGui::BeginMainMenuBar() )
-    {
-        if (ImGui::BeginMenu("Windows"))
-        {
-            ImGui::MenuItem("Bus line and direction", NULL, _busLineAndDirectionWindow->getOpenFlagPointer());
-            ImGui::MenuItem("Colors", NULL, _colorsWindow->getOpenFlagPointer());
-			ImGui::MenuItem("Physics debugger", NULL, _physicsDebuggerWindow->getOpenFlagPointer());
-            ImGui::EndMenu();
-        }
-        ImGui::EndMainMenuBar();
-    }
+	if (_isOpen)
+	{
+		for (ImGuiWindow* window : _windows)
+		{
+			window->draw();
+		}
+	}
 }

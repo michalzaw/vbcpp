@@ -1,36 +1,93 @@
-#ifndef LOGGER_H_INCLUDED
-#define LOGGER_H_INCLUDED
+#ifndef LOGGER2_H_INCLUDED
+#define LOGGER2_H_INCLUDED
 
 
-class Logger
+#include <string>
+#include <fstream>
+#include <functional>
+
+#include "Strings.h"
+
+
+#define VB_ENABLE_LOGGER
+
+
+enum LogLevel
+{
+    LL_DEBUG,
+    LL_INFO,
+    LL_WARNING,
+    LL_ERROR,
+    LL_DISABLED,
+
+    LOG_LEVELS_COUNT
+};
+
+LogLevel getLogLevelFromString(const std::string& name);
+
+
+class Logger final
 {
     private:
-        static constexpr char* LEVEL_INFO = "[INFO]: ";
-        static constexpr char* LEVEL_WARNING = "[WARNING]: ";
-        static constexpr char* LEVEL_ERROR = "[ERROR]: ";
+        static LogLevel _logLevel;
+        static bool _consoleOutput;
+        static bool _fileOutput;
 
-        static void logMessage(const std::string& level, const std::string& message)
+        static std::ofstream* _logFile;
+
+        static std::vector<std::function<void(LogLevel, const std::string&)>> _customAppenders;
+
+        static inline tm* getTime()
         {
-            printf((level + message + "\n").c_str());
+            const time_t now = time(0);
+            return localtime(&now);
         }
 
     public:
-        static void info(const std::string& message)
-        {
-            logMessage(LEVEL_INFO, message);
-        }
+        static void init(LogLevel logLevel, bool consoleOutput, bool fileOutput, const std::string& logFileName = "");
+        static void destroy();
 
-        static void warning(const std::string& message)
-        {
-            logMessage(LEVEL_WARNING, message);
-        }
+        static void setLogLevel(LogLevel newLogLevel);
+        static LogLevel getLogLevel();
 
-        static void error(const std::string& message)
-        {
-            logMessage(LEVEL_ERROR, message);
-        }
+        static void addCustomAppender(const std::function<void(LogLevel, const std::string&)>& appender);
+
+        static void logMessage(LogLevel level, const char* fileName, unsigned int line, const std::string& message);
 
 };
 
+#ifdef VB_ENABLE_LOGGER
+#define LOG_DEBUG(message) Logger::logMessage(LL_DEBUG, __FILE__, __LINE__, message)
+#define LOG_INFO(message) Logger::logMessage(LL_INFO, __FILE__, __LINE__, message)
+#define LOG_WARNING(message) Logger::logMessage(LL_WARNING, __FILE__, __LINE__, message)
+#define LOG_ERROR(message) Logger::logMessage(LL_ERROR, __FILE__, __LINE__, message)
+#else
+#define LOG_DEBUG(message)
+#define LOG_INFO(message)
+#define LOG_WARNING(message)
+#define LOG_ERROR(message)
+#endif
 
-#endif // LOGGER_H_INCLUDED
+
+namespace LoggerUtils
+{
+    template <typename TYPE>
+    inline std::string variableToString(const std::string& variableName, const TYPE& variableValue)
+    {
+        return variableName + "=" + Strings::toString(variableValue);
+    }
+
+    inline std::string variableToString(const std::string& variableName, const std::string& variableValue)
+    {
+        return variableName + "=" + variableValue;
+    }
+}
+
+#ifdef VB_ENABLE_LOGGER
+#define LOG_VARIABLE(variable) LoggerUtils::variableToString(#variable, variable)
+#else
+#define LOG_VARIABLE(variable) variable
+#endif
+
+
+#endif // LOGGER2_H_INCLUDED

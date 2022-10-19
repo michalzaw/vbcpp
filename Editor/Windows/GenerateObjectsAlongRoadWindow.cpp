@@ -17,12 +17,25 @@ class SceneManager;
 namespace vbEditor
 {
 	extern SceneManager* _sceneManager;
+	extern OpenDialogWindow* _addSceneObjectDialogWindow;
 
 	int _objectsNamesCurrentItem;
 
-	bool _showAddObjectWindow;
-
 	ObjectsGenerator::ObjectsAlongRoadGeneratorData _generatorData;
+
+	void showObjectsCollectionName()
+	{
+		char buffer[50];
+
+		strncpy(buffer, _generatorData.objectsCollectionName.c_str(), sizeof buffer);
+
+		buffer[sizeof buffer - 1] = '\0';
+
+		if (ImGui::InputText("Generated objects collection name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			_generatorData.objectsCollectionName = buffer;
+		}
+	}
 
 	void showObjectsList()
 	{
@@ -38,7 +51,12 @@ namespace vbEditor
 
 		if (ImGui::Button("Add object"))
 		{
-			_showAddObjectWindow = true;
+			*(_addSceneObjectDialogWindow->getOpenFlagPointer()) = true;
+			_addSceneObjectDialogWindow->setOnOkClickCallback([](const std::string& selectedObjectName)
+				{
+					_generatorData.objectsNames.push_back(selectedObjectName);
+
+				});
 		}
 
 		ImGui::SameLine();
@@ -66,25 +84,16 @@ namespace vbEditor
 		ImGui::DragFloat3("Range of random rotation offset", glm::value_ptr(_generatorData.rotationOffset), 0.1f, 0.0f, 360.0f);
 	}
 
-	bool showAddObjectWindow(const std::vector<std::string>& availableObjects)
-	{
-		static int currentItem = 0;
-		if (openMapDialog("Add Object...", "Add", availableObjects, currentItem))
-		{
-			_generatorData.objectsNames.push_back(availableObjects[currentItem]);
-
-			return false;
-		}
-
-		return true;
-	}
-
-	bool generateObjectsAlongRoadWindow(const std::vector<std::string>& availableObjects, RoadObject* roadComponent)
+	bool generateObjectsAlongRoadWindow(RoadObject* roadComponent)
 	{
 		bool isOpen = true;
 
 		if (ImGui::Begin("Generate objects along the road...", &isOpen))
 		{
+			showObjectsCollectionName();
+
+			ImGui::Separator();
+
 			showObjectsList();
 
 			ImGui::Separator();
@@ -101,11 +110,6 @@ namespace vbEditor
 			}
 		}
 		ImGui::End();
-
-		if (_showAddObjectWindow)
-		{
-			_showAddObjectWindow = showAddObjectWindow(availableObjects);
-		}
 
 		return isOpen;
 	}

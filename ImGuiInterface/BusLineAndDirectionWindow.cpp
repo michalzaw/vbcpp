@@ -1,8 +1,11 @@
 #include "BusLineAndDirectionWindow.h"
 
+#include "../Game/GameLogicSystem.h"
+
 
 BusLineAndDirectionWindow::BusLineAndDirectionWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-	: ImGuiWindow(sceneManager, buses, isOpen)
+	: ImGuiWindow(sceneManager, isOpen),
+	_buses(buses)
 {
 
 }

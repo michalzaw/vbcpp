@@ -8,6 +8,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../Utils/ResourceDescriptionUtils.h"
+
 
 namespace tinyxml2
 {
@@ -19,18 +21,7 @@ struct RoadLane;
 class RObject;
 class SceneObject;
 struct CrossroadComponent;
-
-
-struct SceneDescription
-{
-	std::string author;
-
-	SceneDescription() {}
-	SceneDescription(const std::string& author)
-	{
-		this->author = author;
-	}
-};
+class RoadObject;
 
 
 class SceneLoader
@@ -45,27 +36,29 @@ class SceneLoader
 
 		std::string _dirPath;
 
-		SceneDescription _sceneDescription;
+		ResourceDescription _sceneDescription;
 
 		void loadStartPosition(tinyxml2::XMLElement* );
 		bool loadTerrain(tinyxml2::XMLElement* );
 		void loadGrass(tinyxml2::XMLElement* );
 		void loadSunLight(tinyxml2::XMLElement* );
 		void loadSky(tinyxml2::XMLElement* );
-		void loadObjects(tinyxml2::XMLElement* );
-		void loadObject(tinyxml2::XMLElement* );
+		void loadObjects(tinyxml2::XMLElement* , SceneObject* parent = nullptr);
+		void loadObject(tinyxml2::XMLElement* , SceneObject* parent = nullptr);
 		void loadRoads(tinyxml2::XMLElement* );
 		void loadRoad(tinyxml2::XMLElement*);
 		void loadRoadV2(tinyxml2::XMLElement*);
+		void loadRoadIntersection(tinyxml2::XMLElement*);
 
-		CrossroadComponent* findCrossRoadComponentBySceneObjectName(std::string& name);
+		CrossroadComponent* findCrossRoadComponentBySceneObjectName(const std::string& name);
+		RoadObject* findRoadObjectBySceneObjectName(const std::string& name);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);
 
 		void loadMap(std::string name);
 
-		SceneDescription& getLoadedSceneDescription();
+		ResourceDescription& getLoadedSceneDescription();
 
 };
 

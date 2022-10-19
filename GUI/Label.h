@@ -15,12 +15,19 @@ class Label : public GUIObject
         RFont* _font;
 
         std::string _text;
-        unsigned int _textSize;
+        std::vector<unsigned int> _unicodeText;
+
+        unsigned int _width;
+        unsigned int _height;
+
+        unsigned int _maxWidth;
+        unsigned int _maxHeight;
 
         std::vector<glm::vec3>  _charsOffsets;
         std::vector<glm::mat4>  _charsTransforms;
         std::vector<bool>       _charsTransformsIs;
 
+        void decodeTextToUnicode();
         bool buildTextData();
         void clearTextData();
 
@@ -40,9 +47,15 @@ class Label : public GUIObject
 
         void setFont(RFont* font);
         void setText(std::string text);
+        void setMaxWidth(unsigned int maxWidth);
+        void setMaxHeight(unsigned int maxHeight);
 
         RFont* getFont();
         std::string getText();
+        unsigned int getWidth();
+        unsigned int getHeight();
+        unsigned int getMaxWidth();
+        unsigned int getMaxHeight();
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
 

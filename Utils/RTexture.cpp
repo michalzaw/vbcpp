@@ -25,7 +25,7 @@ RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFor
 
 RTexture::~RTexture()
 {
-    std::cout << "RTexture - Destruktor: " << _path << std::endl;
+    LOG_INFO("RTexture - Destruktor: " + _path);
     glDeleteTextures(1, &_texID);
 }
 

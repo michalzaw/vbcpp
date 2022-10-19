@@ -13,7 +13,7 @@ class PhysicsDebuggerWindow : public ImGuiWindow
 		virtual void drawWindow() override;
 
 	public:
-		PhysicsDebuggerWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+		PhysicsDebuggerWindow(SceneManager* sceneManager, bool isOpen = true);
 
 };
 

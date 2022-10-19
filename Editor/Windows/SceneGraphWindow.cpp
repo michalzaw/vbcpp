@@ -85,6 +85,7 @@ void SceneGraphWindow::centerGraphView()
 namespace vbEditor {
 
 	extern SceneObject* _selectedSceneObject;
+	extern std::vector<RoadObject*> _selectedRoads;
 
 
 	static int selectionMask = -1;
@@ -95,13 +96,8 @@ namespace vbEditor {
 	void SceneGraphWindow(std::list<SceneObject*> sceneRoot)
 	{
 		nodeNumber = 0;
-		glm::uvec2 windowSize(Renderer::getInstance().getWindowDimensions());
 
-		ImGui::SetNextWindowSize(ImVec2(200, windowSize.y - 18), ImGuiCond_FirstUseEver);
-		ImGui::SetNextWindowSizeConstraints(ImVec2(100, windowSize.y - 18), ImVec2(500, windowSize.y - 18));
-		ImGui::SetNextWindowPos(ImVec2(0, 18));
-
-		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 		if (ImGui::Begin("Scene Graph", nullptr, windowFlags))
 		{
 			for (std::list<SceneObject*>::iterator i = sceneRoot.begin(); i != sceneRoot.end(); ++i)
@@ -121,14 +117,34 @@ namespace vbEditor {
 	}
 
 
+	bool hasVisibleChildren(SceneObject* object)
+	{
+		if (object->getChildren().empty())
+		{
+			return false;
+		}
+		else
+		{
+			for (SceneObject* child : object->getChildren())
+			{
+				if (!(child->getFlags() & SOF_NOT_SELECTABLE))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+
 	void inspectSceneObject(SceneObject* object)
 	{
-		if (startsWith(object->getName(), "editor#"))
+		if (object->getFlags() & SOF_NOT_SELECTABLE)
 			return;
 
 		ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		if (object->getChildren().empty())
+		if (!hasVisibleChildren(object))
 			node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
 
 
@@ -151,6 +167,22 @@ namespace vbEditor {
 			vbEditor::setSelectedSceneObject(object);
 			_centerGraph = false;
 			nodeClicked = nodeNumber;
+		}
+		if (ImGui::IsItemClicked(1))
+		{
+			RoadObject* roadObject = dynamic_cast<RoadObject*>(object->getComponent(CT_ROAD_OBJECT));
+			if (roadObject != nullptr)
+			{
+				if (!isVectorContains(_selectedRoads, roadObject))
+				{
+					_selectedRoads.push_back(roadObject);
+				}
+				else
+				{
+					auto element = std::find(_selectedRoads.begin(), _selectedRoads.end(), roadObject);
+					_selectedRoads.erase(element);
+				}
+			}
 		}
 
 		if (node_open)

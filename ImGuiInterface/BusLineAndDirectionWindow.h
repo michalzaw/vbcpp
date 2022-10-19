@@ -8,6 +8,8 @@
 class BusLineAndDirectionWindow : public ImGuiWindow
 {
 	private:
+		std::vector<Bus*>* _buses;
+
 		virtual void drawWindow() override;
 
 	public:

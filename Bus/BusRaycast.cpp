@@ -2,6 +2,8 @@
 
 #include "../Scene/ClickableObject.h"
 
+#include "../Game/GameEnvironment.h"
+
 #include "../Utils/Math.h"
 
 #include "../Graphics/GraphicsManager.h"
@@ -19,21 +21,26 @@ BusRaycast::BusRaycast()
     _brake(false), _accelerate(false), _handbrake(true), _idle(true),
     _isEnableLights(false), _isEnableHeadlights(false),
     _steeringWheelObject(NULL), _desktopObject(NULL), _driverPosition(0.0f, 0.0f, 0.0f),
+    _engineSoundsObject(NULL),
     _desktop(NULL), _desktopRenderObject(NULL), _desktopClickableObject(NULL)
 {
 	_displayText.head = "";
 	_displayText.line1 = "virtual bus";
 	_displayText.line2 = "";
 	_displayText.type = ONE_LINE;
-
 }
 
 
 BusRaycast::~BusRaycast()
 {
-    Logger::info("Bus Destruktor");
+    LOG_INFO("Bus Destruktor");
 
     SceneManager* sceneManager = _modules[0].sceneObject->getSceneManager();
+
+    if (_engineSoundsObject != NULL)
+    {
+        sceneManager->removeSceneObject(_engineSoundsObject);
+    }
 
 	for (BusRayCastWheel* wheel : _wheels)
 	{
@@ -82,19 +89,65 @@ void BusRaycast::setRandomNumberOfPassengersGettingOff()
 }
 
 
-void BusRaycast::catchInputFromDesktop()
+float BusRaycast::getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus)
 {
-    if (_desktopClickableObject != NULL && _desktopClickableObject->isClicked())
+    if ((soundDefinition.audibilityType == AT_INTERIOR && !isCameraInBus) ||
+        (soundDefinition.audibilityType == AT_EXTERIOR && isCameraInBus))
     {
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_1).modelNode))
+        return 0.0f;
+    }
+
+    float volume = soundDefinition.volume;
+
+    for (const auto& curve : soundDefinition.volumeCurves)
+    {
+        float variableValue = 0.0f;
+        if (curve.variable == SVCV_THROTTLE)
         {
-            doorOpenClose(1);
+            variableValue = _engine->getThrottle();
         }
-        if (isVectorContains(_desktopClickableObject->getClickedNodes(), _desktop->getButton(DBT_DOOR_2).modelNode))
+        else if (curve.variable == SVCV_RPM)
         {
-            doorOpenClose(2);
+            variableValue = _engine->getCurrentRPM();
+        }
+
+        volume *= getValueFromCurveInPoint(curve.points, variableValue);
+    }
+
+    return volume;
+}
+
+
+bool BusRaycast::isCurrentCameraInBus()
+{
+    for (const auto& busModule : _modules)
+    {
+        GraphicsManager* graphicsManager = busModule.sceneObject->getSceneManager()->getGraphicsManager();
+        CameraStatic* camera = graphicsManager->getCurrentCamera();
+        const glm::vec3 cameraPosition = camera->getPosition();
+
+        PhysicalBody* busModulePhysicalObject = static_cast<PhysicalBody*>(busModule.sceneObject->getComponent(CT_PHYSICAL_BODY));
+
+        PhysicsManager* physcsManager = busModule.sceneObject->getSceneManager()->getPhysicsManager();
+        bool isCameraInBusModule = physcsManager->isPointInObject(cameraPosition, busModulePhysicalObject);
+        if (isCameraInBusModule)
+        {
+            return true;
         }
     }
+
+    return false;
+}
+
+
+bool BusRaycast::isSoundPlay(SoundTrigger trigger)
+{
+    for (int i = 0; i < _engineSounds.size(); ++i)
+    {
+        if (_engine->getEngineSounds()[i].trigger == trigger)
+            return _engineSounds[i]->getState() == AL_PLAYING;
+    }
+    return false;
 }
 
 
@@ -220,6 +273,7 @@ void BusRaycast::centerSteringWheel(float dt)
     if (_steerAngle > DEAD_ZONE)
     {
         _steerAngle -= dt * STEER_STEP;
+        _steerAngle = clamp(_steerAngle, 0.0f, _maxSteerAngle);
 
         if (_steeringWheelObject)
         {
@@ -229,6 +283,7 @@ void BusRaycast::centerSteringWheel(float dt)
     else if (_steerAngle < -DEAD_ZONE)
     {
         _steerAngle += dt * STEER_STEP;
+        _steerAngle = clamp(_steerAngle, -_maxSteerAngle, 0.0f);
 
         if (_steeringWheelObject)
         {
@@ -253,30 +308,30 @@ void BusRaycast::centerSteringWheel(float dt)
 }
 
 
-void BusRaycast::accelerate()
+void BusRaycast::accelerate(float dt)
 {
     _accelerate = true;
     _brake = false;
 
-    _engine->throttleUp();
+    _engine->throttleUp(dt);
 }
 
 
-void BusRaycast::idle()
+void BusRaycast::idle(float dt)
 {
     _accelerate = false;
     _brake = false;
 
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
-void BusRaycast::brakeOn()
+void BusRaycast::brakeOn(float dt)
 {
     _accelerate = false;
     _brake = true;
 
-    _engine->throttleDown();
+    _engine->throttleDown(dt);
 }
 
 
@@ -289,6 +344,12 @@ void BusRaycast::brakeOff()
 void BusRaycast::toggleHandbrake()
 {
     _handbrake = !_handbrake;
+}
+
+
+bool BusRaycast::getHandbrakeState()
+{
+    return _handbrake;
 }
 
 
@@ -308,14 +369,25 @@ void BusRaycast::startEngine()
 {
     if (_engine)
     {
-		if (_engineStartSoundSource != nullptr)
+        bool existStartEngineSound = false;
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            if (_engine->getEngineSounds()[i].trigger == ST_START_ENGINE)
+            {
+                _engineSounds[i]->play();
+                _engine->setState(ES_STARTING);
+
+                existStartEngineSound = true;
+            }
+        }
+
+		if (!existStartEngineSound)
 		{
-			_engineStartSoundSource->play();
-			_engine->setState(ES_STARTING);
-		}
-		else
-		{
-			_engineSoundSource->play();
+            for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+            {
+                _engineLoopedSounds[i]->play();
+            }
+
 			_engine->setState(ES_RUN);
 		}
     }
@@ -326,47 +398,27 @@ void BusRaycast::stopEngine()
 {
     if (_engine)
     {
-		_engineSoundSource->stop();
+        for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+        {
+            _engineLoopedSounds[i]->stop();
+        }
 
-		if (_engineStopSoundSource != nullptr)
-		{
-			_engineStopSoundSource->play();
-			_engine->setState(ES_STOPPING);
-		}
-		else
+        bool existStopEngineSound = false;
+        for (int i = 0; i < _engineSounds.size(); ++i)
+        {
+            if (_engine->getEngineSounds()[i].trigger == ST_STOP_ENGINE)
+            {
+                _engineSounds[i]->play();
+                _engine->setState(ES_STOPPING);
+
+                existStopEngineSound = true;
+            }
+        }
+		
+        if (!existStopEngineSound)
 		{
 			_engine->setState(ES_OFF);
 		}
-    }
-}
-
-
-
-void BusRaycast::doorOpenClose(char doorGroup)
-{
-    _desktop->clickButton((DesktopButtonType)(DBT_DOOR_1 + doorGroup - 1));
-
-    for (unsigned char i = 0; i < _doors.size(); i++)
-    {
-        if (_doors[i]->getGroup() == doorGroup)
-        {
-            if (_doors[i]->getState() == EDS_CLOSING)
-            {
-                _doors[i]->open();
-
-                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), true);
-            }
-            else
-            if (_doors[i]->getState() == EDS_OPENING)
-            {
-                _doors[i]->close();
-
-                _desktop->setLightState((DesktopLightType)(DLT_DOOR_1 + doorGroup - 1), false);
-
-                if (isAllDoorClosed())
-                    setRandomNumberOfPassengersGettingOff();
-            }
-        }
     }
 }
 
@@ -442,21 +494,39 @@ float BusRaycast::getBusSpeed()
 
 void BusRaycast::update(float deltaTime)
 {
-    catchInputFromDesktop();
-
     _engine->update(deltaTime);
 
-	if (_engine->getState() == ES_STARTING && _engineStartSoundSource->getState() == AL_STOPPED)
+	if (_engine->getState() == ES_STARTING && !isSoundPlay(ST_START_ENGINE))
 	{
 		_engine->setState(ES_RUN);
-		_engineSoundSource->play();
+
+        for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+        {
+            _engineLoopedSounds[i]->play();
+        }
 	}
-	else if (_engine->getState() == ES_STOPPING && _engineStopSoundSource->getState() == AL_STOPPED)
+	else if (_engine->getState() == ES_STOPPING && !isSoundPlay(ST_STOP_ENGINE))
 	{
 		_engine->setState(ES_OFF);
 	}
 
-	_engineSoundSource->setPitch(_engine->getCurrentRPM() / _engine->getSoundRpm());
+    bool isCameraInBus = isCurrentCameraInBus();
+
+    for (int i = 0; i < _engineLoopedSounds.size(); ++i)
+    {
+        _engineLoopedSounds[i]->setGain(getSoundVolume(_engine->getEngineLoopedSounds()[i], isCameraInBus));
+        if (_engine->getEngineLoopedSounds()[i].rpm > 0.0f)
+        {
+            _engineLoopedSounds[i]->setPitch(_engine->getCurrentRPM() / _engine->getEngineLoopedSounds()[i].rpm);
+        }
+    }
+    for (int i = 0; i < _engineSounds.size(); ++i)
+    {
+        if (_engineSounds[i] != nullptr)
+        {
+            _engineSounds[i]->setGain(getSoundVolume(_engine->getEngineSounds()[i], isCameraInBus));
+        }
+    }
 
     btScalar wheelAngularVelocity = 0.0f;
 
@@ -472,7 +542,7 @@ void BusRaycast::update(float deltaTime)
             if ( wheel->powered )
             {
                 //wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * 0.32f);;
-				wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * _engine->getDifferentialRatio() * 0.7f * 0.1f);; // * 0.1f because, the bus mass is 10 x smaller than than real mass
+				wheel->wheel->applyEngineForce(_gearbox->currentRatio() * _engine->getCurrentTorque() * _engine->getDifferentialRatio() * 0.95f * 0.1f);; // * 0.1f because, the bus mass is 10 x smaller than than real mass
             }
         }
     }
@@ -546,11 +616,144 @@ void BusRaycast::update(float deltaTime)
 
     _engine->setRPM(wheelAngularVelocity/poweredWheels, _gearbox->currentRatio());
 
+    GameEnvironment::Variables::floatVaribles[GameEnvironment::PredefinedVariables::BUS_SPEED] = getBusSpeed();
+    GameEnvironment::Variables::floatVaribles[GameEnvironment::PredefinedVariables::BUS_ENGINE_RPM] = _engine->getCurrentRPM();
+
     if (_desktop != NULL)
     {
-        _desktop->setIndicatorValue(DIT_SPEEDOMETER, getBusSpeed());
-        _desktop->setIndicatorValue(DIT_TACHOMETER, _engine->getCurrentRPM());
-
         _desktop->update(deltaTime);
     }
+}
+
+
+void replaceMaterialsByNameInSceneObject(SceneObject* sceneObject, std::vector<Material*>& altMaterials)
+{
+    Component* renderObject = sceneObject->getComponent(CT_RENDER_OBJECT);
+    if (renderObject != nullptr)
+    {
+        static_cast<RenderObject*>(renderObject)->replaceMaterialsByName(altMaterials);
+    }
+
+    for (SceneObject* child : sceneObject->getChildren())
+    {
+        replaceMaterialsByNameInSceneObject(child, altMaterials);
+    }
+}
+
+
+void BusRaycast::replaceMaterialsByName(std::vector<Material*>& altMaterials)
+{
+    for (const BusRayCastModule& busModule : _modules)
+    {
+        replaceMaterialsByNameInSceneObject(busModule.sceneObject, altMaterials);
+    }
+
+    for (Door* door : _doors)
+    {
+        replaceMaterialsByNameInSceneObject(door->getSceneObject(), altMaterials);
+    }
+}
+
+
+void BusRaycast::doorOpen(char door)
+{
+    if (_doors[door]->getState() == EDS_CLOSING)
+    {
+        _doors[door]->open();
+    }
+}
+
+
+void BusRaycast::doorClose(char door)
+{
+    if (_doors[door]->getState() == EDS_OPENING)
+    {
+        _doors[door]->close();
+
+        if (isAllDoorClosed())
+            setRandomNumberOfPassengersGettingOff();
+    }
+}
+
+
+void BusRaycast::doorOpenClose(char door)
+{
+    if (_doors[door]->getState() == EDS_CLOSING)
+    {
+        _doors[door]->open();
+    }
+    else if (_doors[door]->getState() == EDS_OPENING)
+    {
+        _doors[door]->close();
+
+        if (isAllDoorClosed())
+            setRandomNumberOfPassengersGettingOff();
+    }
+}
+
+
+void BusRaycast::doorGroupOpen(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->open();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorGroupClose(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->close();
+
+                if (isAllDoorClosed())
+                    setRandomNumberOfPassengersGettingOff();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorGroupOpenClose(char doorGroup)
+{
+    for (unsigned char i = 0; i < _doors.size(); i++)
+    {
+        if (_doors[i]->getGroup() == doorGroup)
+        {
+            if (_doors[i]->getState() == EDS_CLOSING)
+            {
+                _doors[i]->open();
+            }
+            else if (_doors[i]->getState() == EDS_OPENING)
+            {
+                _doors[i]->close();
+
+                if (isAllDoorClosed())
+                    setRandomNumberOfPassengersGettingOff();
+            }
+        }
+    }
+}
+
+
+void BusRaycast::doorBlock(char door)
+{
+    _doors[door]->block();
+}
+
+
+void BusRaycast::doorUnblock(char door)
+{
+    _doors[door]->unblock();
 }

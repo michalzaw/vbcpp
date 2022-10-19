@@ -15,6 +15,10 @@ inline float radToDeg(float rad)
     return float((rad * 180 ) / PI);
 }
 
+inline float lerp(float a, float b, float t)
+{
+    return a + t * (b - a);
+}
 
 
 #endif // MATH_H_INCLUDED

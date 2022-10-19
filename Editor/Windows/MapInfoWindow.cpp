@@ -27,7 +27,7 @@ bool MapInfoWindow(MapInfo& mapInfo, std::string buttonText)
 		char nameBuffer[50];
 		char authorBuffer[50];
 
-		static MapInfo tmp = {mapInfo.name, mapInfo.author};
+		MapInfo tmp = {mapInfo.name, mapInfo.author};
 
 
 		strncpy(nameBuffer, tmp.name.c_str(), sizeof nameBuffer);

@@ -2,23 +2,21 @@
 
 #include "SceneObject.h"
 
+#include "../Utils/Logger.h"
+
 
 Component::Component(ComponentType type)
     : _type(type),
     _object(NULL),// _objectTransform(NULL),
     _isActive(true)
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Create Component\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Create Component");
 }
 
 
 Component::~Component()
 {
-    #ifdef _DEBUG_MODE
-        std::cout << "Destroy Component\n";
-    #endif // _DEBUG_MODE
+    LOG_DEBUG("Destroy Component");
 }
 
 

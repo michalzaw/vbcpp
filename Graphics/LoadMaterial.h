@@ -28,6 +28,8 @@ class MaterialLoader
     private:
 		tinyxml2::XMLDocument* _xmlFile;
 
+        Material* loadMaterial(tinyxml2::XMLElement* materialElement, const std::string& materialName, const std::string& texPath);
+
     public:
         MaterialLoader();
         ~MaterialLoader();
@@ -35,9 +37,10 @@ class MaterialLoader
         void openFile(const char* fileName);
         void closeFile();
 
-        Material loadMaterial(std::string materialName, std::string texPath);
+        Material* loadMaterial(const std::string& materialName, const std::string& texPath);
+        void loadAllMaterials(std::vector<Material*>& outMaterials, const std::string& texPath);
 
-        static std::string createMaterialFileName(std::string modelFileName)
+        static std::string createMaterialFileName(const std::string& modelFileName)
         {
             std::string xmlFileName = modelFileName;
             xmlFileName.erase(xmlFileName.size() - 4, 4);

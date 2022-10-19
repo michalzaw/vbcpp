@@ -50,7 +50,7 @@ class SoundComponent : virtual public Component
 
             else
             {
-                fprintf (stderr, "Sound component not attached to any Scene Object! Using default values\n");
+                LOG_WARNING("Sound component not attached to any Scene Object! Using default values");
 
 
                 alSource3f( _source, AL_POSITION, 0., 1., 0. );
@@ -83,7 +83,7 @@ class SoundComponent : virtual public Component
         {
             if (_object)
             {
-                glm::vec3 pos = _object->getPosition() + _soundPosition;
+                glm::vec3 pos = _object->getGlobalPosition() + _soundPosition;
 
                 alSource3f( _source, AL_POSITION, pos.x, pos.y, pos.z );
             }
@@ -100,7 +100,7 @@ class SoundComponent : virtual public Component
         glm::vec3 getPosition()
         {
             if (_object)
-                return _object->getPosition() + _soundPosition;
+                return _object->getGlobalPosition() + _soundPosition;
             else
                 return _soundPosition;
         }

@@ -4,7 +4,7 @@
 
 
 Door::Door(SceneObject* doorSceneObject, SoundComponent* openDoor, SoundComponent* closeDoor, char group)
-	: _group(group), _state(EDS_CLOSING), _doorSceneObject(doorSceneObject), _doorOpenSound(openDoor), _doorCloseSound(closeDoor)
+	: _group(group), _state(EDS_CLOSING), _doorSceneObject(doorSceneObject), _doorOpenSound(openDoor), _doorCloseSound(closeDoor), _blocked(false)
 {
 
 }

@@ -45,7 +45,7 @@ const int MAX_POINT_COUNT = 8;
 const int MAX_SPOT_COUNT = 8;
 
 
-in vec3 Position;
+in vec3 PositionVert;
 in vec2 TexCoord;
 in vec3 Normal;
 #ifdef NORMALMAPPING
@@ -106,7 +106,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 	float DiffuseFactor = max(dot(normal, -dir), 0.0f);
 	vec4 DiffuseColor = vec4(l.Color, 1.0f) * l.DiffuseIntensity * DiffuseFactor;// * 2;// * 20;
 	
-	vec3 FragmentToEye = normalize(CameraPosition - Position);
+	vec3 FragmentToEye = normalize(CameraPosition - PositionVert);
 	vec3 LightReflect = normalize(reflect(dir, normal));
 	float SpecularFactor = max(dot(FragmentToEye, LightReflect), 0.0f);
 	SpecularFactor = pow(SpecularFactor, SpecularPower);
@@ -119,7 +119,7 @@ vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
 
 vec4 CalculatePointLight(PointLight light, vec3 normal)
 {
-	vec3 Direction = Position - light.Position;
+	vec3 Direction = PositionVert - light.Position;
 	float Distance = length(Direction);
 	float Attenuation = light.Attenuation.constant + light.Attenuation.linear * Distance +
 						light.Attenuation.exp * Distance * Distance;
@@ -130,7 +130,7 @@ vec4 CalculatePointLight(PointLight light, vec3 normal)
 
 vec4 CalculateSpotLight(SpotLight light, vec3 normal)
 {
-	vec3 LightToPixel = normalize(Position - light.Base.Position);
+	vec3 LightToPixel = normalize(PositionVert - light.Base.Position);
 	float SpotFactor = dot(LightToPixel, light.Direction);
 	
 	if (SpotFactor > light.CutoffCos)
@@ -193,7 +193,7 @@ void main()
 	float _Cutoff = 0.3f;// dla wysokiego drzewa lepsze jest 0.2, dla drobnych lisci 0.4, a było na poczatku 0.3, w ostatniej wersji było 0.2, zmienione na potrzeby trawy. TODO: sterowac z meterialu
 	float newAlpha = (alpha - _Cutoff) / max(fwidth(alpha), 0.0001) + 0.5;
 	
-	float distance = length(CameraPosition - Position);
+	float distance = length(CameraPosition - PositionVert);
 
 	alpha = mix(alpha, newAlpha, distance / 100.0f);
 	// mozna tez dac _Cutoff = 0.2 i wtedy distance / 200.0f, ale to sie trzeba zastanowic
@@ -209,7 +209,7 @@ void main()
 	
 	
 	
-	/*vec3 eyeToFramgent = normalize(Position - CameraPosition);
+	/*vec3 eyeToFramgent = normalize(PositionVert - CameraPosition);
 	vec3 lightDir = Lights.DirLights[0].Direction;
 	
 	float miFactor = max(dot(-lightDir, eyeToFramgent), 0.0f);
@@ -225,7 +225,7 @@ void main()
 	float normalFactor = mix(1, -1, miFactor);
 		normal = normalFactor * normal;*/
 		
-	/*vec3 eyeToFramgent = normalize(Position - CameraPosition);
+	/*vec3 eyeToFramgent = normalize(PositionVert - CameraPosition);
 	vec3 lightDir = Lights.DirLights[0].Direction;
 	float dot1 = dot(normal, eyeToFramgent);
 	float dot2 = dot(normal, lightDir);

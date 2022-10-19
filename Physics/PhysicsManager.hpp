@@ -52,10 +52,14 @@ class PhysicsManager : virtual public RefCounter
 																	 bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter,
 																	 bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
+        PhysicalBodyConvexHull*         createPhysicalBodyConvexHull(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter,
+                                                                     bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RStaticModel* model, short collisionGroup, short collisionFilter);
+        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& models, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
+        PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyWheel*              createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel);
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
@@ -69,6 +73,7 @@ class PhysicsManager : virtual public RefCounter
         void removeConstraint(Constraint* c);
 
 		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength = 1000.0f);
+        bool isPointInObject(const glm::vec3& point, PhysicalBody* physicalBody);
 
 		void setDebugRenderer(btIDebugDraw* debugRenderer);
 		btIDebugDraw* getDebugRenderer();
@@ -86,6 +91,8 @@ class PhysicsManager : virtual public RefCounter
 
         btAlignedObjectArray<PhysicalBody*>     _physicalBodies;
         btAlignedObjectArray<Constraint*>       _constraints;
+
+        btSphereShape* _pointSphere;
 
 		btIDebugDraw* _debugRenderer;
 		bool		  _debugRendeignEnable;

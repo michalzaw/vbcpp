@@ -33,7 +33,7 @@ struct RenderListElement
     RenderElementType   type;
 
     RStaticModel*       model;
-    StaticModelMesh*    mesh;
+    ModelNodeMesh*      mesh;
     Material*           material;
 
     float               distanceFromCamera;

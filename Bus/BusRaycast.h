@@ -61,48 +61,54 @@ class BusRaycast : public Bus
 
         virtual BusRayCastModule& getModule(int index);
 
-        virtual glm::vec3 getDriverPosition();
-        virtual SceneObject* getSteeringWheelObject();
+        glm::vec3 getDriverPosition() override;
+        SceneObject* getSteeringWheelObject() override;
 
-        virtual void setIsEnableLights(bool is);
-        virtual bool isEnableLights();
-        virtual void setIsEnableHeadlights(bool is);
-        virtual bool isEnableHeadlights();
+        void setIsEnableLights(bool is) override;
+        bool isEnableLights() override;
+        void setIsEnableHeadlights(bool is) override;
+        bool isEnableHeadlights() override;
 
-        virtual void turnLeft(float dt);
-        virtual void turnRight(float dt);
-        virtual void centerSteringWheel(float dt);
-        virtual void accelerate();
-        virtual void idle();
-        virtual void brakeOn();
-        virtual void brakeOff();
-        virtual void toggleHandbrake();
+        void turnLeft(float dt) override;
+        void turnRight(float dt) override;
+        void centerSteringWheel(float dt) override;
+        void accelerate(float dt) override;
+        void idle(float dt) override;
+        void brakeOn(float dt) override;
+        void brakeOff() override;
+        void toggleHandbrake() override;
+        bool getHandbrakeState() override;
 
-		virtual bool getHandbrakeState()
-		{
-			return _handbrake;
-		}
+        Gearbox* getGearbox() override;
+        Engine* getEngine() override;
+        void startEngine() override;
+        void stopEngine() override;
 
-        virtual Gearbox* getGearbox();
-        virtual Engine* getEngine();
-        virtual void startEngine();
-        virtual void stopEngine();
+        Door* getDoor(unsigned char doorIndex) override;
+        int getDoorsCount() override;
 
-        virtual void doorOpenClose(char doorGroup);
-        virtual Door* getDoor(unsigned char doorIndex);
-        virtual int getDoorsCount();
+        MirrorComponent* getMirror(int index) override;
+        int getMirrorsCount() override;
 
-        virtual MirrorComponent* getMirror(int index);
-        virtual int getMirrorsCount();
+		DisplayText& getDisplayText() override;
+		void updateDisplays() override;
 
-		virtual DisplayText& getDisplayText();
-		virtual void updateDisplays();
+        SceneObject* getDesktopObject() override;
 
-        virtual SceneObject* getDesktopObject();
+        float getBusSpeed() override;
 
-        virtual float getBusSpeed();
+        void update(float deltaTime) override;
 
-        virtual void update(float deltaTime);
+        void replaceMaterialsByName(std::vector<Material*>& altMaterials) override;
+
+        void doorOpen(char door);
+        void doorClose(char door);
+        void doorOpenClose(char door);
+        void doorGroupOpen(char doorGroup);
+        void doorGroupClose(char doorGroup);
+        void doorGroupOpenClose(char doorGroup) override;
+        void doorBlock(char door);
+        void doorUnblock(char door);
 
     private:
         std::unique_ptr<Gearbox>    _gearbox;
@@ -129,6 +135,10 @@ class BusRaycast : public Bus
         LightsList      _headlights;
         bool            _isEnableHeadlights;
 
+        SceneObject* _engineSoundsObject;
+        std::vector<SoundComponent*> _engineLoopedSounds;
+        std::vector<SoundComponent*> _engineSounds;
+
         std::vector<BusRayCastWheel*>       _wheels;
         DoorList        _doors;
 
@@ -144,7 +154,11 @@ class BusRaycast : public Bus
         bool isAllDoorClosed();
         void setRandomNumberOfPassengersGettingOff();
 
-        void catchInputFromDesktop();
+        float getSoundVolume(const SoundDefinition& soundDefinition, bool isCameraInBus);
+
+        bool isCurrentCameraInBus();
+
+        bool isSoundPlay(SoundTrigger trigger);
 };
 
 

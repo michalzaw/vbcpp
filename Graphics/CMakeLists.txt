@@ -38,6 +38,8 @@ set (GRAPHICS_SOURCES
 		Graphics/MirrorComponent.h
 		Graphics/Model.cpp
 		Graphics/Model.h
+		Graphics/ModelGenerator.cpp
+		Graphics/ModelGenerator.h
 		Graphics/ModelNode.cpp
 		Graphics/ModelNode.h
 		Graphics/NVMeshMender/NVMeshMender.cpp
@@ -66,8 +68,12 @@ set (GRAPHICS_SOURCES
 		Graphics/RenderData.h
 		Graphics/RenderObject.cpp
 		Graphics/RenderObject.h
+		Graphics/RMaterialsCollection.cpp
+		Graphics/RMaterialsCollection.h
 		Graphics/RoadGenerator.cpp
 		Graphics/RoadGenerator.h
+		Graphics/RoadIntersectionComponent.cpp
+		Graphics/RoadIntersectionComponent.h
 		Graphics/RoadObject.cpp
 		Graphics/RoadObject.h
 		Graphics/RoadProfileLoader.cpp
@@ -79,6 +85,8 @@ set (GRAPHICS_SOURCES
 		Graphics/RotationMode.h
 		Graphics/ShadowMap.cpp
 		Graphics/ShadowMap.h
+		Graphics/ShapePolygonComponent.cpp
+		Graphics/ShapePolygonComponent.h
 		Graphics/Sky.h
 		Graphics/StaticModelLoader.cpp
 		Graphics/StaticModelLoader.h

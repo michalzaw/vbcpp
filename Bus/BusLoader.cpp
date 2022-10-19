@@ -14,14 +14,15 @@
 using namespace tinyxml2;
 
 
-BusLoader::BusLoader(SceneManager* sceneManager, PhysicsManager* physicsManager, SoundManager* soundManager)
-    : _sMgr(sceneManager), _pMgr(physicsManager), _sndMgr(soundManager),
-    _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV)
+BusLoader::BusLoader(SceneManager* sceneManager, GraphicsManager* gmgr, PhysicsManager* physicsManager, SoundManager* soundManager)
+    : _sMgr(sceneManager), _gMgr(gmgr), _pMgr(physicsManager), _sndMgr(soundManager),
+    _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
+    _currentBusModel(nullptr)
 {
 
 }
 
-Bus* BusLoader::loadBus(const std::string& busName)
+Bus* BusLoader::loadBus(const std::string& busName, const std::unordered_map<std::string, std::string>& variables)
 {
     std::string configFileName = GameDirectories::BUSES + busName + "/" + BUS_CONFIG_FILENAME;
 
@@ -33,13 +34,9 @@ Bus* BusLoader::loadBus(const std::string& busName)
     XMLDocument doc;
     doc.LoadFile(configFileName.c_str());
 
-
-    loadEngineAndGearbox(doc);
-
-
     XMLElement* busElement = doc.FirstChildElement("Bus");
 
-    Logger::info("Bus XML DATA");
+    LOG_INFO("Bus XML DATA");
 
     _objName = busElement->Attribute("name");
     std::string textureFolder(busElement->Attribute("textures"));
@@ -49,7 +46,9 @@ Bus* BusLoader::loadBus(const std::string& busName)
     _busPath = GameDirectories::BUSES + busName + "/";
     _texturePath = _busPath + textureFolder + "/";
 
-    Logger::info("Bus name: " + _objName);
+    _variables = variables;
+
+    LOG_INFO("Bus name: " + _objName);
 
     if (busType == "raycast")
     {
@@ -57,11 +56,11 @@ Bus* BusLoader::loadBus(const std::string& busName)
     }
     else if (busType == "constraint")
     {
-        return new BusConstraint(_sMgr, _pMgr, _sndMgr, busName);
+        return new BusConstraint(_sMgr, _gMgr, _pMgr, _sndMgr, busName);
     }
     else
     {
-        Logger::error("Unsupported bus type: " + busType);
+        LOG_ERROR("Unsupported bus type: " + busType);
         return NULL;
     }
 }
@@ -70,8 +69,10 @@ Bus* BusLoader::loadBus(const std::string& busName)
 BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
 {
     _bus = new BusRaycast();
-    _bus->_engine = std::move(_engine);
-    _bus->_gearbox = std::move(_gearbox);
+
+    loadBusDescription(busElement);
+    loadAvailableVariables(busElement);
+    loadTexts(busElement);
 
     bool result = loadBusModules(busElement);
     if (!result)
@@ -80,19 +81,112 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
         return NULL;
     }
 
+    loadEngineAndGearbox(busElement);
+
     return _bus;
 }
 
 
-void BusLoader::loadEngineAndGearbox(XMLDocument& doc)
+void BusLoader::loadEngineAndGearbox(XMLElement* busElement)
 {
-    XMLElement* objElement = doc.FirstChildElement("Gearbox");
-    std::string gearboxFile(objElement->Attribute("model"));
-    _gearbox = std::unique_ptr<Gearbox> (new Gearbox(gearboxFile));
+    XMLElement* objElement = busElement->FirstChildElement("Gearbox");
+    const std::string gearboxFile(objElement->Attribute("model"));
+    _bus->_gearbox = std::unique_ptr<Gearbox>(new Gearbox(gearboxFile));
 
-    objElement = doc.FirstChildElement("Engine");
-    std::string engineFile(objElement->Attribute("model"));
-    _engine = std::unique_ptr<Engine> (new Engine(engineFile));
+    objElement = busElement->FirstChildElement("Engine");
+    const std::string engineFile = objElement->Attribute("model");
+    const glm::vec3 enginePosition = XmlUtils::getAttributeVec3Optional(objElement, "position");
+    const int moduleIndex = XmlUtils::getAttributeIntOptional(objElement, "module");
+
+    _bus->_engine = std::unique_ptr<Engine>(new Engine(engineFile));
+
+
+    if (moduleIndex < _bus->_modules.size())
+    {
+        SceneObject* engineSoundsObject = _sMgr->addSceneObject("busEngine");
+        engineSoundsObject->setPosition(enginePosition);
+
+        _bus->_modules[moduleIndex].sceneObject->addChild(engineSoundsObject);
+        _bus->_engineSoundsObject = engineSoundsObject;
+
+        for (const auto& soundDefinition : _bus->_engine->getEngineLoopedSounds())
+        {
+            SoundComponent* engineSound = createSound(engineSoundsObject, soundDefinition);
+            _bus->_engineLoopedSounds.push_back(engineSound);
+        }
+        for (int i = 0; i < _bus->_engine->getEngineSounds().size(); ++i)
+        {
+            SoundComponent* engineSound = createSound(engineSoundsObject, _bus->_engine->getEngineSounds()[i]);
+            _bus->_engineSounds.push_back(engineSound);
+        }
+    }
+    else
+    {
+        LOG_ERROR("Error while loading engine sounds. Invalid module index.");
+    }
+}
+
+
+void BusLoader::loadBusDescription(XMLElement* busElement)
+{
+    XMLElement* descriptionElement = busElement->FirstChildElement("Description");
+    if (descriptionElement != nullptr)
+    {
+        _bus->_busDescription.model = XmlUtils::getAttributeStringOptional(descriptionElement, "model");
+        _bus->_busDescription.description = XmlUtils::getAttributeStringOptional(descriptionElement, "description");
+        _bus->_busDescription.author = XmlUtils::getAttributeStringOptional(descriptionElement, "author");
+        _bus->_busDescription.logo = _busPath + XmlUtils::getAttributeStringOptional(descriptionElement, "logo");
+    }
+}
+
+
+void BusLoader::loadTexts(XMLElement* busElement)
+{
+    XMLElement* textsElement = busElement->FirstChildElement("Texts");
+    if (textsElement != nullptr)
+    {
+        std::string path = XmlUtils::getAttributeStringOptional(textsElement, "path");
+        std::string defaultLanguage = XmlUtils::getAttributeStringOptional(textsElement, "defaultLanguage", LocalizationSystem::getGlobalInstance().getDefaultLanguage());
+
+        path = _busPath + path + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+        if (!FilesHelper::isDirectoryExists(path))
+            path = ResourceManager::getInstance().getAlternativeResourcePath() + path;
+#endif // DEVELOPMENT_RESOURCES
+
+        LOG_DEBUG("Loaded texts. Path: " + path + ", default language: " + defaultLanguage);
+
+        _bus->_texts.initialize(path, defaultLanguage);
+        _bus->_texts.setLanguage(LocalizationSystem::getGlobalInstance().getLanguage());
+    }
+}
+
+
+void BusLoader::loadAvailableVariables(XMLElement* busElement)
+{
+    XMLElement* variablesElement = busElement->FirstChildElement("Variables");
+    if (variablesElement != nullptr)
+    {
+        for (XMLElement* variableElement = variablesElement->FirstChildElement("Variable"); variableElement != nullptr; variableElement = variableElement->NextSiblingElement("Variable"))
+        {
+            const std::string name = XmlUtils::getAttributeString(variableElement, "name");
+            
+            if (_variables.find(name) == _variables.end())
+            {
+                for (XMLElement* variableValueElement = variableElement->FirstChildElement("VariableValue");
+                     variableValueElement != nullptr;
+                     variableValueElement = variableValueElement->NextSiblingElement("VariableValue"))
+                {
+                    const bool isDefaultValue = XmlUtils::getAttributeBoolOptional(variableValueElement, "default");
+                    if (isDefaultValue)
+                    {
+                        _variables[name] = XmlUtils::getAttributeString(variableValueElement, "value");
+                    }
+                }
+            }
+        }
+    }
 }
 
 
@@ -103,6 +197,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
     while (moduleElement != nullptr)
     {
         std::string modelFile = XmlUtils::getAttributeString(moduleElement, "model");
+        std::string collisionNodeName = XmlUtils::getAttributeStringOptional(moduleElement, "collisionModelNode");
         glm::vec3 modulePosition = XmlUtils::getAttributeVec3Optional(moduleElement, "position");
         float mass = XmlUtils::getAttributeFloat(moduleElement, "mass");
 
@@ -117,49 +212,45 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
         std::string modelPath = _busPath + modelFile;
 
         std::vector<std::string> nodeToSkip;
-        loadModelNodes(moduleElement, modelPath, _texturePath, nodeToSkip, _cachedModelNodes);
+        fetchOptionalModelNodes(moduleElement, nodeToSkip);
 
-        RStaticModel* busModel;
         if (nodeToSkip.empty())
-            busModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
+            _currentBusModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
         else
-            busModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, nodeToSkip, _normalsSmoothing);
+            _currentBusModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
 
-        RenderObject* busRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(busModel), busModule.sceneObject);
-		busRenderObject->setIsDynamicObject(true);
+        RenderObject* busRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, nodeToSkip, true), busModule.sceneObject);
 
 
         // Tworzenie fizycznego obiektu karoserii
-
-        if (busModel->getCollisionMeshSize() > 0)
+        if (!collisionNodeName.empty())
         {
-            int wheelCollidesWith = COL_TERRAIN | COL_ENV;
+            std::vector<glm::vec3> collisionMeshVertices;
 
-            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(busModel->getCollisionMesh(), busModel->getCollisionMeshSize(), mass, COL_BUS, _busCollidesWith);
-            busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, _wheelCollidesWith);
-            busModule.rayCastVehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
+            StaticModelNode* collisionNode = _currentBusModel->getNodeByName(collisionNodeName);
+            collisionNode->getVerticesArray(collisionMeshVertices);
 
-            busModule.sceneObject->addComponent(busModule.rayCastVehicle);
+            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(collisionMeshVertices, mass, COL_BUS, _busCollidesWith);
+        }
+        else if (_currentBusModel->getCollisionMeshSize() > 0)
+        {
+            busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(_currentBusModel->getCollisionMesh(), _currentBusModel->getCollisionMeshSize(), mass, COL_BUS, _busCollidesWith);
         }
         else
         {
-            Logger::error("Collision mesh not found in bus model!\n");
+            LOG_ERROR("Collision mesh not found in bus model!");
             return false;
         }
 
+        busModule.rayCastVehicle->setWheelCollisionFilter(COL_WHEEL, _wheelCollidesWith);
+        busModule.rayCastVehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
+
+        busModule.sceneObject->addComponent(busModule.rayCastVehicle);
+
 
         // Loading other bus module elements
-
-        loadWheels(moduleElement, busModule);
-        loadInteriorLights(moduleElement, busModule);
-        loadDriverParams(busElement, busModule);
-        loadSteeringWheel(moduleElement, busModule);
-        loadDesktop(moduleElement, busModule);
-        loadHeadlights(moduleElement, busModule);
-        loadDoors(moduleElement, busModule);
-        loadEnvironmentCaptureComponents(moduleElement, busModule);
-        loadMirrors(moduleElement, busModule);
-		loadDisplays(moduleElement, busModule);
+        loadModuleElements(moduleElement, busElement, busModule);
+        loadModuleConditionalElements(moduleElement, busElement, busModule);
 
         _bus->_modules.push_back(busModule);
 
@@ -176,7 +267,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 
     if (_bus->_desktop == NULL)
     {
-        _bus->_desktop = new Desktop(NULL);
+        _bus->_desktop = new Desktop(NULL, NULL);
     }
 
 	_bus->updateDisplays();
@@ -185,34 +276,68 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
 }
 
 
-void BusLoader::loadModelNodes(XMLElement* moduleElement, std::string modelPath, std::string texturePath, std::vector<std::string>& modelNodesNames,
-                               std::unordered_map<std::string, ModelNodeAndTransform>& modelNodes)
+void BusLoader::fetchOptionalModelNodes(XMLElement* element, std::vector<std::string>& modelNodesNames)
 {
-    XMLElement* doorElement = moduleElement->FirstChildElement("Door");
-    while (doorElement != nullptr)
+    const int attributesNamesLength = 4;
+    const std::string attributesNames[attributesNamesLength] = {
+        "modelNode",
+        "collisionModelNode",
+        "armModelNode",
+        "armCollisionModelNode"
+    };
+
+    for (int i = 0; i < attributesNamesLength; ++i)
     {
-        std::string doorModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "modelNode");
-        std::string armModelNodeName = XmlUtils::getAttributeStringOptional(doorElement, "armModelNode");
-
-        if (!doorModelNodeName.empty())
-            modelNodesNames.push_back(doorModelNodeName);
-
-        if (!armModelNodeName.empty())
-            modelNodesNames.push_back(armModelNodeName);
-
-        doorElement = doorElement->NextSiblingElement("Door");
-    }
-
-    if (!modelNodesNames.empty())
-    {
-        std::vector<Transform> loadedNodesTransformsInModel;
-        std::vector<RStaticModel*> loadedNodes;
-
-        ResourceManager::getInstance().loadModelWithHierarchyOnlyNodes(modelPath, texturePath, modelNodesNames, loadedNodesTransformsInModel, loadedNodes, _normalsSmoothing);
-
-        for (int i = 0; i < modelNodesNames.size(); ++i)
+        const char* value = element->Attribute(attributesNames[i].c_str());
+        if (value != nullptr)
         {
-            modelNodes[modelNodesNames[i]] = ModelNodeAndTransform(loadedNodes[i], loadedNodesTransformsInModel[i]);
+            modelNodesNames.push_back(value);
+        }
+
+        for (XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
+        {
+            fetchOptionalModelNodes(child, modelNodesNames);
+        }
+    }
+}
+
+
+void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule)
+{
+    loadWheels(moduleElement, busModule);
+    loadInteriorLights(moduleElement, busModule);
+    loadDriverParams(busElement, busModule);
+    loadSteeringWheel(moduleElement, busModule);
+    loadDesktop(moduleElement, busModule);
+    loadHeadlights(moduleElement, busModule);
+    loadDoors(moduleElement, busModule);
+    loadEnvironmentCaptureComponents(moduleElement, busModule);
+    loadMirrors(moduleElement, busModule);
+    loadDisplays(moduleElement, busModule);
+    loadCustomElements(moduleElement, busModule);
+}
+
+
+void BusLoader::loadModuleConditionalElements(XMLElement* moduleElement, XMLElement* busElement, BusRayCastModule& busModule)
+{
+    for (XMLElement* conditionalElement = moduleElement->FirstChildElement("ConnditionalElements");
+         conditionalElement != nullptr;
+         conditionalElement = conditionalElement->NextSiblingElement("ConnditionalElements"))
+    {
+        const std::string variable = XmlUtils::getAttributeString(conditionalElement, "variable");
+        const std::string value = XmlUtils::getAttributeString(conditionalElement, "value");
+
+        auto currentVariableValue = _variables.find(variable);
+        if (currentVariableValue != _variables.end())
+        {
+            if (value == currentVariableValue->second)
+            {
+                loadModuleElements(conditionalElement, busElement, busModule);
+            }
+        }
+        else
+        {
+            LOG_ERROR("Variable " + variable + " not exist");
         }
     }
 }
@@ -223,15 +348,15 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
     XMLElement* wheelElement = moduleElement->FirstChildElement("Wheel");
     if (wheelElement == nullptr)
     {
-        Logger::error("Cannot load Wheel elements from config file!");
+        LOG_ERROR("Cannot load Wheel elements from config file!");
     }
 
     while (wheelElement != nullptr)
     {
-        Logger::info("XML: Wheel data");
+        LOG_INFO("XML: Wheel data");
 
         std::string wheelName(wheelElement->Attribute("name"));
-        Logger::info(wheelName);
+        LOG_INFO(wheelName);
         std::string wheelModel(wheelElement->Attribute("model"));
         std::string side(wheelElement->Attribute("side"));
         float radius = (float)atof(wheelElement->Attribute("radius"));
@@ -274,7 +399,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
 
         std::string modelPath = _busPath + wheelModel;
         RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
-        RenderObject* wheelRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
+        RenderObject* wheelRenderObject = _gMgr->addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
 		wheelRenderObject->setIsDynamicObject(true);
 
 
@@ -311,7 +436,7 @@ void BusLoader::loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& 
     XMLElement* lightElement = moduleElement->FirstChildElement("Light");
     while (lightElement != nullptr)
     {
-        Logger::info("XML: Interior light data");
+        LOG_INFO("XML: Interior light data");
 
         glm::vec3 position = XMLstringToVec3(lightElement->Attribute("position"));
         glm::vec3 color = XMLstringToVec3(lightElement->Attribute("color"));
@@ -322,8 +447,8 @@ void BusLoader::loadInteriorLights(XMLElement* moduleElement, BusRayCastModule& 
 
 
         SceneObject* light = _sMgr->addSceneObject("busLight" + toString(_bus->_lights.size()));
-        Light* lightComponent = GraphicsManager::getInstance().addPointLight(color, ambientIntensity, diffuseIntensity,
-                                                                             LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+        Light* lightComponent = _gMgr->addPointLight(color, ambientIntensity, diffuseIntensity,
+                                                     LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
         light->addComponent(lightComponent);
         light->setPosition(position);
         busModule.sceneObject->addChild(light);
@@ -348,7 +473,7 @@ void BusLoader::loadDriverParams(XMLElement* busElement, BusRayCastModule& busMo
     }
     else
     {
-        Logger::warning("Cannot load driver position from config file!");
+        LOG_WARNING("Cannot load driver position from config file!");
     }
 }
 
@@ -358,7 +483,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
     XMLElement* steeringWheelElement = moduleElement->FirstChildElement("SteeringWheel");
     if (steeringWheelElement != nullptr)
     {
-        Logger::info("XML: Steering wheel data");
+        LOG_INFO("XML: Steering wheel data");
 
         std::string modelFile = std::string(steeringWheelElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(steeringWheelElement->Attribute("position"));
@@ -374,7 +499,7 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* steeringWheelModel = ResourceManager::getInstance().loadModel(modelPath, _texturePath, _normalsSmoothing);
-        RenderObject* renderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
+        RenderObject* renderObject = _gMgr->addRenderObject(new RenderObject(steeringWheelModel), steeringWheelObject);
 		renderObject->setIsDynamicObject(true);
 
         busModule.sceneObject->addChild(steeringWheelObject);
@@ -383,7 +508,50 @@ void BusLoader::loadSteeringWheel(XMLElement* moduleElement, BusRayCastModule& b
     }
     else
     {
-        Logger::info("Cannot load steering wheel element from config file!");
+        LOG_INFO("Cannot load steering wheel element from config file!");
+    }
+}
+
+
+void bindButtonActionToState(BusRaycast* bus, DesktopButtonState& buttonState, DesktopButtonAction action, int actionParam)
+{
+    buttonState.actionParam = actionParam;
+
+    if (action == DBA_DOOR_OPEN)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorOpen, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_OPEN_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorOpenClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_OPEN)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupOpen, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_GROUP_OPEN_CLOSE)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorGroupOpenClose, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_BLOCK)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorBlock, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_DOOR_UNBLOCK)
+    {
+        buttonState.actionWithParamInt = std::bind(&BusRaycast::doorUnblock, bus, std::placeholders::_1);
+    }
+    else if (action == DBA_TOGGLE_HANDBRAKE)
+    {
+        buttonState.action = std::bind(&BusRaycast::toggleHandbrake, bus);
     }
 }
 
@@ -393,7 +561,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
     if (desktopElement != nullptr)
     {
-        Logger::info("XML: Desktop data");
+        LOG_INFO("XML: Desktop data");
 
         std::string modelFile = std::string(desktopElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(desktopElement->Attribute("position"));
@@ -406,32 +574,45 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         desktopObject->setRotation(glm::vec3(rotation.x * PI, rotation.y * PI, rotation.z * PI) );
         desktopObject->setScale(scale);
 
-        _bus->_desktopClickableObject = GraphicsManager::getInstance().addClickableObject();
+        _bus->_desktopClickableObject = _gMgr->addClickableObject();
         desktopObject->addComponent(_bus->_desktopClickableObject);
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
-        _bus->_desktopRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(desktopModel), desktopObject);
+        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel), desktopObject);
 		_bus->_desktopRenderObject->setIsDynamicObject(true);
 
 
         busModule.sceneObject->addChild(desktopObject);
 
         _bus->_desktopObject = desktopObject;
-        _bus->_desktop = new Desktop(_bus->_desktopRenderObject);
+        _bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
         {
-            const char* cType = indicatorElement->Attribute("type");
-            DesktopIndicatorType type = getDesktopIndicatorTypeFromString(cType);
-
             std::string modelNodeName(indicatorElement->Attribute("modelNodeName"));
-            float maxAngle = (float)atof(indicatorElement->Attribute("maxAngle"));
-            float maxValue = (float)atof(indicatorElement->Attribute("maxValue"));
+            std::string variableName(indicatorElement->Attribute("variable"));
+            float maxAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "maxAngle");
+            float maxValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "maxValue");
             float minValue = XmlUtils::getAttributeFloatOptional(indicatorElement, "minValue");
+            float minAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "minAngle");
+            glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
-            _bus->_desktop->setIndicator(type, modelNodeName, degToRad(maxAngle), maxValue, minValue);
+            std::vector<glm::vec2> curve;
+            XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
+            if (curve.size() > 1)
+            {
+                for (auto& point : curve)
+                {
+                    point.y = degToRad(point.y);
+                }
+                _bus->_desktop->addIndicator(modelNodeName, variableName, curve, axis);
+            }
+            else
+            {
+                _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+            }
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
         }
@@ -439,28 +620,43 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
         XMLElement* buttonElement = desktopElement->FirstChildElement("Button");
         while (buttonElement != nullptr)
         {
-            const char* cType = buttonElement->Attribute("type");
-            DesktopButtonType type = getDesktopButtonTypeFromString(cType);
-
             std::string modelNodeName(buttonElement->Attribute("modelNodeName"));
             bool isReturning = XmlUtils::getAttributeBool(buttonElement, "isReturning");
+            glm::vec3 rotationAxis = XmlUtils::getAttributeVec3Optional(buttonElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
+            bool defaultState = XmlUtils::getAttributeBoolOptional(buttonElement, "defaultState", true);
 
-            std::vector<glm::vec3> translationForStates;
-            std::vector<glm::vec3> rotationForStates;
+            std::vector<DesktopButtonState> buttonStates;
+
+            if (defaultState)
+            {
+                buttonStates.push_back(DesktopButtonState());
+            }
 
             XMLElement* buttonStateElement = buttonElement->FirstChildElement("State");
             while (buttonStateElement != nullptr)
             {
-                glm::vec3 translation = XMLstringToVec3(buttonStateElement->Attribute("translation"));
-                translationForStates.push_back(translation);
+                glm::vec3 translationDirection = XmlUtils::getAttributeVec3Optional(buttonStateElement, "translationDirection");
+                float offset = XmlUtils::getAttributeFloatOptional(buttonStateElement, "translationOffset");
 
-                glm::vec3 rotation = XMLstringToVec3(buttonStateElement->Attribute("rotation"));
-                rotationForStates.push_back(rotation);
+                float rotation = XmlUtils::getAttributeFloatOptional(buttonStateElement, "rotation");
+
+                DesktopButtonState state(translationDirection * offset, degToRad(rotation));
+
+                std::string actionName = XmlUtils::getAttributeStringOptional(buttonStateElement, "action");
+                if (!actionName.empty())
+                {
+                    int actionParam = XmlUtils::getAttributeIntOptional(buttonStateElement, "actionParam");
+
+                    DesktopButtonAction action = getDesktopButtonActionFromString(actionName);
+                    bindButtonActionToState(_bus, state, action, actionParam);
+                }
+
+                buttonStates.push_back(state);
 
                 buttonStateElement = buttonStateElement->NextSiblingElement("State");
             }
 
-            _bus->_desktop->setButton(type, modelNodeName, translationForStates, rotationForStates, isReturning);
+            _bus->_desktop->addButton(modelNodeName, rotationAxis, buttonStates, isReturning);
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }
@@ -482,7 +678,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     }
     else
     {
-        Logger::info("Cannot load desktop element from config file!");
+        LOG_INFO("Cannot load desktop element from config file!");
     }
 }
 
@@ -492,7 +688,7 @@ void BusLoader::loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busM
     XMLElement* headlightElement = moduleElement->FirstChildElement("Headlight");
     while (headlightElement != nullptr)
     {
-        Logger::info("XML: Headlights data");
+        LOG_INFO("XML: Headlights data");
 
         std::string headlightName(headlightElement->Attribute("name"));
 
@@ -507,8 +703,8 @@ void BusLoader::loadHeadlights(XMLElement* moduleElement, BusRayCastModule& busM
 
 
         SceneObject* light = _sMgr->addSceneObject(headlightName);
-        Light* lightComponent = GraphicsManager::getInstance().addSpotLight(color, ambientIntensity, diffuseIntensity, cutoff,
-                                                                            LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
+        Light* lightComponent = _gMgr->addSpotLight(color, ambientIntensity, diffuseIntensity, cutoff,
+                                                    LightAttenuation(attenuation.x, attenuation.y, attenuation.z));
         light->addComponent(lightComponent);
         light->setPosition(position);
         light->setRotation(rotation);
@@ -528,7 +724,7 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
     XMLElement* doorElement = moduleElement->FirstChildElement("Door");
     while (doorElement != nullptr)
     {
-        Logger::info("XML: Door data");
+        LOG_INFO("XML: Door data");
 
         // Loading common parameters
 
@@ -540,32 +736,39 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
 
         std::string doorModelName = XmlUtils::getAttributeStringOptional(doorElement, "model");
         std::string doorModelNodeName;
+        std::string doorCollisionModelNode;
         if (doorModelName.empty())
         {
             isDoorLoadedFromSeparateModel = false;
             doorModelNodeName = XmlUtils::getAttributeString(doorElement, "modelNode");
+            doorCollisionModelNode = XmlUtils::getAttributeString(doorElement, "collisionModelNode");
         }
 
 
         glm::vec3 doorPosition;
         glm::vec3 doorRotation;
         RStaticModel* doorModel;
+        StaticModelNode* doorModelNode;
+        StaticModelNode* doorCollisionNode;
         if (isDoorLoadedFromSeparateModel)
         {
             std::string doorModelPath = _busPath + doorModelName;
 
             doorModel = ResourceManager::getInstance().loadModel(doorModelPath, _texturePath, _normalsSmoothing);
+            doorModelNode = doorModel->getRootNode();
+            doorCollisionNode = nullptr; // tymczasowe - zamiast tego bedzie brany collisionMesh utworzony na podstawie materialu
 
             doorPosition = XmlUtils::getAttributeVec3(doorElement, "position");
             doorRotation = XmlUtils::getAttributeVec3Optional(doorElement, "rotation");
         }
         else
         {
-            doorModel = _cachedModelNodes[doorModelNodeName].model;
+            doorModel = _currentBusModel;
+            doorModelNode = doorModel->getNodeByName(doorModelNodeName);
+            doorCollisionNode = doorModel->getNodeByName(doorCollisionModelNode);
 
-            Transform& doorTransform = _cachedModelNodes[doorModelNodeName].transform;
-            doorPosition = doorTransform.getPosition();
-            doorRotation = doorTransform.getRotation();
+            doorPosition = doorModelNode->transform.getPosition();
+            doorRotation = doorModelNode->transform.getRotation();
         }
 
 
@@ -605,11 +808,11 @@ void BusLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& busModule
         }
         else if (doorType == "classic")
         {
-            loadDoorClassic(doorElement, busModule, doorObj, doorModel, mass, group, openSoundComp, closeSoundComp, isDoorLoadedFromSeparateModel);
+            loadDoorClassic(doorElement, busModule, doorObj, doorModel, doorModelNode, doorCollisionNode, mass, group, openSoundComp, closeSoundComp, isDoorLoadedFromSeparateModel);
         }
         else
         {
-            Logger::warning("Unsupported door type: " + doorType + ". Ignored.");
+            LOG_WARNING("Unsupported door type: " + doorType + ". Ignored.");
         }
 
 
@@ -627,7 +830,7 @@ void BusLoader::loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busMod
 	btVector3 axisB = XmlUtils::getAttributeBtVector3Optional(doorElement, "axisB", btVector3(0, 1, 0));
 
 
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
     PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
@@ -673,7 +876,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string armPath = _busPath + armModel;
 
     RStaticModel* arm = ResourceManager::getInstance().loadModel(armPath, _texturePath, _normalsSmoothing);
-    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm), armObj);
+    RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(arm), armObj);
 	armRenderObject->setIsDynamicObject(true);
 
     btVector3 btArmPos(armRelPos.x, armRelPos.y, armRelPos.z);
@@ -704,7 +907,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     std::string arm2Path = _busPath + arm2Model;
 
     RStaticModel* arm2 = ResourceManager::getInstance().loadModel(arm2Path, _texturePath, _normalsSmoothing);
-    RenderObject* arm2RenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(arm2), arm2Obj);
+    RenderObject* arm2RenderObject = _gMgr->addRenderObject(new RenderObject(arm2), arm2Obj);
 	arm2RenderObject->setIsDynamicObject(true);
 
     btVector3 btArm2Pos(arm2RelPos.x, arm2RelPos.y, arm2RelPos.z);
@@ -722,7 +925,7 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
     btVector3 doorPivotA = XMLstringToBtVec3(doorElement->Attribute("pivotA"));
     btVector3 doorPivotB = XMLstringToBtVec3(doorElement->Attribute("pivotB"));
 
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
     //btVector3 btDoorPos(relativePos.x, relativePos.y, relativePos.z);
@@ -749,8 +952,8 @@ void BusLoader::loadDoorSE(XMLElement* doorElement, BusRayCastModule& busModule,
 }
 
 
-void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,
-                                SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel)
+void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, StaticModelNode* doorModelNode, StaticModelNode* doorCollisionNode,
+                                float mass, char group, SoundComponent* openSoundComp, SoundComponent* closeSoundComp, bool isDoorLoadedFromSeparateModel)
 {
     float velocity = XmlUtils::getAttributeFloatOptional(doorElement, "velocity", 1.0f);
     std::string rotDir = XmlUtils::getAttributeStringOptional(doorElement, "rotationDir", "CW");
@@ -770,33 +973,39 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
 
     std::string armModelName = XmlUtils::getAttributeStringOptional(doorElement, "armModel");
     std::string armModelNodeName;
+    std::string armCollisionModelNode;
     if (armModelName.empty())
     {
         isArmLoadedFromSeparateMode = false;
         armModelNodeName = XmlUtils::getAttributeString(doorElement, "armModelNode");
+        armCollisionModelNode = XmlUtils::getAttributeStringOptional(doorElement, "armCollisionModelNode");
     }
 
 
-    RStaticModel* armModel;
     glm::vec3 armPosition;
     glm::vec3 armRotation;
-
+    RStaticModel* armModel;
+    StaticModelNode* armModelNode;
+    StaticModelNode* armCollisionNode;
     if (isArmLoadedFromSeparateMode)
     {
         std::string armModelPath = _busPath + armModelName;
 
         armModel = ResourceManager::getInstance().loadModel(armModelPath, _texturePath, _normalsSmoothing);
+        armModelNode = armModel->getRootNode();
+        armCollisionNode = nullptr; // tymczasowe - zamiast tego bedzie brany collisionMesh utworzony na podstawie materialu
 
         armPosition = XmlUtils::getAttributeVec3(doorElement, "armPosition");
         armRotation = XmlUtils::getAttributeVec3(doorElement, "armRotation");
     }
     else
     {
-        armModel = _cachedModelNodes[armModelNodeName].model;
+        armModel = _currentBusModel;
+        armModelNode = armModel->getNodeByName(armModelNodeName);
+        armCollisionNode = armModel->getNodeByName(armCollisionModelNode);
 
-        Transform& armTransform = _cachedModelNodes[armModelNodeName].transform;
-        armPosition = armTransform.getPosition();
-        armRotation = armTransform.getRotation();
+        armPosition = armModelNode->transform.getPosition();
+        armRotation = armModelNode->transform.getRotation();
     }
 
 
@@ -804,18 +1013,57 @@ void BusLoader::loadDoorClassic(XMLElement* doorElement, BusRayCastModule& busMo
     armObject->setPosition(armPosition);
     armObject->setRotation(armRotation);
 
-    RenderObject* armRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(armModel), armObject);
+    RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode), armObject);
 	armRenderObject->setIsDynamicObject(true);
 
-    PhysicalBodyConvexHull* armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, COL_NOTHING);
+    PhysicalBody* armBody;
+
+    if (isArmLoadedFromSeparateMode)
+    {
+        glm::vec3* armCollisionMesh = armModel->getCollisionMesh();
+        unsigned int armCollisionMeshSize = armModel->getCollisionMeshSize();
+
+        armBody = _pMgr->createPhysicalBodyConvexHull(armCollisionMesh, armCollisionMeshSize, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else if (armCollisionNode != nullptr)
+    {
+        std::vector<glm::vec3> armCollisionMeshVector;
+        armCollisionNode->getVerticesArray(armCollisionMeshVector);
+
+        armBody = _pMgr->createPhysicalBodyConvexHull(armCollisionMeshVector, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else
+    {
+        armBody = _pMgr->createPhysicalBodyConvexHull(std::vector<glm::vec3>{}, armMass, COL_DOOR, COL_NOTHING);
+        //armBody = _pMgr->createPhysicalBodyConvexHull((glm::vec3*)foo, 0, mass, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyCylinder(btVector3(0.1, 2.0, 0.1), mass, Y_AXIS, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyBox(btVector3(0.3, 1.0, 0.3), mass, COL_DOOR, _doorCollidesWith);
+        //armBody = _pMgr->createPhysicalBodyConvexHull(armModel->getCollisionMesh(), armModel->getCollisionMeshSize(), armMass, COL_DOOR, COL_NOTHING);
+    }
+
     armObject->addComponent(armBody);
 
 
     // door object
-    RenderObject* doorRenderObject = GraphicsManager::getInstance().addRenderObject(new RenderObject(doorModel), doorObj);
+    RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode), doorObj);
 	doorRenderObject->setIsDynamicObject(true);
 
-    PhysicalBodyConvexHull* doorBody = _pMgr->createPhysicalBodyConvexHull(doorModel->getCollisionMesh(), doorModel->getCollisionMeshSize(), mass, COL_DOOR, _doorCollidesWith);
+    PhysicalBodyConvexHull* doorBody;
+    if (doorCollisionNode == nullptr)
+    {
+        glm::vec3* doorCollisionMesh = doorModel->getCollisionMesh();
+        unsigned int doorCollisionMeshSize = doorModel->getCollisionMeshSize();
+
+        doorBody = _pMgr->createPhysicalBodyConvexHull(doorCollisionMesh, doorCollisionMeshSize, mass, COL_DOOR, _doorCollidesWith);
+    }
+    else
+    {
+        std::vector<glm::vec3> doorCollisionMeshVector;
+        doorCollisionNode->getVerticesArray(doorCollisionMeshVector);
+
+        doorBody = _pMgr->createPhysicalBodyConvexHull(doorCollisionMeshVector, mass, COL_DOOR, _doorCollidesWith);
+    }
+
     doorObj->addComponent(doorBody);
 
 
@@ -869,7 +1117,7 @@ void BusLoader::loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusR
         std::string type = std::string(componentElement->Attribute("type"));
         if (type == "environmentCapture")
         {
-            Logger::info("XML: environmentCapture component data");
+            LOG_INFO("XML: environmentCapture component data");
 
             std::string textures = std::string(componentElement->Attribute("textures"));
             std::string t[6];
@@ -880,7 +1128,7 @@ void BusLoader::loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusR
                 t[index++] = _busPath + s;
             }
             RTextureCubeMap* cubeMap = ResourceManager::getInstance().loadTextureCubeMap(t);
-            busModule.sceneObject->addComponent(GraphicsManager::getInstance().addEnvironmentCaptureComponent(cubeMap));
+            busModule.sceneObject->addComponent(_gMgr->addEnvironmentCaptureComponent(cubeMap));
         }
     }
 }
@@ -896,7 +1144,7 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 
     while (mirrorElement != nullptr)
     {
-        Logger::info("XML: Mirror component data");
+        LOG_INFO("XML: Mirror component data");
 
         std::string name(mirrorElement->Attribute("name"));
         glm::vec3 position = XMLstringToVec3(mirrorElement->Attribute("position"));
@@ -905,7 +1153,7 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
 		float renderingDistance = GameConfig::getInstance().mirrorRenderingDistance;
 
         SceneObject* mirrorObject = _sMgr->addSceneObject(name);
-        MirrorComponent* mirrorComponent = GraphicsManager::getInstance().addMirrorComponent(name, renderingDistance);
+        MirrorComponent* mirrorComponent = _gMgr->addMirrorComponent(name, renderingDistance);
         mirrorComponent->setNormalVector(normal);
 
         mirrorObject->addComponent(mirrorComponent);
@@ -925,7 +1173,7 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 	XMLElement* displayElement = moduleElement->FirstChildElement("Display");
 	while (displayElement != nullptr)
 	{
-		Logger::info("XML: Display component data");
+		LOG_INFO("XML: Display component data");
 
 		std::string name(displayElement->Attribute("name"));
 		glm::vec3 position = XMLstringToVec3(displayElement->Attribute("position"));
@@ -936,22 +1184,23 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 		int heightInPoints = (int)atoi(displayElement->Attribute("heightInPoints"));;
 		std::string fontName = std::string(displayElement->Attribute("font"));
 		int type = XmlUtils::getAttributeIntOptional(displayElement, "type");
+        glm::vec3 textColor = XmlUtils::getAttributeVec3Optional(displayElement, "textColor", DisplayComponent::DEFAULT_TEXT_COLOR);
 
 		SceneObject* displaySceneObject = _sMgr->addSceneObject(name);
 		displaySceneObject->setPosition(position);
 		displaySceneObject->setRotation(rotation);
 		busModule.sceneObject->addChild(displaySceneObject);
 
-		Material material;
-		material.shininess = 96;
-		material.shader = SOLID_EMISSIVE_MATERIAL;
+		Material* material = new Material;
+		material->shininess = 96;
+		material->shader = SOLID_EMISSIVE_MATERIAL;
 		Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
 		displayRenderObject->init();
 		displayRenderObject->setIsDynamicObject(true);
-		GraphicsManager::getInstance().addRenderObject(displayRenderObject, displaySceneObject);
+        _gMgr->addRenderObject(displayRenderObject, displaySceneObject);
 
 		RDisplayFont* displayFont = ResourceManager::getInstance().loadDisplayFont(fontName);
-		DisplayComponent* displayComponent = GraphicsManager::getInstance().addDisplayComponent(displayFont, widthInPoints, heightInPoints);
+		DisplayComponent* displayComponent = _gMgr->addDisplayComponent(displayFont, widthInPoints, heightInPoints, textColor);
 		displaySceneObject->addComponent(displayComponent);
 		displayComponent->init();
 
@@ -962,12 +1211,38 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 }
 
 
+void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule)
+{
+    XMLElement* childElement = parentElement->FirstChildElement("Element");
+    while (childElement != nullptr)
+    {
+        LOG_INFO("XML: Custom element");
+
+        std::string modelNodeName = XmlUtils::getAttributeString(childElement, "modelNode");
+
+        StaticModelNode* customElementNode = _currentBusModel->getNodeByName(modelNodeName);
+        if (customElementNode != nullptr)
+        {
+            SceneObject* customElementSceneObject = _sMgr->addSceneObject(modelNodeName);
+            customElementSceneObject->setPosition(customElementNode->transform.getPosition());
+            customElementSceneObject->setRotation(customElementNode->transform.getRotation());
+            customElementSceneObject->setScale(customElementNode->transform.getScale());
+            busModule.sceneObject->addChild(customElementSceneObject);
+
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
+        }
+
+        childElement = childElement->NextSiblingElement("Element");
+    }
+}
+
+
 void BusLoader::loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule)
 {
     XMLElement* jointElement = moduleElement->FirstChildElement("Joint");
     while (jointElement != nullptr)
     {
-        Logger::info("XML: Joint element data");
+        LOG_INFO("XML: Joint element data");
 
         busModule.jointPosition = XMLstringToBtVec3(jointElement->Attribute("position"));
 
@@ -976,48 +1251,22 @@ void BusLoader::loadModulesConnectionData(XMLElement* moduleElement, BusRayCastM
 }
 
 
+SoundComponent* BusLoader::createSound(SceneObject* soundObject, const SoundDefinition& soundDefinition)
+{
+    RSound* engineSound = ResourceManager::getInstance().loadSound(soundDefinition.soundFilename);
+    SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, soundDefinition.looped);
+    soundObject->addComponent(soundComp);
+    soundComp->setGain(soundDefinition.volume);
+    soundComp->setPlayDistance(soundDefinition.playDistance);
+
+    _sndMgr->addSoundComponent(soundComp);
+
+    return soundComp;
+}
+
+
 void BusLoader::createRequireSoundComponents()
 {
-    // Create Sound Component if sound filename is defined in Engine XML config file
-    if (_bus->_engine->getSoundFilename() != "")
-    {
-        RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getSoundFilename());
-        SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, true);
-        _bus->_modules[0].sceneObject->addComponent(soundComp);
-        soundComp->setGain(_bus->_engine->getSoundVolume());
-        soundComp->setPlayDistance(20.0f);
-
-        _sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineSoundSource = soundComp;
-    }
-
-	if (_bus->_engine->getStartSoundFilename() != "")
-	{
-		RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getStartSoundFilename());
-		SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, false);
-		_bus->_modules[0].sceneObject->addComponent(soundComp);
-		soundComp->setGain(_bus->_engine->getSoundVolume());
-		soundComp->setPlayDistance(20.0f);
-
-		_sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineStartSoundSource = soundComp;
-	}
-
-	if (_bus->_engine->getStopSoundFilename() != "")
-	{
-		RSound* engineSound = ResourceManager::getInstance().loadSound(_bus->_engine->getStopSoundFilename());
-		SoundComponent* soundComp = new SoundComponent(engineSound, EST_PLAYER, false);
-		_bus->_modules[0].sceneObject->addComponent(soundComp);
-		soundComp->setGain(_bus->_engine->getSoundVolume());
-		soundComp->setPlayDistance(20.0f);
-
-		_sndMgr->addSoundComponent(soundComp);
-
-		_bus->_engineStopSoundSource = soundComp;
-	}
-
     // Create announcement source component
     SoundComponent* announcementSource = new SoundComponent(NULL, EST_PLAYER, false);
     _bus->_modules[0].sceneObject->addComponent(announcementSource);

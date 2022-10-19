@@ -63,6 +63,7 @@ class PhysicalBodyRaycastVehicle : public PhysicalBodyConvexHull
     public:
         PhysicalBodyRaycastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, PhysicsManager* physicsManager);
         PhysicalBodyRaycastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, PhysicsManager* physicsManager);
+        PhysicalBodyRaycastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, PhysicsManager* physicsManager);
         virtual ~PhysicalBodyRaycastVehicle();
 
         void setWheelCollisionFilter(short int collisionGroup, short int collisionFilter);

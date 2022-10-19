@@ -22,7 +22,7 @@ class SoundManager : virtual public RefCounter
         SoundManager()
         : _camera(0), _device(0), _context(0), _mute(false)
         {
-            std::cout << "SoundManager: Konstruktor\n";
+            LOG_INFO("SoundManager: Konstruktor");
             alutInit(NULL, NULL);
 
             _device = alcOpenDevice(NULL);
@@ -41,7 +41,7 @@ class SoundManager : virtual public RefCounter
 
         virtual ~SoundManager()
         {
-            std::cout << "SoundManager: Destructor\n";
+            LOG_INFO("SoundManager: Destructor");
 
             for (std::list<SoundComponent*>::iterator i = _sounds.begin(); i != _sounds.end(); ++i)
             {
@@ -127,6 +127,13 @@ class SoundManager : virtual public RefCounter
             soundcomp->setMute(_mute);
 
             return soundcomp;
+        }
+
+        void removeSoundComponent(SoundComponent* soundComponent)
+        {
+            _sounds.remove(soundComponent);
+
+            delete soundComponent;
         }
 
     protected:

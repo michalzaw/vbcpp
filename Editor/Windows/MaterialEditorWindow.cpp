@@ -18,6 +18,8 @@
 
 namespace vbEditor
 {
+	extern GraphicsManager* _graphicsManager;
+
 	RenderObject* currentRenderObject = nullptr;
 	RStaticModel* currentStaticModel = nullptr;
 	unsigned int currentModelLod = 0;
@@ -33,7 +35,7 @@ namespace vbEditor
 
 	void reloadCurrentMaterialInAllObjects()
 	{
-		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
+		std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
 		for (RenderObject* renderObject : renderObjects)
 		{
 			if (renderObject->getModel() == currentStaticModel)
@@ -53,10 +55,10 @@ namespace vbEditor
 			std::string materialXmlFileName = MaterialLoader::createMaterialFileName(modelFileName);
 			std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
 
-			Logger::info("modelFileName: " + modelFileName);
-			Logger::info("materialXmlFileName: " + materialXmlFileName);
-			Logger::info("objectDirPath: " + objectDirPath);
-			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getMaterial(0), currentRenderObject->getMaterialsCount(), objectDirPath);
+			LOG_INFO("modelFileName: " + modelFileName);
+			LOG_INFO("materialXmlFileName: " + materialXmlFileName);
+			LOG_INFO("objectDirPath: " + objectDirPath);
+			MaterialSaver::saveMaterials(materialXmlFileName, currentRenderObject->getModel()->getMaterials(), objectDirPath);
 
 			isMaterialModified = false;
 		}
@@ -121,7 +123,9 @@ namespace vbEditor
 			"TREE_MATERIAL",
 			"GRASS_MATERIAL",
 			"SKY_MATERIAL",
-			"GLASS_MATERIAL"
+			"GLASS_MATERIAL",
+			"DECAL_MATERIAL",
+			"WIREFRAME_MATERIAL"
 		};
 
 		if (ImGui::Combo("Material type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
@@ -190,7 +194,7 @@ namespace vbEditor
 
 				if (result.size() == 1)
 				{
-					Logger::info(result[0]);
+					LOG_INFO(result[0]);
 
 					std::string path = result[0];
 					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
@@ -277,7 +281,8 @@ namespace vbEditor
 
 		isOpen = true;
 
-		if (ImGui::Begin("Material editor", &isOpen))
+		ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoDocking;
+		if (ImGui::Begin("Material editor", &isOpen, windowFlags))
 		{
 			ImGui::PushID(currentMaterial);
 

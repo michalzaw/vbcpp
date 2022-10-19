@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 struct point
 {
     point() : rpm(0), torque(0) { }
@@ -30,6 +32,73 @@ enum EngineState
 };
 
 
+enum AudibilityType
+{
+    AT_ALWAYS,
+    AT_INTERIOR,
+    AT_EXTERIOR,
+
+    AT_TYPE_COUNT
+};
+
+
+const std::string audibilityTypeStrings[] = { "always", "interior", "exterior" };
+AudibilityType getAudibilityTypeFromStrings(const std::string& name);
+
+
+enum SoundVolumeCurveVariable
+{
+    SVCV_THROTTLE,
+    SVCV_RPM,
+
+    SVCV_VARIABLE_COUNT
+};
+
+
+const std::string soundVolumeCurveStrings[] = { "throttle", "rpm" };
+SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name);
+
+
+enum SoundTrigger
+{
+    ST_START_ENGINE,
+    ST_STOP_ENGINE,
+
+    ST_TRIGGERS_COUNT
+};
+
+
+const std::string soundTriggerStrings[] = { "start_engine", "stop_engine" };
+SoundTrigger getSoundTriggerFromStrings(const std::string& name);
+
+
+struct SoundVolumeCurve
+{
+    SoundVolumeCurveVariable variable;
+    std::vector<glm::vec2> points;
+};
+
+
+struct SoundDefinition
+{
+    std::string soundFilename;
+    AudibilityType audibilityType;
+    float rpm;
+    bool looped;
+    float volume;
+    float playDistance;
+    SoundTrigger trigger;
+
+    std::vector<SoundVolumeCurve> volumeCurves;
+};
+
+
+namespace tinyxml2
+{
+    class XMLElement;
+}
+
+
 class Engine
 {
     public:
@@ -50,26 +119,19 @@ class Engine
 
         void setThrottle(float throttle) { _throttle = throttle; }
 
-        void throttleUp();
+        void throttleUp(float dt);
 
-        void throttleDown();
+        void throttleDown(float dt);
 
         float getCurrentTorque() { return _currentTorque; }
 
 		float getDifferentialRatio() { return _differentialRatio; }
 
-        std::string getSoundFilename() { return _soundFilename; }
+        const std::vector<SoundDefinition>& getEngineLoopedSounds() { return _engineLoopedSounds; }
 
-		float getSoundRpm() { return _soundRpm; }
-
-        float getSoundVolume() { return _volume; }
-
-		std::string getStartSoundFilename() { return _startSoundFilename; }
-
-		std::string getStopSoundFilename() { return _stopSoundFilename; }
+        const std::vector<SoundDefinition>& getEngineSounds() { return _engineSounds; }
 
         void update(float dt);
-
 
     protected:
         EngineState _state;
@@ -81,11 +143,8 @@ class Engine
 
 		float _differentialRatio;
 
-        std::string _soundFilename;
-		float		_soundRpm;
-        float       _volume;
-		std::string _startSoundFilename;
-		std::string _stopSoundFilename;
+        std::vector<SoundDefinition> _engineLoopedSounds;
+        std::vector<SoundDefinition> _engineSounds;
 
         std::vector<point>  _torqueCurve;
         std::vector<params> _curveParams;
@@ -93,6 +152,9 @@ class Engine
         void loadData(const std::string filename);
         void calculateTorqueLine();
         float getMaxTorque();
+
+        void loadSounds(tinyxml2::XMLElement* soundsElement);
+        void loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement, SoundDefinition& soundDefinition);
 };
 
 #endif // ENGINE_H_INCLUDED

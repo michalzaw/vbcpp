@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include "../Utils/Logger.h"
 #include "../Utils/Resource.h"
 #include "../Utils/RTexture.h"
 
@@ -26,9 +27,13 @@ enum ShaderType
     GRASS_MATERIAL,
     SKY_MATERIAL,
     GLASS_MATERIAL,
+    DECAL_MATERIAL,
+
+    WIREFRAME_MATERIAL,
 
     GUI_IMAGE_SHADER,
     GUI_LABEL_SHADER,
+    GUI_PROGRESS_BAR_SHADER,
 
     DEBUG_SHADER,
     EDITOR_AXIS_SHADER,
@@ -63,12 +68,12 @@ class RShader : virtual public Resource
         RShader(std::string path, GLuint id)
             : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0)
         {
-            std::cout << "RShader: Konstruktor: " << _shaderID <<  "\n";
+            LOG_DEBUG("RShader: Konstruktor: " + Strings::toString(_shaderID));
         }
 
         virtual ~RShader()
         {
-            std::cout << "RShader: Destruktor: " << _shaderID << "\n";
+            LOG_DEBUG("RShader: Destruktor: " + Strings::toString(_shaderID));
             glDeleteProgram(_shaderID);
         }
 

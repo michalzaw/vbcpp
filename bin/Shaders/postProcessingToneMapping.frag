@@ -7,6 +7,7 @@ uniform sampler2D texture1;
 out vec4 Color;
 
 uniform float exposure;
+uniform float visibility;
 
 
 #ifdef REINHARD
@@ -38,6 +39,26 @@ vec3 toneMap(vec3 x)
 }
 #endif
 
+#ifdef DEPTH_RENDERING
+vec3 toneMap(vec3 hdrColor)
+{
+	//float ndcDepth = (2.0 * hdrColor.r - 0.1f - 10.0f) / (10.0f - 0.1f);
+	//return vec3((ndcDepth * 0.5) + 0.5);
+
+	float n = 0.1; // camera z near
+	float f = 1000.0; // camera z far
+	float z = hdrColor.r;
+	return vec3((2.0 * n) / (f + n - z * (f - n)));
+}
+#endif
+
+#ifdef NONE
+vec3 toneMap(vec3 hdrColor)
+{
+	return hdrColor;	
+}
+#endif
+
 
 void main()
 {
@@ -47,6 +68,6 @@ void main()
 	
 	// gamma correction;
 	float gamma = 2.2;
-    Color.rgb = pow(resultColor, vec3(1.0 / gamma));
+	Color.rgb = pow(resultColor, vec3(1.0 / gamma)) * visibility;
 	Color.a = 1.0f;
 }

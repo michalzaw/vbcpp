@@ -90,10 +90,10 @@ namespace RoadGenerator
 				}
 				lastPoint = centerPoint;
 
-				vertex1.s = 1.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;
-				vertex1.t = distanceFromLaneBegin * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;
-				vertex2.s = 0.0f * roadLanes[i].material.scale.x + roadLanes[i].material.offset.x;
-				vertex2.t = distanceFromLaneBegin * roadLanes[i].material.scale.y + roadLanes[i].material.offset.y;
+				vertex1.s = 1.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;
+				vertex1.t = distanceFromLaneBegin * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;
+				vertex2.s = 0.0f * roadLanes[i].material->scale.x + roadLanes[i].material->offset.x;
+				vertex2.t = distanceFromLaneBegin * roadLanes[i].material->scale.y + roadLanes[i].material->offset.y;
 
 				lanesVerticesArray[i].push_back(vertex1);
 				lanesVerticesArray[i].push_back(vertex2);
@@ -196,51 +196,21 @@ namespace RoadGenerator
 				indices[j] = lanesIndicesArray[i][j];
 			}
 
-			if (oldMeshes != nullptr)
-			{
-				meshes[i].updateMeshData(vertices, verticesCount, indices, indicesCount);
-			}
-			else if (isGame)
-			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader);
-			}
-			else
-			{
-				meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material.shader, false, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
-			}
+			meshes[i].setMeshData(vertices, verticesCount, indices, indicesCount, i, roadLanes[i].material->shader, isGame, DEFAULT_ROAD_BUFFER_SIZE, DEFAULT_ROAD_BUFFER_SIZE, false);
 		}
 
 		return meshes;
 	}
 
-	glm::vec3* generateCollistionMesh(std::vector<unsigned int>* lanesIndicesArray, StaticModelMesh* meshes, unsigned int totalIndicesCount, unsigned int lanesCount)
-	{
-		glm::vec3* collisionMesh = new glm::vec3[totalIndicesCount];
-		int counter = 0;
-		for (int i = 0; i < lanesCount; ++i)
-		{
-			unsigned int indicesCount = lanesIndicesArray[i].size();
-
-			for (int j = 0; j < indicesCount; ++j)
-			{
-				collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
-			}
-
-			counter += indicesCount;
-		}
-
-		return collisionMesh;
-	}
-
-	RStaticModel* generateModel(const std::vector<RoadLane>& roadLanes, StaticModelMesh* meshes, glm::vec3* collisionMesh, int collistionMeshSize)
+	RStaticModel* generateModel(const std::vector<RoadLane>& roadLanes, StaticModelMesh* meshes)
 	{
 		int lanesCount = roadLanes.size();
 
 		// materials
-		Material* materials = new Material[lanesCount];
+		std::vector<Material*> materials;
 		for (int i = 0; i < lanesCount; ++i)
 		{
-			materials[i] = roadLanes[i].material;
+			materials.push_back(new Material(*roadLanes[i].material));
 		}
 
 		StaticModelNode* modelNode = new StaticModelNode;
@@ -249,12 +219,11 @@ namespace RoadGenerator
 		modelNode->meshesCount = lanesCount;
 		modelNode->parent = nullptr;
 
-		return new RStaticModel("", modelNode, materials, lanesCount, GL_TRIANGLES, collisionMesh, collistionMeshSize);
+		return new RStaticModel("", modelNode, materials, GL_TRIANGLES);
 	}
 
-	RStaticModel* updateOldModel(RStaticModel* oldModel, glm::vec3* collisionMesh, int collistionMeshSize)
+	RStaticModel* updateOldModel(RStaticModel* oldModel)
 	{
-		oldModel->setNewCollisionMesh(collisionMesh, collistionMeshSize);
 		oldModel->recalculateAABB();
 
 		return oldModel;
@@ -278,16 +247,14 @@ namespace RoadGenerator
 		StaticModelMesh* meshes = createMeshes(lanesVerticesArray, lanesIndicesArray, roadLanes, totalIndicesCount, 
 											   isGame, oldModel == nullptr ? nullptr : oldModel->getRootNode()->meshes);
 
-		glm::vec3* collisionMesh = generateCollistionMesh(lanesIndicesArray, meshes, totalIndicesCount, lanesCount);
-
 		RStaticModel* model;
 		if (oldModel == nullptr)
 		{
-			model = generateModel(roadLanes, meshes, collisionMesh, totalIndicesCount);
+			model = generateModel(roadLanes, meshes);
 		}
 		else
 		{
-			model = updateOldModel(oldModel, collisionMesh, totalIndicesCount);
+			model = updateOldModel(oldModel);
 		}
 
 		delete[] lanesVerticesArray;

@@ -45,7 +45,7 @@ typedef std::vector<Light*> HeadlightsList;
 class BusConstraint : public Bus
 {
     public:
-        BusConstraint(SceneManager* smgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
+        BusConstraint(SceneManager* smgr, GraphicsManager* gmgr, PhysicsManager* pmgr, SoundManager* sndMgr, std::string filename);
         virtual ~BusConstraint();
 
         SceneObject* getSceneObject() { return _modules[0].sceneObject; }
@@ -64,9 +64,9 @@ class BusConstraint : public Bus
         void turnLeft(float dt);
         void turnRight(float dt);
         void centerSteringWheel(float dt);
-        void accelerate();
-        void idle();
-        void brakeOn();
+        void accelerate(float dt);
+        void idle(float dt);
+        void brakeOn(float dt);
         void brakeOff();
         void toggleHandbrake();
 
@@ -83,7 +83,7 @@ class BusConstraint : public Bus
         void stopEngine();
 
         // Door methods
-        void doorOpenClose(char doorGroup);
+        void doorGroupOpenClose(char doorGroup);
         //void closeDoor(unsigned char doorIndex);
         Door* getDoor(unsigned char doorIndex);
         int getDoorsCount();
@@ -104,6 +104,7 @@ class BusConstraint : public Bus
     private:
         SceneObject*    _sceneObject;
         PhysicalBodyConvexHull* _chasisBody;
+        GraphicsManager* _gMgr;
         SceneManager*   _sMgr;
         PhysicsManager* _pMgr;
         SoundManager*   _sndMgr;

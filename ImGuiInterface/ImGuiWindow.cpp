@@ -1,8 +1,8 @@
 #include "ImGuiWindow.h"
 
 
-ImGuiWindow::ImGuiWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-    : _sceneManager(sceneManager), _buses(buses), _isOpen(isOpen)
+ImGuiWindow::ImGuiWindow(SceneManager* sceneManager, bool isOpen)
+    : _sceneManager(sceneManager), _isOpen(isOpen)
 {
 
 }

@@ -10,12 +10,13 @@ class PhysicalBodyBvtTriangleMesh : public PhysicalBody
 {
     public:
         PhysicalBodyBvtTriangleMesh(RStaticModel* model);
+        PhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& model);
         virtual ~PhysicalBodyBvtTriangleMesh();
 
     private:
-        RStaticModel*  _model;
+        std::list<RStaticModel*>  _models;
 
-        void addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, glm::mat4 parentTransform);
+        void addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, unsigned int primitiveType, glm::mat4 parentTransform);
         btTriangleMesh* buildTriangleMesh();
         void updateBody();
 };

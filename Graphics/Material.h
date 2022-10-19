@@ -27,7 +27,7 @@ class Material
         : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL), emissiveTexture(NULL),
 		reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
         shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0), fixDisappearanceAlpha(0.0),
-		metalnessValue(0.0f), roughnessValue(0.9f){}
+		metalnessValue(0.0f), roughnessValue(0.9f), requireSeparateInstance(false){}
         virtual ~Material()
         { }
 
@@ -64,6 +64,8 @@ class Material
     glm::vec2 scale;
 
     std::string mirrorName;
+
+    bool requireSeparateInstance;
 
     //RShader* _shader;
     ShaderType shader;

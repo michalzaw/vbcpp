@@ -38,6 +38,8 @@ class EnvironmentCaptureComponent : public Component
         EnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
         ~EnvironmentCaptureComponent();
 
+		void generateRequiredPbrMaps();
+
         RTextureCubeMap* getEnvironmentMap();
 		RTextureCubeMap* getIrradianceMap();
 		RTextureCubeMap* getSpecularIrradianceMap();

@@ -2,19 +2,32 @@ set (GAME_SOURCES
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
 	Game/CameraControlComponent.cpp
-	Game/CameraControlSystem.cpp
 	Game/GameConfig.cpp
+	Game/GameEnvironment.cpp
+	Game/GameLogicSystem.cpp
+	Game/GameScene.cpp
 	Game/Hud.cpp
+	Game/LoadingScreenScene.cpp
+	Game/MainGameScene.cpp
+	Game/MenuSelectBusScene.cpp
+	Game/TestScene.cpp
 )
 
 set (GAME_HEADERS 
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h
 	Game/CameraControlComponent.h
-	Game/CameraControlSystem.h
 	Game/Directories.h
 	Game/GameConfig.h
+	Game/GameEnvironment.h
+	Game/GameLogicSystem.h
+	Game/GameScene.h
+	Game/GameScenesNames.h
 	Game/Hud.h
+	Game/LoadingScreenScene.h
+	Game/MainGameScene.h
+	Game/MenuSelectBusScene.h
+	Game/TestScene.h
     
 )
 

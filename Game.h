@@ -3,8 +3,10 @@
 
 
 #include <string>
+#include <future>
 
 #include "Game/Hud.h"
+#include "Game/GameScene.h"
 
 #include "Graphics/PhysicsDebugRenderer.h"
 
@@ -17,59 +19,39 @@
 #include "Window/Window.h"
 
 
-#define DRAW_IMGUI
-
-
-enum GameState
-{
-	GS_LOADING,
-	GS_GAME
-};
-
-
 class Game
 {
 	private:
 		static constexpr char* WINDOW_TITLE = "Virtual Bus Core++";
 
-		GameState _state;
-
 		Window* _window;
+		Window* _backgroundWindow;
 
-		PhysicsManager* _physicsManager;
-		SoundManager* _soundManager;
-		SceneManager* _sceneManager;
-		GUIManager* _gui;
-		ImGuiInterface* _imGuiInterface;
 		PhysicsDebugRenderer* _physicsDebugRenderer;
+
+		//std::thread* _loadingThread;
+		std::atomic<bool> _initialized;
 
 		double _lastFPSupdate;
 		int _numberOfFrames;
 		int _fps;
 
-		std::vector<Bus*> _buses;
-		Bus* _activeBus;
-		std::vector<CameraFPS*> _cameras;
-		CameraFPS* _activeCamera;
+		std::unordered_map<std::string, std::function<GameScene*()>> _registeredScenes;
+		std::string _loadingScene;
 
-		Hud* _hud;
+		std::string _gameSceneName;
+		std::string _nextGameSceneName;
+		GameScene* _gameScene;
+		GameScene* _nextGameScene;
+		std::future<void> _loadingSceneFuture;
+		bool _swapScenes;
 
-		bool _isCameraControll;
-		bool _isMirrorControll;
-		int _mirrorControllIndex;
-
-		CameraFPS* createCameraBusDriver();
-		CameraFPS* createCameraBus();
-		CameraFPS* createCameraFPSGlobal();
+		std::unordered_map<std::string, std::string> _firstSceneParams;
+		bool _useLoadingScreen;
 
 		void loadGameConfig();
 		void createWindow();
 		void initializeEngineSystems();
-		void initScene();
-		void setActiveCamera(CameraFPS* camera);
-		void loadScene();
-		void initGui();
-		void startGame();
 
 		void updateFpsCounter(double timePhysicsCurr);
 		void fixedStepUpdate(double deltaTime);
@@ -77,10 +59,24 @@ class Game
 		void readInput(double deltaTime);
 		void fixedStepReadInput(float deltaTime);
 
-		void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f));
+		template<typename T>
+		GameScene* createScene();
+
+		GameScene* getSceneByName(const std::string& name);
+
+		void asyncLoadScene(Window* window, GameScene* scene);
+		void swapScenesImpl(float deltaTime);
+		void performSwapScenes();
 
 	public:
 		Game();
+
+		template<typename T>
+		void registerSceneType(const std::string& name);
+		template<typename T>
+		void registerLoadingSceneType(const std::string& name);
+
+		void setFirstScene(const std::string& sceneName, bool useLoadingScreen = true, const std::unordered_map<std::string, std::string>& params = {});
 
 		void initialize();
 
@@ -89,6 +85,26 @@ class Game
 		void terminate();
 
 };
+
+
+template<typename T>
+GameScene* Game::createScene()
+{
+	return new T(_window);
+}
+
+template<typename T>
+void Game::registerSceneType(const std::string& name)
+{
+	_registeredScenes.insert(std::make_pair(name, std::bind(&Game::createScene<T>, this)));
+}
+
+template<typename T>
+void Game::registerLoadingSceneType(const std::string& name)
+{
+	registerSceneType<T>(name);
+	_loadingScene = name;
+}
 
 
 #endif // GAME_H_INCLUDED

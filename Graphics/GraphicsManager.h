@@ -22,6 +22,7 @@
 #include "Sky.h"
 #include "DisplayComponent.h"
 #include "CrossroadComponent.h"
+#include "RoadIntersectionComponent.h"
 
 #include "CameraStatic.hpp"
 #include "CameraFPS.hpp"
@@ -41,15 +42,17 @@ class GraphicsManager
     friend class Renderer;
 
     private:
-        std::list<RenderObject*>    _renderObjects;
-        std::list<Grass*>           _grassComponents;
-        std::vector<CameraStatic*>  _cameras;
-        std::list<Light*>           _lights;
-        std::list<EnvironmentCaptureComponent*> _environmentCaptureComponents;
-        std::vector<MirrorComponent*> _mirrorComponents;
-        std::list<ClickableObject*> _clickableObjects;
-		std::list<DisplayComponent*>_displayComponents;
-		std::vector<CrossroadComponent*> _crossroadComponents;
+        std::list<RenderObject*>                    _renderObjects;
+        std::list<Grass*>                           _grassComponents;
+        std::vector<CameraStatic*>                  _cameras;
+        std::list<Light*>                           _lights;
+        std::list<EnvironmentCaptureComponent*>     _environmentCaptureComponents;
+        std::vector<MirrorComponent*>               _mirrorComponents;
+        std::list<ClickableObject*>                 _clickableObjects;
+		std::list<DisplayComponent*>                _displayComponents;
+		std::vector<CrossroadComponent*>            _crossroadComponents;
+        std::vector<RoadIntersectionComponent*>     _roadIntersectionComponents;
+        std::vector<RoadObject*>                    _roadObjects;
 
 		Sky*						_sky;
 
@@ -67,21 +70,17 @@ class GraphicsManager
 
         std::list<Material*> _pendingMaterialsForMirrorComponent;
 
-        GraphicsManager();
-
         void findAndAssigneMirrorComponentToPendingMaterials(MirrorComponent* mirrorComponent);
 
     public:
+        GraphicsManager();
         ~GraphicsManager();
-
-        static GraphicsManager& getInstance();
-
 
         //RenderObject*   qddRenderObject(RModel* model = NULL/*, glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
-		RoadObject*		addRoadObject(RoadType roadType, RRoadProfile* roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner);
+		RoadObject*		addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner);
 		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
         CameraStatic*   addCameraStatic(CameraProjectionType projectionType = CPT_PERSPECTIVE);
@@ -93,9 +92,10 @@ class GraphicsManager
         EnvironmentCaptureComponent* addGlobalEnvironmentCaptureComponent(RTextureCubeMap* environmentMap, RTextureCubeMap* irradianceMap = NULL, RTextureCubeMap* specularIrradianceMap = NULL);
         MirrorComponent*addMirrorComponent(std::string name, float renderingDistance);
         ClickableObject*addClickableObject();
-		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight);
+		DisplayComponent* addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor);
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
+        RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -111,6 +111,7 @@ class GraphicsManager
 		void removeDisplayComponent(DisplayComponent* displayComponent);
 		void removeSky(Sky* sky);
 		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
+        void removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -129,6 +130,8 @@ class GraphicsManager
 
         std::list<RenderObject*>& getRenderObjects();
 		std::vector<CrossroadComponent*>& getCrossroadComponents();
+        std::vector<RoadIntersectionComponent*>& getRoadIntersectionComponents();
+        std::vector<RoadObject*>& getRoadObjects();
 
 		Sky* getSky();
 

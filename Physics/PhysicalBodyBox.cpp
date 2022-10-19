@@ -1,6 +1,7 @@
 #include "PhysicalBodyBox.hpp"
 
 #include "../Utils/Helpers.hpp"
+#include "../Utils/Logger.h"
 
 PhysicalBodyBox::PhysicalBodyBox(btVector3 halfExtents, btScalar mass)
 : PhysicalBody(mass),
@@ -11,7 +12,7 @@ _halfExtents(halfExtents)
 
 PhysicalBodyBox::~PhysicalBodyBox()
 {
-    printf("PhysicalBodyBox - Destruktor\n");
+    LOG_INFO("PhysicalBodyBox - Destruktor");
 }
 
 void PhysicalBodyBox::updateBody()

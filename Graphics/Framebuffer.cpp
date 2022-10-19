@@ -1,10 +1,8 @@
 #include "Framebuffer.h"
 
-#include  "../Utils/Logger.h"
-
 
 Framebuffer::Framebuffer()
-    : _fboId(0), _depthRenderbuffer(0), _isInitialized(false), _viewport(0, 0, 0, 0)
+    : _fboId(0), _depthRenderbuffer(0), _isCreated(false), _isInitialized(false), _viewport(0, 0, 0, 0)
 {
 
 }
@@ -31,33 +29,33 @@ void Framebuffer::checkFramebufferStatus()
     GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE)
     {
-        Logger::error("Incomplete FBO:");
+        LOG_ERROR("Incomplete FBO:");
 
         switch (status)
         {
             case GL_FRAMEBUFFER_UNDEFINED:
-                Logger::error("FBO error: GL_FRAMEBUFFER_UNDEFINED");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_UNDEFINED");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER");
                 break;
             case GL_FRAMEBUFFER_UNSUPPORTED:
-                Logger::error("FBO error: GL_FRAMEBUFFER_UNSUPPORTED");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_UNSUPPORTED");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE");
                 break;
             case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
-                Logger::error("FBO error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
+                LOG_ERROR("FBO error: GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS");
                 break;
         }
     }
@@ -69,6 +67,46 @@ void Framebuffer::init()
     if (!_isInitialized)
     {
         glGenFramebuffers(1, &_fboId);
+
+        _isCreated = true;
+
+        bind();
+
+        if (_depthRenderbuffer != 0)
+        {
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
+        }
+
+        for (RTexture* texture : _textures)
+        {
+            GLenum attachment;
+            if (texture->getInternalFormat() == TF_DEPTH_COMPONENT)
+            {
+                attachment = GL_DEPTH_ATTACHMENT;
+            }
+            else
+            {
+                attachment = GL_COLOR_ATTACHMENT0 + _fboBuffs.size();
+
+                _fboBuffs.push_back(attachment);
+            }
+
+            if (texture->getTextureType() != TT_CUBE)
+            {
+                glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture->getTextureType(), texture->_texID, 0);
+            }
+        }
+
+        if (_fboBuffs.size() > 0)
+        {
+            glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+        }
+        else
+        {
+            glDrawBuffer(GL_NONE);
+        }
+
+        checkFramebufferStatus();
 
         _isInitialized = true;
     }
@@ -93,8 +131,6 @@ void Framebuffer::bindCubeMapFaceToRender(CubeMapFace face, int textureIndex, in
 
 void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
-    bind();
-
     glGenRenderbuffers(1, &_depthRenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, _depthRenderbuffer);
     if (!multisample)
@@ -105,72 +141,40 @@ void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, 
     {
         glRenderbufferStorageMultisample(GL_RENDERBUFFER, samplesCount, GL_DEPTH_COMPONENT /*GL_DEPTH32F_STENCIL8*/, width, height);
     }
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthRenderbuffer);
-
-    checkFramebufferStatus();
 }
 
 
 void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
-    bind();
-
     RTexture2D* texture = new RTexture2D(format, glm::uvec2(width, height), multisample, samplesCount);
-    texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
-    texture->setClampMode(TCM_CLAMP);
 
-    GLenum attachment;
-    if (format == TF_DEPTH_COMPONENT)
+    if (!multisample)
     {
-        attachment = GL_DEPTH_ATTACHMENT;
+        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+        texture->setClampMode(TCM_CLAMP);
     }
-    else
-    {
-        attachment = GL_COLOR_ATTACHMENT0 + _fboBuffs.size();
-
-        _fboBuffs.push_back(attachment);
-    }
-
-    glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture->getTextureType(), texture->_texID, 0);
 
     _textures.push_back(texture);
 
-    if (_fboBuffs.size() > 0)
+    if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
     {
-        glDrawBuffers(_fboBuffs.size(), &_fboBuffs[0]);
+        setViewport(UintRect(0, 0, width, height));
     }
-    else
-    {
-        glDrawBuffer(GL_NONE);
-    }
-
-    checkFramebufferStatus();
-
-	if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
-	{
-		setViewport(UintRect(0, 0, width, height));
-	}
 }
 
 
 void Framebuffer::addCubeMapTexture(TextureFormat format, unsigned int size, bool mipmaping)
 {
-	bind();
+    RTextureCubeMap* texture = new RTextureCubeMap(format, size);
+    texture->setFiltering(mipmaping ? TFM_TRILINEAR : TFM_LINEAR, TFM_LINEAR);
+    texture->setClampMode(TCM_CLAMP_TO_EDGE);
 
-	RTextureCubeMap* texture = new RTextureCubeMap(format, size);
-	texture->setFiltering(mipmaping ? TFM_TRILINEAR : TFM_LINEAR, TFM_LINEAR);
-	texture->setClampMode(TCM_CLAMP_TO_EDGE);
+    _textures.push_back(texture);
 
-	_textures.push_back(texture);
-
-	_fboBuffs.push_back(GL_COLOR_ATTACHMENT0);
-
-	checkFramebufferStatus();
-
-	if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
-	{
-		setViewport(UintRect(0, 0, size, size));
-	}
+    if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
+    {
+        setViewport(UintRect(0, 0, size, size));
+    }
 }
 
 
@@ -193,11 +197,20 @@ void Framebuffer::setViewport(const UintRect& viewport)
 {
     _viewport = viewport;
 
-    bind();
+    if (_isCreated)
+    {
+        bind();
+    }
 }
 
 
 UintRect& Framebuffer::getViewport()
 {
     return _viewport;
+}
+
+
+void Framebuffer::setTextureFiltering(int index, TextureFilterMode minFilter, TextureFilterMode magFilter)
+{
+    _textures[index]->setFiltering(minFilter, magFilter);
 }

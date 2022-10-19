@@ -13,13 +13,44 @@ using namespace tinyxml2;
 #include "ResourceManager.h"
 #include "Logger.h"
 #include "XmlUtils.h"
+#include "Strings.h"
 
 #include "../Game/Directories.h"
 
 
+AudibilityType getAudibilityTypeFromStrings(const std::string& name)
+{
+    for (int i = 0; i < AT_TYPE_COUNT; ++i)
+    {
+        if (audibilityTypeStrings[i] == name)
+            return static_cast<AudibilityType>(i);
+    }
+}
+
+
+SoundVolumeCurveVariable getSoundVolumeCurveFromStrings(const std::string& name)
+{
+    for (int i = 0; i < SVCV_VARIABLE_COUNT; ++i)
+    {
+        if (soundVolumeCurveStrings[i] == name)
+            return static_cast<SoundVolumeCurveVariable>(i);
+    }
+}
+
+
+SoundTrigger getSoundTriggerFromStrings(const std::string& name)
+{
+    for (int i = 0; i < ST_TRIGGERS_COUNT; ++i)
+    {
+        if (soundTriggerStrings[i] == name)
+            return static_cast<SoundTrigger>(i);
+    }
+}
+
+
 Engine::Engine(std::string filename)
 : _state(ES_OFF),
-_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(3.45f)
+_throttle(0.0f), _currentRPM(0.0f), _currentTorque(0.0f), _maxRPM(0.0f), _differentialRatio(/*5.21f*/3.45f)
 {
     loadData(filename);
 
@@ -52,7 +83,7 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 {
     if (isRunning())
     {
-        float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / PI;
+        float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / (2 * PI * 0.45f);
         //if (_currentRPM < _torqueCurve[0].rpm)
         //    _currentRPM = static_cast<float>(_torqueCurve[0].rpm);
         if (rpm > _torqueCurve[0].rpm)
@@ -67,21 +98,73 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 }
 
 
-void Engine::throttleUp()
+void Engine::throttleUp(float dt)
 {
     if (_throttle < 1.0f)
-        _throttle += 0.001f;
+        _throttle += 0.1f * dt;
     else
         _throttle = 1.0f;
 }
 
 
-void Engine::throttleDown()
+void Engine::throttleDown(float dt)
 {
     if (_throttle > 0)
-        _throttle -= 0.002f;
+        _throttle -= 0.2 * dt;
     else
         _throttle = 0;
+}
+
+
+void Engine::loadSounds(XMLElement* soundsElement)
+{
+    XMLElement* engSound = soundsElement->FirstChildElement("Sound");
+    while (engSound != nullptr)
+    {
+        SoundDefinition soundDefinition;
+
+        soundDefinition.soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
+        soundDefinition.audibilityType = getAudibilityTypeFromStrings(XmlUtils::getAttributeStringOptional(engSound, "audibility", audibilityTypeStrings[0]));
+        soundDefinition.rpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", -1.0f);
+        soundDefinition.looped = XmlUtils::getAttributeBoolOptional(engSound, "looped");
+        soundDefinition.volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
+        soundDefinition.playDistance = XmlUtils::getAttributeFloatOptional(engSound, "playDistance", 20.0f);
+
+        LOG_INFO("Engine sound: " + soundDefinition.soundFilename);
+        LOG_INFO("Engine volume: " + toString(soundDefinition.volume));
+
+        if (soundDefinition.looped)
+        {
+            loadVolumeCurvesForSounds(engSound, soundDefinition);
+
+            _engineLoopedSounds.push_back(soundDefinition);
+        }
+        else
+        {
+            soundDefinition.trigger = getSoundTriggerFromStrings(XmlUtils::getAttributeString(engSound, "trigger"));
+
+            _engineSounds.push_back(soundDefinition);
+        }
+
+        engSound = engSound->NextSiblingElement("Sound");
+    }
+}
+
+
+void Engine::loadVolumeCurvesForSounds(tinyxml2::XMLElement* soundElement, SoundDefinition& soundDefinition)
+{
+    XMLElement* curveElement = soundElement->FirstChildElement("VolumeCurve");
+    while (curveElement != nullptr)
+    {
+        SoundVolumeCurve curve;
+        curve.variable = getSoundVolumeCurveFromStrings(curveElement->Attribute("variable"));
+
+        XmlUtils::loadCurveFromXmlFile(curveElement, curve.points, "value", "volume");
+
+        soundDefinition.volumeCurves.push_back(curve);
+
+        curveElement = curveElement->NextSiblingElement("VolumeCurve");
+    }
 }
 
 
@@ -101,36 +184,26 @@ void Engine::loadData(std::string filename)
     XMLElement* engElement = doc.FirstChildElement("Engine");
 	if (engElement == nullptr)
 	{
-		Logger::error("Engine element not found!Is it correct engine file ? ");
+        LOG_ERROR("Engine element not found!Is it correct engine file ? ");
 		return;
 	}
 
     XMLElement* engDesc = engElement->FirstChildElement("Description");
 	if (engDesc == nullptr)
-		Logger::warning("Description element not found");
+        LOG_ERROR("Description element not found");
 
     // Load file description
     std::string author(engDesc->Attribute("author"));
     std::string model(engDesc->Attribute("name"));
     std::string comment(engDesc->Attribute("comment"));
 
-    XMLElement* engSound = engElement->FirstChildElement("Sound");
-
-	_soundFilename = GameDirectories::BUS_PARTS + std::string(engSound->Attribute("file"));
-
-	_soundRpm = XmlUtils::getAttributeFloatOptional(engSound, "rpm", 1000.0f);
-    _volume = XmlUtils::getAttributeFloatOptional(engSound, "volume", 1.0f);
-
-	_startSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "startFile");
-	_stopSoundFilename = GameDirectories::BUS_PARTS + XmlUtils::getAttributeStringOptional(engSound, "stopFile");
-
-    std::cout << "Engine sound: " << _soundFilename << std::endl;
-    std::cout << "Engine volume: " << _volume << std::endl;
+    XMLElement* soundsElement = engElement->FirstChildElement("Sounds");
+    loadSounds(soundsElement);
 
     XMLElement* pointList = engElement->FirstChildElement("Points");
 
     int curvePoints = atoi(pointList->Attribute("count"));
-    std::cout << "Point count: " << curvePoints << std::endl;
+    LOG_INFO("Point count: "+ Strings::toString(curvePoints));
 
     XMLElement* curvePoint = pointList->FirstChildElement("Point");
 
@@ -146,12 +219,12 @@ void Engine::loadData(std::string filename)
         curvePoint = curvePoint->NextSiblingElement("Point");
     }
 
-    std::cout << "*** ENGINE DATA ***" << std::endl;
-    std::cout << "Author: " << author << std::endl;
-    std::cout << "Model: " << model << std::endl;
-    std::cout << "Comment: " << comment << std::endl;
+    LOG_INFO("*** ENGINE DATA ***");
+    LOG_INFO("Author: " + author);
+    LOG_INFO("Model: " + model);
+    LOG_INFO("Comment: " +  comment);
 
-    std::cout << "Point count: " << _torqueCurve.size() << std::endl;
+    LOG_INFO("Point count: " + Strings::toString(_torqueCurve.size()));
 }
 
 

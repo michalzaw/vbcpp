@@ -1,18 +1,24 @@
 #include "ObjectPropertiesWindow.h"
 
 #include <numeric>
+#include <stdarg.h>
 
-#include "../../ImGui/imGizmo.h"
+#include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
-#include "../../ImGui/imgui.h"
+#include "imgui.h"
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
-#include "../../ImGui/imgui_internal.h"
 
+#include "OpenDialogWindow.h"
 #include "RoadTools.h"
-#include "../../Utils/Logger.h"
+#include "../FileDialogs.h"
+
+#include "../../Graphics/ShapePolygonComponent.h"
+
+#include "../../Utils/FilesHelper.h"
+
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
     : EditorWindow(sceneManager, selectedSceneObject, isOpen, events)
@@ -248,8 +254,6 @@ namespace vbEditor
 	extern int roadActivePoint;
 	extern bool isRoadModified;
 
-	extern std::vector<std::string> _availableRoadProfiles;
-
 	extern bool _showMaterialEditorWindow;
 	extern RenderObject* currentRenderObject;
 	extern RStaticModel* currentStaticModel;
@@ -257,6 +261,8 @@ namespace vbEditor
 	extern unsigned int currentMaterialIndex;
 
 	extern bool _showGenerateObjectsAlongRoadWindow;
+
+	extern OpenDialogWindow* _selectRoadProfileDialogWindow;
 }
 
 
@@ -289,7 +295,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 
 				if (result.size() == 1)
 				{
-					Logger::info(result[0]);
+					LOG_INFO(result[0]);
 
 					std::string path = result[0];
 					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
@@ -309,7 +315,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 
 			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
 
-			for (int j = 0; j < renderComponent->getMaterialsCount(i); ++j)
+			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
 			{
 				Material* material = renderComponent->getModel(i)->getMaterial(j);
 
@@ -317,7 +323,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 				{
 					if (ImGui::IsMouseDoubleClicked(0))
 					{
-						Logger::info(material->name);
+						LOG_INFO(material->name);
 						vbEditor::_showMaterialEditorWindow = true;
 						vbEditor::currentRenderObject = renderComponent;
 						vbEditor::currentStaticModel = renderComponent->getModel(i);
@@ -347,25 +353,36 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 }
 
 
+void shwoRoadProfileEdit(const std::string& roadProfileName, const std::function<void(const std::string&)>& onRoadProfileSelectedCallback)
+{
+	char buffer[1024] = { '\0' };
+	strncpy(buffer, roadProfileName.c_str(), sizeof buffer);
+	buffer[sizeof buffer - 1] = '\0';
+
+	ImGui::Text("Road profile");
+
+	ImGui::InputText("##RoadProfileEditText", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("..."))
+	{
+		*(vbEditor::_selectRoadProfileDialogWindow->getOpenFlagPointer()) = true;
+		vbEditor::_selectRoadProfileDialogWindow->setOnOkClickCallback(onRoadProfileSelectedCallback);
+	}
+}
+
+
 void showRoadComponentDetails(RoadObject* roadComponent)
 {
 	if (ImGui::CollapsingHeader("Road component", ImGuiTreeNodeFlags_DefaultOpen))
 	{
-		int roadProfilesCurrentItem = 0;
-		std::vector<const char*> roadProfilesComboItems;
-		for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
-		{
-			roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
+		shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
+			{
+				roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
 
-			if (vbEditor::_availableRoadProfiles[i] == roadComponent->getRoadProfile()->getName())
-				roadProfilesCurrentItem = i;
-		}
-		if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
-		{
-			roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
-
-			roadComponent->buildModel(false);
-		}
+				roadComponent->buildModel(false);
+			});
 
 		ImGui::Separator();
 
@@ -421,7 +438,7 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 		ImGui::Separator();
 
-		std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+		std::vector<CrossroadComponent*> availableCrossroads = vbEditor::_sceneManager->getGraphicsManager()->getCrossroadComponents();
 		CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
 
 		int crossroadCurrentItems[2] = { 0, 0 };
@@ -489,22 +506,235 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 }
 
 
+void showShapePolygonComponentDetails(ShapePolygonComponent* component)
+{
+	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of points: %d", component->getPoints().size());
+
+		if (ImGui::Button("Generate Triangle Mesh"))
+		{
+			component->buildAndCreateRenderObject(true);
+		}
+		if (ImGui::Button("Generate Triangle Mesh (without mesh mender)"))
+		{
+			component->buildAndCreateRenderObject(false);
+		}
+	}
+}
+
+
+void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
+{
+	if (ImGui::CollapsingHeader("Road intersection", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		for (const auto& connectedRoad : component->getConnectedRoads())
+		{
+			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
+		}
+
+		ImGui::Separator();
+
+		static bool modifyAllConnectedRoads = true;
+		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
+
+		int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
+		for (int i = 0; i < numberOfRoads; ++i)
+		{
+			ImGui::PushID(i);
+
+			ImGui::Text("#%d", i + 1);
+
+			float length = component->getLength(i);
+			if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+			{
+				component->setLength(i, length, modifyAllConnectedRoads);
+			}
+			float width = component->getWidth(i);
+			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
+			{
+				component->setWidth(i, width, modifyAllConnectedRoads);
+			}
+			float arc = component->getArc(i);
+			if (ImGui::DragFloat("Arc", &arc, 0.1f, 0.0f, 20.0f))
+			{
+				component->setArc(i, arc, modifyAllConnectedRoads);
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::Separator();
+
+		float quality = component->getQuality();
+		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
+		{
+			component->setQuality(quality);
+		}
+
+		ImGui::Separator();
+
+		shwoRoadProfileEdit(component->getEdgeRoadProfile()->getName(), [component](const std::string& newRoadProfile)
+			{
+				component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
+			});
+
+		int numberOfLanesToRemove = component->getEdgeRoadProfileNumberOfLanesToRemove();
+		if (ImGui::DragInt("Lanes to remove", &numberOfLanesToRemove, 1.0f, 1, 20))
+		{
+			component->setEdgeRoadProfileNumberOfLanesToRemove(numberOfLanesToRemove);
+		}
+
+		ImGui::Separator();
+
+
+		if (ImGui::Button("Generate polygon"))
+		{
+			component->createPolygon();
+		}
+	}
+}
+
+
+typedef std::string str;
+typedef std::string path;
+
+
+#define IMGUI_INPUT_int(propertyName)																											\
+int value = component->get##propertyName();																										\
+bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_float(propertyName)																											\
+float value = component->get##propertyName();																									\
+bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_bool(propertyName)																											\
+bool value = component->is##propertyName();																										\
+bool result = ImGui::Checkbox("##value", &value);
+
+
+#define IMGUI_INPUT_str(propertyName)																											\
+char value[50];																																	\
+strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
+value[sizeof value - 1] = '\0';																													\
+																																				\
+bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
+
+
+#define IMGUI_INPUT_path(propertyName)																											\
+ImGui::SetNextItemWidth(-30);																													\
+																																				\
+char buffer[1024];																																\
+strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																			\
+buffer[sizeof buffer - 1] = '\0';																												\
+																																				\
+ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);																\
+																																				\
+ImGui::SameLine();																																\
+																																				\
+std::string value;																																\
+bool result = false;																															\
+																																				\
+if (ImGui::Button("...", ImVec2(20, 0)))																										\
+{																																				\
+	std::vector<std::string> dialogResult = FileDialogs::openFile("Choose file...");															\
+																																				\
+	if (dialogResult.size() == 1)																												\
+	{																																			\
+		LOG_INFO(dialogResult[0]);																												\
+		value = dialogResult[0];;																												\
+		result = true;																															\
+	}																																			\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback)												\
+{																																				\
+	ImGui::PushID(#propertyName);																												\
+																																				\
+	ImGui::AlignTextToFramePadding();																											\
+	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
+	ImGui::NextColumn();																														\
+	ImGui::SetNextItemWidth(-1);																												\
+																																				\
+	IMGUI_INPUT_##type(propertyName)																											\
+																																				\
+	if (result)																																	\
+	{																																			\
+		callback(type(value));																													\
+		component->set##propertyName(type(value));																								\
+	}																																			\
+																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){})
+
+
+bool newNode(const char* name, const char* descriptionFmt, ...)
+{
+	ImGui::PushID("node %s", name);
+	ImGui::AlignTextToFramePadding();
+	bool nodeOpen = ImGui::TreeNode(name, name);
+
+	ImGui::NextColumn();
+
+	ImGui::AlignTextToFramePadding();
+
+	va_list args;
+	va_start(args, descriptionFmt);
+	ImGui::TextV(descriptionFmt, args);
+	va_end(args);
+
+	ImGui::NextColumn();
+
+	return nodeOpen;
+}
+
+
+void showBusStopComponentDetails(BusStopComponent* component)
+{
+	if (ImGui::CollapsingHeader("Bus Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		//ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, Id, int, "Id")
+		COMPONENT_PROPERTY_EDIT(component, Name, str, "Name")
+		COMPONENT_PROPERTY_EDIT(component, AnnouncementFileName, path, "Announcement")
+		COMPONENT_PROPERTY_EDIT(component, Distance, float, "Distance")
+		COMPONENT_PROPERTY_EDIT(component, RequestStop, bool, "Request stop")
+
+		if (newNode("Number of passengers", "[%d, %d]", component->getNumberOfPassengersMin(), component->getNumberOfPassengersMax()))
+		{
+			COMPONENT_PROPERTY_EDIT(component, NumberOfPassengersMin, int, "Min")
+			COMPONENT_PROPERTY_EDIT(component, NumberOfPassengersMax, int, "Max")
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
-	glm::uvec2 mainWindowSize(Renderer::getInstance().getWindowDimensions());
-
-	ImGui::SetNextWindowSize(ImVec2(200, mainWindowSize.y - 18), ImGuiCond_FirstUseEver);
-	ImGui::SetNextWindowSizeConstraints(ImVec2(100, mainWindowSize.y - 18), ImVec2(500, mainWindowSize.y - 18));
-
-	ImGuiWindow* window = ImGui::GetCurrentWindow();
-
 	bool isOpened = true;
-	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 	if (ImGui::Begin("Object Properties", &isOpened, windowFlags))
 	{
-		ImVec2 windowSize = ImGui::GetWindowSize();
-		ImGui::SetWindowPos(ImVec2(mainWindowSize.x - windowSize.x, 18));
-
 		if (vbEditor::_selectedSceneObject)
 		{
 			showObjectNameEdit();
@@ -521,6 +751,12 @@ void showObjectProperties()
 				showRenderComponentDetails(renderComponent);
 			}
 
+			Terrain* terrain = dynamic_cast<Terrain*>(vbEditor::_selectedSceneObject->getComponent(CT_TERRAIN));
+			if (terrain)
+			{
+				showRenderComponentDetails(terrain);
+			}
+
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
 			if (physicsComponent)
 			{
@@ -534,6 +770,24 @@ void showObjectProperties()
 			if (grassComponent)
 			{
 				showRenderComponentDetails(grassComponent);
+			}
+
+			ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+			if (shapePolygonComponent)
+			{
+				showShapePolygonComponentDetails(shapePolygonComponent);
+			}
+
+			RoadIntersectionComponent* roadIntersectionComponent = dynamic_cast<RoadIntersectionComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_INTERSECTION));
+			if (roadIntersectionComponent)
+			{
+				showRoadIntersectionComponentDetails(roadIntersectionComponent);
+			}
+
+			BusStopComponent* busStopComponent = dynamic_cast<BusStopComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_BUS_STOP));
+			if (busStopComponent)
+			{
+				showBusStopComponentDetails(busStopComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -617,6 +871,7 @@ void showObjectProperties()
 			if (roadComponent && roadComponent->getRoadType() == RoadType::BEZIER_CURVES)
 			{
 				showRoadComponentDetails(roadComponent);
+				showRenderComponentDetails(roadComponent);
 			}
 			if (roadComponent && roadComponent->getRoadType() == RoadType::LINES_AND_ARC)
 			{
@@ -689,28 +944,20 @@ void showObjectProperties()
 
 					ImGui::Separator();
 
-					int roadProfilesCurrentItem = 0;
-					std::vector<const char*> roadProfilesComboItems;
-					for (int i = 0; i < vbEditor::_availableRoadProfiles.size(); ++i)
-					{
-						roadProfilesComboItems.push_back(vbEditor::_availableRoadProfiles[i].c_str());
 
-						if (vbEditor::_availableRoadProfiles[i] == roadComponent->getRoadProfile()->getName())
-							roadProfilesCurrentItem = i;
-					}
-					if (ImGui::Combo("Road profile", &roadProfilesCurrentItem, roadProfilesComboItems.data(), roadProfilesComboItems.size()))
-					{
-						roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(vbEditor::_availableRoadProfiles[roadProfilesCurrentItem]));
+					shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
+						{
+							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
 
-						roadComponent->buildModel(false);
-					}
+							roadComponent->buildModel(false);
+						});
 
 					ImGui::Separator();
 
 					//ImGui::Text("Connections");
 
 
-					std::vector<CrossroadComponent*> availableCrossroads = GraphicsManager::getInstance().getCrossroadComponents();
+					std::vector<CrossroadComponent*> availableCrossroads = vbEditor::_sceneManager->getGraphicsManager()->getCrossroadComponents();
 					CrossroadComponent* connectedCrossroads[2] = { roadComponent->getConnectionPoint(0).crossroadComponent, roadComponent->getConnectionPoint(1).crossroadComponent };
 
 					int crossroadCurrentItems[2] = { 0, 0 };
@@ -772,6 +1019,14 @@ void showObjectProperties()
 
 
 				}
+			}
+			
+			ImGui::Separator();
+
+			if (ImGui::Button("Delete"))
+			{
+				vbEditor::_sceneManager->removeSceneObject(vbEditor::_selectedSceneObject, true);
+				vbEditor::_selectedSceneObject = nullptr;
 			}
 		}
 	}

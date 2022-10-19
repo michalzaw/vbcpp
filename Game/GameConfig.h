@@ -24,11 +24,13 @@ class GameConfig
 
         GameConfig()
             : windowWidth(1024), windowHeight(768),
-            isFullscreen(false), verticalSync(false), hdrQuality(16), msaaAntialiasing(false), msaaAntialiasingLevel(8), isBloomEnabled(true),
+            fullscreenMode(0), verticalSync(false), hdrQuality(16), msaaAntialiasing(false), msaaAntialiasingLevel(8), isBloomEnabled(true),
 			isShadowmappingEnable(true), shadowmapSize(1024), staticShadowmapSize(1024),
 			isGrassEnable(true), grassRenderingDistance(30.0f), isMirrorsEnabled(true), mirrorRenderingDistance(100.0f),
 			textureCompression(false), anisotropicFiltering(false), anisotropySamples(4.0f),
-			pbrSupport(false), developmentMode(false),
+			pbrSupport(false), openGlDebugContext(false),
+            loggerLevel(""), loggerConsoleOutput(false), loggerFileOutput(""),
+            developmentMode(false), firstScene(""), useLoadingScreen(true),
 			mode(GM_GAME)
         {}
         GameConfig(const GameConfig&) {}
@@ -52,8 +54,10 @@ class GameConfig
         std::string mapFile;
         std::string mapTexPath;
         std::string busModel;
+        std::string busRepaint;
+        std::string busConfiguration;
 
-        bool isFullscreen;
+        int fullscreenMode;
 		bool verticalSync;
 		int hdrQuality;
         bool msaaAntialiasing;
@@ -72,9 +76,18 @@ class GameConfig
 
 		bool pbrSupport;
 
-		bool developmentMode;
+        bool openGlDebugContext;
 
+        std::string loggerLevel;
+        bool loggerConsoleOutput;
+        std::string loggerFileOutput;
+
+        std::string language;
+
+		bool developmentMode;
 		std::string alternativeResourcesPath;
+        std::string firstScene;
+        bool useLoadingScreen;
 
 };
 

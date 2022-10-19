@@ -3,8 +3,8 @@
 #include "../Graphics/PhysicsDebugRenderer.h"
 
 
-PhysicsDebuggerWindow::PhysicsDebuggerWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-	: ImGuiWindow(sceneManager, buses, isOpen)
+PhysicsDebuggerWindow::PhysicsDebuggerWindow(SceneManager* sceneManager, bool isOpen)
+	: ImGuiWindow(sceneManager, isOpen)
 {
 
 }

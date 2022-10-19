@@ -1,43 +1,35 @@
 #include "Game.h"
 
 #include <ctime>
-#include <thread>
 
 #include "Bus/BusLoader.h"
 
-#include "Game/CameraControlSystem.h"
+#include "Game/CameraControlComponent.h"
+#include "Game/GameLogicSystem.h"
 #include "Game/GameConfig.h"
 
 #include "Graphics/Renderer.h"
+
+#include "ImGuiInterface/ImGuiInterfaceContext.h"
 
 #include "Scene/SceneLoader.h"
 
 #include "Utils/InputSystem.h"
 #include "Utils/ResourceManager.h"
-#include "Utils/Logger.h"
 #include "Utils/RaycastingUtils.h"
 
-
-enum GameCamera
-{
-	GC_DRIVER,
-	GC_BUS,
-	GC_GLOBAL
-};
+#include "Window/Window.h"
 
 
 Game* instance = nullptr;
 
 
 Game::Game()
-	: _state(GS_LOADING),
-	_window(nullptr),
-	_physicsManager(nullptr), _soundManager(nullptr), _sceneManager(nullptr), _gui(nullptr), _imGuiInterface(nullptr),
+	: _window(nullptr), _backgroundWindow(nullptr),
 	_fps(0),
-	_activeBus(nullptr),
-	_activeCamera(nullptr),
-	_hud(nullptr),
-	_isCameraControll(false), _isMirrorControll(false), _mirrorControllIndex(-1)
+	_loadingScene(""),
+	_gameSceneName(""), _nextGameSceneName(""), _gameScene(nullptr), _nextGameScene(nullptr), _swapScenes(false),
+	_useLoadingScreen(true)
 {
 	instance = this;
 }
@@ -45,13 +37,7 @@ Game::Game()
 
 void Game::loadGameConfig()
 {
-	GameConfig& gameConfig = GameConfig::getInstance();
-	gameConfig.loadGameConfig("game.xml");
 
-#ifdef DEVELOPMENT_RESOURCES
-	gameConfig.loadDevelopmentConfig("devSettings.xml");
-	ResourceManager::getInstance().setAlternativeResourcePath(gameConfig.alternativeResourcesPath);
-#endif // DEVELOPMENT_RESOURCES
 }
 
 
@@ -60,7 +46,7 @@ void Game::createWindow()
 	GameConfig& gameConfig = GameConfig::getInstance();
 
 	_window = new Window;
-	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.isFullscreen, gameConfig.verticalSync);
+	_window->createWindow(gameConfig.windowWidth, gameConfig.windowHeight, 10, 40, gameConfig.fullscreenMode, gameConfig.verticalSync, gameConfig.openGlDebugContext);
 	_window->setWindowTitle(WINDOW_TITLE);
 }
 
@@ -72,11 +58,6 @@ void Game::initializeEngineSystems()
 	InputSystem::getInstance().init(_window);
 
 	OGLDriver::getInstance().initialize();
-
-	_physicsManager = new PhysicsManager;
-	_soundManager = new SoundManager();
-	_soundManager->setMute(true);
-	_sceneManager = new SceneManager(_physicsManager, _soundManager);
 
 	Renderer& renderer = Renderer::getInstance();
 	renderer.setFramebufferTextureFormat(gameConfig.hdrQuality == 32 ? TF_RGBA_32F : TF_RGBA_16F);
@@ -91,157 +72,34 @@ void Game::initializeEngineSystems()
 	renderer.setToneMappingType(TMT_CLASSIC);
 	renderer.t = 0;
 
-	// unused
-	GraphicsManager::getInstance().setWindDirection(glm::vec3(1.0f, 0.0f, 0.0f));
-	GraphicsManager::getInstance().setWindVelocity(0.6f);
-
-	_gui = new GUIManager;
+	ImGuiInterfaceContext::initializeImGuiContext(_window, true);
 
 #ifdef DRAW_IMGUI
-	_imGuiInterface = new ImGuiInterface(_window, _sceneManager, &_buses);
-
 	_physicsDebugRenderer = new PhysicsDebugRenderer;
-
-	_physicsManager->setDebugRenderer(_physicsDebugRenderer);
 #endif // DRAW_IMGUI
 }
 
 
-CameraFPS* Game::createCameraBusDriver()
+void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initialized)
 {
-	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBusDriver");
+	glfwMakeContextCurrent(window->getWindow());
 
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
-	cameraObject->addComponent(cameraFPS);
-	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(0, 0, 0);
-	cameraObject->setPosition(0, 0, 0);
+	scene->initialize();
 
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
-	cameraObject->addComponent(cameraControlComponent);
-	cameraControlComponent->setMovmentControl(false);
+	Renderer::getInstance().setGraphicsManager(scene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
 
-	return cameraFPS;
+	glFinish();
+
+	initialized = true;
 }
 
 
-CameraFPS* Game::createCameraBus()
+void Game::setFirstScene(const std::string& sceneName, bool useLoadingScreen, const std::unordered_map<std::string, std::string>& params)
 {
-	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraBus");
-
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
-	cameraObject->addComponent(cameraFPS);
-	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(degToRad(0.0f), degToRad(165.0f), degToRad(0.0f));
-	cameraObject->setPosition(0, 0, 0);
-
-	cameraFPS->setMaxVerticalAngle(0.0f);
-
-	cameraFPS->setMinPositionOffset(1.0f);
-	cameraFPS->setMaxPositionOffset(30.0f);
-	cameraFPS->setPositionOffset(10.0f);
-
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
-	cameraObject->addComponent(cameraControlComponent);
-	cameraControlComponent->setMovmentControl(false);
-
-	return cameraFPS;
-}
-
-
-CameraFPS* Game::createCameraFPSGlobal()
-{
-	SceneObject* cameraObject = _sceneManager->addSceneObject("cameraFPSGlobal");
-
-	CameraFPS* cameraFPS = GraphicsManager::getInstance().addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
-	cameraObject->addComponent(cameraFPS);
-	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
-	cameraObject->setRotation(0, 0, 0);
-	cameraObject->setPosition(0, 0, 0);
-
-	CameraControlComponent* cameraControlComponent = CameraControlSystem::getInstance().addCameraControlComponent(cameraFPS);
-	cameraObject->addComponent(cameraControlComponent);
-
-	return cameraFPS;
-}
-
-
-void Game::initScene()
-{
-	_cameras.resize(3);
-
-	_cameras[GC_DRIVER] = createCameraBusDriver();
-	_cameras[GC_BUS] = createCameraBus();
-	_cameras[GC_GLOBAL] = createCameraFPSGlobal();
-
-	setActiveCamera(_cameras[GC_BUS]);
-}
-
-
-void Game::setActiveCamera(CameraFPS* camera)
-{
-	if (_activeCamera != nullptr)
-	{
-		CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(_activeCamera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), false);
-	}
-	CameraControlSystem::getInstance().setCameraActivity(static_cast<CameraControlComponent*>(camera->getSceneObject()->getComponent(CT_CAMERA_CONTROL)), true);
-
-	_activeCamera = camera;
-
-	GraphicsManager::getInstance().setCurrentCamera(camera);
-	_soundManager->setActiveCamera(camera);
-}
-
-
-void Game::loadScene()
-{
-	BusLoader busLoader(_sceneManager, _physicsManager, _soundManager);
-	Bus* bus = busLoader.loadBus(GameConfig::getInstance().busModel);
-	_buses.push_back(bus);
-	_activeBus = bus;
-
-	SceneLoader sceneLoader(_sceneManager);
-	sceneLoader.loadMap(GameConfig::getInstance().mapFile);
-
-	bus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-	bus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-									   degToRad(_sceneManager->getBusStart().rotation.y),
-									   degToRad(_sceneManager->getBusStart().rotation.z));
-
-	bus->getSceneObject()->addChild(_cameras[GC_DRIVER]->getSceneObject());
-	_cameras[GC_DRIVER]->getSceneObject()->setPosition(_activeBus->getDriverPosition());
-	_cameras[GC_DRIVER]->getSceneObject()->setRotation(0, 0, 0);
-
-	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
-
-	/*CameraStatic* camera = GraphicsManager::getInstance().getCurrentCamera();
-	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));
-	camera->getSceneObject()->setRotation(degToRad(-5.0f),
-										  degToRad(60.0f),
-										  degToRad(0.0f));*/
-
-
-	Renderer::getInstance().bakeStaticShadows();
-}
-
-
-void Game::initGui()
-{
-	_hud = new Hud(_gui, _activeBus);
-}
-
-
-void Game::startGame()
-{
-	_state = GS_GAME;
-
-	_physicsManager->play();
-	_soundManager->setMute(false);
-
-	glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
+	_gameSceneName = sceneName;
+	_firstSceneParams = params;
+	_useLoadingScreen = useLoadingScreen;
 }
 
 
@@ -252,13 +110,28 @@ void Game::initialize()
 	loadGameConfig();
 	createWindow();
 	initializeEngineSystems();
-	initScene();
 
-	loadScene();
+	if (_useLoadingScreen && !_loadingScene.empty())
+	{
+		_gameScene = getSceneByName(_loadingScene);
+		_gameScene->setNextGameScene(_gameSceneName, false, _firstSceneParams);
+	}
+	else
+	{
+		_gameScene = getSceneByName(_gameSceneName);
+		_gameScene->setParams(_firstSceneParams);
+	}
+	
+	//Window* backgroundWindow = new Window;
+	//backgroundWindow->createInvisibleWindow(_window);
 
-	initGui();
+	//_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
+	//_loadingThread->detach();
 
-	startGame();
+	_gameScene->initialize();
+	_initialized = true;
+	Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
 }
 
 
@@ -282,17 +155,73 @@ void Game::fixedStepUpdate(double deltaTime)
 {
 	InputSystem::getInstance().update();
 
-	_physicsManager->simulate(deltaTime);
-	_activeBus->update(deltaTime);
-	GraphicsManager::getInstance().update(deltaTime);
-	BusStopSystem::getInstance().update(deltaTime, _activeBus);
+	_gameScene->fixedStepUpdateScene(deltaTime);
+}
 
-	if (_isCameraControll)
+
+GameScene* Game::getSceneByName(const std::string& name)
+{
+	auto createSceneFunction = _registeredScenes.find(name);
+	if (createSceneFunction != _registeredScenes.end())
 	{
-		CameraControlSystem::getInstance().update(deltaTime);
+		return createSceneFunction->second();
 	}
 
-	fixedStepReadInput(deltaTime);
+	return nullptr;
+}
+
+
+void Game::asyncLoadScene(Window* window, GameScene* scene)
+{
+	glfwMakeContextCurrent(window->getWindow());
+
+	scene->initialize();
+
+	glFinish();
+
+	glfwMakeContextCurrent(nullptr);
+}
+
+
+void Game::swapScenesImpl(float deltaTime)
+{
+	static float speed = -1;
+	float sceneVisibility = Renderer::getInstance().getSceneVisibility();
+	if (speed < 0 && sceneVisibility > 0.0f || speed > 0 && sceneVisibility < 1.0f)
+	{
+		sceneVisibility += speed * deltaTime;
+		sceneVisibility = clamp(sceneVisibility, 0.0f, 1.0f);
+		Renderer::getInstance().setSceneVisibility(sceneVisibility);
+	}
+
+	if (speed < 0 && sceneVisibility == 0.0f)
+	{
+		speed = -speed;
+		performSwapScenes();
+	}
+	if (speed > 0 && sceneVisibility == 1)
+	{
+		speed = -speed;
+		_swapScenes = false;
+	}
+}
+
+
+void Game::performSwapScenes()
+{
+	_gameScene->terminate();
+	delete _gameScene;
+
+	_gameSceneName = _nextGameSceneName;
+	_gameScene = _nextGameScene;
+	_nextGameSceneName = "";
+	_nextGameScene = nullptr;
+
+	Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
+	Renderer::getInstance().rebuildStaticLighting();
+#ifdef DRAW_IMGUI
+	_gameScene->getPhysicsManager()->setDebugRenderer(_physicsDebugRenderer);
+#endif // DRAW_IMGUI
 }
 
 
@@ -319,37 +248,72 @@ void Game::run()
 
 		updateFpsCounter(timePhysicsCurr);
 
-		if (_state == GS_GAME)
+		//glfwPollEvents();
+
+		//if (_state == GS_GAME)
+		if (_initialized)
 		{
 			readInput(deltaTime);
+
+			OGLDriver::getInstance().update();
 
 			while (accumulator > TIME_STEP)
 			{
 				fixedStepUpdate(TIME_STEP);
+				fixedStepReadInput(TIME_STEP);
 
 				accumulator -= TIME_STEP;
 			}
 
-			_soundManager->update();
-
-			_hud->update(_fps);
+			_gameScene->updateScene(deltaTime);
 
 			Renderer::getInstance().renderAll();
-		}
+
 
 #ifdef DRAW_IMGUI
-		if (_physicsManager->getDebugRenderingState())
-		{
-			_physicsDebugRenderer->renderAll();
-		}
-		_imGuiInterface->draw();
+			if (_gameScene->getPhysicsManager()->getDebugRenderingState())
+			{
+				_physicsDebugRenderer->renderAll();
+			}
+			_gameScene->getImGuiInterface()->draw();
 #endif // DRAW_IMGUI
 
-		// Render GUI
-		Renderer::getInstance().renderGUI(_gui->getGUIRenderList());
-
+			// Render GUI
+			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
+		}
 		_window->swapBuffers();
 		//_window->updateEvents();
+
+		_nextGameSceneName = _gameScene->getNextScene();
+		if (!_nextGameSceneName.empty() && _nextGameScene == nullptr)
+		{
+			if (_backgroundWindow == nullptr)
+			{
+				_backgroundWindow = new Window;
+				_backgroundWindow->createInvisibleWindow(_window);
+			}
+
+			if (_gameScene->isUseLoadingScreenToLoadNextGameScene() && !_loadingScene.empty())
+			{
+				_nextGameScene = getSceneByName(_loadingScene);
+				_nextGameScene->setNextGameScene(_nextGameSceneName, false, _gameScene->getNextSceneParams());
+			}
+			else
+			{
+				_nextGameScene = getSceneByName(_nextGameSceneName);
+				_nextGameScene->setParams(_gameScene->getNextSceneParams());
+			}
+
+			_loadingSceneFuture = std::async(std::launch::async, &Game::asyncLoadScene, this, _backgroundWindow, _nextGameScene);
+		}
+		if (_nextGameScene != nullptr && _loadingSceneFuture.wait_for(std::chrono::milliseconds(0)) == std::future_status::ready)
+		{
+			_swapScenes = true;
+		}
+		if (_swapScenes)
+		{
+			swapScenesImpl(deltaTime);
+		}
 	}
 
 }
@@ -357,29 +321,19 @@ void Game::run()
 
 void Game::terminate()
 {
-	delete _hud;
-
-	_physicsManager->stop();
+	_gameScene->terminateScene();
+	delete _gameScene;
 
 	_window->setCursorMode(GLFW_CURSOR_NORMAL);
 
-	delete _gui;
-
-	for (int i = 0; i < _buses.size(); ++i)
-	{
-		_buses[i]->drop();
-	}
-
-	_soundManager->drop();
-	_physicsManager->drop();
-	delete _sceneManager;
-
-#ifdef DRAW_IMGUI
-	delete _physicsDebugRenderer;
-	delete _imGuiInterface;
-#endif // DRAW_IMGUI
+	ImGuiInterfaceContext::destroyImGuiContext();
 
 	delete _window;
+
+	if (_backgroundWindow != nullptr)
+	{
+		delete _backgroundWindow;
+	}
 }
 
 
@@ -392,110 +346,7 @@ void Game::readInput(double deltaTime)
 	}
 #endif // DRAW_IMGUI
 
-	GLFWwindow* window = _window->getWindow();
-
-	if (_isMirrorControll)
-	{
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		{
-			_activeBus->getMirror(_mirrorControllIndex)->getSceneObject()->rotate(0.0f, -0.1f * deltaTime, 0.0f);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		{
-			_activeBus->getMirror(_mirrorControllIndex)->getSceneObject()->rotate(0.0f, 0.1f * deltaTime, 0.0f);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		{
-			_activeBus->getMirror(_mirrorControllIndex)->getSceneObject()->rotate(0.1f * deltaTime, 0.0f, 0.0f);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		{
-			_activeBus->getMirror(_mirrorControllIndex)->getSceneObject()->rotate(-0.1f * deltaTime, 0.0f, 0.0f);
-		}
-	}
-	else
-	{
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
-		{
-			_activeBus->turnLeft(deltaTime);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
-		{
-			_activeBus->turnRight(deltaTime);
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
-		{
-			_activeBus->accelerate();
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_RELEASE)
-		{
-			_activeBus->idle();
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-		{
-			_activeBus->brakeOn();
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_RELEASE)
-		{
-			_activeBus->brakeOff();
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_RELEASE && glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_RELEASE)
-		{
-			_activeBus->centerSteringWheel(deltaTime);
-		}
-	}
-
-	static float x = 0;
-	static float angle = 0;
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-	{
-		if (x < 1.0f)
-		{
-			x += deltaTime;
-			float x1 = glm::mix(-PI / 2.0f, PI / 2.0f, x);
-			float sinx1 = sinf(x1);
-			sinx1 = sinx1 * 0.5f + 0.5f;
-			sinx1 *= 25.0f;
-
-			float delta = sinx1 - angle;
-			angle += delta;
-			_activeCamera->getSceneObject()->rotate(0, degToRad(-delta), 0);
-		}
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_E) == GLFW_RELEASE)
-	{
-		if (x > 0.0f)
-		{
-			x -= deltaTime;
-			float x1 = glm::mix(-PI / 2.0f, PI / 2.0f, x);
-			float sinx1 = sinf(x1);
-			sinx1 = sinx1 * 0.5f + 0.5f;
-			sinx1 *= 25.0f;
-
-			float delta = sinx1 - angle;
-			angle += delta;
-			_activeCamera->getSceneObject()->rotate(0, degToRad(-delta), 0);
-		}
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_6) == GLFW_PRESS && GameConfig::getInstance().developmentMode)
-	{
-		Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() * 1.1f);
-	}
-	if (glfwGetKey(window, GLFW_KEY_7) == GLFW_PRESS && GameConfig::getInstance().developmentMode)
-	{
-		Renderer::getInstance().setExposure(Renderer::getInstance().getExposure() / 1.1f);
-	}
+	_gameScene->readInput(deltaTime);
 }
 
 
@@ -510,7 +361,7 @@ void Game::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_GRAVE_ACCENT))
 	{
-		_imGuiInterface->setIsOpen(!_imGuiInterface->isOpen());
+		_gameScene->getImGuiInterface()->setIsOpen(!_gameScene->getImGuiInterface()->isOpen());
 	}
 #endif // DRAW_IMGUI
 
@@ -518,206 +369,16 @@ void Game::fixedStepReadInput(float deltaTime)
 	{
 		_window->setCloseFlag();
 	}
+	if (input.isKeyPressed(GLFW_KEY_ENTER))
+	{
+		/*_gameScene->terminateScene();
+		delete _gameScene;
 
-	if (input.isKeyPressed(GLFW_KEY_L))
-	{
-		_activeBus->setIsEnableHeadlights(!_activeBus->isEnableHeadlights());
-	}
-	if (input.isKeyPressed(GLFW_KEY_K))
-	{
-		_activeBus->setIsEnableLights(!_activeBus->isEnableLights());
-	}
-	if (input.isKeyPressed(GLFW_KEY_H))
-	{
-		SceneObject* dirLight = _sceneManager->getSceneObject("sun");
-		Light* l = dynamic_cast<Light*>(dirLight->getComponent(CT_LIGHT));
+		//_sceneManager->clearScene();
 
-		if (l->getDiffiseIntenisty() > 0.05)
-		{
-			l->setAmbientIntensity(0.0025);
-			l->setDiffuseIntensity(0.0);
-			Renderer::getInstance().setDayNightRatio(-1.0f);
-		}
-		else
-		{
-			l->setAmbientIntensity(0.025);
-			l->setDiffuseIntensity(0.5);
-			Renderer::getInstance().setDayNightRatio(1.0f);
-		}
+		_gameScene = new MainGameScene(_window);
+		_gameScene->initialize();*/
 	}
 
-	if (input.isKeyPressed(GLFW_KEY_Z))
-	{
-		_activeBus->doorOpenClose(1);
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_X))
-	{
-		_activeBus->doorOpenClose(2);
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_C))
-	{
-		_activeBus->doorOpenClose(3);
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
-	{
-		_activeBus->getGearbox()->shiftUp();
-	}
-	if (input.isKeyPressed(GLFW_KEY_LEFT_CONTROL))
-	{
-		_activeBus->getGearbox()->shiftDown();
-	}
-	if (input.isKeyPressed(GLFW_KEY_0))
-	{
-		if (!_activeBus->getEngine()->isRunning())
-		{
-			_activeBus->startEngine();
-		}
-		else
-		{
-			_activeBus->stopEngine();
-		}
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_P))
-	{
-		if (!_physicsManager->isRunning())
-			_physicsManager->play();
-		else
-			_physicsManager->stop();
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_SPACE))
-	{
-		instance->_activeBus->toggleHandbrake();
-	}
-
-	if (input.isKeyPressed(GLFW_KEY_M))
-	{
-		++_mirrorControllIndex;
-		if (_mirrorControllIndex < _activeBus->getMirrorsCount())
-		{
-			_isMirrorControll = true;
-		}
-		else
-		{
-			_isMirrorControll = false;
-			_mirrorControllIndex = -1;
-		}
-	}
-	if (input.isKeyPressed(GLFW_KEY_R))
-	{
-		_activeBus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-			degToRad(_sceneManager->getBusStart().rotation.y),
-			degToRad(_sceneManager->getBusStart().rotation.z));
-	}
-	if (input.isKeyPressed(GLFW_KEY_F5))
-	{
-		_cameras[GC_DRIVER]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-
-		setActiveCamera(_cameras[GC_DRIVER]);
-	}
-	if (input.isKeyPressed(GLFW_KEY_F6))
-	{
-		_cameras[GC_BUS]->getSceneObject()->setRotation(0.0f, 0.0f, 0.0f);
-
-		setActiveCamera(_cameras[GC_BUS]);
-	}
-	if (input.isKeyPressed(GLFW_KEY_F7))
-	{
-		_cameras[GC_GLOBAL]->getSceneObject()->setPosition(_activeCamera->getPosition());
-
-		setActiveCamera(_cameras[GC_GLOBAL]);
-	}
-
-	// debug
-	if (GameConfig::getInstance().developmentMode)
-	{
-		if (input.isKeyPressed(GLFW_KEY_1) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			ResourceManager::getInstance().reloadAllShaders();
-		}
-		if (input.isKeyPressed(GLFW_KEY_2) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			ResourceManager::getInstance().reloadAllTextures();
-		}
-		if (input.isKeyPressed(GLFW_KEY_3) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			Renderer::getInstance().toogleRenderAABBFlag();
-		}
-		if (input.isKeyPressed(GLFW_KEY_4) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			Renderer::getInstance().toogleRenderOBBFlag();
-		}
-		if (input.isKeyPressed(GLFW_KEY_5) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
-		}
-		if (input.isKeyPressed(GLFW_KEY_8) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
-		}
-		if (input.isKeyPressed(GLFW_KEY_9) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a = !(GraphicsManager::getInstance().getGlobalEnvironmentCaptureComponent()->a);
-		}
-	}
-
-	// mouse
-	if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
-	{
-		_isCameraControll = !_isCameraControll;
-		glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
-
-		_window->setCursorMode(_isCameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-	}
-
-	if (input.isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT))
-	{
-		double xpos, ypos;
-		glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
-		ypos = _window->getHeight() - ypos;
-
-		glm::vec3 rayStart;
-		glm::vec3 rayDir;
-		calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
-
-		// collision with model nodes
-		std::list<RenderObject*>& renderObjects = GraphicsManager::getInstance().getRenderObjects();
-		for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
-		{
-			RenderObject* renderObject = *i;
-			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
-		}
-	}
-}
-
-
-void Game::rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform)
-{
-	AABB* aabb = modelNode->getAABB();
-	glm::mat4 modelMatrix = parentTransform * modelNode->getTransformMatrix();
-	float distance;
-	if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
-	{
-		glm::vec4 rayStartLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayStart.x, rayStart.y, rayStart.z, 1.0f);
-		glm::vec4 rayDirLocalspace = glm::inverse(modelMatrix) * glm::vec4(rayDir.x, rayDir.y, rayDir.z, 0.0f);
-
-		if (distance > 0.0f)
-		{
-			ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
-			if (clickableObject != NULL)
-			{
-				clickableObject->click(modelNode);
-			}
-		}
-	}
-
-	for (int i = 0; i < modelNode->getChildrenCount(); ++i)
-	{
-		rayTestWithModelNode(renderObject, modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
-	}
+	_gameScene->fixedStepReadInput(deltaTime);
 }

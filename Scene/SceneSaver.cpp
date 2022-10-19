@@ -11,6 +11,7 @@
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
+#include "../Utils/ResourceDescriptionUtils.h"
 #include "../Utils/Strings.h"
 
 
@@ -29,19 +30,13 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 	std::vector<std::string> textures = split(path, ';');
 
 	if (textures.size() != 6)
-		Logger::error("Scene saver: Invalid skybox textures path");
+		LOG_ERROR("Scene saver: Invalid skybox textures path");
 
 	std::string result = FilesHelper::getRelativePathToDir(textures[0], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[1], GameDirectories::SKYBOX) + "," +
 						 FilesHelper::getRelativePathToDir(textures[2], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[3], GameDirectories::SKYBOX) + "," +
 						 FilesHelper::getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
 
 	return result;
-}
-
-
-void SceneSaver::saveDescription(XMLElement* descriptionElement, const SceneDescription& sceneDescription)
-{
-	descriptionElement->SetAttribute("author", sceneDescription.author.c_str());
 }
 
 
@@ -112,7 +107,7 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 
 	if (renderObject)
 	{
-		std::string skyboxTexturePaths = renderObject->getMaterial(0)->diffuseTexture->getPath();
+		std::string skyboxTexturePaths = renderObject->getModel()->getMaterial(0)->diffuseTexture->getPath();
 		skyElement->SetAttribute("texture", createSkyTextureAttribute(skyboxTexturePaths).c_str());
 	}
 }
@@ -122,19 +117,18 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	if (objectElement)
-	{
-		objectElement->SetAttribute("name", objectDefinition->getName().c_str());
+	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getName() : "";
 
-		if (objectDefinition->getName() != sceneObject->getName())
-			objectElement->SetAttribute("id", sceneObject->getName().c_str());
+	objectElement->SetAttribute("name", objectDefinitionName.c_str());
 
-		objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
-		glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
-			radToDeg(sceneObject->getRotation().y),
-			radToDeg(sceneObject->getRotation().z));
-		objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
-	}
+	if (objectDefinitionName != sceneObject->getName())
+		objectElement->SetAttribute("id", sceneObject->getName().c_str());
+
+	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
+	glm::vec3 rotation = glm::vec3(radToDeg(sceneObject->getRotation().x),
+								   radToDeg(sceneObject->getRotation().y),
+								   radToDeg(sceneObject->getRotation().z));
+	objectElement->SetAttribute("rotation", vec3ToString(rotation).c_str());
 
 	BusStopComponent* busStopComponent = static_cast<BusStopComponent*>(sceneObject->getComponent(CT_BUS_STOP));
 	if (busStopComponent)
@@ -150,6 +144,11 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	}
 
 	objectsElement->InsertEndChild(objectElement);
+
+	for (SceneObject* child : sceneObject->getChildren())
+	{
+		saveObject(objectElement, doc, child, child->getObjectDefinition());
+	}
 }
 
 
@@ -219,12 +218,44 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 }
 
 
-void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescription)
+void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject)
+{
+	XMLElement* objectElement = doc.NewElement("RoadIntersection");
+
+	objectElement->SetAttribute("name", sceneObject->getName().c_str());
+	objectElement->SetAttribute("position", vec3ToString(sceneObject->getPosition()).c_str());
+
+	RoadIntersectionComponent* roadIntersectionComponent = static_cast<RoadIntersectionComponent*>(sceneObject->getComponent(CT_ROAD_INTERSECTION));
+	const auto& connectedRoads = roadIntersectionComponent->getConnectedRoads();
+
+	objectElement->SetAttribute("quality", roadIntersectionComponent->getQuality());
+	objectElement->SetAttribute("profile", roadIntersectionComponent->getEdgeRoadProfile()->getName().c_str());
+
+	for (int i = 0; i < connectedRoads.size(); ++i)
+	{
+		const auto& road = connectedRoads[i];
+
+		XMLElement* roadElement = doc.NewElement("ConnectedRoad");
+
+		roadElement->SetAttribute("name", road.road->getSceneObject()->getName().c_str());
+		roadElement->SetAttribute("index", road.connectionPointInRoadIndex);
+		roadElement->SetAttribute("length", roadIntersectionComponent->getLength(i));
+		roadElement->SetAttribute("width", roadIntersectionComponent->getWidth(i));
+		roadElement->SetAttribute("arc", roadIntersectionComponent->getArc(i));
+
+		objectElement->InsertEndChild(roadElement);
+	}
+
+	roadsElement->InsertEndChild(objectElement);
+}
+
+
+void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
-	printf("Map path: %s\n", fullPath.c_str());
+	LOG_INFO("Map path: " + fullPath);
 
 	XMLDocument doc;
 
@@ -258,43 +289,60 @@ void SceneSaver::saveMap(std::string name, const SceneDescription& sceneDescript
 	roadsElement->SetAttribute("version", "2");
 	rootNode->InsertEndChild(roadsElement);
 	
-	saveDescription(descriptionElement, sceneDescription);
+	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
 	saveStartPosition(startPositionElement);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
+		if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
+		{
+			LOG_DEBUG("Skip object: " + sceneObject->getName());
+			continue;
+		}
+
 		RObject* objectDefinition = sceneObject->getObjectDefinition();
-		if (objectDefinition != nullptr)
+		if (objectDefinition == nullptr)
+		{
+			if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
+			{
+				saveRoad(roadsElement, doc, sceneObject);
+			}
+			else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
+			{
+				saveRoadIntersection(roadsElement, doc, sceneObject);
+			}
+			else if (sceneObject->getComponent(CT_GRASS) != nullptr)
+			{
+				if (grassElement)
+				{
+					rootNode->InsertAfterChild(startPositionElement, grassElement);
+					saveGrass(grassElement, doc, sceneObject);
+				}
+			}
+			else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+			{
+				saveTerrain(terrainElement, grassElement, sceneObject);
+			}
+			else if (sceneObject->getName() == "sky")
+			{
+				saveSky(skyElement, sceneObject);
+			}
+			else if (sceneObject->getName() == "sun")
+			{
+				saveSunLight(sunElement, sceneObject);
+			}
+			else if (sceneObject->getParent() == nullptr)
+			{
+				saveObject(objectsElement, doc, sceneObject, nullptr);
+			}
+		}
+		else if (sceneObject->getParent() == nullptr)
 		{
 			saveObject(objectsElement, doc, sceneObject, objectDefinition);
 		}
-		else if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
-		{
-			saveRoad(roadsElement, doc, sceneObject);
-		}
-		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
-		{
-			if (grassElement)
-			{
-				rootNode->InsertAfterChild(startPositionElement, grassElement);
-				saveGrass(grassElement, doc, sceneObject);
-			}
-		}
-		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
-		{
-			saveTerrain(terrainElement, grassElement, sceneObject);
-		}
-		else if (sceneObject->getName() == "sky")
-		{
-			saveSky(skyElement, sceneObject);
-		}
-		else if (sceneObject->getName() == "sun")
-		{
-			saveSunLight(sunElement, sceneObject);
-		}
 	}
 
-	XMLError err = doc.SaveFile(fullPath.c_str());
+	XMLError errorCode = doc.SaveFile(fullPath.c_str());
 
-	printf("Error code: %d\n", err);
+	LOG_INFO(LOG_VARIABLE((int)errorCode));
 }

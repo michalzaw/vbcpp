@@ -5,8 +5,6 @@
 #include "../Scene/SceneObject.h"
 
 
-static std::unique_ptr<GraphicsManager> gmInstance;
-
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f), _windTimer(0.0f),
     _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
@@ -65,14 +63,6 @@ GraphicsManager::~GraphicsManager()
     //delete _quadTree;
 }
 
-GraphicsManager& GraphicsManager::getInstance()
-{
-    if ( !gmInstance )
-        gmInstance = std::unique_ptr<GraphicsManager>(new GraphicsManager);
-
-    return *gmInstance;
-}
-
 
 RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject* owner)//RModel* model/*, glm::vec3 position, glm::vec3 rotation, glm::vec3 scale*/)
 {
@@ -83,16 +73,30 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     _renderObjects.push_back(object);
     //_quadTree->addObject(object);
 
+    for (Material* material : object->getMirrorMaterials())
+    {
+        MirrorComponent* mirrorComponent = findMirrorComponent(object->getSceneObject(), material->mirrorName);
+        if (mirrorComponent != NULL)
+        {
+            material->diffuseTexture = mirrorComponent->getFramebuffer()->getTexture();
+        }
+        else
+        {
+            registerPendingMaterialForMirrorComponent(material);
+        }
+    }
+
     return object;
 }
 
-RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
+RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
 {
 	RoadObject* roadObject = new RoadObject(roadType, roadProfile, points, segments, buildModelAfterCreate);
 
 	owner->addComponent(roadObject);
 
 	_renderObjects.push_back(roadObject);
+    _roadObjects.push_back(roadObject);
 
 	return roadObject;
 }
@@ -208,9 +212,9 @@ ClickableObject* GraphicsManager::addClickableObject()
 }
 
 
-DisplayComponent* GraphicsManager::addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight)
+DisplayComponent* GraphicsManager::addDisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)
 {
-	DisplayComponent* displayComponent = new DisplayComponent(font, displayWidth, displayHeight);
+	DisplayComponent* displayComponent = new DisplayComponent(font, displayWidth, displayHeight, textColor);
 
 	_displayComponents.push_back(displayComponent);
 
@@ -243,6 +247,16 @@ CrossroadComponent* GraphicsManager::addCrossRoad(std::vector<CrossroadConnectio
 }
 
 
+RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode)
+{
+    RoadIntersectionComponent* roadIntersection = new RoadIntersectionComponent(edgeRoadProfile, interactiveMode);
+
+    _roadIntersectionComponents.push_back(roadIntersection);
+
+    return roadIntersection;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -260,6 +274,16 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
 
 void GraphicsManager::removeRoadObject(RoadObject* object)
 {
+    for (std::vector<RoadObject*>::iterator i = _roadObjects.begin(); i != _roadObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _roadObjects.erase(i);
+
+            break;
+        }
+    }
+
 	removeRenderObject(object);
 }
 
@@ -408,6 +432,22 @@ void GraphicsManager::removeCrossroadComponent(CrossroadComponent* crossroadComp
 }
 
 
+void GraphicsManager::removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent)
+{
+    for (std::vector<RoadIntersectionComponent*>::iterator i = _roadIntersectionComponents.begin(); i != _roadIntersectionComponents.end(); ++i)
+    {
+        if (*i == roadIntersectionComponent)
+        {
+            i = _roadIntersectionComponents.erase(i);
+
+            delete roadIntersectionComponent;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -472,6 +512,18 @@ std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 std::vector<CrossroadComponent*>& GraphicsManager::getCrossroadComponents()
 {
 	return _crossroadComponents;
+}
+
+
+std::vector<RoadIntersectionComponent*>& GraphicsManager::getRoadIntersectionComponents()
+{
+    return _roadIntersectionComponents;
+}
+
+
+std::vector<RoadObject*>& GraphicsManager::getRoadObjects()
+{
+    return _roadObjects;
 }
 
 
@@ -545,6 +597,16 @@ void GraphicsManager::update(float deltaTime)
     for (std::list<ClickableObject*>::iterator i = _clickableObjects.begin(); i != _clickableObjects.end(); ++i)
     {
         (*i)->clear();
+    }
+
+    for (DisplayComponent* displayComponent : _displayComponents)
+    {
+        displayComponent->update(deltaTime);
+    }
+
+    for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
+    {
+        roadIntersectionComponent->update(deltaTime);
     }
 }
 

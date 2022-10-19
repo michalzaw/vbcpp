@@ -1,7 +1,10 @@
 set (BUS_SOURCES
+	Bus/BusConfigurationsLoader.cpp
 	Bus/BusConstraint.cpp
 	Bus/BusLoader.cpp
+	Bus/BusPreviewLoader.cpp
 	Bus/BusRaycast.cpp
+	Bus/BusRepaintLoader.cpp
 	Bus/Desktop.cpp
 	Bus/Door.cpp
 	Bus/DoorClassic.cpp
@@ -11,9 +14,14 @@ set (BUS_SOURCES
 
 set (BUS_HEADERS
 	Bus/Bus.h
+	Bus/BusConfigurationsLoader.h
 	Bus/BusConstraint.h
+	Bus/BusDescription.h
 	Bus/BusLoader.h
+	Bus/BusPreviewLoader.h
 	Bus/BusRaycast.h
+	Bus/BusRepaintDescription.h
+	Bus/BusRepaintLoader.h
 	Bus/Desktop.h
 	Bus/Door.h
 	Bus/DoorClassic.h

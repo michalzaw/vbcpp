@@ -2,6 +2,8 @@
 
 #include <memory>
 
+#include "../Utils/Logger.h"
+
 #include "../Window/Window.h"
 
 
@@ -83,6 +85,12 @@ void InputSystem::update()
 
 void InputSystem::keyCallback(int key, int scancode, int action, int mods)
 {
+	if (key < 0 || key > GLFW_KEY_LAST)
+	{
+		LOG_DEBUG("Unsupported key");
+		return;
+	}
+
 	if (action == GLFW_PRESS)
 	{
 		_keys[key] = true;
@@ -158,9 +166,14 @@ double InputSystem::getScrollOffsetY()
 }
 
 
-void InputSystem::getCursorPosition(double* x, double* y)
+void InputSystem::getCursorPosition(double* x, double* y, bool invertY)
 {
 	glfwGetCursorPos(_window->getWindow(), x, y);
+
+	if (invertY)
+	{
+		*y = _window->getHeight() - *y;
+	}
 }
 
 

@@ -1,8 +1,8 @@
 #include "ColorsWindow.h"
 
 
-ColorsWindow::ColorsWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
-	: ImGuiWindow(sceneManager, buses, isOpen)
+ColorsWindow::ColorsWindow(SceneManager* sceneManager, bool isOpen)
+	: ImGuiWindow(sceneManager, isOpen)
 {
 
 }

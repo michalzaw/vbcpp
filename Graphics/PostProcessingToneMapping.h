@@ -11,7 +11,9 @@ enum ToneMappingType
 {
 	TMT_REINHARD,
 	TMT_CLASSIC,
-	TMT_ACES
+	TMT_ACES,
+	TMT_DEPTH_RENDERING,
+	TMT_NONE
 };
 
 
@@ -21,7 +23,9 @@ class PostProcessingToneMapping : public PostProcessingEffect
 		ToneMappingType _toneMappingType;
 
 		GLint _exposureUniformLocation;
+		GLint _visibilityUniformLocation;
 		float _exposure;
+		float _visibility;
 
 		RShader* loadShader()
 		{
@@ -39,25 +43,40 @@ class PostProcessingToneMapping : public PostProcessingEffect
 				case TMT_ACES:
 					defines.push_back("ACES");
 					break;
+
+				case TMT_DEPTH_RENDERING:
+					defines.push_back("DEPTH_RENDERING");
+					break;
+
+				case TMT_NONE:
+					defines.push_back("NONE");
+					break;
 			}
 
 			return ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingToneMapping.frag", defines);
 		}
 
+		void initUniformLocations()
+		{
+			_exposureUniformLocation = _shader->getUniformLocation("exposure");
+			_visibilityUniformLocation = _shader->getUniformLocation("visibility");
+		}
+
 	protected:
+
 		void setParamUniforms() override
 		{
 			_shader->setUniform(_exposureUniformLocation, _exposure);
+			_shader->setUniform(_visibilityUniformLocation, _visibility);
 		}
 
 	public:
 		PostProcessingToneMapping(VBO* quadVbo, ToneMappingType toneMappingType = TMT_CLASSIC)
 			: PostProcessingEffect(PPT_TONE_MAPPING, quadVbo),
-			_toneMappingType(toneMappingType), _exposure(1.87022f)
+			_toneMappingType(toneMappingType), _exposure(1.87022f), _visibility(1.0f)
 		{
 			setShader(loadShader());
-
-			_exposureUniformLocation = _shader->getUniformLocation("exposure");
+			initUniformLocations();
 		}
 
 		void setExposure(float exposure)
@@ -70,11 +89,22 @@ class PostProcessingToneMapping : public PostProcessingEffect
 			return _exposure;
 		}
 
+		void setVisibility(float visibility)
+		{
+			_visibility = visibility;
+		}
+
+		float getVisibility()
+		{
+			return _visibility;
+		}
+
 		void setToneMappingType(ToneMappingType toneMappingType)
 		{
 			_toneMappingType = toneMappingType;
 
 			setShader(loadShader());
+			initUniformLocations();
 		}
 
 		ToneMappingType getToneMappingType()
