@@ -94,3 +94,90 @@ jobs:
       with:
         name: vbcpp
         path: vbcpp-bin\*
+
+  build-on-linux:
+    # See: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    
+    - name: Show environment
+      run: |
+          ls -l
+          cd ..
+          ls -l
+    
+    - name: Show environment details
+      run: ls -lR
+    
+    - name: Show system info
+      run: |
+          cmake -version
+          make -version
+    
+    - name: Prepare environment
+      run: |
+          sudo apt-get update
+          sudo apt-get install libgl1-mesa-dev
+          sudo apt-get install xorg-dev libglu1-mesa-dev
+
+    - name: Configure CMake
+      run: |
+          mkdir build
+          cd build
+          cmake ..
+    
+    - name: Show generated project files
+      run: |
+          cd  build
+          ls -l
+    
+    - name: Build project
+      run: |
+          cd build
+          make
+    
+    - name: Show build artifacts
+      run: |
+          cd bin
+          ls -l
+    
+    - name: Prepare final files
+      run: |
+          mkdir vbcpp-bin
+
+          cp -r bin/Buses vbcpp-bin
+          cp -r bin/Buses vbcpp-bin
+          cp -r bin/Data vbcpp-bin
+          cp -r bin/Displays vbcpp-bin
+          cp -r bin/fonts vbcpp-bin
+          cp -r bin/Maps vbcpp-bin
+          cp -r bin/Objects vbcpp-bin
+          cp -r bin/Parts vbcpp-bin
+          cp -r bin/RoadProfiles vbcpp-bin
+          cp -r bin/Shaders vbcpp-bin
+          cp -r bin/Skybox vbcpp-bin
+          cp bin/vbcpp vbcpp-bin
+          cp bin/editor vbcpp-bin
+          cp bin/brdfLut.png vbcpp-bin
+          cp bin/doroff.bmp vbcpp-bin
+          cp bin/game.xml vbcpp-bin
+          cp bin/matryca16.csv vbcpp-bin
+
+          tar -zcvf vbcpp.tar.gz vbcpp-bin
+    
+    - name: Show prepared files
+      run: |
+          ls -l
+          cd vbcpp-bin
+          ls -l
+    
+    # See: https://docs.github.com/en/actions/using-workflows/storing-workflow-data-as-artifacts
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: vbcpp2
+        path: vbcpp-bin/*
