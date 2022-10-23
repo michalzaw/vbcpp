@@ -12,6 +12,7 @@
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceDescriptionUtils.h"
+#include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 
 
@@ -349,6 +350,12 @@ void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, Sc
 void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(_dirPath))
+		_dirPath = ResourceManager::getInstance().getAlternativeResourcePath() + _dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
 	LOG_INFO("Map path: " + fullPath);
