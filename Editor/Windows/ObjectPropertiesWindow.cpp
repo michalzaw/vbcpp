@@ -432,7 +432,8 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 			{
 				const std::vector<glm::vec3>& roadControlPoints = roadComponent->getPoints();
 				glm::vec2 distanceFromRoadAxis(aiPath.x, aiPath.y);
-				PathComponent* path = vbEditor::_sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
+				PathComponent* path = vbEditor::_sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, (PathDirection) aiPath.direction,
+																									  roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
 
 				SceneObject* pathObject = vbEditor::_sceneManager->addSceneObject(aiPath.name);
 				pathObject->addComponent(path);

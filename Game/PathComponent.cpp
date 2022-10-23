@@ -37,9 +37,11 @@ RRoadProfile* getHelperProfile()
 }
 
 
-PathComponent::PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
+PathComponent::PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
+							 float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
 	: Component(CT_PATH),
 	_distanceFromBaseBezierCurve(distanceFromBaseBezierCurve), _baseBezierCurveControlPoints(baseBezierCurveControlPoints),
+	_direction(direction),
 	_marginBegin(marginBegin), _marginEnd(marginEnd)
 {
 	recalculate();
@@ -109,14 +111,26 @@ void PathComponent::recalculate()
 		BezierCurvesUtils::cutBezierCurveFromEnd(_curvePoints, _marginEnd);
 	}
 
+	glm::vec3 dir;
+	glm::vec3 right;
+	glm::vec3 realUp;
 	for (int i = 0; i < _curvePoints.size() - 1; ++i)
 	{
-		glm::vec3 dir = glm::normalize(_curvePoints[i + 1] - _curvePoints[i]);
-		glm::vec3 right = glm::cross(dir, glm::vec3(0, 1, 0));
-		glm::vec3 realUp = glm::cross(right, dir);
+		dir = glm::normalize(_curvePoints[i + 1] - _curvePoints[i]);
+		right = glm::cross(dir, glm::vec3(0, 1, 0));
+		realUp = glm::cross(right, dir);
 
 		_curvePoints[i] += glm::vec3(_distanceFromBaseBezierCurve.x) * right;
 		_curvePoints[i] += glm::vec3(_distanceFromBaseBezierCurve.y) * realUp;
+	}
+
+	// modify last point using values from previous point
+	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_distanceFromBaseBezierCurve.x) * right;
+	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_distanceFromBaseBezierCurve.y) * realUp;
+
+	if (_direction == PD_BACKWARD)
+	{
+		std::reverse(_curvePoints.begin(), _curvePoints.end());
 	}
 }
 
