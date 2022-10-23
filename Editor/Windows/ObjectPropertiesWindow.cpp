@@ -426,14 +426,19 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 		if (ImGui::Button("Generate AI paths"))
 		{
-			const std::vector<glm::vec3>& roadControlPoints = roadComponent->getPoints();
-			glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
-			PathComponent* path = vbEditor::_sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
+			const std::vector<AIPath> aiPaths = roadComponent->getRoadProfile()->getAIPaths();
 
-			SceneObject* pathObject = vbEditor::_sceneManager->addSceneObject("path");
-			pathObject->addComponent(path);
+			for (const auto& aiPath : aiPaths)
+			{
+				const std::vector<glm::vec3>& roadControlPoints = roadComponent->getPoints();
+				glm::vec2 distanceFromRoadAxis(aiPath.x, aiPath.y);
+				PathComponent* path = vbEditor::_sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
 
-			roadComponent->getSceneObject()->addChild(pathObject);
+				SceneObject* pathObject = vbEditor::_sceneManager->addSceneObject(aiPath.name);
+				pathObject->addComponent(path);
+
+				roadComponent->getSceneObject()->addChild(pathObject);
+			}
 		}
 	}
 }

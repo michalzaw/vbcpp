@@ -13,4 +13,11 @@
 	</Lanes>
 	
 	<IntersectionData material="asfalt2" y="0.05" />
+
+	<AIPaths>
+		<Path name="path1" x="1.5" y="0.05" direction="1" />
+		<Path name="path2" x="-1.5" y="0.05" direction="-1" />
+		<Path name="path3" x="4.5" y="0.15" direction="0" />
+		<Path name="path4" x="-4.5" y="0.15" direction="0" />
+	</AIPaths>
 </Profile>

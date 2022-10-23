@@ -107,5 +107,24 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 		}
 	}
 
+	XMLElement* pathsElement = profileElement->FirstChildElement("AIPaths");
+	if (pathsElement != nullptr)
+	{
+		XMLElement* pathElement = pathsElement->FirstChildElement("Path");
+		while (pathElement != nullptr)
+		{
+			AIPath aiPath;
+			aiPath.name = pathElement->Attribute("name");
+			aiPath.x = toFloat(pathElement->Attribute("x"));
+			aiPath.y = toFloat(pathElement->Attribute("y"));
+			aiPath.direction = toInt(pathElement->Attribute("direction"));
+
+			roadProfile->getAIPaths().push_back(aiPath);
+
+			pathElement = pathElement->NextSiblingElement("Path");
+		}
+	}
+
+
 	return roadProfile;
 }

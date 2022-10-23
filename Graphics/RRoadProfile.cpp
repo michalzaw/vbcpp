@@ -59,6 +59,12 @@ float RRoadProfile::getIntersectionRoadY()
 }
 
 
+std::vector<AIPath>& RRoadProfile::getAIPaths()
+{
+	return _aiPaths;
+}
+
+
 float RRoadProfile::getMaxX()
 {
 	if (!_maxXIsCalculated)
