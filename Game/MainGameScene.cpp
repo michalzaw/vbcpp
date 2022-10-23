@@ -237,7 +237,7 @@ void MainGameScene::loadScene()
 
 	RoadObject* roadObject = _sceneManager->getGraphicsManager()->getRoadObjects()[0];
 	const std::vector<glm::vec3>& roadControlPoints = roadObject->getPoints();
-	glm::vec2 distanceFromRoadAxis(2.0f, 0.05f);
+	glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
 	PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, PD_FORWARD, roadObject->getMarginBegin(), roadObject->getMarginEnd());
 	//path->getCurvePoints().push_back(glm::vec3(10.0f, 0.0f, -50.0f));
 	//path->getCurvePoints().push_back(glm::vec3(20.0f, 0.0f, 0.0f));

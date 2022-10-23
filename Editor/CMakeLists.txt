@@ -16,6 +16,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/LoggerWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
+	Editor/Utils/AIPathGenerator.cpp
 	Editor/Utils/ObjectsGenerator.cpp
 	Editor/Utils/RoadPolygonsGenerator.cpp
 )
@@ -40,6 +41,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/LoggerWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
+	Editor/Utils/AIPathGenerator.h
 	Editor/Utils/ObjectsGenerator.h
 	Editor/Utils/RoadPolygonsGenerator.h
 )

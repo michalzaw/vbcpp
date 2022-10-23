@@ -37,6 +37,7 @@ class PathComponent final : public Component
 		PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
 					  float marginBegin = 0.0f, float marginEnd = 0.0f);
 
+		inline const glm::vec2& getDistanceFromBaseBezierCurve() { return _distanceFromBaseBezierCurve; }
 		inline const std::vector<glm::vec3>& getBaseBezierCurveControlPoints() { return _baseBezierCurveControlPoints; }
 		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
 		inline PathDirection getDirection() { return _direction; }

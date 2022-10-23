@@ -6,6 +6,7 @@
 #include "SceneLoader.h"
 
 #include "../Game/Directories.h"
+#include "../Game/PathComponent.h"
 
 #include "../Graphics/RenderObject.h"
 
@@ -153,6 +154,33 @@ void SceneSaver::savePrefabComponent(XMLElement* objectElement, XMLDocument& doc
 }
 
 
+void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, PathComponent* pathComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "path");
+	componentElement->SetAttribute("distanceFromBaseBezierCurve", vec2ToString(pathComponent->getDistanceFromBaseBezierCurve()).c_str());
+	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
+	componentElement->SetAttribute("marginBegin", Strings::toString(pathComponent->getMarginBegin()).c_str());
+	componentElement->SetAttribute("marginEnd", Strings::toString(pathComponent->getMarginEnd()).c_str());
+
+	XMLElement* pointsElement = doc.NewElement("Points");
+
+	for (const auto& point : pathComponent->getBaseBezierCurveControlPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetText(vec3ToString(point).c_str());
+
+		pointsElement->InsertEndChild(pointElement);
+	}
+
+	componentElement->InsertEndChild(pointsElement);
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -187,6 +215,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (prefab)
 	{
 		savePrefabComponent(objectElement, doc, prefab);
+	}
+
+	PathComponent* pathComponent = static_cast<PathComponent*>(sceneObject->getComponent(CT_PATH));
+	if (pathComponent)
+	{
+		savePathComponent(objectElement, doc, pathComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);
@@ -335,9 +369,9 @@ void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, Sc
 		{
 			saveSunLight(_sunElement, sceneObject);
 		}
-		else if (sceneObject->getParent() == nullptr)
+		else
 		{
-			saveObject(_objectsElement, doc, sceneObject, nullptr);
+			saveObject(parentElement, doc, sceneObject, nullptr);
 		}
 	}
 	else if (sceneObject->getParent() == parentObject)
@@ -397,7 +431,10 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
-		saveSceneObject(doc, _objectsElement, sceneObject);
+		if (sceneObject->getParent() == nullptr)
+		{
+			saveSceneObject(doc, _objectsElement, sceneObject);
+		}
 	}
 
 	XMLError errorCode = doc.SaveFile(fullPath.c_str());
