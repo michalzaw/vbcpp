@@ -10,23 +10,15 @@
 #include "../Utils/ResourceManager.h"
 
 
-PathComponent::PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
-	: Component(CT_PATH),
-	_distanceFromBaseBezierCurve(distanceFromBaseBezierCurve), _baseBezierCurveControlPoints(baseBezierCurveControlPoints),
-	_marginBegin(marginBegin), _marginEnd(marginEnd)
+RRoadProfile* helperProfile = nullptr;
+
+
+RRoadProfile* getHelperProfile()
 {
-
-}
-
-
-void PathComponent::onAttachedToScenObject()
-{
-
-	if (GameConfig::getInstance().mode == GM_EDITOR)
+	if (helperProfile == nullptr)
 	{
-		// create editor helper
+		helperProfile = new RRoadProfile("", "", "", "");
 
-		RRoadProfile* helperProfile = new RRoadProfile("", "", "", "");
 		RoadLane tempLane;
 		tempLane.r1 = -0.5f;
 		tempLane.r2 = 0.5f;
@@ -37,23 +29,37 @@ void PathComponent::onAttachedToScenObject()
 		tempLane.material->shader = SOLID_MATERIAL;
 		tempLane.material->diffuseTexture = ResourceManager::getInstance().loadTexture("Data/editor/path1.png");
 		tempLane.material->shininess = 96.0f;
+
 		helperProfile->getRoadLanes().push_back(tempLane);
-		std::vector<RoadSegment> segments;
-		SceneObject* pathHelperSceneObject = getSceneObject();
+	}
 
-		RoadObject* pathHelperComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, helperProfile, _curvePoints, segments, true, pathHelperSceneObject);
-		pathHelperComponent->buildModel();
+	return helperProfile;
+}
 
-		for (int i = 0; i < _baseBezierCurveControlPoints.size() / 3; ++i)
-		{
-			RoadSegment segment;
-			segment.type = RST_BEZIER_CURVE;
-			segment.pointsCount = 50;
-			segments.push_back(segment);
-		}
 
-		//RoadObject* pathHelperComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::BEZIER_CURVES, helperProfile, _baseBezierCurveControlPoints, segments, true, pathHelperSceneObject);
-		//pathHelperComponent->buildModel();
+PathComponent::PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
+	: Component(CT_PATH),
+	_distanceFromBaseBezierCurve(distanceFromBaseBezierCurve), _baseBezierCurveControlPoints(baseBezierCurveControlPoints),
+	_marginBegin(marginBegin), _marginEnd(marginEnd)
+{
+	recalculate();
+}
+
+
+void PathComponent::onAttachedToScenObject()
+{
+	if (GameConfig::getInstance().mode == GM_EDITOR)
+	{
+		// create editor helper
+		SceneManager* sceneManager = getSceneObject()->getSceneManager();
+
+		RRoadProfile* helperProfile = getHelperProfile();
+		SceneObject* pathHelperSceneObject = sceneManager->addSceneObject("Path helper");
+		pathHelperSceneObject->setFlags(SOF_NOT_SERIALIZABLE | SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE);
+		getSceneObject()->addChild(pathHelperSceneObject);
+
+		RoadObject* pathHelperComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, helperProfile, _curvePoints, {}, true, pathHelperSceneObject);
+		pathHelperComponent->setCastShadows(false);
 	}
 }
 

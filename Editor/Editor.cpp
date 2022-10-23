@@ -1007,35 +1007,8 @@ namespace vbEditor
 				{
 					RoadObject* roadObject = _sceneManager->getGraphicsManager()->getRoadObjects()[0];
 					const std::vector<glm::vec3>& roadControlPoints = roadObject->getPoints();
-					glm::vec2 distanceFromRoadAxis(2.0f, 0.05f);
+					glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
 					PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadObject->getMarginBegin(), roadObject->getMarginEnd());
-
-
-					/*const std::vector<glm::vec3>& roadControlPoints = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getPoints();
-					for (int i = 1; i < roadControlPoints.size(); i += 3)
-					{
-						const glm::vec3& p0 = roadControlPoints[i - 1];
-						const glm::vec3& p1 = roadControlPoints[i];
-						const glm::vec3& p2 = roadControlPoints[i + 1];
-						const glm::vec3& p3 = roadControlPoints[i + 2];
-
-						glm::vec3 direction1 = glm::normalize(p1 - p0);
-						glm::vec3 direction2 = glm::normalize(p3 - p2);
-
-						glm::vec3 right1 = glm::cross(direction1, glm::vec3(0.0f, 1.0f, 0.0f));
-						glm::vec3 right2 = glm::cross(direction2, glm::vec3(0.0f, 1.0f, 0.0f));
-
-						float distance = 2.0f;
-						path->getBaseBezierCurveControlPoints().push_back(p0 + right1 * distance);
-						path->getBaseBezierCurveControlPoints().push_back(p1 + right1 * distance + direction1 * distance);
-						path->getBaseBezierCurveControlPoints().push_back(p2 + right2 * distance + direction2 * distance);
-						//path->getControlPoints().push_back(p3 + right2 * distance);
-					}
-
-					path->getBaseBezierCurveControlPoints().push_back(roadControlPoints[roadControlPoints.size() - 1]);*/
-
-					//path->getBaseBezierCurveControlPoints() = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getCurvePoints();
-					path->recalculate();
 
 					SceneObject* pathObject = _sceneManager->addSceneObject("path");
 					pathObject->addComponent(path);
