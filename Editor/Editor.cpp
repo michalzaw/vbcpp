@@ -10,8 +10,6 @@
 //#include "../Bus/BusLoader.h"
 
 #include "../Game/Directories.h"
-#include "../Game/PathComponent.h"
-#include "../Game/GameLogicSystem.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -1002,18 +1000,6 @@ namespace vbEditor
 					polygonSceneObject->addComponent(new ShapePolygonComponent);
 
 					setSelectedSceneObject(polygonSceneObject);
-				}
-				if (ImGui::MenuItem("Add new path", NULL))
-				{
-					RoadObject* roadObject = _sceneManager->getGraphicsManager()->getRoadObjects()[0];
-					const std::vector<glm::vec3>& roadControlPoints = roadObject->getPoints();
-					glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
-					PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadObject->getMarginBegin(), roadObject->getMarginEnd());
-
-					SceneObject* pathObject = _sceneManager->addSceneObject("path");
-					pathObject->addComponent(path);
-
-					_sceneManager->getGraphicsManager()->getRoadObjects()[0]->getSceneObject()->addChild(pathObject);
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Add new decal", NULL))

@@ -15,6 +15,9 @@
 #include "RoadTools.h"
 #include "../FileDialogs.h"
 
+#include "../../Game/PathComponent.h"
+#include "../../Game/GameLogicSystem.h"
+
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -414,9 +417,23 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 			ImGui::PopID();
 		}
 
+		ImGui::Separator();
+
 		if (ImGui::Button("Generate objects"))
 		{
 			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
+		}
+
+		if (ImGui::Button("Generate AI paths"))
+		{
+			const std::vector<glm::vec3>& roadControlPoints = roadComponent->getPoints();
+			glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
+			PathComponent* path = vbEditor::_sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
+
+			SceneObject* pathObject = vbEditor::_sceneManager->addSceneObject("path");
+			pathObject->addComponent(path);
+
+			roadComponent->getSceneObject()->addChild(pathObject);
 		}
 	}
 }
