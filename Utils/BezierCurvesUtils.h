@@ -22,6 +22,9 @@ namespace BezierCurvesUtils
 								   unsigned int numberOfPoints, std::vector<glm::vec3>& outPoints);
 
 	void generateBezierCurvePointsWithConstDistance(int resolution, float distance, std::vector<glm::vec3>& outPoints, const std::function<glm::vec3(float)>& function);
+
+	void cutBezierCurveFromBegin(std::vector<glm::vec3>& curvePoints, float distance);
+	void cutBezierCurveFromEnd(std::vector<glm::vec3>& curvePoints, float distance);
 }
 
 

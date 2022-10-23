@@ -12,14 +12,26 @@
 class PathComponent final : public Component
 {
 	private:
-		std::vector<glm::vec3> _controlPoints;
+		glm::vec2 _distanceFromBaseBezierCurve;
+
+		std::vector<glm::vec3> _baseBezierCurveControlPoints;
 		std::vector<glm::vec3> _curvePoints;
 
-	public:
-		PathComponent();
+		float _marginBegin;
+		float _marginEnd;
 
-		std::vector<glm::vec3>& getControlPoints();
-		std::vector<glm::vec3>& getCurvePoints();
+		void onAttachedToScenObject() override;
+
+	public:
+		PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, float marginBegin = 0.0f, float marginEnd = 0.0f);
+
+		inline const std::vector<glm::vec3>& getBaseBezierCurveControlPoints() { return _baseBezierCurveControlPoints; }
+		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
+		inline float getMarginBegin() { return _marginBegin; }
+		inline float getMarginEnd() { return _marginEnd; }
+
+		inline void setMarginBegin(float marginBegin) { _marginBegin = marginBegin; }
+		inline void setMarginEnd(float marginEnd) { _marginBegin = marginEnd; }
 
 		void recalculate();
 

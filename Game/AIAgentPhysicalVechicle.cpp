@@ -29,7 +29,7 @@ void AIAgentPhysicalVechicle::update(float deltaTime)
 
 
 	//LOG_DEBUG("UPDATE 1");
-	glm::vec3& currentPoint = _currentPath->getCurvePoints()[_currentPointIndex];
+	glm::vec3 currentPoint = _currentPath->getCurvePoints()[_currentPointIndex];
 	float distance = glm::distance(centerPoint, currentPoint);
 	//LOG_DEBUG(LOG_VARIABLE(centerPoint));
 	//LOG_DEBUG(LOG_VARIABLE(distance));

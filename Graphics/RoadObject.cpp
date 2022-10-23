@@ -49,34 +49,12 @@ void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoint
 {
 	if (_connectionPoints[0].roadIntersectionComponent != nullptr)
 	{
-		float length = 0.0f;
-		int i;
-		for (i = 0; i < curvePoints.size() - 2; ++i)
-		{
-			length += glm::distance(curvePoints[i], curvePoints[i + 1]);
-			if (length >= _marginBegin)
-			{
-				break;
-			}
-		}
-
-		curvePoints.erase(curvePoints.begin(), curvePoints.begin() + i);
+		BezierCurvesUtils::cutBezierCurveFromBegin(curvePoints, _marginBegin);
 	}
 
 	if (_connectionPoints[1].roadIntersectionComponent != nullptr)
 	{
-		float length = 0.0f;
-		int i;
-		for (i = 0; i < curvePoints.size() - 2; ++i)
-		{
-			length += glm::distance(curvePoints[curvePoints.size() - i - 1], curvePoints[curvePoints.size() - i - 2]);
-			if (length >= _marginEnd)
-			{
-				break;
-			}
-		}
-
-		curvePoints.erase(curvePoints.end() - i, curvePoints.end());
+		BezierCurvesUtils::cutBezierCurveFromEnd(curvePoints, _marginEnd);
 	}
 }
 

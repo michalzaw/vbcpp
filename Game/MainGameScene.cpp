@@ -235,11 +235,14 @@ void MainGameScene::loadScene()
 										  degToRad(0.0f));*/
 
 
-	PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent();
+	RoadObject* roadObject = _sceneManager->getGraphicsManager()->getRoadObjects()[0];
+	const std::vector<glm::vec3>& roadControlPoints = roadObject->getPoints();
+	glm::vec2 distanceFromRoadAxis(2.0f, 0.05f);
+	PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, roadObject->getMarginBegin(), roadObject->getMarginEnd());
 	//path->getCurvePoints().push_back(glm::vec3(10.0f, 0.0f, -50.0f));
 	//path->getCurvePoints().push_back(glm::vec3(20.0f, 0.0f, 0.0f));
 	//path->getCurvePoints().push_back(glm::vec3(0.0f, 0.0f, 50.0f));
-	path->getCurvePoints() = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getCurvePoints();
+	//path->getBaseBezierCurveControlPoints() = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getCurvePoints();
 	path->recalculate();
 
 	SceneObject* pathObject = _sceneManager->addSceneObject("path1");
@@ -247,6 +250,7 @@ void MainGameScene::loadScene()
 
 
 	SceneObject* agentObject = _sceneManager->addSceneObject("agent1");
+	//_buses[1]->getSceneObject()->move(20.0f, 0.0f, 0.0f);
 
 	_aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent(((BusRaycast*)_buses[1])->getModule(0).rayCastVehicle);
 	_aiAgent->setCurrentPath(path);

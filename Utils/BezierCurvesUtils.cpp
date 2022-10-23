@@ -80,4 +80,36 @@ namespace BezierCurvesUtils
 			lastPoint = currentPoint;
 		}
 	}
+
+	void cutBezierCurveFromBegin(std::vector<glm::vec3>& curvePoints, float distance)
+	{
+		float length = 0.0f;
+		int i;
+		for (i = 0; i < curvePoints.size() - 2; ++i)
+		{
+			length += glm::distance(curvePoints[i], curvePoints[i + 1]);
+			if (length >= distance)
+			{
+				break;
+			}
+		}
+
+		curvePoints.erase(curvePoints.begin(), curvePoints.begin() + i);
+	}
+
+	void cutBezierCurveFromEnd(std::vector<glm::vec3>& curvePoints, float distance)
+	{
+		float length = 0.0f;
+		int i;
+		for (i = 0; i < curvePoints.size() - 2; ++i)
+		{
+			length += glm::distance(curvePoints[curvePoints.size() - i - 1], curvePoints[curvePoints.size() - i - 2]);
+			if (length >= distance)
+			{
+				break;
+			}
+		}
+
+		curvePoints.erase(curvePoints.end() - i, curvePoints.end());
+	}
 }
