@@ -3,6 +3,8 @@
 #include "SceneManager.h"
 
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
 #include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
@@ -309,6 +311,31 @@ void SceneLoader::loadPrefabComponent(XMLElement* componentElement, SceneObject*
 }
 
 
+void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::vector<glm::vec3> bezierCurveControlPoints;
+
+	XMLElement* pointsElement = componentElement->FirstChildElement("Points");
+
+	XMLElement* pointElement = pointsElement->FirstChildElement("Point");
+	while (pointElement != nullptr)
+	{
+		bezierCurveControlPoints.push_back(XMLstringToVec3(pointElement->GetText()));
+
+		pointElement = pointElement->NextSiblingElement("Point");
+	}
+
+	glm::vec2 distanceFromBaseBezierCurve = XmlUtils::getAttributeVec2(componentElement, "distanceFromBaseBezierCurve");
+	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
+	float marginBegin = XmlUtils::getAttributeFloat(componentElement, "marginBegin");
+	float marginEnd = XmlUtils::getAttributeFloat(componentElement, "marginEnd");
+
+	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(bezierCurveControlPoints, distanceFromBaseBezierCurve, direction, marginBegin, marginEnd);
+
+	sceneObject->addComponent(pathComponent);
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -364,6 +391,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "prefab")
 			{
 				loadPrefabComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "path")
+			{
+				loadPathComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");
