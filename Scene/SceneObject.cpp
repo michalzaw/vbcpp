@@ -1,7 +1,10 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
-#include "../Game/GameLogicSystem.h"
+
+#include "../Game/AIAgent.h"
 #include "../Game/CameraControlComponent.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -127,6 +130,14 @@ SceneObject::~SceneObject()
 
             case CT_SKELETAL_ANIMATION_HELPER:
                 _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
+                break;
+
+            case CT_AI_AGENT:
+                _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(*i));
+                break;
+
+            case CT_PATH:
+                _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(*i));
                 break;
 
         }
@@ -383,6 +394,14 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_SKELETAL_ANIMATION_HELPER:
                     _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
+                    break;
+
+                case CT_AI_AGENT:
+                    _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(component));
+                    break;
+
+                case CT_PATH:
+                    _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(component));
                     break;
 
             }
