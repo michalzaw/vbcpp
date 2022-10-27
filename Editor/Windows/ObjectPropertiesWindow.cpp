@@ -1106,7 +1106,14 @@ void showAiAgentComponentDetails(AIAgent* component)
 
 			if (result)
 			{
-				component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				if (selectedItemIndex > 0)
+				{
+					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				}
+				else
+				{
+					component->setCurrentPath(nullptr);
+				}
 			}
 
 			ImGui::NextColumn();
