@@ -30,6 +30,7 @@ class AIAgent : public Component
 		float getSpeed();
 
 		void setCurrentPath(PathComponent* path);
+		PathComponent* getCurrentPath() { return _currentPath; }
 
 		void update(float deltaTime) override;
 };

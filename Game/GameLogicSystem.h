@@ -47,6 +47,7 @@ class GameLogicSystem final
 		//void removeBusStop(BusStopComponent* busStop);
 
 		//Bus* getBus(unsigned int index);
+		inline const std::vector<PathComponent*>& getPathComponents() { return _pathComponents; }
 
 		void update(float deltaTime);
 

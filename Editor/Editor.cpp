@@ -9,7 +9,9 @@
 
 //#include "../Bus/BusLoader.h"
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -1076,6 +1078,18 @@ namespace vbEditor
 					}
 					ImGui::EndMenu();
 				}
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Add AI Agent", NULL))
+				{
+					if (_selectedSceneObject != NULL)
+					{
+						AIAgent* aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent();
+						_selectedSceneObject->addComponent(aiAgent);
+
+						aiAgent->setCurrentPath(_sceneManager->getGameLogicSystem()->getPathComponents()[0]);
+					}
+				}
 
 				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
@@ -1393,6 +1407,8 @@ namespace vbEditor
 
 				_graphicsManager->update(TIME_STEP);
 				updateRoads(TIME_STEP);
+
+				_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
 
 

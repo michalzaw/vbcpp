@@ -11,7 +11,9 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
 
 #include "../Graphics/SkeletalAnimationComponent.h"
 
@@ -70,6 +72,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		else if (componentType == "skeletalAnimation")
 		{
 			loadSkeletalAnimation(componentElement, object, componentIndex);
+		}
+		else if (componentType == "aiAgent")
+		{
+			loadAiAgent(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -183,6 +189,12 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
 	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
 	object->getComponents()[componentIndex]["scale"] = XmlUtils::getAttributeStringOptional(componentElement, "scale", "1");
+}
+
+
+void RObjectLoader::loadAiAgent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	object->getComponents()[componentIndex]["speed"] = componentElement->Attribute("speed");
 }
 
 
@@ -434,6 +446,15 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
 			skeletalAnimation->setScale(scale);
+		}
+		else if (componentType == "aiAgent")
+		{
+			float speed = toFloat(components[i]["speed"]);
+
+			AIAgent* aiAgent = sceneManager->getGameLogicSystem()->addAIAgent();
+			aiAgent->setSpeed(speed);
+
+			sceneObject->addComponent(aiAgent);
 		}
 	}
 

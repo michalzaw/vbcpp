@@ -16,6 +16,10 @@
 #include "../FileDialogs.h"
 #include "../Utils/AIPathGenerator.h"
 
+#include "../../Game/AIAgent.h"
+#include "../../Game/GameLogicSystem.h"
+#include "../../Game/PathComponent.h"
+
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -1058,6 +1062,65 @@ void showPrefabComponentDetails(Prefab* component)
 }
 
 
+void showAiAgentComponentDetails(AIAgent* component)
+{
+	if (ImGui::CollapsingHeader("AI agent", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
+		std::vector<std::string> availablePaths;
+		availablePaths.reserve(pathComponents.size());
+
+		for (auto pathComponent : pathComponents)
+		{
+			availablePaths.push_back(pathComponent->getSceneObject()->getName());
+		}
+
+		COMPONENT_PROPERTY_EDIT(component, Speed, float, "Speed")
+
+		{
+			ImGui::PushID("CurrentPath");
+
+			ImGui::AlignTextToFramePadding();
+			ImGui::TreeNodeEx("Path", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Path");
+			ImGui::NextColumn();
+			ImGui::SetNextItemWidth(-1);
+
+			const std::vector<std::string>& itemsNames = availablePaths;
+			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+		
+			bool result = false;
+			std::string value = "";
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				result = true;
+				if (selectedItemIndex > 0)
+					value = itemsNames[selectedItemIndex - 1];
+			}
+
+			if (result)
+			{
+				component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+			}
+
+			ImGui::NextColumn();
+
+			ImGui::PopID();
+		}
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1142,6 +1205,12 @@ void showObjectProperties()
 			{
 				showPrefabComponentDetails(prefabComponent);
 				showRenderComponentDetails(prefabComponent);
+			}
+
+			AIAgent* aiAgent = dynamic_cast<AIAgent*>(vbEditor::_selectedSceneObject->getComponent(CT_AI_AGENT));
+			if (aiAgent)
+			{
+				showAiAgentComponentDetails(aiAgent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
