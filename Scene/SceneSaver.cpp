@@ -5,6 +5,7 @@
 #include "SceneManager.h"
 #include "SceneLoader.h"
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
 #include "../Game/PathComponent.h"
 
@@ -181,6 +182,24 @@ void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, 
 }
 
 
+void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& doc, AIAgent* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgent");
+		componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -221,6 +240,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (pathComponent)
 	{
 		savePathComponent(objectElement, doc, pathComponent);
+	}
+
+	AIAgent* aiAgentComponent = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+	if (aiAgentComponent)
+	{
+		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

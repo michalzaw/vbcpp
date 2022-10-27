@@ -25,6 +25,7 @@ class SceneObject;
 struct ResourceDescription;
 class Prefab;
 class PathComponent;
+class AIAgent;
 
 
 class SceneSaver
@@ -57,6 +58,7 @@ class SceneSaver
 
 		void savePrefabComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, Prefab* prefab);
 		void savePathComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, PathComponent* pathComponent);
+		void saveAIAgentComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgent* aiAgent);
 
 		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);
 

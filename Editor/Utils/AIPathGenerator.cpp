@@ -29,7 +29,7 @@ namespace AIPathGenerator
 			PathComponent* path = sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, (PathDirection) aiPath.direction,
 																					   roadComponent->getMarginBegin(), roadComponent->getMarginEnd());
 
-			SceneObject* pathObject = sceneManager->addSceneObject(aiPath.name);
+			SceneObject* pathObject = sceneManager->addSceneObject(roadComponent->getSceneObject()->getName() + " - " + aiPath.name);
 			pathObject->addComponent(path);
 
 			rootObject->addChild(pathObject);
