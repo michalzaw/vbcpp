@@ -1113,6 +1113,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 				}
 				else
 				{
+					component->getSceneObject()->getParent()->removeChild(component->getSceneObject());
 					component->setCurrentPath(nullptr);
 				}
 			}

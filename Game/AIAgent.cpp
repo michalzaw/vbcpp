@@ -2,6 +2,8 @@
 
 #include "PathComponent.h"
 
+#include "../Graphics/SkeletalAnimationComponent.h"
+
 #include "../Scene/SceneObject.h"
 
 #include "../Utils/QuaternionUtils.h"
@@ -10,10 +12,31 @@
 AIAgent::AIAgent()
 	: Component(CT_AI_AGENT),
 	_speed(10.0f),
-	_currentPath(nullptr),
+	_currentPath(nullptr), _skeletalAnimationComponent(nullptr),
+	_speedInAnimation(10.0f), _baseAnimationTicksPerSecond(0.0f),
 	_currentPointIndex(0), _t(0.0f)
 {
 
+}
+
+
+void AIAgent::onAttachedToScenObject()
+{
+	_skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION));
+	if (_skeletalAnimationComponent != nullptr)
+	{
+		glm::vec3 startPosition = _skeletalAnimationComponent->getRootBonePositionInStartFrame() * _skeletalAnimationComponent->getScale();
+		glm::vec3 endPosition = _skeletalAnimationComponent->getRootBonePositionInEndFrame() * _skeletalAnimationComponent->getScale();
+
+		float distanceFromStartToEndPosition = glm::distance(startPosition, endPosition);
+		float animationDuration = _skeletalAnimationComponent->getAnimationDuration() / _skeletalAnimationComponent->getAnimationTicksPerSecond();
+
+		_speedInAnimation = distanceFromStartToEndPosition / animationDuration;
+
+		_baseAnimationTicksPerSecond = _skeletalAnimationComponent->getAnimationTicksPerSecond();
+
+		setSpeed(_speed);
+	}
 }
 
 
@@ -87,6 +110,13 @@ void AIAgent::move(const glm::vec3& point1, const glm::vec3& point2)
 void AIAgent::setSpeed(float speed)
 {
 	_speed = speed;
+
+	if (_skeletalAnimationComponent != nullptr)
+	{
+		float ratio = _speed / _speedInAnimation;
+
+		_skeletalAnimationComponent->setAnimationTicksPerSecond(_baseAnimationTicksPerSecond * ratio);
+	}
 }
 
 

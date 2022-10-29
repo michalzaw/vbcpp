@@ -8,6 +8,7 @@
 
 
 class PathComponent;
+class SkeletalAnimationComponent;
 
 
 class AIAgent : public Component
@@ -16,12 +17,18 @@ class AIAgent : public Component
 		float _speed;
 
 		PathComponent* _currentPath;
+		SkeletalAnimationComponent* _skeletalAnimationComponent;
+
+		float _speedInAnimation;
+		float _baseAnimationTicksPerSecond;
 
 		unsigned int _currentPointIndex;
 		float _t;
 
 		void reset();
 		void move(const glm::vec3& point1, const glm::vec3& point2);
+
+		void onAttachedToScenObject() override;
 
 	public:
 		AIAgent();
