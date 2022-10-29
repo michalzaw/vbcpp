@@ -189,7 +189,9 @@ void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& do
 		XMLElement* componentElement = doc.NewElement("Component");
 
 		componentElement->SetAttribute("type", "aiAgent");
-		componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
 
 		objectElement->InsertEndChild(componentElement);
 	}

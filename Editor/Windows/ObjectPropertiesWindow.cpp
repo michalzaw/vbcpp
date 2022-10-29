@@ -1108,6 +1108,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 			{
 				if (selectedItemIndex > 0)
 				{
+					pathComponents[selectedItemIndex - 1]->getSceneObject()->addChild(component->getSceneObject());
 					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
 				}
 				else

@@ -2,6 +2,7 @@
 
 #include "SceneManager.h"
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
@@ -336,6 +337,22 @@ void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* s
 }
 
 
+void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgent* component = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -396,6 +413,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "path")
 			{
 				loadPathComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiAgent")
+			{
+				loadAIAgentComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");
