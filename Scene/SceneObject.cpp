@@ -6,6 +6,7 @@
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
 #include "../Graphics/SkeletalAnimationHelperComponent.h"
@@ -130,6 +131,10 @@ SceneObject::~SceneObject()
 
             case CT_SKELETAL_ANIMATION_HELPER:
                 _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
+                break;
+
+            case CT_BEZIER_CURVE:
+                _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
                 break;
 
             case CT_AI_AGENT:
@@ -394,6 +399,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_SKELETAL_ANIMATION_HELPER:
                     _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
+                    break;
+
+                case CT_BEZIER_CURVE:
+                    _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
                     break;
 
                 case CT_AI_AGENT:

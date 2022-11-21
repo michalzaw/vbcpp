@@ -38,6 +38,7 @@
 #include "Windows/GenerateObjectsAlongRoadWindow.h"
 #include "Windows/LoggerWindow.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -570,7 +571,7 @@ namespace vbEditor
 		_selectedSceneObject = object;
 		centerGraphView();
 
-		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr))
+		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr))
 		{
 			_clickMode = CM_ROAD_EDIT; // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
 		}
@@ -652,6 +653,12 @@ namespace vbEditor
 					if (shapePolygonObject != nullptr)
 					{
 						shapePolygonObject->addPoint(hitPosition);
+					}
+
+					BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+					if (bezierCurve != nullptr)
+					{
+						bezierCurve->addPoint(hitPosition);
 					}
 				}
 			}
@@ -1080,6 +1087,16 @@ namespace vbEditor
 				}
 				ImGui::Separator();
 
+				if (ImGui::MenuItem("Add Bezier curve", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Bezier curve");
+
+					BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+					sceneObject->addComponent(bezierCurve);
+
+					setSelectedSceneObject(sceneObject);
+				}
+
 				if (ImGui::MenuItem("Add AI Agent", NULL))
 				{
 					if (_selectedSceneObject != NULL)
@@ -1300,11 +1317,14 @@ namespace vbEditor
 			//{
 				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+				BezierCurve* bezierCurveComponent = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
 
 				if (roadComponent)
 					showRoadTools();
 				else if (shapePolygonComponent)
 					showPolygonEditTool();
+				else if (bezierCurveComponent)
+					showBezierCurveTool();
 				else
 					ShowTransformGizmo();
 			//}
@@ -1626,6 +1646,7 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints(roadComponent->getCurvePoints());
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			_camera->getPosition(),
@@ -1672,6 +1693,7 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints(component->getPoints());
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			/*_selectedSceneObject->getLocalTransformMatrix(),*/
 			glm::mat4(1.0f),
@@ -1679,6 +1701,31 @@ namespace vbEditor
 			component->getPoints(),
 			segments,
 			RoadManipulator::RoadType::POLYGON);
+
+		if (RoadManipulator::IsModified())
+		{
+			component->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+	}
+
+	void showBezierCurveTool()
+	{
+		BezierCurve* component = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+
+		std::vector<RoadSegment> segments;
+		std::vector<glm::vec3> connectionPointsPositions;
+
+		ImGuiIO& io = ImGui::GetIO();
+		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints(component->getCurvePoints());
+		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
+			/*_selectedSceneObject->getLocalTransformMatrix(),*/
+			glm::mat4(1.0f),
+			_camera->getPosition(),
+			component->getPoints(),
+			segments,
+			RoadManipulator::RoadType::BEZIER_CURVE);
 
 		if (RoadManipulator::IsModified())
 		{

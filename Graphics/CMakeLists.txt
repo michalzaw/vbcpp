@@ -2,6 +2,7 @@ set (GRAPHICS_SOURCES
 		Graphics/AABB.h
 		Graphics/AnimatedModelLoader.cpp
 		Graphics/AnimationLoader.cpp
+		Graphics/BezierCurve.cpp
 		Graphics/Camera.cpp
 		Graphics/Camera.h
 		Graphics/CameraFPS.cpp
@@ -111,6 +112,7 @@ set (GRAPHICS_SOURCES
 set (GRAPHICS_HEADERS
 		Graphics/AnimatedModelLoader.h
 		Graphics/AnimationLoader.h
+		Graphics/BezierCurve.h
 		Graphics/RAnimation.h
 		Graphics/AnimationNodeData.h
 		Graphics/SkeletalAnimationComponent.h

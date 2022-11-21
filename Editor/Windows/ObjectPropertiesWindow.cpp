@@ -20,6 +20,7 @@
 #include "../../Game/GameLogicSystem.h"
 #include "../../Game/PathComponent.h"
 
+#include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -1130,6 +1131,24 @@ void showAiAgentComponentDetails(AIAgent* component)
 }
 
 
+void showBezierCurveComponentDetails(BezierCurve* component)
+{
+	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
+		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1220,6 +1239,12 @@ void showObjectProperties()
 			if (aiAgent)
 			{
 				showAiAgentComponentDetails(aiAgent);
+			}
+
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (bezierCurve)
+			{
+				showBezierCurveComponentDetails(bezierCurve);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

@@ -77,6 +77,7 @@ namespace vbEditor
 	void ShowTransformGizmo();
 	void showRoadTools();
 	void showPolygonEditTool();
+	void showBezierCurveTool();
 	void updateRoads(float deltaTime);
 	void addSceneObject();
 

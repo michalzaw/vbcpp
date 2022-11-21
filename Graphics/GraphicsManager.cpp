@@ -1,6 +1,7 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "BezierCurve.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 #include "SkeletalAnimationHelperComponent.h"
@@ -79,6 +80,11 @@ GraphicsManager::~GraphicsManager()
     }
 
     for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
     {
         delete* i;
     }
@@ -309,6 +315,16 @@ SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(Sk
 {
     _skeletalAnimationHelpers.push_back(component);
     return component;
+}
+
+
+BezierCurve* GraphicsManager::addBezierCurve()
+{
+    BezierCurve* bezierCurve = new BezierCurve;
+    
+    _bezierCurves.push_back(bezierCurve);
+
+    return bezierCurve;
 }
 
 
@@ -545,6 +561,22 @@ void GraphicsManager::removeSkeletalAnimationHelper(SkeletalAnimationHelperCompo
             i = _skeletalAnimationHelpers.erase(i);
 
             delete component;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeBezierCurve(BezierCurve* bezierCurve)
+{
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
+    {
+        if (*i == bezierCurve)
+        {
+            i = _bezierCurves.erase(i);
+
+            delete bezierCurve;
 
             return;
         }

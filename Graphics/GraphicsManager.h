@@ -42,6 +42,7 @@ class SkeletalAnimationComponent;
 class SkeletalAnimationComponent2;
 class SkeletalAnimationHelperComponent;
 class RAnimation;
+class BezierCurve;
 
 
 class GraphicsManager
@@ -63,6 +64,7 @@ class GraphicsManager
         std::vector<SkeletalAnimationComponent*>    _skeletalAnimations;
         std::vector<SkeletalAnimationComponent2*>   _skeletalAnimations2;
         std::vector<SkeletalAnimationHelperComponent*>_skeletalAnimationHelpers;
+        std::vector<BezierCurve*>                   _bezierCurves;
 
 		Sky*						_sky;
 
@@ -109,6 +111,7 @@ class GraphicsManager
         SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
         SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
         SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
+        BezierCurve*    addBezierCurve();
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -128,6 +131,7 @@ class GraphicsManager
         void removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent);
         void removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent);
         void removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
+        void removeBezierCurve(BezierCurve* bezierCurve);
 
 
         void setCurrentCamera(CameraStatic* camera);
