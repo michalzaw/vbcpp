@@ -28,6 +28,7 @@ class BezierCurve final : public Component
 		BezierCurve();
 
 		void addPoint(const glm::vec3& position); // void RoadObject::addPoint(glm::vec3);
+		void deletePoint(int index); // void RoadObject::deletePoint(unsigned int);
 		void setPointPostion(int index, const glm::vec3& newPosition); // void RoadObject::setPointPostion(int, glm::vec3);
 
 		const std::vector<glm::vec3>& getCurvePoints();

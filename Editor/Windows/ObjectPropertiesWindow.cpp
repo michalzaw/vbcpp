@@ -12,7 +12,7 @@
 #endif
 
 #include "OpenDialogWindow.h"
-#include "RoadTools.h"
+#include "../Tools/RoadManipulator.h"
 #include "../FileDialogs.h"
 #include "../Utils/AIPathGenerator.h"
 
@@ -623,7 +623,7 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 }
 
 
-#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
+#define COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																				\
 {																																				\
 	ImGui::PushID(#propertyName);																												\
 																																				\
@@ -631,6 +631,19 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
+}
+
+#define COMPONENT_PROPERTY_EDIT_END																												\
+{																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
+{																																				\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
 																																				\
 	IMGUI_INPUT_##type(component, propertyName, additionalParams)																				\
 																																				\
@@ -640,20 +653,13 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 		callback(type(value));																													\
 	}																																			\
 																																				\
-	ImGui::NextColumn();																														\
-																																				\
-	ImGui::PopID();																																\
+	COMPONENT_PROPERTY_EDIT_END																													\
 }
 
 
 #define COMPONENT_RESOURCE_EDIT(component, propertyName, displayName, pathToResourceMapper)														\
 {																																				\
-	ImGui::PushID(#propertyName);																												\
-																																				\
-	ImGui::AlignTextToFramePadding();																											\
-	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
-	ImGui::NextColumn();																														\
-	ImGui::SetNextItemWidth(-1);																												\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
 																																				\
 	IMGUI_INPUT_path(component->get##propertyName(), Path, additionalParams)																	\
 																																				\
@@ -662,9 +668,7 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 		component->set##propertyName(pathToResourceMapper(value));																				\
 	}																																			\
 																																				\
-	ImGui::NextColumn();																														\
-																																				\
-	ImGui::PopID();																																\
+	COMPONENT_PROPERTY_EDIT_END																													\
 }
 
 
@@ -1141,6 +1145,40 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 
 		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
 		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
+
+		int activePoint = RoadManipulator::GetActivePoint();
+		if (activePoint >= 0 && activePoint < component->getPoints().size())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Point: %d", activePoint);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			glm::vec3 pointPosition = component->getPoints()[activePoint];
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(PointPosition, "Point position")
+			if (ImGui::DragFloat3("##value", glm::value_ptr(pointPosition), 0.01f, 0.0f, 0.0f))
+			{
+				component->setPointPostion(activePoint, pointPosition);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			if (activePoint % 3 == 0)
+			{
+				if (ImGui::Button("Delete point"))
+				{
+					component->deletePoint(activePoint);
+
+					if (activePoint == component->getPoints().size())
+					{
+						//--vbEditor::roadActivePoint;
+						//--vbEditor::roadActiveSegment;
+					}
+				}
+			}
+		}
 
 		ImGui::Columns(1);
 		ImGui::Separator();

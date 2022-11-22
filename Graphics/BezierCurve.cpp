@@ -126,8 +126,73 @@ void BezierCurve::addPoint(const glm::vec3& position)
 }
 
 
+void BezierCurve::deletePoint(int index)
+{
+	if (index >= _points.size())
+	{
+		return;
+	}
+
+	if (index % 3 == 1 || index % 3 == 2)
+	{
+		return;
+	}
+
+	if (index == 0 && _points.size() == 1)
+	{
+		//setConnectionPoint(0, nullptr);
+
+		_points.erase(_points.begin());
+	}
+	else if (index == 0)
+	{
+		//setConnectionPoint(0, nullptr);
+
+		_points.erase(_points.begin());
+		_points.erase(_points.begin());
+		_points.erase(_points.begin());
+	}
+	else if (index == _points.size() - 1)
+	{
+		//setConnectionPoint(1, nullptr);
+
+		_points.erase(_points.end() - 1);
+		_points.erase(_points.end() - 1);
+		_points.erase(_points.end() - 1);
+	}
+	else
+	{
+		auto nextPointIterator = _points.erase(_points.begin() + index);
+		// next control point
+		if (nextPointIterator != _points.end())
+		{
+			nextPointIterator = _points.erase(nextPointIterator);
+		}
+		// previous control point
+		if (nextPointIterator - 1 != _points.end())
+		{
+			nextPointIterator = _points.erase(nextPointIterator - 1);
+		}
+	}
+
+	unsigned int segmentIndex = std::max(((int)index - 1) / 3, 0);
+
+	if (segmentIndex < _segmentsPointsCount.size())
+	{
+		_segmentsPointsCount.erase(_segmentsPointsCount.begin() + segmentIndex);
+	}
+
+	_curvePointsIsCalculated = false;
+}
+
+
 void BezierCurve::setPointPostion(int index, const glm::vec3& newPosition)
 {
+	if (index >= _points.size())
+	{
+		return;
+	}
+
 	/*if (index == 0 && isConnectionExist(0) ||
 		index == _points.size() - 1 && isConnectionExist(1))
 	{
