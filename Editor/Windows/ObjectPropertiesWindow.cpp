@@ -1086,14 +1086,8 @@ void showAiAgentComponentDetails(AIAgent* component)
 
 		COMPONENT_PROPERTY_EDIT(component, Speed, float, "Speed")
 
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
 		{
-			ImGui::PushID("CurrentPath");
-
-			ImGui::AlignTextToFramePadding();
-			ImGui::TreeNodeEx("Path", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, "Path");
-			ImGui::NextColumn();
-			ImGui::SetNextItemWidth(-1);
-
 			const std::vector<std::string>& itemsNames = availablePaths;
 			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
 			std::string comboItems;
@@ -1122,11 +1116,8 @@ void showAiAgentComponentDetails(AIAgent* component)
 					component->setCurrentPath(nullptr);
 				}
 			}
-
-			ImGui::NextColumn();
-
-			ImGui::PopID();
 		}
+		COMPONENT_PROPERTY_EDIT_END
 
 		ImGui::Columns(1);
 		ImGui::Separator();
@@ -1156,9 +1147,8 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 
 			ImGui::NextColumn();
 
-			glm::vec3 pointPosition = component->getPoints()[activePoint];
-
 			COMPONENT_PROPERTY_EDIT_BEGIN(PointPosition, "Point position")
+			glm::vec3 pointPosition = component->getPoints()[activePoint];
 			if (ImGui::DragFloat3("##value", glm::value_ptr(pointPosition), 0.01f, 0.0f, 0.0f))
 			{
 				component->setPointPostion(activePoint, pointPosition);
@@ -1170,14 +1160,27 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 				if (ImGui::Button("Delete point"))
 				{
 					component->deletePoint(activePoint);
-
-					if (activePoint == component->getPoints().size())
-					{
-						//--vbEditor::roadActivePoint;
-						//--vbEditor::roadActiveSegment;
-					}
 				}
 			}
+		}
+
+		int activeSegment = RoadManipulator::GetActiveSegment();
+		if (activeSegment >= 0 && component->getSegmentsCount() > 0 && activeSegment < component->getSegmentsCount())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Segment: %d", activeSegment);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(SegmentPointsCount, "Segment points count")
+			int pointsCount = component->getSegmentPointsCount(activeSegment);
+			if (ImGui::DragInt("##value", &pointsCount, 0.5f, 2, 1000))
+			{
+				component->setSegmentPointsCount(activeSegment, pointsCount);
+			}
+			COMPONENT_PROPERTY_EDIT_END
 		}
 
 		ImGui::Columns(1);

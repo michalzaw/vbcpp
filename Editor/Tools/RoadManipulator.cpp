@@ -154,7 +154,7 @@ namespace RoadManipulator
 		{
 			context.activePoint = points.size() - 1;
 		}
-		if (context.activeSegment >= segments.size())
+		if (context.activeSegment >= segments.size() && context.roadType == RoadType::ARC)
 		{
 			context.activeSegment = segments.size() - 1;
 		}

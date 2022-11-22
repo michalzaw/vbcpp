@@ -32,6 +32,10 @@ class BezierCurve final : public Component
 		void setPointPostion(int index, const glm::vec3& newPosition); // void RoadObject::setPointPostion(int, glm::vec3);
 
 		const std::vector<glm::vec3>& getCurvePoints();
+		int getSegmentPointsCount(int segmentIndex);
+		int getSegmentsCount();
+
+		void setSegmentPointsCount(int segmentIndex, int pointsCount);
 
 		inline const std::vector<glm::vec3>& getPoints() { return _points; }
 		inline float getMarginBegin() { return _marginBegin; }

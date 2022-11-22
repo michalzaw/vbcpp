@@ -130,11 +130,13 @@ void BezierCurve::deletePoint(int index)
 {
 	if (index >= _points.size())
 	{
+		LOG_ERROR("Invalid index: " + Strings::toString(index));
 		return;
 	}
 
 	if (index % 3 == 1 || index % 3 == 2)
 	{
+		LOG_ERROR("Invalid index: " + Strings::toString(index));
 		return;
 	}
 
@@ -190,6 +192,7 @@ void BezierCurve::setPointPostion(int index, const glm::vec3& newPosition)
 {
 	if (index >= _points.size())
 	{
+		LOG_ERROR("Invalid index: " + Strings::toString(index));
 		return;
 	}
 
@@ -262,6 +265,39 @@ const std::vector<glm::vec3>& BezierCurve::getCurvePoints()
 
 	return _curvePoints;
 }
+
+
+int BezierCurve::getSegmentPointsCount(int segmentIndex)
+{
+	if (segmentIndex >= _segmentsPointsCount.size())
+	{
+		LOG_ERROR("Invalid segmentIndex: " + Strings::toString(segmentIndex));
+		return 0;
+	}
+
+	return _segmentsPointsCount[segmentIndex];
+}
+
+
+int BezierCurve::getSegmentsCount()
+{
+	return _segmentsPointsCount.size();
+}
+
+
+void BezierCurve::setSegmentPointsCount(int segmentIndex, int pointsCount)
+{
+	if (segmentIndex >= _segmentsPointsCount.size())
+	{
+		LOG_ERROR("Invalid segmentIndex: " + Strings::toString(segmentIndex));
+		return;
+	}
+
+	_segmentsPointsCount[segmentIndex] = pointsCount;
+
+	_curvePointsIsCalculated = false;
+}
+
 
 void BezierCurve::setMarginBegin(float marginBegin) 
 {
