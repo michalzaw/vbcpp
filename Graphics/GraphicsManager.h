@@ -111,7 +111,7 @@ class GraphicsManager
         SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
         SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
         SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
-        BezierCurve*    addBezierCurve();
+        BezierCurve*    addBezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {}, float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie

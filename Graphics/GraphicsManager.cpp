@@ -318,9 +318,9 @@ SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(Sk
 }
 
 
-BezierCurve* GraphicsManager::addBezierCurve()
+BezierCurve* GraphicsManager::addBezierCurve(const std::vector<glm::vec3>& points/* = {}*/, const std::vector<int>& segmentsPointsCount/* = {}*/, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/, const glm::vec2& offsetFromBaseCurve/* = glm::vec2(0.0f, 0.0f)*/)
 {
-    BezierCurve* bezierCurve = new BezierCurve;
+    BezierCurve* bezierCurve = new BezierCurve(points, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
     
     _bezierCurves.push_back(bezierCurve);
 

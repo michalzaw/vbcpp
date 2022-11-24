@@ -6,9 +6,11 @@
 const int DEFAULT_SEGMENT_POINTS_COUNT = 50;
 
 
-BezierCurve::BezierCurve()
+BezierCurve::BezierCurve(const std::vector<glm::vec3>& points/* = {}*/, const std::vector<int>& segmentsPointsCount/* = {}*/,
+						 float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/, const glm::vec2& offsetFromBaseCurve/* = glm::vec2(0.0f, 0.0f)*/)
 	: Component(CT_BEZIER_CURVE),
-	_marginBegin(0.0f), _marginEnd(0.0f),
+	_points(points), _segmentsPointsCount(segmentsPointsCount),
+	_marginBegin(marginBegin), _marginEnd(marginEnd), _offsetFromBaseCurve(offsetFromBaseCurve),
 	_curvePointsIsCalculated(false)
 {
 
@@ -19,12 +21,12 @@ void BezierCurve::calculateCurvePoints()
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
-		LOG_ERROR("RoadObject: Invalid number of control points");
+		LOG_ERROR("Invalid number of control points");
 		return;
 	}
 	if (_points.size() / 3 != _segmentsPointsCount.size())
 	{
-		LOG_ERROR("RoadObject: Invalid number of segments");
+		LOG_ERROR("Invalid number of segments");
 		return;
 	}
 
@@ -309,5 +311,12 @@ void BezierCurve::setMarginBegin(float marginBegin)
 void BezierCurve::setMarginEnd(float marginEnd)
 {
 	_marginEnd = marginEnd;
+	_curvePointsIsCalculated = false;
+}
+
+
+void BezierCurve::setOffsetFromBaseCurve(const glm::vec2& offsetFromBaseCurve)
+{
+	_offsetFromBaseCurve = offsetFromBaseCurve;
 	_curvePointsIsCalculated = false;
 }

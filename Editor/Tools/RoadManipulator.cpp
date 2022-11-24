@@ -135,6 +135,14 @@ namespace RoadManipulator
 		return context.activePoint;
 	}
 
+	int CalculateActiveSegment(int activePoint)
+	{
+		if (context.roadType == RoadType::ARC)
+			return std::max(activePoint - 1, 0);
+		else
+			return std::max((activePoint - 1) / 3, 0);
+	}
+
 	static void ComputeContext(const glm::mat4& view, const glm::mat4& projection, const glm::mat4& matrix,
 							   const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, RoadType roadType)
 	{
@@ -154,9 +162,9 @@ namespace RoadManipulator
 		{
 			context.activePoint = points.size() - 1;
 		}
-		if (context.activeSegment >= segments.size() && context.roadType == RoadType::ARC)
+		if (context.activeSegment >= segments.size())
 		{
-			context.activeSegment = segments.size() - 1;
+			context.activeSegment = CalculateActiveSegment(context.activePoint);
 		}
 
 		context.isUsingGizmoLastFrame = context.isUsingGizmo;
@@ -253,11 +261,7 @@ namespace RoadManipulator
 		if (mouseToPointDistance <= 6.0f && CanActivate())
 		{
 			context.activePoint = index;
-
-			if (context.roadType == RoadType::ARC)
-				context.activeSegment = std::max(index - 1, 0);
-			else
-				context.activeSegment = std::max((index - 1) / 3, 0);
+			context.activeSegment = CalculateActiveSegment(context.activePoint);
 		}
 
 		return newPosition;

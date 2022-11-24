@@ -1136,6 +1136,7 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 
 		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
 		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
+		COMPONENT_PROPERTY_EDIT(component, OffsetFromBaseCurve, vec2, "Offset from base curve")
 
 		int activePoint = RoadManipulator::GetActivePoint();
 		if (activePoint >= 0 && activePoint < component->getPoints().size())

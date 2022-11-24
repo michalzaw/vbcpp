@@ -9,6 +9,7 @@
 #include "../Game/Directories.h"
 #include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/RenderObject.h"
 
 #include "../Utils/FilesHelper.h"
@@ -202,6 +203,41 @@ void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& do
 }
 
 
+void SceneSaver::saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "bezierCurve");
+	componentElement->SetAttribute("offsetFromBaseCurve", vec2ToString(bezierCurve->getOffsetFromBaseCurve()).c_str());
+	componentElement->SetAttribute("marginBegin", Strings::toString(bezierCurve->getMarginBegin()).c_str());
+	componentElement->SetAttribute("marginEnd", Strings::toString(bezierCurve->getMarginEnd()).c_str());
+
+	XMLElement* pointsElement = doc.NewElement("Points");
+	for (const auto& point : bezierCurve->getPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetText(vec3ToString(point).c_str());
+
+		pointsElement->InsertEndChild(pointElement);
+	}
+	componentElement->InsertEndChild(pointsElement);
+
+	XMLElement* segmentsElement = doc.NewElement("Segments");
+	for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
+	{
+		XMLElement* segmentElement = doc.NewElement("Segment");
+
+		segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+		segmentsElement->InsertEndChild(segmentElement);
+	}
+	componentElement->InsertEndChild(segmentsElement);
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -248,6 +284,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentComponent)
 	{
 		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
+	BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+	if (bezierCurveComponent)
+	{
+		saveBezierCurveComponent(objectElement, doc, bezierCurveComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

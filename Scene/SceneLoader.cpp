@@ -7,6 +7,7 @@
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
@@ -353,6 +354,41 @@ void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject
 }
 
 
+void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::vector<glm::vec3> controlPoints;
+	std::vector<int> segmentsPointsCount;
+
+	XMLElement* pointsElement = componentElement->FirstChildElement("Points");
+
+	XMLElement* pointElement = pointsElement->FirstChildElement("Point");
+	while (pointElement != nullptr)
+	{
+		controlPoints.push_back(XMLstringToVec3(pointElement->GetText()));
+
+		pointElement = pointElement->NextSiblingElement("Point");
+	}
+
+	XMLElement* segmentsElement = componentElement->FirstChildElement("Segments");
+
+	XMLElement* segmentElement = segmentsElement->FirstChildElement("Segment");
+	while (segmentElement != nullptr)
+	{
+		segmentsPointsCount.push_back(XmlUtils::getAttributeInt(segmentElement, "points"));
+
+		segmentElement = segmentElement->NextSiblingElement("Segment");
+	}
+
+	glm::vec2 offsetFromBaseCurve = XmlUtils::getAttributeVec2(componentElement, "offsetFromBaseCurve");
+	float marginBegin = XmlUtils::getAttributeFloat(componentElement, "marginBegin");
+	float marginEnd = XmlUtils::getAttributeFloat(componentElement, "marginEnd");
+
+	BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(controlPoints, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
+
+	sceneObject->addComponent(bezierCurve);
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -418,6 +454,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgent")
 			{
 				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "bezierCurve")
+			{
+				loadBezierCurveComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");
