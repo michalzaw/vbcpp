@@ -642,7 +642,7 @@ namespace vbEditor
 				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
 				{
 					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-					if (roadObject != nullptr)
+					if (roadObject != nullptr && roadObject->getRoadType() != RoadType::BEZIER_CURVES)
 					{
 						roadObject->addPoint(hitPosition);
 
@@ -937,6 +937,13 @@ namespace vbEditor
 		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(roadProfileName);
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
+
+		if (roadType == RoadType::BEZIER_CURVES)
+		{
+			BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+			roadSceneObject->addComponent(bezierCurve);
+		}
+
 		RenderObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
 		roadRenderObject->setCastShadows(false);
 
@@ -1319,7 +1326,7 @@ namespace vbEditor
 				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
 				BezierCurve* bezierCurveComponent = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
 
-				if (roadComponent)
+				if (roadComponent && roadComponent->getRoadType() != RoadType::BEZIER_CURVES)
 					showRoadTools();
 				else if (shapePolygonComponent)
 					showPolygonEditTool();
@@ -1646,7 +1653,7 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
-		RoadManipulator::SetCurvePoints(roadComponent->getCurvePoints());
+		RoadManipulator::SetCurvePoints({});
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			_camera->getPosition(),
@@ -1711,9 +1718,15 @@ namespace vbEditor
 	void showBezierCurveTool()
 	{
 		BezierCurve* component = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+		RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 
 		std::vector<RoadSegment> segments;
 		std::vector<glm::vec3> connectionPointsPositions;
+		std::vector<RoadConnectionPoint> connectionPoints;
+		if (roadObject != nullptr)
+		{
+			createAvailableConnectionPointsList(connectionPointsPositions, connectionPoints);
+		}
 
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
@@ -1730,6 +1743,24 @@ namespace vbEditor
 		if (RoadManipulator::IsModified())
 		{
 			component->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+
+		if (RoadManipulator::IsCreatedNewConnection())
+		{
+			if (roadObject != nullptr)
+			{
+				int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+				int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
+
+				if (connectionPoints[newConnectionIndex].crossroadComponent != nullptr)
+				{
+					roadObject->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+				}
+				else
+				{
+					roadObject->setConnectionPointWithRoadIntersection(connectionPointIndex, connectionPoints[newConnectionIndex].roadIntersectionComponent);
+				}
+			}
 		}
 	}
 

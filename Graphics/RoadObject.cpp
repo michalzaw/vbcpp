@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "BezierCurve.h"
 #include "CrossroadComponent.h"
 #include "RoadIntersectionComponent.h"
 #include "RoadGenerator.h"
@@ -13,22 +14,20 @@
 
 
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
-	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
+	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _connectionPointsData(2, nullptr),
+	_buildModelAfterCreate(buildModelAfterCreate),
+	_bezierCurveComponent(nullptr)
 {
 	_type = CT_ROAD_OBJECT;
-	
-	if (buildModelAfterCreate)
-		buildModel();
 }
 
 
 RoadObject::RoadObject(RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, bool buildModelAfterCreate)
-	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _connectionPointsData(2, nullptr), _marginBegin(0.0f), _marginEnd(0.0f)
+	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _connectionPointsData(2, nullptr),
+	_buildModelAfterCreate(buildModelAfterCreate),
+	_bezierCurveComponent(nullptr)
 {
 	_type = CT_ROAD_OBJECT;
-
-	if (buildModelAfterCreate)
-		buildModel();
 }
 
 
@@ -45,17 +44,24 @@ RoadObject::~RoadObject()
 }
 
 
-void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoints)
+void RoadObject::onAttachedToScenObject()
 {
-	if (_connectionPoints[0].roadIntersectionComponent != nullptr)
+	if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		BezierCurvesUtils::cutBezierCurveFromBegin(curvePoints, _marginBegin);
+		_bezierCurveComponent = dynamic_cast<BezierCurve*>(getSceneObject()->getComponent(CT_BEZIER_CURVE));
+		if (_bezierCurveComponent == nullptr)
+		{
+			LOG_ERROR("Cannot find BezierCurve component in object!");
+			return;
+		}
+
+		_bezierCurveComponent->setOnPointAddedListener(std::bind(&RoadObject::onPointAdded, this));
+		_bezierCurveComponent->setOnPointDeletedListener(std::bind(&RoadObject::onPointDeleted, this, std::placeholders::_1));
+		_bezierCurveComponent->setOnPointChangedPositionListener(std::bind(&RoadObject::onPointChangedPosition, this, std::placeholders::_1, std::placeholders::_2));
 	}
 
-	if (_connectionPoints[1].roadIntersectionComponent != nullptr)
-	{
-		BezierCurvesUtils::cutBezierCurveFromEnd(curvePoints, _marginEnd);
-	}
+	if (_buildModelAfterCreate)
+		buildModel();
 }
 
 
@@ -103,50 +109,12 @@ void RoadObject::buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>
 
 void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
-	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
-	{
-		LOG_ERROR("RoadObject: Invalid number of control points");
-		return;
-	}
-	if (_points.size() / 3 != _segments.size())
-	{
-		LOG_ERROR("RoadObject: Invalid number of segments");
-		return;
-	}
-
-	_curvePoints.clear();
-
-	if (_points.size() > 0)
-	{
-		for (int i = 0; i < _points.size() - 1; i += 3)
-		{
-			int segmentIndex = i / 3;
-			std::vector<glm::vec3> segmentPoints;
-			BezierCurvesUtils::generateBezierCurvePoints(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], _segments[segmentIndex].pointsCount, segmentPoints);
-			/*BezierCurvesUtils::generateBezierCurvePointsWithConstDistance(10000, 4.0f, segmentPoints, [this, i](float t)
-				{
-					return BezierCurvesUtils::calculateBezierCurvePoint(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], t);
-				});*/
-
-			if (i == 0)
-			{
-				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin(), segmentPoints.end());
-			}
-			else
-			{
-				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin() + 1, segmentPoints.end());
-			}
-		}
-	}
-
-	buildModelPoints(_curvePoints, connectionPointsData);
+	buildModelPoints(_bezierCurveComponent->getCurvePoints(), connectionPointsData);
 }
 
 
-void RoadObject::buildModelPoints(std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData)
+void RoadObject::buildModelPoints(const std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData)
 {
-	cutCurvePointsToIntersection(curvePoints);
-
 	setModel(RoadGenerator::createRoadModel(_roadProfile->getRoadLanes(), curvePoints, connectionPointsData, _modelsDatas[0].model));
 }
 
@@ -200,58 +168,7 @@ void RoadObject::addPoint(glm::vec3 position)
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		if (_points.size() == 0)
-		{
-			_points.push_back(position);
-		}
-		else if (_points.size() == 1)
-		{
-			glm::vec3 controlPointPosition = (_points[_points.size() - 1] + position) * 0.5f;
-			_points.push_back(controlPointPosition);
-			_points.push_back(controlPointPosition);
-			_points.push_back(position);
-
-			RoadSegment segment;
-			segment.type = RST_BEZIER_CURVE;
-			_segments.push_back(segment);
-		}
-		else if (_points.size() > 1)
-		{
-			int pointsCount = _points.size();
-
-			float distanceLastCurvePointToNewPoint = glm::length(glm::vec3(position.x, 0.0f, position.z) - glm::vec3(_points[pointsCount - 1].x, 0.0f, _points[pointsCount - 1].z));
-			float distanceLastCurvePointToLastControlPoint = glm::length(glm::vec3(_points[pointsCount - 1].x, 0.0f, _points[pointsCount - 1].z) - glm::vec3(_points[pointsCount - 2].x, 0.0f, _points[pointsCount - 2].z));
-
-			glm::vec3 a = glm::normalize(_points[pointsCount - 4] - _points[pointsCount - 1]);
-			glm::vec3 b = glm::normalize(position - _points[pointsCount - 1]);
-			a.y = 0;
-			b.y = 0;
-
-			glm::vec3 angleBisector = glm::normalize(a + b);
-
-			glm::vec3 controlPointsDirection(-angleBisector.z, 0.0f, angleBisector.x);
-
-			if (glm::dot(controlPointsDirection, a) < 0.0f)
-			{
-				controlPointsDirection = -controlPointsDirection;
-			}
-
-			// modify last control point
-			_points[pointsCount - 2] = _points[pointsCount - 1] + controlPointsDirection * distanceLastCurvePointToLastControlPoint;
-			
-
-			// first control point
-			_points.push_back(_points[pointsCount - 1] - controlPointsDirection * distanceLastCurvePointToNewPoint * 0.5f);
-
-			// second control point
-			_points.push_back(position - b * distanceLastCurvePointToNewPoint * 0.5f);
-
-			_points.push_back(position);
-
-			RoadSegment segment;
-			segment.type = RST_BEZIER_CURVE;
-			_segments.push_back(segment);
-		}
+		LOG_WARNING("Impossible call to addPoint for BEZIER_CURVE road type.");
 	}
 }
 
@@ -276,54 +193,7 @@ void RoadObject::deletePoint(unsigned int index)
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
-		if (index % 3 == 1 || index % 3 == 2)
-		{
-			return;
-		}
-
-		if (index == 0 && _points.size() == 1)
-		{
-			setConnectionPoint(0, nullptr);
-
-			_points.erase(_points.begin());
-		}
-		else if (index == 0)
-		{
-			setConnectionPoint(0, nullptr);
-
-			_points.erase(_points.begin());
-			_points.erase(_points.begin());
-			_points.erase(_points.begin());
-		}
-		else if (index == _points.size() - 1)
-		{
-			setConnectionPoint(1, nullptr);
-
-			_points.erase(_points.end() - 1);
-			_points.erase(_points.end() - 1);
-			_points.erase(_points.end() - 1);
-		}
-		else
-		{
-			auto nextPointIterator = _points.erase(_points.begin() + index);
-			// next control point
-			if (nextPointIterator != _points.end())
-			{
-				nextPointIterator = _points.erase(nextPointIterator);
-			}
-			// previous control point
-			if (nextPointIterator - 1 != _points.end())
-			{
-				nextPointIterator = _points.erase(nextPointIterator - 1);
-			}
-		}
-
-		unsigned int segmentIndex = std::max(((int)index - 1) / 3, 0);
-
-		if (segmentIndex < _segments.size())
-		{
-			_segments.erase(_segments.begin() + segmentIndex);
-		}
+		LOG_WARNING("Impossible call to deletePoint for BEZIER_CURVE road type.");
 	}
 }
 
@@ -335,62 +205,15 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 		return;
 	}
 
-	if (_roadType == RoadType::BEZIER_CURVES)
+	if (_roadType == RoadType::LINES_AND_ARC)
 	{
-		if (index == 0 && isConnectionExist(0) ||
-			index == _points.size() - 1 && isConnectionExist(1))
-		{
-			return;
-		}
-
-		if (index % 3 == 0)	// point on curve
-		{
-			glm::vec3 deltaPosition = newPosition - _points[index];
-
-			if (index - 1 >= 0)
-			{
-				_points[index - 1] += deltaPosition;
-			}
-			if (index + 1 < _points.size())
-			{
-				_points[index + 1] += deltaPosition;
-			}
-		}
-		else if (index % 3 == 1) // control point
-		{
-			if (index - 2 >= 0)
-			{
-				glm::vec3 direction = glm::normalize(_points[index] - _points[index - 1]);
-
-				float length = glm::length(_points[index - 2] - _points[index - 1]);
-
-				_points[index - 2] = _points[index - 1] - direction * length;
-			}
-		}
-		else if (index % 3 == 2)
-		{
-			if (index + 2 < _points.size())
-			{
-				glm::vec3 direction = glm::normalize(_points[index] - _points[index + 1]);
-
-				float length = glm::length(_points[index + 2] - _points[index + 1]);
-
-				_points[index + 2] = _points[index + 1] - direction * length;
-			}
-		}
-
-		//rebuild road intersections
-		if (_connectionPoints[0].roadIntersectionComponent != nullptr && index < 5)
-		{
-			_connectionPoints[0].roadIntersectionComponent->needRebuild();
-		}
-		if (_connectionPoints[1].roadIntersectionComponent != nullptr && index > static_cast<int>(_points.size()) - 6)
-		{
-			_connectionPoints[1].roadIntersectionComponent->needRebuild();
-		}
+		_points[index] = newPosition;
 	}
 
-	_points[index] = newPosition;
+	if (_roadType == RoadType::BEZIER_CURVES)
+	{
+		LOG_WARNING("Impossible call to setPointPostion for BEZIER_CURVE road type.");
+	}
 }
 
 
@@ -398,6 +221,19 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 {
 	if (index >= 2)
 		return;
+
+	if (_bezierCurveComponent != nullptr)
+	{
+		int connectedPointIndex = index == 0 ? 0 : _bezierCurveComponent->getPoints().size() - 1;
+		if (crossroadComponent != nullptr)
+		{
+			_bezierCurveComponent->lockPointPosition(connectedPointIndex);
+		}
+		else
+		{
+			_bezierCurveComponent->unlockPointPosition(connectedPointIndex);
+		}
+	}
 
 	if (_connectionPoints[index].crossroadComponent != nullptr)
 	{
@@ -452,6 +288,19 @@ void RoadObject::setConnectionPointWithRoadIntersection(int index, RoadIntersect
 	if (index >= 2)
 		return;
 
+	if (_bezierCurveComponent != nullptr)
+	{
+		int connectedPointIndex = index == 0 ? 0 : _bezierCurveComponent->getPoints().size() - 1;
+		if (roadIntersectionComponent != nullptr)
+		{
+			_bezierCurveComponent->lockPointPosition(connectedPointIndex);
+		}
+		else
+		{
+			_bezierCurveComponent->unlockPointPosition(connectedPointIndex);
+		}
+	}
+
 	if (_connectionPoints[index].crossroadComponent != nullptr)
 	{
 		_connectionPoints[index].crossroadComponent->disconnectRoad(_connectionPoints[index].index, this);
@@ -498,30 +347,6 @@ void RoadObject::setCustomConnectionPointData(int index, const glm::vec3 pos, co
 }
 
 
-void RoadObject::setMarginBegin(float marginBegin)
-{
-	_marginBegin = marginBegin;
-}
-
-
-void RoadObject::setMarginEnd(float marginEnd)
-{
-	_marginEnd = marginEnd;
-}
-
-
-float RoadObject::getMarginBegin()
-{
-	return _marginBegin;
-}
-
-
-float RoadObject::getMarginEnd()
-{
-	return _marginEnd;
-}
-
-
 void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 {
 	CrossroadComponent* crossroadComponent = _connectionPoints[connectionPointIndex].crossroadComponent;
@@ -547,6 +372,8 @@ void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
+		const auto& points = _bezierCurveComponent->getPoints();
+
 		int pointIndex;
 		int controlPointIndex;
 		if (connectionPointIndex == 0)
@@ -556,24 +383,26 @@ void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 		}
 		else if (connectionPointIndex == 1)
 		{
-			pointIndex = _points.size() - 1;
+			pointIndex = points.size() - 1;
 			controlPointIndex = pointIndex - 1;
 		}
 
+		_bezierCurveComponent->unlockPointPosition(pointIndex);
 		if (crossroadComponent != nullptr)
 		{
 			glm::vec3 newPosition = crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad);
 			glm::vec3 direction = crossroadComponent->getGlobalDirectionOfConnectionPoint(indexInCrossroad);
 
-			float length = glm::length(_points[pointIndex] - _points[controlPointIndex]);
+			float length = glm::length(points[pointIndex] - points[controlPointIndex]);
 
-			_points[pointIndex] = newPosition;
-			_points[controlPointIndex] = _points[pointIndex] + length * direction;
+			_bezierCurveComponent->setPointPostion(pointIndex, newPosition);
+			_bezierCurveComponent->setPointPostion(controlPointIndex, newPosition + length * direction);
 		}
 		else
 		{
-			_points[pointIndex] = roadIntersectionComponent->getSceneObject()->getPosition();
+			_bezierCurveComponent->setPointPostion(pointIndex, roadIntersectionComponent->getSceneObject()->getPosition());
 		}
+		_bezierCurveComponent->lockPointPosition(pointIndex);
 	}
 }
 
@@ -592,5 +421,42 @@ void RoadObject::resetConnectedPointPositions()
 
 const std::vector<glm::vec3>& RoadObject::getCurvePoints()
 {
-	return _curvePoints;
+	return _bezierCurveComponent->getCurvePoints();
+}
+
+
+void RoadObject::onPointAdded()
+{
+	buildModel();
+}
+
+
+void RoadObject::onPointDeleted(int index)
+{
+	if (index == 0)
+	{
+		setConnectionPoint(0, nullptr);
+	}
+	else if (index > _bezierCurveComponent->getPoints().size())
+	{
+		setConnectionPoint(1, nullptr);
+	}
+
+	buildModel();
+}
+
+
+void RoadObject::onPointChangedPosition(int index, const glm::vec3& newPosition)
+{
+	//rebuild road intersections
+	if (_connectionPoints[0].roadIntersectionComponent != nullptr && index < 5)
+	{
+		_connectionPoints[0].roadIntersectionComponent->needRebuild();
+	}
+	if (_connectionPoints[1].roadIntersectionComponent != nullptr && index > static_cast<int>(_bezierCurveComponent->getPoints().size()) - 6)
+	{
+		_connectionPoints[1].roadIntersectionComponent->needRebuild();
+	}
+
+	buildModel();
 }

@@ -1,5 +1,6 @@
 #include "BezierCurve.h"
 
+#include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/BezierCurvesUtils.h"
 
@@ -125,6 +126,11 @@ void BezierCurve::addPoint(const glm::vec3& position)
 	}
 
 	_curvePointsIsCalculated = false;
+
+	if (_onPointAddedListener)
+	{
+		_onPointAddedListener();
+	}
 }
 
 
@@ -144,22 +150,16 @@ void BezierCurve::deletePoint(int index)
 
 	if (index == 0 && _points.size() == 1)
 	{
-		//setConnectionPoint(0, nullptr);
-
 		_points.erase(_points.begin());
 	}
 	else if (index == 0)
 	{
-		//setConnectionPoint(0, nullptr);
-
 		_points.erase(_points.begin());
 		_points.erase(_points.begin());
 		_points.erase(_points.begin());
 	}
 	else if (index == _points.size() - 1)
 	{
-		//setConnectionPoint(1, nullptr);
-
 		_points.erase(_points.end() - 1);
 		_points.erase(_points.end() - 1);
 		_points.erase(_points.end() - 1);
@@ -187,6 +187,11 @@ void BezierCurve::deletePoint(int index)
 	}
 
 	_curvePointsIsCalculated = false;
+
+	if (_onPointDeletedListener)
+	{
+		_onPointDeletedListener(index);
+	}
 }
 
 
@@ -198,11 +203,10 @@ void BezierCurve::setPointPostion(int index, const glm::vec3& newPosition)
 		return;
 	}
 
-	/*if (index == 0 && isConnectionExist(0) ||
-		index == _points.size() - 1 && isConnectionExist(1))
+	if (isVectorContains(_pointsWithLockedPosition, index))
 	{
 		return;
-	}*/
+	}
 
 	if (index % 3 == 0)	// point on curve
 	{
@@ -240,19 +244,14 @@ void BezierCurve::setPointPostion(int index, const glm::vec3& newPosition)
 		}
 	}
 
-	//rebuild road intersections
-	/*if (_connectionPoints[0].roadIntersectionComponent != nullptr && index < 5)
-	{
-		_connectionPoints[0].roadIntersectionComponent->needRebuild();
-	}
-	if (_connectionPoints[1].roadIntersectionComponent != nullptr && index > static_cast<int>(_points.size()) - 6)
-	{
-		_connectionPoints[1].roadIntersectionComponent->needRebuild();
-	}*/
-
 	_points[index] = newPosition;
 
 	_curvePointsIsCalculated = false;
+
+	if (_onPointChangedPositionListener)
+	{
+		_onPointChangedPositionListener(index, newPosition);
+	}
 }
 
 
@@ -319,4 +318,42 @@ void BezierCurve::setOffsetFromBaseCurve(const glm::vec2& offsetFromBaseCurve)
 {
 	_offsetFromBaseCurve = offsetFromBaseCurve;
 	_curvePointsIsCalculated = false;
+}
+
+
+void BezierCurve::lockPointPosition(int index)
+{
+	auto iterator = std::find(_pointsWithLockedPosition.begin(), _pointsWithLockedPosition.end(), index);
+	if (iterator == _pointsWithLockedPosition.end())
+	{
+		_pointsWithLockedPosition.push_back(index);
+	}
+}
+
+
+void BezierCurve::unlockPointPosition(int index)
+{
+	auto iterator = std::find(_pointsWithLockedPosition.begin(), _pointsWithLockedPosition.end(), index);
+	if (iterator != _pointsWithLockedPosition.end())
+	{
+		_pointsWithLockedPosition.erase(iterator);
+	}
+}
+
+
+void BezierCurve::setOnPointAddedListener(const std::function<void()>& onPointAddedListener)
+{
+	_onPointAddedListener = onPointAddedListener;
+}
+
+
+void BezierCurve::setOnPointDeletedListener(const std::function<void(int)>& onPointDeletedListener)
+{
+	_onPointDeletedListener = onPointDeletedListener;
+}
+
+
+void BezierCurve::setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener)
+{
+	_onPointChangedPositionListener = onPointChangedPositionListener;
 }

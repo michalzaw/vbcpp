@@ -2,6 +2,7 @@
 
 #include <iterator>
 
+#include "BezierCurve.h"
 #include "ModelGenerator.h"
 #include "ShapePolygonComponent.h"
 #include "RoadGenerator.h"
@@ -58,7 +59,10 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 		return;
 	}
 
-	_roads.push_back(RoadConnectedToIntersection(roadObject, connectionPointInRoadIndex));
+	_roads.push_back(RoadConnectedToIntersection(
+		roadObject,
+		dynamic_cast<BezierCurve*>(roadObject->getSceneObject()->getComponent(CT_BEZIER_CURVE)),
+		connectionPointInRoadIndex));
 
 	if (_roads.size() == 1)
 	{
@@ -142,11 +146,11 @@ void RoadIntersectionComponent::setLengthInternal(int index, float length)
 
 	if (_roads[index].connectionPointInRoadIndex == 0)
 	{
-		_roads[index].road->setMarginBegin(length);
+		_roads[index].bezierCurve->setMarginBegin(length);
 	}
 	else
 	{
-		_roads[index].road->setMarginEnd(length);
+		_roads[index].bezierCurve->setMarginEnd(length);
 	}
 }
 

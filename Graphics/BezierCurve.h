@@ -3,6 +3,7 @@
 
 
 #include <vector>
+#include <functional>
 
 #include <glm/glm.hpp>
 
@@ -22,16 +23,22 @@ class BezierCurve final : public Component
 		std::vector<glm::vec3> _curvePoints;
 		bool _curvePointsIsCalculated;
 
-		void calculateCurvePoints(); // void RoadObject::buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>&)
-		void cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints); // void RoadObject::cutCurvePointsToIntersection(std::vector<glm::vec3>&)
+		std::vector<int> _pointsWithLockedPosition;
+
+		std::function<void()> _onPointAddedListener;
+		std::function<void(int)> _onPointDeletedListener;
+		std::function<void(int, const glm::vec3&)> _onPointChangedPositionListener;
+
+		void calculateCurvePoints();
+		void cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints);
 
 	public:
 		BezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {},
 					float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
 
-		void addPoint(const glm::vec3& position); // void RoadObject::addPoint(glm::vec3);
-		void deletePoint(int index); // void RoadObject::deletePoint(unsigned int);
-		void setPointPostion(int index, const glm::vec3& newPosition); // void RoadObject::setPointPostion(int, glm::vec3);
+		void addPoint(const glm::vec3& position);
+		void deletePoint(int index);
+		void setPointPostion(int index, const glm::vec3& newPosition);
 
 		const std::vector<glm::vec3>& getCurvePoints();
 		int getSegmentPointsCount(int segmentIndex);
@@ -47,6 +54,13 @@ class BezierCurve final : public Component
 		void setMarginBegin(float marginBegin);
 		void setMarginEnd(float marginEnd);
 		void setOffsetFromBaseCurve(const glm::vec2& offsetFromBaseCurve);
+
+		void lockPointPosition(int index);
+		void unlockPointPosition(int index);
+
+		void setOnPointAddedListener(const std::function<void(void)>& onPointAddedListener);
+		void setOnPointDeletedListener(const std::function<void(int)>& onPointDeletedListener);
+		void setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener);
 
 };
 
