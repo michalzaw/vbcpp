@@ -18,6 +18,15 @@ BezierCurve::BezierCurve(const std::vector<glm::vec3>& points/* = {}*/, const st
 }
 
 
+BezierCurve::~BezierCurve()
+{
+	if (_onComponentDeletedListener)
+	{
+		_onComponentDeletedListener();
+	}
+}
+
+
 void BezierCurve::calculateCurvePoints()
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
@@ -356,4 +365,10 @@ void BezierCurve::setOnPointDeletedListener(const std::function<void(int)>& onPo
 void BezierCurve::setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener)
 {
 	_onPointChangedPositionListener = onPointChangedPositionListener;
+}
+
+
+void BezierCurve::setOnComponentDeletedListener(const std::function<void()>& onComponentDeletedListener)
+{
+	_onComponentDeletedListener = onComponentDeletedListener;
 }

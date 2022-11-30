@@ -678,6 +678,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 		std::vector<glm::vec3> points;
 		std::vector<RoadSegment> segments;
+		std::vector<int> pointsInSegments;
 
 
 		XMLElement* pointElement = roadElement->FirstChildElement("Point");
@@ -712,6 +713,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 				segment.interpolation = RI_COS;
 
 			segments.push_back(segment);
+			pointsInSegments.push_back(segment.pointsCount);
 
 			segmentElement = segmentElement->NextSiblingElement("Segment");
 		}
@@ -722,7 +724,18 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		RoadObject* roadRenderObject;
+		if (roadType == RoadType::BEZIER_CURVES)
+		{
+			BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(points, pointsInSegments);
+			roadSceneObject->addComponent(bezierCurve);
+
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, {}, {}, false, roadSceneObject);
+		}
+		else
+		{
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		}
 		roadRenderObject->setCastShadows(false);
 
 

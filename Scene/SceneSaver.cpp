@@ -306,6 +306,7 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 	XMLElement* roadElement = doc.NewElement("Road");
 
 	RoadObject* roadObject = static_cast<RoadObject*>(sceneObject->getComponent(CT_ROAD_OBJECT));
+	BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
 	
 	if (roadObject)
 	{
@@ -314,7 +315,8 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 		roadElement->SetAttribute("name", sceneObject->getName().c_str());
 		roadElement->SetAttribute("profile", profile->getName().c_str());
 
-		for (const glm::vec3& point : roadObject->getPoints())
+		const auto& points = bezierCurve != nullptr ? bezierCurve->getPoints() : roadObject->getPoints();
+		for (const glm::vec3& point : points)
 		{
 			XMLElement* pointElement = doc.NewElement("Point");
 
@@ -323,28 +325,43 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 			roadElement->InsertEndChild(pointElement);
 		}
 
-		for (const RoadSegment& segment : roadObject->getSegments())
+		if (bezierCurve != nullptr)
 		{
-			XMLElement* segmentElement = doc.NewElement("Segment");
-
-			std::string type;
-			if (segment.type == RST_LINE)
-				type = "line";
-			else if (segment.type == RST_ARC)
-				type = "arc";
-			if (segment.type == RST_BEZIER_CURVE)
-				type = "bezier";
-
-			segmentElement->SetAttribute("type", type.c_str());
-			segmentElement->SetAttribute("points", segment.pointsCount);
-
-			if (segment.type != RST_BEZIER_CURVE)
+			for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
 			{
-				segmentElement->SetAttribute("radius", segment.r);
-				segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
-			}
+				XMLElement* segmentElement = doc.NewElement("Segment");
 
-			roadElement->InsertEndChild(segmentElement);
+				segmentElement->SetAttribute("type", "bezier");
+				segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+				roadElement->InsertEndChild(segmentElement);
+			}
+		}
+		else
+		{
+			for (const RoadSegment& segment : roadObject->getSegments())
+			{
+				XMLElement* segmentElement = doc.NewElement("Segment");
+
+				std::string type;
+				if (segment.type == RST_LINE)
+					type = "line";
+				else if (segment.type == RST_ARC)
+					type = "arc";
+				if (segment.type == RST_BEZIER_CURVE)
+					type = "bezier";
+
+				segmentElement->SetAttribute("type", type.c_str());
+				segmentElement->SetAttribute("points", segment.pointsCount);
+
+				if (segment.type != RST_BEZIER_CURVE)
+				{
+					segmentElement->SetAttribute("radius", segment.r);
+					segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+				}
+
+				roadElement->InsertEndChild(segmentElement);
+			}
 		}
 
 		for (int i = 0; i < 2; ++i)

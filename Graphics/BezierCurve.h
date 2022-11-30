@@ -28,6 +28,7 @@ class BezierCurve final : public Component
 		std::function<void()> _onPointAddedListener;
 		std::function<void(int)> _onPointDeletedListener;
 		std::function<void(int, const glm::vec3&)> _onPointChangedPositionListener;
+		std::function<void()> _onComponentDeletedListener;
 
 		void calculateCurvePoints();
 		void cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints);
@@ -35,6 +36,7 @@ class BezierCurve final : public Component
 	public:
 		BezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {},
 					float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
+		~BezierCurve();
 
 		void addPoint(const glm::vec3& position);
 		void deletePoint(int index);
@@ -61,6 +63,7 @@ class BezierCurve final : public Component
 		void setOnPointAddedListener(const std::function<void(void)>& onPointAddedListener);
 		void setOnPointDeletedListener(const std::function<void(int)>& onPointDeletedListener);
 		void setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener);
+		void setOnComponentDeletedListener(const std::function<void()>& onComponentDeletedListener);
 
 };
 
