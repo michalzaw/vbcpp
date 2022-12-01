@@ -567,6 +567,11 @@ glm::vec2 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 
 
+#define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
+glm::vec3 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
 #define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
@@ -1199,13 +1204,7 @@ void showObjectProperties()
 	{
 		if (vbEditor::_selectedSceneObject)
 		{
-			showObjectNameEdit();
-
-			ImGui::Separator();
-
-			showObjectTransformEdit();
-
-			ImGui::Separator();
+			showObjectPropertiesDetails();
 
 			RenderObject* renderComponent = dynamic_cast<RenderObject*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDER_OBJECT));
 			if (renderComponent)
@@ -1533,35 +1532,35 @@ void showObjectProperties()
 }
 
 
-void showObjectNameEdit()
+void showObjectPropertiesDetails()
 {
-	char buffer[50];
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Columns(2);
+	ImGui::Separator();
 
-	strncpy(buffer, vbEditor::_selectedSceneObject->getName().c_str(), sizeof buffer);
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Name, str, "Name")
 
-	buffer[sizeof buffer - 1] = '\0';
+	ImGui::Separator();
 
-	if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Position, vec3, "Position")
+
+	COMPONENT_PROPERTY_EDIT_BEGIN(Rotation, "Rotation")
 	{
-		vbEditor::_selectedSceneObject->setName(std::string(buffer));
+		glm::vec3 value = vbEditor::_selectedSceneObject->getRotation();
+		value = glm::vec3(radToDeg(value.x), radToDeg(value.y), radToDeg(value.z));
+		bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+		if (result)
+		{
+			vbEditor::_selectedSceneObject->setRotation(degToRad(value.x), degToRad(value.y), degToRad(value.z));
+		}
 	}
-}
+	COMPONENT_PROPERTY_EDIT_END	
 
+	//COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Rotation, vec3, "Rotation")
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Scale, vec3, "Scale")
 
-// todo: wykorzystanie funkcji z GlmUtils i setTransformFromMatrix z SceneObject + refactor
-void showObjectTransformEdit()
-{
-	ImGui::Text("Transformation");
-
-	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
-
-	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
-
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()));
-
-	vbEditor::_selectedSceneObject->updateFromLocalMatrix();
+	ImGui::Columns(1);
+	ImGui::Separator();
+	ImGui::PopStyleVar();
 }

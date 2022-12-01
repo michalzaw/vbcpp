@@ -130,7 +130,6 @@ class SceneObject
         glm::mat4& getGlobalTransformMatrix() const;
         glm::mat4& getGlobalNormalMatrix() const;
 
-		void updateFromLocalMatrix();
         void setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions = true);
 
 		glm::vec3 getGlobalPosition()

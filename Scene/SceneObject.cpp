@@ -704,25 +704,6 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     return _globalNormalMatrix;
 }
 
-// todo: wykorzystanie funkcji z GlmUtils + refactor
-void SceneObject::updateFromLocalMatrix()
-{
-	glm::vec3 scale;
-	glm::quat rotation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(_localTransformMatrix, scale, rotation, translation, skew, perspective);
-
-	glm::vec3 rotationEulerAngles = glm::eulerAngles(rotation);
-	rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
-
-	setPosition(translation);
-	setRotation(rotationEulerAngles);
-	setScale(scale);
-	changedTransform();
-}
-
 
 void SceneObject::setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions/* = true*/)
 {

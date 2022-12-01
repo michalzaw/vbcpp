@@ -1588,16 +1588,23 @@ namespace vbEditor
 			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
 		}
 
+		glm::mat4 modelMatrix = _selectedSceneObject->getLocalTransformMatrix();
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
-			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
+			glm::value_ptr(modelMatrix),
 			NULL,
 			useSnap ? &snap[0] : NULL,
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
 		);
+
+		if (ImGuizmo::IsUsing())
+		{
+			_selectedSceneObject->setTransformFromMatrix(modelMatrix);
+		}
 
 		if (!isRoadModified && _selectedSceneObject->getComponent(CT_CROSSROAD) != nullptr)
 		{
