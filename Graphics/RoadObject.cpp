@@ -58,6 +58,7 @@ void RoadObject::onAttachedToScenObject()
 		_bezierCurveComponent->setOnPointAddedListener(std::bind(&RoadObject::onPointAdded, this));
 		_bezierCurveComponent->setOnPointDeletedListener(std::bind(&RoadObject::onPointDeleted, this, std::placeholders::_1));
 		_bezierCurveComponent->setOnPointChangedPositionListener(std::bind(&RoadObject::onPointChangedPosition, this, std::placeholders::_1, std::placeholders::_2));
+		_bezierCurveComponent->setOnCurveChangedListener([this]() { buildModel(); });
 		_bezierCurveComponent->setOnComponentDeletedListener([this]()
 			{
 				_bezierCurveComponent = nullptr;

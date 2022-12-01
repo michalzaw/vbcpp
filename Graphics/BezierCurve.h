@@ -28,6 +28,7 @@ class BezierCurve final : public Component
 		std::function<void()> _onPointAddedListener;
 		std::function<void(int)> _onPointDeletedListener;
 		std::function<void(int, const glm::vec3&)> _onPointChangedPositionListener;
+		std::function<void()> _onCurveChangedListener;
 		std::function<void()> _onComponentDeletedListener;
 
 		void calculateCurvePoints();
@@ -63,6 +64,7 @@ class BezierCurve final : public Component
 		void setOnPointAddedListener(const std::function<void(void)>& onPointAddedListener);
 		void setOnPointDeletedListener(const std::function<void(int)>& onPointDeletedListener);
 		void setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener);
+		void setOnCurveChangedListener(const std::function<void()>& onCurveChangedListener);
 		void setOnComponentDeletedListener(const std::function<void()>& onComponentDeletedListener);
 
 };

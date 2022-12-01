@@ -306,6 +306,11 @@ void BezierCurve::setSegmentPointsCount(int segmentIndex, int pointsCount)
 	_segmentsPointsCount[segmentIndex] = pointsCount;
 
 	_curvePointsIsCalculated = false;
+
+	if (_onCurveChangedListener)
+	{
+		_onCurveChangedListener();
+	}
 }
 
 
@@ -313,6 +318,11 @@ void BezierCurve::setMarginBegin(float marginBegin)
 {
 	_marginBegin = marginBegin;
 	_curvePointsIsCalculated = false;
+
+	if (_onCurveChangedListener)
+	{
+		_onCurveChangedListener();
+	}
 }
 
 
@@ -320,6 +330,11 @@ void BezierCurve::setMarginEnd(float marginEnd)
 {
 	_marginEnd = marginEnd;
 	_curvePointsIsCalculated = false;
+
+	if (_onCurveChangedListener)
+	{
+		_onCurveChangedListener();
+	}
 }
 
 
@@ -327,6 +342,11 @@ void BezierCurve::setOffsetFromBaseCurve(const glm::vec2& offsetFromBaseCurve)
 {
 	_offsetFromBaseCurve = offsetFromBaseCurve;
 	_curvePointsIsCalculated = false;
+
+	if (_onCurveChangedListener)
+	{
+		_onCurveChangedListener();
+	}
 }
 
 
@@ -365,6 +385,12 @@ void BezierCurve::setOnPointDeletedListener(const std::function<void(int)>& onPo
 void BezierCurve::setOnPointChangedPositionListener(const std::function<void(int, const glm::vec3&)>& onPointChangedPositionListener)
 {
 	_onPointChangedPositionListener = onPointChangedPositionListener;
+}
+
+
+void BezierCurve::setOnCurveChangedListener(const std::function<void()>& onCurveChangedListener)
+{
+	_onCurveChangedListener = onCurveChangedListener;
 }
 
 
