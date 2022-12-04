@@ -56,6 +56,10 @@ class RoadObject : public RenderObject
 		// fields for BEZIER_CURVES type
 		BezierCurve* _bezierCurveComponent;
 
+		bool _interactiveMode;
+		bool _needRebuild;
+		float _modificationTimer;
+
 		void onAttachedToScenObject() override;
 
 		bool isConnectionExist(int index);
@@ -93,9 +97,16 @@ class RoadObject : public RenderObject
 
 		const std::vector<glm::vec3>& getCurvePoints();
 
+		void setInteractiveMode(bool interactiveMode);
+		bool isInteractiveMode();
+
+		void needRebuild();
+
 		void onPointAdded();
 		void onPointDeleted(int index);
 		void onPointChangedPosition(int index, const glm::vec3& newPosition);
+
+		void update(float deltaTime) override;
 
 };
 

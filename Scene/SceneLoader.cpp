@@ -500,6 +500,11 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		{
 			roadObject->buildModel();
 
+			if (GameConfig::getInstance().mode == GM_EDITOR)
+			{
+				roadObject->setInteractiveMode(true);
+			}
+
 			PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 			roadMesh->setRestitution(0.9f);
 			roadMesh->getRigidBody()->setFriction(1.0f);

@@ -261,7 +261,6 @@ namespace vbEditor
 
 	extern int roadActiveSegment;
 	extern int roadActivePoint;
-	extern bool isRoadModified;
 
 	extern bool _showMaterialEditorWindow;
 	extern RenderObject* currentRenderObject;
@@ -302,61 +301,7 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 		shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 			{
 				roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-				roadComponent->buildModel(false);
 			});
-
-		ImGui::Separator();
-
-		if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
-		{
-			ImGui::Text("Point: %d", vbEditor::roadActivePoint);
-
-			float* pointPosition = glm::value_ptr(roadComponent->getPoints()[vbEditor::roadActivePoint]);
-
-			if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
-			{
-				vbEditor::isRoadModified = true;
-			}
-
-			if (vbEditor::roadActivePoint % 3 == 0)
-			{
-				if (ImGui::Button("Delete point"))
-				{
-					roadComponent->deletePoint(vbEditor::roadActivePoint);
-
-					if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
-					{
-						--vbEditor::roadActivePoint;
-						--vbEditor::roadActiveSegment;
-					}
-
-					if (roadComponent->getPoints().size() == 0)
-					{
-						vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
-						vbEditor::_selectedSceneObject = nullptr;
-
-						return;
-					}
-
-					vbEditor::isRoadModified = true;
-				}
-			}
-		}
-
-		if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
-		{
-			ImGui::Separator();
-
-			ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
-
-			int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-			if (ImGui::DragInt("Points count", points, 0.5f, 0, 1000))
-			{
-				vbEditor::isRoadModified = true;
-				*points = std::max(*points, 0);
-			}
-		}
 
 		ImGui::Separator();
 
@@ -398,8 +343,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 				}
-
-				vbEditor::isRoadModified = true;
 			}
 
 			if (connectedCrossroads[i] != nullptr)
@@ -413,8 +356,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-					vbEditor::isRoadModified = true;
 				}
 			}
 			ImGui::PopID();
@@ -422,12 +363,12 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 		ImGui::Separator();
 
-		if (ImGui::Button("Generate objects"))
+		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
 		{
 			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
 		}
 
-		if (ImGui::Button("Generate AI paths"))
+		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
 		{
 			AIPathGenerator::generateAIPaths(roadComponent, vbEditor::_sceneManager);
 		}
@@ -1383,12 +1324,11 @@ void showObjectProperties()
 
 						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						if (ImGui::Button("Delete point"))
 						{
-							vbEditor::isRoadModified = true;
 							roadComponent->deletePoint(vbEditor::roadActivePoint);
 
 							if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
@@ -1415,7 +1355,7 @@ void showObjectProperties()
 						const char* typeComboItems[] = { "line", "arc" };
 						if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
 						}
 
@@ -1423,20 +1363,20 @@ void showObjectProperties()
 						const char* interpolationComboItems[] = { "lin", "cos" };
 						if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
 						}
 
 						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
 						if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
 						if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 					}
 
@@ -1446,8 +1386,6 @@ void showObjectProperties()
 					shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 						{
 							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-							roadComponent->buildModel(false);
 						});
 
 					ImGui::Separator();
@@ -1493,8 +1431,6 @@ void showObjectProperties()
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 							}
-
-							vbEditor::isRoadModified = true;
 						}
 
 						if (connectedCrossroads[i] != nullptr)
@@ -1508,8 +1444,6 @@ void showObjectProperties()
 							if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-								vbEditor::isRoadModified = true;
 							}
 						}
 						ImGui::PopID();

@@ -745,6 +745,11 @@ void GraphicsManager::update(float deltaTime)
         roadIntersectionComponent->update(deltaTime);
     }
 
+    for (RoadObject* roadObject : _roadObjects)
+    {
+        roadObject->update(deltaTime);
+    }
+
     for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)
     {
         skeletalAnimation->update(deltaTime);

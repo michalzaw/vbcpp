@@ -16,7 +16,8 @@
 RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate)
 	: _roadType(roadType), _roadProfile(_roadProfile), _points(points), _segments(segments), _connectionPoints(2), _connectionPointsData(2, nullptr),
 	_buildModelAfterCreate(buildModelAfterCreate),
-	_bezierCurveComponent(nullptr)
+	_bezierCurveComponent(nullptr),
+	_interactiveMode(false), _needRebuild(false), _modificationTimer(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 }
@@ -25,7 +26,8 @@ RoadObject::RoadObject(RoadType roadType, RRoadProfile* _roadProfile, const std:
 RoadObject::RoadObject(RRoadProfile* _roadProfile, const std::vector<glm::vec3>& points, bool buildModelAfterCreate)
 	: _roadType(RoadType::BEZIER_CURVES), _roadProfile(_roadProfile), _points(points), _connectionPoints(2), _connectionPointsData(2, nullptr),
 	_buildModelAfterCreate(buildModelAfterCreate),
-	_bezierCurveComponent(nullptr)
+	_bezierCurveComponent(nullptr),
+	_interactiveMode(false), _needRebuild(false), _modificationTimer(0.0f)
 {
 	_type = CT_ROAD_OBJECT;
 }
@@ -58,7 +60,7 @@ void RoadObject::onAttachedToScenObject()
 		_bezierCurveComponent->setOnPointAddedListener(std::bind(&RoadObject::onPointAdded, this));
 		_bezierCurveComponent->setOnPointDeletedListener(std::bind(&RoadObject::onPointDeleted, this, std::placeholders::_1));
 		_bezierCurveComponent->setOnPointChangedPositionListener(std::bind(&RoadObject::onPointChangedPosition, this, std::placeholders::_1, std::placeholders::_2));
-		_bezierCurveComponent->setOnCurveChangedListener([this]() { buildModel(); });
+		_bezierCurveComponent->setOnCurveChangedListener([this]() { _needRebuild = true; });
 		_bezierCurveComponent->setOnComponentDeletedListener([this]()
 			{
 				_bezierCurveComponent = nullptr;
@@ -76,7 +78,7 @@ bool RoadObject::isConnectionExist(int index)
 }
 
 
-void RoadObject::buildModel(bool reuseExistingModel)
+void RoadObject::buildModel(bool reuseExistingModel/* = true*/)
 {
 	if (_modelsDatas[0].modelRootNode != nullptr)
 	{
@@ -151,6 +153,8 @@ std::vector<RoadSegment>& RoadObject::getSegments()
 void RoadObject::setRoadProfile(RRoadProfile* roadProfile)
 {
 	_roadProfile = roadProfile;
+
+	buildModel(false);
 }
 
 
@@ -170,6 +174,8 @@ void RoadObject::addPoint(glm::vec3 position)
 		{
 			_segments.push_back(RoadSegment());
 		}
+
+		_needRebuild = true;
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
@@ -195,6 +201,8 @@ void RoadObject::deletePoint(unsigned int index)
 		{
 			_segments.erase(_segments.begin() + segmentIndex);
 		}
+
+		_needRebuild = true;
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
@@ -213,6 +221,8 @@ void RoadObject::setPointPostion(int index, glm::vec3 newPosition)
 	if (_roadType == RoadType::LINES_AND_ARC)
 	{
 		_points[index] = newPosition;
+
+		_needRebuild = true;
 	}
 
 	if (_roadType == RoadType::BEZIER_CURVES)
@@ -285,6 +295,8 @@ void RoadObject::setConnectionPoint(int index, CrossroadComponent* crossroadComp
 		}
 		_connectionPointsData[index] = nullptr;
 	}
+
+	_needRebuild = true;
 }
 
 
@@ -374,6 +386,8 @@ void RoadObject::setConnectedPointPosition(int connectionPointIndex)
 		_points[pointIndex] = crossroadComponent != nullptr ?
 			crossroadComponent->getGlobalPositionOfConnectionPoint(indexInCrossroad) :
 			roadIntersectionComponent->getSceneObject()->getPosition();
+
+		_needRebuild = true;
 	}
 	else if (_roadType == RoadType::BEZIER_CURVES)
 	{
@@ -430,9 +444,27 @@ const std::vector<glm::vec3>& RoadObject::getCurvePoints()
 }
 
 
+void RoadObject::setInteractiveMode(bool interactiveMode)
+{
+	_interactiveMode = interactiveMode;
+}
+
+
+bool RoadObject::isInteractiveMode()
+{
+	return _interactiveMode;
+}
+
+
+void RoadObject::needRebuild()
+{
+	_needRebuild = true;
+}
+
+
 void RoadObject::onPointAdded()
 {
-	buildModel();
+	_needRebuild = true;
 }
 
 
@@ -447,7 +479,7 @@ void RoadObject::onPointDeleted(int index)
 		setConnectionPoint(1, nullptr);
 	}
 
-	buildModel();
+	_needRebuild = true;
 }
 
 
@@ -463,5 +495,27 @@ void RoadObject::onPointChangedPosition(int index, const glm::vec3& newPosition)
 		_connectionPoints[1].roadIntersectionComponent->needRebuild();
 	}
 
-	buildModel();
+	_needRebuild = true;
+}
+
+
+void RoadObject::update(float deltaTime)
+{
+	if (!_interactiveMode)
+	{
+		return;
+	}
+
+	_modificationTimer += deltaTime;
+
+	if (_modificationTimer >= 0.2f)
+	{
+		if (_needRebuild)
+		{
+			buildModel();
+
+			_needRebuild = false;
+		}
+		_modificationTimer = 0.0f;
+	}
 }

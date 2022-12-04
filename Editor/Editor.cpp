@@ -529,9 +529,6 @@ namespace vbEditor
 	SceneObject* _selectedSceneObject = nullptr;
 	int roadActiveSegment = 0;
 	int roadActivePoint = 0;
-	bool isRoadModified = false;
-	float roadModificationTimer = 0.0f;
-	std::vector<RoadObject*> roadsToUpdate;
 
 	std::vector<RoadObject*> _selectedRoads;
 
@@ -574,28 +571,6 @@ namespace vbEditor
 		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr))
 		{
 			_clickMode = CM_ROAD_EDIT; // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
-		}
-
-		roadsToUpdate.clear();
-
-		if (_selectedSceneObject != nullptr)
-		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (roadComponent != nullptr)
-			{
-				roadsToUpdate.push_back(roadComponent);
-			}
-
-			CrossroadComponent* crossroad = dynamic_cast<CrossroadComponent*>(_selectedSceneObject->getComponent(CT_CROSSROAD));
-			if (crossroad != nullptr)
-			{
-				std::set<RoadObject*> roadsToUpdateSet;
-				for (int i = 0; i < crossroad->getConnectionsCount(); ++i)
-				{
-					roadsToUpdateSet.insert(crossroad->getConnectionPoint(i).connectedRoads.begin(), crossroad->getConnectionPoint(i).connectedRoads.end());
-				}
-				roadsToUpdate.insert(roadsToUpdate.begin(), roadsToUpdateSet.begin(), roadsToUpdateSet.end());
-			}
 		}
 	}
 
@@ -645,8 +620,6 @@ namespace vbEditor
 					if (roadObject != nullptr && roadObject->getRoadType() != RoadType::BEZIER_CURVES)
 					{
 						roadObject->addPoint(hitPosition);
-
-						isRoadModified = true;
 					}
 
 					ShapePolygonComponent* shapePolygonObject = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
@@ -821,7 +794,6 @@ namespace vbEditor
 		}
 
 		_selectedSceneObject = nullptr;
-		roadsToUpdate.clear();
 		_selectedRoads.clear();
 
 		_clickMode = CM_PICK_OBJECT;
@@ -944,7 +916,8 @@ namespace vbEditor
 			roadSceneObject->addComponent(bezierCurve);
 		}
 
-		RenderObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
+		RoadObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, {}, {}, true, roadSceneObject);
+		roadRenderObject->setInteractiveMode(true);
 		roadRenderObject->setCastShadows(false);
 
 		setSelectedSceneObject(roadSceneObject);
@@ -1606,11 +1579,6 @@ namespace vbEditor
 			_selectedSceneObject->setTransformFromMatrix(modelMatrix);
 		}
 
-		if (!isRoadModified && _selectedSceneObject->getComponent(CT_CROSSROAD) != nullptr)
-		{
-			isRoadModified = ImGuizmo::IsUsing();
-		}
-
 		Component* roadIntersectionComponent = _selectedSceneObject->getComponent(CT_ROAD_INTERSECTION);
 		if (roadIntersectionComponent != nullptr)
 		{
@@ -1687,13 +1655,6 @@ namespace vbEditor
 			{
 				roadComponent->setConnectionPointWithRoadIntersection(connectionPointIndex, connectionPoints[newConnectionIndex].roadIntersectionComponent);
 			}
-
-			isRoadModified = true;
-		}
-
-		if (!isRoadModified)
-		{
-			isRoadModified = RoadManipulator::IsModified();
 		}
 	}
 
@@ -1773,20 +1734,7 @@ namespace vbEditor
 
 	void updateRoads(float deltaTime)
 	{
-		roadModificationTimer += deltaTime;
 
-		if (roadModificationTimer >= 0.2f && isRoadModified)
-		{
-			for (int i = 0; i < roadsToUpdate.size(); ++i)
-			{
-				RoadObject* roadComponent = roadsToUpdate[i];
-
-				roadComponent->buildModel();
-			}
-
-			roadModificationTimer = 0.0f;
-			isRoadModified = false;
-		}
 	}
 
 	void addSceneObject()
