@@ -86,6 +86,11 @@ void BezierCurve::cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints)
 
 void BezierCurve::applyCurveOffset(std::vector<glm::vec3>& curvePoints)
 {
+	if (_curvePoints.size() < 1)
+	{
+		return;
+	}
+
 	glm::vec3 dir;
 	glm::vec3 right;
 	glm::vec3 realUp;

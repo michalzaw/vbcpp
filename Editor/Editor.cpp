@@ -12,6 +12,7 @@
 #include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -1073,6 +1074,18 @@ namespace vbEditor
 
 					BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
 					sceneObject->addComponent(bezierCurve);
+
+					setSelectedSceneObject(sceneObject);
+				}
+
+				if (ImGui::MenuItem("Add AI Path", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("AI Path");
+
+					BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+					PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(PD_FORWARD);
+					sceneObject->addComponent(bezierCurve);
+					sceneObject->addComponent(pathComponent);
 
 					setSelectedSceneObject(sceneObject);
 				}
