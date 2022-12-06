@@ -313,47 +313,6 @@ void SceneLoader::loadPrefabComponent(XMLElement* componentElement, SceneObject*
 }
 
 
-void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
-{
-	std::vector<glm::vec3> bezierCurveControlPoints;
-
-	XMLElement* pointsElement = componentElement->FirstChildElement("Points");
-
-	XMLElement* pointElement = pointsElement->FirstChildElement("Point");
-	while (pointElement != nullptr)
-	{
-		bezierCurveControlPoints.push_back(XMLstringToVec3(pointElement->GetText()));
-
-		pointElement = pointElement->NextSiblingElement("Point");
-	}
-
-	glm::vec2 distanceFromBaseBezierCurve = XmlUtils::getAttributeVec2(componentElement, "distanceFromBaseBezierCurve");
-	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
-	float marginBegin = XmlUtils::getAttributeFloat(componentElement, "marginBegin");
-	float marginEnd = XmlUtils::getAttributeFloat(componentElement, "marginEnd");
-
-	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(bezierCurveControlPoints, distanceFromBaseBezierCurve, direction, marginBegin, marginEnd);
-
-	sceneObject->addComponent(pathComponent);
-}
-
-
-void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject* sceneObject)
-{
-	SceneObject* parent = sceneObject->getParent();
-	if (parent != nullptr)
-	{
-		AIAgent* component = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
-
-		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
-		if (pathComponent != nullptr)
-		{
-			component->setCurrentPath(pathComponent);
-		}
-	}
-}
-
-
 void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneObject* sceneObject)
 {
 	std::vector<glm::vec3> controlPoints;
@@ -386,6 +345,31 @@ void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneOb
 	BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(controlPoints, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
 
 	sceneObject->addComponent(bezierCurve);
+}
+
+
+void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
+	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(direction);
+
+	sceneObject->addComponent(pathComponent);
+}
+
+
+void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgent* component = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
 }
 
 
@@ -446,6 +430,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 				loadPrefabComponent(componentElement, sceneObject);
 			}
 
+			if (componentType == "bezierCurve")
+			{
+				loadBezierCurveComponent(componentElement, sceneObject);
+			}
+
 			if (componentType == "path")
 			{
 				loadPathComponent(componentElement, sceneObject);
@@ -454,11 +443,6 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgent")
 			{
 				loadAIAgentComponent(componentElement, sceneObject);
-			}
-
-			if (componentType == "bezierCurve")
-			{
-				loadBezierCurveComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");

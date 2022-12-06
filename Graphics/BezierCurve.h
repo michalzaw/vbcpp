@@ -33,6 +33,7 @@ class BezierCurve final : public Component
 
 		void calculateCurvePoints();
 		void cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints);
+		void applyCurveOffset(std::vector<glm::vec3>& curvePoints);
 
 	public:
 		BezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {},

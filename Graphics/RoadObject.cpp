@@ -105,6 +105,8 @@ void RoadObject::buildModel(bool reuseExistingModel/* = true*/)
 		auto tempPoints = _points;
 		buildModelPoints(tempPoints, _connectionPointsData);
 	}
+
+	_needRebuild = false;
 }
 
 
@@ -513,8 +515,6 @@ void RoadObject::update(float deltaTime)
 		if (_needRebuild)
 		{
 			buildModel();
-
-			_needRebuild = false;
 		}
 		_modificationTimer = 0.0f;
 	}

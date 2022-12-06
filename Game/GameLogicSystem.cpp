@@ -42,10 +42,9 @@ CameraControlComponent* GameLogicSystem::addCameraControlComponent(CameraFPS* ca
 }
 
 
-PathComponent* GameLogicSystem::addPathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
-												 float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
+PathComponent* GameLogicSystem::addPathComponent(PathDirection direction)
 {
-	PathComponent* component = new PathComponent(baseBezierCurveControlPoints, distanceFromBaseBezierCurve, direction, marginBegin, marginEnd);
+	PathComponent* component = new PathComponent(direction);
 
 	_pathComponents.push_back(component);
 

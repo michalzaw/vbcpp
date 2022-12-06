@@ -66,6 +66,7 @@ void BezierCurve::calculateCurvePoints()
 	}
 
 	cutCurvePointsToMargin(_curvePoints);
+	applyCurveOffset(_curvePoints);
 }
 
 
@@ -80,6 +81,28 @@ void BezierCurve::cutCurvePointsToMargin(std::vector<glm::vec3>& curvePoints)
 	{
 		BezierCurvesUtils::cutBezierCurveFromEnd(curvePoints, _marginEnd);
 	}
+}
+
+
+void BezierCurve::applyCurveOffset(std::vector<glm::vec3>& curvePoints)
+{
+	glm::vec3 dir;
+	glm::vec3 right;
+	glm::vec3 realUp;
+
+	for (int i = 0; i < _curvePoints.size() - 1; ++i)
+	{
+		dir = glm::normalize(_curvePoints[i + 1] - _curvePoints[i]);
+		right = glm::cross(dir, glm::vec3(0, 1, 0));
+		realUp = glm::cross(right, dir);
+
+		_curvePoints[i] += glm::vec3(_offsetFromBaseCurve.x) * right;
+		_curvePoints[i] += glm::vec3(_offsetFromBaseCurve.y) * realUp;
+	}
+
+	// modify last point using values from previous point
+	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_offsetFromBaseCurve.x) * right;
+	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_offsetFromBaseCurve.y) * realUp;
 }
 
 

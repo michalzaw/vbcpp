@@ -34,8 +34,7 @@ class GameLogicSystem final
 
 		//Bus* addBus(Bus* bus);
 		CameraControlComponent* addCameraControlComponent(CameraFPS* camera);
-		PathComponent* addPathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
-										float marginBegin = 0.0f, float marginEnd = 0.0f);
+		PathComponent* addPathComponent(PathDirection direction);
 		AIAgent* addAIAgent();
 		AIAgent* addAIAgent(PhysicalBodyRaycastVehicle* vechicle);
 		//BusStopComponent* addBusStopComponent(std::string name);

@@ -9,6 +9,10 @@
 #include "../Scene/Component.h"
 
 
+class BezierCurve;
+class RoadObject;
+
+
 enum PathDirection
 {
 	PD_FORWARD = 1,
@@ -21,32 +25,22 @@ enum PathDirection
 class PathComponent final : public Component
 {
 	private:
-		glm::vec2 _distanceFromBaseBezierCurve;
-
-		std::vector<glm::vec3> _baseBezierCurveControlPoints;
-		std::vector<glm::vec3> _curvePoints;
-
 		PathDirection _direction;
 
-		float _marginBegin;
-		float _marginEnd;
+		BezierCurve* _bezierCurveComponent;
+		RoadObject* _pathHelperComponent;
+
+		std::vector<glm::vec3> _curvePoints;
 
 		void onAttachedToScenObject() override;
 
 	public:
-		PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
-					  float marginBegin = 0.0f, float marginEnd = 0.0f);
+		PathComponent(PathDirection direction);
 
-		inline const glm::vec2& getDistanceFromBaseBezierCurve() { return _distanceFromBaseBezierCurve; }
-		inline const std::vector<glm::vec3>& getBaseBezierCurveControlPoints() { return _baseBezierCurveControlPoints; }
-		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
 		inline PathDirection getDirection() { return _direction; }
-		inline float getMarginBegin() { return _marginBegin; }
-		inline float getMarginEnd() { return _marginEnd; }
+		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
 
 		inline void setPathDirection(PathDirection direction) { _direction = direction; }
-		inline void setMarginBegin(float marginBegin) { _marginBegin = marginBegin; }
-		inline void setMarginEnd(float marginEnd) { _marginBegin = marginEnd; }
 
 		void recalculate();
 

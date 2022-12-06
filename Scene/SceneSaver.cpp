@@ -156,53 +156,6 @@ void SceneSaver::savePrefabComponent(XMLElement* objectElement, XMLDocument& doc
 }
 
 
-void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, PathComponent* pathComponent)
-{
-	XMLElement* componentElement = doc.NewElement("Component");
-
-	componentElement->SetAttribute("type", "path");
-	componentElement->SetAttribute("distanceFromBaseBezierCurve", vec2ToString(pathComponent->getDistanceFromBaseBezierCurve()).c_str());
-	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
-	componentElement->SetAttribute("marginBegin", Strings::toString(pathComponent->getMarginBegin()).c_str());
-	componentElement->SetAttribute("marginEnd", Strings::toString(pathComponent->getMarginEnd()).c_str());
-
-	XMLElement* pointsElement = doc.NewElement("Points");
-
-	for (const auto& point : pathComponent->getBaseBezierCurveControlPoints())
-	{
-		XMLElement* pointElement = doc.NewElement("Point");
-
-		pointElement->SetText(vec3ToString(point).c_str());
-
-		pointsElement->InsertEndChild(pointElement);
-	}
-
-	componentElement->InsertEndChild(pointsElement);
-
-	objectElement->InsertEndChild(componentElement);
-}
-
-
-void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& doc, AIAgent* aiAgent)
-{
-	if (aiAgent->getCurrentPath() != nullptr)
-	{
-		XMLElement* componentElement = doc.NewElement("Component");
-
-		componentElement->SetAttribute("type", "aiAgent");
-		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
-		// path is now loaded from parent object
-		// todo: save other agent params
-
-		objectElement->InsertEndChild(componentElement);
-	}
-	else
-	{
-		LOG_DEBUG("Path is null. Skip saving component data to map file");
-	}
-}
-
-
 void SceneSaver::saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve)
 {
 	XMLElement* componentElement = doc.NewElement("Component");
@@ -235,6 +188,37 @@ void SceneSaver::saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, t
 	componentElement->InsertEndChild(segmentsElement);
 
 	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, PathComponent* pathComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "path");
+	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& doc, AIAgent* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgent");
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
 }
 
 
@@ -274,6 +258,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 		savePrefabComponent(objectElement, doc, prefab);
 	}
 
+	BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+	if (bezierCurveComponent)
+	{
+		saveBezierCurveComponent(objectElement, doc, bezierCurveComponent);
+	}
+
 	PathComponent* pathComponent = static_cast<PathComponent*>(sceneObject->getComponent(CT_PATH));
 	if (pathComponent)
 	{
@@ -284,12 +274,6 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentComponent)
 	{
 		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
-	}
-
-	BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
-	if (bezierCurveComponent)
-	{
-		saveBezierCurveComponent(objectElement, doc, bezierCurveComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

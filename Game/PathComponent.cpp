@@ -2,6 +2,7 @@
 
 #include "GameConfig.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/GraphicsManager.h"
 
 #include "../Scene/SceneManager.h"
@@ -37,19 +38,31 @@ RRoadProfile* getHelperProfile()
 }
 
 
-PathComponent::PathComponent(const std::vector<glm::vec3>& baseBezierCurveControlPoints, const glm::vec2& distanceFromBaseBezierCurve, PathDirection direction,
-							 float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/)
+PathComponent::PathComponent(PathDirection direction)
 	: Component(CT_PATH),
-	_distanceFromBaseBezierCurve(distanceFromBaseBezierCurve), _baseBezierCurveControlPoints(baseBezierCurveControlPoints),
 	_direction(direction),
-	_marginBegin(marginBegin), _marginEnd(marginEnd)
+	_bezierCurveComponent(nullptr), _pathHelperComponent(nullptr)
 {
-	recalculate();
+
 }
 
 
 void PathComponent::onAttachedToScenObject()
 {
+	_bezierCurveComponent = dynamic_cast<BezierCurve*>(getSceneObject()->getComponent(CT_BEZIER_CURVE));
+	if (_bezierCurveComponent == nullptr)
+	{
+		LOG_ERROR("Cannot find BezierCurve component in object!");
+		return;
+	}
+
+	_bezierCurveComponent->setOnPointAddedListener([this]() { recalculate(); });
+	_bezierCurveComponent->setOnPointDeletedListener([this](int index) { recalculate(); });
+	_bezierCurveComponent->setOnPointChangedPositionListener([this](int index, const glm::vec3& newPosition) { recalculate(); });
+	_bezierCurveComponent->setOnCurveChangedListener([this]() { recalculate(); });
+	_bezierCurveComponent->setOnComponentDeletedListener([this]() { _bezierCurveComponent = nullptr; });
+
+
 	if (GameConfig::getInstance().mode == GM_EDITOR)
 	{
 		// create editor helper
@@ -60,77 +73,42 @@ void PathComponent::onAttachedToScenObject()
 		pathHelperSceneObject->setFlags(SOF_NOT_SERIALIZABLE | SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE);
 		getSceneObject()->addChild(pathHelperSceneObject);
 
-		RoadObject* pathHelperComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, helperProfile, _curvePoints, {}, true, pathHelperSceneObject);
-		pathHelperComponent->setCastShadows(false);
+		_pathHelperComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS,
+																										helperProfile,
+																										{},
+																										{},
+																										false,
+																										pathHelperSceneObject);
+		_pathHelperComponent->setCastShadows(false);
 	}
+
+	recalculate();
 }
 
 
 void PathComponent::recalculate()
 {
-	if (_baseBezierCurveControlPoints.size() > 0 && (_baseBezierCurveControlPoints.size() - 1) % 3 != 0)
-	{
-		LOG_ERROR("Invalid number of control points");
-		return;
-	}
-
-	int quality = 50;
-
 	_curvePoints.clear();
 
-	if (_baseBezierCurveControlPoints.size() > 0)
+	if (_bezierCurveComponent != nullptr)
 	{
-		for (int i = 0; i < _baseBezierCurveControlPoints.size() - 1; i += 3)
-		{
-			int segmentIndex = i / 3;
-			std::vector<glm::vec3> segmentPoints;
-			BezierCurvesUtils::generateBezierCurvePoints(_baseBezierCurveControlPoints[i],
-														 _baseBezierCurveControlPoints[i + 1],
-														 _baseBezierCurveControlPoints[i + 2],
-														 _baseBezierCurveControlPoints[i + 3],
-														 quality,
-														 segmentPoints);
-
-			if (i == 0)
-			{
-				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin(), segmentPoints.end());
-			}
-			else
-			{
-				_curvePoints.insert(_curvePoints.end(), segmentPoints.begin() + 1, segmentPoints.end());
-			}
-		}
+		LOG_DEBUG("Fetch curve points");
+		_curvePoints = _bezierCurveComponent->getCurvePoints();
 	}
-
-	if (_marginBegin > 0.0f)
+	else
 	{
-		BezierCurvesUtils::cutBezierCurveFromBegin(_curvePoints, _marginBegin);
+		LOG_WARNING("Null reference to BezierCurve component");
 	}
-	if (_marginEnd > 0.0f)
-	{
-		BezierCurvesUtils::cutBezierCurveFromEnd(_curvePoints, _marginEnd);
-	}
-
-	glm::vec3 dir;
-	glm::vec3 right;
-	glm::vec3 realUp;
-	for (int i = 0; i < _curvePoints.size() - 1; ++i)
-	{
-		dir = glm::normalize(_curvePoints[i + 1] - _curvePoints[i]);
-		right = glm::cross(dir, glm::vec3(0, 1, 0));
-		realUp = glm::cross(right, dir);
-
-		_curvePoints[i] += glm::vec3(_distanceFromBaseBezierCurve.x) * right;
-		_curvePoints[i] += glm::vec3(_distanceFromBaseBezierCurve.y) * realUp;
-	}
-
-	// modify last point using values from previous point
-	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_distanceFromBaseBezierCurve.x) * right;
-	_curvePoints[_curvePoints.size() - 1] += glm::vec3(_distanceFromBaseBezierCurve.y) * realUp;
 
 	if (_direction == PD_BACKWARD)
 	{
 		std::reverse(_curvePoints.begin(), _curvePoints.end());
+	}
+
+	if (_pathHelperComponent != nullptr)
+	{
+		_pathHelperComponent->getPoints() = _curvePoints;
+		_pathHelperComponent->buildModel();
 	}
 }
 
