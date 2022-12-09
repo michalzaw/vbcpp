@@ -1137,6 +1137,64 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 }
 
 
+void showPathComponentDetails(PathComponent* component)
+{
+	if (ImGui::CollapsingHeader("AI Path", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
+		{
+			for (const auto& connectedPath : component->getNextPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+
+		if (newNode("Previous paths", "[%d]", component->getPreviousPaths().size()))
+		{
+			for (const auto& connectedPath : component->getPreviousPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1227,6 +1285,12 @@ void showObjectProperties()
 			if (bezierCurve)
 			{
 				showBezierCurveComponentDetails(bezierCurve);
+			}
+
+			PathComponent* pathComponent = dynamic_cast<PathComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_PATH));
+			if (pathComponent)
+			{
+				showPathComponentDetails(pathComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

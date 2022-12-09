@@ -44,6 +44,12 @@ void AIAgent::reset()
 {
 	_currentPointIndex = 0;
 	_t = 0.0f;
+
+	const auto& nextPaths = _currentPath->getNextPaths();
+	if (nextPaths.size() > 0)
+	{
+		_currentPath = nextPaths[0].path;
+	}
 }
 
 

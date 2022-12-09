@@ -1630,6 +1630,30 @@ namespace vbEditor
 		}
 	}
 
+	struct PathConnectionPoint final
+	{
+		PathComponent* pathComponent;
+		int index;
+	};
+
+	void createAvailableConnectionPointsListForPathComponent(PathComponent* selectedPathComponent, int selectedPointIndex, std::vector<glm::vec3>& connectionPointsPositions, std::vector<PathConnectionPoint>& connectionPoints)
+	{
+		const auto& pathComponents = _sceneManager->getGameLogicSystem()->getPathComponents();
+		for (auto path : pathComponents)
+		{
+			if (path->getCurvePoints().size() > 0 && selectedPointIndex == 1)
+			{
+				connectionPointsPositions.push_back(path->getCurvePoints()[0]);
+				connectionPoints.push_back({ path, 0 });
+			}
+			if (path->getCurvePoints().size() > 1 && selectedPointIndex == 0)
+			{
+				connectionPointsPositions.push_back(path->getCurvePoints()[path->getCurvePoints().size() - 1]);
+				connectionPoints.push_back({ path, 1 });
+			}
+		}
+	}
+
 	void showRoadTools()
 	{
 		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -1700,13 +1724,20 @@ namespace vbEditor
 	{
 		BezierCurve* component = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
 		RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+		PathComponent* pathComponent = dynamic_cast<PathComponent*>(_selectedSceneObject->getComponent(CT_PATH));
 
 		std::vector<RoadSegment> segments;
 		std::vector<glm::vec3> connectionPointsPositions;
-		std::vector<RoadConnectionPoint> connectionPoints;
+		std::vector<RoadConnectionPoint> roatConnectionPoints;
+		std::vector<PathConnectionPoint> pathConnectionPoints;
 		if (roadObject != nullptr)
 		{
-			createAvailableConnectionPointsList(connectionPointsPositions, connectionPoints);
+			createAvailableConnectionPointsList(connectionPointsPositions, roatConnectionPoints);
+		}
+		if (pathComponent != nullptr)
+		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			createAvailableConnectionPointsListForPathComponent(pathComponent, connectionPointIndex, connectionPointsPositions, pathConnectionPoints);
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
@@ -1728,19 +1759,24 @@ namespace vbEditor
 
 		if (RoadManipulator::IsCreatedNewConnection())
 		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
+
 			if (roadObject != nullptr)
 			{
-				int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
-				int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
-
-				if (connectionPoints[newConnectionIndex].crossroadComponent != nullptr)
+				if (roatConnectionPoints[newConnectionIndex].crossroadComponent != nullptr)
 				{
-					roadObject->setConnectionPoint(connectionPointIndex, connectionPoints[newConnectionIndex].crossroadComponent, connectionPoints[newConnectionIndex].index);
+					roadObject->setConnectionPoint(connectionPointIndex, roatConnectionPoints[newConnectionIndex].crossroadComponent, roatConnectionPoints[newConnectionIndex].index);
 				}
 				else
 				{
-					roadObject->setConnectionPointWithRoadIntersection(connectionPointIndex, connectionPoints[newConnectionIndex].roadIntersectionComponent);
+					roadObject->setConnectionPointWithRoadIntersection(connectionPointIndex, roatConnectionPoints[newConnectionIndex].roadIntersectionComponent);
 				}
+			}
+
+			if (pathComponent != nullptr)
+			{
+				pathComponent->setConnection(connectionPointIndex, pathConnectionPoints[newConnectionIndex].pathComponent, pathConnectionPoints[newConnectionIndex].index);
 			}
 		}
 	}

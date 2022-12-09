@@ -86,6 +86,43 @@ void PathComponent::onAttachedToScenObject()
 }
 
 
+void PathComponent::setConnection(int index, PathComponent* otherPath, int indexInOtherPath)
+{
+	if (this == otherPath && index == indexInOtherPath)
+	{
+		return;
+	}
+
+	if (index == indexInOtherPath)
+	{
+		return;
+	}
+
+	LOG_INFO("Create path connection: " + getSceneObject()->getName() + " (" + Strings::toString(index) + ") - " +
+		otherPath->getSceneObject()->getName() + " (" + Strings::toString(indexInOtherPath) + ")");
+
+	if (index == 0)
+	{
+		_previousPaths.push_back({ otherPath, indexInOtherPath });
+	}
+
+	if (index == 1)
+	{
+		_nextPaths.push_back({ otherPath, indexInOtherPath });
+	}
+
+	if (indexInOtherPath == 0)
+	{
+		otherPath->_previousPaths.push_back({ this, index });
+	}
+
+	if (indexInOtherPath == 1)
+	{
+		otherPath->_nextPaths.push_back({ this, index });
+	}
+}
+
+
 void PathComponent::recalculate()
 {
 	_curvePoints.clear();

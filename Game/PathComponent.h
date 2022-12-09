@@ -22,6 +22,16 @@ enum PathDirection
 };
 
 
+class PathComponent;
+
+
+struct ConnectedPath final
+{
+	PathComponent* path;
+	int index;
+};
+
+
 class PathComponent final : public Component
 {
 	private:
@@ -32,6 +42,9 @@ class PathComponent final : public Component
 
 		std::vector<glm::vec3> _curvePoints;
 
+		std::vector<ConnectedPath> _nextPaths;
+		std::vector<ConnectedPath> _previousPaths;
+
 		void onAttachedToScenObject() override;
 
 	public:
@@ -39,8 +52,12 @@ class PathComponent final : public Component
 
 		inline PathDirection getDirection() { return _direction; }
 		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
+		inline const std::vector<ConnectedPath>& getNextPaths() { return _nextPaths; }
+		inline const std::vector<ConnectedPath>& getPreviousPaths() { return _previousPaths; }
 
 		inline void setPathDirection(PathDirection direction) { _direction = direction; }
+
+		void setConnection(int index, PathComponent* otherPath, int indexInOtherPath);
 
 		void recalculate();
 
