@@ -63,8 +63,7 @@ class BezierCurve final : public Component
 		void unlockPointPosition(int index);
 
 		BezierCurve* splitCurve(int segmentIndex, float t); // Dzieli krzywa w danym punkcie, pierwsza czesc zostaje w istniejacej instancji, druga trafia do nowego componentu
-		void cutAndGetCurve1(float marginBegin, float marginEnd, std::vector<glm::vec3>& outPoints, std::vector<int>& outSegmentsPointsCount); // Zwraca parametry dla nowej krzywej obcietej z obu stron (nie modyfikuje istniejacej)
-		void cutAndGetCurve2(float marginBegin, float marginEnd, std::vector<glm::vec3>& outPoints, std::vector<int>& outSegmentsPointsCount); // Zwraca parametry dla nowej krzywej obcietej z obu stron (nie modyfikuje istniejacej)
+		void cutAndGetCurve(float marginBegin, float marginEnd, std::vector<glm::vec3>& outPoints, std::vector<int>& outSegmentsPointsCount); // Zwraca parametry dla nowej krzywej obcietej z obu stron (nie modyfikuje istniejacej)
 
 		void setOnPointAddedListener(const std::function<void(void)>& onPointAddedListener);
 		void setOnPointDeletedListener(const std::function<void(int)>& onPointDeletedListener);

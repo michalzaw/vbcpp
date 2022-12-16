@@ -1134,10 +1134,10 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 		ImGui::Separator();
 		ImGui::PopStyleVar();
 
-		if (ImGui::Button("Split curve", ImVec2(-1.0f, 0.0f)))
+		/*if (ImGui::Button("Split curve", ImVec2(-1.0f, 0.0f)))
 		{
 			component->splitCurve(0, 0.5f);
-		}
+		}*/
 	}
 }
 
