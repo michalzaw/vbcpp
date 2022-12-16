@@ -19,15 +19,11 @@ namespace AIPathGenerator
 
 	void generateAIPath(const std::string& name, BezierCurve* baseBezierCurve, PathDirection direction, const::glm::vec2& offsetFromBaseCurve, SceneObject* rootObject, SceneManager* sceneManager)
 	{
+		std::vector<glm::vec3> points;
 		std::vector<int> segmentsPointsCount;
-		segmentsPointsCount.reserve(baseBezierCurve->getSegmentsCount());
-		for (int i = 0; i < baseBezierCurve->getSegmentsCount(); ++i)
-		{
-			segmentsPointsCount.push_back(baseBezierCurve->getSegmentPointsCount(i));
-		}
+		baseBezierCurve->cutAndGetCurve2(baseBezierCurve->getMarginBegin(), baseBezierCurve->getMarginEnd(), points, segmentsPointsCount);
 
-		BezierCurve* bezierCurve = sceneManager->getGraphicsManager()->addBezierCurve(baseBezierCurve->getPoints(), segmentsPointsCount,
-			baseBezierCurve->getMarginBegin(), baseBezierCurve->getMarginEnd(), offsetFromBaseCurve);
+		BezierCurve* bezierCurve = sceneManager->getGraphicsManager()->addBezierCurve(points, segmentsPointsCount, 0.0f, 0.0f, offsetFromBaseCurve);
 		PathComponent* path = sceneManager->getGameLogicSystem()->addPathComponent(direction);
 
 		SceneObject* pathObject = sceneManager->addSceneObject(name);

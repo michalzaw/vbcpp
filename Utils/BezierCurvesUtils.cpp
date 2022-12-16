@@ -81,6 +81,58 @@ namespace BezierCurvesUtils
 		}
 	}
 
+	float getPointByDistanceFromCurveBegin(int resolution, float expectedDistanceFromBegin, float& outDistanceToReturnedPoint, const std::function<glm::vec3(float)>& function)
+	{
+		float distance = 0.0f;
+		glm::vec3 lastPoint = function(0.0f);
+
+		const float deltaPosition = 1.0f / static_cast<float>(resolution);
+
+		for (int i = 1; i < resolution; ++i)
+		{
+			const float t = i * deltaPosition;
+			const glm::vec3 currentPoint = function(t);
+
+			distance += glm::distance(currentPoint, lastPoint);
+
+			lastPoint = currentPoint;
+
+			if (distance >= expectedDistanceFromBegin)
+			{
+				return t;
+			}
+		}
+
+		outDistanceToReturnedPoint = distance;
+		return -1.0f;
+	}
+
+	float getPointByDistanceFromCurveEnd(int resolution, float expectedDistanceFromEnd, float& outDistanceToReturnedPoint, const std::function<glm::vec3(float)>& function)
+	{
+		float distance = 0.0f;
+		glm::vec3 lastPoint = function(1.0f);
+
+		const float deltaPosition = 1.0f / static_cast<float>(resolution);
+
+		for (int i = resolution - 1; i >= 0; --i)
+		{
+			const float t = i * deltaPosition;
+			const glm::vec3 currentPoint = function(t);
+
+			distance += glm::distance(currentPoint, lastPoint);
+
+			lastPoint = currentPoint;
+
+			if (distance >= expectedDistanceFromEnd)
+			{
+				return t;
+			}
+		}
+
+		outDistanceToReturnedPoint = distance;
+		return -1.0f;
+	}
+
 	void cutBezierCurveFromBegin(std::vector<glm::vec3>& curvePoints, float distance)
 	{
 		float length = 0.0f;
@@ -111,5 +163,27 @@ namespace BezierCurvesUtils
 		}
 
 		curvePoints.erase(curvePoints.end() - i, curvePoints.end());
+	}
+
+	void splitBezierCurve(const std::vector<glm::vec3>& curveControlPoints, float t, std::vector<glm::vec3>& outNewCurve1ControlPoints, std::vector<glm::vec3>& outNewCurve2ControlPoints)
+	{
+		glm::vec3 splitPointPosition = calculateBezierCurvePoint(curveControlPoints[0], curveControlPoints[1], curveControlPoints[2], curveControlPoints[3], t);
+
+		glm::vec3 p1 = glm::mix(curveControlPoints[0], curveControlPoints[1], t);
+		glm::vec3 p2 = glm::mix(curveControlPoints[1], curveControlPoints[2], t);
+		glm::vec3 p3 = glm::mix(curveControlPoints[2], curveControlPoints[3], t);
+
+		glm::vec3 p4 = glm::mix(p1, p2, t);
+		glm::vec3 p5 = glm::mix(p2, p3, t);
+
+		outNewCurve1ControlPoints.push_back(curveControlPoints[0]);
+		outNewCurve1ControlPoints.push_back(p1);
+		outNewCurve1ControlPoints.push_back(p4);
+		outNewCurve1ControlPoints.push_back(splitPointPosition);
+
+		outNewCurve2ControlPoints.push_back(splitPointPosition);
+		outNewCurve2ControlPoints.push_back(p5);
+		outNewCurve2ControlPoints.push_back(p3);
+		outNewCurve2ControlPoints.push_back(curveControlPoints[3]);
 	}
 }

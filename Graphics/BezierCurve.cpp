@@ -1,5 +1,9 @@
 #include "BezierCurve.h"
 
+#include "../Graphics/GraphicsManager.h"
+
+#include "../Scene/SceneManager.h"
+
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/BezierCurvesUtils.h"
@@ -31,12 +35,12 @@ void BezierCurve::calculateCurvePoints()
 {
 	if (_points.size() > 0 && (_points.size() - 1) % 3 != 0)
 	{
-		LOG_ERROR("Invalid number of control points");
+		LOG_ERROR("Invalid number of control points: " + Strings::toString(_points.size()));
 		return;
 	}
 	if (_points.size() / 3 != _segmentsPointsCount.size())
 	{
-		LOG_ERROR("Invalid number of segments");
+		LOG_ERROR("Invalid number of segments: " + _segmentsPointsCount.size());
 		return;
 	}
 
@@ -395,6 +399,251 @@ void BezierCurve::unlockPointPosition(int index)
 	{
 		_pointsWithLockedPosition.erase(iterator);
 	}
+}
+
+
+BezierCurve* BezierCurve::splitCurve(int segmentIndex, float t)
+{
+	int firstIndex = segmentIndex * 3;
+	int endIndex = firstIndex + 3;
+
+	std::vector<glm::vec3> controlPoints = { _points[firstIndex], _points[firstIndex + 1], _points[firstIndex + 2], _points[firstIndex + 3] };
+	std::vector<glm::vec3> newCurve1;
+	std::vector<glm::vec3> newCurve2;
+
+	BezierCurvesUtils::splitBezierCurve(controlPoints, t, newCurve1, newCurve2);
+
+	_points[firstIndex] = newCurve1[0];
+	_points[firstIndex + 1] = newCurve1[1];
+	_points[firstIndex + 2] = newCurve1[2];
+	_points[firstIndex + 3] = newCurve1[3];
+
+	{
+		newCurve2.insert(newCurve2.end(), _points.begin() + endIndex + 1, _points.end());
+
+		std::vector<int> newCurve2Segments;
+		newCurve2Segments.push_back(_segmentsPointsCount[segmentIndex] / 2);
+		newCurve2Segments.insert(newCurve2Segments.begin(), _segmentsPointsCount.begin() + segmentIndex + 1, _segmentsPointsCount.end());
+
+		SceneObject* newCurveSceneObject = getSceneObject()->getSceneManager()->addSceneObject(getSceneObject()->getName() + ".2");
+		BezierCurve* newCurveComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addBezierCurve(newCurve2, newCurve2Segments);
+		newCurveSceneObject->addComponent(newCurveComponent);
+	}
+
+	_points.erase(_points.begin() + endIndex + 1, _points.end());
+	_segmentsPointsCount.erase(_segmentsPointsCount.begin() + segmentIndex + 1, _segmentsPointsCount.end());
+
+	_segmentsPointsCount[segmentIndex] /= 2;
+
+	_curvePointsIsCalculated = false;
+
+	return nullptr;
+}
+
+
+void BezierCurve::cutAndGetCurve1(float marginBegin, float marginEnd, std::vector<glm::vec3>& outPoints, std::vector<int>& outSegmentsPointsCount)
+{
+	int internalFirstPoint = 0;
+	int internalEndPoint = _points.size();
+	int internalFirstSegment = 0;
+	int internalEndSegment = _segmentsPointsCount.size();
+
+	int segment1 = 0;
+	float t1 = 0.0f;
+
+	int firstCurveFirstIndex = 0;
+	int firstCurveEndIndex = 0;
+
+	std::vector<glm::vec3> firstCurveCurve1;
+	std::vector<glm::vec3> firstCurveCurve2;
+
+	if (marginBegin > 0.0f)
+	{
+		for (int i = 0; i < _points.size() - 1; i += 3)
+		{
+			float distance;
+			t1 = BezierCurvesUtils::getPointByDistanceFromCurveBegin(10000, marginBegin, distance, [this, i](float t)
+				{
+					return BezierCurvesUtils::calculateBezierCurvePoint(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], t);
+				});
+
+			if (t1 > 0.0f)
+			{
+				segment1 = i / 3;
+				break;
+			}
+			else
+			{
+				marginBegin -= distance;
+			}
+		}
+
+		firstCurveFirstIndex = segment1 * 3;
+		firstCurveEndIndex = firstCurveFirstIndex + 3;
+
+		std::vector<glm::vec3> controlPoints = { _points[firstCurveFirstIndex], _points[firstCurveFirstIndex + 1], _points[firstCurveFirstIndex + 2], _points[firstCurveFirstIndex + 3] };
+
+		BezierCurvesUtils::splitBezierCurve(controlPoints, t1, firstCurveCurve1, firstCurveCurve2);
+
+		internalFirstPoint = firstCurveEndIndex + 1;
+		internalFirstSegment = segment1 + 1;
+	}
+
+	int segment2 = 0;
+	float t2 = 0.0f;
+
+	int lastCurveFirstIndex = 0;
+	int lastCurveEndIndex = 0;
+
+	std::vector<glm::vec3> lastCurveCurve1;
+	std::vector<glm::vec3> lastCurveCurve2;
+
+	if (marginEnd > 0.0f)
+	{
+		for (int i = _points.size() - 4; i >= 3; i -= 3)
+		{
+			float distance;
+			t2 = BezierCurvesUtils::getPointByDistanceFromCurveEnd(10000, marginEnd, distance, [this, i](float t)
+				{
+					return BezierCurvesUtils::calculateBezierCurvePoint(_points[i], _points[i + 1], _points[i + 2], _points[i + 3], t);
+				});
+
+			if (t2 > 0.0f)
+			{
+				segment2 = i / 3;
+				break;
+			}
+			else
+			{
+				marginEnd -= distance;
+			}
+		}
+
+		lastCurveFirstIndex = segment2 * 3;
+		lastCurveEndIndex = lastCurveFirstIndex + 3;
+
+		std::vector<glm::vec3> controlPoints = { _points[lastCurveFirstIndex], _points[lastCurveFirstIndex + 1], _points[lastCurveFirstIndex + 2], _points[lastCurveFirstIndex + 3] };
+
+		BezierCurvesUtils::splitBezierCurve(controlPoints, t2, lastCurveCurve1, lastCurveCurve2);
+
+		internalEndPoint = lastCurveFirstIndex + 1;
+		internalEndSegment = segment2;
+	}
+
+	if (firstCurveCurve2.size() > 0)
+	{
+		outPoints.insert(outPoints.end(), firstCurveCurve2.begin(), firstCurveCurve2.end());
+		outSegmentsPointsCount.push_back((1 - t1) * _segmentsPointsCount[segment1]);
+	}
+
+	if (internalEndPoint > internalFirstPoint)
+	{
+		outPoints.insert(outPoints.end(), _points.begin() + internalFirstPoint, _points.begin() + internalEndPoint);
+		outSegmentsPointsCount.insert(outSegmentsPointsCount.end(), _segmentsPointsCount.begin() + internalFirstSegment, _segmentsPointsCount.begin() + internalEndSegment);
+	}
+
+	if (lastCurveCurve1.size() > 0)
+	{
+		outPoints.insert(outPoints.end(), lastCurveCurve1.begin() + 1, lastCurveCurve1.end());
+		outSegmentsPointsCount.push_back(t2 * _segmentsPointsCount[segment2]);
+	}
+}
+
+
+void BezierCurve::cutAndGetCurve2(float marginBegin, float marginEnd, std::vector<glm::vec3>& outPoints, std::vector<int>& outSegmentsPointsCount)
+{
+	std::vector<glm::vec3> points = _points;
+	std::vector<int> segmentsPointsCount = _segmentsPointsCount;
+
+	std::vector<int>& foo = segmentsPointsCount;
+	foo = _segmentsPointsCount;
+
+	if (marginBegin > 0.0f)
+	{
+		int segment = 0;
+		float t = 0.0f;
+
+		for (int i = 0; i < points.size() - 1; i += 3)
+		{
+			float distance;
+			t = BezierCurvesUtils::getPointByDistanceFromCurveBegin(10000, marginBegin, distance, [&points, i](float t)
+				{
+					return BezierCurvesUtils::calculateBezierCurvePoint(points[i], points[i + 1], points[i + 2], points[i + 3], t);
+				});
+
+			if (t > 0.0f)
+			{
+				segment = i / 3;
+				break;
+			}
+			else
+			{
+				marginBegin -= distance;
+			}
+		}
+
+		int firstCurveFirstIndex = segment * 3;
+		int firstCurveEndIndex = firstCurveFirstIndex + 3;
+
+		std::vector<glm::vec3> controlPoints = { points[firstCurveFirstIndex], points[firstCurveFirstIndex + 1], points[firstCurveFirstIndex + 2], points[firstCurveFirstIndex + 3] };
+
+		std::vector<glm::vec3> firstCurveCurve1;
+		std::vector<glm::vec3> firstCurveCurve2;
+		BezierCurvesUtils::splitBezierCurve(controlPoints, t, firstCurveCurve1, firstCurveCurve2);
+
+		points.erase(points.begin(), points.begin() + firstCurveFirstIndex);
+		segmentsPointsCount.erase(segmentsPointsCount.begin(), segmentsPointsCount.begin() + segment);
+
+		points[0] = firstCurveCurve2[0];
+		points[1] = firstCurveCurve2[1];
+		points[2] = firstCurveCurve2[2];
+		points[3] = firstCurveCurve2[3];
+	}
+
+	if (marginEnd > 0.0f)
+	{
+		int segment = 0;
+		float t = 0.0f;
+
+		for (int i = points.size() - 4; i >= 0; i -= 3)
+		{
+			float distance;
+			t = BezierCurvesUtils::getPointByDistanceFromCurveEnd(10000, marginEnd, distance, [&points, i](float t)
+				{
+					return BezierCurvesUtils::calculateBezierCurvePoint(points[i], points[i + 1], points[i + 2], points[i + 3], t);
+				});
+
+			if (t > 0.0f)
+			{
+				segment = i / 3;
+				break;
+			}
+			else
+			{
+				marginEnd -= distance;
+			}
+		}
+
+		int lastCurveFirstIndex = segment * 3;
+		int lastCurveEndIndex = lastCurveFirstIndex + 3;
+
+		std::vector<glm::vec3> controlPoints = { points[lastCurveFirstIndex], points[lastCurveFirstIndex + 1], points[lastCurveFirstIndex + 2], points[lastCurveFirstIndex + 3] };
+
+		std::vector<glm::vec3> lastCurveCurve1;
+		std::vector<glm::vec3> lastCurveCurve2;
+		BezierCurvesUtils::splitBezierCurve(controlPoints, t, lastCurveCurve1, lastCurveCurve2);
+
+		points.erase(points.begin() + lastCurveFirstIndex + 4, points.end());
+		segmentsPointsCount.erase(segmentsPointsCount.begin() + segment + 1, segmentsPointsCount.end());
+
+		points[lastCurveFirstIndex] = lastCurveCurve1[0];
+		points[lastCurveFirstIndex + 1] = lastCurveCurve1[1];
+		points[lastCurveFirstIndex + 2] = lastCurveCurve1[2];
+		points[lastCurveFirstIndex + 3] = lastCurveCurve1[3];
+	}
+
+	outPoints = points;
+	outSegmentsPointsCount = segmentsPointsCount;
 }
 
 
