@@ -83,7 +83,7 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 {
     if (isRunning())
     {
-        float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / PI;
+        float rpm = (wheelAngularVelocity * abs(gearRatio) * _differentialRatio * 60.0f) / (2 * PI * 0.45f);
         //if (_currentRPM < _torqueCurve[0].rpm)
         //    _currentRPM = static_cast<float>(_torqueCurve[0].rpm);
         if (rpm > _torqueCurve[0].rpm)
@@ -98,19 +98,19 @@ void Engine::setRPM(float wheelAngularVelocity, float gearRatio)
 }
 
 
-void Engine::throttleUp()
+void Engine::throttleUp(float dt)
 {
     if (_throttle < 1.0f)
-        _throttle += 0.001f;
+        _throttle += 0.1f * dt;
     else
         _throttle = 1.0f;
 }
 
 
-void Engine::throttleDown()
+void Engine::throttleDown(float dt)
 {
     if (_throttle > 0)
-        _throttle -= 0.002f;
+        _throttle -= 0.2 * dt;
     else
         _throttle = 0;
 }

@@ -1201,6 +1201,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[ALPHA_TEST_ANIMATED_MATERIAL] = MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
+    _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
 
 
 	initUniformLocations();

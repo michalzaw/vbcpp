@@ -174,11 +174,19 @@ void BusLoader::loadAvailableVariables(XMLElement* busElement)
         for (XMLElement* variableElement = variablesElement->FirstChildElement("Variable"); variableElement != nullptr; variableElement = variableElement->NextSiblingElement("Variable"))
         {
             const std::string name = XmlUtils::getAttributeString(variableElement, "name");
-            const std::string defaultValue = XmlUtils::getAttributeStringOptional(variableElement, "defaultValue");
             
             if (_variables.find(name) == _variables.end())
             {
-                _variables[name] = defaultValue;
+                for (XMLElement* variableValueElement = variableElement->FirstChildElement("VariableValue");
+                     variableValueElement != nullptr;
+                     variableValueElement = variableValueElement->NextSiblingElement("VariableValue"))
+                {
+                    const bool isDefaultValue = XmlUtils::getAttributeBoolOptional(variableValueElement, "default");
+                    if (isDefaultValue)
+                    {
+                        _variables[name] = XmlUtils::getAttributeString(variableValueElement, "value");
+                    }
+                }
             }
         }
     }
