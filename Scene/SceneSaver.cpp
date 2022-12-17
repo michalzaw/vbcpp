@@ -198,6 +198,22 @@ void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, 
 	componentElement->SetAttribute("type", "path");
 	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
 
+	const auto& nextPaths = pathComponent->getNextPaths();
+	if (nextPaths.size() > 0)
+	{
+		XMLElement* connectionsElement = doc.NewElement("Connections");
+		for (const auto& connectedPath : nextPaths)
+		{
+			XMLElement* connectionElement = doc.NewElement("Connection");
+
+			connectionElement->SetAttribute("pathName", connectedPath.path->getSceneObject()->getName().c_str());
+			connectionElement->SetAttribute("index", connectedPath.index);
+
+			connectionsElement->InsertEndChild(connectionElement);
+		}
+		componentElement->InsertEndChild(connectionsElement);
+	}
+
 	objectElement->InsertEndChild(componentElement);
 }
 

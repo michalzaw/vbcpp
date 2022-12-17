@@ -354,6 +354,22 @@ void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* s
 	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(direction);
 
 	sceneObject->addComponent(pathComponent);
+
+	XMLElement* connectionsElement = componentElement->FirstChildElement("Connections");
+	if (connectionsElement != nullptr)
+	{
+
+		XMLElement* connectionElement = connectionsElement->FirstChildElement("Connection");
+		while (connectionElement != nullptr)
+		{
+			_sceneManager->getGameLogicSystem()->setPathConnection(pathComponent,
+																   XmlUtils::getAttributeString(connectionElement, "pathName"),
+																   1,
+																   XmlUtils::getAttributeInt(connectionElement, "index"));
+
+			connectionElement = connectionElement->NextSiblingElement("Connection");
+		}
+	}
 }
 
 
@@ -900,6 +916,9 @@ void SceneLoader::loadMap(std::string name)
 	XMLElement* roadsElement = scnElement->FirstChildElement("Roads");
 	if (roadsElement)
 		loadRoads(roadsElement);
+
+	// todo: auto call after scene creation
+	_sceneManager->getGameLogicSystem()->createPendingPathConnections();
 }
 
 

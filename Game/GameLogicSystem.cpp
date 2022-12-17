@@ -162,6 +162,41 @@ void GameLogicSystem::removeAIAgent(AIAgent* component)
 }*/
 
 
+void GameLogicSystem::setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound/* = true*/)
+{
+	auto path2 = std::find_if(_pathComponents.begin(), _pathComponents.end(), [&path2Name](PathComponent* path)
+		{
+			return path->getSceneObject() != nullptr && path->getSceneObject()->getName() == path2Name;
+		});
+
+	if (path2 != _pathComponents.end())
+	{
+		LOG_DEBUG("Path to connection: " + Strings::toString(path2Name) + " found.");
+		path1->setConnection(indexInPath1, *path2, indexInPath2);
+	}
+	else if (registerAsPendingIfNotFound)
+	{
+		LOG_DEBUG("Path to connection: " + Strings::toString(path2Name) + " not found. Path is registerd as pending to connection.");
+		_pendingPathConnections.push_back({ path1, path2Name, indexInPath1, indexInPath2 });
+	}
+	else
+	{
+		LOG_ERROR("Path to connection: " + Strings::toString(path2Name) + " not found.");
+	}
+}
+
+
+void GameLogicSystem::createPendingPathConnections()
+{
+	for (const auto& pendingPathConnection : _pendingPathConnections)
+	{
+		setPathConnection(pendingPathConnection.path1, pendingPathConnection.path2Name, pendingPathConnection.indexInPath1, pendingPathConnection.indexInPath2, false);
+	}
+
+	_pendingPathConnections.clear();
+}
+
+
 /*Bus* GameLogicSystem::getBus(unsigned int index)
 {
 	return _buses[index];

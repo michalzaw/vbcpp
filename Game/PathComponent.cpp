@@ -120,6 +120,13 @@ void PathComponent::setConnection(int index, PathComponent* otherPath, int index
 	{
 		otherPath->_nextPaths.push_back({ this, index });
 	}
+
+
+	const auto& otherPathCurvePoints = otherPath->getCurvePoints();
+	glm::vec3 direction = otherPathCurvePoints[indexInOtherPath == 0 ? 0 : otherPathCurvePoints.size() - 1] - _curvePoints[index == 0 ? 0 : _curvePoints.size() - 1];
+
+	int pointIndex = index == 0 ? 0 : _bezierCurveComponent->getPoints().size() - 1;
+	_bezierCurveComponent->setPointPostion(pointIndex, _bezierCurveComponent->getPoints()[pointIndex] + direction);
 }
 
 
