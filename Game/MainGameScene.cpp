@@ -225,56 +225,12 @@ void MainGameScene::loadScene()
 	_cameras[GC_DRIVER]->getSceneObject()->setRotation(0, 0, 0);
 
 	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
-	_buses[1]->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
-	//_buses[1]->getSceneObject()->addChild(_cameras[GC_DRIVER]->getSceneObject());
 
 	/*CameraStatic* camera = _graphicsManager->getCurrentCamera();
 	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));
 	camera->getSceneObject()->setRotation(degToRad(-5.0f),
 										  degToRad(60.0f),
 										  degToRad(0.0f));*/
-
-
-	/*RoadObject* roadObject = _sceneManager->getGraphicsManager()->getRoadObjects()[0];
-	const std::vector<glm::vec3>& roadControlPoints = roadObject->getPoints();
-	glm::vec2 distanceFromRoadAxis(1.5f, 0.05f);
-	PathComponent* path = _sceneManager->getGameLogicSystem()->addPathComponent(roadControlPoints, distanceFromRoadAxis, PD_FORWARD, roadObject->getMarginBegin(), roadObject->getMarginEnd());
-	//path->getCurvePoints().push_back(glm::vec3(10.0f, 0.0f, -50.0f));
-	//path->getCurvePoints().push_back(glm::vec3(20.0f, 0.0f, 0.0f));
-	//path->getCurvePoints().push_back(glm::vec3(0.0f, 0.0f, 50.0f));
-	//path->getBaseBezierCurveControlPoints() = _sceneManager->getGraphicsManager()->getRoadObjects()[0]->getCurvePoints();
-	path->recalculate();
-
-	SceneObject* pathObject = _sceneManager->addSceneObject("path1");
-	pathObject->addComponent(path);*/
-
-	PathComponent* path = _sceneManager->getGameLogicSystem()->getPathComponents()[0];
-
-
-	SceneObject* agentObject = _sceneManager->addSceneObject("agent1");
-	//_buses[1]->getSceneObject()->move(20.0f, 0.0f, 0.0f);
-
-	_aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent(((BusRaycast*)_buses[1])->getModule(0).rayCastVehicle);
-	_aiAgent->setCurrentPath(path);
-	agentObject->addComponent(_aiAgent);
-
-	Material* cubeMaterial = new Material;
-	cubeMaterial->shader = NOTEXTURE_MATERIAL;
-	cubeMaterial->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
-	Prefab* cube = new Cube(2.0f, cubeMaterial);
-	cube->init();
-	_sceneManager->getGraphicsManager()->addRenderObject(cube, agentObject);
-
-	//agentObject->addChild(_cameras[GC_DRIVER]->getSceneObject());
-	//_cameras[GC_DRIVER]->getSceneObject()->move(0.0f, 1.0f, 0.0f);
-
-	GameEnvironment::Variables::floatVaribles["agentSpeed"] = _aiAgent->getSpeed();
-
-	//RStaticModel* model = ResourceManager::getInstance().loadModel("Buses/neoplan/neoplan.fbx", "Buses/neoplan/");
-	//_sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(model), agentObject);
-
-	//agentObject->setScale(1.0f, 1.0f, 2.0f);
-
 
 
 	if (!busRepaint.empty())
@@ -362,8 +318,6 @@ void MainGameScene::initialize()
 
 void MainGameScene::fixedStepUpdate(double deltaTime)
 {
-	_aiAgent->setSpeed(GameEnvironment::Variables::floatVaribles["agentSpeed"]);
-
 	_activeBus->update(deltaTime);
 
 	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
