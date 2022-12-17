@@ -994,7 +994,7 @@ namespace vbEditor
 					setSelectedSceneObject(polygonSceneObject);
 				}
 				ImGui::Separator();
-				if (ImGui::MenuItem("Add new decal", NULL))
+				if (ImGui::MenuItem("Add new decal (WIP)", NULL))
 				{
 					SceneObject* decalSceneObject = _sceneManager->addSceneObject("Decal");
 

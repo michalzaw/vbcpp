@@ -119,9 +119,9 @@ class Engine
 
         void setThrottle(float throttle) { _throttle = throttle; }
 
-        void throttleUp();
+        void throttleUp(float dt);
 
-        void throttleDown();
+        void throttleDown(float dt);
 
         float getCurrentTorque() { return _currentTorque; }
 

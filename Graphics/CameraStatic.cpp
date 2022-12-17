@@ -259,7 +259,7 @@ glm::mat4 CameraStatic::getProjectionMatrix()
     if (!_projectionMatrixIs)
     {
         if (_projectionType == CPT_PERSPECTIVE)
-            _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight), _nearValue, _farValue);
+            _projectionMatrix = glm::perspective(_viewAngle, float(_windowWidth) / float(_windowHeight != 0 ? _windowHeight : 1), _nearValue, _farValue);
 
         else
             _projectionMatrix = glm::ortho(_left, _right, _bottom, _top, _nearValue, _farValue);

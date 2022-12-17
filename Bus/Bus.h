@@ -71,9 +71,9 @@ class Bus : public RefCounter
         virtual void turnLeft(float dt) = 0;
         virtual void turnRight(float dt) = 0;
         virtual void centerSteringWheel(float dt) = 0;
-        virtual void accelerate() = 0;
-        virtual void idle() = 0;
-        virtual void brakeOn() = 0;
+        virtual void accelerate(float dt) = 0;
+        virtual void idle(float dt) = 0;
+        virtual void brakeOn(float dt) = 0;
         virtual void brakeOff() = 0;
         virtual void toggleHandbrake() = 0;
 

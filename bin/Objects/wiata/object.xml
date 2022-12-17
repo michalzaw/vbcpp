@@ -8,6 +8,7 @@
 		<Component type="render" model="wiata2.fbx" />
 		<!-- <Component type="physics" mass="0" body="static" /> -->
 		<Component type="bus-stop" />
+		<Component type="physics" mass="2000" body="dynamic" centerOfMassOffset="true" centerOfMassOffsetValue="-0.2,1.4,0.3" />
 	</Components>
 	
 </Object>
