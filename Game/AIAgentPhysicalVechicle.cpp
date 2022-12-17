@@ -42,10 +42,10 @@ void AIAgentPhysicalVechicle::update(float deltaTime)
 	}
 
 	currentPoint = _currentPath->getCurvePoints()[_currentPointIndex];
-	glm::vec3& vechiclePosition = _vechicle->getSceneObject()->getPosition();
+	glm::vec3 vechiclePosition = _vechicle->getSceneObject()->getPosition();
 
-	btVector3& vechicleDirectionBt = _vechicle->getRayCastVehicle()->getForwardVector();
-	glm::vec3& vechicleDirection = glm::normalize(glm::vec3(vechicleDirectionBt.x(), vechicleDirectionBt.y(), vechicleDirectionBt.z()));
+	btVector3 vechicleDirectionBt = _vechicle->getRayCastVehicle()->getForwardVector();
+	glm::vec3 vechicleDirection = glm::normalize(glm::vec3(vechicleDirectionBt.x(), vechicleDirectionBt.y(), vechicleDirectionBt.z()));
 
 	glm::vec3 destinationDirection = glm::normalize(currentPoint - vechiclePosition);
 
