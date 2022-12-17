@@ -822,6 +822,8 @@ namespace vbEditor
 
 	void initializeEngineSubsystems()
 	{
+		srand(static_cast<unsigned int>(time(NULL)));
+
 #ifdef DEVELOPMENT_RESOURCES
 		GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
 		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);

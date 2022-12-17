@@ -13,7 +13,7 @@
 AIAgentPhysicalVechicle::AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle)
 	: _vechicle(vechicle)
 {
-
+	_isInitializedStartPosition = true;
 }
 
 

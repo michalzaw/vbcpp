@@ -25,6 +25,8 @@ class AIAgent : public Component
 		unsigned int _currentPointIndex;
 		float _t;
 
+		bool _isInitializedStartPosition;
+
 		void reset();
 		void move(const glm::vec3& point1, const glm::vec3& point2);
 

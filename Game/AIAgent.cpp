@@ -14,7 +14,8 @@ AIAgent::AIAgent()
 	_speed(10.0f),
 	_currentPath(nullptr), _skeletalAnimationComponent(nullptr),
 	_speedInAnimation(10.0f), _baseAnimationTicksPerSecond(0.0f),
-	_currentPointIndex(0), _t(0.0f)
+	_currentPointIndex(0), _t(0.0f),
+	_isInitializedStartPosition(false)
 {
 
 }
@@ -48,7 +49,8 @@ void AIAgent::reset()
 	const auto& nextPaths = _currentPath->getNextPaths();
 	if (nextPaths.size() > 0)
 	{
-		_currentPath = nextPaths[0].path;
+		int nexPathIndex = rand() % nextPaths.size();
+		setCurrentPath(nextPaths[nexPathIndex].path);
 	}
 }
 
@@ -134,7 +136,22 @@ float AIAgent::getSpeed()
 
 void AIAgent::setCurrentPath(PathComponent* path)
 {
+	if (path != nullptr)
+	{
+		path->getSceneObject()->addChild(getSceneObject());
+	}
+	else
+	{
+		getSceneObject()->getParent()->removeChild(getSceneObject());
+	}
+
 	_currentPath = path;
+
+	if (!_isInitializedStartPosition)
+	{
+		_currentPointIndex = rand() % _currentPath->getCurvePoints().size();
+		_isInitializedStartPosition = true;
+	}
 }
 
 
