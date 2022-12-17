@@ -7,14 +7,15 @@
 
 #include <glm/glm.hpp>
 
+#include "PathComponent.h"
+
+
 class CameraControlComponent;
 class BusStopComponent;
 class CameraFPS;
 class Bus;
-class PathComponent;
 class AIAgent;
 class PhysicalBodyRaycastVehicle;
-enum PathDirection;
 
 
 struct PendingPathConnection final
