@@ -36,7 +36,7 @@
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
 #include "Windows/MaterialEditorWindow.h"
-#include "Windows/GenerateObjectsAlongRoadWindow.h"
+#include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/BezierCurve.h"
@@ -545,7 +545,7 @@ namespace vbEditor
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
-	bool _showGenerateObjectsAlongRoadWindow = false;
+	bool _showGenerateObjectsAlongCurveWindow = false;
 
 	std::string windowTitle = "VBCPP - World Editor";
 
@@ -1361,12 +1361,12 @@ namespace vbEditor
 			}
 		}
 
-		if (_showGenerateObjectsAlongRoadWindow && _selectedSceneObject != nullptr)
+		if (_showGenerateObjectsAlongCurveWindow && _selectedSceneObject != nullptr)
 		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (!generateObjectsAlongRoadWindow(roadComponent))
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (!generateObjectsAlongCurveWindow(bezierCurve))
 			{
-				_showGenerateObjectsAlongRoadWindow = false;
+				_showGenerateObjectsAlongCurveWindow = false;
 			}
 		}
 
