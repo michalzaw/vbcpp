@@ -12,9 +12,15 @@
 #endif
 
 #include "OpenDialogWindow.h"
-#include "RoadTools.h"
+#include "../Tools/RoadManipulator.h"
 #include "../FileDialogs.h"
+#include "../Utils/AIPathGenerator.h"
 
+#include "../../Game/AIAgent.h"
+#include "../../Game/GameLogicSystem.h"
+#include "../../Game/PathComponent.h"
+
+#include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -255,7 +261,6 @@ namespace vbEditor
 
 	extern int roadActiveSegment;
 	extern int roadActivePoint;
-	extern bool isRoadModified;
 
 	extern bool _showMaterialEditorWindow;
 	extern RenderObject* currentRenderObject;
@@ -296,61 +301,7 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 		shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 			{
 				roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-				roadComponent->buildModel(false);
 			});
-
-		ImGui::Separator();
-
-		if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
-		{
-			ImGui::Text("Point: %d", vbEditor::roadActivePoint);
-
-			float* pointPosition = glm::value_ptr(roadComponent->getPoints()[vbEditor::roadActivePoint]);
-
-			if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
-			{
-				vbEditor::isRoadModified = true;
-			}
-
-			if (vbEditor::roadActivePoint % 3 == 0)
-			{
-				if (ImGui::Button("Delete point"))
-				{
-					roadComponent->deletePoint(vbEditor::roadActivePoint);
-
-					if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
-					{
-						--vbEditor::roadActivePoint;
-						--vbEditor::roadActiveSegment;
-					}
-
-					if (roadComponent->getPoints().size() == 0)
-					{
-						vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
-						vbEditor::_selectedSceneObject = nullptr;
-
-						return;
-					}
-
-					vbEditor::isRoadModified = true;
-				}
-			}
-		}
-
-		if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
-		{
-			ImGui::Separator();
-
-			ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
-
-			int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-			if (ImGui::DragInt("Points count", points, 0.5f, 0, 1000))
-			{
-				vbEditor::isRoadModified = true;
-				*points = std::max(*points, 0);
-			}
-		}
 
 		ImGui::Separator();
 
@@ -392,8 +343,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 				}
-
-				vbEditor::isRoadModified = true;
 			}
 
 			if (connectedCrossroads[i] != nullptr)
@@ -407,16 +356,21 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-					vbEditor::isRoadModified = true;
 				}
 			}
 			ImGui::PopID();
 		}
 
-		if (ImGui::Button("Generate objects"))
+		ImGui::Separator();
+
+		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
 		{
 			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
+		}
+
+		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
+		{
+			AIPathGenerator::generateAIPaths(roadComponent, vbEditor::_sceneManager);
 		}
 	}
 }
@@ -554,6 +508,11 @@ glm::vec2 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 
 
+#define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
+glm::vec3 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
 #define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
@@ -610,7 +569,7 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 }
 
 
-#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
+#define COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																				\
 {																																				\
 	ImGui::PushID(#propertyName);																												\
 																																				\
@@ -618,6 +577,19 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
+}
+
+#define COMPONENT_PROPERTY_EDIT_END																												\
+{																																				\
+	ImGui::NextColumn();																														\
+																																				\
+	ImGui::PopID();																																\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
+{																																				\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
 																																				\
 	IMGUI_INPUT_##type(component, propertyName, additionalParams)																				\
 																																				\
@@ -627,20 +599,13 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 		callback(type(value));																													\
 	}																																			\
 																																				\
-	ImGui::NextColumn();																														\
-																																				\
-	ImGui::PopID();																																\
+	COMPONENT_PROPERTY_EDIT_END																													\
 }
 
 
 #define COMPONENT_RESOURCE_EDIT(component, propertyName, displayName, pathToResourceMapper)														\
 {																																				\
-	ImGui::PushID(#propertyName);																												\
-																																				\
-	ImGui::AlignTextToFramePadding();																											\
-	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
-	ImGui::NextColumn();																														\
-	ImGui::SetNextItemWidth(-1);																												\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
 																																				\
 	IMGUI_INPUT_path(component->get##propertyName(), Path, additionalParams)																	\
 																																				\
@@ -649,9 +614,7 @@ if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))												
 		component->set##propertyName(pathToResourceMapper(value));																				\
 	}																																			\
 																																				\
-	ImGui::NextColumn();																														\
-																																				\
-	ImGui::PopID();																																\
+	COMPONENT_PROPERTY_EDIT_END																													\
 }
 
 
@@ -1050,6 +1013,191 @@ void showPrefabComponentDetails(Prefab* component)
 }
 
 
+void showAiAgentComponentDetails(AIAgent* component)
+{
+	if (ImGui::CollapsingHeader("AI agent", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
+		std::vector<std::string> availablePaths;
+		availablePaths.reserve(pathComponents.size());
+
+		for (auto pathComponent : pathComponents)
+		{
+			availablePaths.push_back(pathComponent->getSceneObject()->getName());
+		}
+
+		COMPONENT_PROPERTY_EDIT(component, Speed, float, "Speed")
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
+		{
+			const std::vector<std::string>& itemsNames = availablePaths;
+			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+		
+			bool result = false;
+			std::string value = "";
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				result = true;
+				if (selectedItemIndex > 0)
+					value = itemsNames[selectedItemIndex - 1];
+			}
+
+			if (result)
+			{
+				if (selectedItemIndex > 0)
+				{
+					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				}
+				else
+				{
+					component->setCurrentPath(nullptr);
+				}
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showBezierCurveComponentDetails(BezierCurve* component)
+{
+	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
+		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
+		COMPONENT_PROPERTY_EDIT(component, OffsetFromBaseCurve, vec2, "Offset from base curve")
+
+		int activePoint = RoadManipulator::GetActivePoint();
+		if (activePoint >= 0 && activePoint < component->getPoints().size())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Point: %d", activePoint);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(PointPosition, "Point position")
+			glm::vec3 pointPosition = component->getPoints()[activePoint];
+			if (ImGui::DragFloat3("##value", glm::value_ptr(pointPosition), 0.01f, 0.0f, 0.0f))
+			{
+				component->setPointPostion(activePoint, pointPosition);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			if (activePoint % 3 == 0)
+			{
+				if (ImGui::Button("Delete point"))
+				{
+					component->deletePoint(activePoint);
+				}
+			}
+		}
+
+		int activeSegment = RoadManipulator::GetActiveSegment();
+		if (activeSegment >= 0 && component->getSegmentsCount() > 0 && activeSegment < component->getSegmentsCount())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Segment: %d", activeSegment);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(SegmentPointsCount, "Segment points count")
+			int pointsCount = component->getSegmentPointsCount(activeSegment);
+			if (ImGui::DragInt("##value", &pointsCount, 0.5f, 2, 1000))
+			{
+				component->setSegmentPointsCount(activeSegment, pointsCount);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+		}
+
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		/*if (ImGui::Button("Split curve", ImVec2(-1.0f, 0.0f)))
+		{
+			component->splitCurve(0, 0.5f);
+		}*/
+	}
+}
+
+
+void showPathComponentDetails(PathComponent* component)
+{
+	if (ImGui::CollapsingHeader("AI Path", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+
+		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
+		{
+			for (const auto& connectedPath : component->getNextPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+
+		if (newNode("Previous paths", "[%d]", component->getPreviousPaths().size()))
+		{
+			for (const auto& connectedPath : component->getPreviousPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+		
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1058,13 +1206,7 @@ void showObjectProperties()
 	{
 		if (vbEditor::_selectedSceneObject)
 		{
-			showObjectNameEdit();
-
-			ImGui::Separator();
-
-			showObjectTransformEdit();
-
-			ImGui::Separator();
+			showObjectPropertiesDetails();
 
 			RenderObject* renderComponent = dynamic_cast<RenderObject*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDER_OBJECT));
 			if (renderComponent)
@@ -1134,6 +1276,24 @@ void showObjectProperties()
 			{
 				showPrefabComponentDetails(prefabComponent);
 				showRenderComponentDetails(prefabComponent);
+			}
+
+			AIAgent* aiAgent = dynamic_cast<AIAgent*>(vbEditor::_selectedSceneObject->getComponent(CT_AI_AGENT));
+			if (aiAgent)
+			{
+				showAiAgentComponentDetails(aiAgent);
+			}
+
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (bezierCurve)
+			{
+				showBezierCurveComponentDetails(bezierCurve);
+			}
+
+			PathComponent* pathComponent = dynamic_cast<PathComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_PATH));
+			if (pathComponent)
+			{
+				showPathComponentDetails(pathComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -1231,12 +1391,11 @@ void showObjectProperties()
 
 						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						if (ImGui::Button("Delete point"))
 						{
-							vbEditor::isRoadModified = true;
 							roadComponent->deletePoint(vbEditor::roadActivePoint);
 
 							if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
@@ -1263,7 +1422,7 @@ void showObjectProperties()
 						const char* typeComboItems[] = { "line", "arc" };
 						if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
 						}
 
@@ -1271,20 +1430,20 @@ void showObjectProperties()
 						const char* interpolationComboItems[] = { "lin", "cos" };
 						if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
 						}
 
 						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
 						if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
 						if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 					}
 
@@ -1294,8 +1453,6 @@ void showObjectProperties()
 					shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 						{
 							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-							roadComponent->buildModel(false);
 						});
 
 					ImGui::Separator();
@@ -1341,8 +1498,6 @@ void showObjectProperties()
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 							}
-
-							vbEditor::isRoadModified = true;
 						}
 
 						if (connectedCrossroads[i] != nullptr)
@@ -1356,8 +1511,6 @@ void showObjectProperties()
 							if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-								vbEditor::isRoadModified = true;
 							}
 						}
 						ImGui::PopID();
@@ -1380,35 +1533,35 @@ void showObjectProperties()
 }
 
 
-void showObjectNameEdit()
+void showObjectPropertiesDetails()
 {
-	char buffer[50];
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Columns(2);
+	ImGui::Separator();
 
-	strncpy(buffer, vbEditor::_selectedSceneObject->getName().c_str(), sizeof buffer);
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Name, str, "Name")
 
-	buffer[sizeof buffer - 1] = '\0';
+	ImGui::Separator();
 
-	if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Position, vec3, "Position")
+
+	COMPONENT_PROPERTY_EDIT_BEGIN(Rotation, "Rotation")
 	{
-		vbEditor::_selectedSceneObject->setName(std::string(buffer));
+		glm::vec3 value = vbEditor::_selectedSceneObject->getRotation();
+		value = glm::vec3(radToDeg(value.x), radToDeg(value.y), radToDeg(value.z));
+		bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+		if (result)
+		{
+			vbEditor::_selectedSceneObject->setRotation(degToRad(value.x), degToRad(value.y), degToRad(value.z));
+		}
 	}
-}
+	COMPONENT_PROPERTY_EDIT_END	
 
+	//COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Rotation, vec3, "Rotation")
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Scale, vec3, "Scale")
 
-// todo: wykorzystanie funkcji z GlmUtils i setTransformFromMatrix z SceneObject + refactor
-void showObjectTransformEdit()
-{
-	ImGui::Text("Transformation");
-
-	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
-
-	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
-
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()));
-
-	vbEditor::_selectedSceneObject->updateFromLocalMatrix();
+	ImGui::Columns(1);
+	ImGui::Separator();
+	ImGui::PopStyleVar();
 }

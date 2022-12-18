@@ -195,3 +195,37 @@ void SkeletalAnimationComponent::setRootBone(const std::string& boneName)
 		LOG_WARNING("Invalid bone name");
 	}
 }
+
+
+glm::vec3 SkeletalAnimationComponent::getRootBonePositionInStartFrame()
+{
+	if (_rootBoneName != "")
+	{
+		auto bone = _animation->getBones().find(_rootBoneName);
+		if (bone != _animation->getBones().end())
+		{
+			glm::mat4 transformMatrix = bone->second->calculatePosition(_startFrame);
+
+			return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		}
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+
+glm::vec3 SkeletalAnimationComponent::getRootBonePositionInEndFrame()
+{
+	if (_rootBoneName != "")
+	{
+		auto bone = _animation->getBones().find(_rootBoneName);
+		if (bone != _animation->getBones().end())
+		{
+			glm::mat4 transformMatrix = bone->second->calculatePosition(_endFrame - 1);
+
+			return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+		}
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}

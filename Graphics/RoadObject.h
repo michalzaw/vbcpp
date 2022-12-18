@@ -9,6 +9,7 @@
 
 class CrossroadComponent;
 class RoadIntersectionComponent;
+class BezierCurve;
 
 
 enum class RoadType
@@ -50,10 +51,17 @@ class RoadObject : public RenderObject
 		float _marginBegin;
 		float _marginEnd;
 
-		// fields for BEZIER_CURVES type
-		std::vector<glm::vec3> _curvePoints;
+		bool _buildModelAfterCreate;
 
-		void cutCurvePointsToIntersection(std::vector<glm::vec3>& curvePoints);
+		// fields for BEZIER_CURVES type
+		BezierCurve* _bezierCurveComponent;
+
+		bool _interactiveMode;
+		bool _needRebuild;
+		float _modificationTimer;
+
+		void onAttachedToScenObject() override;
+
 		bool isConnectionExist(int index);
 
 	public:
@@ -64,7 +72,7 @@ class RoadObject : public RenderObject
 		void buildModel(bool reuseExistingModel = true);
 		void buildModelLinesAndArcMode(std::vector<RoadConnectionPointData*>& connectionPointsData);
 		void buildModelBezierCurvesMode(std::vector<RoadConnectionPointData*>& connectionPointsData);
-		void buildModelPoints(std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData);
+		void buildModelPoints(const std::vector<glm::vec3>& curvePoints, std::vector<RoadConnectionPointData*>& connectionPointsData);
 
 		RoadType getRoadType();
 		RRoadProfile* getRoadProfile();
@@ -84,15 +92,21 @@ class RoadObject : public RenderObject
 
 		void setCustomConnectionPointData(int index, const glm::vec3 pos, const glm::vec3 dir);
 
-		void setMarginBegin(float marginBegin);
-		void setMarginEnd(float marginEnd);
-		float getMarginBegin();
-		float getMarginEnd();
-
 		void setConnectedPointPosition(int connectionPointIndex);
 		void resetConnectedPointPositions();
 
 		const std::vector<glm::vec3>& getCurvePoints();
+
+		void setInteractiveMode(bool interactiveMode);
+		bool isInteractiveMode();
+
+		void needRebuild();
+
+		void onPointAdded();
+		void onPointDeleted(int index);
+		void onPointChangedPosition(int index, const glm::vec3& newPosition);
+
+		void update(float deltaTime) override;
 
 };
 

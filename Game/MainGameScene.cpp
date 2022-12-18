@@ -1,9 +1,12 @@
 #include "MainGameScene.h"
 
+#include "AIAgent.h"
+#include "AIAgentPhysicalVechicle.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
+#include "PathComponent.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -136,7 +139,7 @@ CameraFPS* MainGameScene::createCameraFPSGlobal()
 	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
+	cameraFPS->setMoveSpeed(25);
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
@@ -196,9 +199,15 @@ void MainGameScene::loadScene()
 	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	/*BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
-	Bus* bus2 = busLoader.loadBus(busModel, busVariables);
-	_buses.push_back(bus2);*/
+	/*for (int i = 0; i < 1; ++i)
+	{
+		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
+		Bus* bus2 = busLoader.loadBus(busModel, busVariables);
+		_buses.push_back(bus2);
+
+		//bus2->getSceneObject()->setPosition(glm::vec3((i + 2) * 5.0f, 1.0f, 0.0f));
+		bus2->getSceneObject()->setPosition(glm::vec3(0.8f, 1.0f, 6.8f));
+	}*/
 
 	_activeBus = bus;
 

@@ -1,6 +1,7 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "BezierCurve.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 #include "SkeletalAnimationHelperComponent.h"
@@ -79,6 +80,11 @@ GraphicsManager::~GraphicsManager()
     }
 
     for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
     {
         delete* i;
     }
@@ -309,6 +315,16 @@ SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(Sk
 {
     _skeletalAnimationHelpers.push_back(component);
     return component;
+}
+
+
+BezierCurve* GraphicsManager::addBezierCurve(const std::vector<glm::vec3>& points/* = {}*/, const std::vector<int>& segmentsPointsCount/* = {}*/, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/, const glm::vec2& offsetFromBaseCurve/* = glm::vec2(0.0f, 0.0f)*/)
+{
+    BezierCurve* bezierCurve = new BezierCurve(points, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
+    
+    _bezierCurves.push_back(bezierCurve);
+
+    return bezierCurve;
 }
 
 
@@ -552,6 +568,22 @@ void GraphicsManager::removeSkeletalAnimationHelper(SkeletalAnimationHelperCompo
 }
 
 
+void GraphicsManager::removeBezierCurve(BezierCurve* bezierCurve)
+{
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
+    {
+        if (*i == bezierCurve)
+        {
+            i = _bezierCurves.erase(i);
+
+            delete bezierCurve;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -711,6 +743,11 @@ void GraphicsManager::update(float deltaTime)
     for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
     {
         roadIntersectionComponent->update(deltaTime);
+    }
+
+    for (RoadObject* roadObject : _roadObjects)
+    {
+        roadObject->update(deltaTime);
     }
 
     for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)

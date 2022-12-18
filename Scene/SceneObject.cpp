@@ -1,8 +1,12 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
-#include "../Game/GameLogicSystem.h"
-#include "../Game/CameraControlComponent.h"
 
+#include "../Game/AIAgent.h"
+#include "../Game/CameraControlComponent.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
+
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
 #include "../Graphics/SkeletalAnimationHelperComponent.h"
@@ -127,6 +131,18 @@ SceneObject::~SceneObject()
 
             case CT_SKELETAL_ANIMATION_HELPER:
                 _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
+                break;
+
+            case CT_BEZIER_CURVE:
+                _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
+                break;
+
+            case CT_AI_AGENT:
+                _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(*i));
+                break;
+
+            case CT_PATH:
+                _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(*i));
                 break;
 
         }
@@ -383,6 +399,18 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_SKELETAL_ANIMATION_HELPER:
                     _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
+                    break;
+
+                case CT_BEZIER_CURVE:
+                    _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
+                    break;
+
+                case CT_AI_AGENT:
+                    _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(component));
+                    break;
+
+                case CT_PATH:
+                    _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(component));
                     break;
 
             }
@@ -674,25 +702,6 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     }
 
     return _globalNormalMatrix;
-}
-
-// todo: wykorzystanie funkcji z GlmUtils + refactor
-void SceneObject::updateFromLocalMatrix()
-{
-	glm::vec3 scale;
-	glm::quat rotation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(_localTransformMatrix, scale, rotation, translation, skew, perspective);
-
-	glm::vec3 rotationEulerAngles = glm::eulerAngles(rotation);
-	rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
-
-	setPosition(translation);
-	setRotation(rotationEulerAngles);
-	setScale(scale);
-	changedTransform();
 }
 
 

@@ -2,8 +2,12 @@
 
 #include "SceneManager.h"
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
@@ -309,6 +313,82 @@ void SceneLoader::loadPrefabComponent(XMLElement* componentElement, SceneObject*
 }
 
 
+void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::vector<glm::vec3> controlPoints;
+	std::vector<int> segmentsPointsCount;
+
+	XMLElement* pointsElement = componentElement->FirstChildElement("Points");
+
+	XMLElement* pointElement = pointsElement->FirstChildElement("Point");
+	while (pointElement != nullptr)
+	{
+		controlPoints.push_back(XMLstringToVec3(pointElement->GetText()));
+
+		pointElement = pointElement->NextSiblingElement("Point");
+	}
+
+	XMLElement* segmentsElement = componentElement->FirstChildElement("Segments");
+
+	XMLElement* segmentElement = segmentsElement->FirstChildElement("Segment");
+	while (segmentElement != nullptr)
+	{
+		segmentsPointsCount.push_back(XmlUtils::getAttributeInt(segmentElement, "points"));
+
+		segmentElement = segmentElement->NextSiblingElement("Segment");
+	}
+
+	glm::vec2 offsetFromBaseCurve = XmlUtils::getAttributeVec2(componentElement, "offsetFromBaseCurve");
+	float marginBegin = XmlUtils::getAttributeFloat(componentElement, "marginBegin");
+	float marginEnd = XmlUtils::getAttributeFloat(componentElement, "marginEnd");
+
+	BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(controlPoints, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
+
+	sceneObject->addComponent(bezierCurve);
+}
+
+
+void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
+	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(direction);
+
+	sceneObject->addComponent(pathComponent);
+
+	XMLElement* connectionsElement = componentElement->FirstChildElement("Connections");
+	if (connectionsElement != nullptr)
+	{
+
+		XMLElement* connectionElement = connectionsElement->FirstChildElement("Connection");
+		while (connectionElement != nullptr)
+		{
+			_sceneManager->getGameLogicSystem()->setPathConnection(pathComponent,
+																   XmlUtils::getAttributeString(connectionElement, "pathName"),
+																   1,
+																   XmlUtils::getAttributeInt(connectionElement, "index"));
+
+			connectionElement = connectionElement->NextSiblingElement("Connection");
+		}
+	}
+}
+
+
+void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgent* component = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -366,6 +446,21 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 				loadPrefabComponent(componentElement, sceneObject);
 			}
 
+			if (componentType == "bezierCurve")
+			{
+				loadBezierCurveComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "path")
+			{
+				loadPathComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiAgent")
+			{
+				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
 			componentElement = componentElement->NextSiblingElement("Component");
 		}
 
@@ -404,6 +499,11 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		if (roadObject->getSceneObject()->getParent() == nullptr)
 		{
 			roadObject->buildModel();
+
+			if (GameConfig::getInstance().mode == GM_EDITOR)
+			{
+				roadObject->setInteractiveMode(true);
+			}
 
 			PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 			roadMesh->setRestitution(0.9f);
@@ -583,6 +683,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 		std::vector<glm::vec3> points;
 		std::vector<RoadSegment> segments;
+		std::vector<int> pointsInSegments;
 
 
 		XMLElement* pointElement = roadElement->FirstChildElement("Point");
@@ -617,6 +718,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 				segment.interpolation = RI_COS;
 
 			segments.push_back(segment);
+			pointsInSegments.push_back(segment.pointsCount);
 
 			segmentElement = segmentElement->NextSiblingElement("Segment");
 		}
@@ -627,7 +729,18 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		RoadObject* roadRenderObject;
+		if (roadType == RoadType::BEZIER_CURVES)
+		{
+			BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(points, pointsInSegments);
+			roadSceneObject->addComponent(bezierCurve);
+
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, {}, {}, false, roadSceneObject);
+		}
+		else
+		{
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		}
 		roadRenderObject->setCastShadows(false);
 
 
@@ -803,6 +916,9 @@ void SceneLoader::loadMap(std::string name)
 	XMLElement* roadsElement = scnElement->FirstChildElement("Roads");
 	if (roadsElement)
 		loadRoads(roadsElement);
+
+	// todo: auto call after scene creation
+	_sceneManager->getGameLogicSystem()->createPendingPathConnections();
 }
 
 

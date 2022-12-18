@@ -7,6 +7,7 @@
 #include "../Scene/Component.h"
 
 
+class BezierCurve;
 class RoadObject;
 class RStaticModel;
 class RRoadProfile;
@@ -16,10 +17,11 @@ class Material;
 struct RoadConnectedToIntersection final
 {
 	RoadObject* road;
+	BezierCurve* bezierCurve;
 	int connectionPointInRoadIndex;
 
-	RoadConnectedToIntersection(RoadObject* road, int connectionPointInRoadIndex)
-		: road(road), connectionPointInRoadIndex(connectionPointInRoadIndex)
+	RoadConnectedToIntersection(RoadObject* road, BezierCurve* bezierCurve, int connectionPointInRoadIndex)
+		: road(road), bezierCurve(bezierCurve), connectionPointInRoadIndex(connectionPointInRoadIndex)
 	{}
 };
 

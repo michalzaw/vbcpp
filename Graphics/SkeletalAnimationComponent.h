@@ -87,6 +87,9 @@ class SkeletalAnimationComponent final : public Component
 		void setRootBone(const std::string& boneName);
 		inline void setScale(float scale) { _scale = scale; }
 
+		glm::vec3 getRootBonePositionInStartFrame();
+		glm::vec3 getRootBonePositionInEndFrame();
+
 };
 
 

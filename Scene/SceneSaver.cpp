@@ -5,13 +5,17 @@
 #include "SceneManager.h"
 #include "SceneLoader.h"
 
+#include "../Game/AIAgent.h"
 #include "../Game/Directories.h"
+#include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/RenderObject.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceDescriptionUtils.h"
+#include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 
 
@@ -152,6 +156,88 @@ void SceneSaver::savePrefabComponent(XMLElement* objectElement, XMLDocument& doc
 }
 
 
+void SceneSaver::saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "bezierCurve");
+	componentElement->SetAttribute("offsetFromBaseCurve", vec2ToString(bezierCurve->getOffsetFromBaseCurve()).c_str());
+	componentElement->SetAttribute("marginBegin", Strings::toString(bezierCurve->getMarginBegin()).c_str());
+	componentElement->SetAttribute("marginEnd", Strings::toString(bezierCurve->getMarginEnd()).c_str());
+
+	XMLElement* pointsElement = doc.NewElement("Points");
+	for (const auto& point : bezierCurve->getPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetText(vec3ToString(point).c_str());
+
+		pointsElement->InsertEndChild(pointElement);
+	}
+	componentElement->InsertEndChild(pointsElement);
+
+	XMLElement* segmentsElement = doc.NewElement("Segments");
+	for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
+	{
+		XMLElement* segmentElement = doc.NewElement("Segment");
+
+		segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+		segmentsElement->InsertEndChild(segmentElement);
+	}
+	componentElement->InsertEndChild(segmentsElement);
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, PathComponent* pathComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "path");
+	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
+
+	const auto& nextPaths = pathComponent->getNextPaths();
+	if (nextPaths.size() > 0)
+	{
+		XMLElement* connectionsElement = doc.NewElement("Connections");
+		for (const auto& connectedPath : nextPaths)
+		{
+			XMLElement* connectionElement = doc.NewElement("Connection");
+
+			connectionElement->SetAttribute("pathName", connectedPath.path->getSceneObject()->getName().c_str());
+			connectionElement->SetAttribute("index", connectedPath.index);
+
+			connectionsElement->InsertEndChild(connectionElement);
+		}
+		componentElement->InsertEndChild(connectionsElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& doc, AIAgent* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgent");
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -188,6 +274,24 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 		savePrefabComponent(objectElement, doc, prefab);
 	}
 
+	BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+	if (bezierCurveComponent)
+	{
+		saveBezierCurveComponent(objectElement, doc, bezierCurveComponent);
+	}
+
+	PathComponent* pathComponent = static_cast<PathComponent*>(sceneObject->getComponent(CT_PATH));
+	if (pathComponent)
+	{
+		savePathComponent(objectElement, doc, pathComponent);
+	}
+
+	AIAgent* aiAgentComponent = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+	if (aiAgentComponent)
+	{
+		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
 	objectsElement->InsertEndChild(objectElement);
 
 	for (SceneObject* child : sceneObject->getChildren())
@@ -202,6 +306,7 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 	XMLElement* roadElement = doc.NewElement("Road");
 
 	RoadObject* roadObject = static_cast<RoadObject*>(sceneObject->getComponent(CT_ROAD_OBJECT));
+	BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
 	
 	if (roadObject)
 	{
@@ -210,7 +315,8 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 		roadElement->SetAttribute("name", sceneObject->getName().c_str());
 		roadElement->SetAttribute("profile", profile->getName().c_str());
 
-		for (const glm::vec3& point : roadObject->getPoints())
+		const auto& points = bezierCurve != nullptr ? bezierCurve->getPoints() : roadObject->getPoints();
+		for (const glm::vec3& point : points)
 		{
 			XMLElement* pointElement = doc.NewElement("Point");
 
@@ -219,28 +325,43 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 			roadElement->InsertEndChild(pointElement);
 		}
 
-		for (const RoadSegment& segment : roadObject->getSegments())
+		if (bezierCurve != nullptr)
 		{
-			XMLElement* segmentElement = doc.NewElement("Segment");
-
-			std::string type;
-			if (segment.type == RST_LINE)
-				type = "line";
-			else if (segment.type == RST_ARC)
-				type = "arc";
-			if (segment.type == RST_BEZIER_CURVE)
-				type = "bezier";
-
-			segmentElement->SetAttribute("type", type.c_str());
-			segmentElement->SetAttribute("points", segment.pointsCount);
-
-			if (segment.type != RST_BEZIER_CURVE)
+			for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
 			{
-				segmentElement->SetAttribute("radius", segment.r);
-				segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
-			}
+				XMLElement* segmentElement = doc.NewElement("Segment");
 
-			roadElement->InsertEndChild(segmentElement);
+				segmentElement->SetAttribute("type", "bezier");
+				segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+				roadElement->InsertEndChild(segmentElement);
+			}
+		}
+		else
+		{
+			for (const RoadSegment& segment : roadObject->getSegments())
+			{
+				XMLElement* segmentElement = doc.NewElement("Segment");
+
+				std::string type;
+				if (segment.type == RST_LINE)
+					type = "line";
+				else if (segment.type == RST_ARC)
+					type = "arc";
+				if (segment.type == RST_BEZIER_CURVE)
+					type = "bezier";
+
+				segmentElement->SetAttribute("type", type.c_str());
+				segmentElement->SetAttribute("points", segment.pointsCount);
+
+				if (segment.type != RST_BEZIER_CURVE)
+				{
+					segmentElement->SetAttribute("radius", segment.r);
+					segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+				}
+
+				roadElement->InsertEndChild(segmentElement);
+			}
 		}
 
 		for (int i = 0; i < 2; ++i)
@@ -334,9 +455,9 @@ void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, Sc
 		{
 			saveSunLight(_sunElement, sceneObject);
 		}
-		else if (sceneObject->getParent() == nullptr)
+		else
 		{
-			saveObject(_objectsElement, doc, sceneObject, nullptr);
+			saveObject(parentElement, doc, sceneObject, nullptr);
 		}
 	}
 	else if (sceneObject->getParent() == parentObject)
@@ -349,6 +470,12 @@ void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, Sc
 void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(_dirPath))
+		_dirPath = ResourceManager::getInstance().getAlternativeResourcePath() + _dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
 	LOG_INFO("Map path: " + fullPath);
@@ -390,7 +517,10 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
-		saveSceneObject(doc, _objectsElement, sceneObject);
+		if (sceneObject->getParent() == nullptr)
+		{
+			saveSceneObject(doc, _objectsElement, sceneObject);
+		}
 	}
 
 	XMLError errorCode = doc.SaveFile(fullPath.c_str());
