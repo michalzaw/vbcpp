@@ -73,13 +73,13 @@ namespace vbEditor
 	void clearScene();
 	void shutDown();
 
+	void loadNewObjectToAdd();
+
 	void drawMainMenu();
 	void ShowTransformGizmo();
 	void showRoadTools();
 	void showPolygonEditTool();
 	void showBezierCurveTool();
-	void updateRoads(float deltaTime);
-	void addSceneObject();
 
 	bool getGUIhasFocus();
 
