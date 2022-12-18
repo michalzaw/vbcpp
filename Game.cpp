@@ -80,21 +80,6 @@ void Game::initializeEngineSystems()
 }
 
 
-void loadingThread(Window* window, GameScene* scene, std::atomic<bool>& initialized)
-{
-	glfwMakeContextCurrent(window->getWindow());
-
-	scene->initialize();
-
-	Renderer::getInstance().setGraphicsManager(scene->getGraphicsManager());
-	Renderer::getInstance().rebuildStaticLighting();
-
-	glFinish();
-
-	initialized = true;
-}
-
-
 void Game::setFirstScene(const std::string& sceneName, bool useLoadingScreen, const std::unordered_map<std::string, std::string>& params)
 {
 	_gameSceneName = sceneName;
@@ -121,17 +106,14 @@ void Game::initialize()
 		_gameScene = getSceneByName(_gameSceneName);
 		_gameScene->setParams(_firstSceneParams);
 	}
-	
-	//Window* backgroundWindow = new Window;
-	//backgroundWindow->createInvisibleWindow(_window);
-
-	//_loadingThread = new std::thread(loadingThread, backgroundWindow, _gameScene, std::ref(_initialized));
-	//_loadingThread->detach();
 
 	_gameScene->initialize();
 	_initialized = true;
 	Renderer::getInstance().setGraphicsManager(_gameScene->getGraphicsManager());
 	Renderer::getInstance().rebuildStaticLighting();
+#ifdef DRAW_IMGUI
+	_gameScene->getPhysicsManager()->setDebugRenderer(_physicsDebugRenderer);
+#endif // DRAW_IMGUI
 }
 
 
