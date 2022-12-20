@@ -608,7 +608,7 @@ namespace vbEditor
 		glm::vec3 rayDir;
 		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
-		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, outCursorPosition);
+		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
 	}
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
@@ -707,6 +707,11 @@ namespace vbEditor
 			glm::vec3 mousePosition;
 			if (getCursorPositionIn3D(glfwWindow, mousePosition))
 			{
+				if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				{
+					mousePosition.x = round(mousePosition.x);
+					mousePosition.z = round(mousePosition.z);
+				}
 				_objectToAdd->setPosition(mousePosition);
 			}
 		}
