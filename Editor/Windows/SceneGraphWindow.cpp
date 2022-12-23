@@ -58,11 +58,8 @@ void SceneGraphWindow::inspectSceneObject(SceneObject* object)
         _selectedSceneObject = object;
     if (node_open)
     {
-        std::list<SceneObject*>& children = object->getChildren();
-        for (std::list<SceneObject*>::iterator i = children.begin(); i != children.end(); ++i)
+        for (SceneObject* child : object->getChildren())
         {
-            SceneObject* child = *i;
-
             ImGui::PushID(child);
 
             inspectSceneObject(child);

@@ -1,17 +1,7 @@
 #include "SceneManager.h"
 
-// XML reader
-#include "../Utils/tinyxml2.h"
-#include <sstream>
-#include <cstdlib>
-using namespace tinyxml2;
-
-#include "../Utils/Helpers.hpp"
-#include "../Utils/XmlUtils.h"
-#include "../Graphics/LoadTerrainModel.h"
-
-#include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
+
 
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
     : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
@@ -52,7 +42,7 @@ SceneManager::~SceneManager()
 }
 
 
-SceneObject* SceneManager::addSceneObject(std::string name, RObject* objectDefinition)
+SceneObject* SceneManager::addSceneObject(const std::string& name, RObject* objectDefinition/* = nullptr*/)
 {
     SceneObject* obj = new SceneObject(name, this, objectDefinition);
 
@@ -62,7 +52,7 @@ SceneObject* SceneManager::addSceneObject(std::string name, RObject* objectDefin
 }
 
 
-void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
+void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
@@ -72,7 +62,7 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
@@ -91,7 +81,7 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
 }
 
 
-void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren)
+void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
@@ -101,7 +91,7 @@ void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildr
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
@@ -118,7 +108,8 @@ void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildr
     }
 }
 
-void SceneManager::removeSceneObject(std::string name, bool removeChildren)
+
+void SceneManager::removeSceneObject(const std::string& name, bool removeChildren/* = true*/)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end();)
     {
@@ -130,7 +121,7 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
@@ -145,7 +136,21 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
     }
 }
 
-SceneObject* SceneManager::getSceneObject(std::string name)
+
+void SceneManager::clearScene()
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        delete* i;
+    }
+
+    _sceneObjects.clear();
+
+    _graphicsManager->clearQuadTree();
+}
+
+
+SceneObject* SceneManager::getSceneObject(const std::string& name)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {

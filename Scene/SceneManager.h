@@ -3,7 +3,6 @@
 
 
 #include <list>
-#include <map>
 
 #include "../Graphics/GraphicsManager.h"
 #include "../Graphics/Roads.h"
@@ -16,7 +15,6 @@
 
 
 class GameLogicSystem;
-class BusStopSystem;
 
 
 class SceneManager
@@ -34,32 +32,22 @@ class SceneManager
         SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
 
-        GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
-        PhysicsManager*     getPhysicsManager() { return _physicsManager; };
-        SoundManager*       getSoundManager() { return _soundManager; };
-        GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
-        BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
+        inline GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
+        inline PhysicsManager*     getPhysicsManager() { return _physicsManager; };
+        inline SoundManager*       getSoundManager() { return _soundManager; };
+        inline GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
+        inline BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
 
 
-        SceneObject*    addSceneObject(std::string name, RObject* objectDefinition = NULL);
+        SceneObject*    addSceneObject(const std::string& name, RObject* objectDefinition = nullptr);
         void            removeSceneObject(SceneObject* object, bool removeChildren = true);
         void            removeChildSceneObject(SceneObject* object, bool removeChildren = true);
 
-        void            removeSceneObject(std::string name, bool removeChildren = true);
+        void            removeSceneObject(const std::string& name, bool removeChildren = true);
 
-        void clearScene()
-        {
-            for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
-            {
-                delete *i;
-            }
+        void clearScene();
 
-            _sceneObjects.clear();
-
-            _graphicsManager->clearQuadTree();
-        }
-
-        SceneObject*    getSceneObject(std::string name);
+        SceneObject*    getSceneObject(const std::string& name);
         std::list<SceneObject*>& getSceneObjects();
 
 };

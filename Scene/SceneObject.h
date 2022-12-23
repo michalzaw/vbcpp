@@ -62,7 +62,7 @@ class SceneObject
         void calculateGlobalTransformMatrix() const;
 
     public:
-        SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition = NULL, SceneObject* parent = NULL);
+        SceneObject(const std::string& name, SceneManager* sceneManager, RObject* objectDefinition = nullptr, SceneObject* parent = nullptr);
         ~SceneObject();
 
 
@@ -74,79 +74,67 @@ class SceneObject
         bool removeChild(SceneObject* child);
         void removeAllChildren();
         void removeAllChildrenFromScene();
-        std::list<SceneObject*>& getChildren();
+        const std::list<SceneObject*>& getChildren();
 
 
         void addComponent(Component* component);
         void removeComponent(Component* component);
 
 
-		void			setName(std::string name);
-        void            setIsActive(bool is);
+		void			    setName(const std::string& name);
+        void                setIsActive(bool is);
 
-        std::string     getName();
-        unsigned int    getId();
-        bool            isActive();
+        const std::string&  getName();
+        unsigned int        getId();
+        bool                isActive();
 
-        void            setFlags(unsigned int flags);
-        void            addFlag(SceneObjectFlags flag);
-        unsigned int    getFlags();
+        void                setFlags(unsigned int flags);
+        void                addFlag(SceneObjectFlags flag);
+        unsigned int        getFlags();
 
-		RObject*		getObjectDefinition();
+		RObject*		    getObjectDefinition();
 
-        Component*      getComponent(unsigned int index);
-        Component*      getComponent(ComponentType type);
+        Component*          getComponent(unsigned int index);
+        Component*          getComponent(ComponentType type);
 
-        unsigned int    getComponentsCount();
+        unsigned int        getComponentsCount();
 
 
         SceneManager* getSceneManager();
 
 
-        void setPosition(glm::vec3 position);                               // Set in local space
+        void setPosition(const glm::vec3& position);                               // Set in local space
         void setPosition(float x, float y, float z);
-        void setRotation(glm::vec3 rotation);                               // Rotations in radians
+        void setRotation(const glm::vec3& rotation);                               // Rotations in radians
         void setRotation(float x, float y, float z);
-        void setRotationQuaternion(glm::quat rotation);
+        void setRotationQuaternion(const glm::quat& rotation);
         void setRotationQuaternion(float x, float y, float z, float w);
-        void setScale(glm::vec3 scale);
+        void setScale(const glm::vec3& scale);
         void setScale(float x, float y, float z);
         void setScale(float scale);
 
-        void move(glm::vec3 deltaPosition);
+        void move(const glm::vec3& deltaPosition);
         void move(float dx, float dy, float dz);
-        void rotate(glm::vec3 deltaRotation);
+        void rotate(const glm::vec3& deltaRotation);
         void rotate(float dx, float dy, float dz);
-        void scale(glm::vec3 scale);
+        void scale(const glm::vec3& scale);
         void scale(float x, float y, float z);
 
-        glm::vec3 getPosition() const;                                      // In local space
-        glm::vec3 getRotation() const;
-        glm::quat getRotationQuaternion() const;
-        glm::vec3 getScale() const;
+        const glm::vec3& getPosition() const;                                      // In local space
+        const glm::vec3& getRotation() const;
+        const glm::quat& getRotationQuaternion() const;
+        const glm::vec3& getScale() const;
 
-        glm::mat4& getLocalTransformMatrix() const;
-        glm::mat4& getLocalNormalMatrix() const;
-        glm::mat4& getGlobalTransformMatrix() const;
-        glm::mat4& getGlobalNormalMatrix() const;
+        const glm::mat4& getLocalTransformMatrix() const;
+        const glm::mat4& getLocalNormalMatrix() const;
+        const glm::mat4& getGlobalTransformMatrix() const;
+        const glm::mat4& getGlobalNormalMatrix() const;
 
         void setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions = true);
 
-		glm::vec3 getGlobalPosition()
-		{
-			return transformLocalPointToGlobal(glm::vec3(0.0f, 0.0f, 0.0f));
-		}
-
-        glm::vec3 transformLocalPointToGlobal(glm::vec3 point)
-        {
-            glm::vec4 p = getGlobalTransformMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
-            return glm::vec3(p.x, p.y, p.z);
-        }
-        glm::vec3 transformLocalVectorToGlobal(glm::vec3 vec)
-        {
-            glm::vec4 v = getGlobalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
-            return glm::vec3(v.x, v.y, v.z);
-        }
+        glm::vec3 getGlobalPosition();
+        glm::vec3 transformLocalPointToGlobal(const glm::vec3& point);
+        glm::vec3 transformLocalVectorToGlobal(const glm::vec3& vec);
 
 };
 
