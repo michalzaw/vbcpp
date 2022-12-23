@@ -655,14 +655,9 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
+		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, false, roadSceneObject);
 		roadRenderObject->setCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
-		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
-		roadMesh->setRestitution(0.9f);
-		roadMesh->getRigidBody()->setFriction(1.0f);
-		//terrainMesh->getRigidBody()->setFriction(1.5f);
-		roadSceneObject->addComponent(roadMesh);
 
 		roadElement = roadElement->NextSiblingElement("Road");
 	}

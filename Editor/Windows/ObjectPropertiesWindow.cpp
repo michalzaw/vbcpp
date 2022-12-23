@@ -268,7 +268,7 @@ namespace vbEditor
 	extern unsigned int currentModelLod;
 	extern unsigned int currentMaterialIndex;
 
-	extern bool _showGenerateObjectsAlongRoadWindow;
+	extern bool _showGenerateObjectsAlongCurveWindow;
 
 	extern OpenDialogWindow* _selectRoadProfileDialogWindow;
 }
@@ -362,11 +362,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 		}
 
 		ImGui::Separator();
-
-		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
-		{
-			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
-		}
 
 		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
 		{
@@ -1131,6 +1126,11 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
+
+		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
+		{
+			vbEditor::_showGenerateObjectsAlongCurveWindow = true;
+		}
 
 		/*if (ImGui::Button("Split curve", ImVec2(-1.0f, 0.0f)))
 		{

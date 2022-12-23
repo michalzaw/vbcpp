@@ -36,7 +36,7 @@
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
 #include "Windows/MaterialEditorWindow.h"
-#include "Windows/GenerateObjectsAlongRoadWindow.h"
+#include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
 
 #include "../Graphics/BezierCurve.h"
@@ -545,14 +545,15 @@ namespace vbEditor
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
-	bool _showGenerateObjectsAlongRoadWindow = false;
+	bool _showGenerateObjectsAlongCurveWindow = false;
 
 	std::string windowTitle = "VBCPP - World Editor";
 
 	ResourceDescription mapInfo = {"Unknown", "Unknown", "Unknown"};
 
 	ClickMode _clickMode = CM_PICK_OBJECT;
-	RObject* _objectToAdd = nullptr;
+	RObject* _objectToAddDefinition = nullptr;
+	SceneObject* _objectToAdd = nullptr;
 
 	ImGuiInterface* _imGuiInterface = nullptr;
 	OpenDialogWindow* _openMapDialogWindow = nullptr;
@@ -564,6 +565,28 @@ namespace vbEditor
 	bool _isLoading = false;
 	SceneManager* _newSceneManager = nullptr;
 
+	void setClickMode(ClickMode clickMode)
+	{
+		if (_clickMode == CM_ADD_OBJECT)
+		{
+			if (_objectToAdd != nullptr)
+			{
+				_sceneManager->removeSceneObject(_objectToAdd);
+				_objectToAddDefinition = nullptr;
+				_objectToAdd = nullptr;
+			}
+		}
+
+		_clickMode = clickMode;
+
+		if (_clickMode == CM_PICK_OBJECT)
+		{
+			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+			glfwSetCursor(window.getWindow(), cursor);
+			glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+	}
+
 	void setSelectedSceneObject(SceneObject* object)
 	{
 		_selectedSceneObject = object;
@@ -571,8 +594,21 @@ namespace vbEditor
 
 		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr))
 		{
-			_clickMode = CM_ROAD_EDIT; // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
 		}
+	}
+
+	bool getCursorPositionIn3D(GLFWwindow* glfwWindow, glm::vec3& outCursorPosition)
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(glfwWindow, &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		glm::vec3 rayStart;
+		glm::vec3 rayDir;
+		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
 	}
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
@@ -594,28 +630,16 @@ namespace vbEditor
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
-			double xpos, ypos;
-			glfwGetCursorPos(glfwWindow, &xpos, &ypos);
-			ypos = window.getHeight() - ypos;
-
-			glm::vec3 rayStart;
-			glm::vec3 rayDir;
-			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
-
 			if (_clickMode == CM_ADD_OBJECT)
 			{
-				glm::vec3 hitPosition;
-				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
-				{
-					SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
-
-					setSelectedSceneObject(newObject);
-				}
+				_objectToAdd->setFlags(SOF_NONE);
+				setSelectedSceneObject(_objectToAdd);
+				loadNewObjectToAdd();
 			}
 			else if (_clickMode == CM_ROAD_EDIT && glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			{
 				glm::vec3 hitPosition;
-				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
+				if (getCursorPositionIn3D(glfwWindow, hitPosition))
 				{
 					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 					if (roadObject != nullptr && roadObject->getRoadType() != RoadType::BEZIER_CURVES)
@@ -638,6 +662,14 @@ namespace vbEditor
 			}
 			else if (_clickMode == CM_PICK_OBJECT || _clickMode == CM_ROAD_EDIT)
 			{
+				double xpos, ypos;
+				glfwGetCursorPos(glfwWindow, &xpos, &ypos);
+				ypos = window.getHeight() - ypos;
+
+				glm::vec3 rayStart;
+				glm::vec3 rayDir;
+				calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
 				// collision with render objects
 				SceneObject* selectedObject = nullptr;
 				float d = std::numeric_limits<float>::max();
@@ -668,19 +700,44 @@ namespace vbEditor
 		}
 	}
 
+	void mouseCursourPosCallback(GLFWwindow* glfwWindow, double xPosition, double yPosition)
+	{
+		if (_clickMode == CM_ADD_OBJECT && _objectToAdd != nullptr)
+		{
+			glm::vec3 mousePosition;
+			if (getCursorPositionIn3D(glfwWindow, mousePosition))
+			{
+				if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				{
+					mousePosition.x = round(mousePosition.x);
+					mousePosition.z = round(mousePosition.z);
+				}
+				_objectToAdd->setPosition(mousePosition);
+			}
+		}
+	}
+
+	void mouseScrollCallback(GLFWwindow* glfwWindow, double xOffset, double yOffset)
+	{
+		if (_objectToAdd != nullptr)
+		{
+			if (yOffset > 0)
+			{
+				_objectToAdd->rotate(0.0f, degToRad(90.0f), 0.0f);
+			}
+			else if (yOffset < 0)
+			{
+				_objectToAdd->rotate(0.0f, -degToRad(90.0f), 0.0f);
+			}
+		}
+	}
+
 	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 	{
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
-			if (_clickMode == CM_ADD_OBJECT)
-			{
-				_clickMode = CM_PICK_OBJECT;
-			}
-			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-			glfwSetCursor(window, cursor);
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			setClickMode(CM_PICK_OBJECT);
 		}
-
 	}
 
 	void processInput(double deltaTime)
@@ -734,6 +791,8 @@ namespace vbEditor
 		window.setWindowTitle(windowTitle);
 
 		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
+		glfwSetCursorPosCallback(window.getWindow(), mouseCursourPosCallback);
+		glfwSetScrollCallback(window.getWindow(), mouseScrollCallback);
 		glfwSetKeyCallback(window.getWindow(), keyCallback);
 		glfwSetCharCallback(window.getWindow(), editorCharCallback);
 		glfwSetWindowSizeCallback(window.getWindow(), changeWindowSizeCallback);
@@ -797,7 +856,8 @@ namespace vbEditor
 		_selectedSceneObject = nullptr;
 		_selectedRoads.clear();
 
-		_clickMode = CM_PICK_OBJECT;
+		setClickMode(CM_PICK_OBJECT);
+		_objectToAddDefinition = nullptr;
 		_objectToAdd = nullptr;
 		
 		_isLoading = true;
@@ -899,15 +959,26 @@ namespace vbEditor
 		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
 	}
 
+	void loadNewObjectToAdd()
+	{
+		glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+		getCursorPositionIn3D(window.getWindow(), position);
+
+		_objectToAdd = RObjectLoader::createSceneObjectFromRObject(_objectToAddDefinition, _objectToAddDefinition->getName(), position, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
+		_objectToAdd->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+	}
+
 	void addObject(const std::string& objectName)
 	{
-		_clickMode = CM_ADD_OBJECT;
-		_objectToAdd = ResourceManager::getInstance().loadRObject(objectName);
+		setClickMode(CM_ADD_OBJECT);
+		_objectToAddDefinition = ResourceManager::getInstance().loadRObject(objectName);
+
+		loadNewObjectToAdd();
 	}
 
 	void addRoad(const std::string& roadProfileName, RoadType roadType)
 	{
-		_clickMode = CM_ROAD_EDIT;
+		setClickMode(CM_ROAD_EDIT);
 
 		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(roadProfileName);
 
@@ -1295,12 +1366,12 @@ namespace vbEditor
 			}
 		}
 
-		if (_showGenerateObjectsAlongRoadWindow && _selectedSceneObject != nullptr)
+		if (_showGenerateObjectsAlongCurveWindow && _selectedSceneObject != nullptr)
 		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (!generateObjectsAlongRoadWindow(roadComponent))
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (!generateObjectsAlongCurveWindow(bezierCurve))
 			{
-				_showGenerateObjectsAlongRoadWindow = false;
+				_showGenerateObjectsAlongCurveWindow = false;
 			}
 		}
 
@@ -1421,7 +1492,6 @@ namespace vbEditor
 				accumulator -= TIME_STEP;
 
 				_graphicsManager->update(TIME_STEP);
-				updateRoads(TIME_STEP);
 
 				_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
@@ -1781,16 +1851,6 @@ namespace vbEditor
 				pathComponent->setConnection(connectionPointIndex, pathConnectionPoints[newConnectionIndex].pathComponent, pathConnectionPoints[newConnectionIndex].index);
 			}
 		}
-	}
-
-	void updateRoads(float deltaTime)
-	{
-
-	}
-
-	void addSceneObject()
-	{
-
 	}
 
 } // namespace
