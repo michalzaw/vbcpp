@@ -18,11 +18,6 @@
 class GameLogicSystem;
 class BusStopSystem;
 
-struct BusStart
-{
-    glm::vec3 position;
-    glm::vec3 rotation;
-};
 
 class SceneManager
 {
@@ -34,8 +29,6 @@ class SceneManager
         BusStopSystem*      _busStopSystem;
 
         std::list<SceneObject*> _sceneObjects;
-
-        BusStart    _busStart;
 
     public:
         SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr);
@@ -68,8 +61,6 @@ class SceneManager
 
         SceneObject*    getSceneObject(std::string name);
         std::list<SceneObject*>& getSceneObjects();
-
-        BusStart& getBusStart() { return _busStart; }
 
 };
 

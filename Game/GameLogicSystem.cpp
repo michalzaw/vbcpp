@@ -4,6 +4,7 @@
 
 #include "AIAgent.h"
 #include "AIAgentPhysicalVechicle.h"
+#include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
 #include "PathComponent.h"
@@ -67,6 +68,16 @@ AIAgent* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
 	AIAgent* component = new AIAgentPhysicalVechicle(vechicle);
 
 	_aiAgents.push_back(component);
+
+	return component;
+}
+
+
+BusStartPoint* GameLogicSystem::addBusStartPoint(const std::string& name)
+{
+	BusStartPoint* component = new BusStartPoint(name);
+
+	_busStartPoints.push_back(component);
 
 	return component;
 }
@@ -137,6 +148,22 @@ void GameLogicSystem::removeAIAgent(AIAgent* component)
 		if (*i == component)
 		{
 			i = _aiAgents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
+void GameLogicSystem::removeBusStartPoint(BusStartPoint* component)
+{
+	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _busStartPoints.erase(i);
 
 			delete component;
 
@@ -256,6 +283,13 @@ void GameLogicSystem::destroy()
 	}
 
 	_aiAgents.clear();
+
+	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_busStartPoints.clear();
 
 	/*for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
 	{

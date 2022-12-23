@@ -16,6 +16,7 @@ class CameraFPS;
 class Bus;
 class AIAgent;
 class PhysicalBodyRaycastVehicle;
+class BusStartPoint;
 
 
 struct PendingPathConnection final
@@ -35,6 +36,7 @@ class GameLogicSystem final
 		std::vector<CameraControlComponent*> _cameraControlComponents;
 		std::vector<PathComponent*> _pathComponents;
 		std::vector<AIAgent*> _aiAgents;
+		std::vector<BusStartPoint*> _busStartPoints; // todo: dodawac defaultowy Start point po wczytaniu sceny jesli vector jest pusty
 		// todo: Przeniesc obsluge przystankow do tego systemu
 		//std::vector<BusStopComponent*> _busStops;
 
@@ -49,12 +51,14 @@ class GameLogicSystem final
 		PathComponent* addPathComponent(PathDirection direction);
 		AIAgent* addAIAgent();
 		AIAgent* addAIAgent(PhysicalBodyRaycastVehicle* vechicle);
+		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 
 		//void removeBus(Bus* bus);
 		void removeCameraControlComponent(CameraControlComponent* component);
 		void removePathComponent(PathComponent* component);
 		void removeAIAgent(AIAgent* component);
+		void removeBusStartPoint(BusStartPoint* component);
 		//void removeBusStop(BusStopComponent* busStop);
 
 		void setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound = true);
@@ -62,6 +66,7 @@ class GameLogicSystem final
 
 		//Bus* getBus(unsigned int index);
 		inline const std::vector<PathComponent*>& getPathComponents() { return _pathComponents; }
+		inline const std::vector<BusStartPoint*>& getBusStartPoints() { return _busStartPoints; }
 
 		void update(float deltaTime);
 

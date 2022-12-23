@@ -2,6 +2,7 @@
 #include "SceneManager.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/CameraControlComponent.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
@@ -143,6 +144,10 @@ SceneObject::~SceneObject()
 
             case CT_PATH:
                 _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(*i));
+                break;
+
+            case CT_BUS_START_POINT:
+                _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(*i));
                 break;
 
         }
@@ -411,6 +416,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_PATH:
                     _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(component));
+                    break;
+
+                case CT_BUS_START_POINT:
+                    _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(component));
                     break;
 
             }

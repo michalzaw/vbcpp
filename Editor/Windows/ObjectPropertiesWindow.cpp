@@ -17,6 +17,7 @@
 #include "../Utils/AIPathGenerator.h"
 
 #include "../../Game/AIAgent.h"
+#include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
 #include "../../Game/PathComponent.h"
 
@@ -729,6 +730,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("RenderComponentDetails");
 
 
 		ImGui::PushID("Models");
@@ -790,6 +792,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 		COMPONENT_PROPERTY_EDIT(renderComponent, CastShadows, bool, "Cast shadows")
 		COMPONENT_PROPERTY_EDIT(renderComponent, DynamicObject, bool, "Dynamic object")
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -805,6 +808,7 @@ void showBusStopComponentDetails(BusStopComponent* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("BusStopComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT(component, Id, int, "Id")
 		COMPONENT_PROPERTY_EDIT(component, Name, str, "Name")
@@ -820,7 +824,8 @@ void showBusStopComponentDetails(BusStopComponent* component)
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
-		
+
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -835,6 +840,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimationComponentDetails");
 
 		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
 		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); }, "")
@@ -845,6 +851,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		COMPONENT_PROPERTY_EDIT_2(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
 		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -859,12 +866,14 @@ void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* compone
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimation2ComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
 		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
 		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -879,6 +888,7 @@ void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponen
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimationHelperComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT(component, ShowModelBones, bool, "Show model bones")
 		COMPONENT_PROPERTY_EDIT(component, ShowAnimationBones, bool, "Show animation bones")
@@ -896,6 +906,7 @@ void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponen
 		COMPONENT_PROPERTY_EDIT(component, ShowFinalBones, bool, "Show final bones")
 		COMPONENT_PROPERTY_EDIT(component, ShowFinalSkeletonBones, bool, "Show final skeleton bones")
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -964,6 +975,7 @@ void showPrefabComponentDetails(Prefab* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("PrefabComponentDetails");
 
 		if (component->getPrefabType() == PrefabType::PLANE)
 		{
@@ -993,6 +1005,7 @@ void showPrefabComponentDetails(Prefab* component)
 			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](float newValue) { cylinder->init(); }, "")
 		}
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -1015,6 +1028,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("AIAgentComponentDetails");
 
 		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
 		std::vector<std::string> availablePaths;
@@ -1058,6 +1072,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 		}
 		COMPONENT_PROPERTY_EDIT_END
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -1072,6 +1087,7 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("BezierCurveComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
 		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
@@ -1123,6 +1139,7 @@ void showBezierCurveComponentDetails(BezierCurve* component)
 			COMPONENT_PROPERTY_EDIT_END
 		}
 
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -1147,6 +1164,7 @@ void showPathComponentDetails(PathComponent* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("PathComponentDetails");
 
 		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
 		{
@@ -1190,7 +1208,27 @@ void showPathComponentDetails(PathComponent* component)
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
-		
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showBusStartComponentDetails(BusStartPoint* component)
+{
+	if (ImGui::CollapsingHeader("Bus start point", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BusStartPointCpmponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, Name, str, "Point name")
+
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -1294,6 +1332,12 @@ void showObjectProperties()
 			if (pathComponent)
 			{
 				showPathComponentDetails(pathComponent);
+			}
+
+			BusStartPoint* busStartPoint = dynamic_cast<BusStartPoint*>(vbEditor::_selectedSceneObject->getComponent(CT_BUS_START_POINT));
+			if (busStartPoint)
+			{
+				showBusStartComponentDetails(busStartPoint);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

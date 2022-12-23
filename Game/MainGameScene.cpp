@@ -2,6 +2,7 @@
 
 #include "AIAgent.h"
 #include "AIAgentPhysicalVechicle.h"
+#include "BusStartPoint.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
@@ -177,6 +178,27 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 }
 
 
+void MainGameScene::setBusInDefaultPosition(Bus* bus)
+{
+	const auto& availableBusStartPoints = _sceneManager->getGameLogicSystem()->getBusStartPoints();
+	glm::vec3 busStartPosition(0.0f, 3.0f, 0.0f);
+	glm::vec3 busStartRotation(0.0f, 0.0f, 0.0f);
+
+	if (availableBusStartPoints.size() > 0)
+	{
+		busStartPosition = availableBusStartPoints[0]->getSceneObject()->getPosition();
+		busStartRotation = availableBusStartPoints[0]->getSceneObject()->getRotation();
+	}
+	else
+	{
+		LOG_WARNING("Cannot find any available Bus Start Point. USe default value.");
+	}
+
+	bus->getSceneObject()->setPosition(busStartPosition);
+	bus->getSceneObject()->setRotation(busStartRotation);
+}
+
+
 void MainGameScene::loadScene()
 {
 	std::unordered_map<std::string, std::string> busVariables;
@@ -214,10 +236,7 @@ void MainGameScene::loadScene()
 	SceneLoader sceneLoader(_sceneManager);
 	sceneLoader.loadMap(GameConfig::getInstance().mapFile);
 
-	bus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-	bus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-		degToRad(_sceneManager->getBusStart().rotation.y),
-		degToRad(_sceneManager->getBusStart().rotation.z));
+	setBusInDefaultPosition(bus);
 
 	//bus2->getSceneObject()->setPosition(_sceneManager->getBusStart().position + vec3(20.0f, 0.0f, 0.0f));
 	//bus2->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
@@ -557,10 +576,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_R))
 	{
-		_activeBus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-			degToRad(_sceneManager->getBusStart().rotation.y),
-			degToRad(_sceneManager->getBusStart().rotation.z));
+		setBusInDefaultPosition(_activeBus);
 	}
 	if (input.isKeyPressed(GLFW_KEY_F5))
 	{

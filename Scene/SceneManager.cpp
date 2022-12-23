@@ -23,9 +23,6 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
     _gameLogicSystem = new GameLogicSystem;
     _busStopSystem = new BusStopSystem;
 
-    _busStart.position = glm::vec3(0,3,0);
-    _busStart.rotation = glm::vec3(0,0,0);
-
     //_graphicsManager = new GraphicsManager;
     //_physicsManager = new PhysicsManager;
 
