@@ -10,6 +10,7 @@
 //#include "../Bus/BusLoader.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
@@ -1172,6 +1173,17 @@ namespace vbEditor
 
 						aiAgent->setCurrentPath(_sceneManager->getGameLogicSystem()->getPathComponents()[0]);
 					}
+				}
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Add Bus Start Point", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Bus start point");
+
+					BusStartPoint* busStartPoint = _sceneManager->getGameLogicSystem()->addBusStartPoint("Start point");
+					sceneObject->addComponent(busStartPoint);
+
+					setSelectedSceneObject(sceneObject);
 				}
 
 				ImGui::Separator();

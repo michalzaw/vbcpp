@@ -14,6 +14,8 @@ class BusStartPoint final : public Component
 
 		// todo: add more params
 
+		void onAttachedToScenObject() override;
+
 	public:
 		BusStartPoint(const std::string& name);
 
