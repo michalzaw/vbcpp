@@ -178,6 +178,9 @@ class Renderer
 		bool _requiredRebuildStaticLighting;
 
 
+		unsigned int* _objectsIdsTextureData;
+
+
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
 		PostProcessingEffect* findEffect(PostProcessingType type);
@@ -215,6 +218,9 @@ class Renderer
 
 
 		void rebuildStaticLightingInternal();
+
+
+		void recreateObjectsIdsTextureData();
 
         Renderer();
 
@@ -281,6 +287,8 @@ class Renderer
         void renderToMirrorTexture(RenderData* renderData);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
+
+		unsigned int pickObject(int x, int y);
 
 };
 

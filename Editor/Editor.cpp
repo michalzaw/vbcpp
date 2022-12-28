@@ -667,7 +667,7 @@ namespace vbEditor
 				glfwGetCursorPos(glfwWindow, &xpos, &ypos);
 				ypos = window.getHeight() - ypos;
 
-				glm::vec3 rayStart;
+				/*glm::vec3 rayStart;
 				glm::vec3 rayDir;
 				calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
@@ -696,7 +696,10 @@ namespace vbEditor
 					}
 				}
 
-				setSelectedSceneObject(selectedObject);
+				setSelectedSceneObject(selectedObject);*/
+
+				unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+				setSelectedSceneObject(_sceneManager->getSceneObject(objectId));
 			}
 		}
 	}
@@ -901,7 +904,7 @@ namespace vbEditor
 
 		Renderer& renderer = Renderer::getInstance();
 		renderer.setGraphicsManager(_graphicsManager);
-		renderer.setMsaaAntialiasing(true);
+		renderer.setMsaaAntialiasing(false);
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
 		renderer.setIsShadowMappingEnable(true);

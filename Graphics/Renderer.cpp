@@ -24,7 +24,8 @@ Renderer::Renderer()
     _renderObjectsAAABB(false), _renderObjectsOBB(false),
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
-    _requiredRebuildStaticLighting(false)
+    _requiredRebuildStaticLighting(false),
+    _objectsIdsTextureData(nullptr)
 {
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
@@ -65,6 +66,11 @@ Renderer::~Renderer()
 	OGLDriver::getInstance().deleteVBO(_quadVBO);
 	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[0]);
 	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[1]);
+
+    if (_objectsIdsTextureData != nullptr)
+    {
+        delete _objectsIdsTextureData;
+    }
 }
 
 
@@ -188,6 +194,7 @@ void Renderer::recreateAllFramebuffers()
     if (_renderObjectIdsForPicking)
     {
         framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+        recreateObjectsIdsTextureData();
     }
 
     framebuffer->init();
@@ -966,6 +973,17 @@ void Renderer::rebuildStaticLightingInternal()
 }
 
 
+void Renderer::recreateObjectsIdsTextureData()
+{
+    if (_objectsIdsTextureData != nullptr)
+    {
+        delete _objectsIdsTextureData;
+    }
+
+    _objectsIdsTextureData = new unsigned int[_screenWidth * _screenHeight];
+}
+
+
 void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 {
     if (_isInitialized)
@@ -990,6 +1008,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking)
     {
         framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+        recreateObjectsIdsTextureData();
     }
 
     framebuffer->init();
@@ -2491,4 +2510,24 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
     delete renderList;
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+}
+
+
+unsigned int Renderer::pickObject(int x, int y)
+{
+    RTexture* texture = _mainRenderData->framebuffer->getTexture(2);
+
+    glBindTexture(GL_TEXTURE_2D, texture->getID());
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, _objectsIdsTextureData);
+
+    unsigned int id = _objectsIdsTextureData[y * texture->getSize().x + x];
+
+    LOG_DEBUG("Selected object " + LOG_VARIABLE(id));
+
+    //unsigned int id2[4];
+    //glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, id2);
+
+    //LOG_DEBUG(LOG_VARIABLE(id) + ", " + LOG_VARIABLE(id2[0]) + ", " + LOG_VARIABLE(id2[1]) + ", " + LOG_VARIABLE(id2[2]) + ", " + LOG_VARIABLE(id2[3]));
+
+    return id;
 }

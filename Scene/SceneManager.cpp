@@ -209,6 +209,19 @@ SceneObject* SceneManager::getSceneObject(const std::string& name)
 }
 
 
+SceneObject* SceneManager::getSceneObject(ObjectId id)
+{
+    auto object = _sceneObjectsMap.find(id);
+    if (object != _sceneObjectsMap.end())
+    {
+        return object->second;
+    }
+
+    LOG_ERROR("Cannot find Object with id: " + Strings::toString(id));
+    return nullptr;
+}
+
+
 std::list<SceneObject*>& SceneManager::getSceneObjects()
 {
     return _sceneObjects;

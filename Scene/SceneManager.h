@@ -58,6 +58,7 @@ class SceneManager
         void clearScene();
 
         SceneObject*    getSceneObject(const std::string& name);
+        SceneObject*    getSceneObject(ObjectId id);
         std::list<SceneObject*>& getSceneObjects();
 
 };
