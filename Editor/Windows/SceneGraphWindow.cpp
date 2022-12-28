@@ -159,6 +159,11 @@ namespace vbEditor {
 		//ImGui::PushID(object);
 		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)object, node_flags, object->getName().c_str());
 
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetTooltip("Id: %d", object->getId());
+		}
+
 		if (ImGui::IsItemClicked())
 		{
 			vbEditor::setSelectedSceneObject(object);

@@ -3,6 +3,7 @@
 
 
 #include <list>
+#include <unordered_map>
 
 #include "../Graphics/GraphicsManager.h"
 #include "../Graphics/Roads.h"
@@ -20,6 +21,9 @@ class GameLogicSystem;
 class SceneManager
 {
     private:
+        static const ObjectId MIN_OBJECT_ID = 1u;
+        static const ObjectId MAX_OBJECT_ID = 0xffffffff;
+
         GraphicsManager*    _graphicsManager;
         PhysicsManager*     _physicsManager;
         SoundManager*       _soundManager;
@@ -27,6 +31,11 @@ class SceneManager
         BusStopSystem*      _busStopSystem;
 
         std::list<SceneObject*> _sceneObjects;
+        std::unordered_map<ObjectId, SceneObject*> _sceneObjectsMap;
+
+        ObjectId _nextObjectId;
+
+        ObjectId generateNewObjectId();
 
     public:
         SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr);
@@ -39,11 +48,12 @@ class SceneManager
         inline BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
 
 
-        SceneObject*    addSceneObject(const std::string& name, RObject* objectDefinition = nullptr);
+        SceneObject*    addSceneObject(const std::string& name, ObjectId id = 0u, RObject* objectDefinition = nullptr);
         void            removeSceneObject(SceneObject* object, bool removeChildren = true);
         void            removeChildSceneObject(SceneObject* object, bool removeChildren = true);
 
         void            removeSceneObject(const std::string& name, bool removeChildren = true);
+        void            removeSceneObject(ObjectId id, bool removeChildren = true);
 
         void clearScene();
 

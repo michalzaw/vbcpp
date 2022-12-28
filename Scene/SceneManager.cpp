@@ -4,7 +4,8 @@
 
 
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
+    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr),
+    _nextObjectId(MIN_OBJECT_ID)
 {
     LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
@@ -42,11 +43,36 @@ SceneManager::~SceneManager()
 }
 
 
-SceneObject* SceneManager::addSceneObject(const std::string& name, RObject* objectDefinition/* = nullptr*/)
+ObjectId SceneManager::generateNewObjectId()
 {
-    SceneObject* obj = new SceneObject(name, this, objectDefinition);
+    while (_sceneObjectsMap.find(_nextObjectId) != _sceneObjectsMap.end())
+    {
+        _nextObjectId = clamp(_nextObjectId + 1, MIN_OBJECT_ID, MAX_OBJECT_ID);
+    }
+
+    return _nextObjectId;
+}
+
+
+SceneObject* SceneManager::addSceneObject(const std::string& name, ObjectId id/* = 0u*/, RObject* objectDefinition/* = nullptr*/)
+{
+    ObjectId objectId = id;
+    if (objectId == 0u)
+    {
+        objectId = generateNewObjectId();
+    }
+
+    auto existingSceneObject = _sceneObjectsMap.find(objectId);
+    if (existingSceneObject != _sceneObjectsMap.end())
+    {
+        LOG_ERROR("Object with id=" + Strings::toString(objectId) + " already exist.");
+        return nullptr;
+    }
+
+    SceneObject* obj = new SceneObject(name, objectId, this, objectDefinition);
 
     _sceneObjects.push_back(obj);
+    _sceneObjectsMap.insert(std::make_pair(obj->getId(), obj));
 
     return obj;
 }
@@ -54,6 +80,8 @@ SceneObject* SceneManager::addSceneObject(const std::string& name, RObject* obje
 
 void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
+    _sceneObjectsMap.erase(object->getId());
+
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
         if (*i == object)
@@ -83,6 +111,8 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren/* 
 
 void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
+    _sceneObjectsMap.erase(object->getId());
+
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
         if (*i == object)
@@ -117,6 +147,8 @@ void SceneManager::removeSceneObject(const std::string& name, bool removeChildre
         {
             SceneObject* temp = *i;
 
+            _sceneObjectsMap.erase(temp->getId());
+
             i = _sceneObjects.erase(i);
 
             if (removeChildren)
@@ -126,13 +158,28 @@ void SceneManager::removeSceneObject(const std::string& name, bool removeChildre
                     removeChildSceneObject(*j);
                 }
             }
+            else
+            {
+                temp->removeAllChildren();
+            }
 
+            temp->removeParent();
             delete temp;
         }
         else
         {
             ++i;
         }
+    }
+}
+
+
+void SceneManager::removeSceneObject(ObjectId id, bool removeChildren/* = true*/)
+{
+    auto object = _sceneObjectsMap.find(id);
+    if (object != _sceneObjectsMap.end())
+    {
+        removeSceneObject(object->second, removeChildren);
     }
 }
 

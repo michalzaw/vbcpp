@@ -16,6 +16,9 @@
 class SceneManager;
 
 
+typedef unsigned int ObjectId;
+
+
 enum SceneObjectFlags
 {
     SOF_NONE                        = 0,
@@ -34,7 +37,7 @@ class SceneObject
         std::vector<Component*> _components;
 
         std::string     _name;
-        unsigned int    _id;
+        ObjectId        _id;
         bool            _isActive;
 
         unsigned int    _flags;
@@ -62,7 +65,7 @@ class SceneObject
         void calculateGlobalTransformMatrix() const;
 
     public:
-        SceneObject(const std::string& name, SceneManager* sceneManager, RObject* objectDefinition = nullptr, SceneObject* parent = nullptr);
+        SceneObject(const std::string& name, ObjectId id, SceneManager* sceneManager, RObject* objectDefinition = nullptr, SceneObject* parent = nullptr);
         ~SceneObject();
 
 
@@ -85,7 +88,7 @@ class SceneObject
         void                setIsActive(bool is);
 
         const std::string&  getName();
-        unsigned int        getId();
+        ObjectId            getId();
         bool                isActive();
 
         void                setFlags(unsigned int flags);

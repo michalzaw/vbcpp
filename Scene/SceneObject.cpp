@@ -15,9 +15,9 @@
 #include "../Utils/GlmUtils.h"
 
 
-SceneObject::SceneObject(const std::string& name, SceneManager* sceneManager, RObject* objectDefinition/* = nullptr*/, SceneObject* parent/* = nullptr*/)
+SceneObject::SceneObject(const std::string& name, ObjectId id, SceneManager* sceneManager, RObject* objectDefinition/* = nullptr*/, SceneObject* parent/* = nullptr*/)
     : _parent(parent),
-    _id(0), _name(name), _isActive(true),
+    _id(id), _name(name), _isActive(true),
     _flags(0),
 	_objectDefinition(objectDefinition),
     _sceneManager(sceneManager),
@@ -447,7 +447,7 @@ const std::string& SceneObject::getName()
     return _name;
 }
 
-unsigned int SceneObject::getId()
+ObjectId SceneObject::getId()
 {
     return _id;
 }
