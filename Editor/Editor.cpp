@@ -905,6 +905,7 @@ namespace vbEditor
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
 		renderer.setIsShadowMappingEnable(true);
+		renderer.setRenderObjectIdsForPicking(true);
 		renderer.init(window.getWidth(), window.getHeight());
 		renderer.setDayNightRatio(1.0f);
 		renderer.setAlphaToCoverage(true);

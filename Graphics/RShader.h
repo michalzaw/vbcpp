@@ -106,6 +106,8 @@ class RShader : virtual public Resource
 		{ glUniform1fv(location, count, values); }
 		inline void setUniform(GLint location, int value)
 		{ glUniform1i(location, value); }
+		inline void setUniform(GLint location, unsigned int value)
+		{ glUniform1ui(location, value); }
 		inline void setUniform(GLint location, float value)
 		{ glUniform1f(location, value); }
 		inline void setUniform(GLint location, glm::vec2* vectors, int count = 1)

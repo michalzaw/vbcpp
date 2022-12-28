@@ -18,6 +18,7 @@ Renderer::Renderer()
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC), _sceneVisibility(1.0f),
 	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
+    _renderObjectIdsForPicking(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
     _renderObjectsAAABB(false), _renderObjectsOBB(false),
@@ -183,6 +184,12 @@ void Renderer::recreateAllFramebuffers()
 	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+
+    if (_renderObjectIdsForPicking)
+    {
+        framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    }
+
     framebuffer->init();
 	//framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	//framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
@@ -240,6 +247,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
 	_uniformsNames[UNIFORM_EMISSIVE_TEXTURE] = "emissiveTexture";
+    _uniformsNames[UNIFORM_OBJECT_ID] = "objectId";
 
 	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
 	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
@@ -978,6 +986,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+
+    if (_renderObjectIdsForPicking)
+    {
+        framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+    }
+
     framebuffer->init();
     //framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
@@ -1002,6 +1016,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // SOLID_MATERIAL
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // NOTEXTURE_MATERIAL
@@ -1012,6 +1027,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("NORMALMAPPING");
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
 	// SOLID_EMISSIVE_MATERIAL
@@ -1019,6 +1035,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("SOLID");
 	defines.push_back("EMISSIVE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_EMISSIVE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // CAR_PAINT_MATERIAL
@@ -1027,6 +1044,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("CAR_PAINT");
     defines.push_back("REFLECTION");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // MIRROR_MATERIAL
@@ -1037,6 +1055,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // TREE_MATERIAL
@@ -1045,6 +1064,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     defines.push_back("SUBSURFACE_SCATTERING");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
 
     // DECAL_MATERIAL
@@ -1053,6 +1073,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("DECALS");
     defines.push_back("ALPHA_TEST");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // SOLID_ANIMATED_MATERIAL
@@ -1060,6 +1081,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     defines.push_back("ANIMATED");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // NORMALMAPPING_ANIMATED_MATERIAL
@@ -1068,6 +1090,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     defines.push_back("ANIMATED");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[NORMALMAPPING_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // ALPHA_TEST_ANIMATED_MATERIAL
@@ -1076,6 +1099,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     defines.push_back("ANIMATED");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[ALPHA_TEST_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // GRASS_MATERIAL
@@ -1085,10 +1109,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SUBSURFACE_SCATTERING");
     defines.push_back("GRASS");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[GRASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
 
     // SKY_MATERIAL
-    _shaderList[SKY_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
+    defines.clear();
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[SKY_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag", defines);
 
     // GLASS_MATERIAL
     defines.clear();
@@ -1096,6 +1123,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     //defines.push_back("TRANSPARENCY");
     //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
@@ -1159,6 +1187,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	// PBR_MATERIAL
 	defines.clear();
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
 
 	// PBR_TREE_MATERIAL
@@ -1169,6 +1198,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("NORMALMAPPING");
 	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
 	// NEW_TREE_2_MATERIAL
@@ -1176,6 +1206,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("NORMALMAPPING");
 	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
 
     // EDITOR_AXIS_SHADER
@@ -1193,8 +1224,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[ALPHA_TEST_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
     _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
+    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
 	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
 	_shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
 	_shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
@@ -1348,6 +1379,18 @@ void Renderer::setBloom(bool isEnable)
 bool Renderer::isBloomEnable()
 {
     return _bloom;
+}
+
+
+void Renderer::setRenderObjectIdsForPicking(bool isEnabled)
+{
+    _renderObjectIdsForPicking = isEnabled;
+}
+
+
+bool Renderer::isRenderObjectIdsForPickingEnabled()
+{
+    return _renderObjectIdsForPicking;
 }
 
 
@@ -2107,6 +2150,8 @@ void Renderer::renderScene(RenderData* renderData)
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], _graphicsManager->getWindTimer());
+
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_OBJECT_ID], i->object->getId());
 
         if (i->type != RET_GRASS)
         {

@@ -57,7 +57,10 @@ in float ClipSpacePositionZ;
 
 //out vec4 FragmentColor;
 layout (location = 0) out vec3 FragmentColor;
-layout (location = 1) out vec4 BrightnessColor;  
+layout (location = 1) out vec4 BrightnessColor;
+#ifdef RENDER_OBJECT_ID
+layout (location = 2) out uvec4 ObjectIdValue;
+#endif
 
 
 uniform LightsBlock
@@ -96,6 +99,10 @@ uniform vec3 color1;
 uniform vec3 color2;
 uniform vec3 color3;
 uniform vec3 color4;
+
+#ifdef RENDER_OBJECT_ID
+uniform uint objectId;
+#endif
 
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir, float ratio)
@@ -283,4 +290,9 @@ void main()
 	}
 	
 	FragmentColor.rgb = LightsColor.rgb;
+
+	
+#ifdef RENDER_OBJECT_ID
+	ObjectIdValue = uvec4(objectId, 0, 0, 0);
+#endif
 }

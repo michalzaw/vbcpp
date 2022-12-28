@@ -29,6 +29,8 @@ enum TextureFormat
     TF_RGB_32F          = GL_RGB32F,
     TF_RGBA_16F         = GL_RGBA16F,
     TF_RGBA_32F         = GL_RGBA32F,
+    TF_RED_32           = GL_R32UI,
+    TF_RED_INTEGER      = GL_RED_INTEGER,
     TF_DEPTH_COMPONENT  = GL_DEPTH_COMPONENT
 
 };

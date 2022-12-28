@@ -191,7 +191,7 @@ void MainGameScene::setBusInDefaultPosition(Bus* bus)
 	}
 	else
 	{
-		LOG_WARNING("Cannot find any available Bus Start Point. USe default value.");
+		LOG_WARNING("Cannot find any available Bus Start Point. Use default value.");
 	}
 
 	bus->getSceneObject()->setPosition(busStartPosition);

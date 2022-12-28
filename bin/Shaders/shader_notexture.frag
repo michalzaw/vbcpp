@@ -43,7 +43,10 @@ in vec3 PositionVert;
 in vec2 TexCoord;
 in vec3 Normal;
 
-out vec4 FragmentColor;
+layout (location = 0) out vec4 FragmentColor;
+#ifdef RENDER_OBJECT_ID
+layout (location = 2) out uvec4 ObjectIdValue;
+#endif
 
 
 uniform LightsBlock
@@ -65,6 +68,10 @@ uniform sampler2D Texture;
 uniform float SpecularPower;
 
 uniform vec3 CameraPosition;
+
+#ifdef RENDER_OBJECT_ID
+uniform uint objectId;
+#endif
 
 
 vec4 CalculateLight(Light l, vec3 normal, vec3 dir)
@@ -146,5 +153,9 @@ void main()
 	FragmentColor.a = 1.0f;
 #ifdef TRANSPARENCY
 	FragmentColor.a = 1 - Transparency;
+#endif
+
+#ifdef RENDER_OBJECT_ID
+	ObjectIdValue = uvec4(objectId, 0, 0, 0);
 #endif
 }

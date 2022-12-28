@@ -8,7 +8,8 @@ uniform float dayNightRatio;
 
 //out vec4 Color;
 layout (location = 0) out vec4 Color;
-layout (location = 1) out vec4 BrightnessColor;  
+layout (location = 1) out vec4 BrightnessColor;
+layout (location = 2) out uvec4 ObjectIdValue;
 
 
 /*const vec2 invAtan = vec2(0.1591, 0.3183);
@@ -35,4 +36,8 @@ void main()
 		BrightnessColor = vec4(Color.rgb, 1.0f);
 	else
 		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+#ifdef RENDER_OBJECT_ID
+	ObjectIdValue = uvec4(0, 0, 0, 0);
+#endif
 }

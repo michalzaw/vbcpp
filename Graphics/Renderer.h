@@ -76,6 +76,7 @@ enum UniformName
 	UNIFORM_DEBUG_VERTEX_INDEX_7,
 	UNIFORM_DEBUG_VERTEX_INDEX_8,
 	UNIFORM_EMISSIVE_TEXTURE,
+	UNIFORM_OBJECT_ID,
 
 	UNIFORM_ALBEDO_TEXTURE,
 	UNIFORM_METALIC_TEXTURE,
@@ -132,6 +133,8 @@ class Renderer
         int _msaaAntialiasingLevel;
 
         bool _bloom;
+
+		bool _renderObjectIdsForPicking;
 
 		Framebuffer* _defaultFramebuffer;
 		Framebuffer* _depthFramebuffer;
@@ -247,6 +250,8 @@ class Renderer
         int getMsaaAntialiasingLevel();
         void setBloom(bool isEnable);
         bool isBloomEnable();
+		void setRenderObjectIdsForPicking(bool isEnabled);
+		bool isRenderObjectIdsForPickingEnabled();
         void setIsShadowMappingEnable(bool isEnable);
         bool isShadowMappingEnable();
         void registerShadowMap(ShadowMap* shadowMap);
