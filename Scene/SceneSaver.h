@@ -27,6 +27,7 @@ class Prefab;
 class PathComponent;
 class AIAgent;
 class BezierCurve;
+class BusStartPoint;
 
 
 class SceneSaver
@@ -39,7 +40,6 @@ class SceneSaver
 
 		tinyxml2::XMLNode* _rootNode;
 		tinyxml2::XMLElement* _terrainElement;
-		tinyxml2::XMLElement* _startPositionElement;
 		tinyxml2::XMLElement* _grassElement;
 		tinyxml2::XMLElement* _sunElement;
 		tinyxml2::XMLElement* _skyElement;
@@ -48,7 +48,6 @@ class SceneSaver
 
 		std::string createSkyTextureAttribute(std::string path);
 
-		void saveStartPosition(tinyxml2::XMLElement* startPositionElement);
 		void saveTerrain(tinyxml2::XMLElement* terrainElement, tinyxml2::XMLElement* grassElement, SceneObject* sceneObject);
 		void saveGrass(tinyxml2::XMLElement* grassElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
 		void saveSunLight(tinyxml2::XMLElement* sunElement, SceneObject* sceneObject);
@@ -61,6 +60,7 @@ class SceneSaver
 		void saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve);
 		void savePathComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, PathComponent* pathComponent);
 		void saveAIAgentComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgent* aiAgent);
+		void saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint);
 
 		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);
 

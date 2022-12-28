@@ -57,6 +57,7 @@ class SceneLoader
 		void loadBezierCurveComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadPathComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadAIAgentComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
+		void loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);

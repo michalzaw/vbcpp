@@ -687,10 +687,9 @@ MirrorComponent* GraphicsManager::findMirrorComponent(SceneObject* object, std::
                 return m;
         }
 
-        std::list<SceneObject*>& children = object->getChildren();
-        for (std::list<SceneObject*>::iterator i = children.begin(); i != children.end(); ++i)
+        for (SceneObject* child : object->getChildren())
         {
-            MirrorComponent* mirrorComponent = findMirrorComponent(*i, name);
+            MirrorComponent* mirrorComponent = findMirrorComponent(child, name);
             if (mirrorComponent != NULL)
                 return mirrorComponent;
         }

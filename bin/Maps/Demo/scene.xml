@@ -6,8 +6,6 @@
 	
 	<Terrain heightmap="terrain_map.bmp" material="terrain" />
 	
-	<Start position="150,5,-151" rotation="0,-90,0" />
-	
 	<!--<Grass model="grass.fbx" terrain_heightmap="terrain_map.bmp" density_texture="grass.bmp" />-->
 	
 	<!-- rotation=(-0.2f * PI, 0.35f * PI, 0) -->
@@ -16,6 +14,10 @@
 	<Sky texture="rt.bmp,lt.bmp,up.bmp,dn.bmp,ft.bmp,bk.bmp" />
 	
 	<Objects>
+        <Object name="" id="BusStartPoint" position="150,5,-151" rotation="0,-90,0">
+            <Component type="busStartPoint" name="Default start point"/>
+        </Object>
+		
 		<Object name="jezioro" position="185,2.8,0" rotation="0,0,0" />
 
 		<Object name="iglak" position="160,3.5,-165" rotation="0,0,0" />

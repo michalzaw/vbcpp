@@ -41,6 +41,7 @@ enum ComponentType
 	CT_CAMERA_CONTROL,
     CT_PATH,
     CT_AI_AGENT,
+    CT_BUS_START_POINT,
 
     COMPONENTS_TYPE_SIZE
 };

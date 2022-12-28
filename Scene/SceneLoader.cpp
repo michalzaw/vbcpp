@@ -3,6 +3,7 @@
 #include "SceneManager.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/PathComponent.h"
@@ -29,20 +30,22 @@ SceneLoader::SceneLoader(SceneManager* sceneManager)
 }
 
 
+// deprecated - only for backward compatibility. Bus start should be saved as BusStartPoint component in SceneObject (loadBusStartPointComponent)
 void SceneLoader::loadStartPosition(XMLElement* sceneElement)
 {
 	XMLElement* startElement = sceneElement->FirstChildElement("Start");
-	if (startElement == nullptr)
+	if (startElement != nullptr)
 	{
-		LOG_WARNING("Start point not found!");
-	}
-	else
-	{
-		const char* cPosition(startElement->Attribute("position"));
-		_sceneManager->getBusStart().position = XMLstringToVec3(cPosition);
+		glm::vec3 position = XmlUtils::getAttributeVec3(startElement, "position");
+		glm::vec3 rotation = XmlUtils::getAttributeVec3(startElement, "rotation");
 
-		const char* cRotation(startElement->Attribute("rotation"));
-		_sceneManager->getBusStart().rotation = XMLstringToVec3(cRotation);
+		SceneObject* busStartSceneObject = _sceneManager->addSceneObject("BusStartPoint");
+		busStartSceneObject->setPosition(position);
+		busStartSceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z));
+
+		BusStartPoint* busStartPointComponent = _sceneManager->getGameLogicSystem()->addBusStartPoint("Default start point");
+
+		busStartSceneObject->addComponent(busStartPointComponent);
 	}
 }
 
@@ -389,6 +392,16 @@ void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject
 }
 
 
+void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::string name = XmlUtils::getAttributeString(componentElement, "name");
+
+	BusStartPoint* busStartPoint = _sceneManager->getGameLogicSystem()->addBusStartPoint(name);
+
+	sceneObject->addComponent(busStartPoint);
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -459,6 +472,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgent")
 			{
 				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "busStartPoint")
+			{
+				loadBusStartPointComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");

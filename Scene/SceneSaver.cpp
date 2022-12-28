@@ -6,6 +6,7 @@
 #include "SceneLoader.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/PathComponent.h"
 
@@ -41,13 +42,6 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 						 FilesHelper::getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
 
 	return result;
-}
-
-
-void SceneSaver::saveStartPosition(XMLElement* startPositionElement)
-{
-	startPositionElement->SetAttribute("position", vec3ToString(_sceneManager->getBusStart().position).c_str());
-	startPositionElement->SetAttribute("rotation", vec3ToString(_sceneManager->getBusStart().rotation).c_str());
 }
 
 
@@ -238,6 +232,17 @@ void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& do
 }
 
 
+void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "busStartPoint");
+	componentElement->SetAttribute("name", busStartPoint->getName().c_str());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -290,6 +295,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentComponent)
 	{
 		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
+	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));
+	if (busStartPointComponent)
+	{
+		saveBusStartPointComponent(objectElement, doc, busStartPointComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);
@@ -439,7 +450,7 @@ void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, Sc
 		{
 			if (_grassElement)
 			{
-				_rootNode->InsertAfterChild(_startPositionElement, _grassElement);
+				_rootNode->InsertAfterChild(_terrainElement, _grassElement);
 				saveGrass(_grassElement, doc, sceneObject);
 			}
 		}
@@ -494,9 +505,6 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	_terrainElement = doc.NewElement("Terrain");
 	rootNode->InsertEndChild(_terrainElement);
 
-	_startPositionElement = doc.NewElement("Start");
-	rootNode->InsertEndChild(_startPositionElement);
-
 	_grassElement = doc.NewElement("Grass");
 
 	_sunElement = doc.NewElement("Light");
@@ -513,7 +521,6 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	rootNode->InsertEndChild(_roadsElement);
 	
 	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
-	saveStartPosition(_startPositionElement);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
