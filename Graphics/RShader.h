@@ -57,6 +57,13 @@ enum ShaderType
 };
 
 
+enum RShaderType
+{
+    ST_NORMAL,
+    ST_COMPUTE
+};
+
+
 class RShader : virtual public Resource
 {
     friend class ResourceManager;
@@ -65,6 +72,8 @@ class RShader : virtual public Resource
         GLuint _shaderID;
         int _textureLocation;
 
+        RShaderType _shaderType;
+
         void setNewShader(GLuint newId)
         {
             glDeleteProgram(_shaderID);
@@ -72,8 +81,8 @@ class RShader : virtual public Resource
         }
 
     public:
-        RShader(std::string path, GLuint id)
-            : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0)
+        RShader(std::string path, GLuint id, RShaderType shaderType)
+            : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0), _shaderType(shaderType)
         {
             LOG_DEBUG("RShader: Konstruktor: " + Strings::toString(_shaderID));
         }
@@ -179,6 +188,8 @@ class RShader : virtual public Resource
             GLuint index = glGetUniformBlockIndex(_shaderID, blocksname);
             glUniformBlockBinding(_shaderID, index, location);
         }
+
+        inline RShaderType getShaderType() { return _shaderType; }
 
 };
 

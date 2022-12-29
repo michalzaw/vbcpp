@@ -349,7 +349,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 		fragmPath = _alternativeResourcePath + fragmPath;
 #endif // DEVELOPMENT_RESOURCES
 
-    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants), ST_NORMAL) );
 
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
 
@@ -365,38 +365,77 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 }
 
 
+RShader* ResourceManager::loadComputeShader(std::string shaderPath)
+{
+    Resource* res = findResource(shaderPath);
+    if (res != 0)
+    {
+        RShader* shdr = dynamic_cast<RShader*>(res);
+        return shdr;
+    }
+
+    // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(shaderPath))
+        shaderPath = _alternativeResourcePath + shaderPath;
+#endif // DEVELOPMENT_RESOURCES
+
+    std::unique_ptr<Resource> shader(new RShader(shaderPath, ShaderLoader::loadComputeShader(shaderPath.c_str()), ST_COMPUTE));
+
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
+
+    RShader* s = dynamic_cast<RShader*>(shader.get());
+
+    if (s)
+    {
+        _resources.push_back(std::move(shader));
+        return s;
+    }
+    else
+        return 0;
+}
+
+
 void ResourceManager::reloadShader(RShader* shader)
 {
-    std::istringstream stream(shader->getPath());
-
-    std::string vertexShaderFilename;
-    std::string fragmentShaderFilename;
-    std::vector<std::string> defines;
-    std::unordered_map<std::string, std::string> constants;
-
-    getline(stream, vertexShaderFilename, ';');
-    getline(stream, fragmentShaderFilename, ';');
-
-    string s;
-    while (getline(stream, s, ';'))
+    if (shader->getShaderType() == ST_NORMAL)
     {
-        if (s == "c:")
-            break;
+        std::istringstream stream(shader->getPath());
 
-        defines.push_back(s);
+        std::string vertexShaderFilename;
+        std::string fragmentShaderFilename;
+        std::vector<std::string> defines;
+        std::unordered_map<std::string, std::string> constants;
+
+        getline(stream, vertexShaderFilename, ';');
+        getline(stream, fragmentShaderFilename, ';');
+
+        string s;
+        while (getline(stream, s, ';'))
+        {
+            if (s == "c:")
+                break;
+
+            defines.push_back(s);
+        }
+
+        while (getline(stream, s, ';'))
+        {
+            unsigned int pos = s.find(":");
+            std::string name = s.substr(0, pos);
+            std::string value = s.substr(pos + 1, s.size() - pos);
+
+            constants[name] = value;
+        }
+
+
+        shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
     }
-
-    while (getline(stream, s, ';'))
+    else
     {
-        unsigned int pos = s.find(":");
-        std::string name = s.substr(0, pos);
-        std::string value = s.substr(pos + 1, s.size() - pos);
-
-        constants[name] = value;
+        shader->setNewShader(ShaderLoader::loadComputeShader(shader->getPath().c_str()));
     }
-
-
-    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
 }
 
 
