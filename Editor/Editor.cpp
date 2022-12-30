@@ -502,6 +502,12 @@ namespace vbEditor
 		CM_ROAD_EDIT
 	};
 
+	enum ObjectPickingMode
+	{
+		OPM_RAY_CAST,
+		OPM_GRAPHICS
+	};
+
 	struct RoadConnectionPoint
 	{
 		CrossroadComponent* crossroadComponent;
@@ -568,6 +574,8 @@ namespace vbEditor
 	bool _isLoading = false;
 	SceneManager* _newSceneManager = nullptr;
 
+	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
+
 	void setClickMode(ClickMode clickMode)
 	{
 		if (_clickMode == CM_ADD_OBJECT)
@@ -612,6 +620,63 @@ namespace vbEditor
 		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
 		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
+	}
+
+	void selectClickedObject()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		if (_objectPickingMode == OPM_RAY_CAST)
+		{
+			glm::vec3 rayStart;
+			glm::vec3 rayDir;
+			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+			// collision with render objects
+			SceneObject* selectedObject = nullptr;
+			float d = std::numeric_limits<float>::max();
+
+			std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
+			for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+			{
+				RenderObject* renderObject = *i;
+				if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
+				{
+					continue;
+				}
+				AABB* aabb = renderObject->getModel()->getAABB();
+				glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+				float distance;
+				if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+				{
+					if (distance > 0.0f && distance < d)
+					{
+						selectedObject = renderObject->getSceneObject();
+						d = distance;
+					}
+				}
+			}
+
+			setSelectedSceneObject(selectedObject);
+		}
+		else
+		{
+			unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+			if (objectId > 0)
+			{
+				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+				if (!(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					setSelectedSceneObject(sceneObject);
+				}
+			}
+			else
+			{
+				setSelectedSceneObject(nullptr);
+			}
+		}
 	}
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
@@ -665,43 +730,7 @@ namespace vbEditor
 			}
 			else if (_clickMode == CM_PICK_OBJECT || _clickMode == CM_ROAD_EDIT)
 			{
-				double xpos, ypos;
-				glfwGetCursorPos(glfwWindow, &xpos, &ypos);
-				ypos = window.getHeight() - ypos;
-
-				/*glm::vec3 rayStart;
-				glm::vec3 rayDir;
-				calculateRay(xpos, ypos, _camera, rayStart, rayDir);
-
-				// collision with render objects
-				SceneObject* selectedObject = nullptr;
-				float d = std::numeric_limits<float>::max();
-
-				std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
-				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
-				{
-					RenderObject* renderObject = *i;
-					if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
-					{
-						continue;
-					}
-					AABB* aabb = renderObject->getModel()->getAABB();
-					glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
-					float distance;
-					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
-					{
-						if (distance > 0.0f && distance < d)
-						{
-							selectedObject = renderObject->getSceneObject();
-							d = distance;
-						}
-					}
-				}
-
-				setSelectedSceneObject(selectedObject);*/
-
-				unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
-				setSelectedSceneObject(_sceneManager->getSceneObject(objectId));
+				selectClickedObject();
 			}
 		}
 	}
