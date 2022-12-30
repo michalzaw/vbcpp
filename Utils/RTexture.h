@@ -55,6 +55,14 @@ enum TextureClampMode
 };
 
 
+enum TextureImageBindMode
+{
+    TIBM_READ           = GL_READ_ONLY,
+    TIBM_WRITE          = GL_WRITE_ONLY,
+    TIBM_READ_AND_WRITE = GL_READ_WRITE
+};
+
+
 class RTexture : public Resource
 {
     friend class Framebuffer;
@@ -87,6 +95,11 @@ class RTexture : public Resource
         inline void bind()
         {
             glBindTexture(_textureType, _texID);
+        }
+
+        inline void bindImage(unsigned int unit, unsigned int level, TextureImageBindMode bindMode)
+        {
+            glBindImageTexture(unit, _texID, level, GL_FALSE, 0, bindMode, _internalFormat);
         }
 
 		void generateMipmap();

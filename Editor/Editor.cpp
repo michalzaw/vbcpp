@@ -39,6 +39,7 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
+#include "Windows/ComputeShaderTestWindow.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/ShapePolygonComponent.h"
@@ -560,6 +561,7 @@ namespace vbEditor
 	OpenDialogWindow* _openMapDialogWindow = nullptr;
 	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
 	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
+	ComputeShaderTestWindow* _computeShaderTestWindow = nullptr;
 
 	Window* _backgroundWindow = nullptr;
 	std::future<void> _loadingSceneFuture;
@@ -962,6 +964,9 @@ namespace vbEditor
 		_selectRoadProfileDialogWindow->setDefaultDirectoryFilter("profile.xml");
 		_selectRoadProfileDialogWindow->setDefaultDescriptionLoader("profile.xml", "Profile");
 		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
+
+		_computeShaderTestWindow = new ComputeShaderTestWindow(true);
+		_imGuiInterface->addWindow(_computeShaderTestWindow);
 	}
 
 	void loadNewObjectToAdd()
@@ -1268,6 +1273,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Windows"))
 			{
 				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Compute shader test", NULL, _computeShaderTestWindow->getOpenFlagPointer());
 				ImGui::EndMenu();
 			}
 

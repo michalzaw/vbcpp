@@ -148,6 +148,11 @@ class RShader : virtual public Resource
             setUniform(location, _textureLocation++);
         }
 
+        inline void bindTextureImage(RTexture* texture, unsigned int unit, unsigned int level, TextureImageBindMode bindMode)
+        {
+            texture->bindImage(unit, level, bindMode);
+        }
+
 		inline GLint getUniformLocation(const char* name)
 		{
 			return glGetUniformLocation(_shaderID, name);
@@ -190,6 +195,19 @@ class RShader : virtual public Resource
         }
 
         inline RShaderType getShaderType() { return _shaderType; }
+
+        inline void runComputeShader(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+        {
+            if (_shaderType == ST_COMPUTE)
+            {
+                glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+                glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            }
+            else
+            {
+                LOG_WARNING("Invalid operation for standard shader.");
+            }
+        }
 
 };
 
