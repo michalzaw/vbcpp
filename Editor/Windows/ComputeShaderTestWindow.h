@@ -4,6 +4,8 @@
 
 #include "../../ImGuiInterface/ImGuiWindow.h"
 
+#include "../../Graphics/ShaderStorageBuffer.h"
+
 
 class RShader;
 class RTexture;
@@ -14,6 +16,8 @@ class ComputeShaderTestWindow final : public ImGuiWindow
 	private:
 		RShader* _computeShader;
 		RTexture* _texture;
+
+		ShaderStorageBuffer* _shaderStorageBuffer;
 
 		virtual void drawWindow() override;
 

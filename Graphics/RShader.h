@@ -194,6 +194,12 @@ class RShader : virtual public Resource
             glUniformBlockBinding(_shaderID, index, location);
         }
 
+        inline void setShaderStorageBlockBinding(const char* blocksname, unsigned int location)
+        {
+            GLuint index = glGetProgramResourceIndex(_shaderID, GL_SHADER_STORAGE_BLOCK, blocksname);
+            glShaderStorageBlockBinding(_shaderID, index, location);
+        }
+
         inline RShaderType getShaderType() { return _shaderType; }
 
         inline void runComputeShader(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)

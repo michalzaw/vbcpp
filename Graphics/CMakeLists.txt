@@ -115,6 +115,7 @@ set (GRAPHICS_HEADERS
 		Graphics/BezierCurve.h
 		Graphics/RAnimation.h
 		Graphics/AnimationNodeData.h
+		Graphics/ShaderStorageBuffer.h
 		Graphics/SkeletalAnimationComponent.h
 		Graphics/SkeletalAnimationComponent2.h
 		Graphics/SkeletalAnimationHelperComponent.h

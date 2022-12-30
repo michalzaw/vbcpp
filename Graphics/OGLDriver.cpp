@@ -37,6 +37,11 @@ OGLDriver::~OGLDriver()
         delete _uboList[i];
     }
 
+    for (int i = 0; i < _ssboList.size(); ++i)
+    {
+        delete _ssboList[i];
+    }
+
     for (int i = 0; i < _framebufferList.size(); ++i)
     {
         delete _framebufferList[i];
@@ -223,6 +228,15 @@ UBO* OGLDriver::createUBO(unsigned int size)
 }
 
 
+ShaderStorageBuffer* OGLDriver::createShaderStorageBuffesr(unsigned int size)
+{
+    ShaderStorageBuffer* ssbo = new ShaderStorageBuffer(size);
+    _ssboList.push_back(ssbo);
+
+    return ssbo;
+}
+
+
 Framebuffer* OGLDriver::createFramebuffer()
 {
     Framebuffer* framebuffer = new Framebuffer;
@@ -297,6 +311,21 @@ void OGLDriver::deleteUBO(UBO* ubo)
         {
             delete _uboList[i];
             _uboList.erase(_uboList.begin() + i);
+
+            break;
+        }
+    }
+}
+
+
+void OGLDriver::deleteShaderStorageBuffer(ShaderStorageBuffer* ssbo)
+{
+    for (int i = 0; i < _ssboList.size(); ++i)
+    {
+        if (_ssboList[i] == ssbo)
+        {
+            delete _ssboList[i];
+            _ssboList.erase(_ssboList.begin() + i);
 
             break;
         }
