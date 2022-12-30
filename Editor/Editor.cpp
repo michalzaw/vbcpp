@@ -906,7 +906,7 @@ namespace vbEditor
 
 		Renderer& renderer = Renderer::getInstance();
 		renderer.setGraphicsManager(_graphicsManager);
-		renderer.setMsaaAntialiasing(false);
+		renderer.setMsaaAntialiasing(true);
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
 		renderer.setIsShadowMappingEnable(true);
@@ -965,7 +965,7 @@ namespace vbEditor
 		_selectRoadProfileDialogWindow->setDefaultDescriptionLoader("profile.xml", "Profile");
 		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
 
-		_computeShaderTestWindow = new ComputeShaderTestWindow(true);
+		_computeShaderTestWindow = new ComputeShaderTestWindow(false);
 		_imGuiInterface->addWindow(_computeShaderTestWindow);
 	}
 

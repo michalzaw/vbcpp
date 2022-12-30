@@ -1277,7 +1277,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     if (_renderObjectIdsForPicking)
     {
-        _pickingComputeShader = ResourceManager::getInstance().loadComputeShader("Shaders/pickingShader.comp");
+        defines.clear();
+        defines.push_back(_msaaAntialiasing ? "MSAA_ENABLED" : "MSAA_DISABLED");
+
+        _pickingComputeShader = ResourceManager::getInstance().loadComputeShader("Shaders/compute/pickingShader.comp", defines);
         _pickingSSBO = OGLDriver::getInstance().createShaderStorageBuffesr(sizeof(PickingShaderStorageBufferData));
     }
 

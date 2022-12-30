@@ -48,9 +48,10 @@ class ResourceManager
         RTexture2D* loadDefaultWhiteTexture();
 		RTexture2D* loadOneColorTexture(glm::vec4 color);
 
-        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>(),
-                            const std::unordered_map<std::string, std::string>& constants = std::unordered_map<std::string, std::string>());
-        RShader* loadComputeShader(std::string shaderPath);
+        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = {},
+                            const std::unordered_map<std::string, std::string>& constants = {});
+        RShader* loadComputeShader(std::string shaderPath, const std::vector<std::string>& defines = {},
+                                   const std::unordered_map<std::string, std::string>& constants = {});
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 

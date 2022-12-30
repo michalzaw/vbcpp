@@ -23,7 +23,7 @@ ShaderData shaderData;
 ComputeShaderTestWindow::ComputeShaderTestWindow(bool isOpen/* = false*/)
 	: ImGuiWindow(nullptr, isOpen)
 {
-	_computeShader = ResourceManager::getInstance().loadComputeShader("Shaders/computeShader.comp");
+	_computeShader = ResourceManager::getInstance().loadComputeShader("Shaders/compute/computeShader.comp");
 
 	_texture = new RTexture2D("ComputeShaderResult", (float*) nullptr, TF_RGBA_32F, glm::uvec2(1000, 1000), false);
 	_texture->setClampMode(TCM_CLAMP_TO_EDGE);

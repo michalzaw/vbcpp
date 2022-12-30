@@ -147,8 +147,8 @@ GLuint ShaderLoader::linkProgram(std::vector<GLuint> shadersIds)
 }
 
 
-GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fragmentShaderFileName, const std::vector<std::string>& defines,
-                                const std::unordered_map<std::string, std::string>& constants)
+GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fragmentShaderFileName, const std::vector<std::string>& defines/* = {}*/,
+                                const std::unordered_map<std::string, std::string>& constants/* = {}*/)
 {
 	std::string vertexShaderCode;
 	std::string fragmentShaderCode;
@@ -182,11 +182,12 @@ GLuint ShaderLoader::loadShader(const char* vertexShaderFileName, const char* fr
 }
 
 
-GLuint ShaderLoader::loadComputeShader(const char* shaderFileName)
+GLuint ShaderLoader::loadComputeShader(const char* shaderFileName, const std::vector<std::string>& defines/* = {}*/,
+                                       const std::unordered_map<std::string, std::string>& constants/* = {}*/)
 {
     std::string shaderCode;
 
-    if (!loadShaderCode(shaderFileName, shaderCode, {}, {}))
+    if (!loadShaderCode(shaderFileName, shaderCode, defines, constants))
     {
         LOG_ERROR("Can not open ShaderFile: " + std::string(shaderFileName) + "!");
     }

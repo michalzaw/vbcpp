@@ -317,8 +317,8 @@ RTexture2D* ResourceManager::loadOneColorTexture(glm::vec4 color)
 
 
 // Ładowanie shaderów
-RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines,
-                                     const std::unordered_map<std::string, std::string>& constants)
+RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines/* = {}*/,
+                                     const std::unordered_map<std::string, std::string>& constants/* = {}*/)
 {
     std::string path = vertexPath + ";" + fragmPath;
     for (int i = 0; i < defines.size(); ++i)
@@ -365,9 +365,23 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 }
 
 
-RShader* ResourceManager::loadComputeShader(std::string shaderPath)
+RShader* ResourceManager::loadComputeShader(std::string shaderPath, const std::vector<std::string>& defines/* = {}*/,
+                                            const std::unordered_map<std::string, std::string>& constants/* = {}*/)
 {
-    Resource* res = findResource(shaderPath);
+    std::string path = shaderPath;
+    for (int i = 0; i < defines.size(); ++i)
+    {
+        path += ";" + defines[i];
+    }
+    if (constants.size() > 0)
+        path += ";c:";
+
+    for (std::pair<std::string, std::string> element : constants)
+    {
+        path += ";" + element.first + ":" + element.second;
+    }
+
+    Resource* res = findResource(path);
     if (res != 0)
     {
         RShader* shdr = dynamic_cast<RShader*>(res);
@@ -381,7 +395,7 @@ RShader* ResourceManager::loadComputeShader(std::string shaderPath)
         shaderPath = _alternativeResourcePath + shaderPath;
 #endif // DEVELOPMENT_RESOURCES
 
-    std::unique_ptr<Resource> shader(new RShader(shaderPath, ShaderLoader::loadComputeShader(shaderPath.c_str()), ST_COMPUTE));
+    std::unique_ptr<Resource> shader(new RShader(path, ShaderLoader::loadComputeShader(shaderPath.c_str(), defines, constants), ST_COMPUTE));
 
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
 
@@ -399,42 +413,53 @@ RShader* ResourceManager::loadComputeShader(std::string shaderPath)
 
 void ResourceManager::reloadShader(RShader* shader)
 {
+    std::istringstream stream(shader->getPath());
+
+    std::string vertexShaderFilename;
+    std::string fragmentShaderFilename;
+    std::string computeShaderFilename;
+
     if (shader->getShaderType() == ST_NORMAL)
     {
-        std::istringstream stream(shader->getPath());
-
-        std::string vertexShaderFilename;
-        std::string fragmentShaderFilename;
-        std::vector<std::string> defines;
-        std::unordered_map<std::string, std::string> constants;
-
         getline(stream, vertexShaderFilename, ';');
         getline(stream, fragmentShaderFilename, ';');
-
-        string s;
-        while (getline(stream, s, ';'))
-        {
-            if (s == "c:")
-                break;
-
-            defines.push_back(s);
-        }
-
-        while (getline(stream, s, ';'))
-        {
-            unsigned int pos = s.find(":");
-            std::string name = s.substr(0, pos);
-            std::string value = s.substr(pos + 1, s.size() - pos);
-
-            constants[name] = value;
-        }
+    }
+    else
+    {
+        getline(stream, computeShaderFilename, ';');
+    }
 
 
+    std::vector<std::string> defines;
+    std::unordered_map<std::string, std::string> constants;
+
+
+    string s;
+    while (getline(stream, s, ';'))
+    {
+        if (s == "c:")
+            break;
+
+        defines.push_back(s);
+    }
+
+    while (getline(stream, s, ';'))
+    {
+        unsigned int pos = s.find(":");
+        std::string name = s.substr(0, pos);
+        std::string value = s.substr(pos + 1, s.size() - pos);
+
+        constants[name] = value;
+    }
+
+
+    if (shader->getShaderType() == ST_NORMAL)
+    {
         shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
     }
     else
     {
-        shader->setNewShader(ShaderLoader::loadComputeShader(shader->getPath().c_str()));
+        shader->setNewShader(ShaderLoader::loadComputeShader(computeShaderFilename.c_str(), defines, constants));
     }
 }
 

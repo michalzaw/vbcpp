@@ -33,10 +33,11 @@ class ShaderLoader
         static GLuint linkProgram(std::vector<GLuint> shadersIds);
 
     public:
-        static GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName, const std::vector<std::string>& defines = std::vector<std::string>(),
-                                 const std::unordered_map<std::string, std::string>& constants = std::unordered_map<std::string, std::string>());
+        static GLuint loadShader(const char* VertexShaderFileName, const char* FragmentShaderFileName, const std::vector<std::string>& defines = {},
+                                 const std::unordered_map<std::string, std::string>& constants = {});
 
-        static GLuint loadComputeShader(const char* shaderFileName);
+        static GLuint loadComputeShader(const char* shaderFileName, const std::vector<std::string>& defines = {},
+                                        const std::unordered_map<std::string, std::string>& constants = {});
 
 };
 
