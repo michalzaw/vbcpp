@@ -2,10 +2,15 @@
 
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
+#include "StorageBuffer/PickingShaderStorageBufferData.h"
 
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/Timer.h"
+
+
+//#define OBJECT_PICKING_GET_TEX_IMAGE
+#define OBJECT_PICKING_STORAGE_BUFFER
 
 
 static std::unique_ptr<Renderer> rendererInstance;
@@ -25,7 +30,7 @@ Renderer::Renderer()
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
     _requiredRebuildStaticLighting(false),
-    _objectsIdsTextureData(nullptr)
+    _objectsIdsTextureData(nullptr), _pickingComputeShader(nullptr), _pickingSSBO(nullptr)
 {
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
@@ -70,6 +75,11 @@ Renderer::~Renderer()
     if (_objectsIdsTextureData != nullptr)
     {
         delete _objectsIdsTextureData;
+    }
+
+    if (_pickingSSBO != nullptr)
+    {
+        OGLDriver::getInstance().deleteShaderStorageBuffer(_pickingSSBO);
     }
 }
 
@@ -1263,6 +1273,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     _shaderList[SOLID_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
     _shaderList[NORMALMAPPING_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
+
+
+    if (_renderObjectIdsForPicking)
+    {
+        _pickingComputeShader = ResourceManager::getInstance().loadComputeShader("Shaders/pickingShader.comp");
+        _pickingSSBO = OGLDriver::getInstance().createShaderStorageBuffesr(sizeof(PickingShaderStorageBufferData));
+    }
 
 
     _isInitialized = true;
@@ -2515,19 +2532,58 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
 
 unsigned int Renderer::pickObject(int x, int y)
 {
+    if (!_pickingComputeShader)
+    {
+        LOG_WARNING("Graphics object picking is disabled.");
+        return 0;
+    }
+
     RTexture* texture = _mainRenderData->framebuffer->getTexture(2);
 
-    glBindTexture(GL_TEXTURE_2D, texture->getID());
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, _objectsIdsTextureData);
+    unsigned int id = 0;
 
-    unsigned int id = _objectsIdsTextureData[y * texture->getSize().x + x];
+#ifdef OBJECT_PICKING_GET_TEX_IMAGE
+    {
+        Timer timer;
+        timer.start();
+
+        glBindTexture(GL_TEXTURE_2D, texture->getID());
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, _objectsIdsTextureData);
+
+        id = _objectsIdsTextureData[y * texture->getSize().x + x];
+
+        double pickingTime = timer.stop();
+        LOG_DEBUG(LOG_VARIABLE(pickingTime));
+    }
+#endif // OBJECT_PICKING_GET_TEX_IMAGE
+
+#ifdef OBJECT_PICKING_STORAGE_BUFFER
+    {
+        Timer timer;
+        timer.start();
+
+        PickingShaderStorageBufferData shaderData;
+        shaderData.x = static_cast<float>(x) / static_cast<float>(_screenWidth);
+        shaderData.y = static_cast<float>(y) / static_cast<float>(_screenHeight);
+
+        _pickingComputeShader->enable();
+        _pickingComputeShader->bindTexture(_pickingComputeShader->getUniformLocation("textureObjectsIds"), texture);
+        _pickingComputeShader->setShaderStorageBlockBinding("ShaderData", 0);
+        _pickingSSBO->bindBufferBase(0);
+        _pickingSSBO->setData(shaderData);
+
+        _pickingComputeShader->runComputeShader(1, 1, 1);
+
+        _pickingSSBO->getBufferData(shaderData);
+
+        id = shaderData.selectedObject;
+
+        double pickingTime = timer.stop();
+        LOG_DEBUG(LOG_VARIABLE(pickingTime));
+    }
+#endif // OBJECT_PICKING_STORAGE_BUFFER
 
     LOG_DEBUG("Selected object " + LOG_VARIABLE(id));
-
-    //unsigned int id2[4];
-    //glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_UNSIGNED_INT, id2);
-
-    //LOG_DEBUG(LOG_VARIABLE(id) + ", " + LOG_VARIABLE(id2[0]) + ", " + LOG_VARIABLE(id2[1]) + ", " + LOG_VARIABLE(id2[2]) + ", " + LOG_VARIABLE(id2[3]));
 
     return id;
 }

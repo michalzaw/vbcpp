@@ -110,6 +110,7 @@ set (GRAPHICS_SOURCES
 )
 
 set (GRAPHICS_HEADERS
+		Graphics/StorageBuffer/PickingShaderStorageBufferData.h
 		Graphics/AnimatedModelLoader.h
 		Graphics/AnimationLoader.h
 		Graphics/BezierCurve.h

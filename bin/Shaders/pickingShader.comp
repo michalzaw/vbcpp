@@ -1,0 +1,17 @@
+#version 430 core
+
+layout (local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+uniform usampler2D textureObjectsIds;
+
+layout (std430) buffer ShaderData
+{
+    float x;
+    float y;
+    uint selectedObject;
+} shaderData;
+
+
+void main() {
+    shaderData.selectedObject = texture(textureObjectsIds, vec2(shaderData.x, shaderData.y)).r;
+}

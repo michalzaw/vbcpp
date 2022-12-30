@@ -179,6 +179,8 @@ class Renderer
 
 
 		unsigned int* _objectsIdsTextureData;
+		RShader* _pickingComputeShader;
+		ShaderStorageBuffer* _pickingSSBO;
 
 
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);

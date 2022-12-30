@@ -53,6 +53,16 @@ class ShaderStorageBuffer final
             return true;
         }
 
+        template <typename DataType>
+        void getBufferData(DataType& outData)
+        {
+            bind();
+
+            GLvoid* data = glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_READ_ONLY);
+            memcpy(&outData, data, sizeof(DataType));
+            glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+        }
+
 };
 
 
