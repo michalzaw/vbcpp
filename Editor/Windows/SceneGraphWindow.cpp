@@ -84,6 +84,8 @@ namespace vbEditor {
 	extern SceneObject* _selectedSceneObject;
 	extern std::vector<RoadObject*> _selectedRoads;
 
+	extern std::vector<SceneObject*> _selectedObjects;
+	extern SceneObject* _groupingSceneObject;
 
 	static int selectionMask = -1;
 	int nodeNumber, nodeClicked = -1;
@@ -99,7 +101,7 @@ namespace vbEditor {
 		{
 			for (std::list<SceneObject*>::iterator i = sceneRoot.begin(); i != sceneRoot.end(); ++i)
 			{
-				if ((*i)->getParent() == nullptr)
+				if ((*i)->getParent() == nullptr || isVectorContains(_selectedObjects, (*i)->getParent()));
 				{
 					inspectSceneObject(*i);
 				}
@@ -145,7 +147,7 @@ namespace vbEditor {
 			node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
 
 
-		if (object == _selectedSceneObject)
+		if (object == _selectedSceneObject || isVectorContains(_selectedObjects, object))
 		{
 			node_flags |= ImGuiTreeNodeFlags_Selected;
 

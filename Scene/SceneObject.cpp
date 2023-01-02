@@ -266,11 +266,22 @@ bool SceneObject::removeChild(SceneObject* child)
 }
 
 
-void SceneObject::removeAllChildren()
+void SceneObject::removeAllChildren(bool setChildInGlobalPosition/* = false*/)
 {
     for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
     {
+        glm::mat4 globalTransform;
+        if (setChildInGlobalPosition)
+        {
+            globalTransform = (*i)->getGlobalTransformMatrix();
+        }
+
         (*i)->_parent = NULL;
+
+        if (setChildInGlobalPosition)
+        {
+            (*i)->setTransformFromMatrix(globalTransform, false);
+        }
     }
 
     _childrens.clear();

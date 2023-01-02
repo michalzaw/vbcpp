@@ -21,6 +21,7 @@
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
+#include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
 #include "../Utils/ResourceDescription.h"
@@ -576,6 +577,8 @@ namespace vbEditor
 
 	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
 
+	SceneObject* _groupingSceneObject = nullptr;
+
 	void setClickMode(ClickMode clickMode)
 	{
 		if (_clickMode == CM_ADD_OBJECT)
@@ -598,14 +601,79 @@ namespace vbEditor
 		}
 	}
 
+	std::vector<SceneObject*> _selectedObjects;
+
 	void setSelectedSceneObject(SceneObject* object)
 	{
-		_selectedSceneObject = object;
-		centerGraphView();
-
-		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr))
+		if (_clickMode != CM_PICK_OBJECT)
 		{
-			setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			setClickMode(CM_PICK_OBJECT);
+		}
+
+		if (object == nullptr)
+		{
+			_selectedSceneObject = nullptr;
+
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+
+			return;
+		}
+
+		if (_selectedSceneObject != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			if (_selectedSceneObject != _groupingSceneObject)
+			{
+				_selectedObjects.push_back(_selectedSceneObject);
+				_selectedSceneObject = _groupingSceneObject;
+			}
+
+			_selectedObjects.push_back(object);
+
+			std::vector<glm::vec3> selectedObjectsGlobalPositions;
+			glm::vec3 selectedObjectsCenterPosition(0.0f, 0.0f, 0.0f);
+			for (SceneObject* object : _selectedObjects)
+			{
+				const glm::mat4& globalTransform = object->getGlobalTransformMatrix();
+
+				glm::vec3 translation;
+				glm::quat orientation;
+				glm::vec3 scale;
+				GlmUtils::decomposeMatrix(globalTransform, translation, orientation, scale);
+
+				object->setRotationQuaternion(orientation);
+				object->setScale(scale);
+
+				selectedObjectsGlobalPositions.push_back(translation);
+				selectedObjectsCenterPosition += translation;
+			}
+
+			selectedObjectsCenterPosition /= _selectedObjects.size();
+
+			_groupingSceneObject->setPosition(selectedObjectsCenterPosition);
+			_groupingSceneObject->setRotation(0.0f, 0.0f, 0.0f);
+			_groupingSceneObject->setScale(1.0f, 1.0f, 1.0f);
+
+			for (int i = 0; i < _selectedObjects.size(); ++i)
+			{
+				_groupingSceneObject->addChild(_selectedObjects[i]);
+				_selectedObjects[i]->setPosition(selectedObjectsGlobalPositions[i] - selectedObjectsCenterPosition);
+			}
+
+			centerGraphView();
+		}
+		else
+		{
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+
+			_selectedSceneObject = object;
+			centerGraphView();
+
+			if (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr)
+			{
+				setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			}
 		}
 	}
 
@@ -667,7 +735,7 @@ namespace vbEditor
 			if (objectId > 0)
 			{
 				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
-				if (!(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
 				{
 					setSelectedSceneObject(sceneObject);
 				}
@@ -862,6 +930,9 @@ namespace vbEditor
 
 		sceneManager->getGraphicsManager()->setCurrentCamera(_camera);
 		sceneManager->getSoundManager()->setActiveCamera(_camera);
+
+		_groupingSceneObject = sceneManager->addSceneObject("editor#groupingSceneObject");
+		_groupingSceneObject->setFlags(SOF_NOT_SELECTABLE);
 
 
 		SceneLoader sceneLoader(sceneManager);
