@@ -932,7 +932,7 @@ namespace vbEditor
 		sceneManager->getSoundManager()->setActiveCamera(_camera);
 
 		_groupingSceneObject = sceneManager->addSceneObject("editor#groupingSceneObject");
-		_groupingSceneObject->setFlags(SOF_NOT_SELECTABLE);
+		_groupingSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 
 
 		SceneLoader sceneLoader(sceneManager);
