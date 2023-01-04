@@ -603,32 +603,73 @@ namespace vbEditor
 
 	std::vector<SceneObject*> _selectedObjects;
 
+	void setObjectHighlighting(SceneObject* object, bool isHighlighted)
+	{
+		RenderObject* renderObject = static_cast<RenderObject*>(object->getComponent(CT_RENDER_OBJECT));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+		}
+	}
+
+	void setObjectsHighlighting(std::vector<SceneObject*> objects, bool isHighlighted)
+	{
+		for (SceneObject* object : objects)
+		{
+			setObjectHighlighting(object, isHighlighted);
+		}
+	}
+
 	void setSelectedSceneObject(SceneObject* object)
 	{
-		if (_clickMode != CM_PICK_OBJECT)
+		if (_clickMode == CM_ROAD_EDIT)
 		{
 			setClickMode(CM_PICK_OBJECT);
 		}
 
-		if (object == nullptr)
+		if (_selectedSceneObject != nullptr && object != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
-			_selectedSceneObject = nullptr;
+			auto objectInVector = std::find(_selectedObjects.begin(), _selectedObjects.end(), object);
+			if (objectInVector == _selectedObjects.end())
+			{
+				_selectedObjects.push_back(object);
+				setObjectHighlighting(object, true);
+			}
+			else
+			{
+				_selectedObjects.erase(objectInVector);
+				setObjectHighlighting(object, false);
+			}
 
+			if (_selectedObjects.size() == 1 && _selectedSceneObject != _groupingSceneObject && !isVectorContains(_selectedObjects, _selectedSceneObject))
+			{
+				_selectedObjects.push_back(_selectedSceneObject);
+			}
+
+			_groupingSceneObject->removeAllChildren(true);
+		}
+		else if (object != nullptr)
+		{
+			setObjectsHighlighting(_selectedObjects, false);
 			_selectedObjects.clear();
 			_groupingSceneObject->removeAllChildren(true);
 
-			return;
+			if (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr)
+			{
+				setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			}
+		}
+		else
+		{
+			setObjectsHighlighting(_selectedObjects, false);
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
 		}
 
-		if (_selectedSceneObject != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		{
-			if (_selectedSceneObject != _groupingSceneObject)
-			{
-				_selectedObjects.push_back(_selectedSceneObject);
-				_selectedSceneObject = _groupingSceneObject;
-			}
 
-			_selectedObjects.push_back(object);
+		if (_selectedObjects.size() > 1)
+		{
+			_selectedSceneObject = _groupingSceneObject;
 
 			std::vector<glm::vec3> selectedObjectsGlobalPositions;
 			glm::vec3 selectedObjectsCenterPosition(0.0f, 0.0f, 0.0f);
@@ -659,22 +700,23 @@ namespace vbEditor
 				_groupingSceneObject->addChild(_selectedObjects[i]);
 				_selectedObjects[i]->setPosition(selectedObjectsGlobalPositions[i] - selectedObjectsCenterPosition);
 			}
+		}
+		else if (_selectedObjects.size() == 1)
+		{
+			_selectedSceneObject = _selectedObjects[0];
 
-			centerGraphView();
+			_selectedObjects.clear();
 		}
 		else
 		{
-			_selectedObjects.clear();
-			_groupingSceneObject->removeAllChildren(true);
+			if (_selectedSceneObject != nullptr) setObjectHighlighting(_selectedSceneObject, false);
+			if (object != nullptr) setObjectHighlighting(object, true);
 
 			_selectedSceneObject = object;
-			centerGraphView();
-
-			if (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr)
-			{
-				setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
-			}
 		}
+
+
+		centerGraphView();
 	}
 
 	bool getCursorPositionIn3D(GLFWwindow* glfwWindow, glm::vec3& outCursorPosition)

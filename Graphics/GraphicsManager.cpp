@@ -11,6 +11,7 @@
 
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f), _windTimer(0.0f),
+    _objectsHighlightingColor(1.0f, 0.0f, 0.0f, 1.0f),
     _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
 {
     //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
@@ -636,6 +637,18 @@ float GraphicsManager::getWindValue()
 float GraphicsManager::getWindTimer()
 {
 	return _windTimer;
+}
+
+
+void GraphicsManager::setObjectHighlightingColor(const glm::vec4& objectHighlightingColor)
+{
+    _objectsHighlightingColor = objectHighlightingColor;
+}
+
+
+const glm::vec4& GraphicsManager::getObjectHighlightingColor()
+{
+    return _objectsHighlightingColor;
 }
 
 

@@ -36,6 +36,8 @@ class RenderObject : public Component
         bool _isCastShadows;
 		bool _isDynamicObject;
 
+        bool _isHighlighted;
+
         AABB _aabb;
         bool _isCalculatedAABB;
 
@@ -66,6 +68,9 @@ class RenderObject : public Component
         bool isCastShadows();
 		void setDynamicObject(bool isDynamic);
 		bool isDynamicObject();
+
+        void setIsHighlighted(bool isHighlighted);
+        bool isHighlighted();
 
         AABB* getAABB();
 

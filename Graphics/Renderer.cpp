@@ -2081,10 +2081,11 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MODEL_MATRIX], modelMatrix);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_NORMAL_MATRIX], normalMatrix);
 
+        glm::vec4 highlightingEmissiveColor = static_cast<float>(i->renderObject->isHighlighted()) * _graphicsManager->getObjectHighlightingColor();
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_AMBIENT_COLOR], material->ambientColor);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_DIFFUSE_COLOR], material->diffuseColor);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_COLOR], material->specularColor);
-        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor + highlightingEmissiveColor);
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
