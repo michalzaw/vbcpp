@@ -101,7 +101,7 @@ namespace vbEditor {
 		{
 			for (std::list<SceneObject*>::iterator i = sceneRoot.begin(); i != sceneRoot.end(); ++i)
 			{
-				if ((*i)->getParent() == nullptr || isVectorContains(_selectedObjects, (*i)->getParent()));
+				if ((*i)->getParent() == nullptr || isVectorContains(_selectedObjects, *i))
 				{
 					inspectSceneObject(*i);
 				}

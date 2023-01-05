@@ -610,6 +610,11 @@ namespace vbEditor
 		{
 			renderObject->setIsHighlighted(isHighlighted);
 		}
+
+		for (SceneObject* child : object->getChildren())
+		{
+			setObjectHighlighting(child, isHighlighted);
+		}
 	}
 
 	void setObjectsHighlighting(std::vector<SceneObject*> objects, bool isHighlighted)
@@ -629,6 +634,12 @@ namespace vbEditor
 
 		if (_selectedSceneObject != nullptr && object != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
+			if (object->getParent() != nullptr || _selectedSceneObject->hasParent())
+			{
+				LOG_WARNING("Multi select is not supported for objects with parent.");
+				return;
+			}
+
 			auto objectInVector = std::find(_selectedObjects.begin(), _selectedObjects.end(), object);
 			if (objectInVector == _selectedObjects.end())
 			{

@@ -66,6 +66,8 @@ void ComputeShaderTestWindow::drawWindow()
 		{
 			_computeShader->enable();
 			_computeShader->bindTextureImage(_texture, 0, 0, TIBM_READ_AND_WRITE);
+			_computeShader->setShaderStorageBlockBinding("ShaderData", 0);
+			_shaderStorageBuffer->bindBufferBase(0);
 			//_computeShader->setUniform(_computeShader->getUniformLocation("t"), t);
 			_computeShader->runComputeShader(numGroups.x, numGroups.y, numGroups.z);
 		}
