@@ -605,15 +605,22 @@ namespace vbEditor
 
 	void setObjectHighlighting(SceneObject* object, bool isHighlighted)
 	{
+		for (SceneObject* child : object->getChildren())
+		{
+			setObjectHighlighting(child, isHighlighted);
+		}
+
 		RenderObject* renderObject = static_cast<RenderObject*>(object->getComponent(CT_RENDER_OBJECT));
 		if (renderObject != nullptr)
 		{
 			renderObject->setIsHighlighted(isHighlighted);
+			return;
 		}
-
-		for (SceneObject* child : object->getChildren())
+		renderObject = static_cast<RenderObject*>(object->getComponent(CT_PREFAB));
+		if (renderObject != nullptr)
 		{
-			setObjectHighlighting(child, isHighlighted);
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
 		}
 	}
 
@@ -634,7 +641,7 @@ namespace vbEditor
 
 		if (_selectedSceneObject != nullptr && object != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 		{
-			if (object->getParent() != nullptr || _selectedSceneObject->hasParent())
+			if ((object->getParent() != nullptr && object->getParent() != _groupingSceneObject) || _selectedSceneObject->hasParent())
 			{
 				LOG_WARNING("Multi select is not supported for objects with parent.");
 				return;

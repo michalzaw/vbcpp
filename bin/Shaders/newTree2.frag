@@ -291,6 +291,8 @@ void main()
 	}
 	
 	FragmentColor.rgb = LightsColor.rgb;
+	
+	FragmentColor.rgb += (matEmissive * textureColor).rgb;
 
 	
 #ifdef RENDER_OBJECT_ID

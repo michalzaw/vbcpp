@@ -63,6 +63,7 @@ uniform LightsBlock
 uniform vec4 matAmbient;
 uniform vec4 matDiffuse;
 uniform vec4 matSpecular;
+uniform vec4 matEmissive;
 uniform float Transparency;
 uniform sampler2D Texture;
 uniform float SpecularPower;
@@ -150,6 +151,7 @@ void main()
 	//FragmentColor = texture2D(Texture, TexCoord) * LightsColor;
 	
 	FragmentColor = LightsColor * matDiffuse;
+	FragmentColor += matEmissive;
 	FragmentColor.a = 1.0f;
 #ifdef TRANSPARENCY
 	FragmentColor.a = 1 - Transparency;
