@@ -2252,7 +2252,7 @@ void Renderer::renderScene(RenderData* renderData)
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
         }
-        if (material->shader == SOLID_ANIMATED_MATERIAL)
+        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
         {
             glDisableVertexAttribArray(5);
             glDisableVertexAttribArray(6);
