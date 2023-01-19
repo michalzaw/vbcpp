@@ -99,6 +99,13 @@ bool compareByShader(const RenderListElement& a, const RenderListElement& b)
 }
 
 
+// obiekty ktore nie renderuja swojego id trafiaja na koniec
+bool compareByShaderAndObjectId(const RenderListElement& a, const RenderListElement& b)
+{
+    return a.material->shader + (a.renderObject->isRenderObjectId() ? 0 : 100) < b.material->shader + (b.renderObject->isRenderObjectId() ? 0 : 100);
+}
+
+
 void Renderer::addPostProcessingEffect(PostProcessingEffect* postProcessingEffect)
 {
 	for (std::vector<PostProcessingEffect*>::iterator i = _postProcessingEffectsStack.begin(); i != _postProcessingEffectsStack.end(); ++i)
@@ -692,8 +699,15 @@ void Renderer::prepareRenderData()
 			}
 		}
 	}
-
-    _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
+    
+    if (_renderObjectIdsForPicking)
+    {
+        _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShaderAndObjectId);
+    }
+    else
+    {
+        _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
+    }
 }
 
 
@@ -2193,6 +2207,11 @@ void Renderer::renderScene(RenderData* renderData)
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_OBJECT_ID], i->object->getId());
 
+        if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())
+        {
+            glColorMaski(2, GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        }
+
         if (i->type != RET_GRASS)
         {
             glDrawElements(model->getPrimitiveType(),
@@ -2242,6 +2261,11 @@ void Renderer::renderScene(RenderData* renderData)
                                 (int)a);
 
             glEnable(GL_CULL_FACE);
+        }
+
+        if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())
+        {
+            glColorMaski(2, GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
         }
 
         glDisableVertexAttribArray(0);

@@ -24,6 +24,7 @@
 #include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
+#include "../Utils/QuaternionUtils.h"
 #include "../Utils/ResourceDescription.h"
 
 #include <imgui.h>
@@ -829,6 +830,12 @@ namespace vbEditor
 			if (_clickMode == CM_ADD_OBJECT)
 			{
 				_objectToAdd->setFlags(SOF_NONE);
+				Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+				if (renderObject != nullptr)
+				{
+					static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(true);
+				}
+
 				setSelectedSceneObject(_objectToAdd);
 				loadNewObjectToAdd();
 			}
@@ -863,6 +870,49 @@ namespace vbEditor
 		}
 	}
 
+	void adjustNewObjectRotationToCurve()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		if (objectId > 0)
+		{
+			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+			if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+			{
+				BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+				if (bezierCurveComponent != nullptr)
+				{
+					const auto& points = bezierCurveComponent->getCurvePoints();
+					int pointWithMinDistanceIndex = 0;
+					float minDistance = FLT_MAX;
+					for (int i = 0; i < points.size(); ++i)
+					{
+						float distance = glm::distance(points[i], _objectToAdd->getPosition());
+						if (distance < minDistance)
+						{
+							minDistance = distance;
+							pointWithMinDistanceIndex = i;
+						}
+					}
+
+					int i = pointWithMinDistanceIndex;
+					const glm::vec3& p1 = (i < points.size() - 1) ? points[i] : points[i - 1];
+					const glm::vec3& p2 = (i < points.size() - 1) ? points[i + 1] : points[i];
+
+					glm::vec3 direction = glm::normalize(p2 - p1);
+					glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					glm::vec3 rightVector = glm::cross(direction, upVector);
+
+					_objectToAdd->setRotationQuaternion(QuaternionUtils::rotationBetweenVectors(glm::vec3(1.0f, 0.0f, 0.0f), direction));
+				}
+			}
+		}
+	}
+
 	void mouseCursourPosCallback(GLFWwindow* glfwWindow, double xPosition, double yPosition)
 	{
 		if (_clickMode == CM_ADD_OBJECT && _objectToAdd != nullptr)
@@ -876,6 +926,11 @@ namespace vbEditor
 					mousePosition.z = round(mousePosition.z);
 				}
 				_objectToAdd->setPosition(mousePosition);
+			}
+
+			if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+			{
+				adjustNewObjectRotationToCurve();
 			}
 		}
 	}
@@ -1136,6 +1191,11 @@ namespace vbEditor
 
 		_objectToAdd = RObjectLoader::createSceneObjectFromRObject(_objectToAddDefinition, _objectToAddDefinition->getName(), position, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 		_objectToAdd->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+		Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+		if (renderObject != nullptr)
+		{
+			static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(false);
+		}
 	}
 
 	void addObject(const std::string& objectName)

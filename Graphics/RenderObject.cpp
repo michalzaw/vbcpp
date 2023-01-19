@@ -9,7 +9,7 @@
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
-    _isHighlighted(false),
+    _isHighlighted(false), _isRenderObjectId(true),
     _isCalculatedAABB(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");

@@ -37,6 +37,7 @@ class RenderObject : public Component
 		bool _isDynamicObject;
 
         bool _isHighlighted;
+        bool _isRenderObjectId;
 
         AABB _aabb;
         bool _isCalculatedAABB;
@@ -71,6 +72,8 @@ class RenderObject : public Component
 
         void setIsHighlighted(bool isHighlighted);
         bool isHighlighted();
+        inline void setIsRenderObjectId(bool isRenderObjectId) { _isRenderObjectId = isRenderObjectId; }
+        inline bool isRenderObjectId() { return _isRenderObjectId; }
 
         AABB* getAABB();
 
