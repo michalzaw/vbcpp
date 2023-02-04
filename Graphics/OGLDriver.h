@@ -13,6 +13,7 @@
 #include "VBO.h"
 #include "IBO.h"
 #include "UBO.h"
+#include "ShaderStorageBuffer.h"
 #include "Framebuffer.h"
 
 #include <memory>
@@ -35,6 +36,7 @@ class OGLDriver
         std::vector<VBO*> _vboList;
         std::vector<IBO*> _iboList;
         std::vector<UBO*> _uboList;
+        std::vector<ShaderStorageBuffer*> _ssboList;
         std::vector<Framebuffer*> _framebufferList;
 
         VAO* _currentVAO;
@@ -67,6 +69,7 @@ class OGLDriver
         VBO* createVBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         IBO* createIBO(unsigned int size, GLenum usage = GL_STATIC_DRAW);
         UBO* createUBO(unsigned int size);
+        ShaderStorageBuffer* createShaderStorageBuffesr(unsigned int size);
         Framebuffer* createFramebuffer();
         void registerFramebufferForInitialization(Framebuffer* framebuffer);
 
@@ -74,6 +77,7 @@ class OGLDriver
         void deleteVBO(VBO* vbo);
         void deleteIBO(IBO* ibo);
         void deleteUBO(UBO* ubo);
+        void deleteShaderStorageBuffer(ShaderStorageBuffer* ssbo);
         void deleteFramebuffer(Framebuffer* framebuffer);
 
         VAO* getCurrentVAO();

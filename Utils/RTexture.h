@@ -29,6 +29,8 @@ enum TextureFormat
     TF_RGB_32F          = GL_RGB32F,
     TF_RGBA_16F         = GL_RGBA16F,
     TF_RGBA_32F         = GL_RGBA32F,
+    TF_RED_32           = GL_R32UI,
+    TF_RED_INTEGER      = GL_RED_INTEGER,
     TF_DEPTH_COMPONENT  = GL_DEPTH_COMPONENT
 
 };
@@ -50,6 +52,14 @@ enum TextureClampMode
     TCM_CLAMP_TO_EDGE   = GL_CLAMP_TO_EDGE,
     TCM_CLAMP_TO_BORDER = GL_CLAMP_TO_BORDER
 
+};
+
+
+enum TextureImageBindMode
+{
+    TIBM_READ           = GL_READ_ONLY,
+    TIBM_WRITE          = GL_WRITE_ONLY,
+    TIBM_READ_AND_WRITE = GL_READ_WRITE
 };
 
 
@@ -85,6 +95,11 @@ class RTexture : public Resource
         inline void bind()
         {
             glBindTexture(_textureType, _texID);
+        }
+
+        inline void bindImage(unsigned int unit, unsigned int level, TextureImageBindMode bindMode)
+        {
+            glBindImageTexture(unit, _texID, level, GL_FALSE, 0, bindMode, _internalFormat);
         }
 
 		void generateMipmap();

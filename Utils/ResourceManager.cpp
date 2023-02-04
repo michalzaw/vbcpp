@@ -317,8 +317,8 @@ RTexture2D* ResourceManager::loadOneColorTexture(glm::vec4 color)
 
 
 // Ładowanie shaderów
-RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines,
-                                     const std::unordered_map<std::string, std::string>& constants)
+RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines/* = {}*/,
+                                     const std::unordered_map<std::string, std::string>& constants/* = {}*/)
 {
     std::string path = vertexPath + ";" + fragmPath;
     for (int i = 0; i < defines.size(); ++i)
@@ -349,7 +349,7 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 		fragmPath = _alternativeResourcePath + fragmPath;
 #endif // DEVELOPMENT_RESOURCES
 
-    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants)) );
+    std::unique_ptr<Resource> shader ( new RShader(path, ShaderLoader::loadShader(vertexPath.c_str(), fragmPath.c_str(), defines, constants), ST_NORMAL) );
 
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
 
@@ -365,17 +365,74 @@ RShader* ResourceManager::loadShader(std::string vertexPath, std::string fragmPa
 }
 
 
+RShader* ResourceManager::loadComputeShader(std::string shaderPath, const std::vector<std::string>& defines/* = {}*/,
+                                            const std::unordered_map<std::string, std::string>& constants/* = {}*/)
+{
+    std::string path = shaderPath;
+    for (int i = 0; i < defines.size(); ++i)
+    {
+        path += ";" + defines[i];
+    }
+    if (constants.size() > 0)
+        path += ";c:";
+
+    for (std::pair<std::string, std::string> element : constants)
+    {
+        path += ";" + element.first + ":" + element.second;
+    }
+
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RShader* shdr = dynamic_cast<RShader*>(res);
+        return shdr;
+    }
+
+    // std::unique_ptr<Shader> shdr1( new Shader(LoadShader("DirLight.vert", "DirLight.frag")) );
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(shaderPath))
+        shaderPath = _alternativeResourcePath + shaderPath;
+#endif // DEVELOPMENT_RESOURCES
+
+    std::unique_ptr<Resource> shader(new RShader(path, ShaderLoader::loadComputeShader(shaderPath.c_str(), defines, constants), ST_COMPUTE));
+
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + shader.get()->getPath());
+
+    RShader* s = dynamic_cast<RShader*>(shader.get());
+
+    if (s)
+    {
+        _resources.push_back(std::move(shader));
+        return s;
+    }
+    else
+        return 0;
+}
+
+
 void ResourceManager::reloadShader(RShader* shader)
 {
     std::istringstream stream(shader->getPath());
 
     std::string vertexShaderFilename;
     std::string fragmentShaderFilename;
+    std::string computeShaderFilename;
+
+    if (shader->getShaderType() == ST_NORMAL)
+    {
+        getline(stream, vertexShaderFilename, ';');
+        getline(stream, fragmentShaderFilename, ';');
+    }
+    else
+    {
+        getline(stream, computeShaderFilename, ';');
+    }
+
+
     std::vector<std::string> defines;
     std::unordered_map<std::string, std::string> constants;
 
-    getline(stream, vertexShaderFilename, ';');
-    getline(stream, fragmentShaderFilename, ';');
 
     string s;
     while (getline(stream, s, ';'))
@@ -396,7 +453,14 @@ void ResourceManager::reloadShader(RShader* shader)
     }
 
 
-    shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
+    if (shader->getShaderType() == ST_NORMAL)
+    {
+        shader->setNewShader(ShaderLoader::loadShader(vertexShaderFilename.c_str(), fragmentShaderFilename.c_str(), defines, constants));
+    }
+    else
+    {
+        shader->setNewShader(ShaderLoader::loadComputeShader(computeShaderFilename.c_str(), defines, constants));
+    }
 }
 
 

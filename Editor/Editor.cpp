@@ -21,8 +21,10 @@
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
+#include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
+#include "../Utils/QuaternionUtils.h"
 #include "../Utils/ResourceDescription.h"
 
 #include <imgui.h>
@@ -39,6 +41,7 @@
 #include "Windows/MaterialEditorWindow.h"
 #include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
+#include "Windows/ComputeShaderTestWindow.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/ShapePolygonComponent.h"
@@ -501,6 +504,12 @@ namespace vbEditor
 		CM_ROAD_EDIT
 	};
 
+	enum ObjectPickingMode
+	{
+		OPM_RAY_CAST,
+		OPM_GRAPHICS
+	};
+
 	struct RoadConnectionPoint
 	{
 		CrossroadComponent* crossroadComponent;
@@ -560,11 +569,16 @@ namespace vbEditor
 	OpenDialogWindow* _openMapDialogWindow = nullptr;
 	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
 	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
+	ComputeShaderTestWindow* _computeShaderTestWindow = nullptr;
 
 	Window* _backgroundWindow = nullptr;
 	std::future<void> _loadingSceneFuture;
 	bool _isLoading = false;
 	SceneManager* _newSceneManager = nullptr;
+
+	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
+
+	SceneObject* _groupingSceneObject = nullptr;
 
 	void setClickMode(ClickMode clickMode)
 	{
@@ -588,15 +602,140 @@ namespace vbEditor
 		}
 	}
 
+	std::vector<SceneObject*> _selectedObjects;
+
+	void setObjectHighlighting(SceneObject* object, bool isHighlighted)
+	{
+		for (SceneObject* child : object->getChildren())
+		{
+			setObjectHighlighting(child, isHighlighted);
+		}
+
+		RenderObject* renderObject = static_cast<RenderObject*>(object->getComponent(CT_RENDER_OBJECT));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
+		}
+		renderObject = static_cast<RenderObject*>(object->getComponent(CT_PREFAB));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
+		}
+	}
+
+	void setObjectsHighlighting(std::vector<SceneObject*> objects, bool isHighlighted)
+	{
+		for (SceneObject* object : objects)
+		{
+			setObjectHighlighting(object, isHighlighted);
+		}
+	}
+
 	void setSelectedSceneObject(SceneObject* object)
 	{
-		_selectedSceneObject = object;
-		centerGraphView();
-
-		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr))
+		if (_clickMode == CM_ROAD_EDIT)
 		{
-			setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			setClickMode(CM_PICK_OBJECT);
 		}
+
+		if (_selectedSceneObject != nullptr && object != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			if ((object->getParent() != nullptr && object->getParent() != _groupingSceneObject) || _selectedSceneObject->hasParent())
+			{
+				LOG_WARNING("Multi select is not supported for objects with parent.");
+				return;
+			}
+
+			auto objectInVector = std::find(_selectedObjects.begin(), _selectedObjects.end(), object);
+			if (objectInVector == _selectedObjects.end())
+			{
+				_selectedObjects.push_back(object);
+				setObjectHighlighting(object, true);
+			}
+			else
+			{
+				_selectedObjects.erase(objectInVector);
+				setObjectHighlighting(object, false);
+			}
+
+			if (_selectedObjects.size() == 1 && _selectedSceneObject != _groupingSceneObject && !isVectorContains(_selectedObjects, _selectedSceneObject))
+			{
+				_selectedObjects.push_back(_selectedSceneObject);
+			}
+
+			_groupingSceneObject->removeAllChildren(true);
+		}
+		else if (object != nullptr)
+		{
+			setObjectsHighlighting(_selectedObjects, false);
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+
+			if (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr)
+			{
+				setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			}
+		}
+		else
+		{
+			setObjectsHighlighting(_selectedObjects, false);
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+		}
+
+
+		if (_selectedObjects.size() > 1)
+		{
+			_selectedSceneObject = _groupingSceneObject;
+
+			std::vector<glm::vec3> selectedObjectsGlobalPositions;
+			glm::vec3 selectedObjectsCenterPosition(0.0f, 0.0f, 0.0f);
+			for (SceneObject* object : _selectedObjects)
+			{
+				const glm::mat4& globalTransform = object->getGlobalTransformMatrix();
+
+				glm::vec3 translation;
+				glm::quat orientation;
+				glm::vec3 scale;
+				GlmUtils::decomposeMatrix(globalTransform, translation, orientation, scale);
+
+				object->setRotationQuaternion(orientation);
+				object->setScale(scale);
+
+				selectedObjectsGlobalPositions.push_back(translation);
+				selectedObjectsCenterPosition += translation;
+			}
+
+			selectedObjectsCenterPosition /= _selectedObjects.size();
+
+			_groupingSceneObject->setPosition(selectedObjectsCenterPosition);
+			_groupingSceneObject->setRotation(0.0f, 0.0f, 0.0f);
+			_groupingSceneObject->setScale(1.0f, 1.0f, 1.0f);
+
+			for (int i = 0; i < _selectedObjects.size(); ++i)
+			{
+				_groupingSceneObject->addChild(_selectedObjects[i]);
+				_selectedObjects[i]->setPosition(selectedObjectsGlobalPositions[i] - selectedObjectsCenterPosition);
+			}
+		}
+		else if (_selectedObjects.size() == 1)
+		{
+			_selectedSceneObject = _selectedObjects[0];
+
+			_selectedObjects.clear();
+		}
+		else
+		{
+			if (_selectedSceneObject != nullptr) setObjectHighlighting(_selectedSceneObject, false);
+			if (object != nullptr) setObjectHighlighting(object, true);
+
+			_selectedSceneObject = object;
+		}
+
+
+		centerGraphView();
 	}
 
 	bool getCursorPositionIn3D(GLFWwindow* glfwWindow, glm::vec3& outCursorPosition)
@@ -610,6 +749,63 @@ namespace vbEditor
 		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
 
 		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
+	}
+
+	void selectClickedObject()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		if (_objectPickingMode == OPM_RAY_CAST)
+		{
+			glm::vec3 rayStart;
+			glm::vec3 rayDir;
+			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+			// collision with render objects
+			SceneObject* selectedObject = nullptr;
+			float d = std::numeric_limits<float>::max();
+
+			std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
+			for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+			{
+				RenderObject* renderObject = *i;
+				if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
+				{
+					continue;
+				}
+				AABB* aabb = renderObject->getModel()->getAABB();
+				glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+				float distance;
+				if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+				{
+					if (distance > 0.0f && distance < d)
+					{
+						selectedObject = renderObject->getSceneObject();
+						d = distance;
+					}
+				}
+			}
+
+			setSelectedSceneObject(selectedObject);
+		}
+		else
+		{
+			unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+			if (objectId > 0)
+			{
+				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					setSelectedSceneObject(sceneObject);
+				}
+			}
+			else
+			{
+				setSelectedSceneObject(nullptr);
+			}
+		}
 	}
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
@@ -634,6 +830,12 @@ namespace vbEditor
 			if (_clickMode == CM_ADD_OBJECT)
 			{
 				_objectToAdd->setFlags(SOF_NONE);
+				Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+				if (renderObject != nullptr)
+				{
+					static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(true);
+				}
+
 				setSelectedSceneObject(_objectToAdd);
 				loadNewObjectToAdd();
 			}
@@ -663,40 +865,50 @@ namespace vbEditor
 			}
 			else if (_clickMode == CM_PICK_OBJECT || _clickMode == CM_ROAD_EDIT)
 			{
-				double xpos, ypos;
-				glfwGetCursorPos(glfwWindow, &xpos, &ypos);
-				ypos = window.getHeight() - ypos;
+				selectClickedObject();
+			}
+		}
+	}
 
-				glm::vec3 rayStart;
-				glm::vec3 rayDir;
-				calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+	void adjustNewObjectRotationToCurve()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
 
-				// collision with render objects
-				SceneObject* selectedObject = nullptr;
-				float d = std::numeric_limits<float>::max();
-
-				std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
-				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		if (objectId > 0)
+		{
+			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+			if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+			{
+				BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+				if (bezierCurveComponent != nullptr)
 				{
-					RenderObject* renderObject = *i;
-					if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
+					const auto& points = bezierCurveComponent->getCurvePoints();
+					int pointWithMinDistanceIndex = 0;
+					float minDistance = FLT_MAX;
+					for (int i = 0; i < points.size(); ++i)
 					{
-						continue;
-					}
-					AABB* aabb = renderObject->getModel()->getAABB();
-					glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
-					float distance;
-					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
-					{
-						if (distance > 0.0f && distance < d)
+						float distance = glm::distance(points[i], _objectToAdd->getPosition());
+						if (distance < minDistance)
 						{
-							selectedObject = renderObject->getSceneObject();
-							d = distance;
+							minDistance = distance;
+							pointWithMinDistanceIndex = i;
 						}
 					}
-				}
 
-				setSelectedSceneObject(selectedObject);
+					int i = pointWithMinDistanceIndex;
+					const glm::vec3& p1 = (i < points.size() - 1) ? points[i] : points[i - 1];
+					const glm::vec3& p2 = (i < points.size() - 1) ? points[i + 1] : points[i];
+
+					glm::vec3 direction = glm::normalize(p2 - p1);
+					glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					glm::vec3 rightVector = glm::cross(direction, upVector);
+
+					_objectToAdd->setRotationQuaternion(QuaternionUtils::rotationBetweenVectors(glm::vec3(1.0f, 0.0f, 0.0f), direction));
+				}
 			}
 		}
 	}
@@ -714,6 +926,11 @@ namespace vbEditor
 					mousePosition.z = round(mousePosition.z);
 				}
 				_objectToAdd->setPosition(mousePosition);
+			}
+
+			if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+			{
+				adjustNewObjectRotationToCurve();
 			}
 		}
 	}
@@ -829,6 +1046,9 @@ namespace vbEditor
 		sceneManager->getGraphicsManager()->setCurrentCamera(_camera);
 		sceneManager->getSoundManager()->setActiveCamera(_camera);
 
+		_groupingSceneObject = sceneManager->addSceneObject("editor#groupingSceneObject");
+		_groupingSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+
 
 		SceneLoader sceneLoader(sceneManager);
 		sceneLoader.loadMap(mapName);
@@ -905,6 +1125,7 @@ namespace vbEditor
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
 		renderer.setIsShadowMappingEnable(true);
+		renderer.setRenderObjectIdsForPicking(true);
 		renderer.init(window.getWidth(), window.getHeight());
 		renderer.setDayNightRatio(1.0f);
 		renderer.setAlphaToCoverage(true);
@@ -958,6 +1179,9 @@ namespace vbEditor
 		_selectRoadProfileDialogWindow->setDefaultDirectoryFilter("profile.xml");
 		_selectRoadProfileDialogWindow->setDefaultDescriptionLoader("profile.xml", "Profile");
 		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
+
+		_computeShaderTestWindow = new ComputeShaderTestWindow(false);
+		_imGuiInterface->addWindow(_computeShaderTestWindow);
 	}
 
 	void loadNewObjectToAdd()
@@ -967,6 +1191,11 @@ namespace vbEditor
 
 		_objectToAdd = RObjectLoader::createSceneObjectFromRObject(_objectToAddDefinition, _objectToAddDefinition->getName(), position, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
 		_objectToAdd->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+		Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+		if (renderObject != nullptr)
+		{
+			static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(false);
+		}
 	}
 
 	void addObject(const std::string& objectName)
@@ -1264,6 +1493,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Windows"))
 			{
 				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Compute shader test", NULL, _computeShaderTestWindow->getOpenFlagPointer());
 				ImGui::EndMenu();
 			}
 

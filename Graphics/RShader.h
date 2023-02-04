@@ -57,6 +57,13 @@ enum ShaderType
 };
 
 
+enum RShaderType
+{
+    ST_NORMAL,
+    ST_COMPUTE
+};
+
+
 class RShader : virtual public Resource
 {
     friend class ResourceManager;
@@ -65,6 +72,8 @@ class RShader : virtual public Resource
         GLuint _shaderID;
         int _textureLocation;
 
+        RShaderType _shaderType;
+
         void setNewShader(GLuint newId)
         {
             glDeleteProgram(_shaderID);
@@ -72,8 +81,8 @@ class RShader : virtual public Resource
         }
 
     public:
-        RShader(std::string path, GLuint id)
-            : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0)
+        RShader(std::string path, GLuint id, RShaderType shaderType)
+            : Resource(RT_SHADER, path),  _shaderID(id), _textureLocation(0), _shaderType(shaderType)
         {
             LOG_DEBUG("RShader: Konstruktor: " + Strings::toString(_shaderID));
         }
@@ -106,6 +115,8 @@ class RShader : virtual public Resource
 		{ glUniform1fv(location, count, values); }
 		inline void setUniform(GLint location, int value)
 		{ glUniform1i(location, value); }
+		inline void setUniform(GLint location, unsigned int value)
+		{ glUniform1ui(location, value); }
 		inline void setUniform(GLint location, float value)
 		{ glUniform1f(location, value); }
 		inline void setUniform(GLint location, glm::vec2* vectors, int count = 1)
@@ -135,6 +146,11 @@ class RShader : virtual public Resource
             glActiveTexture(GL_TEXTURE0 + _textureLocation);
             texture->bind();
             setUniform(location, _textureLocation++);
+        }
+
+        inline void bindTextureImage(RTexture* texture, unsigned int unit, unsigned int level, TextureImageBindMode bindMode)
+        {
+            texture->bindImage(unit, level, bindMode);
         }
 
 		inline GLint getUniformLocation(const char* name)
@@ -176,6 +192,27 @@ class RShader : virtual public Resource
         {
             GLuint index = glGetUniformBlockIndex(_shaderID, blocksname);
             glUniformBlockBinding(_shaderID, index, location);
+        }
+
+        inline void setShaderStorageBlockBinding(const char* blocksname, unsigned int location)
+        {
+            GLuint index = glGetProgramResourceIndex(_shaderID, GL_SHADER_STORAGE_BLOCK, blocksname);
+            glShaderStorageBlockBinding(_shaderID, index, location);
+        }
+
+        inline RShaderType getShaderType() { return _shaderType; }
+
+        inline void runComputeShader(unsigned int numGroupsX, unsigned int numGroupsY, unsigned int numGroupsZ)
+        {
+            if (_shaderType == ST_COMPUTE)
+            {
+                glDispatchCompute(numGroupsX, numGroupsY, numGroupsZ);
+                glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+            }
+            else
+            {
+                LOG_WARNING("Invalid operation for standard shader.");
+            }
         }
 
 };

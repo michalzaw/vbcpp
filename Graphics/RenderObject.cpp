@@ -9,6 +9,7 @@
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isHighlighted(false), _isRenderObjectId(true),
     _isCalculatedAABB(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
@@ -251,6 +252,18 @@ void RenderObject::setDynamicObject(bool isDynamic)
 bool RenderObject::isDynamicObject()
 {
 	return _isDynamicObject;
+}
+
+
+void RenderObject::setIsHighlighted(bool isHighlighted)
+{
+    _isHighlighted = isHighlighted;
+}
+
+
+bool RenderObject::isHighlighted()
+{
+    return _isHighlighted;
 }
 
 

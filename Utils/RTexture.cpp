@@ -19,6 +19,8 @@ RTexture::RTexture(std::string path, TextureType type, TextureFormat internalFor
         _format = TF_RGBA;
     if (_format == TF_RGB_16F || _format == TF_RGB_32F)
         _format = TF_RGB;
+    if (_format == TF_RED_32)
+        _format = TF_RED_INTEGER;
 
 }
 

@@ -272,6 +272,8 @@ namespace vbEditor
 	extern bool _showGenerateObjectsAlongCurveWindow;
 
 	extern OpenDialogWindow* _selectRoadProfileDialogWindow;
+
+	extern SceneObject* _groupingSceneObject;
 }
 
 
@@ -1242,7 +1244,7 @@ void showObjectProperties()
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 	if (ImGui::Begin("Object Properties", &isOpened, windowFlags))
 	{
-		if (vbEditor::_selectedSceneObject)
+		if (vbEditor::_selectedSceneObject && vbEditor::_selectedSceneObject != vbEditor::_groupingSceneObject)
 		{
 			showObjectPropertiesDetails();
 

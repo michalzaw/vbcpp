@@ -78,6 +78,8 @@ class GraphicsManager
         glm::vec3   _windVector;
 		float		_windTimer;
 
+        glm::vec4   _objectsHighlightingColor;
+
         EnvironmentCaptureComponent* _globalEnvironmentCaptureComponent;
 
         std::list<Material*> _pendingMaterialsForMirrorComponent;
@@ -146,6 +148,10 @@ class GraphicsManager
         glm::vec3   getWindVector();
         float       getWindValue();
 		float		getWindTimer();
+
+
+        void                setObjectHighlightingColor(const glm::vec4& objectHighlightingColor);
+        const glm::vec4&    getObjectHighlightingColor();
 
 
         std::list<RenderObject*>& getRenderObjects();

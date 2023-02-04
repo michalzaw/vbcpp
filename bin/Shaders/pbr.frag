@@ -18,7 +18,10 @@ uniform sampler2D brdfLUT;
 
 uniform vec3 CameraPosition;
 
-out vec3 Color;
+layout (location = 0) out vec3 Color;
+#ifdef RENDER_OBJECT_ID
+layout (location = 2) out uvec4 ObjectIdValue;
+#endif
 
 
 // Lights
@@ -79,6 +82,10 @@ const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005
 in vec4 PositionLightSpace[CASCADES_COUNT];
 in float ClipSpacePositionZ;
 uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
+
+#ifdef RENDER_OBJECT_ID
+uniform uint objectId;
+#endif
 
 
 const float PI = 3.14159265359;
@@ -234,4 +241,9 @@ void main()
 	
 	
 	Color = ambient + L0;
+
+	
+#ifdef RENDER_OBJECT_ID
+	ObjectIdValue = uvec4(objectId, 0, 0, 0);
+#endif
 }
