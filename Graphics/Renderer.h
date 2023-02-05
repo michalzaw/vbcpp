@@ -76,6 +76,7 @@ enum UniformName
 	UNIFORM_DEBUG_VERTEX_INDEX_7,
 	UNIFORM_DEBUG_VERTEX_INDEX_8,
 	UNIFORM_EMISSIVE_TEXTURE,
+	UNIFORM_OBJECT_ID,
 
 	UNIFORM_ALBEDO_TEXTURE,
 	UNIFORM_METALIC_TEXTURE,
@@ -133,6 +134,8 @@ class Renderer
 
         bool _bloom;
 
+		bool _renderObjectIdsForPicking;
+
 		Framebuffer* _defaultFramebuffer;
 		Framebuffer* _depthFramebuffer;
 
@@ -175,6 +178,11 @@ class Renderer
 		bool _requiredRebuildStaticLighting;
 
 
+		unsigned int* _objectsIdsTextureData;
+		RShader* _pickingComputeShader;
+		ShaderStorageBuffer* _pickingSSBO;
+
+
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
 		PostProcessingEffect* findEffect(PostProcessingType type);
@@ -208,8 +216,13 @@ class Renderer
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);
 		void clearRenderDatasForShadowMap();
 
+		const std::vector<glm::mat4>& getFinalMatrices(SceneObject* sceneObject);
+
 
 		void rebuildStaticLightingInternal();
+
+
+		void recreateObjectsIdsTextureData();
 
         Renderer();
 
@@ -245,6 +258,8 @@ class Renderer
         int getMsaaAntialiasingLevel();
         void setBloom(bool isEnable);
         bool isBloomEnable();
+		void setRenderObjectIdsForPicking(bool isEnabled);
+		bool isRenderObjectIdsForPickingEnabled();
         void setIsShadowMappingEnable(bool isEnable);
         bool isShadowMappingEnable();
         void registerShadowMap(ShadowMap* shadowMap);
@@ -274,6 +289,8 @@ class Renderer
         void renderToMirrorTexture(RenderData* renderData);
         void renderScene(RenderData* renderData);
         void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
+
+		unsigned int pickObject(int x, int y);
 
 };
 

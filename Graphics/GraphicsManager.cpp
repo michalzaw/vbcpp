@@ -1,12 +1,17 @@
 #include "GraphicsManager.h"
 
 #include "Renderer.h"
+#include "BezierCurve.h"
+#include "SkeletalAnimationComponent.h"
+#include "SkeletalAnimationComponent2.h"
+#include "SkeletalAnimationHelperComponent.h"
 
 #include "../Scene/SceneObject.h"
 
 
 GraphicsManager::GraphicsManager()
     : _windDirection(0.0f, 0.0f, 0.0f), _windVelocity(0.0f), _windValue(0.0f), _windVector(0.0f, 0.0f, 0.0f), _windTimer(0.0f),
+    _objectsHighlightingColor(1.0f, 0.0f, 0.0f, 1.0f),
     _globalEnvironmentCaptureComponent(NULL), _sky(NULL)
 {
     //_quadTree = new QuadTree(glm::vec3(512, 512, 512));
@@ -54,6 +59,36 @@ GraphicsManager::~GraphicsManager()
 	{
 		delete* i;
 	}
+
+    for (std::vector<CrossroadComponent*>::iterator i = _crossroadComponents.begin(); i != _crossroadComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<RoadIntersectionComponent*>::iterator i = _roadIntersectionComponents.begin(); i != _roadIntersectionComponents.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
+    {
+        delete* i;
+    }
 
 	if (_sky != NULL)
 	{
@@ -257,6 +292,44 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
+{
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
+
+    _skeletalAnimations.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
+SkeletalAnimationComponent2* GraphicsManager::addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap)
+{
+    SkeletalAnimationComponent2* skeletalAnimation = new SkeletalAnimationComponent2(animation, animationNodeNameToBoneNameInModelMap);
+
+    _skeletalAnimations2.push_back(skeletalAnimation);
+
+    return skeletalAnimation;
+}
+
+
+SkeletalAnimationHelperComponent* GraphicsManager::addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    _skeletalAnimationHelpers.push_back(component);
+    return component;
+}
+
+
+BezierCurve* GraphicsManager::addBezierCurve(const std::vector<glm::vec3>& points/* = {}*/, const std::vector<int>& segmentsPointsCount/* = {}*/, float marginBegin/* = 0.0f*/, float marginEnd/* = 0.0f*/, const glm::vec2& offsetFromBaseCurve/* = glm::vec2(0.0f, 0.0f)*/)
+{
+    BezierCurve* bezierCurve = new BezierCurve(points, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
+    
+    _bezierCurves.push_back(bezierCurve);
+
+    return bezierCurve;
+}
+
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -448,6 +521,70 @@ void GraphicsManager::removeRoadIntersectionComponent(RoadIntersectionComponent*
 }
 
 
+void GraphicsManager::removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent*>::iterator i = _skeletalAnimations.begin(); i != _skeletalAnimations.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent)
+{
+    for (std::vector<SkeletalAnimationComponent2*>::iterator i = _skeletalAnimations2.begin(); i != _skeletalAnimations2.end(); ++i)
+    {
+        if (*i == skeletalAnimationComponent)
+        {
+            i = _skeletalAnimations2.erase(i);
+
+            delete skeletalAnimationComponent;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component)
+{
+    for (std::vector<SkeletalAnimationHelperComponent*>::iterator i = _skeletalAnimationHelpers.begin(); i != _skeletalAnimationHelpers.end(); ++i)
+    {
+        if (*i == component)
+        {
+            i = _skeletalAnimationHelpers.erase(i);
+
+            delete component;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeBezierCurve(BezierCurve* bezierCurve)
+{
+    for (std::vector<BezierCurve*>::iterator i = _bezierCurves.begin(); i != _bezierCurves.end(); ++i)
+    {
+        if (*i == bezierCurve)
+        {
+            i = _bezierCurves.erase(i);
+
+            delete bezierCurve;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -503,6 +640,18 @@ float GraphicsManager::getWindTimer()
 }
 
 
+void GraphicsManager::setObjectHighlightingColor(const glm::vec4& objectHighlightingColor)
+{
+    _objectsHighlightingColor = objectHighlightingColor;
+}
+
+
+const glm::vec4& GraphicsManager::getObjectHighlightingColor()
+{
+    return _objectsHighlightingColor;
+}
+
+
 std::list<RenderObject*>& GraphicsManager::getRenderObjects()
 {
     return _renderObjects;
@@ -551,10 +700,9 @@ MirrorComponent* GraphicsManager::findMirrorComponent(SceneObject* object, std::
                 return m;
         }
 
-        std::list<SceneObject*>& children = object->getChildren();
-        for (std::list<SceneObject*>::iterator i = children.begin(); i != children.end(); ++i)
+        for (SceneObject* child : object->getChildren())
         {
-            MirrorComponent* mirrorComponent = findMirrorComponent(*i, name);
+            MirrorComponent* mirrorComponent = findMirrorComponent(child, name);
             if (mirrorComponent != NULL)
                 return mirrorComponent;
         }
@@ -607,6 +755,26 @@ void GraphicsManager::update(float deltaTime)
     for (RoadIntersectionComponent* roadIntersectionComponent : _roadIntersectionComponents)
     {
         roadIntersectionComponent->update(deltaTime);
+    }
+
+    for (RoadObject* roadObject : _roadObjects)
+    {
+        roadObject->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent* skeletalAnimation : _skeletalAnimations)
+    {
+        skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationComponent2* skeletalAnimation : _skeletalAnimations2)
+    {
+        skeletalAnimation->update(deltaTime);
+    }
+
+    for (SkeletalAnimationHelperComponent* skeletalAnimationHelper : _skeletalAnimationHelpers)
+    {
+        skeletalAnimationHelper->update(deltaTime);
     }
 }
 

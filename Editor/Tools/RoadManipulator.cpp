@@ -42,6 +42,7 @@ namespace RoadManipulator
 		float displayRatio = 1.f;
 
 		std::vector<glm::vec3>* availableConnectionPoints = nullptr;
+		const std::vector<glm::vec3>* curvePoints = nullptr;
 
 		bool isAnyPointModified = false;
 		int modifiedPointIndex = -1;
@@ -94,6 +95,11 @@ namespace RoadManipulator
 		context.availableConnectionPoints = availableConnectionPoints;
 	}
 
+	void SetCurvePoints(const std::vector<glm::vec3>& curvePoints)
+	{
+		context.curvePoints = &curvePoints;
+	}
+
 	int IsModified()
 	{
 		return context.isAnyPointModified;
@@ -129,7 +135,16 @@ namespace RoadManipulator
 		return context.activePoint;
 	}
 
-	static void ComputeContext(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType)
+	int CalculateActiveSegment(int activePoint)
+	{
+		if (context.roadType == RoadType::ARC)
+			return std::max(activePoint - 1, 0);
+		else
+			return std::max((activePoint - 1) / 3, 0);
+	}
+
+	static void ComputeContext(const glm::mat4& view, const glm::mat4& projection, const glm::mat4& matrix,
+							   const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, RoadType roadType)
 	{
 		context.roadType = roadType;
 
@@ -149,7 +164,7 @@ namespace RoadManipulator
 		}
 		if (context.activeSegment >= segments.size())
 		{
-			context.activeSegment = segments.size() - 1;
+			context.activeSegment = CalculateActiveSegment(context.activePoint);
 		}
 
 		context.isUsingGizmoLastFrame = context.isUsingGizmo;
@@ -175,32 +190,35 @@ namespace RoadManipulator
 		return false;
 	}
 
-	// return true - if the point is drawn
-	bool DrawPoint(glm::vec4 position, ImVec2& trans, ImU32 color = IM_COL32(255, 255, 255, 255))
+	// return true - if the point is visible
+	bool CalculatePointTransformInScreenSpace(const glm::vec4& position, ImVec2& outTrans)
 	{
-		ImDrawList* drawList = context.drawList;
+		glm::vec4 globalPosition = context.MVP * position;
 
-		position = context.MVP * position;
+		outTrans = transformToImGuiScreenSpace(globalPosition);
 
-		trans = transformToImGuiScreenSpace(position);
-
-		if (position.z < 0.1f) // todo: < near and > far
+		if (globalPosition.z < 0.1f) // todo: < near and > far
 		{
 			return false;
 		}
 
-		if (trans.x <= 0.0f || trans.x >= context.width || trans.y <= 0.0f || trans.y >= context.height)
+		if (outTrans.x <= 0.0f || outTrans.x >= context.width || outTrans.y <= 0.0f || outTrans.y >= context.height)
 		{
 			//return false;
 		}
+
+		return true;
+	}
+
+	void DrawPoint(const ImVec2& trans, ImU32 color = IM_COL32(255, 255, 255, 255))
+	{
+		ImDrawList* drawList = context.drawList;
 
 		//drawList->AddCircleFilled(trans, 10.0f, 0xFF000000);
 		//drawList->AddCircleFilled(trans, 7.0f, 0xFFFFFF00);
 
 		//drawList->AddCircleFilled(trans, 10.0f, IM_COL32(255, 0, 0, 255));
 		drawList->AddCircleFilled(trans, 6.0f, color);
-
-		return true;
 	}
 
 	// return new point position
@@ -243,17 +261,13 @@ namespace RoadManipulator
 		if (mouseToPointDistance <= 6.0f && CanActivate())
 		{
 			context.activePoint = index;
-
-			if (context.roadType == RoadType::ARC)
-				context.activeSegment = std::max(index - 1, 0);
-			else
-				context.activeSegment = std::max((index - 1) / 3, 0);
+			context.activeSegment = CalculateActiveSegment(context.activePoint);
 		}
 
 		return newPosition;
 	}
 
-	void HandleMouseWheelInput(std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
+	void HandleMouseWheelInput(const std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments)
 	{
 		if (segments.size() == 0 || context.roadType != RoadType::ARC)
 			return;
@@ -309,7 +323,11 @@ namespace RoadManipulator
 			glm::vec3 pos = (*context.availableConnectionPoints)[i];
 
 			int alpha = (ImGui::IsMouseDown(0) && context.isUsingGizmoLastFrame) ? 255 : 0;
-			DrawPoint(glm::vec4(pos.x, pos.y, pos.z, 1.0f), transform, IM_COL32(255, 255, 255, alpha));
+			bool pointVisibility = CalculatePointTransformInScreenSpace(glm::vec4(pos.x, pos.y, pos.z, 1.0f), transform);
+			if (pointVisibility)
+			{
+				DrawPoint(transform, IM_COL32(255, 255, 255, alpha));
+			}
 
 			if (context.activePoint == 0 || context.activePoint == roadPointsTransform.size() - 1)
 			{
@@ -345,7 +363,8 @@ namespace RoadManipulator
 		}
 	}
 
-	void drawLine(int p1, int p2, const std::vector<glm::vec3>& points, const std::vector<ImVec2>& pointsTransformImGui, const std::vector<bool>& pointsVisibility, const glm::vec3& cameraPosition)
+	void drawLine(int p1, int p2, const std::vector<glm::vec3>& points, const std::vector<ImVec2>& pointsTransformImGui, const std::vector<bool>& pointsVisibility, const glm::vec3& cameraPosition,
+				  ImU32 color = IM_COL32(255, 255, 255, 255))
 	{
 		ImVec2 point1 = pointsTransformImGui[p1];
 		ImVec2 point2 = pointsTransformImGui[p2];
@@ -367,10 +386,32 @@ namespace RoadManipulator
 		}
 
 		ImDrawList* drawList = context.drawList;
-		drawList->AddLine(fixedPoint1, fixedPoint2, 0xFFFFFFFF);
+		drawList->AddLine(fixedPoint1, fixedPoint2, color);
 	}
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, glm::vec3 cameraPosition, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
+	void drawCurve(const std::vector<glm::vec3>& points, const glm::vec3& cameraPosition)
+	{
+		std::vector<ImVec2> pointsTransformImGui(points.size()); // todo: ten wektor chyba trzeba przeniesc do Context
+		std::vector<bool> pointsVisibility(points.size());
+
+		for (unsigned int i = 0; i < points.size(); ++i)
+		{
+			glm::vec4 position(points[i].x, points[i].y, points[i].z, 1.0f);
+
+			pointsVisibility[i] = CalculatePointTransformInScreenSpace(position, pointsTransformImGui[i]);
+		}
+
+		for (int i = 0; i < points.size() - 1; ++i)
+		{
+			int p1 = i;
+			int p2 = i + 1;
+
+			drawLine(p1, p2, points, pointsTransformImGui, pointsVisibility, cameraPosition, IM_COL32(255, 0, 0, 255));
+		}
+	}
+
+	void Manipulate(const glm::mat4& view, const glm::mat4& projection, const glm::mat4& matrix, const glm::vec3& cameraPosition,
+					const std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix)
 	{
 		ComputeContext(view, projection, matrix, points, segments, roadType);
 
@@ -383,7 +424,11 @@ namespace RoadManipulator
 		{
 			glm::vec4 position(points[i].x, points[i].y, points[i].z, 1.0f);
 
-			pointsVisibility[i] = DrawPoint(position, pointsTransformImGui[i]);
+			pointsVisibility[i] = CalculatePointTransformInScreenSpace(position, pointsTransformImGui[i]);
+			if (pointsVisibility[i])
+			{
+				DrawPoint(pointsTransformImGui[i]);
+			}
 
 			glm::vec3 newPosition = HandleInputForPoint(position, pointsTransformImGui[i], i);
 
@@ -433,6 +478,12 @@ namespace RoadManipulator
 		HandleMouseWheelInput(points, segments);
 
 		drawAvailableConnectionPoints(pointsTransformImGui);
+
+		if (context.roadType == RoadType::BEZIER_CURVE &&
+			context.curvePoints != nullptr && context.curvePoints->size() > 1)
+		{
+			drawCurve(*context.curvePoints, cameraPosition);
+		}
 	}
 
 };

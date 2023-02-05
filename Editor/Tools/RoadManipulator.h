@@ -26,6 +26,8 @@ namespace RoadManipulator
 	void SetRect(float x, float y, float width, float height);
 	void SetAvailableConnectionPoints(std::vector<glm::vec3>* availableConnectionPoints);
 
+	void SetCurvePoints(const std::vector<glm::vec3>& curvePoints);
+
 	int IsModified();
 	int GetModifiedPointIndex();
 	glm::vec3 GetModifiedPointNewPostion();
@@ -35,7 +37,8 @@ namespace RoadManipulator
 	int GetActiveSegment();
 	int GetActivePoint();
 
-	void Manipulate(glm::mat4 view, glm::mat4 projection, glm::mat4 matrix, glm::vec3 cameraPosition, std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix = 0);
+	void Manipulate(const glm::mat4& view, const glm::mat4& projection, const glm::mat4& matrix, const glm::vec3& cameraPosition,
+					const std::vector<glm::vec3>& points, std::vector<RoadSegment>& segments, RoadType roadType, float* deltaMatrix = 0);
 };
 
 

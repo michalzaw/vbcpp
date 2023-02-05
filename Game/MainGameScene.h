@@ -44,6 +44,7 @@ class MainGameScene final : public GameScene
 
 		void initScene();
 		void setActiveCamera(CameraFPS* camera);
+		void setBusInDefaultPosition(Bus* bus);
 		void loadScene();
 		void initGui();
 		void initImGuiInterface();

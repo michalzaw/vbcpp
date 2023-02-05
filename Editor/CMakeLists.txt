@@ -12,10 +12,12 @@ set (EDITOR_SOURCES
 	Editor/Windows/RoadTools.cpp
 	Editor/Windows/MapInfoWindow.cpp
 	Editor/Windows/MaterialEditorWindow.cpp
-	Editor/Windows/GenerateObjectsAlongRoadWindow.cpp
+	Editor/Windows/GenerateObjectsAlongCurveWindow.cpp
 	Editor/Windows/LoggerWindow.cpp
+	Editor/Windows/ComputeShaderTestWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
+	Editor/Utils/AIPathGenerator.cpp
 	Editor/Utils/ObjectsGenerator.cpp
 	Editor/Utils/RoadPolygonsGenerator.cpp
 )
@@ -36,10 +38,12 @@ set (EDITOR_HEADERS
 	Editor/Windows/RoadTools.h
 	Editor/Windows/MapInfoWindow.h
 	Editor/Windows/MaterialEditorWindow.h
-	Editor/Windows/GenerateObjectsAlongRoadWindow.h
+	Editor/Windows/GenerateObjectsAlongCurveWindow.h
 	Editor/Windows/LoggerWindow.h
+	Editor/Windows/ComputeShaderTestWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
+	Editor/Utils/AIPathGenerator.h
 	Editor/Utils/ObjectsGenerator.h
 	Editor/Utils/RoadPolygonsGenerator.h
 )

@@ -37,6 +37,14 @@
 //#define FRUSTUM_CULLING
 //#define QUAD_TREE
 
+
+class SkeletalAnimationComponent;
+class SkeletalAnimationComponent2;
+class SkeletalAnimationHelperComponent;
+class RAnimation;
+class BezierCurve;
+
+
 class GraphicsManager
 {
     friend class Renderer;
@@ -53,6 +61,10 @@ class GraphicsManager
 		std::vector<CrossroadComponent*>            _crossroadComponents;
         std::vector<RoadIntersectionComponent*>     _roadIntersectionComponents;
         std::vector<RoadObject*>                    _roadObjects;
+        std::vector<SkeletalAnimationComponent*>    _skeletalAnimations;
+        std::vector<SkeletalAnimationComponent2*>   _skeletalAnimations2;
+        std::vector<SkeletalAnimationHelperComponent*>_skeletalAnimationHelpers;
+        std::vector<BezierCurve*>                   _bezierCurves;
 
 		Sky*						_sky;
 
@@ -65,6 +77,8 @@ class GraphicsManager
         float       _windValue;
         glm::vec3   _windVector;
 		float		_windTimer;
+
+        glm::vec4   _objectsHighlightingColor;
 
         EnvironmentCaptureComponent* _globalEnvironmentCaptureComponent;
 
@@ -96,6 +110,10 @@ class GraphicsManager
 		Sky*			addSky(RTexture* texture, SceneObject* owner); // return NULL if sky exist
 		CrossroadComponent* addCrossRoad(std::vector<CrossroadConnectionPoint>& connectionPoints);
         RoadIntersectionComponent* addRoadIntersection(RRoadProfile* edgeRoadProfile, bool interactiveMode = false);
+        SkeletalAnimationComponent* addSkeletalAnimation(RAnimation* animation);
+        SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
+        SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
+        BezierCurve*    addBezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {}, float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -112,6 +130,10 @@ class GraphicsManager
 		void removeSky(Sky* sky);
 		void removeCrossroadComponent(CrossroadComponent* crossroadComponent);
         void removeRoadIntersectionComponent(RoadIntersectionComponent* roadIntersectionComponent);
+        void removeSkeletalAnimation(SkeletalAnimationComponent* skeletalAnimationComponent);
+        void removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent);
+        void removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
+        void removeBezierCurve(BezierCurve* bezierCurve);
 
 
         void setCurrentCamera(CameraStatic* camera);
@@ -126,6 +148,10 @@ class GraphicsManager
         glm::vec3   getWindVector();
         float       getWindValue();
 		float		getWindTimer();
+
+
+        void                setObjectHighlightingColor(const glm::vec4& objectHighlightingColor);
+        const glm::vec4&    getObjectHighlightingColor();
 
 
         std::list<RenderObject*>& getRenderObjects();

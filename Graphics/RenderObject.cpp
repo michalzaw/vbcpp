@@ -9,6 +9,7 @@
 RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isHighlighted(false), _isRenderObjectId(true),
     _isCalculatedAABB(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
@@ -230,7 +231,7 @@ const std::vector<Material*>& RenderObject::getMirrorMaterials()
 }
 
 
-void RenderObject::setIsCastShadows(bool isCastShadows)
+void RenderObject::setCastShadows(bool isCastShadows)
 {
     _isCastShadows = isCastShadows;
 }
@@ -242,7 +243,7 @@ bool RenderObject::isCastShadows()
 }
 
 
-void RenderObject::setIsDynamicObject(bool isDynamic)
+void RenderObject::setDynamicObject(bool isDynamic)
 {
 	_isDynamicObject = isDynamic;
 }
@@ -251,6 +252,18 @@ void RenderObject::setIsDynamicObject(bool isDynamic)
 bool RenderObject::isDynamicObject()
 {
 	return _isDynamicObject;
+}
+
+
+void RenderObject::setIsHighlighted(bool isHighlighted)
+{
+    _isHighlighted = isHighlighted;
+}
+
+
+bool RenderObject::isHighlighted()
+{
+    return _isHighlighted;
 }
 
 

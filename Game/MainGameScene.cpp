@@ -1,9 +1,13 @@
 #include "MainGameScene.h"
 
+#include "AIAgent.h"
+#include "AIAgentPhysicalVechicle.h"
+#include "BusStartPoint.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
+#include "PathComponent.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -136,7 +140,7 @@ CameraFPS* MainGameScene::createCameraFPSGlobal()
 	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(5);
+	cameraFPS->setMoveSpeed(25);
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
@@ -174,6 +178,27 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 }
 
 
+void MainGameScene::setBusInDefaultPosition(Bus* bus)
+{
+	const auto& availableBusStartPoints = _sceneManager->getGameLogicSystem()->getBusStartPoints();
+	glm::vec3 busStartPosition(0.0f, 3.0f, 0.0f);
+	glm::vec3 busStartRotation(0.0f, 0.0f, 0.0f);
+
+	if (availableBusStartPoints.size() > 0)
+	{
+		busStartPosition = availableBusStartPoints[0]->getSceneObject()->getPosition();
+		busStartRotation = availableBusStartPoints[0]->getSceneObject()->getRotation();
+	}
+	else
+	{
+		LOG_WARNING("Cannot find any available Bus Start Point. Use default value.");
+	}
+
+	bus->getSceneObject()->setPosition(busStartPosition);
+	bus->getSceneObject()->setRotation(busStartRotation);
+}
+
+
 void MainGameScene::loadScene()
 {
 	std::unordered_map<std::string, std::string> busVariables;
@@ -196,19 +221,22 @@ void MainGameScene::loadScene()
 	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	/*BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
-	Bus* bus2 = busLoader.loadBus(busModel, busVariables);
-	_buses.push_back(bus2);*/
+	/*for (int i = 0; i < 1; ++i)
+	{
+		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
+		Bus* bus2 = busLoader.loadBus(busModel, busVariables);
+		_buses.push_back(bus2);
+
+		//bus2->getSceneObject()->setPosition(glm::vec3((i + 2) * 5.0f, 1.0f, 0.0f));
+		bus2->getSceneObject()->setPosition(glm::vec3(0.8f, 1.0f, 6.8f));
+	}*/
 
 	_activeBus = bus;
 
 	SceneLoader sceneLoader(_sceneManager);
 	sceneLoader.loadMap(GameConfig::getInstance().mapFile);
 
-	bus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-	bus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-		degToRad(_sceneManager->getBusStart().rotation.y),
-		degToRad(_sceneManager->getBusStart().rotation.z));
+	setBusInDefaultPosition(bus);
 
 	//bus2->getSceneObject()->setPosition(_sceneManager->getBusStart().position + vec3(20.0f, 0.0f, 0.0f));
 	//bus2->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
@@ -548,10 +576,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_R))
 	{
-		_activeBus->getSceneObject()->setPosition(_sceneManager->getBusStart().position);
-		_activeBus->getSceneObject()->setRotation(degToRad(_sceneManager->getBusStart().rotation.x),
-			degToRad(_sceneManager->getBusStart().rotation.y),
-			degToRad(_sceneManager->getBusStart().rotation.z));
+		setBusInDefaultPosition(_activeBus);
 	}
 	if (input.isKeyPressed(GLFW_KEY_F5))
 	{
@@ -598,10 +623,6 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		if (input.isKeyPressed(GLFW_KEY_8) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
 		{
 			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
-		}
-		if (input.isKeyPressed(GLFW_KEY_9) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
-		{
-			_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
 		}
 	}
 

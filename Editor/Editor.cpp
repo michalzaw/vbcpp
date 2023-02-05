@@ -9,7 +9,11 @@
 
 //#include "../Bus/BusLoader.h"
 
+#include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -17,8 +21,10 @@
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
+#include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
+#include "../Utils/QuaternionUtils.h"
 #include "../Utils/ResourceDescription.h"
 
 #include <imgui.h>
@@ -33,10 +39,14 @@
 #include "Windows/ObjectPropertiesWindow.h"
 #include "Windows/MapInfoWindow.h"
 #include "Windows/MaterialEditorWindow.h"
-#include "Windows/GenerateObjectsAlongRoadWindow.h"
+#include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
+#include "Windows/ComputeShaderTestWindow.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/ShapePolygonComponent.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
 
 //std::list<Editor*> editorInstances;
 
@@ -494,6 +504,12 @@ namespace vbEditor
 		CM_ROAD_EDIT
 	};
 
+	enum ObjectPickingMode
+	{
+		OPM_RAY_CAST,
+		OPM_GRAPHICS
+	};
+
 	struct RoadConnectionPoint
 	{
 		CrossroadComponent* crossroadComponent;
@@ -524,9 +540,6 @@ namespace vbEditor
 	SceneObject* _selectedSceneObject = nullptr;
 	int roadActiveSegment = 0;
 	int roadActivePoint = 0;
-	bool isRoadModified = false;
-	float roadModificationTimer = 0.0f;
-	std::vector<RoadObject*> roadsToUpdate;
 
 	std::vector<RoadObject*> _selectedRoads;
 
@@ -542,54 +555,255 @@ namespace vbEditor
 	static bool _addRoadDialogWindow = false;
 	static bool _addRoad2DialogWindow = false;
 	bool _showMaterialEditorWindow = false;
-	bool _showGenerateObjectsAlongRoadWindow = false;
+	bool _showGenerateObjectsAlongCurveWindow = false;
 
 	std::string windowTitle = "VBCPP - World Editor";
 
 	ResourceDescription mapInfo = {"Unknown", "Unknown", "Unknown"};
 
 	ClickMode _clickMode = CM_PICK_OBJECT;
-	RObject* _objectToAdd = nullptr;
+	RObject* _objectToAddDefinition = nullptr;
+	SceneObject* _objectToAdd = nullptr;
 
 	ImGuiInterface* _imGuiInterface = nullptr;
 	OpenDialogWindow* _openMapDialogWindow = nullptr;
 	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
 	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
+	ComputeShaderTestWindow* _computeShaderTestWindow = nullptr;
 
 	Window* _backgroundWindow = nullptr;
 	std::future<void> _loadingSceneFuture;
 	bool _isLoading = false;
 	SceneManager* _newSceneManager = nullptr;
 
-	void setSelectedSceneObject(SceneObject* object)
-	{
-		_selectedSceneObject = object;
-		centerGraphView();
+	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
 
-		if (object != nullptr && (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr))
+	SceneObject* _groupingSceneObject = nullptr;
+
+	void setClickMode(ClickMode clickMode)
+	{
+		if (_clickMode == CM_ADD_OBJECT)
 		{
-			_clickMode = CM_ROAD_EDIT; // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			if (_objectToAdd != nullptr)
+			{
+				_sceneManager->removeSceneObject(_objectToAdd);
+				_objectToAddDefinition = nullptr;
+				_objectToAdd = nullptr;
+			}
 		}
 
-		roadsToUpdate.clear();
+		_clickMode = clickMode;
 
-		if (_selectedSceneObject != nullptr)
+		if (_clickMode == CM_PICK_OBJECT)
 		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (roadComponent != nullptr)
+			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
+			glfwSetCursor(window.getWindow(), cursor);
+			glfwSetInputMode(window.getWindow(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+		}
+	}
+
+	std::vector<SceneObject*> _selectedObjects;
+
+	void setObjectHighlighting(SceneObject* object, bool isHighlighted)
+	{
+		for (SceneObject* child : object->getChildren())
+		{
+			setObjectHighlighting(child, isHighlighted);
+		}
+
+		RenderObject* renderObject = static_cast<RenderObject*>(object->getComponent(CT_RENDER_OBJECT));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
+		}
+		renderObject = static_cast<RenderObject*>(object->getComponent(CT_PREFAB));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
+		}
+	}
+
+	void setObjectsHighlighting(std::vector<SceneObject*> objects, bool isHighlighted)
+	{
+		for (SceneObject* object : objects)
+		{
+			setObjectHighlighting(object, isHighlighted);
+		}
+	}
+
+	void setSelectedSceneObject(SceneObject* object)
+	{
+		if (_clickMode == CM_ROAD_EDIT)
+		{
+			setClickMode(CM_PICK_OBJECT);
+		}
+
+		if (_selectedSceneObject != nullptr && object != nullptr && glfwGetKey(window.getWindow(), GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+		{
+			if ((object->getParent() != nullptr && object->getParent() != _groupingSceneObject) || _selectedSceneObject->hasParent())
 			{
-				roadsToUpdate.push_back(roadComponent);
+				LOG_WARNING("Multi select is not supported for objects with parent.");
+				return;
 			}
 
-			CrossroadComponent* crossroad = dynamic_cast<CrossroadComponent*>(_selectedSceneObject->getComponent(CT_CROSSROAD));
-			if (crossroad != nullptr)
+			auto objectInVector = std::find(_selectedObjects.begin(), _selectedObjects.end(), object);
+			if (objectInVector == _selectedObjects.end())
 			{
-				std::set<RoadObject*> roadsToUpdateSet;
-				for (int i = 0; i < crossroad->getConnectionsCount(); ++i)
+				_selectedObjects.push_back(object);
+				setObjectHighlighting(object, true);
+			}
+			else
+			{
+				_selectedObjects.erase(objectInVector);
+				setObjectHighlighting(object, false);
+			}
+
+			if (_selectedObjects.size() == 1 && _selectedSceneObject != _groupingSceneObject && !isVectorContains(_selectedObjects, _selectedSceneObject))
+			{
+				_selectedObjects.push_back(_selectedSceneObject);
+			}
+
+			_groupingSceneObject->removeAllChildren(true);
+		}
+		else if (object != nullptr)
+		{
+			setObjectsHighlighting(_selectedObjects, false);
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+
+			if (object->getComponent(CT_ROAD_OBJECT) != nullptr || object->getComponent(CT_SHAPE_POLYGON) != nullptr || object->getComponent(CT_BEZIER_CURVE) != nullptr)
+			{
+				setClickMode(CM_ROAD_EDIT); // todo: uzywamy tez dla polygon chociaz to nie jest droga, ale jego sposob edycji jest taki sam
+			}
+		}
+		else
+		{
+			setObjectsHighlighting(_selectedObjects, false);
+			_selectedObjects.clear();
+			_groupingSceneObject->removeAllChildren(true);
+		}
+
+
+		if (_selectedObjects.size() > 1)
+		{
+			_selectedSceneObject = _groupingSceneObject;
+
+			std::vector<glm::vec3> selectedObjectsGlobalPositions;
+			glm::vec3 selectedObjectsCenterPosition(0.0f, 0.0f, 0.0f);
+			for (SceneObject* object : _selectedObjects)
+			{
+				const glm::mat4& globalTransform = object->getGlobalTransformMatrix();
+
+				glm::vec3 translation;
+				glm::quat orientation;
+				glm::vec3 scale;
+				GlmUtils::decomposeMatrix(globalTransform, translation, orientation, scale);
+
+				object->setRotationQuaternion(orientation);
+				object->setScale(scale);
+
+				selectedObjectsGlobalPositions.push_back(translation);
+				selectedObjectsCenterPosition += translation;
+			}
+
+			selectedObjectsCenterPosition /= _selectedObjects.size();
+
+			_groupingSceneObject->setPosition(selectedObjectsCenterPosition);
+			_groupingSceneObject->setRotation(0.0f, 0.0f, 0.0f);
+			_groupingSceneObject->setScale(1.0f, 1.0f, 1.0f);
+
+			for (int i = 0; i < _selectedObjects.size(); ++i)
+			{
+				_groupingSceneObject->addChild(_selectedObjects[i]);
+				_selectedObjects[i]->setPosition(selectedObjectsGlobalPositions[i] - selectedObjectsCenterPosition);
+			}
+		}
+		else if (_selectedObjects.size() == 1)
+		{
+			_selectedSceneObject = _selectedObjects[0];
+
+			_selectedObjects.clear();
+		}
+		else
+		{
+			if (_selectedSceneObject != nullptr) setObjectHighlighting(_selectedSceneObject, false);
+			if (object != nullptr) setObjectHighlighting(object, true);
+
+			_selectedSceneObject = object;
+		}
+
+
+		centerGraphView();
+	}
+
+	bool getCursorPositionIn3D(GLFWwindow* glfwWindow, glm::vec3& outCursorPosition)
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(glfwWindow, &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		glm::vec3 rayStart;
+		glm::vec3 rayDir;
+		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
+	}
+
+	void selectClickedObject()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		if (_objectPickingMode == OPM_RAY_CAST)
+		{
+			glm::vec3 rayStart;
+			glm::vec3 rayDir;
+			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+
+			// collision with render objects
+			SceneObject* selectedObject = nullptr;
+			float d = std::numeric_limits<float>::max();
+
+			std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
+			for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+			{
+				RenderObject* renderObject = *i;
+				if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
 				{
-					roadsToUpdateSet.insert(crossroad->getConnectionPoint(i).connectedRoads.begin(), crossroad->getConnectionPoint(i).connectedRoads.end());
+					continue;
 				}
-				roadsToUpdate.insert(roadsToUpdate.begin(), roadsToUpdateSet.begin(), roadsToUpdateSet.end());
+				AABB* aabb = renderObject->getModel()->getAABB();
+				glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
+				float distance;
+				if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
+				{
+					if (distance > 0.0f && distance < d)
+					{
+						selectedObject = renderObject->getSceneObject();
+						d = distance;
+					}
+				}
+			}
+
+			setSelectedSceneObject(selectedObject);
+		}
+		else
+		{
+			unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+			if (objectId > 0)
+			{
+				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					setSelectedSceneObject(sceneObject);
+				}
+			}
+			else
+			{
+				setSelectedSceneObject(nullptr);
 			}
 		}
 	}
@@ -613,35 +827,27 @@ namespace vbEditor
 
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 		{
-			double xpos, ypos;
-			glfwGetCursorPos(glfwWindow, &xpos, &ypos);
-			ypos = window.getHeight() - ypos;
-
-			glm::vec3 rayStart;
-			glm::vec3 rayDir;
-			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
-
 			if (_clickMode == CM_ADD_OBJECT)
 			{
-				glm::vec3 hitPosition;
-				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
+				_objectToAdd->setFlags(SOF_NONE);
+				Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+				if (renderObject != nullptr)
 				{
-					SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(_objectToAdd, _objectToAdd->getName(), hitPosition, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
-
-					setSelectedSceneObject(newObject);
+					static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(true);
 				}
+
+				setSelectedSceneObject(_objectToAdd);
+				loadNewObjectToAdd();
 			}
 			else if (_clickMode == CM_ROAD_EDIT && glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 			{
 				glm::vec3 hitPosition;
-				if (_sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_BUS | COL_DOOR | COL_ENV | COL_TERRAIN | COL_WHEEL, COL_ENV, hitPosition))
+				if (getCursorPositionIn3D(glfwWindow, hitPosition))
 				{
 					RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-					if (roadObject != nullptr)
+					if (roadObject != nullptr && roadObject->getRoadType() != RoadType::BEZIER_CURVES)
 					{
 						roadObject->addPoint(hitPosition);
-
-						isRoadModified = true;
 					}
 
 					ShapePolygonComponent* shapePolygonObject = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
@@ -649,36 +855,97 @@ namespace vbEditor
 					{
 						shapePolygonObject->addPoint(hitPosition);
 					}
+
+					BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+					if (bezierCurve != nullptr)
+					{
+						bezierCurve->addPoint(hitPosition);
+					}
 				}
 			}
 			else if (_clickMode == CM_PICK_OBJECT || _clickMode == CM_ROAD_EDIT)
 			{
-				// collision with render objects
-				SceneObject* selectedObject = nullptr;
-				float d = std::numeric_limits<float>::max();
+				selectClickedObject();
+			}
+		}
+	}
 
-				std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
-				for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+	void adjustNewObjectRotationToCurve()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		if (objectId > 0)
+		{
+			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+			if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+			{
+				BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+				if (bezierCurveComponent != nullptr)
 				{
-					RenderObject* renderObject = *i;
-					if (renderObject->getSceneObject()->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE)
+					const auto& points = bezierCurveComponent->getCurvePoints();
+					int pointWithMinDistanceIndex = 0;
+					float minDistance = FLT_MAX;
+					for (int i = 0; i < points.size(); ++i)
 					{
-						continue;
-					}
-					AABB* aabb = renderObject->getModel()->getAABB();
-					glm::mat4 modelMatrix = renderObject->getSceneObject()->getGlobalTransformMatrix();
-					float distance;
-					if (isRayIntersectOBB(rayStart, rayDir, *aabb, modelMatrix, distance))
-					{
-						if (distance > 0.0f && distance < d)
+						float distance = glm::distance(points[i], _objectToAdd->getPosition());
+						if (distance < minDistance)
 						{
-							selectedObject = renderObject->getSceneObject();
-							d = distance;
+							minDistance = distance;
+							pointWithMinDistanceIndex = i;
 						}
 					}
-				}
 
-				setSelectedSceneObject(selectedObject);
+					int i = pointWithMinDistanceIndex;
+					const glm::vec3& p1 = (i < points.size() - 1) ? points[i] : points[i - 1];
+					const glm::vec3& p2 = (i < points.size() - 1) ? points[i + 1] : points[i];
+
+					glm::vec3 direction = glm::normalize(p2 - p1);
+					glm::vec3 upVector = glm::vec3(0.0f, 1.0f, 0.0f);
+
+					glm::vec3 rightVector = glm::cross(direction, upVector);
+
+					_objectToAdd->setRotationQuaternion(QuaternionUtils::rotationBetweenVectors(glm::vec3(1.0f, 0.0f, 0.0f), direction));
+				}
+			}
+		}
+	}
+
+	void mouseCursourPosCallback(GLFWwindow* glfwWindow, double xPosition, double yPosition)
+	{
+		if (_clickMode == CM_ADD_OBJECT && _objectToAdd != nullptr)
+		{
+			glm::vec3 mousePosition;
+			if (getCursorPositionIn3D(glfwWindow, mousePosition))
+			{
+				if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+				{
+					mousePosition.x = round(mousePosition.x);
+					mousePosition.z = round(mousePosition.z);
+				}
+				_objectToAdd->setPosition(mousePosition);
+			}
+
+			if (glfwGetKey(glfwWindow, GLFW_KEY_LEFT_ALT) == GLFW_PRESS)
+			{
+				adjustNewObjectRotationToCurve();
+			}
+		}
+	}
+
+	void mouseScrollCallback(GLFWwindow* glfwWindow, double xOffset, double yOffset)
+	{
+		if (_objectToAdd != nullptr)
+		{
+			if (yOffset > 0)
+			{
+				_objectToAdd->rotate(0.0f, degToRad(90.0f), 0.0f);
+			}
+			else if (yOffset < 0)
+			{
+				_objectToAdd->rotate(0.0f, -degToRad(90.0f), 0.0f);
 			}
 		}
 	}
@@ -687,15 +954,8 @@ namespace vbEditor
 	{
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		{
-			if (_clickMode == CM_ADD_OBJECT)
-			{
-				_clickMode = CM_PICK_OBJECT;
-			}
-			GLFWcursor* cursor = glfwCreateStandardCursor(GLFW_IBEAM_CURSOR);
-			glfwSetCursor(window, cursor);
-			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+			setClickMode(CM_PICK_OBJECT);
 		}
-
 	}
 
 	void processInput(double deltaTime)
@@ -749,6 +1009,8 @@ namespace vbEditor
 		window.setWindowTitle(windowTitle);
 
 		glfwSetMouseButtonCallback(window.getWindow(), mouseButtonCallback);
+		glfwSetCursorPosCallback(window.getWindow(), mouseCursourPosCallback);
+		glfwSetScrollCallback(window.getWindow(), mouseScrollCallback);
 		glfwSetKeyCallback(window.getWindow(), keyCallback);
 		glfwSetCharCallback(window.getWindow(), editorCharCallback);
 		glfwSetWindowSizeCallback(window.getWindow(), changeWindowSizeCallback);
@@ -784,6 +1046,9 @@ namespace vbEditor
 		sceneManager->getGraphicsManager()->setCurrentCamera(_camera);
 		sceneManager->getSoundManager()->setActiveCamera(_camera);
 
+		_groupingSceneObject = sceneManager->addSceneObject("editor#groupingSceneObject");
+		_groupingSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+
 
 		SceneLoader sceneLoader(sceneManager);
 		sceneLoader.loadMap(mapName);
@@ -810,10 +1075,10 @@ namespace vbEditor
 		}
 
 		_selectedSceneObject = nullptr;
-		roadsToUpdate.clear();
 		_selectedRoads.clear();
 
-		_clickMode = CM_PICK_OBJECT;
+		setClickMode(CM_PICK_OBJECT);
+		_objectToAddDefinition = nullptr;
 		_objectToAdd = nullptr;
 		
 		_isLoading = true;
@@ -838,6 +1103,8 @@ namespace vbEditor
 
 	void initializeEngineSubsystems()
 	{
+		srand(static_cast<unsigned int>(time(NULL)));
+
 #ifdef DEVELOPMENT_RESOURCES
 		GameConfig::getInstance().loadDevelopmentConfig("devSettings.xml");
 		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
@@ -858,6 +1125,7 @@ namespace vbEditor
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
 		renderer.setIsShadowMappingEnable(true);
+		renderer.setRenderObjectIdsForPicking(true);
 		renderer.init(window.getWidth(), window.getHeight());
 		renderer.setDayNightRatio(1.0f);
 		renderer.setAlphaToCoverage(true);
@@ -911,23 +1179,50 @@ namespace vbEditor
 		_selectRoadProfileDialogWindow->setDefaultDirectoryFilter("profile.xml");
 		_selectRoadProfileDialogWindow->setDefaultDescriptionLoader("profile.xml", "Profile");
 		_imGuiInterface->addWindow(_selectRoadProfileDialogWindow);
+
+		_computeShaderTestWindow = new ComputeShaderTestWindow(false);
+		_imGuiInterface->addWindow(_computeShaderTestWindow);
+	}
+
+	void loadNewObjectToAdd()
+	{
+		glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f);
+		getCursorPositionIn3D(window.getWindow(), position);
+
+		_objectToAdd = RObjectLoader::createSceneObjectFromRObject(_objectToAddDefinition, _objectToAddDefinition->getName(), position, glm::vec3(0.0f, 0.0f, 0.0f), _sceneManager);
+		_objectToAdd->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+		Component* renderObject = _objectToAdd->getComponent(CT_RENDER_OBJECT);
+		if (renderObject != nullptr)
+		{
+			static_cast<RenderObject*>(renderObject)->setIsRenderObjectId(false);
+		}
 	}
 
 	void addObject(const std::string& objectName)
 	{
-		_clickMode = CM_ADD_OBJECT;
-		_objectToAdd = ResourceManager::getInstance().loadRObject(objectName);
+		setClickMode(CM_ADD_OBJECT);
+		_objectToAddDefinition = ResourceManager::getInstance().loadRObject(objectName);
+
+		loadNewObjectToAdd();
 	}
 
 	void addRoad(const std::string& roadProfileName, RoadType roadType)
 	{
-		_clickMode = CM_ROAD_EDIT;
+		setClickMode(CM_ROAD_EDIT);
 
 		RRoadProfile* roadProfile = ResourceManager::getInstance().loadRoadProfile(roadProfileName);
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject("Road");
-		RenderObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, std::vector<glm::vec3>(), std::vector<RoadSegment>(), true, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+
+		if (roadType == RoadType::BEZIER_CURVES)
+		{
+			BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+			roadSceneObject->addComponent(bezierCurve);
+		}
+
+		RoadObject* roadRenderObject = _graphicsManager->addRoadObject(roadType, roadProfile, {}, {}, true, roadSceneObject);
+		roadRenderObject->setInteractiveMode(true);
+		roadRenderObject->setCastShadows(false);
 
 		setSelectedSceneObject(roadSceneObject);
 	}
@@ -1017,6 +1312,110 @@ namespace vbEditor
 					setSelectedSceneObject(decalSceneObject);
 				}
 				ImGui::Separator();
+
+				if (ImGui::BeginMenu("Add mesh"))
+				{
+					if (ImGui::MenuItem("Plane", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Plane");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						PlanePrefab* plane = new PlanePrefab(glm::vec2(1, 1), material);
+						plane->init();
+						_graphicsManager->addRenderObject(plane, sceneObject);
+					}
+					if (ImGui::MenuItem("Cube", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cube");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						Cube* cube = new Cube(1, material);
+						cube->init();
+						_graphicsManager->addRenderObject(cube, sceneObject);
+					}
+					if (ImGui::MenuItem("Sphere", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Sphere");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						SpherePrefab* sphere = new SpherePrefab(1.0f, material);
+						sphere->init();
+						_graphicsManager->addRenderObject(sphere, sceneObject);
+					}
+					if (ImGui::MenuItem("Cylinder", NULL))
+					{
+						SceneObject* sceneObject = _sceneManager->addSceneObject("Cylinder");
+
+						Material* material = new Material;
+						material->shader = SOLID_MATERIAL;
+						material->shininess = 96.0f;
+						material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+						CylinderPrefab* cylinder = new CylinderPrefab(0.5f, 2.0f, material);
+						cylinder->init();
+						_graphicsManager->addRenderObject(cylinder, sceneObject);
+					}
+					ImGui::EndMenu();
+				}
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Add Bezier curve", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Bezier curve");
+
+					BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+					sceneObject->addComponent(bezierCurve);
+
+					setSelectedSceneObject(sceneObject);
+				}
+
+				if (ImGui::MenuItem("Add AI Path", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("AI Path");
+
+					BezierCurve* bezierCurve = _graphicsManager->addBezierCurve();
+					PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(PD_FORWARD);
+					sceneObject->addComponent(bezierCurve);
+					sceneObject->addComponent(pathComponent);
+
+					setSelectedSceneObject(sceneObject);
+				}
+
+				if (ImGui::MenuItem("Add AI Agent", NULL))
+				{
+					if (_selectedSceneObject != NULL)
+					{
+						AIAgent* aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent();
+						_selectedSceneObject->addComponent(aiAgent);
+
+						aiAgent->setCurrentPath(_sceneManager->getGameLogicSystem()->getPathComponents()[0]);
+					}
+				}
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Add Bus Start Point", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Bus start point");
+
+					BusStartPoint* busStartPoint = _sceneManager->getGameLogicSystem()->addBusStartPoint("Start point");
+					sceneObject->addComponent(busStartPoint);
+
+					setSelectedSceneObject(sceneObject);
+				}
+
+				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
 					Renderer::getInstance().bakeStaticShadows();
@@ -1059,10 +1458,6 @@ namespace vbEditor
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 				}
-				if (ImGui::MenuItem("TEST!!!", NULL, _graphicsManager->getGlobalEnvironmentCaptureComponent()->a))
-				{
-					_graphicsManager->getGlobalEnvironmentCaptureComponent()->a = !(_graphicsManager->getGlobalEnvironmentCaptureComponent()->a);
-				}
 
 				ImGui::Separator();
 
@@ -1098,6 +1493,7 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Windows"))
 			{
 				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
+				ImGui::MenuItem("Compute shader test", NULL, _computeShaderTestWindow->getOpenFlagPointer());
 				ImGui::EndMenu();
 			}
 
@@ -1212,12 +1608,12 @@ namespace vbEditor
 			}
 		}
 
-		if (_showGenerateObjectsAlongRoadWindow && _selectedSceneObject != nullptr)
+		if (_showGenerateObjectsAlongCurveWindow && _selectedSceneObject != nullptr)
 		{
-			RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-			if (!generateObjectsAlongRoadWindow(roadComponent))
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (!generateObjectsAlongCurveWindow(bezierCurve))
 			{
-				_showGenerateObjectsAlongRoadWindow = false;
+				_showGenerateObjectsAlongCurveWindow = false;
 			}
 		}
 
@@ -1229,11 +1625,14 @@ namespace vbEditor
 			//{
 				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
+				BezierCurve* bezierCurveComponent = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
 
-				if (roadComponent)
+				if (roadComponent && roadComponent->getRoadType() != RoadType::BEZIER_CURVES)
 					showRoadTools();
 				else if (shapePolygonComponent)
 					showPolygonEditTool();
+				else if (bezierCurveComponent)
+					showBezierCurveTool();
 				else
 					ShowTransformGizmo();
 			//}
@@ -1335,7 +1734,8 @@ namespace vbEditor
 				accumulator -= TIME_STEP;
 
 				_graphicsManager->update(TIME_STEP);
-				updateRoads(TIME_STEP);
+
+				_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
 
 
@@ -1482,20 +1882,28 @@ namespace vbEditor
 			ImGui::PopID();
 		}
 
+		glm::mat4 viewMatrix = _camera->getViewMatrix();
+		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
+		{
+			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
+		}
+
+		glm::mat4 modelMatrix = _selectedSceneObject->getLocalTransformMatrix();
+
 		ImGuiIO& io = ImGui::GetIO();
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(glm::value_ptr(_camera->getViewMatrix()), glm::value_ptr(_camera->getProjectionMatrix()),
+		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
-			glm::value_ptr(_selectedSceneObject->getLocalTransformMatrix()),
+			glm::value_ptr(modelMatrix),
 			NULL,
 			useSnap ? &snap[0] : NULL,
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
 		);
 
-		if (!isRoadModified && _selectedSceneObject->getComponent(CT_CROSSROAD) != nullptr)
+		if (ImGuizmo::IsUsing())
 		{
-			isRoadModified = ImGuizmo::IsUsing();
+			_selectedSceneObject->setTransformFromMatrix(modelMatrix);
 		}
 
 		Component* roadIntersectionComponent = _selectedSceneObject->getComponent(CT_ROAD_INTERSECTION);
@@ -1536,6 +1944,30 @@ namespace vbEditor
 		}
 	}
 
+	struct PathConnectionPoint final
+	{
+		PathComponent* pathComponent;
+		int index;
+	};
+
+	void createAvailableConnectionPointsListForPathComponent(PathComponent* selectedPathComponent, int selectedPointIndex, std::vector<glm::vec3>& connectionPointsPositions, std::vector<PathConnectionPoint>& connectionPoints)
+	{
+		const auto& pathComponents = _sceneManager->getGameLogicSystem()->getPathComponents();
+		for (auto path : pathComponents)
+		{
+			if (path->getCurvePoints().size() > 0 && selectedPointIndex == 1)
+			{
+				connectionPointsPositions.push_back(path->getCurvePoints()[0]);
+				connectionPoints.push_back({ path, 0 });
+			}
+			if (path->getCurvePoints().size() > 1 && selectedPointIndex == 0)
+			{
+				connectionPointsPositions.push_back(path->getCurvePoints()[path->getCurvePoints().size() - 1]);
+				connectionPoints.push_back({ path, 1 });
+			}
+		}
+	}
+
 	void showRoadTools()
 	{
 		RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -1547,6 +1979,7 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints({});
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			_selectedSceneObject->getLocalTransformMatrix(),
 			_camera->getPosition(),
@@ -1573,13 +2006,6 @@ namespace vbEditor
 			{
 				roadComponent->setConnectionPointWithRoadIntersection(connectionPointIndex, connectionPoints[newConnectionIndex].roadIntersectionComponent);
 			}
-
-			isRoadModified = true;
-		}
-
-		if (!isRoadModified)
-		{
-			isRoadModified = RoadManipulator::IsModified();
 		}
 	}
 
@@ -1593,6 +2019,7 @@ namespace vbEditor
 		ImGuiIO& io = ImGui::GetIO();
 		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints(component->getPoints());
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
 			/*_selectedSceneObject->getLocalTransformMatrix(),*/
 			glm::mat4(1.0f),
@@ -1607,27 +2034,65 @@ namespace vbEditor
 		}
 	}
 
-	void updateRoads(float deltaTime)
+	void showBezierCurveTool()
 	{
-		roadModificationTimer += deltaTime;
+		BezierCurve* component = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+		RoadObject* roadObject = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+		PathComponent* pathComponent = dynamic_cast<PathComponent*>(_selectedSceneObject->getComponent(CT_PATH));
 
-		if (roadModificationTimer >= 0.2f && isRoadModified)
+		std::vector<RoadSegment> segments;
+		std::vector<glm::vec3> connectionPointsPositions;
+		std::vector<RoadConnectionPoint> roatConnectionPoints;
+		std::vector<PathConnectionPoint> pathConnectionPoints;
+		if (roadObject != nullptr)
 		{
-			for (int i = 0; i < roadsToUpdate.size(); ++i)
-			{
-				RoadObject* roadComponent = roadsToUpdate[i];
+			createAvailableConnectionPointsList(connectionPointsPositions, roatConnectionPoints);
+		}
+		if (pathComponent != nullptr)
+		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			createAvailableConnectionPointsListForPathComponent(pathComponent, connectionPointIndex, connectionPointsPositions, pathConnectionPoints);
+		}
 
-				roadComponent->buildModel();
+		ImGuiIO& io = ImGui::GetIO();
+		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
+		RoadManipulator::SetCurvePoints(component->getCurvePoints());
+		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
+			/*_selectedSceneObject->getLocalTransformMatrix(),*/
+			glm::mat4(1.0f),
+			_camera->getPosition(),
+			component->getPoints(),
+			segments,
+			RoadManipulator::RoadType::BEZIER_CURVE);
+
+		if (RoadManipulator::IsModified())
+		{
+			component->setPointPostion(RoadManipulator::GetModifiedPointIndex(), RoadManipulator::GetModifiedPointNewPostion());
+		}
+
+		if (RoadManipulator::IsCreatedNewConnection())
+		{
+			int connectionPointIndex = RoadManipulator::GetModifiedPointIndex() == 0 ? 0 : 1;
+			int newConnectionIndex = RoadManipulator::GetNewConnectionIndex();
+
+			if (roadObject != nullptr)
+			{
+				if (roatConnectionPoints[newConnectionIndex].crossroadComponent != nullptr)
+				{
+					roadObject->setConnectionPoint(connectionPointIndex, roatConnectionPoints[newConnectionIndex].crossroadComponent, roatConnectionPoints[newConnectionIndex].index);
+				}
+				else
+				{
+					roadObject->setConnectionPointWithRoadIntersection(connectionPointIndex, roatConnectionPoints[newConnectionIndex].roadIntersectionComponent);
+				}
 			}
 
-			roadModificationTimer = 0.0f;
-			isRoadModified = false;
+			if (pathComponent != nullptr)
+			{
+				pathComponent->setConnection(connectionPointIndex, pathConnectionPoints[newConnectionIndex].pathComponent, pathConnectionPoints[newConnectionIndex].index);
+			}
 		}
-	}
-
-	void addSceneObject()
-	{
-
 	}
 
 } // namespace

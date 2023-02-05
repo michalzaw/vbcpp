@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "../../Graphics/RoadObject.h"
+#include "../../Graphics/BezierCurve.h"
 
 #include "../../Scene/SceneManager.h"
 
@@ -17,9 +17,9 @@ namespace ObjectsGenerator
 	std::random_device randomDevice;
 	std::mt19937 randomGenerator(randomDevice());
 
-	SceneObject* getExistingCollectionSceneObject(RoadObject* roadComponent, const std::string& collectionName)
+	SceneObject* getExistingCollectionSceneObject(Component* component, const std::string& collectionName)
 	{
-		const auto& children = roadComponent->getSceneObject()->getChildren();
+		const auto& children = component->getSceneObject()->getChildren();
 		for (SceneObject* child : children)
 		{
 			if (child->getName() == collectionName)
@@ -31,16 +31,16 @@ namespace ObjectsGenerator
 		return nullptr;
 	}
 
-	void generateRoadPoints(RoadObject* roadComponent, float distance, std::vector<glm::vec3>& outPoints)
+	void generateCurvePoints(BezierCurve* bezierCurve, float distance, std::vector<glm::vec3>& outPoints)
 	{
-		const std::vector<glm::vec3>& roadControlPoints = roadComponent->getPoints();
+		const std::vector<glm::vec3>& controlPoints = bezierCurve->getPoints();
 
-		for (int i = 0; i < roadControlPoints.size() - 1; i += 3)
+		for (int i = 0; i < controlPoints.size() - 1; i += 3)
 		{
 			std::vector<glm::vec3> segmentPoints;
-			BezierCurvesUtils::generateBezierCurvePointsWithConstDistance(10000, distance, segmentPoints, [roadControlPoints, i](float t)
+			BezierCurvesUtils::generateBezierCurvePointsWithConstDistance(10000, distance, segmentPoints, [&controlPoints, i](float t)
 				{
-					return BezierCurvesUtils::calculateBezierCurvePoint(roadControlPoints[i], roadControlPoints[i + 1], roadControlPoints[i + 2], roadControlPoints[i + 3], t);
+					return BezierCurvesUtils::calculateBezierCurvePoint(controlPoints[i], controlPoints[i + 1], controlPoints[i + 2], controlPoints[i + 3], t);
 				});
 
 			if (i == 0)
@@ -54,7 +54,7 @@ namespace ObjectsGenerator
 		}
 	}
 
-	glm::vec3 calculateRoadDirection(const glm::vec3& currentPoint, const glm::vec3& previousPoint, const glm::vec3& nextPoint)
+	glm::vec3 calculateDirection(const glm::vec3& currentPoint, const glm::vec3& previousPoint, const glm::vec3& nextPoint)
 	{
 		glm::vec3 v1 = currentPoint - previousPoint;
 		glm::vec3 v2 = nextPoint - currentPoint;
@@ -129,7 +129,7 @@ namespace ObjectsGenerator
 						 generateRandomFloat(minValue.z, maxValue.z));
 	}
 
-	void generateObjectsAlongRoad(RoadObject* roadComponent, ObjectsAlongRoadGeneratorData* generatorData, SceneManager* sceneManager)
+	void generateObjectsAlongCurve(BezierCurve* bezierCurve, ObjectsAlongCurveGeneratorData* generatorData, SceneManager* sceneManager)
 	{
 		if (generatorData->objectsNames.size() == 0)
 		{
@@ -139,33 +139,33 @@ namespace ObjectsGenerator
 
 		const std::string& objectsCollectionName = generatorData->objectsCollectionName;
 
-		std::vector<glm::vec3> roadPoints;
-		generateRoadPoints(roadComponent, 1.0f, roadPoints);
+		std::vector<glm::vec3> curvePoints;
+		generateCurvePoints(bezierCurve, 1.0f, curvePoints);
 		LOG_INFO("Generate objects: " + objectsCollectionName);
-		LOG_INFO("Number of road points: " + Strings::toString(roadPoints.size()) + " with distance: 1.0");
+		LOG_INFO("Number of curve points: " + Strings::toString(curvePoints.size()) + " with distance: 1.0");
 		LOG_INFO("Number of objects: " + Strings::toString(generatorData->objectsNames.size()));
 
 		
-		SceneObject* rootObject = getExistingCollectionSceneObject(roadComponent, objectsCollectionName);
+		SceneObject* rootObject = getExistingCollectionSceneObject(bezierCurve, objectsCollectionName);
 		if (rootObject != nullptr)
 		{
 			rootObject->removeAllChildrenFromScene();
 		}
 		else
 		{
-			rootObject = sceneManager->addSceneObject(roadComponent->getSceneObject()->getName() + " - " + objectsCollectionName);
+			rootObject = sceneManager->addSceneObject(bezierCurve->getSceneObject()->getName() + " - " + objectsCollectionName);
 			// todo: attach object to roadObject. Support in map file
 			//roadComponent->getSceneObject()->addChild(rootObject);
 		}
 
 		int objectsCounter = 0;
-		for (int i = 0; i < roadPoints.size(); i += generatorData->distance)
+		for (int i = 0; i < curvePoints.size(); i += generatorData->distance)
 		{
-			const glm::vec3& currentPoint = roadPoints[i];
-			const glm::vec3& previousPoint = i - 1 >= 0 ? roadPoints[i - 1] : currentPoint;
-			const glm::vec3& nextPoint = i + 1 < roadPoints.size() ? roadPoints[i + 1] : currentPoint;
+			const glm::vec3& currentPoint = curvePoints[i];
+			const glm::vec3& previousPoint = i - 1 >= 0 ? curvePoints[i - 1] : currentPoint;
+			const glm::vec3& nextPoint = i + 1 < curvePoints.size() ? curvePoints[i + 1] : currentPoint;
 
-			const glm::vec3 direction = calculateRoadDirection(currentPoint, previousPoint, nextPoint);
+			const glm::vec3 direction = calculateDirection(currentPoint, previousPoint, nextPoint);
 			const glm::vec3 rightVector = calculateRightVector(direction);
 			const glm::vec3 upVector = calculateUpVector(direction, rightVector);
 
@@ -188,7 +188,7 @@ namespace ObjectsGenerator
 				const glm::vec3 randomRotation = generateRandomVec3(-generatorData->rotationOffset, generatorData->rotationOffset);
 
 				const glm::vec3 offset = tangentMatrix * glm::vec3(generatorData->offsetFromCenter.x + randomOffset.x, generatorData->offsetFromCenter.y + randomOffset.y, 0.0f + randomOffset.z);
-				const glm::vec3 position = roadPoints[i] + offset;
+				const glm::vec3 position = curvePoints[i] + offset;
 				const glm::vec3 rotation = calculateRotation(tangentMatrix, generatorData->rotation + randomRotation);
 
 				LOG_INFO("Index=" + Strings::toString(i) + ", "	+ LOG_VARIABLE(objectName) + ", " + LOG_VARIABLE(position) + ", " + LOG_VARIABLE(rotation));
@@ -208,7 +208,7 @@ namespace ObjectsGenerator
 				const glm::vec3 randomRotation = generateRandomVec3(-generatorData->rotationOffset, generatorData->rotationOffset);
 
 				const glm::vec3 offset = tangentMatrix * glm::vec3(-generatorData->offsetFromCenter.x + randomOffset.x, generatorData->offsetFromCenter.y + randomOffset.y, 0.0f + randomOffset.z);
-				const glm::vec3 position = roadPoints[i] + offset;
+				const glm::vec3 position = curvePoints[i] + offset;
 				const glm::vec3 rotation = calculateRotation(tangentMatrix, -(generatorData->rotation + randomRotation));
 
 				LOG_INFO("Index=" + Strings::toString(i) + ", " + LOG_VARIABLE(objectName) + ", " + LOG_VARIABLE(position) + ", " + LOG_VARIABLE(rotation));

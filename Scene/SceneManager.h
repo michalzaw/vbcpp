@@ -3,7 +3,7 @@
 
 
 #include <list>
-#include <map>
+#include <unordered_map>
 
 #include "../Graphics/GraphicsManager.h"
 #include "../Graphics/Roads.h"
@@ -16,17 +16,14 @@
 
 
 class GameLogicSystem;
-class BusStopSystem;
 
-struct BusStart
-{
-    glm::vec3 position;
-    glm::vec3 rotation;
-};
 
 class SceneManager
 {
     private:
+        static const ObjectId MIN_OBJECT_ID = 1u;
+        static const ObjectId MAX_OBJECT_ID = 0xffffffff;
+
         GraphicsManager*    _graphicsManager;
         PhysicsManager*     _physicsManager;
         SoundManager*       _soundManager;
@@ -34,42 +31,35 @@ class SceneManager
         BusStopSystem*      _busStopSystem;
 
         std::list<SceneObject*> _sceneObjects;
+        std::unordered_map<ObjectId, SceneObject*> _sceneObjectsMap;
 
-        BusStart    _busStart;
+        ObjectId _nextObjectId;
+
+        ObjectId generateNewObjectId();
 
     public:
         SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr);
         ~SceneManager();
 
-        GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
-        PhysicsManager*     getPhysicsManager() { return _physicsManager; };
-        SoundManager*       getSoundManager() { return _soundManager; };
-        GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
-        BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
+        inline GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
+        inline PhysicsManager*     getPhysicsManager() { return _physicsManager; };
+        inline SoundManager*       getSoundManager() { return _soundManager; };
+        inline GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
+        inline BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
 
 
-        SceneObject*    addSceneObject(std::string name, RObject* objectDefinition = NULL);
+        SceneObject*    addSceneObject(const std::string& name, ObjectId id = 0u, RObject* objectDefinition = nullptr);
         void            removeSceneObject(SceneObject* object, bool removeChildren = true);
         void            removeChildSceneObject(SceneObject* object, bool removeChildren = true);
 
-        void            removeSceneObject(std::string name, bool removeChildren = true);
+        void            removeSceneObject(const std::string& name, bool removeChildren = true);
+        void            removeSceneObject(ObjectId id, bool removeChildren = true);
 
-        void clearScene()
-        {
-            for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
-            {
-                delete *i;
-            }
+        void clearScene();
 
-            _sceneObjects.clear();
-
-            _graphicsManager->clearQuadTree();
-        }
-
-        SceneObject*    getSceneObject(std::string name);
+        SceneObject*    getSceneObject(const std::string& name);
+        SceneObject*    getSceneObject(ObjectId id);
         std::list<SceneObject*>& getSceneObjects();
-
-        BusStart& getBusStart() { return _busStart; }
 
 };
 

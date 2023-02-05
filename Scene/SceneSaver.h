@@ -15,6 +15,7 @@ namespace tinyxml2
 {
 	class XMLElement;
 	class XMLDocument;
+	class XMLNode;
 }
 
 class SceneManager;
@@ -22,6 +23,11 @@ struct RoadLane;
 class RObject;
 class SceneObject;
 struct ResourceDescription;
+class Prefab;
+class PathComponent;
+class AIAgent;
+class BezierCurve;
+class BusStartPoint;
 
 
 class SceneSaver
@@ -32,9 +38,16 @@ class SceneSaver
 		SceneManager* _sceneManager;
 		std::string _dirPath;
 
+		tinyxml2::XMLNode* _rootNode;
+		tinyxml2::XMLElement* _terrainElement;
+		tinyxml2::XMLElement* _grassElement;
+		tinyxml2::XMLElement* _sunElement;
+		tinyxml2::XMLElement* _skyElement;
+		tinyxml2::XMLElement* _objectsElement;
+		tinyxml2::XMLElement* _roadsElement;
+
 		std::string createSkyTextureAttribute(std::string path);
 
-		void saveStartPosition(tinyxml2::XMLElement* startPositionElement);
 		void saveTerrain(tinyxml2::XMLElement* terrainElement, tinyxml2::XMLElement* grassElement, SceneObject* sceneObject);
 		void saveGrass(tinyxml2::XMLElement* grassElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
 		void saveSunLight(tinyxml2::XMLElement* sunElement, SceneObject* sceneObject);
@@ -42,6 +55,14 @@ class SceneSaver
 		void saveObject(tinyxml2::XMLElement* objectsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition);
 		void saveRoad(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
 		void saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxml2::XMLDocument& doc, SceneObject* sceneObject);
+
+		void savePrefabComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, Prefab* prefab);
+		void saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve);
+		void savePathComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, PathComponent* pathComponent);
+		void saveAIAgentComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgent* aiAgent);
+		void saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint);
+
+		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);
 
 	public:
 		SceneSaver(SceneManager* sceneManager);

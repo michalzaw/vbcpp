@@ -324,7 +324,7 @@ void EditorGUI::ShowTransformGizmo(CameraStatic* camera, SceneObject* obj)
 	}
 	*/
 	
-	static bool useSnap(false);
+	/*static bool useSnap(false);
 	
 	if (ImGui::IsKeyPressed(80))
 		useSnap = !useSnap;
@@ -375,5 +375,5 @@ void EditorGUI::ShowTransformGizmo(CameraStatic* camera, SceneObject* obj)
 							useSnap ? &snap[0] : NULL, 
 							boundSizing ? bounds : NULL, 
 							boundSizingSnap ? boundsSnap : NULL
-	);
+	);*/
 }

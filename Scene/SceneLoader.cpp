@@ -2,8 +2,13 @@
 
 #include "SceneManager.h"
 
+#include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
@@ -25,20 +30,22 @@ SceneLoader::SceneLoader(SceneManager* sceneManager)
 }
 
 
+// deprecated - only for backward compatibility. Bus start should be saved as BusStartPoint component in SceneObject (loadBusStartPointComponent)
 void SceneLoader::loadStartPosition(XMLElement* sceneElement)
 {
 	XMLElement* startElement = sceneElement->FirstChildElement("Start");
-	if (startElement == nullptr)
+	if (startElement != nullptr)
 	{
-		LOG_WARNING("Start point not found!");
-	}
-	else
-	{
-		const char* cPosition(startElement->Attribute("position"));
-		_sceneManager->getBusStart().position = XMLstringToVec3(cPosition);
+		glm::vec3 position = XmlUtils::getAttributeVec3(startElement, "position");
+		glm::vec3 rotation = XmlUtils::getAttributeVec3(startElement, "rotation");
 
-		const char* cRotation(startElement->Attribute("rotation"));
-		_sceneManager->getBusStart().rotation = XMLstringToVec3(cRotation);
+		SceneObject* busStartSceneObject = _sceneManager->addSceneObject("BusStartPoint");
+		busStartSceneObject->setPosition(position);
+		busStartSceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z));
+
+		BusStartPoint* busStartPointComponent = _sceneManager->getGameLogicSystem()->addBusStartPoint("Default start point");
+
+		busStartSceneObject->addComponent(busStartPointComponent);
 	}
 }
 
@@ -64,7 +71,7 @@ bool SceneLoader::loadTerrain(XMLElement* sceneElement)
 	SceneObject* terrainObject = _sceneManager->addSceneObject("terrain");
 	terrainObject->setFlags(SOF_NOT_SELECTABLE_ON_SCENE);
 	Terrain* terrainObj = _sceneManager->getGraphicsManager()->addTerrain(terrainHeightmap, _dirPath, materialName, terrainMaxHeight, is16bitTexture, terrainObject);
-	terrainObj->setIsCastShadows(false);
+	terrainObj->setCastShadows(false);
 	PhysicalBodyBvtTriangleMesh* terrainMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(terrainObj->getModel(), COL_TERRAIN, _terrainCollidesWith);
 	terrainMesh->setRestitution(0.9f);
 	terrainMesh->getRigidBody()->setFriction(1.0f);
@@ -253,6 +260,148 @@ void SceneLoader::loadObjects(XMLElement* objectsElement, SceneObject* parent)
 	*/
 }
 
+
+void SceneLoader::loadPrefabComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	PrefabType prefabType = getPrefabTypeFromString(XmlUtils::getAttributeString(componentElement, "prefabType"));
+
+	Material* material = new Material;
+	material->shader = SOLID_MATERIAL;
+	material->shininess = 96.0f;
+	material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+	if (prefabType == PrefabType::PLANE)
+	{
+		glm::vec2 size = XmlUtils::getAttributeVec2(componentElement, "size");
+
+		PlanePrefab* plane = new PlanePrefab(size, material);
+		plane->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(plane, sceneObject);
+	}
+	else if (prefabType == PrefabType::CUBE)
+	{
+		float size = XmlUtils::getAttributeFloat(componentElement, "size");
+
+		Cube* cube = new Cube(size, material);
+		cube->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(cube, sceneObject);
+	}
+	else if (prefabType == PrefabType::SPHERE)
+	{
+		float radius = XmlUtils::getAttributeFloat(componentElement, "radius");
+		int quality = XmlUtils::getAttributeInt(componentElement, "quality");
+
+		SpherePrefab* sphere = new SpherePrefab(radius, material);
+		sphere->setQuality(quality);
+		sphere->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(sphere, sceneObject);
+	}
+	else if (prefabType == PrefabType::CYLINDER)
+	{
+		float radius = XmlUtils::getAttributeFloat(componentElement, "radius");
+		float height = XmlUtils::getAttributeFloat(componentElement, "height");
+		int axis = XmlUtils::getAttributeInt(componentElement, "axis");
+		int quality = XmlUtils::getAttributeInt(componentElement, "quality");
+
+		CylinderPrefab* cylinder = new CylinderPrefab(radius, height, material);
+		cylinder->setAxis(axis);
+		cylinder->setQuality(quality);
+		cylinder->init();
+		_sceneManager->getGraphicsManager()->addRenderObject(cylinder, sceneObject);
+	}
+	else
+	{
+		delete material;
+	}
+}
+
+
+void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::vector<glm::vec3> controlPoints;
+	std::vector<int> segmentsPointsCount;
+
+	XMLElement* pointsElement = componentElement->FirstChildElement("Points");
+
+	XMLElement* pointElement = pointsElement->FirstChildElement("Point");
+	while (pointElement != nullptr)
+	{
+		controlPoints.push_back(XMLstringToVec3(pointElement->GetText()));
+
+		pointElement = pointElement->NextSiblingElement("Point");
+	}
+
+	XMLElement* segmentsElement = componentElement->FirstChildElement("Segments");
+
+	XMLElement* segmentElement = segmentsElement->FirstChildElement("Segment");
+	while (segmentElement != nullptr)
+	{
+		segmentsPointsCount.push_back(XmlUtils::getAttributeInt(segmentElement, "points"));
+
+		segmentElement = segmentElement->NextSiblingElement("Segment");
+	}
+
+	glm::vec2 offsetFromBaseCurve = XmlUtils::getAttributeVec2(componentElement, "offsetFromBaseCurve");
+	float marginBegin = XmlUtils::getAttributeFloat(componentElement, "marginBegin");
+	float marginEnd = XmlUtils::getAttributeFloat(componentElement, "marginEnd");
+
+	BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(controlPoints, segmentsPointsCount, marginBegin, marginEnd, offsetFromBaseCurve);
+
+	sceneObject->addComponent(bezierCurve);
+}
+
+
+void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
+	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(direction);
+
+	sceneObject->addComponent(pathComponent);
+
+	XMLElement* connectionsElement = componentElement->FirstChildElement("Connections");
+	if (connectionsElement != nullptr)
+	{
+
+		XMLElement* connectionElement = connectionsElement->FirstChildElement("Connection");
+		while (connectionElement != nullptr)
+		{
+			_sceneManager->getGameLogicSystem()->setPathConnection(pathComponent,
+																   XmlUtils::getAttributeString(connectionElement, "pathName"),
+																   1,
+																   XmlUtils::getAttributeInt(connectionElement, "index"));
+
+			connectionElement = connectionElement->NextSiblingElement("Connection");
+		}
+	}
+}
+
+
+void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgent* component = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
+}
+
+
+void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::string name = XmlUtils::getAttributeString(componentElement, "name");
+
+	BusStartPoint* busStartPoint = _sceneManager->getGameLogicSystem()->addBusStartPoint(name);
+
+	sceneObject->addComponent(busStartPoint);
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -305,6 +454,31 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 				component->setAnnouncementFileName(announcementFileName);
 			}
 
+			if (componentType == "prefab")
+			{
+				loadPrefabComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "bezierCurve")
+			{
+				loadBezierCurveComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "path")
+			{
+				loadPathComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiAgent")
+			{
+				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "busStartPoint")
+			{
+				loadBusStartPointComponent(componentElement, sceneObject);
+			}
+
 			componentElement = componentElement->NextSiblingElement("Component");
 		}
 
@@ -343,6 +517,11 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		if (roadObject->getSceneObject()->getParent() == nullptr)
 		{
 			roadObject->buildModel();
+
+			if (GameConfig::getInstance().mode == GM_EDITOR)
+			{
+				roadObject->setInteractiveMode(true);
+			}
 
 			PhysicalBodyBvtTriangleMesh* roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 			roadMesh->setRestitution(0.9f);
@@ -426,7 +605,7 @@ void SceneLoader::loadRoads(XMLElement* roadsElement)
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
 		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadProfile, segments, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		roadRenderObject->setCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
 		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
 		roadMesh->setRestitution(0.9f);
@@ -494,14 +673,9 @@ void SceneLoader::loadRoad(XMLElement* roadElement)
 		//RModel* roadModel2 = new RModel("", roadModel);
 		//RStaticModel* roadModel2 = new RStaticModel;
 		SceneObject * roadSceneObject = _sceneManager->addSceneObject(name);
-		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, true, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		RenderObject * roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(RoadType::LINES_AND_ARC, roadProfile, points, segments, false, roadSceneObject);
+		roadRenderObject->setCastShadows(false);
 		//roadSceneObject->addComponent(roadRenderObject);
-		PhysicalBodyBvtTriangleMesh * roadMesh = _sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(roadRenderObject->getModel(), COL_TERRAIN, _roadCollidesWith);
-		roadMesh->setRestitution(0.9f);
-		roadMesh->getRigidBody()->setFriction(1.0f);
-		//terrainMesh->getRigidBody()->setFriction(1.5f);
-		roadSceneObject->addComponent(roadMesh);
 
 		roadElement = roadElement->NextSiblingElement("Road");
 	}
@@ -522,6 +696,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 		std::vector<glm::vec3> points;
 		std::vector<RoadSegment> segments;
+		std::vector<int> pointsInSegments;
 
 
 		XMLElement* pointElement = roadElement->FirstChildElement("Point");
@@ -556,6 +731,7 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 				segment.interpolation = RI_COS;
 
 			segments.push_back(segment);
+			pointsInSegments.push_back(segment.pointsCount);
 
 			segmentElement = segmentElement->NextSiblingElement("Segment");
 		}
@@ -566,8 +742,19 @@ void SceneLoader::loadRoadV2(XMLElement* roadElement)
 
 
 		SceneObject* roadSceneObject = _sceneManager->addSceneObject(name);
-		RoadObject* roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
-		roadRenderObject->setIsCastShadows(false);
+		RoadObject* roadRenderObject;
+		if (roadType == RoadType::BEZIER_CURVES)
+		{
+			BezierCurve* bezierCurve = _sceneManager->getGraphicsManager()->addBezierCurve(points, pointsInSegments);
+			roadSceneObject->addComponent(bezierCurve);
+
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, {}, {}, false, roadSceneObject);
+		}
+		else
+		{
+			roadRenderObject = _sceneManager->getGraphicsManager()->addRoadObject(roadType, roadProfile, points, segments, false, roadSceneObject);
+		}
+		roadRenderObject->setCastShadows(false);
 
 
 		XMLElement* connectionElement = roadElement->FirstChildElement("Connection");
@@ -742,6 +929,9 @@ void SceneLoader::loadMap(std::string name)
 	XMLElement* roadsElement = scnElement->FirstChildElement("Roads");
 	if (roadsElement)
 		loadRoads(roadsElement);
+
+	// todo: auto call after scene creation
+	_sceneManager->getGameLogicSystem()->createPendingPathConnections();
 }
 
 

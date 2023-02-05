@@ -1,5 +1,8 @@
 set (GRAPHICS_SOURCES
 		Graphics/AABB.h
+		Graphics/AnimatedModelLoader.cpp
+		Graphics/AnimationLoader.cpp
+		Graphics/BezierCurve.cpp
 		Graphics/Camera.cpp
 		Graphics/Camera.h
 		Graphics/CameraFPS.cpp
@@ -54,10 +57,12 @@ set (GRAPHICS_SOURCES
 		Graphics/PostProcessingEffect.h
 		Graphics/PostProcessingToneMapping.h
 		Graphics/Prefab.h
+		Graphics/Prefab.cpp
 		Graphics/QuadTree.cpp
 		Graphics/QuadTree.h
 		Graphics/QuadTreeNode.cpp
 		Graphics/QuadTreeNode.h
+		Graphics/RAnimation.cpp
 		Graphics/RDisplayFont.cpp
 		Graphics/RDisplayFont.h
 		Graphics/RRoadProfile.cpp
@@ -87,6 +92,9 @@ set (GRAPHICS_SOURCES
 		Graphics/ShadowMap.h
 		Graphics/ShapePolygonComponent.cpp
 		Graphics/ShapePolygonComponent.h
+		Graphics/SkeletalAnimationComponent.cpp
+		Graphics/SkeletalAnimationComponent2.cpp
+		Graphics/SkeletalAnimationHelperComponent.cpp
 		Graphics/Sky.h
 		Graphics/StaticModelLoader.cpp
 		Graphics/StaticModelLoader.h
@@ -98,9 +106,20 @@ set (GRAPHICS_SOURCES
 		Graphics/UBO.h
 		Graphics/VAO.h
 		Graphics/VBO.cpp
+		Graphics/Vertex.cpp
 )
 
 set (GRAPHICS_HEADERS
+		Graphics/StorageBuffer/PickingShaderStorageBufferData.h
+		Graphics/AnimatedModelLoader.h
+		Graphics/AnimationLoader.h
+		Graphics/BezierCurve.h
+		Graphics/RAnimation.h
+		Graphics/AnimationNodeData.h
+		Graphics/ShaderStorageBuffer.h
+		Graphics/SkeletalAnimationComponent.h
+		Graphics/SkeletalAnimationComponent2.h
+		Graphics/SkeletalAnimationHelperComponent.h
 		Graphics/VBO.h
 		Graphics/Vector3.h
 		Graphics/Vertex.h

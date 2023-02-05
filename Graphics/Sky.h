@@ -22,7 +22,7 @@ public:
 
 		init();
 
-		setIsCastShadows(false);
+		setCastShadows(false);
 	}
 
 	~Sky()

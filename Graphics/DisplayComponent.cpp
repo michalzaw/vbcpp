@@ -1,9 +1,10 @@
 #include "DisplayComponent.h"
 
-#include "../Scene/SceneObject.h"
+#include "Framebuffer.h"
+#include "RenderObject.h"
+#include "Renderer.h"
 
-#include "../Graphics/RenderObject.h"
-#include "../Graphics/Renderer.h"
+#include "../Scene/SceneObject.h"
 
 
 DisplayComponent::DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor)
@@ -288,7 +289,7 @@ DisplayText& DisplayComponent::getText()
 
 void DisplayComponent::init()
 {
-	RenderObject* renderObject = static_cast<RenderObject*>(_object->getComponent(CT_RENDER_OBJECT));
+	RenderObject* renderObject = static_cast<RenderObject*>(_object->getComponent(CT_PREFAB));
 
 	renderObject->getModel()->getMaterial(0)->diffuseTexture = _displayRenderTexture->getTexture(1);
 	renderObject->getModel()->getMaterial(0)->emissiveTexture = _displayRenderTexture->getTexture(0);

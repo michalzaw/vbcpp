@@ -1,12 +1,23 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
-#include "../Game/GameLogicSystem.h"
+
+#include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/CameraControlComponent.h"
+#include "../Game/GameLogicSystem.h"
+#include "../Game/PathComponent.h"
+
+#include "../Graphics/BezierCurve.h"
+#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../Graphics/SkeletalAnimationComponent2.h"
+#include "../Graphics/SkeletalAnimationHelperComponent.h"
+
+#include "../Utils/GlmUtils.h"
 
 
-SceneObject::SceneObject(std::string name, SceneManager* sceneManager, RObject* objectDefinition, SceneObject* parent)
+SceneObject::SceneObject(const std::string& name, ObjectId id, SceneManager* sceneManager, RObject* objectDefinition/* = nullptr*/, SceneObject* parent/* = nullptr*/)
     : _parent(parent),
-    _id(0), _name(name), _isActive(true),
+    _id(id), _name(name), _isActive(true),
     _flags(0),
 	_objectDefinition(objectDefinition),
     _sceneManager(sceneManager),
@@ -35,6 +46,7 @@ SceneObject::~SceneObject()
         switch ((*i)->getType())
         {
             case CT_RENDER_OBJECT:
+            case CT_PREFAB:
                 _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(*i));
                 break;
 
@@ -108,6 +120,34 @@ SceneObject::~SceneObject()
 
             case CT_ROAD_INTERSECTION:
                 _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_2:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(*i));
+                break;
+
+            case CT_SKELETAL_ANIMATION_HELPER:
+                _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(*i));
+                break;
+
+            case CT_BEZIER_CURVE:
+                _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
+                break;
+
+            case CT_AI_AGENT:
+                _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(*i));
+                break;
+
+            case CT_PATH:
+                _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(*i));
+                break;
+
+            case CT_BUS_START_POINT:
+                _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(*i));
                 break;
 
         }
@@ -226,11 +266,22 @@ bool SceneObject::removeChild(SceneObject* child)
 }
 
 
-void SceneObject::removeAllChildren()
+void SceneObject::removeAllChildren(bool setChildInGlobalPosition/* = false*/)
 {
     for (std::list<SceneObject*>::iterator i = _childrens.begin(); i != _childrens.end(); ++i)
     {
+        glm::mat4 globalTransform;
+        if (setChildInGlobalPosition)
+        {
+            globalTransform = (*i)->getGlobalTransformMatrix();
+        }
+
         (*i)->_parent = NULL;
+
+        if (setChildInGlobalPosition)
+        {
+            (*i)->setTransformFromMatrix(globalTransform, false);
+        }
     }
 
     _childrens.clear();
@@ -248,7 +299,7 @@ void SceneObject::removeAllChildrenFromScene()
 }
 
 
-std::list<SceneObject*>& SceneObject::getChildren()
+const std::list<SceneObject*>& SceneObject::getChildren()
 {
     return _childrens;
 }
@@ -258,9 +309,9 @@ void SceneObject::addComponent(Component* component)
 {
     if (component != NULL)
     {
-        component->setSceneObject(this);
-
         _components.push_back(component);
+
+        component->setSceneObject(this);
 
         component->changedTransform();
     }
@@ -278,6 +329,7 @@ void SceneObject::removeComponent(Component* component)
 			switch (component->getType())
             {
                 case CT_RENDER_OBJECT:
+                case CT_PREFAB:
                     _sceneManager->getGraphicsManager()->removeRenderObject(static_cast<RenderObject*>(component));
                     break;
 
@@ -353,6 +405,34 @@ void SceneObject::removeComponent(Component* component)
                     _sceneManager->getGraphicsManager()->removeRoadIntersectionComponent(static_cast<RoadIntersectionComponent*>(component));
                     break;
 
+                case CT_SKELETAL_ANIMATION:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation(static_cast<SkeletalAnimationComponent*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_2:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimation2(static_cast<SkeletalAnimationComponent2*>(component));
+                    break;
+
+                case CT_SKELETAL_ANIMATION_HELPER:
+                    _sceneManager->getGraphicsManager()->removeSkeletalAnimationHelper(static_cast<SkeletalAnimationHelperComponent*>(component));
+                    break;
+
+                case CT_BEZIER_CURVE:
+                    _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
+                    break;
+
+                case CT_AI_AGENT:
+                    _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(component));
+                    break;
+
+                case CT_PATH:
+                    _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(component));
+                    break;
+
+                case CT_BUS_START_POINT:
+                    _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(component));
+                    break;
+
             }
 
             return;
@@ -361,7 +441,7 @@ void SceneObject::removeComponent(Component* component)
 }
 
 
-void SceneObject::setName(std::string name)
+void SceneObject::setName(const std::string& name)
 {
 	_name = name;
 }
@@ -373,12 +453,12 @@ void SceneObject::setIsActive(bool is)
 }
 
 
-std::string SceneObject::getName()
+const std::string& SceneObject::getName()
 {
     return _name;
 }
 
-unsigned int SceneObject::getId()
+ObjectId SceneObject::getId()
 {
     return _id;
 }
@@ -450,7 +530,7 @@ SceneManager* SceneObject::getSceneManager()
 }
 
 
-void SceneObject::setPosition(glm::vec3 position)
+void SceneObject::setPosition(const glm::vec3& position)
 {
     _position = position;
 
@@ -464,7 +544,7 @@ void SceneObject::setPosition(float x, float y, float z)
 }
 
 
-void SceneObject::setRotation(glm::vec3 rotation)
+void SceneObject::setRotation(const glm::vec3& rotation)
 {
     _rotation = rotation;
     _rotationQuaternion = glm::quat(rotation);
@@ -481,7 +561,7 @@ void SceneObject::setRotation(float x, float y, float z)
 }
 
 
-void SceneObject::setRotationQuaternion(glm::quat rotation)
+void SceneObject::setRotationQuaternion(const glm::quat& rotation)
 {
     _rotationQuaternion = rotation;
     _rotation = glm::eulerAngles(rotation);
@@ -505,7 +585,7 @@ void SceneObject::setRotationQuaternion(float x, float y, float z, float w)
 }
 
 
-void SceneObject::setScale(glm::vec3 scale)
+void SceneObject::setScale(const glm::vec3& scale)
 {
     _scale = scale;
 
@@ -525,7 +605,7 @@ void SceneObject::setScale(float scale)
 }
 
 
-void SceneObject::move(glm::vec3 deltaPosition)
+void SceneObject::move(const glm::vec3& deltaPosition)
 {
     _position += deltaPosition;
 
@@ -539,7 +619,7 @@ void SceneObject::move(float dx, float dy, float dz)
 }
 
 
-void SceneObject::rotate(glm::vec3 deltaRotation)
+void SceneObject::rotate(const glm::vec3& deltaRotation)
 {
     _rotation += deltaRotation;
 
@@ -555,7 +635,7 @@ void SceneObject::rotate(float dx, float dy, float dz)
 }
 
 
-void SceneObject::scale(glm::vec3 scale)
+void SceneObject::scale(const glm::vec3& scale)
 {
     _scale *= scale;
 
@@ -569,31 +649,31 @@ void SceneObject::scale(float x, float y, float z)
 }
 
 
-glm::vec3 SceneObject::getPosition() const
+const glm::vec3& SceneObject::getPosition() const
 {
     return _position;
 }
 
 
-glm::vec3 SceneObject::getRotation() const
+const glm::vec3& SceneObject::getRotation() const
 {
     return _rotation;
 }
 
 
-glm::quat SceneObject::getRotationQuaternion() const
+const glm::quat& SceneObject::getRotationQuaternion() const
 {
     return _rotationQuaternion;
 }
 
 
-glm::vec3 SceneObject::getScale() const
+const glm::vec3& SceneObject::getScale() const
 {
     return _scale;
 }
 
 
-glm::mat4& SceneObject::getLocalTransformMatrix() const
+const glm::mat4& SceneObject::getLocalTransformMatrix() const
 {
     if (!_localTransformMatrixIsCalculated)
     {
@@ -606,7 +686,7 @@ glm::mat4& SceneObject::getLocalTransformMatrix() const
 }
 
 
-glm::mat4& SceneObject::getLocalNormalMatrix() const
+const glm::mat4& SceneObject::getLocalNormalMatrix() const
 {
     if (!_localNormalMatrixIsCalculated)
     {
@@ -619,7 +699,7 @@ glm::mat4& SceneObject::getLocalNormalMatrix() const
 }
 
 
-glm::mat4& SceneObject::getGlobalTransformMatrix() const
+const glm::mat4& SceneObject::getGlobalTransformMatrix() const
 {
     if (!_globalTransformMatrixIsCalculated)
     {
@@ -632,7 +712,7 @@ glm::mat4& SceneObject::getGlobalTransformMatrix() const
 }
 
 
-glm::mat4& SceneObject::getGlobalNormalMatrix() const
+const glm::mat4& SceneObject::getGlobalNormalMatrix() const
 {
     if (!_globalNormalMatrixIsCalculated)
     {
@@ -644,20 +724,44 @@ glm::mat4& SceneObject::getGlobalNormalMatrix() const
     return _globalNormalMatrix;
 }
 
-void SceneObject::updateFromLocalMatrix()
+
+void SceneObject::setTransformFromMatrix(const glm::mat4& transformMatrix, bool forceQuaternions/* = true*/)
 {
-	glm::vec3 scale;
-	glm::quat rotation;
-	glm::vec3 translation;
-	glm::vec3 skew;
-	glm::vec4 perspective;
-	glm::decompose(_localTransformMatrix, scale, rotation, translation, skew, perspective);
+    glm::vec3 translation;
+    glm::quat orientation;
+    glm::vec3 scale;
+    GlmUtils::decomposeMatrix(transformMatrix, translation, orientation, scale);
 
-	glm::vec3 rotationEulerAngles = glm::eulerAngles(rotation);
-	rotationEulerAngles = glm::vec3(-rotationEulerAngles.x, -rotationEulerAngles.y, -rotationEulerAngles.z);
+    setPosition(translation);
+    setScale(scale);
 
-	setPosition(translation);
-	setRotation(rotationEulerAngles);
-	setScale(scale);
-	changedTransform();
+    if (_rotationMode == RM_QUATERNION || forceQuaternions)
+    {
+        setRotationQuaternion(orientation);
+    }
+    else
+    {
+        glm::vec3 rotationEulerAngles = glm::eulerAngles(orientation);
+        setRotation(rotationEulerAngles);
+    }
+}
+
+
+glm::vec3 SceneObject::getGlobalPosition()
+{
+    return transformLocalPointToGlobal(glm::vec3(0.0f, 0.0f, 0.0f));
+}
+
+
+glm::vec3 SceneObject::transformLocalPointToGlobal(const glm::vec3& point)
+{
+    glm::vec4 p = getGlobalTransformMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
+    return glm::vec3(p.x, p.y, p.z);
+}
+
+
+glm::vec3 SceneObject::transformLocalVectorToGlobal(const glm::vec3& vec)
+{
+    glm::vec4 v = getGlobalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
+    return glm::vec3(v.x, v.y, v.z);
 }

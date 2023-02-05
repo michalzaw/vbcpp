@@ -1,4 +1,7 @@
 set (GAME_SOURCES
+	Game/AIAgent.cpp
+	Game/AIAgentPhysicalVechicle.cpp
+	Game/BusStartPoint.cpp
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
 	Game/CameraControlComponent.cpp
@@ -10,10 +13,14 @@ set (GAME_SOURCES
 	Game/LoadingScreenScene.cpp
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp
+	Game/PathComponent.cpp
 	Game/TestScene.cpp
 )
 
 set (GAME_HEADERS 
+	Game/AIAgent.h
+	Game/AIAgentPhysicalVechicle.h
+	Game/BusStartPoint.h
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h
 	Game/CameraControlComponent.h
@@ -27,6 +34,7 @@ set (GAME_HEADERS
 	Game/LoadingScreenScene.h
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h
+	Game/PathComponent.h
 	Game/TestScene.h
     
 )

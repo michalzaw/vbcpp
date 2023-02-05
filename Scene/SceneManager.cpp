@@ -1,20 +1,11 @@
 #include "SceneManager.h"
 
-// XML reader
-#include "../Utils/tinyxml2.h"
-#include <sstream>
-#include <cstdlib>
-using namespace tinyxml2;
-
-#include "../Utils/Helpers.hpp"
-#include "../Utils/XmlUtils.h"
-#include "../Graphics/LoadTerrainModel.h"
-
-#include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 
+
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
-    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr)
+    : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr),
+    _nextObjectId(MIN_OBJECT_ID)
 {
     LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
@@ -22,9 +13,6 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
 
     _gameLogicSystem = new GameLogicSystem;
     _busStopSystem = new BusStopSystem;
-
-    _busStart.position = glm::vec3(0,3,0);
-    _busStart.rotation = glm::vec3(0,0,0);
 
     //_graphicsManager = new GraphicsManager;
     //_physicsManager = new PhysicsManager;
@@ -55,18 +43,45 @@ SceneManager::~SceneManager()
 }
 
 
-SceneObject* SceneManager::addSceneObject(std::string name, RObject* objectDefinition)
+ObjectId SceneManager::generateNewObjectId()
 {
-    SceneObject* obj = new SceneObject(name, this, objectDefinition);
+    while (_sceneObjectsMap.find(_nextObjectId) != _sceneObjectsMap.end())
+    {
+        _nextObjectId = clamp(_nextObjectId + 1, MIN_OBJECT_ID, MAX_OBJECT_ID);
+    }
+
+    return _nextObjectId;
+}
+
+
+SceneObject* SceneManager::addSceneObject(const std::string& name, ObjectId id/* = 0u*/, RObject* objectDefinition/* = nullptr*/)
+{
+    ObjectId objectId = id;
+    if (objectId == 0u)
+    {
+        objectId = generateNewObjectId();
+    }
+
+    auto existingSceneObject = _sceneObjectsMap.find(objectId);
+    if (existingSceneObject != _sceneObjectsMap.end())
+    {
+        LOG_ERROR("Object with id=" + Strings::toString(objectId) + " already exist.");
+        return nullptr;
+    }
+
+    SceneObject* obj = new SceneObject(name, objectId, this, objectDefinition);
 
     _sceneObjects.push_back(obj);
+    _sceneObjectsMap.insert(std::make_pair(obj->getId(), obj));
 
     return obj;
 }
 
 
-void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
+void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
+    _sceneObjectsMap.erase(object->getId());
+
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
         if (*i == object)
@@ -75,7 +90,7 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
@@ -94,8 +109,10 @@ void SceneManager::removeSceneObject(SceneObject* object, bool removeChildren)
 }
 
 
-void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren)
+void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildren/* = true*/)
 {
+    _sceneObjectsMap.erase(object->getId());
+
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
         if (*i == object)
@@ -104,7 +121,7 @@ void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildr
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = object->getChildren().begin(); j != object->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
@@ -121,7 +138,8 @@ void SceneManager::removeChildSceneObject(SceneObject* object, bool removeChildr
     }
 }
 
-void SceneManager::removeSceneObject(std::string name, bool removeChildren)
+
+void SceneManager::removeSceneObject(const std::string& name, bool removeChildren/* = true*/)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end();)
     {
@@ -129,16 +147,23 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
         {
             SceneObject* temp = *i;
 
+            _sceneObjectsMap.erase(temp->getId());
+
             i = _sceneObjects.erase(i);
 
             if (removeChildren)
             {
-                for (std::list<SceneObject*>::iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
+                for (std::list<SceneObject*>::const_iterator j = temp->getChildren().begin(); j != temp->getChildren().end(); ++j)
                 {
                     removeChildSceneObject(*j);
                 }
             }
+            else
+            {
+                temp->removeAllChildren();
+            }
 
+            temp->removeParent();
             delete temp;
         }
         else
@@ -148,7 +173,31 @@ void SceneManager::removeSceneObject(std::string name, bool removeChildren)
     }
 }
 
-SceneObject* SceneManager::getSceneObject(std::string name)
+
+void SceneManager::removeSceneObject(ObjectId id, bool removeChildren/* = true*/)
+{
+    auto object = _sceneObjectsMap.find(id);
+    if (object != _sceneObjectsMap.end())
+    {
+        removeSceneObject(object->second, removeChildren);
+    }
+}
+
+
+void SceneManager::clearScene()
+{
+    for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
+    {
+        delete* i;
+    }
+
+    _sceneObjects.clear();
+
+    _graphicsManager->clearQuadTree();
+}
+
+
+SceneObject* SceneManager::getSceneObject(const std::string& name)
 {
     for (std::list<SceneObject*>::iterator i = _sceneObjects.begin(); i != _sceneObjects.end(); ++i)
     {
@@ -157,6 +206,19 @@ SceneObject* SceneManager::getSceneObject(std::string name)
     }
 
     return 0;
+}
+
+
+SceneObject* SceneManager::getSceneObject(ObjectId id)
+{
+    auto object = _sceneObjectsMap.find(id);
+    if (object != _sceneObjectsMap.end())
+    {
+        return object->second;
+    }
+
+    LOG_ERROR("Cannot find Object with id: " + Strings::toString(id));
+    return nullptr;
 }
 
 

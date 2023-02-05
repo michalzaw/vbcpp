@@ -2,6 +2,7 @@
 
 #include <iterator>
 
+#include "BezierCurve.h"
 #include "ModelGenerator.h"
 #include "ShapePolygonComponent.h"
 #include "RoadGenerator.h"
@@ -58,7 +59,10 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 		return;
 	}
 
-	_roads.push_back(RoadConnectedToIntersection(roadObject, connectionPointInRoadIndex));
+	_roads.push_back(RoadConnectedToIntersection(
+		roadObject,
+		dynamic_cast<BezierCurve*>(roadObject->getSceneObject()->getComponent(CT_BEZIER_CURVE)),
+		connectionPointInRoadIndex));
 
 	if (_roads.size() == 1)
 	{
@@ -86,7 +90,7 @@ void RoadIntersectionComponent::connectRoad(RoadObject* roadObject, int connecti
 	roadSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
 	getSceneObject()->addChild(roadSceneObject);
 	RoadObject* edgeRoadObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRoadObject(RoadType::POINTS, _edgeRoadProfile, {}, {}, false, roadSceneObject);
-	edgeRoadObject->setIsCastShadows(false);
+	edgeRoadObject->setCastShadows(false);
 	roadSceneObject->setIsActive(false);
 
 	if (_interactiveMode)
@@ -142,11 +146,11 @@ void RoadIntersectionComponent::setLengthInternal(int index, float length)
 
 	if (_roads[index].connectionPointInRoadIndex == 0)
 	{
-		_roads[index].road->setMarginBegin(length);
+		_roads[index].bezierCurve->setMarginBegin(length);
 	}
 	else
 	{
-		_roads[index].road->setMarginEnd(length);
+		_roads[index].bezierCurve->setMarginEnd(length);
 	}
 }
 
@@ -417,7 +421,7 @@ void RoadIntersectionComponent::onAttachedToScenObject()
 
 		Cube* cube = new Cube(1, material);
 		cube->init();
-		cube->setIsCastShadows(false);
+		cube->setCastShadows(false);
 		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
 
 		getSceneObject()->addChild(helperSceneObject);
@@ -742,7 +746,7 @@ void RoadIntersectionComponent::createPolygon()
 		_generatedModel = new RStaticModel("", modelNode, materials, GL_TRIANGLE_STRIP);
 
 		RenderObject* renderObject = getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(new RenderObject(_generatedModel), getSceneObject());
-		renderObject->setIsCastShadows(false);
+		renderObject->setCastShadows(false);
 	}
 
 	{

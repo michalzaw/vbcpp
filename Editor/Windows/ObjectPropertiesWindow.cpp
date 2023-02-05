@@ -6,16 +6,26 @@
 #include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
-#include "imgui.h"
+#include <imgui.h>
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 
 #include "OpenDialogWindow.h"
-#include "RoadTools.h"
+#include "../Tools/RoadManipulator.h"
 #include "../FileDialogs.h"
+#include "../Utils/AIPathGenerator.h"
 
+#include "../../Game/AIAgent.h"
+#include "../../Game/BusStartPoint.h"
+#include "../../Game/GameLogicSystem.h"
+#include "../../Game/PathComponent.h"
+
+#include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/ShapePolygonComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent2.h"
+#include "../../Graphics/SkeletalAnimationHelperComponent.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -252,7 +262,6 @@ namespace vbEditor
 
 	extern int roadActiveSegment;
 	extern int roadActivePoint;
-	extern bool isRoadModified;
 
 	extern bool _showMaterialEditorWindow;
 	extern RenderObject* currentRenderObject;
@@ -260,96 +269,11 @@ namespace vbEditor
 	extern unsigned int currentModelLod;
 	extern unsigned int currentMaterialIndex;
 
-	extern bool _showGenerateObjectsAlongRoadWindow;
+	extern bool _showGenerateObjectsAlongCurveWindow;
 
 	extern OpenDialogWindow* _selectRoadProfileDialogWindow;
-}
 
-
-void showRenderComponentDetails(RenderObject* renderComponent)
-{
-	if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
-		{
-			char id[50];
-			sprintf(id, "Lod %d", i);
-
-			ImGui::PushID(id);
-
-			ImGui::Text(id);
-
-			RStaticModel* model = renderComponent->getModel(i);
-
-			char buffer[1024] = { '\0' };
-			strncpy(buffer, model->getPath().c_str(), sizeof buffer);
-			buffer[sizeof buffer - 1] = '\0';
-
-			ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
-
-			ImGui::SameLine();
-
-			if (ImGui::Button("..."))
-			{
-				/*std::vector<std::string> result = pfd::open_file("Choose texture...").result();
-
-				if (result.size() == 1)
-				{
-					LOG_INFO(result[0]);
-
-					std::string path = result[0];
-					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
-
-					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
-					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
-					{
-						FilesHelper::copyFile(path, newPath);
-					}
-					texture = ResourceManager::getInstance().loadTexture(newPath);
-
-					isMaterialModified = true;
-				}*/
-			}
-
-			ImGui::Text("Materials");
-
-			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
-
-			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
-			{
-				Material* material = renderComponent->getModel(i)->getMaterial(j);
-
-				if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
-				{
-					if (ImGui::IsMouseDoubleClicked(0))
-					{
-						LOG_INFO(material->name);
-						vbEditor::_showMaterialEditorWindow = true;
-						vbEditor::currentRenderObject = renderComponent;
-						vbEditor::currentStaticModel = renderComponent->getModel(i);
-						vbEditor::currentModelLod = i;
-						vbEditor::currentMaterialIndex = j;
-					}
-				}
-			}
-
-			ImGui::Separator();
-
-			ImGui::PopID();
-		}
-
-		bool isCastShadows = renderComponent->isCastShadows();
-		if (ImGui::Checkbox("Cast shadows", &isCastShadows))
-		{
-			renderComponent->setIsCastShadows(isCastShadows);
-		}
-
-		bool isDynamicObject = renderComponent->isDynamicObject();
-		if (ImGui::Checkbox("Dynamic object", &isDynamicObject))
-		{
-			renderComponent->setIsDynamicObject(isDynamicObject);
-		}
-	}
+	extern SceneObject* _groupingSceneObject;
 }
 
 
@@ -380,61 +304,7 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 		shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 			{
 				roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-				roadComponent->buildModel(false);
 			});
-
-		ImGui::Separator();
-
-		if (vbEditor::roadActivePoint >= 0 && vbEditor::roadActivePoint < roadComponent->getPoints().size())
-		{
-			ImGui::Text("Point: %d", vbEditor::roadActivePoint);
-
-			float* pointPosition = glm::value_ptr(roadComponent->getPoints()[vbEditor::roadActivePoint]);
-
-			if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
-			{
-				vbEditor::isRoadModified = true;
-			}
-
-			if (vbEditor::roadActivePoint % 3 == 0)
-			{
-				if (ImGui::Button("Delete point"))
-				{
-					roadComponent->deletePoint(vbEditor::roadActivePoint);
-
-					if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
-					{
-						--vbEditor::roadActivePoint;
-						--vbEditor::roadActiveSegment;
-					}
-
-					if (roadComponent->getPoints().size() == 0)
-					{
-						vbEditor::_sceneManager->removeSceneObject(roadComponent->getSceneObject());
-						vbEditor::_selectedSceneObject = nullptr;
-
-						return;
-					}
-
-					vbEditor::isRoadModified = true;
-				}
-			}
-		}
-
-		if (vbEditor::roadActiveSegment >= 0 && roadComponent->getSegments().size() > 0 && vbEditor::roadActiveSegment < roadComponent->getSegments().size())
-		{
-			ImGui::Separator();
-
-			ImGui::Text("Segment: %d", vbEditor::roadActiveSegment);
-
-			int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
-			if (ImGui::DragInt("Points count", points, 0.5f, 0, 1000))
-			{
-				vbEditor::isRoadModified = true;
-				*points = std::max(*points, 0);
-			}
-		}
 
 		ImGui::Separator();
 
@@ -476,8 +346,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 				}
-
-				vbEditor::isRoadModified = true;
 			}
 
 			if (connectedCrossroads[i] != nullptr)
@@ -491,16 +359,16 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 				if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 				{
 					roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-					vbEditor::isRoadModified = true;
 				}
 			}
 			ImGui::PopID();
 		}
 
-		if (ImGui::Button("Generate objects"))
+		ImGui::Separator();
+
+		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
 		{
-			vbEditor::_showGenerateObjectsAlongRoadWindow = true;
+			AIPathGenerator::generateAIPaths(roadComponent, vbEditor::_sceneManager);
 		}
 	}
 }
@@ -597,26 +465,58 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 }
 
 
+template<typename TYPE>
+void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex)
+{
+	outItemsString += " ";
+	outItemsString += '\0';
+
+	for (int i = 0; i < items.size(); ++i)
+	{
+		outItemsString += Strings::toString(items[i]) + '\0';
+
+		if (items[i] == selectedItemValue)
+		{
+			outSelectedItemIndex = i + 1;
+		}
+	}
+}
+
+
+typedef glm::vec2 vec2;
+typedef glm::vec3 vec3;
 typedef std::string str;
 typedef std::string path;
+typedef std::string str_combo;
 
 
-#define IMGUI_INPUT_int(propertyName)																											\
+#define IMGUI_INPUT_int(component, propertyName, additionalParams)																				\
 int value = component->get##propertyName();																										\
 bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_float(propertyName)																											\
+#define IMGUI_INPUT_float(component, propertyName, additionalParams)																			\
 float value = component->get##propertyName();																									\
-bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
+bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
+//bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_bool(propertyName)																											\
+#define IMGUI_INPUT_vec2(component, propertyName, additionalParams)																				\
+glm::vec2 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
+glm::vec3 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
 bool value = component->is##propertyName();																										\
 bool result = ImGui::Checkbox("##value", &value);
 
 
-#define IMGUI_INPUT_str(propertyName)																											\
+#define IMGUI_INPUT_str(component, propertyName, additionalParams)																				\
 char value[50];																																	\
 strncpy(value, component->get##propertyName().c_str(), sizeof value);																			\
 value[sizeof value - 1] = '\0';																													\
@@ -624,7 +524,7 @@ value[sizeof value - 1] = '\0';																													\
 bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInputTextFlags_EnterReturnsTrue);
 
 
-#define IMGUI_INPUT_path(propertyName)																											\
+#define IMGUI_INPUT_path(component, propertyName, additionalParams)																				\
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
@@ -651,7 +551,23 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback)												\
+#define IMGUI_INPUT_str_combo(component, propertyName, additionalParams)																		\
+const std::vector<std::string>& itemsNames = additionalParams;																					\
+std::string comboItems;																															\
+int selectedItemIndex = 0;																														\
+convertVectorToComboData(itemsNames, component->get##propertyName(), comboItems, selectedItemIndex);											\
+																																				\
+bool result = false;																															\
+std::string value = "";																															\
+if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))																			\
+{																																				\
+	result = true;																																\
+	if (selectedItemIndex > 0)																													\
+		value = itemsNames[selectedItemIndex - 1];																								\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																				\
 {																																				\
 	ImGui::PushID(#propertyName);																												\
 																																				\
@@ -659,29 +575,56 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 	ImGui::TreeNodeEx(displayName, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_Bullet, displayName);		\
 	ImGui::NextColumn();																														\
 	ImGui::SetNextItemWidth(-1);																												\
-																																				\
-	IMGUI_INPUT_##type(propertyName)																											\
-																																				\
-	if (result)																																	\
-	{																																			\
-		callback(type(value));																													\
-		component->set##propertyName(type(value));																								\
-	}																																			\
-																																				\
+}
+
+#define COMPONENT_PROPERTY_EDIT_END																												\
+{																																				\
 	ImGui::NextColumn();																														\
 																																				\
 	ImGui::PopID();																																\
 }
 
 
-#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){})
+#define COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, callback, additionalParams)							\
+{																																				\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
+																																				\
+	IMGUI_INPUT_##type(component, propertyName, additionalParams)																				\
+																																				\
+	if (result)																																	\
+	{																																			\
+		component->set##propertyName(type(value));																								\
+		callback(type(value));																													\
+	}																																			\
+																																				\
+	COMPONENT_PROPERTY_EDIT_END																													\
+}
+
+
+#define COMPONENT_RESOURCE_EDIT(component, propertyName, displayName, pathToResourceMapper)														\
+{																																				\
+	COMPONENT_PROPERTY_EDIT_BEGIN(propertyName, displayName)																					\
+																																				\
+	IMGUI_INPUT_path(component->get##propertyName(), Path, additionalParams)																	\
+																																				\
+	if (result)																																	\
+	{																																			\
+		component->set##propertyName(pathToResourceMapper(value));																				\
+	}																																			\
+																																				\
+	COMPONENT_PROPERTY_EDIT_END																													\
+}
+
+
+#define COMPONENT_PROPERTY_EDIT(component, propertyName, type, displayName) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, "")
+#define COMPONENT_PROPERTY_EDIT_2(component, propertyName, type, displayName, additionalParams) COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, propertyName, type, displayName, [](type){}, additionalParams)
 
 
 bool newNode(const char* name, const char* descriptionFmt, ...)
 {
-	ImGui::PushID("node %s", name);
+	ImGui::PushID(name);
 	ImGui::AlignTextToFramePadding();
-	bool nodeOpen = ImGui::TreeNode(name, name);
+	bool nodeOpen = ImGui::TreeNode("treeNode", name);
 
 	ImGui::NextColumn();
 
@@ -698,6 +641,167 @@ bool newNode(const char* name, const char* descriptionFmt, ...)
 }
 
 
+void showRenderComponentDetails(RenderObject* renderComponent)
+{
+	if (ImGui::CollapsingHeader("Render Component"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
+	{
+		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
+		{
+			char id[50];
+			sprintf(id, "Lod %d", i);
+
+			ImGui::PushID(id);
+
+			ImGui::Text(id);
+
+			RStaticModel* model = renderComponent->getModel(i);
+
+			char buffer[1024] = { '\0' };
+			strncpy(buffer, model->getPath().c_str(), sizeof buffer);
+			buffer[sizeof buffer - 1] = '\0';
+
+			ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("..."))
+			{
+				/*std::vector<std::string> result = pfd::open_file("Choose texture...").result();
+
+				if (result.size() == 1)
+				{
+					LOG_INFO(result[0]);
+
+					std::string path = result[0];
+					std::string objectDirPath = currentRenderObject->getSceneObject()->getObjectDefinition()->getPath();
+
+					std::string newPath = objectDirPath + FilesHelper::getFileNameFromPath(path);
+					if (!FilesHelper::isInPathSubdir(path, objectDirPath))
+					{
+						FilesHelper::copyFile(path, newPath);
+					}
+					texture = ResourceManager::getInstance().loadTexture(newPath);
+
+					isMaterialModified = true;
+				}*/
+			}
+
+			ImGui::Text("Materials");
+
+			ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_Leaf;
+
+			for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
+			{
+				Material* material = renderComponent->getModel(i)->getMaterial(j);
+
+				if (ImGui::Selectable(material->name.c_str(), false, ImGuiSelectableFlags_AllowDoubleClick))
+				{
+					if (ImGui::IsMouseDoubleClicked(0))
+					{
+						LOG_INFO(material->name);
+						vbEditor::_showMaterialEditorWindow = true;
+						vbEditor::currentRenderObject = renderComponent;
+						vbEditor::currentStaticModel = renderComponent->getModel(i);
+						vbEditor::currentModelLod = i;
+						vbEditor::currentMaterialIndex = j;
+					}
+				}
+			}
+
+			ImGui::Separator();
+
+			ImGui::PopID();
+		}
+
+		bool isCastShadows = renderComponent->isCastShadows();
+		if (ImGui::Checkbox("Cast shadows", &isCastShadows))
+		{
+			renderComponent->setCastShadows(isCastShadows);
+		}
+
+		bool isDynamicObject = renderComponent->isDynamicObject();
+		if (ImGui::Checkbox("Dynamic object", &isDynamicObject))
+		{
+			renderComponent->setDynamicObject(isDynamicObject);
+		}
+	}
+
+
+	if (ImGui::CollapsingHeader("Render Component (WIP)", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RenderComponentDetails");
+
+
+		ImGui::PushID("Models");
+		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
+		{
+			ImGui::PushID(i);
+			if (newNode("LOD", "%d", i))
+			{
+				COMPONENT_RESOURCE_EDIT(renderComponent, Model, "Model", [renderComponent](const std::string& path) { return ResourceManager::getInstance().loadModel(path, renderComponent->getSceneObject()->getObjectDefinition()->getPath()); })
+
+				if (newNode("Materials", ""))
+				{
+					static RTexture* whiteTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+
+					for (int j = 0; j < renderComponent->getModel(i)->getMaterialsCount(); ++j)
+					{
+						Material* material = renderComponent->getModel(i)->getMaterial(j);
+
+						ImGui::PushID(material->name.c_str());
+						ImGui::AlignTextToFramePadding();
+						ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+						ImGui::NextColumn();
+						ImGui::SetNextItemWidth(-1);
+
+						RTexture* texture = material->diffuseTexture != nullptr
+							? material->diffuseTexture
+							: whiteTexture;
+
+						if (ImGui::ImageButton((ImTextureID)texture->getID(), ImVec2(48, 48)))
+						{
+							LOG_DEBUG(material->name);
+							vbEditor::_showMaterialEditorWindow = true;
+							vbEditor::currentRenderObject = renderComponent;
+							vbEditor::currentStaticModel = renderComponent->getModel(i);
+							vbEditor::currentModelLod = i;
+							vbEditor::currentMaterialIndex = j;
+						}
+
+						ImGui::SameLine();
+						ImGui::Text(material->name.c_str());
+
+						ImGui::NextColumn();
+
+						ImGui::PopID();
+					}
+
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+
+				ImGui::TreePop();
+			}
+			ImGui::PopID();
+
+			ImGui::PopID(); // i
+		}
+		ImGui::PopID(); // Models
+
+		COMPONENT_PROPERTY_EDIT(renderComponent, CastShadows, bool, "Cast shadows")
+		COMPONENT_PROPERTY_EDIT(renderComponent, DynamicObject, bool, "Dynamic object")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showBusStopComponentDetails(BusStopComponent* component)
 {
 	if (ImGui::CollapsingHeader("Bus Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
@@ -706,6 +810,7 @@ void showBusStopComponentDetails(BusStopComponent* component)
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
+		ImGui::PushID("BusStopComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT(component, Id, int, "Id")
 		COMPONENT_PROPERTY_EDIT(component, Name, str, "Name")
@@ -721,7 +826,411 @@ void showBusStopComponentDetails(BusStopComponent* component)
 			ImGui::TreePop();
 		}
 		ImGui::PopID();
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimationComponentDetails");
+
+		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
+		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); }, "")
+		COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
+		COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+		COMPONENT_PROPERTY_EDIT_2(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationComponent2Details(SkeletalAnimationComponent2* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimation2ComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, CurrentTime, float, "Current time")
+		COMPONENT_PROPERTY_EDIT(component, AnimationDuration, float, "Duration")
+		COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSkeletalAnimationHelperComponentDetails(SkeletalAnimationHelperComponent* component)
+{
+	if (ImGui::CollapsingHeader("Skeletal Animation Helper", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("SkeletalAnimationHelperComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, ShowModelBones, bool, "Show model bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowAnimationBones, bool, "Show animation bones")
+
+		if (newNode("Animation bones transform", ""))
+		{
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformFromAnimation, bool, "Transform from animation")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformDefault, bool, "Default transform")
+			COMPONENT_PROPERTY_EDIT(component, AnimationBonesTransformCustom, bool, "Custom transform")
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalBones, bool, "Show final bones")
+		COMPONENT_PROPERTY_EDIT(component, ShowFinalSkeletonBones, bool, "Show final skeleton bones")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void createPhysicalBodyForPrefab(Prefab* component)
+{
+	if (component->getPrefabType() == PrefabType::PLANE)
+	{
+		PlanePrefab* plane = static_cast<PlanePrefab*>(component);
+
+		glm::vec2 size = plane->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size.x, 0.1f, size.y), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::CUBE)
+	{
+		Cube* cube = static_cast<Cube*>(component);
+
+		float size = cube->getSize();
+		PhysicalBodyBox* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyBox(btVector3(size, size, size), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::SPHERE)
+	{
+		SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+
+		PhysicalBodySphere* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodySphere(sphere->getRadius(), 1.0f, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+
+	if (component->getPrefabType() == PrefabType::CYLINDER)
+	{
+		CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+
+		int axis = cylinder->getAxis();
+		float radius2 = cylinder->getRadius() * 2.0f;
+		float height = cylinder->getHeight();
+		btVector3 dimensions;
+		if (axis == 0)
+		{
+			dimensions = btVector3(height, radius2, radius2);
+		}
+		else if (axis == 1)
+		{
+			dimensions = btVector3(radius2, height, radius2);
+		}
+		else if (axis == 2)
+		{
+			dimensions = btVector3(radius2, radius2, height);
+		}
+		PhysicalBodyCylinder* physicalBody = vbEditor::_sceneManager->getPhysicsManager()->createPhysicalBodyCylinder(dimensions, 1.0f, (ShapeAlign) axis, COL_ENV, COL_ENV);
+		component->getSceneObject()->addComponent(physicalBody);
+	}
+}
+
+
+void showPrefabComponentDetails(Prefab* component)
+{
+	if (ImGui::CollapsingHeader(convertPrefabTypeToString(component->getPrefabType()).c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("PrefabComponentDetails");
+
+		if (component->getPrefabType() == PrefabType::PLANE)
+		{
+			PlanePrefab* plane = static_cast<PlanePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(plane, Size, vec2, "Size", [plane](glm::vec2 newValue) { plane->init(); }, "")
+		}
+
+		if (component->getPrefabType() == PrefabType::CUBE)
+		{
+			Cube* cube = static_cast<Cube*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cube, Size, float, "Size", [cube](float newValue) { cube->init(); }, "")
+		}
+
+		if (component->getPrefabType() == PrefabType::SPHERE)
+		{
+			SpherePrefab* sphere = static_cast<SpherePrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Radius, float, "Radius", [sphere](float newValue) { sphere->init(); }, "")
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(sphere, Quality, float, "Quality", [sphere](float newValue) { sphere->init(); }, "")
+		}
+
+		if (component->getPrefabType() == PrefabType::CYLINDER)
+		{
+			CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(component);
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Radius, float, "Radius", [cylinder](float newValue) { cylinder->init(); }, "")
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Height, float, "Height", [cylinder](float newValue) { cylinder->init(); }, "")
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Axis, int, "Axis", [cylinder](float newValue) { cylinder->init(); }, "")
+			COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(cylinder, Quality, int, "Quality", [cylinder](float newValue) { cylinder->init(); }, "")
+		}
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		if (component->getSceneObject()->getComponent(CT_PHYSICAL_BODY) == nullptr)
+		{
+			if (ImGui::Button("Add physical body"))
+			{
+				createPhysicalBodyForPrefab(component);
+			}
+		}
+	}
+}
+
+
+void showAiAgentComponentDetails(AIAgent* component)
+{
+	if (ImGui::CollapsingHeader("AI agent", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("AIAgentComponentDetails");
+
+		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
+		std::vector<std::string> availablePaths;
+		availablePaths.reserve(pathComponents.size());
+
+		for (auto pathComponent : pathComponents)
+		{
+			availablePaths.push_back(pathComponent->getSceneObject()->getName());
+		}
+
+		COMPONENT_PROPERTY_EDIT(component, Speed, float, "Speed")
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
+		{
+			const std::vector<std::string>& itemsNames = availablePaths;
+			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
 		
+			bool result = false;
+			std::string value = "";
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				result = true;
+				if (selectedItemIndex > 0)
+					value = itemsNames[selectedItemIndex - 1];
+			}
+
+			if (result)
+			{
+				if (selectedItemIndex > 0)
+				{
+					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				}
+				else
+				{
+					component->setCurrentPath(nullptr);
+				}
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showBezierCurveComponentDetails(BezierCurve* component)
+{
+	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BezierCurveComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, MarginBegin, float, "Margin begin")
+		COMPONENT_PROPERTY_EDIT(component, MarginEnd, float, "Margin end")
+		COMPONENT_PROPERTY_EDIT(component, OffsetFromBaseCurve, vec2, "Offset from base curve")
+
+		int activePoint = RoadManipulator::GetActivePoint();
+		if (activePoint >= 0 && activePoint < component->getPoints().size())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Point: %d", activePoint);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(PointPosition, "Point position")
+			glm::vec3 pointPosition = component->getPoints()[activePoint];
+			if (ImGui::DragFloat3("##value", glm::value_ptr(pointPosition), 0.01f, 0.0f, 0.0f))
+			{
+				component->setPointPostion(activePoint, pointPosition);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			if (activePoint % 3 == 0)
+			{
+				if (ImGui::Button("Delete point"))
+				{
+					component->deletePoint(activePoint);
+				}
+			}
+		}
+
+		int activeSegment = RoadManipulator::GetActiveSegment();
+		if (activeSegment >= 0 && component->getSegmentsCount() > 0 && activeSegment < component->getSegmentsCount())
+		{
+			ImGui::Separator();
+
+			ImGui::Text("Segment: %d", activeSegment);
+			ImGui::NextColumn();
+
+			ImGui::NextColumn();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(SegmentPointsCount, "Segment points count")
+			int pointsCount = component->getSegmentPointsCount(activeSegment);
+			if (ImGui::DragInt("##value", &pointsCount, 0.5f, 2, 1000))
+			{
+				component->setSegmentPointsCount(activeSegment, pointsCount);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+		}
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
+		{
+			vbEditor::_showGenerateObjectsAlongCurveWindow = true;
+		}
+
+		/*if (ImGui::Button("Split curve", ImVec2(-1.0f, 0.0f)))
+		{
+			component->splitCurve(0, 0.5f);
+		}*/
+	}
+}
+
+
+void showPathComponentDetails(PathComponent* component)
+{
+	if (ImGui::CollapsingHeader("AI Path", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("PathComponentDetails");
+
+		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
+		{
+			for (const auto& connectedPath : component->getNextPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+
+		if (newNode("Previous paths", "[%d]", component->getPreviousPaths().size()))
+		{
+			for (const auto& connectedPath : component->getPreviousPaths())
+			{
+				ImGui::PushID(&connectedPath);
+				ImGui::AlignTextToFramePadding();
+				ImGui::TreeNodeEx("#treeNode", ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "");
+				ImGui::NextColumn();
+				ImGui::SetNextItemWidth(-1);
+
+				ImGui::Text(connectedPath.path->getSceneObject()->getName().c_str());
+
+				ImGui::NextColumn();
+
+				ImGui::PopID();
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showBusStartComponentDetails(BusStartPoint* component)
+{
+	if (ImGui::CollapsingHeader("Bus start point", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BusStartPointCpmponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, Name, str, "Point name")
+
+		ImGui::PopID();
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
@@ -735,15 +1244,9 @@ void showObjectProperties()
 	ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoCollapse;
 	if (ImGui::Begin("Object Properties", &isOpened, windowFlags))
 	{
-		if (vbEditor::_selectedSceneObject)
+		if (vbEditor::_selectedSceneObject && vbEditor::_selectedSceneObject != vbEditor::_groupingSceneObject)
 		{
-			showObjectNameEdit();
-
-			ImGui::Separator();
-
-			showObjectTransformEdit();
-
-			ImGui::Separator();
+			showObjectPropertiesDetails();
 
 			RenderObject* renderComponent = dynamic_cast<RenderObject*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDER_OBJECT));
 			if (renderComponent)
@@ -788,6 +1291,55 @@ void showObjectProperties()
 			if (busStopComponent)
 			{
 				showBusStopComponentDetails(busStopComponent);
+			}
+
+			SkeletalAnimationComponent* skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION));
+			if (skeletalAnimationComponent)
+			{
+				showSkeletalAnimationComponentDetails(skeletalAnimationComponent);
+			}
+
+			SkeletalAnimationComponent2* skeletalAnimationComponent2 = dynamic_cast<SkeletalAnimationComponent2*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+			if (skeletalAnimationComponent2)
+			{
+				showSkeletalAnimationComponent2Details(skeletalAnimationComponent2);
+			}
+
+			SkeletalAnimationHelperComponent* skeletalAnimationHelperComponent = dynamic_cast<SkeletalAnimationHelperComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SKELETAL_ANIMATION_HELPER));
+			if (skeletalAnimationHelperComponent)
+			{
+				showSkeletalAnimationHelperComponentDetails(skeletalAnimationHelperComponent);
+			}
+
+			Prefab* prefabComponent = dynamic_cast<Prefab*>(vbEditor::_selectedSceneObject->getComponent(CT_PREFAB));
+			if (prefabComponent)
+			{
+				showPrefabComponentDetails(prefabComponent);
+				showRenderComponentDetails(prefabComponent);
+			}
+
+			AIAgent* aiAgent = dynamic_cast<AIAgent*>(vbEditor::_selectedSceneObject->getComponent(CT_AI_AGENT));
+			if (aiAgent)
+			{
+				showAiAgentComponentDetails(aiAgent);
+			}
+
+			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
+			if (bezierCurve)
+			{
+				showBezierCurveComponentDetails(bezierCurve);
+			}
+
+			PathComponent* pathComponent = dynamic_cast<PathComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_PATH));
+			if (pathComponent)
+			{
+				showPathComponentDetails(pathComponent);
+			}
+
+			BusStartPoint* busStartPoint = dynamic_cast<BusStartPoint*>(vbEditor::_selectedSceneObject->getComponent(CT_BUS_START_POINT));
+			if (busStartPoint)
+			{
+				showBusStartComponentDetails(busStartPoint);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -885,12 +1437,11 @@ void showObjectProperties()
 
 						if (ImGui::DragFloat3("Point position", pointPosition, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						if (ImGui::Button("Delete point"))
 						{
-							vbEditor::isRoadModified = true;
 							roadComponent->deletePoint(vbEditor::roadActivePoint);
 
 							if (vbEditor::roadActivePoint == roadComponent->getPoints().size())
@@ -917,7 +1468,7 @@ void showObjectProperties()
 						const char* typeComboItems[] = { "line", "arc" };
 						if (ImGui::Combo("Type", &typeComboCurrentItem, typeComboItems, IM_ARRAYSIZE(typeComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].type = typeComboCurrentItem == 0 ? RST_LINE : RST_ARC;
 						}
 
@@ -925,20 +1476,20 @@ void showObjectProperties()
 						const char* interpolationComboItems[] = { "lin", "cos" };
 						if (ImGui::Combo("Interpolation", &interpolationComboCurrentItem, interpolationComboItems, IM_ARRAYSIZE(interpolationComboItems)))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 							roadComponent->getSegments()[vbEditor::roadActiveSegment].interpolation = interpolationComboCurrentItem == 0 ? RI_LIN : RI_COS;
 						}
 
 						int* points = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].pointsCount);
 						if (ImGui::DragInt("Points count", points, 5.0f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 
 						float* radius = &(roadComponent->getSegments()[vbEditor::roadActiveSegment].r);
 						if (ImGui::DragFloat("Radius", radius, 0.01f, 0.0f, 0.0f))
 						{
-							vbEditor::isRoadModified = true;
+							roadComponent->needRebuild();
 						}
 					}
 
@@ -948,8 +1499,6 @@ void showObjectProperties()
 					shwoRoadProfileEdit(roadComponent->getRoadProfile()->getName(), [roadComponent](const std::string& newRoadProfile)
 						{
 							roadComponent->setRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-
-							roadComponent->buildModel(false);
 						});
 
 					ImGui::Separator();
@@ -995,8 +1544,6 @@ void showObjectProperties()
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], 0);
 							}
-
-							vbEditor::isRoadModified = true;
 						}
 
 						if (connectedCrossroads[i] != nullptr)
@@ -1010,8 +1557,6 @@ void showObjectProperties()
 							if (ImGui::Combo("Index", &connectionPointCurrentItems[i], connectionPointComboItems.c_str()))
 							{
 								roadComponent->setConnectionPoint(i, availableCrossroads[crossroadCurrentItems[i] - 1], connectionPointCurrentItems[i]);
-
-								vbEditor::isRoadModified = true;
 							}
 						}
 						ImGui::PopID();
@@ -1034,34 +1579,35 @@ void showObjectProperties()
 }
 
 
-void showObjectNameEdit()
+void showObjectPropertiesDetails()
 {
-	char buffer[50];
+	ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+	ImGui::Columns(2);
+	ImGui::Separator();
 
-	strncpy(buffer, vbEditor::_selectedSceneObject->getName().c_str(), sizeof buffer);
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Name, str, "Name")
 
-	buffer[sizeof buffer - 1] = '\0';
+	ImGui::Separator();
 
-	if (ImGui::InputText("Name", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Position, vec3, "Position")
+
+	COMPONENT_PROPERTY_EDIT_BEGIN(Rotation, "Rotation")
 	{
-		vbEditor::_selectedSceneObject->setName(std::string(buffer));
+		glm::vec3 value = vbEditor::_selectedSceneObject->getRotation();
+		value = glm::vec3(radToDeg(value.x), radToDeg(value.y), radToDeg(value.z));
+		bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+		if (result)
+		{
+			vbEditor::_selectedSceneObject->setRotation(degToRad(value.x), degToRad(value.y), degToRad(value.z));
+		}
 	}
-}
+	COMPONENT_PROPERTY_EDIT_END	
 
+	//COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Rotation, vec3, "Rotation")
+	COMPONENT_PROPERTY_EDIT(vbEditor::_selectedSceneObject, Scale, vec3, "Scale")
 
-void showObjectTransformEdit()
-{
-	ImGui::Text("Transformation");
-
-	float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-	ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
-
-	ImGui::DragFloat3("Position", matrixTranslation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Rotation", matrixRotation, 0.01f, 0.0f, 0.0f);
-	ImGui::DragFloat3("Scale", matrixScale, 0.01f, 0.0f, 0.0f);
-
-	ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(vbEditor::_selectedSceneObject->getLocalTransformMatrix()));
-
-	vbEditor::_selectedSceneObject->updateFromLocalMatrix();
+	ImGui::Columns(1);
+	ImGui::Separator();
+	ImGui::PopStyleVar();
 }

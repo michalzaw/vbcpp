@@ -58,11 +58,8 @@ void SceneGraphWindow::inspectSceneObject(SceneObject* object)
         _selectedSceneObject = object;
     if (node_open)
     {
-        std::list<SceneObject*>& children = object->getChildren();
-        for (std::list<SceneObject*>::iterator i = children.begin(); i != children.end(); ++i)
+        for (SceneObject* child : object->getChildren())
         {
-            SceneObject* child = *i;
-
             ImGui::PushID(child);
 
             inspectSceneObject(child);
@@ -87,6 +84,8 @@ namespace vbEditor {
 	extern SceneObject* _selectedSceneObject;
 	extern std::vector<RoadObject*> _selectedRoads;
 
+	extern std::vector<SceneObject*> _selectedObjects;
+	extern SceneObject* _groupingSceneObject;
 
 	static int selectionMask = -1;
 	int nodeNumber, nodeClicked = -1;
@@ -102,7 +101,7 @@ namespace vbEditor {
 		{
 			for (std::list<SceneObject*>::iterator i = sceneRoot.begin(); i != sceneRoot.end(); ++i)
 			{
-				if ((*i)->getParent() == nullptr)
+				if ((*i)->getParent() == nullptr || isVectorContains(_selectedObjects, *i))
 				{
 					inspectSceneObject(*i);
 				}
@@ -148,7 +147,7 @@ namespace vbEditor {
 			node_flags = node_flags | ImGuiTreeNodeFlags_Leaf;
 
 
-		if (object == _selectedSceneObject)
+		if (object == _selectedSceneObject || isVectorContains(_selectedObjects, object))
 		{
 			node_flags |= ImGuiTreeNodeFlags_Selected;
 
@@ -161,6 +160,11 @@ namespace vbEditor {
 
 		//ImGui::PushID(object);
 		bool node_open = ImGui::TreeNodeEx((void*)(intptr_t)object, node_flags, object->getName().c_str());
+
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetTooltip("Id: %d", object->getId());
+		}
 
 		if (ImGui::IsItemClicked())
 		{

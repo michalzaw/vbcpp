@@ -9,6 +9,16 @@
 #include "../Utils/Resource.h"
 
 
+struct AIPath final
+{
+	std::string name;
+	float x;
+	float y;
+	int direction;
+
+};
+
+
 class RRoadProfile : public Resource
 {
 	private:
@@ -18,10 +28,12 @@ class RRoadProfile : public Resource
 
 		std::vector<RoadLane> _roadLanes;
 
-		std::vector<glm::vec2> _edges;
+		std::vector<glm::vec2> _edges; // todo: remove (unused)
 
 		Material* _intersectionMaterial;
 		float _intersectionRoadY;
+
+		std::vector<AIPath> _aiPaths;
 
 		float _maxX;			bool _maxXIsCalculated;
 		float _minX;			bool _minXIsCalculated;
@@ -38,6 +50,7 @@ class RRoadProfile : public Resource
 		std::vector<glm::vec2>& getEdges();
 		Material* getIntersectionMaterial();
 		float getIntersectionRoadY();
+		std::vector<AIPath>& getAIPaths();
 
 		float getMaxX();
 		float getMinX();

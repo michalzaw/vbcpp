@@ -5,13 +5,18 @@
 #include "SceneManager.h"
 #include "SceneLoader.h"
 
+#include "../Game/AIAgent.h"
+#include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
+#include "../Game/PathComponent.h"
 
+#include "../Graphics/BezierCurve.h"
 #include "../Graphics/RenderObject.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 #include "../Utils/ResourceDescriptionUtils.h"
+#include "../Utils/ResourceManager.h"
 #include "../Utils/Strings.h"
 
 
@@ -37,13 +42,6 @@ std::string SceneSaver::createSkyTextureAttribute(std::string path)
 						 FilesHelper::getRelativePathToDir(textures[4], GameDirectories::SKYBOX) + "," + FilesHelper::getRelativePathToDir(textures[5], GameDirectories::SKYBOX);
 
 	return result;
-}
-
-
-void SceneSaver::saveStartPosition(XMLElement* startPositionElement)
-{
-	startPositionElement->SetAttribute("position", vec3ToString(_sceneManager->getBusStart().position).c_str());
-	startPositionElement->SetAttribute("rotation", vec3ToString(_sceneManager->getBusStart().rotation).c_str());
 }
 
 
@@ -113,11 +111,143 @@ void SceneSaver::saveSky(XMLElement* skyElement, SceneObject* sceneObject)
 }
 
 
+void SceneSaver::savePrefabComponent(XMLElement* objectElement, XMLDocument& doc, Prefab* prefab)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "prefab");
+	componentElement->SetAttribute("prefabType", convertPrefabTypeToString(prefab->getPrefabType()).c_str());
+
+	if (prefab->getPrefabType() == PrefabType::PLANE)
+	{
+		PlanePrefab* plane = static_cast<PlanePrefab*>(prefab);
+		componentElement->SetAttribute("size", vec2ToString(plane->getSize()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::CUBE)
+	{
+		Cube* cube = static_cast<Cube*>(prefab);
+		componentElement->SetAttribute("size", toString(cube->getSize()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::SPHERE)
+	{
+		SpherePrefab* sphere = static_cast<SpherePrefab*>(prefab);
+		componentElement->SetAttribute("radius", toString(sphere->getRadius()).c_str());
+		componentElement->SetAttribute("quality", toString(sphere->getQuality()).c_str());
+	}
+
+	if (prefab->getPrefabType() == PrefabType::CYLINDER)
+	{
+		CylinderPrefab* cylinder = static_cast<CylinderPrefab*>(prefab);
+		componentElement->SetAttribute("radius", toString(cylinder->getRadius()).c_str());
+		componentElement->SetAttribute("height", toString(cylinder->getHeight()).c_str());
+		componentElement->SetAttribute("axis", toString(cylinder->getAxis()).c_str());
+		componentElement->SetAttribute("quality", toString(cylinder->getQuality()).c_str());
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "bezierCurve");
+	componentElement->SetAttribute("offsetFromBaseCurve", vec2ToString(bezierCurve->getOffsetFromBaseCurve()).c_str());
+	componentElement->SetAttribute("marginBegin", Strings::toString(bezierCurve->getMarginBegin()).c_str());
+	componentElement->SetAttribute("marginEnd", Strings::toString(bezierCurve->getMarginEnd()).c_str());
+
+	XMLElement* pointsElement = doc.NewElement("Points");
+	for (const auto& point : bezierCurve->getPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetText(vec3ToString(point).c_str());
+
+		pointsElement->InsertEndChild(pointElement);
+	}
+	componentElement->InsertEndChild(pointsElement);
+
+	XMLElement* segmentsElement = doc.NewElement("Segments");
+	for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
+	{
+		XMLElement* segmentElement = doc.NewElement("Segment");
+
+		segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+		segmentsElement->InsertEndChild(segmentElement);
+	}
+	componentElement->InsertEndChild(segmentsElement);
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, PathComponent* pathComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "path");
+	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
+
+	const auto& nextPaths = pathComponent->getNextPaths();
+	if (nextPaths.size() > 0)
+	{
+		XMLElement* connectionsElement = doc.NewElement("Connections");
+		for (const auto& connectedPath : nextPaths)
+		{
+			XMLElement* connectionElement = doc.NewElement("Connection");
+
+			connectionElement->SetAttribute("pathName", connectedPath.path->getSceneObject()->getName().c_str());
+			connectionElement->SetAttribute("index", connectedPath.index);
+
+			connectionsElement->InsertEndChild(connectionElement);
+		}
+		componentElement->InsertEndChild(connectionsElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& doc, AIAgent* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgent");
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
+}
+
+
+void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "busStartPoint");
+	componentElement->SetAttribute("name", busStartPoint->getName().c_str());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
 
-	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getName() : "";
+	const std::string& objectDefinitionName = objectDefinition != nullptr ? objectDefinition->getOriginalName() : "";
 
 	objectElement->SetAttribute("name", objectDefinitionName.c_str());
 
@@ -143,11 +273,41 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 		objectElement->InsertEndChild(componentElement);
 	}
 
+	Prefab* prefab = static_cast<Prefab*>(sceneObject->getComponent(CT_PREFAB));
+	if (prefab)
+	{
+		savePrefabComponent(objectElement, doc, prefab);
+	}
+
+	BezierCurve* bezierCurveComponent = static_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
+	if (bezierCurveComponent)
+	{
+		saveBezierCurveComponent(objectElement, doc, bezierCurveComponent);
+	}
+
+	PathComponent* pathComponent = static_cast<PathComponent*>(sceneObject->getComponent(CT_PATH));
+	if (pathComponent)
+	{
+		savePathComponent(objectElement, doc, pathComponent);
+	}
+
+	AIAgent* aiAgentComponent = static_cast<AIAgent*>(sceneObject->getComponent(CT_AI_AGENT));
+	if (aiAgentComponent)
+	{
+		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
+	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));
+	if (busStartPointComponent)
+	{
+		saveBusStartPointComponent(objectElement, doc, busStartPointComponent);
+	}
+
 	objectsElement->InsertEndChild(objectElement);
 
 	for (SceneObject* child : sceneObject->getChildren())
 	{
-		saveObject(objectElement, doc, child, child->getObjectDefinition());
+		saveSceneObject(doc, objectElement, child, sceneObject);
 	}
 }
 
@@ -157,6 +317,7 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 	XMLElement* roadElement = doc.NewElement("Road");
 
 	RoadObject* roadObject = static_cast<RoadObject*>(sceneObject->getComponent(CT_ROAD_OBJECT));
+	BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(sceneObject->getComponent(CT_BEZIER_CURVE));
 	
 	if (roadObject)
 	{
@@ -165,7 +326,8 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 		roadElement->SetAttribute("name", sceneObject->getName().c_str());
 		roadElement->SetAttribute("profile", profile->getName().c_str());
 
-		for (const glm::vec3& point : roadObject->getPoints())
+		const auto& points = bezierCurve != nullptr ? bezierCurve->getPoints() : roadObject->getPoints();
+		for (const glm::vec3& point : points)
 		{
 			XMLElement* pointElement = doc.NewElement("Point");
 
@@ -174,28 +336,43 @@ void SceneSaver::saveRoad(XMLElement* roadsElement, XMLDocument& doc, SceneObjec
 			roadElement->InsertEndChild(pointElement);
 		}
 
-		for (const RoadSegment& segment : roadObject->getSegments())
+		if (bezierCurve != nullptr)
 		{
-			XMLElement* segmentElement = doc.NewElement("Segment");
-
-			std::string type;
-			if (segment.type == RST_LINE)
-				type = "line";
-			else if (segment.type == RST_ARC)
-				type = "arc";
-			if (segment.type == RST_BEZIER_CURVE)
-				type = "bezier";
-
-			segmentElement->SetAttribute("type", type.c_str());
-			segmentElement->SetAttribute("points", segment.pointsCount);
-
-			if (segment.type != RST_BEZIER_CURVE)
+			for (int i = 0; i < bezierCurve->getSegmentsCount(); ++i)
 			{
-				segmentElement->SetAttribute("radius", segment.r);
-				segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
-			}
+				XMLElement* segmentElement = doc.NewElement("Segment");
 
-			roadElement->InsertEndChild(segmentElement);
+				segmentElement->SetAttribute("type", "bezier");
+				segmentElement->SetAttribute("points", bezierCurve->getSegmentPointsCount(i));
+
+				roadElement->InsertEndChild(segmentElement);
+			}
+		}
+		else
+		{
+			for (const RoadSegment& segment : roadObject->getSegments())
+			{
+				XMLElement* segmentElement = doc.NewElement("Segment");
+
+				std::string type;
+				if (segment.type == RST_LINE)
+					type = "line";
+				else if (segment.type == RST_ARC)
+					type = "arc";
+				if (segment.type == RST_BEZIER_CURVE)
+					type = "bezier";
+
+				segmentElement->SetAttribute("type", type.c_str());
+				segmentElement->SetAttribute("points", segment.pointsCount);
+
+				if (segment.type != RST_BEZIER_CURVE)
+				{
+					segmentElement->SetAttribute("radius", segment.r);
+					segmentElement->SetAttribute("interpolation", segment.interpolation == RI_LIN ? "lin" : "cos");
+				}
+
+				roadElement->InsertEndChild(segmentElement);
+			}
 		}
 
 		for (int i = 0; i < 2; ++i)
@@ -250,9 +427,66 @@ void SceneSaver::saveRoadIntersection(tinyxml2::XMLElement* roadsElement, tinyxm
 }
 
 
+void SceneSaver::saveSceneObject(XMLDocument& doc, XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject/* = nullptr*/)
+{
+	if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
+	{
+		LOG_DEBUG("Skip object: " + sceneObject->getName());
+		return;
+	}
+
+	RObject* objectDefinition = sceneObject->getObjectDefinition();
+	if (objectDefinition == nullptr)
+	{
+		if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
+		{
+			saveRoad(_roadsElement, doc, sceneObject);
+		}
+		else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
+		{
+			saveRoadIntersection(_roadsElement, doc, sceneObject);
+		}
+		else if (sceneObject->getComponent(CT_GRASS) != nullptr)
+		{
+			if (_grassElement)
+			{
+				_rootNode->InsertAfterChild(_terrainElement, _grassElement);
+				saveGrass(_grassElement, doc, sceneObject);
+			}
+		}
+		else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
+		{
+			saveTerrain(_terrainElement, _grassElement, sceneObject);
+		}
+		else if (sceneObject->getName() == "sky")
+		{
+			saveSky(_skyElement, sceneObject);
+		}
+		else if (sceneObject->getName() == "sun")
+		{
+			saveSunLight(_sunElement, sceneObject);
+		}
+		else
+		{
+			saveObject(parentElement, doc, sceneObject, nullptr);
+		}
+	}
+	else if (sceneObject->getParent() == parentObject)
+	{
+		saveObject(parentElement, doc, sceneObject, objectDefinition);
+	}
+}
+
+
 void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescription)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
+
+#ifdef DEVELOPMENT_RESOURCES
+	if (!FilesHelper::isDirectoryExists(_dirPath))
+		_dirPath = ResourceManager::getInstance().getAlternativeResourcePath() + _dirPath;
+#endif // DEVELOPMENT_RESOURCES
+
 	std::string fullPath = _dirPath + MAP_FILE_NAME;
 
 	LOG_INFO("Map path: " + fullPath);
@@ -268,77 +502,31 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	XMLElement* descriptionElement = doc.NewElement("Description");
 	rootNode->InsertEndChild(descriptionElement);
 
-	XMLElement* terrainElement = doc.NewElement("Terrain");
-	rootNode->InsertEndChild(terrainElement);
+	_terrainElement = doc.NewElement("Terrain");
+	rootNode->InsertEndChild(_terrainElement);
 
-	XMLElement* startPositionElement = doc.NewElement("Start");
-	rootNode->InsertEndChild(startPositionElement);
+	_grassElement = doc.NewElement("Grass");
 
-	XMLElement* grassElement = doc.NewElement("Grass");
+	_sunElement = doc.NewElement("Light");
+	rootNode->InsertEndChild(_sunElement);
 
-	XMLElement* sunElement = doc.NewElement("Light");
-	rootNode->InsertEndChild(sunElement);
+	_skyElement = doc.NewElement("Sky");
+	rootNode->InsertEndChild(_skyElement);
 
-	XMLElement* skyElement = doc.NewElement("Sky");
-	rootNode->InsertEndChild(skyElement);
+	_objectsElement = doc.NewElement("Objects");
+	rootNode->InsertEndChild(_objectsElement);
 
-	XMLElement* objectsElement = doc.NewElement("Objects");
-	rootNode->InsertEndChild(objectsElement);
-
-	XMLElement* roadsElement = doc.NewElement("Roads");
-	roadsElement->SetAttribute("version", "2");
-	rootNode->InsertEndChild(roadsElement);
+	_roadsElement = doc.NewElement("Roads");
+	_roadsElement->SetAttribute("version", "2");
+	rootNode->InsertEndChild(_roadsElement);
 	
 	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
-	saveStartPosition(startPositionElement);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
-		if (sceneObject->getFlags() & SOF_NOT_SERIALIZABLE)
+		if (sceneObject->getParent() == nullptr)
 		{
-			LOG_DEBUG("Skip object: " + sceneObject->getName());
-			continue;
-		}
-
-		RObject* objectDefinition = sceneObject->getObjectDefinition();
-		if (objectDefinition == nullptr)
-		{
-			if (sceneObject->getComponent(CT_ROAD_OBJECT) != nullptr)
-			{
-				saveRoad(roadsElement, doc, sceneObject);
-			}
-			else if (sceneObject->getComponent(CT_ROAD_INTERSECTION) != nullptr)
-			{
-				saveRoadIntersection(roadsElement, doc, sceneObject);
-			}
-			else if (sceneObject->getComponent(CT_GRASS) != nullptr)
-			{
-				if (grassElement)
-				{
-					rootNode->InsertAfterChild(startPositionElement, grassElement);
-					saveGrass(grassElement, doc, sceneObject);
-				}
-			}
-			else if (sceneObject->getComponent(CT_TERRAIN) != nullptr)
-			{
-				saveTerrain(terrainElement, grassElement, sceneObject);
-			}
-			else if (sceneObject->getName() == "sky")
-			{
-				saveSky(skyElement, sceneObject);
-			}
-			else if (sceneObject->getName() == "sun")
-			{
-				saveSunLight(sunElement, sceneObject);
-			}
-			else if (sceneObject->getParent() == nullptr)
-			{
-				saveObject(objectsElement, doc, sceneObject, nullptr);
-			}
-		}
-		else if (sceneObject->getParent() == nullptr)
-		{
-			saveObject(objectsElement, doc, sceneObject, objectDefinition);
+			saveSceneObject(doc, _objectsElement, sceneObject);
 		}
 	}
 

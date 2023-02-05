@@ -1,8 +1,8 @@
 #include "RStaticModel.h"
 
 
-RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, std::vector<Material*>& materials,
-                           GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize)
+RStaticModel::RStaticModel(const std::string& path, StaticModelNode* rootNode, const std::vector<Material*>& materials,
+                           GLenum primitiveType, glm::vec3* collisionMesh, unsigned int collisionMeshSize, float aabbScaleFactor)
     : Resource(RT_MODEL, path)
 {
     _rootNode = rootNode;
@@ -13,6 +13,8 @@ RStaticModel::RStaticModel(string path, StaticModelNode* rootNode, std::vector<M
     _collisionMeshSize = collisionMeshSize;
 
     _primitiveType = primitiveType;
+
+    _aabbScaleFactor = aabbScaleFactor;
 
 
     calculateAABB();
@@ -48,9 +50,10 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
     {
         for (int j = 0; j < node->meshes[i].verticesCount; ++j)
         {
-            glm::vec4 v = nodeTransform * glm::vec4(node->meshes[i].vertices[j].position.x,
-                                                    node->meshes[i].vertices[j].position.y,
-                                                    node->meshes[i].vertices[j].position.z,
+            glm::vec3 vertexPosition = VerticesUtils::getVertexPosition(node->meshes[i].vertices, node->meshes[i].vertexType, j);
+            glm::vec4 v = nodeTransform * glm::vec4(vertexPosition.x,
+                                                    vertexPosition.y,
+                                                    vertexPosition.z,
                                                     1.0f);
             if (v.x < min.x)
                 min.x = v.x;
@@ -69,7 +72,7 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
 
 
             // local aabb for node
-            glm::vec3 vl = node->meshes[i].vertices[j].position;
+            glm::vec3 vl = vertexPosition;
 
             if (vl.x < nodeMin.x)
                 nodeMin.x = vl.x;
@@ -104,7 +107,7 @@ void RStaticModel::calculateAABB()
 
     findMinAndMaxVertices(_rootNode, glm::mat4(1.0f), min, max);
 
-    _aabb.setSize(min, max);
+    _aabb.setSize(_aabbScaleFactor * min, _aabbScaleFactor * max);
 }
 
 

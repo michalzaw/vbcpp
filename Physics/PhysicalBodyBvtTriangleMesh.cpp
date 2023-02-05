@@ -35,7 +35,6 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
         StaticModelMesh* mesh = staticModelNode->getMesh(i);
 
         unsigned int* indices = mesh->indices;
-        Vertex* vertices = mesh->vertices;
 
         unsigned int vertexCount = mesh->verticesCount;
 
@@ -51,8 +50,9 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 
                     if (index > vertexCount) continue;
 
-                    glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
-                    tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+                    glm::vec3 v3 = VerticesUtils::getVertexPosition(mesh->vertices, mesh->vertexType, index);
+                    glm::vec4 v4 = nodeTransform * glm::vec4(v3.x, v3.y, v3.z, 1.0f);
+                    tmp_vertices[k] = btVector3(v4[0], v4[1], v4[2]);
                 }
 
                 triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);
@@ -76,8 +76,9 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 
                     if (index > vertexCount) continue;
 
-                    glm::vec4 v = nodeTransform * glm::vec4(vertices[index].position.x, vertices[index].position.y, vertices[index].position.z, 1.0f);
-                    tmp_vertices[k] = btVector3(v[0], v[1], v[2]);
+                    glm::vec3 v3 = VerticesUtils::getVertexPosition(mesh->vertices, mesh->vertexType, index);
+                    glm::vec4 v4 = nodeTransform * glm::vec4(v3.x, v3.y, v3.z, 1.0f);
+                    tmp_vertices[k] = btVector3(v4[0], v4[1], v4[2]);
                 }
 
                 triMesh->addTriangle(tmp_vertices[0], tmp_vertices[1], tmp_vertices[2]);

@@ -137,7 +137,7 @@ class BusConstraint : public Bus
         WheelList       _wheels;
         DoorList        _doors;
 
-
+        DisplayText     _displayText;
 
 
 

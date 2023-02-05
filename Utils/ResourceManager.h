@@ -8,6 +8,8 @@
 #include "../Graphics/RoadProfileLoader.h"
 #include "../Graphics/RDisplayFont.h"
 #include "../Graphics/RMaterialsCollection.h"
+#include "../Graphics/RAnimation.h"
+#include "RAnimatedModel.h"
 #include "RStaticModel.h"
 #include "RFont.h"
 #include "SoundLoader.h"
@@ -46,8 +48,10 @@ class ResourceManager
         RTexture2D* loadDefaultWhiteTexture();
 		RTexture2D* loadOneColorTexture(glm::vec4 color);
 
-        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = std::vector<std::string>(),
-                            const std::unordered_map<std::string, std::string>& constants = std::unordered_map<std::string, std::string>());
+        RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = {},
+                            const std::unordered_map<std::string, std::string>& constants = {});
+        RShader* loadComputeShader(std::string shaderPath, const std::vector<std::string>& defines = {},
+                                   const std::unordered_map<std::string, std::string>& constants = {});
         void reloadShader(RShader* shader);
         void reloadAllShaders();
 
@@ -59,6 +63,9 @@ class ResourceManager
                                              std::vector<Transform>& loadedNodesTransformsInModel, std::vector<RStaticModel*>& loadedNodes,
 											 bool normalsSmoothing = true);
         RStaticModel* loadModel(std::string path, std::string texturePath, bool normalsSmoothing = true);
+
+        RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath, const std::unordered_map<std::string, BoneInfo*>& boneInfosFromExistingModel = {});
+        RAnimation* loadAnimation(const std::string& path);
 
         RFont* loadFont(std::string path, int pixelSize = 32);
 

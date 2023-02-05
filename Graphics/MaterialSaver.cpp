@@ -42,6 +42,12 @@ std::string mapShaderTypeToString(ShaderType shaderType)
 			return "pbr_tree";
 		case NEW_TREE_2_MATERIAL:
 			return "new_tree2";
+		case SOLID_ANIMATED_MATERIAL:
+			return "solid_animated";
+		case NORMALMAPPING_ANIMATED_MATERIAL:
+			return "normalmapping_animated";
+		case ALPHA_TEST_ANIMATED_MATERIAL:
+			return "alpha_test_animated";
 	}
 
 	return "solid";

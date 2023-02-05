@@ -1,6 +1,6 @@
-#include "GenerateObjectsAlongRoadWindow.h"
+#include "GenerateObjectsAlongCurveWindow.h"
 
-#include "../../ImGui/imgui.h"
+#include <imgui.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -8,7 +8,7 @@
 #include "OpenDialogWindow.h"
 #include "../Utils/ObjectsGenerator.h"
 
-#include "../../Graphics/RoadObject.h"
+#include "../../Graphics/BezierCurve.h"
 
 
 class SceneManager;
@@ -21,7 +21,7 @@ namespace vbEditor
 
 	int _objectsNamesCurrentItem;
 
-	ObjectsGenerator::ObjectsAlongRoadGeneratorData _generatorData;
+	ObjectsGenerator::ObjectsAlongCurveGeneratorData _generatorData;
 
 	void showObjectsCollectionName()
 	{
@@ -69,8 +69,8 @@ namespace vbEditor
 
 	void showLocationParameters()
 	{
-		ImGui::DragInt("Distance between objects", &_generatorData.distance, 0.1f, 1, 1000);
-		ImGui::DragFloat2("Offset from the road axis", glm::value_ptr(_generatorData.offsetFromCenter), 0.01f, 0.0f, 1000.0f);
+		ImGui::DragFloat("Distance between objects", &_generatorData.distance, 0.1f, 1.0f, 1000.0f);
+		ImGui::DragFloat2("Offset from the curve axis", glm::value_ptr(_generatorData.offsetFromCenter), 0.01f, 0.0f, 1000.0f);
 		ImGui::DragFloat3("Rotation", glm::value_ptr(_generatorData.rotation), 0.1f, 0.0f, 360.0f);
 
 		ImGui::Checkbox("Right", &_generatorData.rightSide);
@@ -84,11 +84,11 @@ namespace vbEditor
 		ImGui::DragFloat3("Range of random rotation offset", glm::value_ptr(_generatorData.rotationOffset), 0.1f, 0.0f, 360.0f);
 	}
 
-	bool generateObjectsAlongRoadWindow(RoadObject* roadComponent)
+	bool generateObjectsAlongCurveWindow(BezierCurve* bezierCurve)
 	{
 		bool isOpen = true;
 
-		if (ImGui::Begin("Generate objects along the road...", &isOpen))
+		if (ImGui::Begin("Generate objects along the curve...", &isOpen))
 		{
 			showObjectsCollectionName();
 
@@ -106,7 +106,7 @@ namespace vbEditor
 
 			if (ImGui::Button("Generate"))
 			{
-				ObjectsGenerator::generateObjectsAlongRoad(roadComponent, &_generatorData, _sceneManager);
+				ObjectsGenerator::generateObjectsAlongCurve(bezierCurve, &_generatorData, _sceneManager);
 			}
 		}
 		ImGui::End();

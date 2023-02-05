@@ -16,7 +16,9 @@ namespace ModelGenerator
 
 			for (int j = 0; j < indicesCount; ++j)
 			{
-				collisionMesh[counter + j] = meshes[i].vertices[meshes[i].indices[j] - meshes[i].firstVertexInVbo].position;
+				collisionMesh[counter + j] = VerticesUtils::getVertexPosition(meshes[i].vertices,
+																			  meshes[i].vertexType,
+																			  meshes[i].indices[j] - meshes[i].firstVertexInVbo);
 			}
 
 			counter += indicesCount;

@@ -67,7 +67,10 @@ in vec4 ClipSpacePosition;
 
 //out vec4 FragmentColor;
 layout (location = 0) out vec4 FragmentColor;
-layout (location = 1) out vec4 BrightnessColor;  
+layout (location = 1) out vec4 BrightnessColor;
+#ifdef RENDER_OBJECT_ID
+layout (location = 2) out uvec4 ObjectIdValue;
+#endif
 
 
 uniform LightsBlock
@@ -123,6 +126,10 @@ uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
 uniform sampler2D t[7];
 uniform int grassTexturesCount;
 flat in int tIndex;
+
+#ifdef RENDER_OBJECT_ID
+uniform uint objectId;
+#endif
 
 vec4 textureColor;
 vec4 ambient;
@@ -429,4 +436,9 @@ float isGrass = 0.0f;
 		BrightnessColor = vec4(FragmentColor.rgb, FragmentColor.a);
 	else
 		BrightnessColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+
+#ifdef RENDER_OBJECT_ID
+	ObjectIdValue = uvec4(objectId, 0, 0, 0);
+#endif
 }

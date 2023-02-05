@@ -1,8 +1,16 @@
 #include "Renderer.h"
 
+#include "SkeletalAnimationComponent.h"
+#include "SkeletalAnimationComponent2.h"
+#include "StorageBuffer/PickingShaderStorageBufferData.h"
+
 #include "../Utils/Helpers.hpp"
 #include "../Utils/Logger.h"
 #include "../Utils/Timer.h"
+
+
+//#define OBJECT_PICKING_GET_TEX_IMAGE
+#define OBJECT_PICKING_STORAGE_BUFFER
 
 
 static std::unique_ptr<Renderer> rendererInstance;
@@ -15,12 +23,14 @@ Renderer::Renderer()
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC), _sceneVisibility(1.0f),
 	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
     _bloom(false),
+    _renderObjectIdsForPicking(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
     _mainRenderData(NULL),
     _renderObjectsAAABB(false), _renderObjectsOBB(false),
 	//color1(1.0f, 1.0f, 1.0f), color2(1.0f, 1.0f, 1.0f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f)
 	color1(0.733f, 0.769f, 0.475f), color2(0.773f, 0.804f, 0.537f), color3(1.0f, 1.0f, 1.0f), color4(1.0f, 1.0f, 1.0f),
-    _requiredRebuildStaticLighting(false)
+    _requiredRebuildStaticLighting(false),
+    _objectsIdsTextureData(nullptr), _pickingComputeShader(nullptr), _pickingSSBO(nullptr)
 {
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
@@ -61,6 +71,16 @@ Renderer::~Renderer()
 	OGLDriver::getInstance().deleteVBO(_quadVBO);
 	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[0]);
 	OGLDriver::getInstance().deleteFramebuffer(_postProcessingFramebuffers[1]);
+
+    if (_objectsIdsTextureData != nullptr)
+    {
+        delete _objectsIdsTextureData;
+    }
+
+    if (_pickingSSBO != nullptr)
+    {
+        OGLDriver::getInstance().deleteShaderStorageBuffer(_pickingSSBO);
+    }
 }
 
 
@@ -76,6 +96,13 @@ Renderer& Renderer::getInstance()
 bool compareByShader(const RenderListElement& a, const RenderListElement& b)
 {
     return a.material->shader < b.material->shader;
+}
+
+
+// obiekty ktore nie renderuja swojego id trafiaja na koniec
+bool compareByShaderAndObjectId(const RenderListElement& a, const RenderListElement& b)
+{
+    return a.material->shader + (a.renderObject->isRenderObjectId() ? 0 : 100) < b.material->shader + (b.renderObject->isRenderObjectId() ? 0 : 100);
 }
 
 
@@ -180,6 +207,13 @@ void Renderer::recreateAllFramebuffers()
 	framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
 	framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+
+    if (_renderObjectIdsForPicking)
+    {
+        framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+        recreateObjectsIdsTextureData();
+    }
+
     framebuffer->init();
 	//framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
 	//framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
@@ -237,6 +271,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_7] = "indices[6]";
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
 	_uniformsNames[UNIFORM_EMISSIVE_TEXTURE] = "emissiveTexture";
+    _uniformsNames[UNIFORM_OBJECT_ID] = "objectId";
 
 	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
 	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
@@ -664,8 +699,15 @@ void Renderer::prepareRenderData()
 			}
 		}
 	}
-
-    _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
+    
+    if (_renderObjectIdsForPicking)
+    {
+        _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShaderAndObjectId);
+    }
+    else
+    {
+        _renderDataList[_renderDataList.size() - 1]->renderList.sort(compareByShader);
+    }
 }
 
 
@@ -913,6 +955,24 @@ void Renderer::clearRenderDatasForShadowMap()
 }
 
 
+const std::vector<glm::mat4>& Renderer::getFinalMatrices(SceneObject* sceneObject)
+{
+    SkeletalAnimationComponent* skeletatlAnimation = static_cast<SkeletalAnimationComponent*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION));
+    if (skeletatlAnimation != nullptr)
+    {
+        return skeletatlAnimation->getFinalBoneMatrices();
+    }
+
+    SkeletalAnimationComponent2* skeletatlAnimation2 = static_cast<SkeletalAnimationComponent2*>(sceneObject->getComponent(CT_SKELETAL_ANIMATION_2));
+    if (skeletatlAnimation2 != nullptr)
+    {
+        return skeletatlAnimation2->getFinalBoneMatrices();
+    }
+
+    return {};
+}
+
+
 void Renderer::rebuildStaticLightingInternal()
 {
     clearRenderDatasForShadowMap();
@@ -937,6 +997,17 @@ void Renderer::rebuildStaticLightingInternal()
 }
 
 
+void Renderer::recreateObjectsIdsTextureData()
+{
+    if (_objectsIdsTextureData != nullptr)
+    {
+        delete _objectsIdsTextureData;
+    }
+
+    _objectsIdsTextureData = new unsigned int[_screenWidth * _screenHeight];
+}
+
+
 void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 {
     if (_isInitialized)
@@ -957,6 +1028,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     framebuffer->addDepthRenderbuffer(_screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
     framebuffer->addTexture(_framebufferTextureFormat, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+
+    if (_renderObjectIdsForPicking)
+    {
+        framebuffer->addTexture(TF_RED_32, _screenWidth, _screenHeight, _msaaAntialiasing, _msaaAntialiasingLevel);
+        recreateObjectsIdsTextureData();
+    }
+
     framebuffer->init();
     //framebuffer->getTexture(0)->setFiltering(TFM_NEAREST, TFM_NEAREST);
     //framebuffer->getTexture(1)->setFiltering(TFM_NEAREST, TFM_NEAREST);
@@ -981,6 +1059,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // SOLID_MATERIAL
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // NOTEXTURE_MATERIAL
@@ -991,6 +1070,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("NORMALMAPPING");
     defines.push_back("SOLID");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
 	// SOLID_EMISSIVE_MATERIAL
@@ -998,6 +1078,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("SOLID");
 	defines.push_back("EMISSIVE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_EMISSIVE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // CAR_PAINT_MATERIAL
@@ -1006,6 +1087,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("CAR_PAINT");
     defines.push_back("REFLECTION");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // MIRROR_MATERIAL
@@ -1016,6 +1098,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // TREE_MATERIAL
@@ -1024,7 +1107,43 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     defines.push_back("SUBSURFACE_SCATTERING");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
+
+    // DECAL_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("DECALS");
+    defines.push_back("ALPHA_TEST");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // SOLID_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[SOLID_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // NORMALMAPPING_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("NORMALMAPPING");
+    defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[NORMALMAPPING_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // ALPHA_TEST_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("ANIMATED");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[ALPHA_TEST_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // GRASS_MATERIAL
     defines.clear();
@@ -1033,10 +1152,13 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SUBSURFACE_SCATTERING");
     defines.push_back("GRASS");
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[GRASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/grass.vert", "Shaders/shader.frag", defines);
 
     // SKY_MATERIAL
-    _shaderList[SKY_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag");
+    defines.clear();
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[SKY_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/sky.vert", "Shaders/sky.frag", defines);
 
     // GLASS_MATERIAL
     defines.clear();
@@ -1044,15 +1166,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     //defines.push_back("TRANSPARENCY");
     //if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
-    // DECAL_MATERIAL
-    defines.clear();
-    defines.push_back("SOLID");
-    defines.push_back("DECALS");
-    defines.push_back("ALPHA_TEST");
-    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
-    _shaderList[DECAL_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+    // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
+    _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
 
     // GUI_IMAGE_SHADER
     _shaderList[GUI_IMAGE_SHADER] = ResourceManager::getInstance().loadShader("Shaders/GUIshader.vert", "Shaders/GUIshader.frag");
@@ -1074,6 +1192,11 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
 
+    // SHADOWMAP_ANIMATED_SHADER
+    defines.clear();
+    defines.push_back("ANIMATED");
+    _shaderList[SHADOWMAP_ANIMATED_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
     // MIRROR_SOLID_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -1091,9 +1214,23 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MIRROR_SOLID_ANIMATED_MATRIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ANIMATED");
+    _shaderList[MIRROR_SOLID_ANIMATED_MATRIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_ALPHA_TEST_ANIMATED_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("ANIMATED");
+    _shaderList[MIRROR_ALPHA_TEST_ANIMATED_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
 	// PBR_MATERIAL
 	defines.clear();
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
 
 	// PBR_TREE_MATERIAL
@@ -1104,6 +1241,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("NORMALMAPPING");
 	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
 	// NEW_TREE_2_MATERIAL
@@ -1111,6 +1249,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	defines.push_back("NORMALMAPPING");
 	defines.push_back("TREE");
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
 
     // EDITOR_AXIS_SHADER
@@ -1128,11 +1267,14 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[ALPHA_TEST_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
     _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
+    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
 	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
 	_shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
 	_shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
+    _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
+    _shaderListForMirrorRendering[ALPHA_TEST_ANIMATED_MATERIAL] = MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
     _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
 
 
@@ -1145,6 +1287,16 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 
     _shaderList[SOLID_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
     _shaderList[NORMALMAPPING_MATERIAL]->setUniformBlockBinding("LightsBlock", 0);
+
+
+    if (_renderObjectIdsForPicking)
+    {
+        defines.clear();
+        defines.push_back(_msaaAntialiasing ? "MSAA_ENABLED" : "MSAA_DISABLED");
+
+        _pickingComputeShader = ResourceManager::getInstance().loadComputeShader("Shaders/compute/pickingShader.comp", defines);
+        _pickingSSBO = OGLDriver::getInstance().createShaderStorageBuffesr(sizeof(PickingShaderStorageBufferData));
+    }
 
 
     _isInitialized = true;
@@ -1280,6 +1432,18 @@ void Renderer::setBloom(bool isEnable)
 bool Renderer::isBloomEnable()
 {
     return _bloom;
+}
+
+
+void Renderer::setRenderObjectIdsForPicking(bool isEnabled)
+{
+    _renderObjectIdsForPicking = isEnabled;
+}
+
+
+bool Renderer::isRenderObjectIdsForPickingEnabled()
+{
+    return _renderObjectIdsForPicking;
 }
 
 
@@ -1510,8 +1674,11 @@ void Renderer::renderDepth(RenderData* renderData)
 
         ShaderType shaderType;
         bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL;
+        bool isAnimated = material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL;
         if (isAlphaTest)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
+        else if (isAnimated)
+            shaderType = SHADOWMAP_ANIMATED_SHADER;
         else
             shaderType = SHADOWMAP_SHADER;
 
@@ -1548,17 +1715,36 @@ void Renderer::renderDepth(RenderData* renderData)
         mesh->vbo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         if (isAlphaTest)
         {
             glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEXTURE], material->diffuseTexture);
 
 			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
 			shader->setUniform(_uniformsLocations[shaderType][UNIFORM_ALPHA_TEST_THRESHOLD], material->shadowmappingAlphaTestThreshold);
+        }
+        if (isAnimated)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
         }
 
         mesh->ibo->bind();
@@ -1571,6 +1757,11 @@ void Renderer::renderDepth(RenderData* renderData)
         if (isAlphaTest)
         {
             glDisableVertexAttribArray(1);
+        }
+        if (isAnimated)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
         }
     }
     glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
@@ -1601,7 +1792,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1614,7 +1805,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL)
+            else if (shaderType == MIRROR_ALPHA_TEST_MATERIAL || shaderType == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1695,13 +1886,34 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
+
+        bool isAnimated = currentShader == MIRROR_SOLID_ANIMATED_MATRIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
+        if (isAnimated)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
+        }
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
@@ -1718,6 +1930,11 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
+        if (isAnimated)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
+        }
     }
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
@@ -1758,7 +1975,7 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL)
+            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1774,12 +1991,16 @@ void Renderer::renderScene(RenderData* renderData)
             {
                 glDepthMask(GL_TRUE);
             }
+            else if (currentShader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glEnable(GL_DEPTH_TEST);
+            }
 
             if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL) && _alphaToCoverage)
+            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
@@ -1794,6 +2015,10 @@ void Renderer::renderScene(RenderData* renderData)
             else if (material->shader == DECAL_MATERIAL)
             {
                 glDepthMask(GL_FALSE);
+            }
+            else if (material->shader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            {
+                glDisable(GL_DEPTH_TEST);
             }
             else if (material->shader == EDITOR_AXIS_SHADER)
             {
@@ -1870,10 +2095,11 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MODEL_MATRIX], modelMatrix);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_NORMAL_MATRIX], normalMatrix);
 
+        glm::vec4 highlightingEmissiveColor = static_cast<float>(i->renderObject->isHighlighted()) * _graphicsManager->getObjectHighlightingColor();
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_AMBIENT_COLOR], material->ambientColor);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_DIFFUSE_COLOR], material->diffuseColor);
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_SPECULAR_COLOR], material->specularColor);
-        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor);
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_EMISSIVE_COLOR], material->emissiveColor + highlightingEmissiveColor);
 
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_TRANSPARENCY], material->transparency);
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_MATERIAL_FIX_DISAPPEARANCE_ALPHA], material->fixDisappearanceAlpha);
@@ -1898,23 +2124,43 @@ void Renderer::renderScene(RenderData* renderData)
         mesh->ibo->bind();
 
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 3));
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
 
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 5));
+        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 5));
 
         if (material->normalmapTexture != NULL)
         {
             glEnableVertexAttribArray(3);
-            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 8));
+            glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 8));
 
             glEnableVertexAttribArray(4);
-            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float) * 11));
+            glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 11));
 
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
+        }
+
+        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
+        {
+            glEnableVertexAttribArray(5);
+            glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
+
+            glEnableVertexAttribArray(6);
+            glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 14 + sizeof(int) * 4));
+
+            SceneObject* sceneObject = i->object;
+
+            const std::vector<glm::mat4>& finalMatrices = getFinalMatrices(sceneObject);
+
+            for (int i = 0; i < MAX_BONES; ++i)
+            {
+                const glm::mat4& matrix = finalMatrices[i];
+
+                shader->setUniform(shader->getUniformLocation(("finalBonesMatrices[" + Strings::toString(i) + "]").c_str()), matrix);
+            }
         }
 
         if (material->diffuseTexture != NULL)
@@ -1958,6 +2204,13 @@ void Renderer::renderScene(RenderData* renderData)
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_4], color4);
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_GRASS_WIND_TIMER], _graphicsManager->getWindTimer());
+
+        shader->setUniform(_uniformsLocations[currentShader][UNIFORM_OBJECT_ID], i->object->getId());
+
+        if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())
+        {
+            glColorMaski(2, GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+        }
 
         if (i->type != RET_GRASS)
         {
@@ -2010,6 +2263,11 @@ void Renderer::renderScene(RenderData* renderData)
             glEnable(GL_CULL_FACE);
         }
 
+        if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())
+        {
+            glColorMaski(2, GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+        }
+
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
         glDisableVertexAttribArray(2);
@@ -2018,12 +2276,18 @@ void Renderer::renderScene(RenderData* renderData)
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
         }
+        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
+        {
+            glDisableVertexAttribArray(5);
+            glDisableVertexAttribArray(6);
+        }
     }
     glEnable(GL_CULL_FACE);
     glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
     glDisable(GL_BLEND);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glDepthMask(GL_TRUE);
+    glEnable(GL_DEPTH_TEST);
 
     // -----------------DEBUG----------------------------------------
     #ifdef DRAW_AABB
@@ -2291,4 +2555,63 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
     delete renderList;
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+}
+
+
+unsigned int Renderer::pickObject(int x, int y)
+{
+    if (!_pickingComputeShader)
+    {
+        LOG_WARNING("Graphics object picking is disabled.");
+        return 0;
+    }
+
+    RTexture* texture = _mainRenderData->framebuffer->getTexture(2);
+
+    unsigned int id = 0;
+
+#ifdef OBJECT_PICKING_GET_TEX_IMAGE
+    {
+        Timer timer;
+        timer.start();
+
+        glBindTexture(GL_TEXTURE_2D, texture->getID());
+        glGetTexImage(GL_TEXTURE_2D, 0, GL_RED_INTEGER, GL_UNSIGNED_INT, _objectsIdsTextureData);
+
+        id = _objectsIdsTextureData[y * texture->getSize().x + x];
+
+        double pickingTime = timer.stop();
+        LOG_DEBUG(LOG_VARIABLE(pickingTime));
+    }
+#endif // OBJECT_PICKING_GET_TEX_IMAGE
+
+#ifdef OBJECT_PICKING_STORAGE_BUFFER
+    {
+        Timer timer;
+        timer.start();
+
+        PickingShaderStorageBufferData shaderData;
+        shaderData.x = static_cast<float>(x) / static_cast<float>(_screenWidth);
+        shaderData.y = static_cast<float>(y) / static_cast<float>(_screenHeight);
+
+        _pickingComputeShader->enable();
+        _pickingComputeShader->bindTexture(_pickingComputeShader->getUniformLocation("textureObjectsIds"), texture);
+        _pickingComputeShader->setShaderStorageBlockBinding("ShaderData", 0);
+        _pickingSSBO->bindBufferBase(0);
+        _pickingSSBO->setData(shaderData);
+
+        _pickingComputeShader->runComputeShader(1, 1, 1);
+
+        _pickingSSBO->getBufferData(shaderData);
+
+        id = shaderData.selectedObject;
+
+        double pickingTime = timer.stop();
+        LOG_DEBUG(LOG_VARIABLE(pickingTime));
+    }
+#endif // OBJECT_PICKING_STORAGE_BUFFER
+
+    LOG_DEBUG("Selected object " + LOG_VARIABLE(id));
+
+    return id;
 }

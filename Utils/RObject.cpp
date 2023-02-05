@@ -1,9 +1,10 @@
 #include "RObject.h"
 
 
-RObject::RObject(std::string path, std::string author, std::string name, std::string comment)
+RObject::RObject(const std::string& path, const std::string& author, const std::string& name, const std::string& comment, const std::string& originalName)
 	: Resource(RT_OBJECT, path),
-	_author(author), _name(name), _comment(comment)
+	_author(author), _name(name), _comment(comment),
+	_originalName(originalName)
 {
 
 }
@@ -15,19 +16,25 @@ std::vector<std::unordered_map<std::string, std::string>>& RObject::getComponent
 }
 
 
-std::string RObject::getAuthor()
+const std::string& RObject::getAuthor()
 {
 	return _author;
 }
 
 
-std::string RObject::getName()
+const std::string& RObject::getName()
 {
 	return _name;
 }
 
 
-std::string RObject::getComment()
+const std::string& RObject::getComment()
 {
 	return _comment;
+}
+
+
+const std::string& RObject::getOriginalName()
+{
+	return _originalName;
 }
