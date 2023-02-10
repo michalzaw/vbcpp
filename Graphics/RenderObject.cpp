@@ -28,6 +28,7 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
 RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isHighlighted(false), _isRenderObjectId(true),
     _isCalculatedAABB(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
@@ -44,6 +45,7 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
 RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
+    _isHighlighted(false), _isRenderObjectId(true),
     _isCalculatedAABB(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
