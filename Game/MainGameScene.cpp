@@ -42,7 +42,7 @@ MainGameScene::MainGameScene(Window* window)
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
 	_hud(nullptr),
-	_isCameraControll(false), _isMirrorControll(false), _mirrorControllIndex(-1)
+	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1)
 {
 
 }
