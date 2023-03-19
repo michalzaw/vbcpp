@@ -296,11 +296,11 @@ void BusLoader::fetchOptionalModelNodes(XMLElement* element, std::vector<std::st
         {
             modelNodesNames.push_back(value);
         }
+    }
 
-        for (XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
-        {
-            fetchOptionalModelNodes(child, modelNodesNames);
-        }
+    for (XMLElement* child = element->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
+    {
+        fetchOptionalModelNodes(child, modelNodesNames);
     }
 }
 
