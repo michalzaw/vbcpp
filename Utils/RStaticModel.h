@@ -240,6 +240,16 @@ struct StaticModelNode
     }
 
 
+    glm::mat4 getGlobalTransformMatrix()
+    {
+        if (parent != nullptr)
+        {
+            return parent->getGlobalTransformMatrix() * transform.getTransformMatrix();
+        }
+
+        return transform.getTransformMatrix();
+    }
+
     unsigned int    getMeshesCount()
     {
         return meshesCount;
@@ -273,7 +283,7 @@ struct StaticModelNode
         return nullptr;
     }
 
-    void getVerticesArray(std::vector<glm::vec3>& vertices)
+    void getVerticesArray(std::vector<glm::vec3>& vertices, bool transformToGlobalSpace = false)
     {
         for (int i = 0; i < meshesCount; ++i)
         {
@@ -284,6 +294,15 @@ struct StaticModelNode
             else if (meshes[i].vertexType == VertexType::ANIMATED)
             {
                 VerticesUtils::getVerticesPositionsArray<AnimatedVertex>(meshes[i].vertices, meshes[i].verticesCount, vertices);
+            }
+        }
+
+        if (transformToGlobalSpace)
+        {
+            glm::mat4 transfromMatrix = getGlobalTransformMatrix();
+            for (int i = 0; i < vertices.size(); ++i)
+            {
+                vertices[i] = glm::vec3(transfromMatrix * glm::vec4(vertices[i], 1.0f));
             }
         }
     }

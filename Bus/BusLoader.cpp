@@ -231,7 +231,7 @@ bool BusLoader::loadBusModules(XMLElement* busElement)
             std::vector<glm::vec3> collisionMeshVertices;
 
             StaticModelNode* collisionNode = _currentBusModel->getNodeByName(collisionNodeName);
-            collisionNode->getVerticesArray(collisionMeshVertices);
+            collisionNode->getVerticesArray(collisionMeshVertices, true);
 
             busModule.rayCastVehicle = _pMgr->createPhysicalBodyRayCastVehicle(collisionMeshVertices, mass, COL_BUS, _busCollidesWith);
         }
