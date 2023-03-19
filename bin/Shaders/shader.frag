@@ -350,7 +350,10 @@ float isGrass = 0.0f;
 		Coords.z -= bias[cascadeIndex];//0.0005f;//
 
 		// only hardware 2x2 PCF
-		Ratio = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+		if (cascadeIndex == 0)
+			Ratio = texture(ShadowMap[0], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+		else
+			Ratio = texture(ShadowMap[1], Coords);
 
 		// 4x4 PCF
 		/*vec2 TexelSize = 1.0f / textureSize(ShadowMap[cascadeIndex], 0) / 2.0f;
