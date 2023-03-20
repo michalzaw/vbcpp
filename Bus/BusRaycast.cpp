@@ -423,6 +423,25 @@ void BusRaycast::stopEngine()
 }
 
 
+BusRayCastWheel* BusRaycast::getWheel(unsigned char wheelIndex)
+{
+    if (wheelIndex < _wheels.size())
+    {
+        return _wheels[wheelIndex];
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
+
+int BusRaycast::getWheelsCount()
+{
+    return _wheels.size();
+}
+
+
 Door* BusRaycast::getDoor(unsigned char doorIndex)
 {
     if (doorIndex <= _doors.size()-1)

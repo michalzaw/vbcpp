@@ -14,6 +14,7 @@
 #include "../Bus/BusRepaintLoader.h"
 
 #include "../ImGuiInterface/BusLineAndDirectionWindow.h"
+#include "../ImGuiInterface/BusParametersWindow.h"
 #include "../ImGuiInterface/ColorsWindow.h"
 #include "../ImGuiInterface/PhysicsDebuggerWindow.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -293,10 +294,12 @@ void MainGameScene::initImGuiInterface()
 		ImGuiWindow* colorsWindow = new ColorsWindow(_sceneManager);
 		ImGuiWindow* physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
 		ImGuiWindow* variablesWindow = new VariablesWindow(_sceneManager, false);
+		ImGuiWindow* busParametersWindow = new BusParametersWindow(_sceneManager, _buses);
 
 		_imGuiInterface->addWindow(colorsWindow);
 		_imGuiInterface->addWindow(physicsDebuggerWindow);
 		_imGuiInterface->addWindow(variablesWindow);
+		_imGuiInterface->addWindow(busParametersWindow);
 
 		// menu
 		std::vector<MenuItem> windowMenuItems;
@@ -304,6 +307,7 @@ void MainGameScene::initImGuiInterface()
 		windowMenuItems.push_back(MenuItem("Colors", colorsWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Physics debugger", physicsDebuggerWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Game variables", variablesWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Bus parameters", busParametersWindow->getOpenFlagPointer()));
 
 		std::vector<MenuItem> menuItems;
 		menuItems.push_back(MenuItem("Window", windowMenuItems));
