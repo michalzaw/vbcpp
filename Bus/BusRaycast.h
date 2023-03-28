@@ -36,6 +36,9 @@ struct BusRayCastWheel
     bool                  handbrake;
     float                 maxBrakeForce;
     WheelSide             wheelSide;
+
+    float dampingCompression;
+    float dampingRelaxation;
 };
 
 
@@ -83,6 +86,9 @@ class BusRaycast : public Bus
         Engine* getEngine() override;
         void startEngine() override;
         void stopEngine() override;
+
+        BusRayCastWheel* getWheel(unsigned char wheelIndex);
+        int getWheelsCount();
 
         Door* getDoor(unsigned char doorIndex) override;
         int getDoorsCount() override;

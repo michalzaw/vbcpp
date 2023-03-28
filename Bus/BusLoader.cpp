@@ -426,6 +426,8 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         w->handbrake = handbrake;
         w->maxBrakeForce = brakeForce;
         w->wheelSide = wheelSide;
+        w->dampingCompression = dampingCompression;
+        w->dampingRelaxation = dampingRelaxation;
 
         _bus->_wheels.push_back(w);
 
