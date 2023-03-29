@@ -91,7 +91,11 @@ void Framebuffer::init()
                 _fboBuffs.push_back(attachment);
             }
 
-            if (texture->getTextureType() != TT_CUBE)
+            if (texture->getTextureType() == TT_2D_ARRAY || texture->getTextureType() == TT_2D_MULTISAMPLE_ARRAY)
+            {
+                glFramebufferTexture(GL_FRAMEBUFFER, attachment, texture->_texID, 0);
+            }
+            else if (texture->getTextureType() != TT_CUBE)
             {
                 glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texture->getTextureType(), texture->_texID, 0);
             }
@@ -121,6 +125,24 @@ void Framebuffer::bind()
 }
 
 
+void Framebuffer::bindTextureArrayLayerToRender(int layerIndex, int textureIndex/* = 0*/, int mipmapLevel/* = 0*/)
+{
+    GLenum attachment;
+    if (_textures[textureIndex]->getInternalFormat() == TF_DEPTH_COMPONENT)
+    {
+        attachment = GL_DEPTH_ATTACHMENT;
+    }
+    else
+    {
+        attachment = GL_COLOR_ATTACHMENT0;
+    }
+
+    //glFramebufferTexture3D(GL_FRAMEBUFFER, attachment, /*_textures[textureIndex]->getTextureType()*/TT_2D_ARRAY, _textures[textureIndex]->_texID, mipmapLevel, layerIndex);
+    glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, _textures[textureIndex]->_texID, mipmapLevel, layerIndex);
+    //LOG_DEBUG(LOG_VARIABLE(layerIndex) + " " + LOG_VARIABLE(_textures[textureIndex]->_texID));
+}
+
+
 void Framebuffer::bindCubeMapFaceToRender(CubeMapFace face, int textureIndex, int mipmapLevel)
 {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, face, _textures[textureIndex]->_texID, mipmapLevel);
@@ -147,6 +169,25 @@ void Framebuffer::addDepthRenderbuffer(unsigned int width, unsigned int height, 
 void Framebuffer::addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample, int samplesCount)
 {
     RTexture2D* texture = new RTexture2D(format, glm::uvec2(width, height), multisample, samplesCount);
+
+    if (!multisample)
+    {
+        texture->setFiltering(TFM_LINEAR, TFM_LINEAR);
+        texture->setClampMode(TCM_CLAMP);
+    }
+
+    _textures.push_back(texture);
+
+    if (_viewport.position.x == 0 && _viewport.position.y == 0 && _viewport.size.x == 0 && _viewport.size.y == 0)
+    {
+        setViewport(UintRect(0, 0, width, height));
+    }
+}
+
+
+void Framebuffer::addTextureArray(TextureFormat format, unsigned int width, unsigned int height, unsigned int arraySize, bool multisample/* = false*/, int samplesCount/* = 0*/)
+{
+    RTexture2DArray* texture = new RTexture2DArray(format, glm::vec2(width, height), arraySize, multisample, samplesCount);
 
     if (!multisample)
     {

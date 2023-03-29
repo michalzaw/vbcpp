@@ -15,10 +15,11 @@ class ShadowMap
         static const int CASCADE_COUNT = 2;
 
     private:
-        int _shadowmapSize[CASCADE_COUNT];
+        int _shadowmapSize;
 
-        Framebuffer*    _shadowMap[CASCADE_COUNT];
         CameraStatic*   _cameraForShadowMap[CASCADE_COUNT];
+
+        Framebuffer*    _shadowMapFramebuffer;
 
         SceneObject* _lightObject;
 
@@ -31,7 +32,7 @@ class ShadowMap
         void create();
         void destroy();
 
-        Framebuffer* getShadowMap(int index);
+        Framebuffer* getShadowMapFramebuffer();
         CameraStatic* getCameraForShadowMap(int index);
 
 };

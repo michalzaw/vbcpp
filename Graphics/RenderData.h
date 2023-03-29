@@ -54,8 +54,13 @@ struct RenderData
     std::list<RenderListElement> renderList;
     CameraStatic* camera;
     Framebuffer* framebuffer;
+    int framebufferLayer;
     glm::mat4 MVMatrix;
     RenderPass renderPass;
+
+    RenderData()
+        : camera(nullptr), framebuffer(nullptr), framebufferLayer(-1), MVMatrix(1.0f), renderPass(RP_NORMAL)
+    {}
 
 };
 

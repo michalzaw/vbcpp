@@ -9,6 +9,7 @@
 #include "Rect.h"
 
 #include "../Utils/RTexture2D.h"
+#include "../Utils/RTexture2DArray.h"
 #include "../Utils/RTextureCubeMap.h"
 
 
@@ -36,10 +37,12 @@ class Framebuffer
 
         void init();
         void bind();
+        void bindTextureArrayLayerToRender(int layerIndex, int textureIndex = 0, int mipmapLevel = 0);
 		void bindCubeMapFaceToRender(CubeMapFace face, int textureIndex = 0, int mipmapLevel = 0);
 
         void addDepthRenderbuffer(unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
         void addTexture(TextureFormat format, unsigned int width, unsigned int height, bool multisample = false, int samplesCount = 0);
+        void addTextureArray(TextureFormat format, unsigned int width, unsigned int height, unsigned int arraySize, bool multisample = false, int samplesCount = 0);
 		void addCubeMapTexture(TextureFormat format, unsigned int size, bool mipmaping = false);
 
         int getTexturesCount();

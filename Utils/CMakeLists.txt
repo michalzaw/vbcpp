@@ -22,6 +22,7 @@ set (UTILS_SOURCES
 	Utils/RTexture.cpp
 	Utils/RTexture2D.cpp
 	Utils/RTextureCubeMap.cpp
+	Utils/RTexture2DArray.cpp
 	Utils/ResourceDescriptionUtils.cpp
 	Utils/ResourceManager.cpp
 	Utils/SoundLoader.cpp
@@ -57,6 +58,7 @@ set (UTILS_HEADERS
 	Utils/RTexture.h
 	Utils/RTexture2D.h
 	Utils/RTextureCubeMap.h
+	Utils/RTexture2DArray.h
 	Utils/RefCounter.h
 	Utils/Resource.h
 	Utils/ResourceDescription.h
