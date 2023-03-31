@@ -1262,20 +1262,22 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NOTEXTURE_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[SOLID_EMISSIVE_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[CAR_PAINT_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[MIRROR_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[ALPHA_TEST_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
-    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
-	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
-	_shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-	_shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[DECAL_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[ALPHA_TEST_ANIMATED_MATERIAL] = MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
-    _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
+    _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
 
 
 	initUniformLocations();
@@ -1927,6 +1929,8 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
+        if (material->emissiveTexture != NULL)
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
 
         if (i->type != RET_GRASS)

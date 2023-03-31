@@ -2,10 +2,13 @@
 
 
 PostProcessingEffect::PostProcessingEffect(PostProcessingType type, VBO* quadVbo, RShader* shader)
-	: _type(type), _quadVbo(quadVbo), _shader(shader),
+	: _type(type), _quadVbo(quadVbo), _shader(nullptr),
 	_mainInputTexture(nullptr), _outputFramebuffer(nullptr)
 {
-
+	if (shader != nullptr)
+	{
+		setShader(shader);
+	}
 }
 
 
