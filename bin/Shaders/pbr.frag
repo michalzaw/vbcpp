@@ -81,7 +81,7 @@ const float bias[CASCADES_COUNT] = float[CASCADES_COUNT](0.0004f, 0.0008f, 0.005
 
 in vec4 PositionLightSpace[CASCADES_COUNT];
 in float ClipSpacePositionZ;
-uniform sampler2DShadow ShadowMap[CASCADES_COUNT];
+uniform sampler2DArrayShadow ShadowMap;
 
 #ifdef RENDER_OBJECT_ID
 uniform uint objectId;
@@ -190,7 +190,7 @@ void main()
 		float CurrentDepth = Coords.z;
 
 		Coords.z -= bias[cascadeIndex];//0.0005f;//
-		attenuation = texture(ShadowMap[cascadeIndex], Coords);//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
+		attenuation = texture(ShadowMap, vec4(Coords.xy, cascadeIndex, Coords.z));//CurrentDepth - 0.0005f > Depth ? 0.5f : 1.0f;//
 #endif
 		vec3 radiance = lightColor * attenuation;
 	

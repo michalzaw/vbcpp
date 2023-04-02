@@ -249,9 +249,7 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_1] = "LightSpaceMatrix[0]";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_2] = "LightSpaceMatrix[1]";
 	_uniformsNames[UNIFORM_LIGHT_SPACE_MATRIX_3] = "LightSpaceMatrix[2]";
-	_uniformsNames[UNIFORM_SHADOW_MAP_1] = "ShadowMap[0]";
-	_uniformsNames[UNIFORM_SHADOW_MAP_2] = "ShadowMap[1]";
-	_uniformsNames[UNIFORM_SHADOW_MAP_3] = "ShadowMap[2]";
+	_uniformsNames[UNIFORM_SHADOW_MAP] = "ShadowMap";
 	_uniformsNames[UNIFORM_GRASS_COLOR] = "grassColor";
 	_uniformsNames[UNIFORM_HEIGHTMAP] = "heightmap";
 	_uniformsNames[UNIFORM_GRASS_DENSITY] = "grassDensity";
@@ -502,7 +500,7 @@ void Renderer::prepareLightsData()
 			max += offset;
 			min -= offset;
 
-			float worldUnitsPerTexel = _shadowCameraFrustumDiagonal / _shadowMap->getShadowMap(i)->getTexture(0)->getSize().x;
+			float worldUnitsPerTexel = _shadowCameraFrustumDiagonal / _shadowMap->getShadowMapFramebuffer()->getTexture(0)->getSize().x;
 			glm::vec3 worldUnitsPerTexelVector = glm::vec3(worldUnitsPerTexel, worldUnitsPerTexel, 0.0f);
 
 			min.x /= worldUnitsPerTexel;
@@ -869,7 +867,8 @@ void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
     {
         RenderData* renderData = new RenderData;
         renderData->camera = shadowMap->getCameraForShadowMap(i);
-        renderData->framebuffer = shadowMap->getShadowMap(i);
+        renderData->framebuffer = shadowMap->getShadowMapFramebuffer();
+        renderData->framebufferLayer = i;
         renderData->renderPass = RP_SHADOWS;
         _renderDataListForShadowmapping.insert(_renderDataListForShadowmapping.begin(), renderData);
     }
@@ -877,7 +876,8 @@ void Renderer::createRenderDatasForShadowMap(ShadowMap* shadowMap)
 	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
 	RenderData* renderData = new RenderData;
 	renderData->camera = shadowMap->getCameraForShadowMap(staticShadowmapIndex);
-	renderData->framebuffer = shadowMap->getShadowMap(staticShadowmapIndex);
+	renderData->framebuffer = shadowMap->getShadowMapFramebuffer();
+    renderData->framebufferLayer = staticShadowmapIndex;
 	renderData->renderPass = RP_SHADOWS;
 	_renderDataListForStaticShadowmapping.insert(_renderDataListForStaticShadowmapping.begin(), renderData);
 }
@@ -889,7 +889,7 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
     {
         for (std::vector<RenderData*>::iterator j = _renderDataListForShadowmapping.begin(); j != _renderDataListForShadowmapping.end(); ++j)
         {
-            if (shadowMap->getShadowMap(i) == (*j)->framebuffer)
+            if (shadowMap->getShadowMapFramebuffer() == (*j)->framebuffer)
             {
                 RenderData* renderData = (*j);
                 _renderDataListForShadowmapping.erase(j);
@@ -913,7 +913,7 @@ void Renderer::deleteRenderDatasForShadowMap(ShadowMap* shadowMap)
 	int staticShadowmapIndex = shadowMap->CASCADE_COUNT - 1;
 	for (std::vector<RenderData*>::iterator i = _renderDataListForStaticShadowmapping.begin(); i != _renderDataListForStaticShadowmapping.end(); ++i)
 	{
-		if (shadowMap->getShadowMap(staticShadowmapIndex) == (*i)->framebuffer)
+		if (shadowMap->getShadowMapFramebuffer() == (*i)->framebuffer)
 		{
 			RenderData* renderData = (*i);
 			_renderDataListForStaticShadowmapping.erase(i);
@@ -1262,20 +1262,22 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NOTEXTURE_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[SOLID_EMISSIVE_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[CAR_PAINT_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[MIRROR_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[ALPHA_TEST_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
+    _shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-    _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
-    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
-	_shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
-	_shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
-	_shaderListForMirrorRendering[NEW_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[DECAL_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[ALPHA_TEST_ANIMATED_MATERIAL] = MIRROR_ALPHA_TEST_ANIMATED_MATERIAL;
-    _shaderListForMirrorRendering[NEW_TREE_2_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
+    _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
 
 
 	initUniformLocations();
@@ -1659,6 +1661,11 @@ void Renderer::renderAll()
 void Renderer::renderDepth(RenderData* renderData)
 {
     renderData->framebuffer->bind();
+    if (renderData->framebufferLayer >= 0)
+    {
+        renderData->framebuffer->bindTextureArrayLayerToRender(renderData->framebufferLayer);
+    }
+
     glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
     glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -1771,6 +1778,11 @@ void Renderer::renderDepth(RenderData* renderData)
 void Renderer::renderToMirrorTexture(RenderData* renderData)
 {
     renderData->framebuffer->bind();
+    if (renderData->framebufferLayer >= 0)
+    {
+        renderData->framebuffer->bindTextureArrayLayerToRender(renderData->framebufferLayer);
+    }
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     CameraStatic* camera = renderData->camera;
@@ -1917,6 +1929,8 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
 
         if (material->diffuseTexture != NULL)
             shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_DIFFUSE_TEXTURE], material->diffuseTexture);
+        if (material->emissiveTexture != NULL)
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
 
         if (i->type != RET_GRASS)
@@ -1955,6 +1969,11 @@ void Renderer::renderScene(RenderData* renderData)
     }
 
     renderData->framebuffer->bind();
+    if (renderData->framebufferLayer >= 0)
+    {
+        renderData->framebuffer->bindTextureArrayLayerToRender(renderData->framebufferLayer);
+    }
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     CameraStatic* camera = renderData->camera;
@@ -2112,12 +2131,12 @@ void Renderer::renderScene(RenderData* renderData)
 
         if (_isShadowMappingEnable)
         {
-            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_1], lightSpaceMatrix[0]);
-            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_1], _shadowMap->getShadowMap(0)->getTexture(0));
-            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_2], lightSpaceMatrix[1]);
-            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_2], _shadowMap->getShadowMap(1)->getTexture(0));
-            //shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_3], lightSpaceMatrix[2]);
-            //shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP_3], _shadowMap->getShadowMap(2)->getTexture(0));
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SHADOW_MAP], _shadowMap->getShadowMapFramebuffer()->getTexture(0));
+
+            for (int i = 0; i < ShadowMap::CASCADE_COUNT; ++i)
+            {
+                shader->setUniform(_uniformsLocations[currentShader][UNIFORM_LIGHT_SPACE_MATRIX_1 + i], lightSpaceMatrix[i]);
+            }
         }
 
         mesh->vbo->bind();

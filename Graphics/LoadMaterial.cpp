@@ -324,6 +324,19 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 		}
 	}
 
+	// add missing textures
+	if (sMaterial->diffuseTexture == NULL)
+	{
+		sMaterial->diffuseTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1, 1, 1, 1));
+	}
+	if (sMaterial->normalmapTexture == NULL && (sMaterial->shader == NORMALMAPPING_MATERIAL || sMaterial->shader == NORMALMAPPING_ANIMATED_MATERIAL || sMaterial->shader == NEW_TREE_MATERIAL || sMaterial->shader == NEW_TREE_2_MATERIAL))
+	{
+		sMaterial->normalmapTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.5, 0.5, 1, 1));
+	}
+	if (sMaterial->emissiveTexture == NULL && sMaterial->shader == SOLID_EMISSIVE_MATERIAL)
+	{
+		sMaterial->metalicTexture = ResourceManager::getInstance().loadOneColorTexture(sMaterial->emissiveColor);
+	}
 
     return sMaterial;
 }
