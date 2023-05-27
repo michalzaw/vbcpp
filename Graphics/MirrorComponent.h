@@ -13,11 +13,12 @@ class MirrorComponent : public CameraStatic
         glm::vec3    _normalVector;
 
 		float _renderingDistance;
+        float _refreshDistance;
 
     public:
-        MirrorComponent(std::string name, float renderingDistance)
+        MirrorComponent(const std::string& name, float renderingDistance, float refreshDistance)
             : CameraStatic(CPT_PERSPECTIVE),
-            _name(name), _renderingDistance(renderingDistance)
+            _name(name), _renderingDistance(renderingDistance), _refreshDistance(refreshDistance)
         {
             _type = CT_MIRROR;
 
@@ -42,14 +43,19 @@ class MirrorComponent : public CameraStatic
             _normalVector = normalVector;
         }
 
-        glm::vec3 getNormalVector()
+        const glm::vec3& getNormalVector()
         {
             return _normalVector;
         }
 
-        std::string getName()
+        const std::string& getName()
         {
             return _name;
+        }
+
+        float getRefreshDistance()
+        {
+            return _refreshDistance;
         }
 
         void calculateReflectionVectorAndRotateCamera(glm::vec3 mainCameraPosition)

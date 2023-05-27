@@ -90,6 +90,10 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					mirrorRenderingDistance = toFloat(configElement->GetText());
 				}
+                else if (strcmp(ename, "MirrorRefreshDistance") == 0)
+                {
+                    mirrorRefreshDistance = toFloat(configElement->GetText());
+                }
 				else if (strcmp(ename, "TextureCompression") == 0)
 				{
 					textureCompression = toBool(configElement->GetText());

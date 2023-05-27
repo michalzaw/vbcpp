@@ -225,9 +225,9 @@ EnvironmentCaptureComponent* GraphicsManager::addGlobalEnvironmentCaptureCompone
 }
 
 
-MirrorComponent* GraphicsManager::addMirrorComponent(std::string name, float renderingDistance)
+MirrorComponent* GraphicsManager::addMirrorComponent(std::string name, float renderingDistance, float refreshDistance)
 {
-    MirrorComponent* mirrorComponent = new MirrorComponent(name, renderingDistance);
+    MirrorComponent* mirrorComponent = new MirrorComponent(name, renderingDistance, refreshDistance);
 
     _mirrorComponents.push_back(mirrorComponent);
 

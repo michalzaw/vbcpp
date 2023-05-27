@@ -27,6 +27,7 @@
 		
 		<Mirrors>true</Mirrors>
 		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
+		<MirrorRefreshDistance>5.0</MirrorRefreshDistance>
 
 		<TextureCompression>true</TextureCompression>
 		<AnisotropicFiltering>false</AnisotropicFiltering>
