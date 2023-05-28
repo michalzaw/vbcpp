@@ -4,6 +4,7 @@
 Image::Image(RTexture* texture)
     : _texture(texture),
     _size(0.0f, 0.0f),
+    _invertX(false), _invertY(true),
     _isInitialized(false)
 {
     createVBO();
@@ -97,7 +98,7 @@ void Image::calculateTexCoordTransformMatrix()
     _texCoordTransformMatrix =
                                glm::translate(glm::vec3(_textureRect.position.x / (float)_texture->getSize().x, _textureRect.position.y / (float)_texture->getSize().y, 1.0f)) *
                                glm::scale(glm::vec3(_textureRect.size.x / (float)_texture->getSize().x, _textureRect.size.y / (float)_texture->getSize().y, 1.0f)) *
-                               glm::scale(glm::vec3(1.0f, -1.0f, 1.0f));
+                               glm::scale(glm::vec3(_invertX ? -1.0f : 1.0f, _invertY ? -1.0f : 1.0f, 1.0f));
 
 }
 
@@ -144,6 +145,30 @@ glm::vec2 Image::getSize()
 glm::vec2 Image::getRealSize()
 {
     return _size * _scale;
+}
+
+
+void Image::setInvertX(bool invertX)
+{
+    _invertX = invertX;
+}
+
+
+void Image::setInvertY(bool invertY)
+{
+    _invertY = invertY;
+}
+
+
+bool Image::getInvertX()
+{
+    return _invertX;
+}
+
+
+bool Image::getInvertY()
+{
+    return _invertY;
 }
 
 

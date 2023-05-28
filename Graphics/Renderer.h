@@ -183,7 +183,6 @@ class Renderer
 
 		void addPostProcessingEffect(PostProcessingEffect* postProcessingEffect);
 		void removePostProcessingEffect(PostProcessingType type);
-		PostProcessingEffect* findEffect(PostProcessingType type);
 
 		PostProcessingBloom* createBloomPostProcessing();
 
@@ -278,6 +277,8 @@ class Renderer
 		bool getOBBFlag();
 
 		VBO* getQuadVbo();
+
+		PostProcessingEffect* findEffect(PostProcessingType type);
 
 		void bakeStaticShadows();
 		void rebuildStaticLighting();

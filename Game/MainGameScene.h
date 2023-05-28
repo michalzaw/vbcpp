@@ -6,6 +6,7 @@
 
 
 class Hud;
+class MirrorImage;
 
 
 enum GameState
@@ -30,6 +31,8 @@ class MainGameScene final : public GameScene
 		CameraFPS* _activeCamera;
 
 		Hud* _hud;
+		std::vector<MirrorImage*> _mirrorsImages;
+		std::vector<bool>		  _mirrorsImagesVisibility;
 
 		bool _isCameraControll;
 		bool _isMirrorControll;

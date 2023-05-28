@@ -8,6 +8,7 @@
 #include "GameLogicSystem.h"
 #include "Hud.h"
 #include "PathComponent.h"
+#include "MainGameScene/MirrorImage.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -53,6 +54,11 @@ MainGameScene::~MainGameScene()
 {
 
 	delete _hud;
+
+	for (int i = 0; i < _mirrorsImages.size(); ++i)
+	{
+		delete _mirrorsImages[i];
+	}
 }
 
 
@@ -176,6 +182,22 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 
 	_graphicsManager->setCurrentCamera(camera);
 	_soundManager->setActiveCamera(camera);
+
+
+	if (_activeCamera == _cameras[GC_DRIVER])
+	{
+		for (int i = 0; i < _mirrorsImages.size(); ++i)
+		{
+			_mirrorsImages[i]->setIsActive(_mirrorsImagesVisibility[i]);
+		}
+	}
+	else
+	{
+		for (int i = 0; i < _mirrorsImages.size(); ++i)
+		{
+			_mirrorsImages[i]->setIsActive(false);
+		}
+	}
 }
 
 
@@ -279,6 +301,29 @@ void MainGameScene::loadScene()
 void MainGameScene::initGui()
 {
 	_hud = new Hud(_gui, _activeBus);
+
+	MirrorComponent* mirrorComponent = _activeBus->getMirror(0);
+	MirrorImage* mirrorImage1 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
+	mirrorImage1->setPosition(glm::vec2(0.0f, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	mirrorImage1->setIsActive(false);
+
+	mirrorComponent = _activeBus->getMirror(1);
+	MirrorImage* mirrorImage2 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
+	mirrorImage2->setPosition(glm::vec2(Renderer::getInstance().getWindowDimensions().x - mirrorComponent->getFramebuffer()->getTexture()->getSize().x, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	mirrorImage2->setIsActive(false);
+
+	mirrorComponent = _activeBus->getMirror(2);
+	MirrorImage* mirrorImage3 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
+	mirrorImage3->setPosition(glm::vec2((Renderer::getInstance().getWindowDimensions().x - mirrorComponent->getFramebuffer()->getTexture()->getSize().x) / 2.0f, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	mirrorImage3->setIsActive(false);
+
+	_mirrorsImages.push_back(mirrorImage1);
+	_mirrorsImages.push_back(mirrorImage2);
+	_mirrorsImages.push_back(mirrorImage3);
+
+	_mirrorsImagesVisibility.push_back(false);
+	_mirrorsImagesVisibility.push_back(false);
+	_mirrorsImagesVisibility.push_back(false);
 }
 
 
@@ -359,6 +404,9 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 void MainGameScene::update(double deltaTime)
 {
 	_hud->update(deltaTime);
+	_mirrorsImages[0]->update();
+	_mirrorsImages[1]->update();
+	_mirrorsImages[2]->update();
 }
 
 
@@ -600,6 +648,33 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 
 		setActiveCamera(_cameras[GC_GLOBAL]);
 	}
+
+	// mirrors
+	if (input.isKeyPressed(GLFW_KEY_1))
+	{
+		if (_activeCamera == _cameras[GC_DRIVER])
+		{
+			_mirrorsImagesVisibility[0] = !_mirrorsImagesVisibility[0];
+			_mirrorsImages[0]->setIsActive(_mirrorsImagesVisibility[0]);
+		}
+	}
+	if (input.isKeyPressed(GLFW_KEY_2))
+	{
+		if (_activeCamera == _cameras[GC_DRIVER])
+		{
+			_mirrorsImagesVisibility[2] = !_mirrorsImagesVisibility[2];
+			_mirrorsImages[2]->setIsActive(_mirrorsImagesVisibility[2]);
+		}
+	}
+	if (input.isKeyPressed(GLFW_KEY_3))
+	{
+		if (_activeCamera == _cameras[GC_DRIVER])
+		{
+			_mirrorsImagesVisibility[1] = !_mirrorsImagesVisibility[1];
+			_mirrorsImages[1]->setIsActive(_mirrorsImagesVisibility[1]);
+		}
+	}
+
 
 	// debug
 	if (GameConfig::getInstance().developmentMode)
