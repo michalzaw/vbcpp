@@ -26,6 +26,7 @@
 		<GrassRenderingDistance>30.0</GrassRenderingDistance>
 		
 		<Mirrors>true</Mirrors>
+		<MirrorSize>256.0</MirrorSize>
 		<MirrorRenderingDistance>100.0</MirrorRenderingDistance>
 		<MirrorRefreshDistance>5.0</MirrorRefreshDistance>
 

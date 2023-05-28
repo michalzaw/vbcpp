@@ -86,6 +86,10 @@ void GameConfig::loadGameConfig(const char* filename)
 				{
 					isMirrorsEnabled = toBool(configElement->GetText());
 				}
+                else if (strcmp(ename, "MirrorSize") == 0)
+                {
+                    mirrorSize = toFloat(configElement->GetText());
+                }
 				else if (strcmp(ename, "MirrorRenderingDistance") == 0)
 				{
 					mirrorRenderingDistance = toFloat(configElement->GetText());

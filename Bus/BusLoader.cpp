@@ -1155,11 +1155,14 @@ void BusLoader::loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModu
         glm::vec3 position = XMLstringToVec3(mirrorElement->Attribute("position"));
         glm::vec3 rotation = XMLstringToVec3(mirrorElement->Attribute("rotation"));
         glm::vec3 normal = XMLstringToVec3(mirrorElement->Attribute("normal"));
+        float  widthRatio = (float)atof(mirrorElement->Attribute("widthRatio"));
+        float  heightRatio = (float)atof(mirrorElement->Attribute("heightRatio"));
 		float renderingDistance = GameConfig::getInstance().mirrorRenderingDistance;
         float mirrorRefreshDistance = GameConfig::getInstance().mirrorRefreshDistance;
+        float mirrorSize = GameConfig::getInstance().mirrorSize;
 
         SceneObject* mirrorObject = _sMgr->addSceneObject(name);
-        MirrorComponent* mirrorComponent = _gMgr->addMirrorComponent(name, renderingDistance, mirrorRefreshDistance);
+        MirrorComponent* mirrorComponent = _gMgr->addMirrorComponent(name, mirrorSize * widthRatio, mirrorSize * heightRatio, renderingDistance, mirrorRefreshDistance);
         mirrorComponent->setNormalVector(normal);
 
         mirrorObject->addComponent(mirrorComponent);

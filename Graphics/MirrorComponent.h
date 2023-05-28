@@ -16,20 +16,20 @@ class MirrorComponent : public CameraStatic
         float _refreshDistance;
 
     public:
-        MirrorComponent(const std::string& name, float renderingDistance, float refreshDistance)
+        MirrorComponent(const std::string& name, float width, float height, float renderingDistance, float refreshDistance)
             : CameraStatic(CPT_PERSPECTIVE),
             _name(name), _renderingDistance(renderingDistance), _refreshDistance(refreshDistance)
         {
             _type = CT_MIRROR;
 
-            setWindowDimensions(256, 512);
+            setWindowDimensions(width, height);
             setViewAngle(degToRad(50.0f));
             setNearValue(0.1);
             setFarValue(_renderingDistance);
 
             _framebuffer = OGLDriver::getInstance().createFramebuffer();
-            _framebuffer->addDepthRenderbuffer(256, 512);
-            _framebuffer->addTexture(TF_RGBA, 256, 512);
+            _framebuffer->addDepthRenderbuffer(width, height);
+            _framebuffer->addTexture(TF_RGBA, width, height);
             OGLDriver::getInstance().registerFramebufferForInitialization(_framebuffer);
         }
 
