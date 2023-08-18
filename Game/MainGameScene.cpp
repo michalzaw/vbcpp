@@ -302,19 +302,33 @@ void MainGameScene::initGui()
 {
 	_hud = new Hud(_gui, _activeBus);
 
+	glm::vec2 mirrorsMargin(
+		0.01f * Renderer::getInstance().getWindowDimensions().x,
+		0.05f * Renderer::getInstance().getWindowDimensions().y
+	);
+
 	MirrorComponent* mirrorComponent = _activeBus->getMirror(0);
 	MirrorImage* mirrorImage1 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
-	mirrorImage1->setPosition(glm::vec2(0.0f, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	float scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+	mirrorImage1->getImage()->setScale(glm::vec2(scale, scale));
+	mirrorImage1->getImage()->setPosition(glm::vec2(0.0f + mirrorsMargin.x,
+													Renderer::getInstance().getWindowDimensions().y - mirrorImage1->getImage()->getRealSize().y - mirrorsMargin.y));
 	mirrorImage1->setIsActive(false);
 
 	mirrorComponent = _activeBus->getMirror(1);
 	MirrorImage* mirrorImage2 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
-	mirrorImage2->setPosition(glm::vec2(Renderer::getInstance().getWindowDimensions().x - mirrorComponent->getFramebuffer()->getTexture()->getSize().x, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+	mirrorImage2->getImage()->setScale(glm::vec2(scale, scale));
+	mirrorImage2->getImage()->setPosition(glm::vec2(Renderer::getInstance().getWindowDimensions().x - mirrorImage2->getImage()->getRealSize().x - mirrorsMargin.x,
+													Renderer::getInstance().getWindowDimensions().y - mirrorImage2->getImage()->getRealSize().y - mirrorsMargin.y));
 	mirrorImage2->setIsActive(false);
 
 	mirrorComponent = _activeBus->getMirror(2);
 	MirrorImage* mirrorImage3 = new MirrorImage(_gui, mirrorComponent->getFramebuffer()->getTexture());
-	mirrorImage3->setPosition(glm::vec2((Renderer::getInstance().getWindowDimensions().x - mirrorComponent->getFramebuffer()->getTexture()->getSize().x) / 2.0f, Renderer::getInstance().getWindowDimensions().y - mirrorComponent->getFramebuffer()->getTexture()->getSize().y));
+	scale = 0.24f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+	mirrorImage3->getImage()->setScale(glm::vec2(scale, scale));
+	mirrorImage3->getImage()->setPosition(glm::vec2((Renderer::getInstance().getWindowDimensions().x - mirrorImage3->getImage()->getRealSize().x) / 2.0f,
+													 Renderer::getInstance().getWindowDimensions().y - mirrorImage3->getImage()->getRealSize().y - mirrorsMargin.y));
 	mirrorImage3->setIsActive(false);
 
 	_mirrorsImages.push_back(mirrorImage1);

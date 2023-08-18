@@ -27,9 +27,9 @@ void MirrorImage::setMirrorOriginalTexture(RTexture* texture)
 }
 
 
-void MirrorImage::setPosition(const glm::vec2& position)
+Image* MirrorImage::getImage()
 {
-	_mirrorImage->setPosition(position);
+	return _mirrorImage;
 }
 
 

@@ -26,7 +26,7 @@ class MirrorImage
 
 		void setMirrorOriginalTexture(RTexture* texture);
 
-		void setPosition(const glm::vec2& position);
+		Image* getImage();
 
 		void setIsActive(bool isActive);
 		bool isActive();
