@@ -598,9 +598,10 @@ void Renderer::prepareRenderData()
     for (int i = 0; i < _graphicsManager->_mirrorComponents.size(); ++i)
     {
         Frustum frustum(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
-        if (_graphicsManager->_mirrorComponents[i]->isActive() &&
+        if ((_graphicsManager->_mirrorComponents[i]->isActive() &&
             glm::distance(_mainRenderData->camera->getPosition(), _graphicsManager->_mirrorComponents[i]->getPosition()) < _graphicsManager->_mirrorComponents[i]->getRefreshDistance() &&
-            isPointInFrustum(frustum, _graphicsManager->_mirrorComponents[i]->getPosition()))
+            isPointInFrustum(frustum, _graphicsManager->_mirrorComponents[i]->getPosition())) ||
+            _graphicsManager->_mirrorComponents[i]->isRefreshAlways())
         {
             _graphicsManager->_mirrorComponents[i]->calculateReflectionVectorAndRotateCamera(_graphicsManager->getCurrentCamera()->getPosition());
             RenderData* renderData = new RenderData;

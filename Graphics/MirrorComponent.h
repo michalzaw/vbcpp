@@ -15,10 +15,13 @@ class MirrorComponent : public CameraStatic
 		float _renderingDistance;
         float _refreshDistance;
 
+        bool _refreshAlways;
+
     public:
         MirrorComponent(const std::string& name, float width, float height, float renderingDistance, float refreshDistance)
             : CameraStatic(CPT_PERSPECTIVE),
-            _name(name), _renderingDistance(renderingDistance), _refreshDistance(refreshDistance)
+            _name(name), _renderingDistance(renderingDistance), _refreshDistance(refreshDistance),
+            _refreshAlways(false)
         {
             _type = CT_MIRROR;
 
@@ -56,6 +59,16 @@ class MirrorComponent : public CameraStatic
         float getRefreshDistance()
         {
             return _refreshDistance;
+        }
+
+        bool isRefreshAlways()
+        {
+            return _refreshAlways;
+        }
+
+        void setRefreshAlways(bool refreshAlways)
+        {
+            _refreshAlways = refreshAlways;
         }
 
         void calculateReflectionVectorAndRotateCamera(glm::vec3 mainCameraPosition)

@@ -8,7 +8,7 @@
 class GUIManager;
 class Image;
 class Framebuffer;
-class RTexture;
+class MirrorComponent;
 
 
 class MirrorImage
@@ -18,13 +18,13 @@ class MirrorImage
 
 		Image* _mirrorImage;
 		
-		RTexture* _mirrorOriginalTexture;
+		MirrorComponent* _mirrorComponent;
 		Framebuffer* _mirrorImageFramebuffer;
 
 	public:
-		MirrorImage(GUIManager* gui, RTexture* texture);
+		MirrorImage(GUIManager* gui, MirrorComponent* mirrorComponent);
 
-		void setMirrorOriginalTexture(RTexture* texture);
+		void setMirrorComponent(MirrorComponent* mirrorComponent);
 
 		Image* getImage();
 

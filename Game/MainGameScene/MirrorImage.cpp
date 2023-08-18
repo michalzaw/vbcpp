@@ -5,12 +5,14 @@
 #include "../../Graphics/Renderer.h"
 
 
-MirrorImage::MirrorImage(GUIManager* gui, RTexture* texture)
+MirrorImage::MirrorImage(GUIManager* gui, MirrorComponent* mirrorComponent)
 	: _gui(gui),
-	_mirrorOriginalTexture(texture)
+	_mirrorComponent(mirrorComponent)
 {
+	RTexture* mirrorComponentTexture = _mirrorComponent->getFramebuffer()->getTexture();
+
 	_mirrorImageFramebuffer = OGLDriver::getInstance().createFramebuffer();
-	_mirrorImageFramebuffer->addTexture(TF_RGBA, _mirrorOriginalTexture->getSize().x, _mirrorOriginalTexture->getSize().y);
+	_mirrorImageFramebuffer->addTexture(TF_RGBA, mirrorComponentTexture->getSize().x, mirrorComponentTexture->getSize().y);
 	_mirrorImageFramebuffer->getTexture()->setClampMode(TCM_REPEAT);
 
 	OGLDriver::getInstance().registerFramebufferForInitialization(_mirrorImageFramebuffer);
@@ -21,9 +23,9 @@ MirrorImage::MirrorImage(GUIManager* gui, RTexture* texture)
 }
 
 
-void MirrorImage::setMirrorOriginalTexture(RTexture* texture)
+void MirrorImage::setMirrorComponent(MirrorComponent* mirrorComponent)
 {
-	_mirrorOriginalTexture = texture;
+	_mirrorComponent = mirrorComponent;
 }
 
 
@@ -36,6 +38,8 @@ Image* MirrorImage::getImage()
 void MirrorImage::setIsActive(bool isActive)
 {
 	_mirrorImage->setIsActive(isActive);
+
+	_mirrorComponent->setRefreshAlways(isActive);
 }
 
 
@@ -50,6 +54,6 @@ void MirrorImage::update()
 	PostProcessingEffect* postProcessingToneMappingEffect = Renderer::getInstance().findEffect(PPT_TONE_MAPPING);
 	if (postProcessingToneMappingEffect != nullptr)
 	{
-		postProcessingToneMappingEffect->run(_mirrorOriginalTexture, _mirrorImageFramebuffer);
+		postProcessingToneMappingEffect->run(_mirrorComponent->getFramebuffer()->getTexture(), _mirrorImageFramebuffer);
 	}
 }
