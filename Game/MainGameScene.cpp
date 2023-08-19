@@ -57,7 +57,10 @@ MainGameScene::~MainGameScene()
 
 	for (int i = 0; i < _mirrorsImages.size(); ++i)
 	{
-		delete _mirrorsImages[i];
+		if (_mirrorsImages[i] != nullptr)
+		{
+			delete _mirrorsImages[i];
+		}
 	}
 }
 
@@ -188,14 +191,20 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 	{
 		for (int i = 0; i < _mirrorsImages.size(); ++i)
 		{
-			_mirrorsImages[i]->setIsActive(_mirrorsImagesVisibility[i]);
+			if (_mirrorsImages[i] != nullptr)
+			{
+				_mirrorsImages[i]->setIsActive(_mirrorsImagesVisibility[i]);
+			}
 		}
 	}
 	else
 	{
 		for (int i = 0; i < _mirrorsImages.size(); ++i)
 		{
-			_mirrorsImages[i]->setIsActive(false);
+			if (_mirrorsImages[i] != nullptr)
+			{
+				_mirrorsImages[i]->setIsActive(false);
+			}
 		}
 	}
 }
@@ -308,32 +317,56 @@ void MainGameScene::initGui()
 	);
 
 	MirrorComponent* mirrorComponent = _activeBus->getMirror(0);
-	MirrorImage* mirrorImage1 = new MirrorImage(_gui, mirrorComponent);
-	float scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
-	mirrorImage1->getImage()->setScale(glm::vec2(scale, scale));
-	mirrorImage1->getImage()->setPosition(glm::vec2(0.0f + mirrorsMargin.x,
-													Renderer::getInstance().getWindowDimensions().y - mirrorImage1->getImage()->getRealSize().y - mirrorsMargin.y));
-	mirrorImage1->setIsActive(false);
+	if (mirrorComponent != nullptr)
+	{
+		MirrorImage* mirrorImage1 = new MirrorImage(_gui, mirrorComponent);
+		float scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+		mirrorImage1->getImage()->setScale(glm::vec2(scale, scale));
+		mirrorImage1->getImage()->setPosition(glm::vec2(0.0f + mirrorsMargin.x,
+			Renderer::getInstance().getWindowDimensions().y - mirrorImage1->getImage()->getRealSize().y - mirrorsMargin.y));
+		mirrorImage1->setIsActive(false);
+
+		_mirrorsImages.push_back(mirrorImage1);
+	}
+	else
+	{
+		_mirrorsImages.push_back(nullptr);
+	}
 
 	mirrorComponent = _activeBus->getMirror(1);
-	MirrorImage* mirrorImage2 = new MirrorImage(_gui, mirrorComponent);
-	scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
-	mirrorImage2->getImage()->setScale(glm::vec2(scale, scale));
-	mirrorImage2->getImage()->setPosition(glm::vec2(Renderer::getInstance().getWindowDimensions().x - mirrorImage2->getImage()->getRealSize().x - mirrorsMargin.x,
-													Renderer::getInstance().getWindowDimensions().y - mirrorImage2->getImage()->getRealSize().y - mirrorsMargin.y));
-	mirrorImage2->setIsActive(false);
+	if (mirrorComponent != nullptr)
+	{
+		MirrorImage* mirrorImage2 = new MirrorImage(_gui, mirrorComponent);
+		float scale = 0.12f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+		mirrorImage2->getImage()->setScale(glm::vec2(scale, scale));
+		mirrorImage2->getImage()->setPosition(glm::vec2(Renderer::getInstance().getWindowDimensions().x - mirrorImage2->getImage()->getRealSize().x - mirrorsMargin.x,
+			Renderer::getInstance().getWindowDimensions().y - mirrorImage2->getImage()->getRealSize().y - mirrorsMargin.y));
+		mirrorImage2->setIsActive(false);
+
+		_mirrorsImages.push_back(mirrorImage2);
+	}
+	else
+	{
+		_mirrorsImages.push_back(nullptr);
+	}
+
 
 	mirrorComponent = _activeBus->getMirror(2);
-	MirrorImage* mirrorImage3 = new MirrorImage(_gui, mirrorComponent);
-	scale = 0.24f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
-	mirrorImage3->getImage()->setScale(glm::vec2(scale, scale));
-	mirrorImage3->getImage()->setPosition(glm::vec2((Renderer::getInstance().getWindowDimensions().x - mirrorImage3->getImage()->getRealSize().x) / 2.0f,
-													 Renderer::getInstance().getWindowDimensions().y - mirrorImage3->getImage()->getRealSize().y - mirrorsMargin.y));
-	mirrorImage3->setIsActive(false);
+	if (mirrorComponent != nullptr)
+	{
+		MirrorImage* mirrorImage3 = new MirrorImage(_gui, mirrorComponent);
+		float scale = 0.24f * Renderer::getInstance().getWindowDimensions().x / mirrorComponent->getFramebuffer()->getTexture()->getSize().x;
+		mirrorImage3->getImage()->setScale(glm::vec2(scale, scale));
+		mirrorImage3->getImage()->setPosition(glm::vec2((Renderer::getInstance().getWindowDimensions().x - mirrorImage3->getImage()->getRealSize().x) / 2.0f,
+			Renderer::getInstance().getWindowDimensions().y - mirrorImage3->getImage()->getRealSize().y - mirrorsMargin.y));
+		mirrorImage3->setIsActive(false);
 
-	_mirrorsImages.push_back(mirrorImage1);
-	_mirrorsImages.push_back(mirrorImage2);
-	_mirrorsImages.push_back(mirrorImage3);
+		_mirrorsImages.push_back(mirrorImage3);
+	}
+	else
+	{
+		_mirrorsImages.push_back(nullptr);
+	}
 
 	_mirrorsImagesVisibility.push_back(false);
 	_mirrorsImagesVisibility.push_back(false);
@@ -418,9 +451,14 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 void MainGameScene::update(double deltaTime)
 {
 	_hud->update(deltaTime);
-	_mirrorsImages[0]->update();
-	_mirrorsImages[1]->update();
-	_mirrorsImages[2]->update();
+
+	for (auto* mirrorImage : _mirrorsImages)
+	{
+		if (mirrorImage != nullptr)
+		{
+			mirrorImage->update();
+		}
+	}
 }
 
 
@@ -666,7 +704,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	// mirrors
 	if (input.isKeyPressed(GLFW_KEY_1))
 	{
-		if (_activeCamera == _cameras[GC_DRIVER])
+		if (_activeCamera == _cameras[GC_DRIVER] && _mirrorsImages[0] != nullptr)
 		{
 			_mirrorsImagesVisibility[0] = !_mirrorsImagesVisibility[0];
 			_mirrorsImages[0]->setIsActive(_mirrorsImagesVisibility[0]);
@@ -674,7 +712,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_2))
 	{
-		if (_activeCamera == _cameras[GC_DRIVER])
+		if (_activeCamera == _cameras[GC_DRIVER] && _mirrorsImages[2] != nullptr)
 		{
 			_mirrorsImagesVisibility[2] = !_mirrorsImagesVisibility[2];
 			_mirrorsImages[2]->setIsActive(_mirrorsImagesVisibility[2]);
@@ -682,7 +720,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	}
 	if (input.isKeyPressed(GLFW_KEY_3))
 	{
-		if (_activeCamera == _cameras[GC_DRIVER])
+		if (_activeCamera == _cameras[GC_DRIVER] && _mirrorsImages[1] != nullptr)
 		{
 			_mirrorsImagesVisibility[1] = !_mirrorsImagesVisibility[1];
 			_mirrorsImages[1]->setIsActive(_mirrorsImagesVisibility[1]);
