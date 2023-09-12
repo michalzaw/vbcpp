@@ -13,22 +13,26 @@ class MirrorComponent : public CameraStatic
         glm::vec3    _normalVector;
 
 		float _renderingDistance;
+        float _refreshDistance;
+
+        bool _refreshAlways;
 
     public:
-        MirrorComponent(std::string name, float renderingDistance)
+        MirrorComponent(const std::string& name, float width, float height, float renderingDistance, float refreshDistance)
             : CameraStatic(CPT_PERSPECTIVE),
-            _name(name), _renderingDistance(renderingDistance)
+            _name(name), _renderingDistance(renderingDistance), _refreshDistance(refreshDistance),
+            _refreshAlways(false)
         {
             _type = CT_MIRROR;
 
-            setWindowDimensions(256, 512);
+            setWindowDimensions(width, height);
             setViewAngle(degToRad(50.0f));
             setNearValue(0.1);
             setFarValue(_renderingDistance);
 
             _framebuffer = OGLDriver::getInstance().createFramebuffer();
-            _framebuffer->addDepthRenderbuffer(256, 512);
-            _framebuffer->addTexture(TF_RGBA, 256, 512);
+            _framebuffer->addDepthRenderbuffer(width, height);
+            _framebuffer->addTexture(TF_RGBA, width, height);
             OGLDriver::getInstance().registerFramebufferForInitialization(_framebuffer);
         }
 
@@ -42,14 +46,29 @@ class MirrorComponent : public CameraStatic
             _normalVector = normalVector;
         }
 
-        glm::vec3 getNormalVector()
+        const glm::vec3& getNormalVector()
         {
             return _normalVector;
         }
 
-        std::string getName()
+        const std::string& getName()
         {
             return _name;
+        }
+
+        float getRefreshDistance()
+        {
+            return _refreshDistance;
+        }
+
+        bool isRefreshAlways()
+        {
+            return _refreshAlways;
+        }
+
+        void setRefreshAlways(bool refreshAlways)
+        {
+            _refreshAlways = refreshAlways;
         }
 
         void calculateReflectionVectorAndRotateCamera(glm::vec3 mainCameraPosition)

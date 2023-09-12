@@ -459,7 +459,7 @@ int BusRaycast::getDoorsCount()
 
 MirrorComponent* BusRaycast::getMirror(int index)
 {
-    if (index <= _mirrors.size()-1)
+    if (_mirrors.size() != 0 && index <= _mirrors.size() - 1)
         return _mirrors[index];
     else
         return NULL;

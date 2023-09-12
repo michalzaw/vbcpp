@@ -15,6 +15,7 @@ set (GAME_SOURCES
 	Game/MenuSelectBusScene.cpp
 	Game/PathComponent.cpp
 	Game/TestScene.cpp
+	Game/MainGameScene/MirrorImage.cpp
 )
 
 set (GAME_HEADERS 
@@ -36,6 +37,7 @@ set (GAME_HEADERS
 	Game/MenuSelectBusScene.h
 	Game/PathComponent.h
 	Game/TestScene.h
+	Game/MainGameScene/MirrorImage.h
     
 )
 

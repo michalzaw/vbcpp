@@ -20,6 +20,9 @@ class Image : public GUIObject
 
         glm::vec2   _size;                      // Wykorzystywane wewnetrznie, zalezy np od rozmiaru tekstury
 
+        bool _invertX;
+        bool _invertY;
+
         glm::mat4 _verticesTransformMatrix;
         glm::mat4 _texCoordTransformMatrix;
 
@@ -53,6 +56,11 @@ class Image : public GUIObject
 
         glm::vec2 getSize();
         glm::vec2 getRealSize();
+
+        void setInvertX(bool invertX);
+        void setInvertY(bool invertY);
+        bool getInvertX();
+        bool getInvertY();
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
         virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0);
