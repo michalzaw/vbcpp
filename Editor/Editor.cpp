@@ -1110,7 +1110,9 @@ namespace vbEditor
 		ResourceManager::getInstance().setAlternativeResourcePath(GameConfig::getInstance().alternativeResourcesPath);
 #endif // DEVELOPMENT_RESOURCES
 
+		GameConfig::getInstance().pbrSupport = true;
 		GameConfig::getInstance().mode = GM_EDITOR;
+		GameConfig::getInstance().isGrassEnable = true;
 
 		OGLDriver::getInstance().initialize();
 
