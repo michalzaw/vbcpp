@@ -215,6 +215,23 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 			sMaterial->aoTexture = ResourceManager::getInstance().loadTexture(texturePath);
 	}
 
+	const char* c4 = materialElement->Attribute("opacity_mask_texture");
+	if (c4 != NULL)
+	{
+		std::string texStr = std::string(c4);
+
+		LOG_DEBUG("OpacityMaskTexture: " + texStr);
+
+		for (unsigned int i = 0; i < texStr.size(); i++)
+			texStr[i] = tolower(texStr[i]);
+
+		std::string texturePath = texPath + texStr;
+
+
+		if (texStr != "")
+			sMaterial->opacityMaskTexture = ResourceManager::getInstance().loadTexture(texturePath);
+	}
+
     // reflection texture - global lub local, 1 dla czesci zewnetrznej, 2 dla czesci wewnetrznej szyby
     const char* reflectionTexture1 = materialElement->Attribute("reflection_texture_1");
     if (reflectionTexture1 != NULL)
@@ -304,7 +321,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 	{
 		if (sMaterial->diffuseTexture == NULL)
 		{
-			sMaterial->diffuseTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1, 1, 1, 1));
+			sMaterial->diffuseTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(sMaterial->diffuseColor.r, sMaterial->diffuseColor.g, sMaterial->diffuseColor.b, 1));
 		}
 		if (sMaterial->normalmapTexture == NULL)
 		{
@@ -317,6 +334,10 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 		if (sMaterial->roughnessTexture == NULL)
 		{
 			sMaterial->roughnessTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(sMaterial->roughnessValue, sMaterial->roughnessValue, sMaterial->roughnessValue, 1));
+		}
+		if (sMaterial->opacityMaskTexture == NULL)
+		{
+			sMaterial->opacityMaskTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(1, 1, 1, 1));
 		}
 		if (sMaterial->aoTexture == NULL)
 		{

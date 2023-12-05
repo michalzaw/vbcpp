@@ -2196,6 +2196,8 @@ void Renderer::renderScene(RenderData* renderData)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ROUGHNESS_TEXTURE], material->roughnessTexture);
 		if (material->aoTexture != NULL)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_AO_TEXTURE], material->aoTexture);
+        if (material->opacityMaskTexture != NULL)
+            shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_ALPHA_TEXTURE], material->opacityMaskTexture);
 		if (material->emissiveTexture != NULL)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
