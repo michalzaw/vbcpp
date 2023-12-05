@@ -22,6 +22,7 @@ Renderer::Renderer()
     _screenWidth(0), _screenHeight(0),
     _alphaToCoverage(true), _exposure(0.05f), _toneMappingType(TMT_CLASSIC), _sceneVisibility(1.0f),
 	_framebufferTextureFormat(TF_RGBA_16F), _msaaAntialiasing(false), _msaaAntialiasingLevel(8),
+    _fxaa(false),
     _bloom(false),
     _renderObjectIdsForPicking(false),
 	_isShadowMappingEnable(false), _shadowMap(NULL), _shadowCameraFrustumDiagonalIsCalculated(false),
@@ -156,6 +157,14 @@ PostProcessingBloom* Renderer::createBloomPostProcessing()
 }
 
 
+PostProcessingEffect* Renderer::createFxaaPostPorcessing()
+{
+    RShader* shader = ResourceManager::getInstance().loadShader("Shaders/quad.vert", "Shaders/postProcessingFxaa.frag");
+
+    return new PostProcessingEffect(PPT_FXAA, _quadVBO, shader);
+}
+
+
 void Renderer::createFramebuffersForPostProcessing()
 {
 	for (int i = 0; i < 2; ++i)
@@ -194,6 +203,13 @@ void Renderer::initPostProcessingEffectsStack()
 	PostProcessingToneMapping* postProcessingToneMapping = new PostProcessingToneMapping(_quadVBO, _toneMappingType);
 	postProcessingToneMapping->setExposure(_exposure);
 	addPostProcessingEffect(postProcessingToneMapping);
+
+    // fxaa
+    if (_fxaa)
+    {
+        PostProcessingEffect* postProcessingFxaa = createFxaaPostPorcessing();
+        addPostProcessingEffect(postProcessingFxaa);
+    }
 }
 
 
@@ -1412,6 +1428,31 @@ void Renderer::setMsaaAntialiasingLevel(int level)
 int Renderer::getMsaaAntialiasingLevel()
 {
     return _msaaAntialiasingLevel;
+}
+
+
+void Renderer::setFxaa(bool isEnable)
+{
+    if (_isInitialized)
+    {
+        if (isEnable && findEffect(PPT_FXAA) == NULL)
+        {
+            PostProcessingEffect* postProcessingFxaa = createFxaaPostPorcessing();
+            addPostProcessingEffect(postProcessingFxaa);
+        }
+        else if (!isEnable)
+        {
+            removePostProcessingEffect(PPT_FXAA);
+        }
+    }
+
+    _fxaa = isEnable;
+}
+
+
+bool Renderer::isFxaaEnabled()
+{
+    return _fxaa;
 }
 
 

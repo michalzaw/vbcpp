@@ -1458,6 +1458,10 @@ namespace vbEditor
 				{
 					Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 				}
+				if (ImGui::MenuItem("Fxaa", NULL, Renderer::getInstance().isFxaaEnabled()))
+				{
+					Renderer::getInstance().setFxaa(!Renderer::getInstance().isFxaaEnabled());
+				}
 
 				ImGui::Separator();
 

@@ -130,6 +130,8 @@ class Renderer
         bool _msaaAntialiasing;
         int _msaaAntialiasingLevel;
 
+		bool _fxaa;
+
         bool _bloom;
 
 		bool _renderObjectIdsForPicking;
@@ -185,6 +187,7 @@ class Renderer
 		void removePostProcessingEffect(PostProcessingType type);
 
 		PostProcessingBloom* createBloomPostProcessing();
+		PostProcessingEffect* createFxaaPostPorcessing();
 
 		void createFramebuffersForPostProcessing();
 		void initPostProcessingEffectsStack();
@@ -253,6 +256,8 @@ class Renderer
         bool isMsaaAntialiasingEnable();
         void setMsaaAntialiasingLevel(int level);
         int getMsaaAntialiasingLevel();
+		void setFxaa(bool isEnable);
+		bool isFxaaEnabled();
         void setBloom(bool isEnable);
         bool isBloomEnable();
 		void setRenderObjectIdsForPicking(bool isEnabled);
