@@ -16,6 +16,9 @@
 		<HdrQuality>16</HdrQuality>
 		<MsaaAntialiasing>true</MsaaAntialiasing>
 		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
+
+		<Fxaa>true</Fxaa>
+		<FxaaQuality>17</FxaaQuality>
 		
 		<Bloom>true</Bloom>
 		

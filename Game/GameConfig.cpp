@@ -62,6 +62,14 @@ void GameConfig::loadGameConfig(const char* filename)
                 {
                     msaaAntialiasingLevel = toInt(configElement->GetText());
                 }
+                else if (strcmp(ename, "Fxaa") == 0)
+                {
+                    isFxaaEnabled = toBool(configElement->GetText());
+                }
+                else if (strcmp(ename, "FxaaQuality") == 0)
+                {
+                    fxaaQuality = toInt(configElement->GetText());
+                }
                 else if (strcmp(ename,"Shadowmapping") == 0)
                 {
                     isShadowmappingEnable = toBool(configElement->GetText());

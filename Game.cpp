@@ -63,6 +63,8 @@ void Game::initializeEngineSystems()
 	renderer.setFramebufferTextureFormat(gameConfig.hdrQuality == 32 ? TF_RGBA_32F : TF_RGBA_16F);
 	renderer.setMsaaAntialiasing(gameConfig.msaaAntialiasing);
 	renderer.setMsaaAntialiasingLevel(gameConfig.msaaAntialiasingLevel);
+	renderer.setFxaa(gameConfig.isFxaaEnabled);
+	renderer.setFxaaQuality(gameConfig.fxaaQuality);
 	renderer.setBloom(gameConfig.isBloomEnabled);
 	renderer.setIsShadowMappingEnable(gameConfig.isShadowmappingEnable);
 	renderer.init(_window->getWidth(), _window->getHeight());

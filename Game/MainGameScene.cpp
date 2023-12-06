@@ -751,6 +751,10 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		{
 			Renderer::getInstance().setAlphaToCoverage(!(Renderer::getInstance().isAlphaToCoverageEnable()));
 		}
+		if (input.isKeyPressed(GLFW_KEY_9) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			Renderer::getInstance().setFxaa(!Renderer::getInstance().isFxaaEnabled());
+		}
 		if (input.isKeyPressed(GLFW_KEY_8) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
 		{
 			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
