@@ -24,7 +24,7 @@ class Material
 {
     public:
         Material()
-        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL), emissiveTexture(NULL),
+        : diffuseTexture(NULL), normalmapTexture(NULL), glassTexture(NULL), metalicTexture(NULL), roughnessTexture(NULL), aoTexture(NULL), opacityMaskTexture(NULL), emissiveTexture(NULL),
 		reflectionTexture1(EMT_GLOBAL), reflectionTexture2(EMT_GLOBAL),
         shininess(0), transparency(0), shader(SOLID_MATERIAL), emissiveColor(0, 0, 0, 0), fixDisappearanceAlpha(0.0),
 		metalnessValue(0.0f), roughnessValue(0.9f), requireSeparateInstance(false){}
@@ -45,6 +45,7 @@ class Material
 	RTexture* metalicTexture;
 	RTexture* roughnessTexture;
 	RTexture* aoTexture;
+    RTexture* opacityMaskTexture;
 	RTexture* emissiveTexture;
 
     EnvironmentMapType reflectionTexture1;

@@ -126,7 +126,7 @@ void saveMaterial(XMLElement* materialsElement, XMLDocument& doc, Material* mate
 	std::string scaleStr = toString(material->scale.x) + "," + toString(material->scale.y);
 	matElement->SetAttribute("scale", scaleStr.c_str());
 
-	if (material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == GRASS_MATERIAL)
+	if (material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL || material->shader == GRASS_MATERIAL)
 	{
 		std::string fixDisappearanceAlphaStr = toString(material->fixDisappearanceAlpha);
 		matElement->SetAttribute("fixDisappearanceAlpha", fixDisappearanceAlphaStr.c_str());

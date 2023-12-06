@@ -22,6 +22,7 @@ layout (location = 0) out vec3 Color;
 #ifdef RENDER_OBJECT_ID
 layout (location = 2) out uvec4 ObjectIdValue;
 #endif
+uniform sampler2D AlphaTexture;
 
 
 // Lights
@@ -157,6 +158,8 @@ void main()
 	float ao = texture(AoTexture, TexCoord).r;//1.0f;
 	
 	if (texture(AlbedoTexture, TexCoord).a < 0.5)
+		discard;
+	if (texture2D(AlphaTexture, TexCoord).r < 0.1f)
 		discard;
 	
 	vec3 f0 = vec3(0.04f);
