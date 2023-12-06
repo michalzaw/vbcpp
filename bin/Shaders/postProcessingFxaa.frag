@@ -32,28 +32,93 @@ float FxaaLuma(vec4 rgba)
 //#endif
 }
 
+// FXAA QUALITY - MEDIUM DITHER PRESETS
+#ifdef QUALITY__PRESET_1
+const int FXAA_QUALITY_PS = 3;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.5, 3.0, 12.0 );
+#endif
 
-//const float FXAA_QUALITY_PS = 3;
-//const float FXAA_QUALITY_P0 = 1.5;
-//const float FXAA_QUALITY_P1 = 2.0;
-//const float FXAA_QUALITY_P2 = 8.0;
+#ifdef QUALITY__PRESET_2
+const int FXAA_QUALITY_PS = 4;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 3.0, 12.0 );
+#endif
 
-const float FXAA_QUALITY_PS = 12;
+#ifdef QUALITY__PRESET_3
+const int FXAA_QUALITY_PS = 5;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 4.0, 12.0 );
+#endif
 
-const float FXAA_QUALITY[12] = float[12](
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.0,
-    1.5,
-    2.0,
-    2.0,
-    2.0,
-    2.0,
-    4.0,
-    8.0
-);
+#ifdef QUALITY__PRESET_4
+const int FXAA_QUALITY_PS = 6;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 4.0, 12.0 );
+#endif
+
+#ifdef QUALITY__PRESET_5
+const int FXAA_QUALITY_PS = 7;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 4.0, 12.0 );
+#endif
+
+#ifdef QUALITY__PRESET_6
+const int FXAA_QUALITY_PS = 8;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 12.0 );
+#endif
+
+// FXAA QUALITY - LOW DITHER PRESETS
+#ifdef QUALITY__PRESET_7
+const int FXAA_QUALITY_PS = 3;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.5, 2.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_8
+const int FXAA_QUALITY_PS = 4;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_9
+const int FXAA_QUALITY_PS = 5;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_10
+const int FXAA_QUALITY_PS = 6;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_11
+const int FXAA_QUALITY_PS = 7;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 3.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_12
+const int FXAA_QUALITY_PS = 8;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_13
+const int FXAA_QUALITY_PS = 9;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_14
+const int FXAA_QUALITY_PS = 10;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_15
+const int FXAA_QUALITY_PS = 11;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
+
+#ifdef QUALITY__PRESET_16
+const int FXAA_QUALITY_PS = 12;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
+
+// FXAA QUALITY - EXTREME QUALITY
+#ifdef QUALITY__PRESET_17
+const int FXAA_QUALITY_PS = 12;
+const float FXAA_QUALITY[FXAA_QUALITY_PS] = float[FXAA_QUALITY_PS]( 1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0 );
+#endif
 
 
 // FXAA3 QUALITY - PC
@@ -75,53 +140,11 @@ vec4 FxaaPixelShader(
     //     {___a} = luma in perceptual color space (not linear)
     sampler2D tex,
     //
-    // Only used on the optimized 360 version of FXAA Console.
-    // For everything but 360, just use the same input here as for "tex".
-    // For 360, same texture, just alias with a 2nd sampler.
-    // This sampler needs to have an exponent bias of -1.
-    //sampler2D fxaaConsole360TexExpBiasNegOne,
-    //
-    // Only used on the optimized 360 version of FXAA Console.
-    // For everything but 360, just use the same input here as for "tex".
-    // For 360, same texture, just alias with a 3nd sampler.
-    // This sampler needs to have an exponent bias of -2.
-    //sampler2D fxaaConsole360TexExpBiasNegTwo,
-    //
     // Only used on FXAA Quality.
     // This must be from a constant/uniform.
     // {x_} = 1.0/screenWidthInPixels
     // {_y} = 1.0/screenHeightInPixels
     vec2 fxaaQualityRcpFrame,
-    //
-    // Only used on FXAA Console.
-    // This must be from a constant/uniform.
-    // This effects sub-pixel AA quality and inversely sharpness.
-    //   Where N ranges between,
-    //     N = 0.50 (default)
-    //     N = 0.33 (sharper)
-    // {x___} = -N/screenWidthInPixels  
-    // {_y__} = -N/screenHeightInPixels
-    // {__z_} =  N/screenWidthInPixels  
-    // {___w} =  N/screenHeightInPixels 
-    //vec4 fxaaConsoleRcpFrameOpt,
-    //
-    // Only used on FXAA Console.
-    // Not used on 360, but used on PS3 and PC.
-    // This must be from a constant/uniform.
-    // {x___} = -2.0/screenWidthInPixels  
-    // {_y__} = -2.0/screenHeightInPixels
-    // {__z_} =  2.0/screenWidthInPixels  
-    // {___w} =  2.0/screenHeightInPixels 
-    //vec4 fxaaConsoleRcpFrameOpt2,
-    //
-    // Only used on FXAA Console.
-    // Only used on 360 in place of fxaaConsoleRcpFrameOpt2.
-    // This must be from a constant/uniform.
-    // {x___} =  8.0/screenWidthInPixels  
-    // {_y__} =  8.0/screenHeightInPixels
-    // {__z_} = -4.0/screenWidthInPixels  
-    // {___w} = -4.0/screenHeightInPixels 
-    //vec4 fxaaConsole360RcpFrameOpt2,
     //
     // Only used on FXAA Quality.
     // This used to be the FXAA_QUALITY__SUBPIX define.
@@ -160,60 +183,6 @@ vec4 FxaaPixelShader(
     //   Tune by looking at mostly non-green content,
     //   then start at zero and increase until aliasing is a problem.
     float fxaaQualityEdgeThresholdMin
-    // 
-    // Only used on FXAA Console.
-    // This used to be the FXAA_CONSOLE__EDGE_SHARPNESS define.
-    // It is here now to allow easier tuning.
-    // This does not effect PS3, as this needs to be compiled in.
-    //   Use FXAA_CONSOLE__PS3_EDGE_SHARPNESS for PS3.
-    //   Due to the PS3 being ALU bound,
-    //   there are only three safe values here: 2 and 4 and 8.
-    //   These options use the shaders ability to a free *|/ by 2|4|8.
-    // For all other platforms can be a non-power of two.
-    //   8.0 is sharper (default!!!)
-    //   4.0 is softer
-    //   2.0 is really soft (good only for vector graphics inputs)
-    //float fxaaConsoleEdgeSharpness,
-    //
-    // Only used on FXAA Console.
-    // This used to be the FXAA_CONSOLE__EDGE_THRESHOLD define.
-    // It is here now to allow easier tuning.
-    // This does not effect PS3, as this needs to be compiled in.
-    //   Use FXAA_CONSOLE__PS3_EDGE_THRESHOLD for PS3.
-    //   Due to the PS3 being ALU bound,
-    //   there are only two safe values here: 1/4 and 1/8.
-    //   These options use the shaders ability to a free *|/ by 2|4|8.
-    // The console setting has a different mapping than the quality setting.
-    // Other platforms can use other values.
-    //   0.125 leaves less aliasing, but is softer (default!!!)
-    //   0.25 leaves more aliasing, and is sharper
-    //float fxaaConsoleEdgeThreshold,
-    //
-    // Only used on FXAA Console.
-    // This used to be the FXAA_CONSOLE__EDGE_THRESHOLD_MIN define.
-    // It is here now to allow easier tuning.
-    // Trims the algorithm from processing darks.
-    // The console setting has a different mapping than the quality setting.
-    // This only applies when FXAA_EARLY_EXIT is 1.
-    // This does not apply to PS3, 
-    // PS3 was simplified to avoid more shader instructions.
-    //   0.06 - faster but more aliasing in darks
-    //   0.05 - default
-    //   0.04 - slower and less aliasing in darks
-    // Special notes when using FXAA_GREEN_AS_LUMA,
-    //   Likely want to set this to zero.
-    //   As colors that are mostly not-green
-    //   will appear very dark in the green channel!
-    //   Tune by looking at mostly non-green content,
-    //   then start at zero and increase until aliasing is a problem.
-    //float fxaaConsoleEdgeThresholdMin,
-    //    
-    // Extra constants for 360 FXAA Console only.
-    // Use zeros or anything else for other platforms.
-    // These must be in physical constant registers and NOT immedates.
-    // Immedates will result in compiler un-optimizing.
-    // {xyzw} = float4(1.0, -1.0, 0.25, -0.25)
-    //float fxaaConsole360ConstDir
 )
 {
 	vec2 posM;
@@ -336,25 +305,21 @@ vec4 FxaaPixelShader(
 /*--------------------------------------------------------------------------*/
     for (int i = 2; i < FXAA_QUALITY_PS; ++i)
     {
-    if (doneNP)
-	{
-        if (!doneN) lumaEndN = FxaaLuma(FxaaTexTop(tex, posN.xy));
-        if (!doneP) lumaEndP = FxaaLuma(FxaaTexTop(tex, posP.xy));
-        if (!doneN) lumaEndN = lumaEndN - lumaNN * 0.5;
-        if (!doneP) lumaEndP = lumaEndP - lumaNN * 0.5;
-        doneN = abs(lumaEndN) >= gradientScaled;
-        doneP = abs(lumaEndP) >= gradientScaled;
-        if (!doneN) posN.x -= offNP.x * FXAA_QUALITY[i];
-        if (!doneN) posN.y -= offNP.y * FXAA_QUALITY[i];
-        doneNP = (!doneN) || (!doneP);
-        if (!doneP) posP.x += offNP.x * FXAA_QUALITY[i];
-        if (!doneP) posP.y += offNP.y * FXAA_QUALITY[i];
-	}
+        if (doneNP)
+        {
+            if (!doneN) lumaEndN = FxaaLuma(FxaaTexTop(tex, posN.xy));
+            if (!doneP) lumaEndP = FxaaLuma(FxaaTexTop(tex, posP.xy));
+            if (!doneN) lumaEndN = lumaEndN - lumaNN * 0.5;
+            if (!doneP) lumaEndP = lumaEndP - lumaNN * 0.5;
+            doneN = abs(lumaEndN) >= gradientScaled;
+            doneP = abs(lumaEndP) >= gradientScaled;
+            if (!doneN) posN.x -= offNP.x * FXAA_QUALITY[i];
+            if (!doneN) posN.y -= offNP.y * FXAA_QUALITY[i];
+            doneNP = (!doneN) || (!doneP);
+            if (!doneP) posP.x += offNP.x * FXAA_QUALITY[i];
+            if (!doneP) posP.y += offNP.y * FXAA_QUALITY[i];
+        }
     }
-/*--------------------------------------------------------------------------*/
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// tu kolejne poziomy quality
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 /*--------------------------------------------------------------------------*/
     float dstN = posM.x - posN.x;
     float dstP = posP.x - posM.x;
@@ -381,13 +346,13 @@ vec4 FxaaPixelShader(
 	return vec4(FxaaTexTop(tex, posM).xyz, lumaM);
 }
 
-// FXAA_GATHER4_ALPHA = 0
-// FXAA_GREEN_AS_LUMA = 1
-
 void main()
 {
 	//vec3 Color1 = texture2D(texture1, texCoord).rgb;
 
-	Color.rgb = FxaaPixelShader(texCoord, texture1, vec2(1.0 / 1920.0, 1.0 / 1280), 1.0, 0.333, 0.0833).rgb;
+    vec2 size = textureSize(texture1, 0);
+    vec2 sizeInv = vec2(1.0 / size.x, 1.0 / size.y);
+
+	Color.rgb = FxaaPixelShader(texCoord, texture1, sizeInv, 1.0, 0.333, 0.0833).rgb;
 	Color.a = 1.0f;
 }

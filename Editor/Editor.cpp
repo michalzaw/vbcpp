@@ -1462,6 +1462,18 @@ namespace vbEditor
 				{
 					Renderer::getInstance().setFxaa(!Renderer::getInstance().isFxaaEnabled());
 				}
+				if (ImGui::BeginMenu("Fxaa quality"))
+				{
+					int fxaaQuality = Renderer::getInstance().getFxaaQuality();
+					for (int i = 1; i <= 17; ++i)
+					{
+						if (ImGui::MenuItem(Strings::toString(i).c_str(), NULL, i == fxaaQuality))
+						{
+							Renderer::getInstance().setFxaaQuality(i);
+						}
+					}
+					ImGui::EndMenu();
+				}
 
 				ImGui::Separator();
 

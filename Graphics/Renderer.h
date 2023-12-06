@@ -131,6 +131,7 @@ class Renderer
         int _msaaAntialiasingLevel;
 
 		bool _fxaa;
+		int _fxaaQuality;
 
         bool _bloom;
 
@@ -258,6 +259,8 @@ class Renderer
         int getMsaaAntialiasingLevel();
 		void setFxaa(bool isEnable);
 		bool isFxaaEnabled();
+		void setFxaaQuality(int quality);
+		int getFxaaQuality();
         void setBloom(bool isEnable);
         bool isBloomEnable();
 		void setRenderObjectIdsForPicking(bool isEnabled);

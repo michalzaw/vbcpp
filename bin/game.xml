@@ -18,6 +18,7 @@
 		<MsaaAntialiasingLevel>4</MsaaAntialiasingLevel>
 
 		<Fxaa>true</Fxaa>
+		<FxaaQuality>17</FxaaQuality>
 		
 		<Bloom>true</Bloom>
 		
