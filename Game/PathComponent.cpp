@@ -47,6 +47,40 @@ PathComponent::PathComponent(PathDirection direction)
 }
 
 
+PathComponent::~PathComponent()
+{
+	for (const ConnectedPath& connectedPath : _nextPaths)
+	{
+		if (connectedPath.path != this)
+		{
+			for (auto i = connectedPath.path->_previousPaths.begin(); i != connectedPath.path->_previousPaths.end(); ++i)
+			{
+				if (i->path == this)
+				{
+					connectedPath.path->_previousPaths.erase(i);
+					break;
+				}
+			}
+		}
+	}
+
+	for (const ConnectedPath& connectedPath : _previousPaths)
+	{
+		if (connectedPath.path != this)
+		{
+			for (auto i = connectedPath.path->_nextPaths.begin(); i != connectedPath.path->_nextPaths.end(); ++i)
+			{
+				if (i->path == this)
+				{
+					connectedPath.path->_nextPaths.erase(i);
+					break;
+				}
+			}
+		}
+	}
+}
+
+
 void PathComponent::onAttachedToScenObject()
 {
 	_bezierCurveComponent = dynamic_cast<BezierCurve*>(getSceneObject()->getComponent(CT_BEZIER_CURVE));

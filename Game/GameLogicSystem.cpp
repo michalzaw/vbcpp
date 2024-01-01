@@ -63,9 +63,9 @@ AIAgent* GameLogicSystem::addAIAgent()
 }
 
 
-AIAgent* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
+AIAgentPhysicalVechicle* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
 {
-	AIAgent* component = new AIAgentPhysicalVechicle(vechicle);
+	AIAgentPhysicalVechicle* component = new AIAgentPhysicalVechicle(vechicle);
 
 	_aiAgents.push_back(component);
 
@@ -244,7 +244,10 @@ void GameLogicSystem::update(float deltaTime)
 
 	for (AIAgent* component : _aiAgents)
 	{
-		component->update(deltaTime);
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
 	}
 
 	/*for (BusStopComponent* component : _busStops)

@@ -15,6 +15,7 @@ class BusStopComponent;
 class CameraFPS;
 class Bus;
 class AIAgent;
+class AIAgentPhysicalVechicle;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
 
@@ -50,7 +51,7 @@ class GameLogicSystem final
 		CameraControlComponent* addCameraControlComponent(CameraFPS* camera);
 		PathComponent* addPathComponent(PathDirection direction);
 		AIAgent* addAIAgent();
-		AIAgent* addAIAgent(PhysicalBodyRaycastVehicle* vechicle);
+		AIAgentPhysicalVechicle* addAIAgent(PhysicalBodyRaycastVehicle* vechicle);
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 

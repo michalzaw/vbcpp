@@ -167,7 +167,7 @@ void AIAgent::update(float deltaTime)
 		move(point1, point2);
 	}
 
-	if (_currentPath != nullptr)
+	if (_currentPath != nullptr && _currentPath->getCurvePoints().size() > _currentPointIndex + 1)
 	{
 		const auto& point1 = _currentPath->getCurvePoints()[_currentPointIndex];
 		const auto& point2 = _currentPath->getCurvePoints()[_currentPointIndex + 1];

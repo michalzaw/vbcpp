@@ -18,6 +18,8 @@ class AIAgentPhysicalVechicle final : public AIAgent
 	public:
 		AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle);
 
+		void moveToStartPoint();
+
 		void update(float deltaTime) override;
 };
 

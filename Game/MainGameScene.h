@@ -7,6 +7,7 @@
 
 class Hud;
 class MirrorImage;
+class AIAgent;
 
 
 enum GameState
@@ -29,6 +30,8 @@ class MainGameScene final : public GameScene
 		Bus* _activeBus;
 		std::vector<CameraFPS*> _cameras;
 		CameraFPS* _activeCamera;
+
+		AIAgent* _aiAgent;
 
 		Hud* _hud;
 		std::vector<MirrorImage*> _mirrorsImages;

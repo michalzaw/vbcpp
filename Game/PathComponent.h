@@ -49,6 +49,7 @@ class PathComponent final : public Component
 
 	public:
 		PathComponent(PathDirection direction);
+		~PathComponent();
 
 		inline PathDirection getDirection() { return _direction; }
 		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
