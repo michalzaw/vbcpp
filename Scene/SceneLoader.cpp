@@ -3,6 +3,7 @@
 #include "SceneManager.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/AIAgentVehicle.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
@@ -392,6 +393,22 @@ void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject
 }
 
 
+void SceneLoader::loadAIAgentVehicleComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgentVehicle* component = static_cast<AIAgentVehicle*>(sceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
+}
+
+
 void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
 	std::string name = XmlUtils::getAttributeString(componentElement, "name");
@@ -472,6 +489,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgent")
 			{
 				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiAgentVehicle")
+			{
+				loadAIAgentVehicleComponent(componentElement, sceneObject);
 			}
 
 			if (componentType == "busStartPoint")

@@ -17,6 +17,7 @@
 #include "../Utils/AIPathGenerator.h"
 
 #include "../../Game/AIAgent.h"
+#include "../../Game/AIAgentVehicle.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
 #include "../../Game/PathComponent.h"
@@ -1082,6 +1083,63 @@ void showAiAgentComponentDetails(AIAgent* component)
 }
 
 
+void showAiAgentVehicleComponentDetails(AIAgentVehicle* component)
+{
+	if (ImGui::CollapsingHeader("AI agent Vehicle", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("AIAgentVehicleComponentDetails");
+
+		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
+		std::vector<std::string> availablePaths;
+		availablePaths.reserve(pathComponents.size());
+
+		for (auto pathComponent : pathComponents)
+		{
+			availablePaths.push_back(pathComponent->getSceneObject()->getName());
+		}
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
+		{
+			const std::vector<std::string>& itemsNames = availablePaths;
+			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+
+			bool result = false;
+			std::string value = "";
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				result = true;
+				if (selectedItemIndex > 0)
+					value = itemsNames[selectedItemIndex - 1];
+			}
+
+			if (result)
+			{
+				if (selectedItemIndex > 0)
+				{
+					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				}
+				else
+				{
+					component->setCurrentPath(nullptr);
+				}
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showBezierCurveComponentDetails(BezierCurve* component)
 {
 	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1322,6 +1380,12 @@ void showObjectProperties()
 			if (aiAgent)
 			{
 				showAiAgentComponentDetails(aiAgent);
+			}
+
+			AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(vbEditor::_selectedSceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+			if (aiAgentVehicle)
+			{
+				showAiAgentVehicleComponentDetails(aiAgentVehicle);
 			}
 
 			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));

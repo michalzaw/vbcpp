@@ -15,6 +15,7 @@ using namespace tinyxml2;
 
 #include "../Game/AIAgent.h"
 #include "../Game/AIAgentPhysicalVechicle.h"
+#include "../Game/AIAgentVehicle.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 
@@ -590,7 +591,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		}
 		else if (componentType == "aiAgentVehicle")
 		{
-			AIAgentPhysicalVechicle* aiAgent = sceneManager->getGameLogicSystem()->addAIAgentPhysicalVechicle();
+			AIAgentVehicle* aiAgent = sceneManager->getGameLogicSystem()->addAIAgentVehicle();
 
 			sceneObject->addComponent(aiAgent);
 		}

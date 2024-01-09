@@ -16,6 +16,7 @@ class CameraFPS;
 class Bus;
 class AIAgent;
 class AIAgentPhysicalVechicle;
+class AIAgentVehicle;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
 
@@ -37,6 +38,7 @@ class GameLogicSystem final
 		std::vector<CameraControlComponent*> _cameraControlComponents;
 		std::vector<PathComponent*> _pathComponents;
 		std::vector<AIAgent*> _aiAgents;
+		std::vector<AIAgentVehicle*> _aiAgentVehicles;
 		std::vector<BusStartPoint*> _busStartPoints; // todo: dodawac defaultowy Start point po wczytaniu sceny jesli vector jest pusty
 		// todo: Przeniesc obsluge przystankow do tego systemu
 		//std::vector<BusStopComponent*> _busStops;
@@ -52,6 +54,7 @@ class GameLogicSystem final
 		PathComponent* addPathComponent(PathDirection direction);
 		AIAgent* addAIAgent();
 		AIAgentPhysicalVechicle* addAIAgentPhysicalVechicle();
+		AIAgentVehicle* addAIAgentVehicle();
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 
@@ -59,6 +62,7 @@ class GameLogicSystem final
 		void removeCameraControlComponent(CameraControlComponent* component);
 		void removePathComponent(PathComponent* component);
 		void removeAIAgent(AIAgent* component);
+		void removeAIAgentVehicle(AIAgentVehicle* component);
 		void removeBusStartPoint(BusStartPoint* component);
 		//void removeBusStop(BusStopComponent* busStop);
 

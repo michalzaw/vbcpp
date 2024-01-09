@@ -6,6 +6,7 @@
 #include "SceneLoader.h"
 
 #include "../Game/AIAgent.h"
+#include "../Game/AIAgentVehicle.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/PathComponent.h"
@@ -232,6 +233,26 @@ void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& do
 }
 
 
+void SceneSaver::saveAIAgentVehicleComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgentVehicle* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgentVehicle");
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
+}
+
+
 void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
 {
 	XMLElement* componentElement = doc.NewElement("Component");
@@ -295,6 +316,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentComponent)
 	{
 		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
+	AIAgentVehicle* aiAgentVehicleComponent = static_cast<AIAgentVehicle*>(sceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+	if (aiAgentVehicleComponent)
+	{
+		saveAIAgentVehicleComponent(objectElement, doc, aiAgentVehicleComponent);
 	}
 
 	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));
