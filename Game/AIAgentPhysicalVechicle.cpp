@@ -10,10 +10,20 @@
 #include "../Utils/QuaternionUtils.h"
 
 
-AIAgentPhysicalVechicle::AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle)
-	: _vechicle(vechicle)
+AIAgentPhysicalVechicle::AIAgentPhysicalVechicle()
+	: _vechicle(nullptr)
 {
-	//_isInitializedStartPosition = true;
+	_isInitializedStartPosition = true;
+}
+
+
+void AIAgentPhysicalVechicle::onAttachedToScenObject()
+{
+	_vechicle = dynamic_cast<PhysicalBodyRaycastVehicle*>(getSceneObject()->getComponent(CT_PHYSICAL_BODY));
+	if (_vechicle != nullptr)
+	{
+
+	}
 }
 
 
@@ -34,6 +44,11 @@ void AIAgentPhysicalVechicle::moveToStartPoint()
 
 void AIAgentPhysicalVechicle::update(float deltaTime)
 {
+	if (_currentPath == nullptr)
+	{
+		return;
+	}
+
 	const btTransform& wheel1Transform = _vechicle->getRayCastVehicle()->getWheelTransformWS(0);
 	const btTransform& wheel2Transform = _vechicle->getRayCastVehicle()->getWheelTransformWS(1);
 	float radius1 = _vechicle->getRayCastVehicle()->getWheelInfo(0).m_wheelsRadius;

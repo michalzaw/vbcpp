@@ -51,7 +51,7 @@ class GameLogicSystem final
 		CameraControlComponent* addCameraControlComponent(CameraFPS* camera);
 		PathComponent* addPathComponent(PathDirection direction);
 		AIAgent* addAIAgent();
-		AIAgentPhysicalVechicle* addAIAgent(PhysicalBodyRaycastVehicle* vechicle);
+		AIAgentPhysicalVechicle* addAIAgentPhysicalVechicle();
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 

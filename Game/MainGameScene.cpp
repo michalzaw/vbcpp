@@ -254,7 +254,7 @@ void MainGameScene::loadScene()
 	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	for (int i = 0; i < 10; ++i)
+	/*for (int i = 0; i < 10; ++i)
 	{
 		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
 		Bus* bus2 = busLoader.loadBus("CivilianVehicle", busVariables);
@@ -262,7 +262,7 @@ void MainGameScene::loadScene()
 
 		//bus2->getSceneObject()->setPosition(glm::vec3((i + 2) * 5.0f, 1.0f, 0.0f));
 		bus2->getSceneObject()->setPosition(glm::vec3(0.8f, 1.0f, 6.8f));
-	}
+	}*/
 
 	_activeBus = bus;
 
@@ -281,7 +281,7 @@ void MainGameScene::loadScene()
 	_cameras[GC_DRIVER]->getSceneObject()->setRotation(0, 0, 0);
 
 	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
-	_buses[1]->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
+	//_buses[1]->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
 	//_buses[1]->getSceneObject()->addChild(_cameras[GC_DRIVER]->getSceneObject());
 
 	/*CameraStatic* camera = _graphicsManager->getCurrentCamera();
@@ -309,15 +309,17 @@ void MainGameScene::loadScene()
 
 	for (int i = 1; i < 11; ++i)
 	{
+		/*
 		//SceneObject* agentObject = _sceneManager->addSceneObject("agent1");
 		SceneObject* agentObject = _buses[i]->getSceneObject();
 		//_buses[1]->getSceneObject()->move(20.0f, 0.0f, 0.0f);
 
-		AIAgentPhysicalVechicle* aiAgent = _sceneManager->getGameLogicSystem()->addAIAgent(((BusRaycast*)_buses[i])->getModule(0).rayCastVehicle);
+		AIAgentPhysicalVechicle* aiAgent = _sceneManager->getGameLogicSystem()->addAIAgentPhysicalVechicle();
 		aiAgent->setCurrentPath(path);
 		agentObject->addComponent(aiAgent);
 		aiAgent->moveToStartPoint();
 		_aiAgent = aiAgent;
+		*/
 
 		/*const glm::vec3 firstPointPosition = path->getCurvePoints()[_aiAgent->_currentPointIndex];
 		//_aiAgent->setIsActive(false);
@@ -346,7 +348,7 @@ void MainGameScene::loadScene()
 	//agentObject->addChild(_cameras[GC_DRIVER]->getSceneObject());
 	//_cameras[GC_DRIVER]->getSceneObject()->move(0.0f, 1.0f, 0.0f);
 
-	GameEnvironment::Variables::floatVaribles["agentSpeed"] = _aiAgent->getSpeed();
+	//GameEnvironment::Variables::floatVaribles["agentSpeed"] = _aiAgent->getSpeed();
 
 	//RStaticModel* model = ResourceManager::getInstance().loadModel("Buses/neoplan/neoplan.fbx", "Buses/neoplan/");
 	//_sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(model), agentObject);
@@ -504,7 +506,7 @@ void MainGameScene::initialize()
 
 void MainGameScene::fixedStepUpdate(double deltaTime)
 {
-	_aiAgent->setSpeed(GameEnvironment::Variables::floatVaribles["agentSpeed"]);
+	//_aiAgent->setSpeed(GameEnvironment::Variables::floatVaribles["agentSpeed"]);
 
 	_activeBus->update(deltaTime);
 

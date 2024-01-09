@@ -63,9 +63,9 @@ AIAgent* GameLogicSystem::addAIAgent()
 }
 
 
-AIAgentPhysicalVechicle* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
+AIAgentPhysicalVechicle* GameLogicSystem::addAIAgentPhysicalVechicle()
 {
-	AIAgentPhysicalVechicle* component = new AIAgentPhysicalVechicle(vechicle);
+	AIAgentPhysicalVechicle* component = new AIAgentPhysicalVechicle();
 
 	_aiAgents.push_back(component);
 

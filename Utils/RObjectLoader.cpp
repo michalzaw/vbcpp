@@ -1,4 +1,4 @@
-#include "RObjectLoader.h"
+﻿#include "RObjectLoader.h"
 
 #include <sstream>
 #include <cstdlib>
@@ -11,7 +11,10 @@
 #include "tinyxml2.h"
 using namespace tinyxml2;
 
+#include "../Bus/BusLoader.h"
+
 #include "../Game/AIAgent.h"
+#include "../Game/AIAgentPhysicalVechicle.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 
@@ -73,9 +76,17 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		{
 			loadSkeletalAnimation(componentElement, object, componentIndex);
 		}
+		else if (componentType == "vehicle")
+		{
+			loadVehicle(componentElement, object, componentIndex);
+		}
 		else if (componentType == "aiAgent")
 		{
 			loadAiAgent(componentElement, object, componentIndex);
+		}
+		else if (componentType == "aiAgentVehicle")
+		{
+			loadAiAgentVehicle(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -192,9 +203,48 @@ void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement
 }
 
 
+void RObjectLoader::loadVehicle(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	int index = 0;
+
+	object->getComponents()[componentIndex]["mass"] = XmlUtils::getAttributeStringOptional(componentElement, "mass");
+
+	XMLElement* wheelPointElement = componentElement->FirstChildElement("Wheel");
+	while (wheelPointElement != nullptr)
+	{
+		object->getComponents()[componentIndex]["wheel_name#" + toString(index)] = wheelPointElement->Attribute("name");
+		object->getComponents()[componentIndex]["wheel_side#" + toString(index)] = wheelPointElement->Attribute("side");
+		object->getComponents()[componentIndex]["wheel_steering#" + toString(index)] = wheelPointElement->Attribute("steering");
+		object->getComponents()[componentIndex]["wheel_powered#" + toString(index)] = wheelPointElement->Attribute("powered");
+		object->getComponents()[componentIndex]["wheel_handbrake#" + toString(index)] = wheelPointElement->Attribute("handbrake");
+		object->getComponents()[componentIndex]["wheel_model#" + toString(index)] = wheelPointElement->Attribute("model");
+		object->getComponents()[componentIndex]["wheel_position#" + toString(index)] = wheelPointElement->Attribute("position");
+		object->getComponents()[componentIndex]["wheel_radius#" + toString(index)] = wheelPointElement->Attribute("radius");
+		object->getComponents()[componentIndex]["wheel_suspensionRestLength#" + toString(index)] = wheelPointElement->Attribute("suspensionRestLength");
+		object->getComponents()[componentIndex]["wheel_suspensionStiffness#" + toString(index)] = wheelPointElement->Attribute("suspensionStiffness");
+		object->getComponents()[componentIndex]["wheel_dampingCompression#" + toString(index)] = wheelPointElement->Attribute("dampingCompression");
+		object->getComponents()[componentIndex]["wheel_dampingRelaxation#" + toString(index)] = wheelPointElement->Attribute("dampingRelaxation");
+		object->getComponents()[componentIndex]["wheel_frictionSlip#" + toString(index)] = wheelPointElement->Attribute("frictionSlip");
+		object->getComponents()[componentIndex]["wheel_rollInfluence#" + toString(index)] = wheelPointElement->Attribute("rollInfluence");
+		object->getComponents()[componentIndex]["wheel_brakeForce#" + toString(index)] = wheelPointElement->Attribute("brakeForce");
+
+		++index;
+		wheelPointElement = wheelPointElement->NextSiblingElement("Wheel");
+	}
+
+	object->getComponents()[componentIndex]["wheelsCount"] = toString(index);
+}
+
+
 void RObjectLoader::loadAiAgent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["speed"] = componentElement->Attribute("speed");
+}
+
+
+void RObjectLoader::loadAiAgentVehicle(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	// not contains additional parameters
 }
 
 
@@ -447,12 +497,100 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
 			skeletalAnimation->setScale(scale);
 		}
+		else if (componentType == "vehicle")
+		{
+			PhysicsManager* physicsManager = sceneManager->getPhysicsManager();
+			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
+
+			float mass = toFloat(components[i]["mass"]);
+
+			int collidesWith = COL_TERRAIN | COL_ENV | COL_BUS;
+			int wheelCollidesWith = COL_TERRAIN | COL_ENV;
+
+			PhysicalBodyRaycastVehicle* vehicle = physicsManager->createPhysicalBodyRayCastVehicle(model->getCollisionMesh(), model->getCollisionMeshSize(), mass, COL_BUS, collidesWith);
+
+			vehicle->setWheelCollisionFilter(COL_WHEEL, wheelCollidesWith);
+			vehicle->getRigidBody()->setActivationState(DISABLE_DEACTIVATION);
+
+			sceneObject->addComponent(vehicle);
+
+			// wheels
+			int wheelsCount = toInt(components[i]["wheelsCount"]);
+			for (int j = 0; j < wheelsCount; ++j)
+			{
+				const std::string& wheelName = components[i]["wheel_name#" + toString(j)];
+				const std::string& wheelModel = components[i]["wheel_model#" + toString(j)];
+				const std::string& side = components[i]["wheel_side#" + toString(j)];
+				float radius = toFloat(components[i]["wheel_radius#" + toString(j)]);
+
+				int steering = toInt(components[i]["wheel_steering#" + toString(j)]);
+				int powered = toInt(components[i]["wheel_powered#" + toString(j)]);
+				int handbrake = toInt(components[i]["wheel_handbrake#" + toString(j)]);
+
+				float suspensionRestLength = toFloat(components[i]["wheel_suspensionRestLength#" + toString(j)]);
+				float suspensionStiffness = toFloat(components[i]["wheel_suspensionStiffness#" + toString(j)]);
+				float dampingCompression = toFloat(components[i]["wheel_dampingCompression#" + toString(j)]);
+				float dampingRelaxation = toFloat(components[i]["wheel_dampingRelaxation#" + toString(j)]);
+				float frictionSlip = toFloat(components[i]["wheel_frictionSlip#" + toString(j)]);
+				float rollInfluence = toFloat(components[i]["wheel_rollInfluence#" + toString(j)]);
+				float brakeForce = toFloat(components[i]["wheel_brakeForce#" + toString(j)]);
+
+				glm::vec3 wheelPosition = XMLstringToVec3(components[i]["wheel_position#" + toString(j)].c_str());
+
+				SceneObject* wheelObj = sceneManager->addSceneObject(wheelName);
+				wheelObj->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+
+				// obracamy model kola je¿li jest po lewej stronie
+				WheelSide wheelSide;
+				float wheelAngle;
+				if (side == "right")
+				{
+					wheelAngle = 0.0f;
+					wheelSide = WS_RIGHT;
+				}
+				else
+				{
+					wheelAngle = 180.0f;
+					wheelSide = WS_LEFT;
+				}
+
+
+				SceneObject* wheelSubObjectForModel = sceneManager->addSceneObject(wheelName + "Model");
+				wheelSubObjectForModel->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+				wheelSubObjectForModel->setRotation(0.0f, degToRad(wheelAngle), 0.0f);
+				wheelObj->addChild(wheelSubObjectForModel);
+
+				std::string modelPath = objectDirPath + wheelModel;
+				RStaticModel* wheel = ResourceManager::getInstance().loadModel(modelPath, objectDirPath, false);
+				RenderObject* wheelRenderObject = graphicsManager->addRenderObject(new RenderObject(wheel), wheelSubObjectForModel);
+				wheelRenderObject->setDynamicObject(true);
+
+
+				btVector3 btWheelPos(wheelPosition.x, wheelPosition.y, wheelPosition.z);
+
+				PhysicalBodyWheel* wheelBody = physicsManager->createPhysicalBodyWheel(vehicle, btWheelPos, suspensionRestLength, radius, steering);
+				wheelObj->addComponent(wheelBody);
+
+				btWheelInfo& wheelInfo = wheelBody->getWheelInfo();
+				wheelInfo.m_suspensionStiffness = suspensionStiffness;
+				wheelInfo.m_wheelsDampingCompression = dampingCompression * 2 * sqrt(wheelInfo.m_suspensionStiffness);
+				wheelInfo.m_wheelsDampingRelaxation = dampingRelaxation * 2 * sqrt(wheelInfo.m_suspensionStiffness);
+				wheelInfo.m_frictionSlip = frictionSlip;
+				wheelInfo.m_rollInfluence = rollInfluence;
+			}
+		}
 		else if (componentType == "aiAgent")
 		{
 			float speed = toFloat(components[i]["speed"]);
 
 			AIAgent* aiAgent = sceneManager->getGameLogicSystem()->addAIAgent();
 			aiAgent->setSpeed(speed);
+
+			sceneObject->addComponent(aiAgent);
+		}
+		else if (componentType == "aiAgentVehicle")
+		{
+			AIAgentPhysicalVechicle* aiAgent = sceneManager->getGameLogicSystem()->addAIAgentPhysicalVechicle();
 
 			sceneObject->addComponent(aiAgent);
 		}
