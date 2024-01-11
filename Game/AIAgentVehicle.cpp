@@ -41,12 +41,6 @@ void AIAgentVehicle::setCurrentPath(PathComponent* path)
 }
 
 
-float mapRange(float a1, float a2, float b1, float b2, float value)
-{
-	return b1 + (value - a1) * (b2 - b1) / (a2 - a1);
-}
-
-
 float AIAgentVehicle::getSteeringValue()
 {
 	const glm::vec3& vehiclePosition = _vehicle->getSceneObject()->getPosition();
@@ -58,7 +52,7 @@ float AIAgentVehicle::getSteeringValue()
 
 	float destinationRotation = calculateDestinationRotation(nextPointPosition);
 
-	return mapRange(-0.25f * PI, 0.25f * PI, -0.55, 0.55, destinationRotation);
+	return mapRange(-0.25f * PI, 0.25f * PI, -1.0f, 1.0f, destinationRotation);
 }
 
 
@@ -99,24 +93,17 @@ void AIAgentVehicle::update(float deltaTime)
 	
 	float steeringValue = getSteeringValue();
 
-	_vehicle->getRayCastVehicle()->setSteeringValue(steeringValue, 0);
-	_vehicle->getRayCastVehicle()->setSteeringValue(steeringValue, 1);
+	_vehicle->setSteeringValue(steeringValue);
 
 
 	if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 40.0f)
 	{
-		_vehicle->getRayCastVehicle()->setBrake(0.0f, 2);
-		_vehicle->getRayCastVehicle()->setBrake(0.0f, 3);
-
-		_vehicle->getRayCastVehicle()->applyEngineForce(300.0f, 2);
-		_vehicle->getRayCastVehicle()->applyEngineForce(300.0f, 3);
+		_vehicle->setBrakeValue(0.0f);
+		_vehicle->setEngineForce(300.0f);
 	}
 	else
 	{
-		_vehicle->getRayCastVehicle()->setBrake(1.0f, 2);
-		_vehicle->getRayCastVehicle()->setBrake(1.0f, 3);
-
-		_vehicle->getRayCastVehicle()->applyEngineForce(0.0f, 2);
-		_vehicle->getRayCastVehicle()->applyEngineForce(0.0f, 3);
+		_vehicle->setBrakeValue(1.0f);
+		_vehicle->setEngineForce(0.0f);
 	}
 }
