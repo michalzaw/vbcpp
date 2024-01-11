@@ -71,6 +71,7 @@ class GameLogicSystem final
 
 		//Bus* getBus(unsigned int index);
 		inline const std::vector<PathComponent*>& getPathComponents() { return _pathComponents; }
+		inline const std::vector<AIAgentVehicle*>& getAIAgentVehicles() { return _aiAgentVehicles; }
 		inline const std::vector<BusStartPoint*>& getBusStartPoints() { return _busStartPoints; }
 
 		void update(float deltaTime);

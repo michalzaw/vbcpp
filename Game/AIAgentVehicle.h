@@ -7,6 +7,7 @@
 
 class PhysicalBodyRaycastVehicle;
 class PathComponent;
+class BezierCurve;
 
 
 class AIAgentVehicle final : public Component
@@ -15,6 +16,10 @@ class AIAgentVehicle final : public Component
 		PhysicalBodyRaycastVehicle* _vehicle;
 
 		PathComponent* _currentPath;
+		BezierCurve* _currentPathBezierCurve;
+
+		float getSteeringValue();
+		float calculateDestinationRotation(const glm::vec3& destinationPoint);
 
 	protected:
 		void onAttachedToScenObject() override;

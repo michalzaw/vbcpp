@@ -535,6 +535,48 @@ void BezierCurve::cutAndGetCurve(float marginBegin, float marginEnd, std::vector
 }
 
 
+int BezierCurve::getClosestPointToPosition(const glm::vec3 position)
+{
+	float minDistance = std::numeric_limits<float>::max();
+	int closestPointIndex = 0;
+
+	for (int i = 0; i < _curvePoints.size(); ++i)
+	{
+		float distance = glm::distance(position, _curvePoints[i]);
+		if (distance < minDistance)
+		{
+			minDistance = distance;
+			closestPointIndex = i;
+		}
+	}
+
+	return closestPointIndex;
+}
+
+
+glm::vec3 BezierCurve::getClosestTangentToPosition(const glm::vec3 position)
+{
+	if (_curvePoints.size() < 2)
+	{
+		return glm::vec3(0.0f);
+	}
+
+	int cloasestPointIndex = getClosestPointToPosition(position);
+	if (cloasestPointIndex == 0)
+	{
+		return glm::normalize(_curvePoints[cloasestPointIndex + 1] - _curvePoints[cloasestPointIndex]);
+	}
+	else if (cloasestPointIndex == _curvePoints.size() - 1)
+	{
+		return glm::normalize(_curvePoints[cloasestPointIndex] - _curvePoints[cloasestPointIndex - 1]);
+	}
+	else
+	{
+		return glm::normalize(_curvePoints[cloasestPointIndex + 1] - _curvePoints[cloasestPointIndex - 1]);
+	}
+}
+
+
 void BezierCurve::setOnPointAddedListener(const std::function<void()>& onPointAddedListener)
 {
 	_onPointAddedListener = onPointAddedListener;
