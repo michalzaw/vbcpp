@@ -2,9 +2,9 @@
 
 #include "PathComponent.h"
 
-#include "../Graphics/BezierCurve.h"
+#include "../../Graphics/BezierCurve.h"
 
-#include "../Physics/PhysicalBodyRaycastVehicle.h"
+#include "../../Physics/PhysicalBodyRaycastVehicle.h"
 
 
 AIAgentVehicle::AIAgentVehicle()

@@ -2,13 +2,13 @@
 
 #include <memory>
 
-#include "AIAgent.h"
-#include "AIAgentPhysicalVechicle.h"
-#include "AIAgentVehicle.h"
+#include "AI/AIAgent.h"
+#include "AI/AIAgentPhysicalVechicle.h"
+#include "AI/AIAgentVehicle.h"
+#include "AI/PathComponent.h"
 #include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
-#include "PathComponent.h"
 
 #include "../Graphics/CameraFPS.hpp"
 

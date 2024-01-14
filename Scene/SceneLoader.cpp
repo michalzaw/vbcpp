@@ -2,12 +2,12 @@
 
 #include "SceneManager.h"
 
-#include "../Game/AIAgent.h"
-#include "../Game/AIAgentVehicle.h"
+#include "../Game/AI/AIAgent.h"
+#include "../Game/AI/AIAgentVehicle.h"
+#include "../Game/AI/PathComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
-#include "../Game/PathComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"

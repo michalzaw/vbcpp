@@ -2,7 +2,7 @@
 #define AIAGENTVEHICLE_H_INCLUDED
 
 
-#include "../Scene/Component.h"
+#include "../../Scene/Component.h"
 
 
 class PhysicalBodyRaycastVehicle;

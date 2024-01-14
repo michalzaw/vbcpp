@@ -2,12 +2,12 @@
 
 #include "PathComponent.h"
 
-#include "../Physics/PhysicalBodyRaycastVehicle.h"
+#include "../../Physics/PhysicalBodyRaycastVehicle.h"
 
-#include "../Scene/SceneObject.h"
-#include "../Scene/SceneManager.h"
+#include "../../Scene/SceneObject.h"
+#include "../../Scene/SceneManager.h"
 
-#include "../Utils/QuaternionUtils.h"
+#include "../../Utils/QuaternionUtils.h"
 
 
 AIAgentPhysicalVechicle::AIAgentPhysicalVechicle()

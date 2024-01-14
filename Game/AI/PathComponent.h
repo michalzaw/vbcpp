@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include "../Scene/Component.h"
+#include "../../Scene/Component.h"
 
 
 class BezierCurve;

@@ -7,7 +7,7 @@
 
 #include <glm/glm.hpp>
 
-#include "PathComponent.h"
+#include "AI/PathComponent.h"
 
 
 class CameraControlComponent;

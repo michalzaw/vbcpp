@@ -1,14 +1,14 @@
 #include "PathComponent.h"
 
-#include "GameConfig.h"
+#include "../GameConfig.h"
 
-#include "../Graphics/BezierCurve.h"
-#include "../Graphics/GraphicsManager.h"
+#include "../../Graphics/BezierCurve.h"
+#include "../../Graphics/GraphicsManager.h"
 
-#include "../Scene/SceneManager.h"
+#include "../../Scene/SceneManager.h"
 
-#include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/ResourceManager.h"
+#include "../../Utils/BezierCurvesUtils.h"
+#include "../../Utils/ResourceManager.h"
 
 
 RRoadProfile* helperProfile = nullptr;

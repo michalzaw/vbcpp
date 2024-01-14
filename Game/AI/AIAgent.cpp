@@ -2,11 +2,11 @@
 
 #include "PathComponent.h"
 
-#include "../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/SkeletalAnimationComponent.h"
 
-#include "../Scene/SceneObject.h"
+#include "../../Scene/SceneObject.h"
 
-#include "../Utils/QuaternionUtils.h"
+#include "../../Utils/QuaternionUtils.h"
 
 
 AIAgent::AIAgent()

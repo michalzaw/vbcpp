@@ -1,13 +1,14 @@
 #include "MainGameScene.h"
 
-#include "AIAgent.h"
-#include "AIAgentPhysicalVechicle.h"
+#include "AI/AIAgent.h"
+#include "AI/AIAgentVehicle.h"
+#include "AI/AIAgentPhysicalVechicle.h"
+#include "AI/PathComponent.h"
 #include "BusStartPoint.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
-#include "PathComponent.h"
 #include "MainGameScene/MirrorImage.h"
 
 #include "../Bus/BusLoader.h"

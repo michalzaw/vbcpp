@@ -1,7 +1,7 @@
 #include "AIPathGenerator.h"
 
 #include "../../Game/GameLogicSystem.h"
-#include "../../Game/PathComponent.h"
+#include "../../Game/AI/PathComponent.h"
 
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/RoadObject.h"

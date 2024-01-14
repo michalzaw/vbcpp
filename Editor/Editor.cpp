@@ -9,11 +9,11 @@
 
 //#include "../Bus/BusLoader.h"
 
-#include "../Game/AIAgent.h"
+#include "../Game/AI/AIAgent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
-#include "../Game/PathComponent.h"
+#include "../Game/AI/PathComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
