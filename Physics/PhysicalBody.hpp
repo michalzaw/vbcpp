@@ -9,6 +9,7 @@
 #include "../Utils/Math.h"
 
 #include <memory>
+#include <set>
 
 class PhysicsManager;
 class Constraint;
@@ -71,6 +72,13 @@ class PhysicalBody : public Component
 
         virtual void changedTransform();
 
+        // functions is called internally by PhysicsManager - do not call manually
+        void setCollisionWith(PhysicalBody* body);
+        void setNotCollisionWith(PhysicalBody* body);
+
+        inline const std::vector<PhysicalBody*>& getObjectsBeginCollision() { return _objectsBeginCollision; }
+        inline const std::vector<PhysicalBody*>& getObjectsEndCollision() { return _objectsEndCollision; }
+
     protected:
         btDiscreteDynamicsWorld*                _dynamicsWorld;
         std::unique_ptr<btRigidBody>            _rigidBody;
@@ -84,6 +92,10 @@ class PhysicalBody : public Component
 
         std::vector<Constraint*> _constraints;
 
+        std::set<PhysicalBody*> _collidesWith;
+        std::vector<PhysicalBody*> _objectsBeginCollision;
+        std::vector<PhysicalBody*> _objectsEndCollision;
+
         bool _isUpdateTransformFromObject;
 
         virtual void updateBody() { }
@@ -91,7 +103,7 @@ class PhysicalBody : public Component
         virtual void onAttachedToScenObject()
         {
             if (_rigidBody)
-                _rigidBody->setUserPointer(_object);
+                _rigidBody->setUserPointer(this);
         }
 };
 

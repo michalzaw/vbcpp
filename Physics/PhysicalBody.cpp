@@ -53,6 +53,9 @@ void PhysicalBody::update()
             _isUpdateTransformFromObject = true;
         }
     }
+
+    _objectsBeginCollision.clear();
+    _objectsEndCollision.clear();
 }
 
 
@@ -95,5 +98,27 @@ void PhysicalBody::changedTransform()
         }
 
         _rigidBody->activate();
+    }
+}
+
+
+void PhysicalBody::setCollisionWith(PhysicalBody* body)
+{
+    std::pair<std::set<PhysicalBody*>::iterator, bool> result = _collidesWith.insert(body);
+    if (result.second)
+    {
+        //LOG_DEBUG(getSceneObject()->getName() + ": COLLISTION START WITH " + body->getSceneObject()->getName());
+        _objectsBeginCollision.push_back(body);
+    }
+}
+
+
+void PhysicalBody::setNotCollisionWith(PhysicalBody* body)
+{
+    int result = _collidesWith.erase(body);
+    if (result == 1)
+    {
+        //LOG_DEBUG(getSceneObject()->getName() + ": COLLISTION END WITH: " + body->getSceneObject()->getName());
+        _objectsEndCollision.push_back(body);
     }
 }

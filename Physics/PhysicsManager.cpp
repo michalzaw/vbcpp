@@ -150,6 +150,10 @@ int PhysicsManager::destroyPhysicsWorld()
 }
 
 
+bool collision1 = false;
+bool collision2 = false;
+
+
 void PhysicsManager::simulate(btScalar timeStep)
 {
     if (_running)
@@ -159,7 +163,53 @@ void PhysicsManager::simulate(btScalar timeStep)
 
         for (int i = 0; i < _physicalBodies.size(); i++)
         {
+            if (_physicalBodies[i]->getRigidBody() != nullptr)
+            {
+                //SceneObject* object = static_cast<SceneObject*>(_physicalBodies[i]->getRigidBody()->getUserPointer());
+                //LOG_DEBUG(LOG_VARIABLE(object->getName()));
+            }
+
             _physicalBodies[i]->update();
+        }
+
+        btDispatcher* dispatcher = _dynamicsWorld->getDispatcher();
+        for (int i = 0; i < dispatcher->getNumManifolds(); ++i)
+        {
+            btPersistentManifold* manifold = dispatcher->getManifoldByIndexInternal(i);
+            if (manifold->getNumContacts() > 0)
+            {
+                const btCollisionObject* body1 = manifold->getBody0();
+                const btCollisionObject* body2 = manifold->getBody1();
+
+                PhysicalBody* physicalBody1 = static_cast<PhysicalBody*>(body1->getUserPointer());
+                PhysicalBody* physicalBody2 = static_cast<PhysicalBody*>(body2->getUserPointer());
+
+                if (physicalBody1 != nullptr && physicalBody2 != nullptr)
+                {
+                    const std::string& body1Name = physicalBody1->getSceneObject()->getName();
+                    const std::string& body2Name = physicalBody2->getSceneObject()->getName();
+
+                    physicalBody1->setCollisionWith(physicalBody2);
+                    physicalBody2->setCollisionWith(physicalBody1);
+                }
+            }
+            else
+            {
+                const btCollisionObject* body1 = manifold->getBody0();
+                const btCollisionObject* body2 = manifold->getBody1();
+
+                PhysicalBody* physicalBody1 = static_cast<PhysicalBody*>(body1->getUserPointer());
+                PhysicalBody* physicalBody2 = static_cast<PhysicalBody*>(body2->getUserPointer());
+
+                if (physicalBody1 != nullptr && physicalBody2 != nullptr)
+                {
+                    const std::string& body1Name = physicalBody1->getSceneObject()->getName();
+                    const std::string& body2Name = physicalBody2->getSceneObject()->getName();
+
+                    physicalBody1->setNotCollisionWith(physicalBody2);
+                    physicalBody2->setNotCollisionWith(physicalBody1);
+                }
+            }
         }
 
 		if (_debugRendeignEnable && _debugRenderer != nullptr)
