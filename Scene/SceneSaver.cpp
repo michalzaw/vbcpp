@@ -8,6 +8,7 @@
 #include "../Game/AI/AIAgent.h"
 #include "../Game/AI/AIAgentVehicle.h"
 #include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 
@@ -253,6 +254,16 @@ void SceneSaver::saveAIAgentVehicleComponent(tinyxml2::XMLElement* objectElement
 }
 
 
+void SceneSaver::saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, StopComponent* stopComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "aiStop");
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
 {
 	XMLElement* componentElement = doc.NewElement("Component");
@@ -322,6 +333,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentVehicleComponent)
 	{
 		saveAIAgentVehicleComponent(objectElement, doc, aiAgentVehicleComponent);
+	}
+
+	StopComponent* stopComponent = static_cast<StopComponent*>(sceneObject->getComponent(CT_STOP_COMPONENT));
+	if (stopComponent)
+	{
+		saveStopComponent(objectElement, doc, stopComponent);
 	}
 
 	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));

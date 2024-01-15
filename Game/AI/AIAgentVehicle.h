@@ -18,6 +18,9 @@ class AIAgentVehicle final : public Component
 		PathComponent* _currentPath;
 		BezierCurve* _currentPathBezierCurve;
 
+		bool _isStop;
+		float _timeToStart;
+
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
 
@@ -29,6 +32,8 @@ class AIAgentVehicle final : public Component
 
 		void setCurrentPath(PathComponent* path);
 		inline PathComponent* getCurrentPath() { return _currentPath; }
+
+		void stop();
 
 		void update(float deltaTime) override;
 };

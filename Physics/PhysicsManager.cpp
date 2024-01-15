@@ -132,6 +132,8 @@ int PhysicsManager::createPhysicsWorld()
     // Setting gravity force (we use 10 for simplicity)
     _dynamicsWorld->setGravity(btVector3(0, -10, 0));
 
+    _dynamicsWorld->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback);
+
     return 0;
 }
 
@@ -369,6 +371,18 @@ PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVe
 {
     int index = vehicle->addWheel(connectionPoint, suspensionRestLength, radius, isFrontWheel);
     PhysicalBodyWheel* b = new PhysicalBodyWheel(vehicle->getRayCastVehicle(), index);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
+PhysicalBodyGhost* PhysicsManager::createPhysicalBodyGhost()
+{
+    PhysicalBodyGhost* b = new PhysicalBodyGhost();
+
+    _dynamicsWorld->addCollisionObject(b->getBulletObject(), COL_ENV, COL_BUS | COL_WHEEL);
 
     _physicalBodies.push_back(b);
 

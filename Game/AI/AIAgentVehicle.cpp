@@ -9,7 +9,8 @@
 
 AIAgentVehicle::AIAgentVehicle()
 	: Component(CT_AI_AGENT_VEHICLE),
-	_vehicle(nullptr), _currentPath(nullptr), _currentPathBezierCurve(nullptr)
+	_vehicle(nullptr), _currentPath(nullptr), _currentPathBezierCurve(nullptr),
+	_isStop(false), _timeToStart(0.0f)
 {
 
 }
@@ -84,6 +85,13 @@ float AIAgentVehicle::calculateDestinationRotation(const glm::vec3& destinationP
 }
 
 
+void AIAgentVehicle::stop()
+{
+	_isStop = true;
+	_timeToStart = 5.0f;
+}
+
+
 void AIAgentVehicle::update(float deltaTime)
 {
 	if (_currentPath == nullptr || _vehicle == nullptr)
@@ -96,14 +104,28 @@ void AIAgentVehicle::update(float deltaTime)
 	_vehicle->setSteeringValue(steeringValue);
 
 
-	if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 40.0f)
+	if (!_isStop)
 	{
-		_vehicle->setBrakeValue(0.0f);
-		_vehicle->setEngineForce(300.0f);
+		if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 40.0f)
+		{
+			_vehicle->setBrakeValue(0.0f);
+			_vehicle->setEngineForce(300.0f);
+		}
+		else
+		{
+			_vehicle->setBrakeValue(1.0f);
+			_vehicle->setEngineForce(0.0f);
+		}
 	}
 	else
 	{
-		_vehicle->setBrakeValue(1.0f);
+		_vehicle->setBrakeValue(40.0f);
 		_vehicle->setEngineForce(0.0f);
+
+		_timeToStart -= deltaTime;
+		if (_timeToStart <= 0.0f)
+		{
+			_isStop = false;
+		}
 	}
 }

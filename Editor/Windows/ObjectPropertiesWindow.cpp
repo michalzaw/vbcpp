@@ -19,6 +19,7 @@
 #include "../../Game/AI/AIAgent.h"
 #include "../../Game/AI/AIAgentVehicle.h"
 #include "../../Game/AI/PathComponent.h"
+#include "../../Game/AI/StopComponent.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
 
@@ -1140,6 +1141,15 @@ void showAiAgentVehicleComponentDetails(AIAgentVehicle* component)
 }
 
 
+void showStopComponentDetails(StopComponent* component)
+{
+	if (ImGui::CollapsingHeader("Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+
+	}
+}
+
+
 void showBezierCurveComponentDetails(BezierCurve* component)
 {
 	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1386,6 +1396,12 @@ void showObjectProperties()
 			if (aiAgentVehicle)
 			{
 				showAiAgentVehicleComponentDetails(aiAgentVehicle);
+			}
+
+			StopComponent* stopComponent = dynamic_cast<StopComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_STOP_COMPONENT));
+			if (stopComponent)
+			{
+				showStopComponentDetails(stopComponent);
 			}
 
 			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));

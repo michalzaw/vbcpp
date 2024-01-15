@@ -6,6 +6,7 @@
 #include "AI/AIAgentPhysicalVechicle.h"
 #include "AI/AIAgentVehicle.h"
 #include "AI/PathComponent.h"
+#include "AI/StopComponent.h"
 #include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
@@ -79,6 +80,16 @@ AIAgentVehicle* GameLogicSystem::addAIAgentVehicle()
 	AIAgentVehicle* component = new AIAgentVehicle();
 
 	_aiAgentVehicles.push_back(component);
+
+	return component;
+}
+
+
+StopComponent* GameLogicSystem::addStopComponent()
+{
+	StopComponent* component = new StopComponent();
+
+	_stopComponents.push_back(component);
 
 	return component;
 }
@@ -184,6 +195,22 @@ void GameLogicSystem::removeAIAgentVehicle(AIAgentVehicle* component)
 }
 
 
+void GameLogicSystem::removeStopComponent(StopComponent* component)
+{
+	for (std::vector<StopComponent*>::iterator i = _stopComponents.begin(); i != _stopComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _stopComponents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
 void GameLogicSystem::removeBusStartPoint(BusStartPoint* component)
 {
 	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
@@ -278,6 +305,14 @@ void GameLogicSystem::update(float deltaTime)
 	}
 
 	for (AIAgentVehicle* component : _aiAgentVehicles)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
+	for (StopComponent* component : _stopComponents)
 	{
 		if (component->isActive())
 		{

@@ -5,6 +5,7 @@
 #include "../Game/AI/AIAgent.h"
 #include "../Game/AI/AIAgentVehicle.h"
 #include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
@@ -409,6 +410,14 @@ void SceneLoader::loadAIAgentVehicleComponent(XMLElement* componentElement, Scen
 }
 
 
+void SceneLoader::loadStopComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	StopComponent* stopComponent = _sceneManager->getGameLogicSystem()->addStopComponent();
+
+	sceneObject->addComponent(stopComponent);
+}
+
+
 void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
 	std::string name = XmlUtils::getAttributeString(componentElement, "name");
@@ -494,6 +503,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgentVehicle")
 			{
 				loadAIAgentVehicleComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiStop")
+			{
+				loadStopComponent(componentElement, sceneObject);
 			}
 
 			if (componentType == "busStartPoint")

@@ -3,6 +3,7 @@ set (GAME_SOURCES
 	Game/AI/AIAgentPhysicalVechicle.cpp
 	Game/AI/AIAgentVehicle.cpp
 	Game/AI/PathComponent.cpp
+	Game/AI/StopComponent.cpp
 	Game/BusStartPoint.cpp
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
@@ -24,6 +25,7 @@ set (GAME_HEADERS
 	Game/AI/AIAgentPhysicalVechicle.h
 	Game/AI/AIAgentVehicle.h
 	Game/AI/PathComponent.h
+	Game/AI/StopComponent.h
 	Game/BusStartPoint.h
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h

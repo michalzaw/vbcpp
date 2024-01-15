@@ -11,6 +11,7 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 #include "PhysicalBodyRaycastVehicle.h"
 #include "PhysicalBodyWheel.h"
+#include "PhysicalBodyGhost.h"
 
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
@@ -61,6 +62,7 @@ class PhysicsManager : virtual public RefCounter
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyWheel*              createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel);
+        PhysicalBodyGhost*              createPhysicalBodyGhost();
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);
