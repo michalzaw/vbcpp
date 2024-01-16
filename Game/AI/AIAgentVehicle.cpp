@@ -85,10 +85,15 @@ float AIAgentVehicle::calculateDestinationRotation(const glm::vec3& destinationP
 }
 
 
-void AIAgentVehicle::stop()
+void AIAgentVehicle::stop(float distance)
 {
 	_isStop = true;
 	_timeToStart = 5.0f;
+	
+	float v0 = _vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() * 1000.0f / 3600.0f; // m/s
+	float a = (v0 * v0) / (2.0f * distance);
+	float mass = _vehicle->getMass();
+	_brakeForce = mass * a;
 }
 
 
@@ -119,7 +124,7 @@ void AIAgentVehicle::update(float deltaTime)
 	}
 	else
 	{
-		_vehicle->setBrakeValue(40.0f);
+		_vehicle->setBrakeValue(_brakeForce * deltaTime / _vehicle->getRayCastVehicle()->getNumWheels());
 		_vehicle->setEngineForce(0.0f);
 
 		_timeToStart -= deltaTime;

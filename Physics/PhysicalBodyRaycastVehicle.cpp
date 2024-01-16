@@ -126,10 +126,7 @@ void PhysicalBodyRaycastVehicle::setBrakeValue(float brakeValue)
 
     for (int i = 0; i < _rayCastVehicle->getNumWheels(); ++i)
     {
-        if (!_rayCastVehicle->getWheelInfo(i).m_bIsFrontWheel)
-        {
-            _rayCastVehicle->setBrake(_brakeValue, i);
-        }
+        _rayCastVehicle->setBrake(_brakeValue, i);
     }
 }
 

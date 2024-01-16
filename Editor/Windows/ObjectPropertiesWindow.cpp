@@ -1145,7 +1145,17 @@ void showStopComponentDetails(StopComponent* component)
 {
 	if (ImGui::CollapsingHeader("Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
 	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BezierCurveComponentDetails");
 
+		COMPONENT_PROPERTY_EDIT(component, DistanceToStop, float, "Distance to stop")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
 	}
 }
 

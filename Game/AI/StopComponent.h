@@ -10,13 +10,19 @@ class PhysicalBody;
 
 class StopComponent : public Component
 {
-	protected:
+	private:
 		PhysicalBody* _physicalBody;
 
+		float _distanceToStop;
+
+	protected:
 		void onAttachedToScenObject() override;
 
 	public:
 		StopComponent();
+
+		inline void setDistanceToStop(float distanceToStop) { _distanceToStop = distanceToStop; }
+		inline float getDistanceToStop() { return _distanceToStop; }
 
 		void update(float deltaTime) override;
 };

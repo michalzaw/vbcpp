@@ -259,6 +259,7 @@ void SceneSaver::saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2
 	XMLElement* componentElement = doc.NewElement("Component");
 
 	componentElement->SetAttribute("type", "aiStop");
+	componentElement->SetAttribute("distance", stopComponent->getDistanceToStop());
 
 	objectElement->InsertEndChild(componentElement);
 }

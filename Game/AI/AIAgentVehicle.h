@@ -20,6 +20,7 @@ class AIAgentVehicle final : public Component
 
 		bool _isStop;
 		float _timeToStart;
+		float _brakeForce;
 
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
@@ -33,7 +34,7 @@ class AIAgentVehicle final : public Component
 		void setCurrentPath(PathComponent* path);
 		inline PathComponent* getCurrentPath() { return _currentPath; }
 
-		void stop();
+		void stop(float distance);
 
 		void update(float deltaTime) override;
 };

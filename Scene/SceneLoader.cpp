@@ -412,7 +412,10 @@ void SceneLoader::loadAIAgentVehicleComponent(XMLElement* componentElement, Scen
 
 void SceneLoader::loadStopComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
+	float distanceToStop = XmlUtils::getAttributeFloatOptional(componentElement, "distance", 10.0f);
+
 	StopComponent* stopComponent = _sceneManager->getGameLogicSystem()->addStopComponent();
+	stopComponent->setDistanceToStop(distanceToStop);
 
 	sceneObject->addComponent(stopComponent);
 }
