@@ -62,8 +62,14 @@ void StopComponent::update(float deltaTime)
 		{
 			AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(aiAgentVehicleComponent);
 
-			LOG_DEBUG("Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
+			LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
 			aiAgentVehicle->stop(_distanceToStop);
 		}
+	}
+
+
+	for (PhysicalBody* body : _physicalBody->getObjectsEndCollision())
+	{
+		LOG_DEBUG(getSceneObject()->getName() + " - Collision end with agent: " + body->getSceneObject()->getName());
 	}
 }

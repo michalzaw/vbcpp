@@ -19,15 +19,23 @@ void PhysicalBodyGhost::update()
     _objectsBeginCollision.clear();
     _objectsEndCollision.clear();
 
+    std::set<PhysicalBody*> objectsEndCollision = _collidesWith;
+
     for (int i = 0; i < _ghostObject->getNumOverlappingObjects(); ++i)
     {
         btCollisionObject* body = _ghostObject->getOverlappingObject(i);
         PhysicalBody* physicalBody = static_cast<PhysicalBody*>(body->getUserPointer());
         if (physicalBody != nullptr)
         {
-            physicalBody->setCollisionWith(this);
             setCollisionWith(physicalBody);
+
+            objectsEndCollision.erase(physicalBody);
         }
+    }
+
+    for (PhysicalBody* physicalBody : objectsEndCollision)
+    {
+        setNotCollisionWith(physicalBody);
     }
 }
 
