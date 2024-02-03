@@ -241,6 +241,8 @@ void SceneObject::addChild(SceneObject* child)
 
     child->removeParent();
     child->_parent = this;
+
+    child->changedTransform();
 }
 
 

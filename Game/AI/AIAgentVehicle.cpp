@@ -6,6 +6,8 @@
 
 #include "../../Physics/PhysicalBodyRaycastVehicle.h"
 
+#include "../../Scene/SceneManager.h"
+
 
 AIAgentVehicle::AIAgentVehicle()
 	: Component(CT_AI_AGENT_VEHICLE),
@@ -85,6 +87,49 @@ float AIAgentVehicle::calculateDestinationRotation(const glm::vec3& destinationP
 }
 
 
+void AIAgentVehicle::lookForward()
+{
+	PhysicsManager* physicsManager = _vehicle->getSceneObject()->getSceneManager()->getPhysicsManager();
+
+	btVector3 forwardVector = _vehicle->getRayCastVehicle()->getForwardVector();
+
+	glm::vec3 vehiclePosition = _vehicle->getSceneObject()->getPosition() + glm::vec3(0.0f, 0.5f, 0.0f);
+	glm::vec3 rayDirection = glm::normalize(glm::vec3(forwardVector.x(), forwardVector.y(), forwardVector.z()));
+	//LOG_DEBUG(LOG_VARIABLE(rayDirection));
+	float rayLength = std::max(_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() / 2.0f, 0.5f);// 30.0f;
+
+	short RAY_TEST_FILTER_MASK = btBroadphaseProxy::AllFilter;// COL_ENV | COL_BUS;
+	short RAY_TEST_FILTER_GROUP = btBroadphaseProxy::DefaultFilter;// COL_WHEEL;
+
+	glm::vec3 outPosition;
+	PhysicalBody* outObject = nullptr;
+	bool result = physicsManager->rayTest(vehiclePosition, rayDirection, RAY_TEST_FILTER_MASK, RAY_TEST_FILTER_GROUP, outPosition, outObject, rayLength);
+	if (result)
+	{
+		float distanceToObject = glm::distance(outPosition, vehiclePosition);
+
+		if (outObject != nullptr)
+		{
+			//LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
+		}
+		else
+		{
+
+		}
+
+		//if (!_isStop)
+		{
+			LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
+			stop(distanceToObject - 5);
+		}
+	}
+	else
+	{
+
+	}
+}
+
+
 void AIAgentVehicle::stop(float distance)
 {
 	_isStop = true;
@@ -108,6 +153,7 @@ void AIAgentVehicle::update(float deltaTime)
 
 	_vehicle->setSteeringValue(steeringValue);
 
+	lookForward();
 
 	if (!_isStop)
 	{

@@ -74,7 +74,8 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
-		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength = 1000.0f);
+		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, float rayLength = 1000.0f);
+        bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, PhysicalBody*& outObject, float rayLength = 1000.0f);
         bool isPointInObject(const glm::vec3& point, PhysicalBody* physicalBody);
 
 		void setDebugRenderer(btIDebugDraw* debugRenderer);

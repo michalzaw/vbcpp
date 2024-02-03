@@ -18,6 +18,9 @@ class PhysicalBodyGhost : virtual public PhysicalBody
 
         inline btGhostObject* getBulletObject() { return _ghostObject; }
 
+    protected:
+        void onAttachedToScenObject() override;
+
     private:
         btGhostObject* _ghostObject;
 

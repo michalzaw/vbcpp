@@ -25,6 +25,8 @@ class AIAgentVehicle final : public Component
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
 
+		void lookForward();
+
 	protected:
 		void onAttachedToScenObject() override;
 

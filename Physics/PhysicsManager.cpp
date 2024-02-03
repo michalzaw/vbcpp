@@ -471,7 +471,14 @@ void PhysicsManager::removeConstraint(Constraint* c)
 }
 
 
-bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength)
+bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, float rayLength)
+{
+    PhysicalBody* object;
+    return rayTest(rayOrigin, rayDir, filterMask, filterGroup, outPosition, object, rayLength);
+}
+
+
+bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, PhysicalBody*& outObject, float rayLength)
 {
 	const glm::vec3 rayEnd = rayOrigin + (rayDir * rayLength);
 
@@ -491,7 +498,8 @@ bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir
 
 	if (rayCallback.hasHit())
 	{
-		position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+        outPosition = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+        outObject = static_cast<PhysicalBody*>(rayCallback.m_collisionObject->getUserPointer());
 
 		return true;
 	}

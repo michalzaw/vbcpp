@@ -54,6 +54,15 @@ void PhysicalBodyGhost::changedTransform()
 }
 
 
+void PhysicalBodyGhost::onAttachedToScenObject()
+{
+    if (_ghostObject)
+    {
+        _ghostObject->setUserPointer((PhysicalBody*) this);
+    }
+}
+
+
 void PhysicalBodyGhost::updateBody()
 {
     _collShape.reset(new btBoxShape(btVector3(1.0f, 1.0f, 1.0f)));
