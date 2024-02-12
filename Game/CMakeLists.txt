@@ -4,6 +4,7 @@ set (GAME_SOURCES
 	Game/AI/AIAgentVehicle.cpp
 	Game/AI/PathComponent.cpp
 	Game/AI/StopComponent.cpp
+	Game/AI/TrafficLightsComponent.cpp
 	Game/BusStartPoint.cpp
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
@@ -26,6 +27,7 @@ set (GAME_HEADERS
 	Game/AI/AIAgentVehicle.h
 	Game/AI/PathComponent.h
 	Game/AI/StopComponent.h
+	Game/AI/TrafficLightsComponent.h
 	Game/BusStartPoint.h
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h

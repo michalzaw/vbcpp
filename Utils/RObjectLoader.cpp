@@ -16,6 +16,7 @@ using namespace tinyxml2;
 #include "../Game/AI/AIAgent.h"
 #include "../Game/AI/AIAgentPhysicalVechicle.h"
 #include "../Game/AI/AIAgentVehicle.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 
@@ -88,6 +89,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		else if (componentType == "aiAgentVehicle")
 		{
 			loadAiAgentVehicle(componentElement, object, componentIndex);
+		}
+		else if (componentType == "trafficLights")
+		{
+			loadTrafficLightsComponent(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -246,6 +251,14 @@ void RObjectLoader::loadAiAgent(tinyxml2::XMLElement* componentElement, RObject*
 void RObjectLoader::loadAiAgentVehicle(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	// not contains additional parameters
+}
+
+
+void RObjectLoader::loadTrafficLightsComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	object->getComponents()[componentIndex]["redLightNodeName"] = componentElement->Attribute("redLightNodeName");
+	object->getComponents()[componentIndex]["yellowLightNodeName"] = componentElement->Attribute("yellowLightNodeName");
+	object->getComponents()[componentIndex]["greenLightNodeName"] = componentElement->Attribute("greenLightNodeName");
 }
 
 
@@ -594,6 +607,16 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			AIAgentVehicle* aiAgent = sceneManager->getGameLogicSystem()->addAIAgentVehicle();
 
 			sceneObject->addComponent(aiAgent);
+		}
+		else if (componentType == "trafficLights")
+		{
+			const std::string& redLightNodeName = components[i]["redLightNodeName"];
+			const std::string& yellowLightNodeName = components[i]["yellowLightNodeName"];
+			const std::string& greenLightNodeName = components[i]["greenLightNodeName"];
+
+			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName);
+
+			sceneObject->addComponent(trafficLights);
 		}
 	}
 

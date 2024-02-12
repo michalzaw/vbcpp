@@ -7,6 +7,7 @@
 #include "AI/AIAgentVehicle.h"
 #include "AI/PathComponent.h"
 #include "AI/StopComponent.h"
+#include "AI/TrafficLightsComponent.h"
 #include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
@@ -90,6 +91,16 @@ StopComponent* GameLogicSystem::addStopComponent()
 	StopComponent* component = new StopComponent();
 
 	_stopComponents.push_back(component);
+
+	return component;
+}
+
+
+TrafficLightsComponent* GameLogicSystem::addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName)
+{
+	TrafficLightsComponent* component = new TrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLighNodeName);
+
+	_trafficLightsComponents.push_back(component);
 
 	return component;
 }
@@ -211,6 +222,22 @@ void GameLogicSystem::removeStopComponent(StopComponent* component)
 }
 
 
+void GameLogicSystem::removeTrafficLightsComponent(TrafficLightsComponent* component)
+{
+	for (std::vector<TrafficLightsComponent*>::iterator i = _trafficLightsComponents.begin(); i != _trafficLightsComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _trafficLightsComponents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
 void GameLogicSystem::removeBusStartPoint(BusStartPoint* component)
 {
 	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
@@ -320,6 +347,14 @@ void GameLogicSystem::update(float deltaTime)
 		}
 	}
 
+	for (TrafficLightsComponent* component : _trafficLightsComponents)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
 	/*for (BusStopComponent* component : _busStops)
 	{
 		component->update(deltaTime);
@@ -363,6 +398,20 @@ void GameLogicSystem::destroy()
 	}
 
 	_aiAgentVehicles.clear();
+
+	for (std::vector<StopComponent*>::iterator i = _stopComponents.begin(); i != _stopComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_stopComponents.clear();
+
+	for (std::vector<TrafficLightsComponent*>::iterator i = _trafficLightsComponents.begin(); i != _trafficLightsComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_trafficLightsComponents.clear();
 
 	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
 	{

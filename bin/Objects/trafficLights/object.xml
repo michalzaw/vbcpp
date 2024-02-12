@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Object>
+	<Description author="mich" name="trafficLights" comment="simple traffic lights" />
+
+	<Components>
+	
+		<Component type="render" model="trafficLights.fbx" />
+	
+		<Component type="physics" mass="25" body="dynamic" />
+
+		<Component type="trafficLights" redLightNodeName="RedLight" yellowLightNodeName="YellowLight" greenLightNodeName="GreenLight" />
+	</Components>
+	
+</Object>

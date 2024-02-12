@@ -18,6 +18,7 @@ class AIAgent;
 class AIAgentPhysicalVechicle;
 class AIAgentVehicle;
 class StopComponent;
+class TrafficLightsComponent;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
 
@@ -41,6 +42,7 @@ class GameLogicSystem final
 		std::vector<AIAgent*> _aiAgents;
 		std::vector<AIAgentVehicle*> _aiAgentVehicles;
 		std::vector<StopComponent*> _stopComponents;
+		std::vector<TrafficLightsComponent*> _trafficLightsComponents;
 		std::vector<BusStartPoint*> _busStartPoints; // todo: dodawac defaultowy Start point po wczytaniu sceny jesli vector jest pusty
 		// todo: Przeniesc obsluge przystankow do tego systemu
 		//std::vector<BusStopComponent*> _busStops;
@@ -58,6 +60,7 @@ class GameLogicSystem final
 		AIAgentPhysicalVechicle* addAIAgentPhysicalVechicle();
 		AIAgentVehicle* addAIAgentVehicle();
 		StopComponent* addStopComponent();
+		TrafficLightsComponent* addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName);
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 
@@ -67,6 +70,7 @@ class GameLogicSystem final
 		void removeAIAgent(AIAgent* component);
 		void removeAIAgentVehicle(AIAgentVehicle* component);
 		void removeStopComponent(StopComponent* component);
+		void removeTrafficLightsComponent(TrafficLightsComponent* component);
 		void removeBusStartPoint(BusStartPoint* component);
 		//void removeBusStop(BusStopComponent* busStop);
 
