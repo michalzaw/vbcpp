@@ -72,6 +72,9 @@ void saveMaterial(XMLElement* materialsElement, XMLDocument& doc, Material* mate
 	std::string specularStr = vec4ToString(material->specularColor);
 	matElement->SetAttribute("specular", specularStr.c_str());
 
+	std::string emissiveStr = vec4ToString(material->emissiveColor);
+	matElement->SetAttribute("emissive", emissiveStr.c_str());
+
 	if (material->diffuseTexture != nullptr && material->diffuseTexture->isLoadedFromFile())
 	{
 		std::string diffuseTexturePath = FilesHelper::getRelativePathToDirInGameDir(material->diffuseTexture->getPath(), texPath);
