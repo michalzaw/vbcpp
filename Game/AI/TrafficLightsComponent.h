@@ -43,6 +43,8 @@ class TrafficLightsComponent : public Component
 		glm::vec4 _yellowLightColor;
 		glm::vec4 _greenLightColor;
 
+		TrafficLightsState _initState;
+
 		float _timer;
 		TrafficLightsState _currentState;
 
@@ -57,8 +59,11 @@ class TrafficLightsComponent : public Component
 							   const TrafficLightsState initState);
 		~TrafficLightsComponent();
 
+		inline TrafficLightsState getInitState() { return _initState; }
+		void setInitState(TrafficLightsState state);
+
 		inline TrafficLightsState getCurrentState() { return _currentState; }
-		void setCurrentState(TrafficLightsState state);
+		void setCurrentState(TrafficLightsState state, bool initialization = false);
 
 		void changedTransform() override;
 		void update(float deltaTime) override;

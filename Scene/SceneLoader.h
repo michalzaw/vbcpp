@@ -59,6 +59,7 @@ class SceneLoader
 		void loadAIAgentComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadAIAgentVehicleComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadStopComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
+		void loadTrafficLightComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 
 	public:

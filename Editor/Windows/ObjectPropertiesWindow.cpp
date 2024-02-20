@@ -1197,23 +1197,23 @@ void showStopComponentDetails(StopComponent* component)
 
 void showTrafficLightsComponentDetails(TrafficLightsComponent* component)
 {
-	if (ImGui::CollapsingHeader("Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Traffic Lights", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
-		ImGui::PushID("BezierCurveComponentDetails");
+		ImGui::PushID("TrafficLightsComponentDetails");
 
 		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Init state")
 		{
-			const std::string& currentValue = trafficLightsStateStrings[component->getCurrentState()];
+			const std::string& currentValue = trafficLightsStateStrings[component->getInitState()];
 			std::string comboItems;
 			int selectedItemIndex = 0;
 			convertVectorToComboData(&trafficLightsStateStrings[0], (unsigned int) TLS_STATE_COUNT, currentValue, comboItems, selectedItemIndex, false);
 
 			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
 			{
-				component->setCurrentState((TrafficLightsState) selectedItemIndex);
+				component->setInitState((TrafficLightsState) selectedItemIndex);
 			}
 		}
 		COMPONENT_PROPERTY_EDIT_END

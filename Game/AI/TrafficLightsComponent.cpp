@@ -26,7 +26,9 @@ TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeNa
 	_redLightNodeName(redLightNodeName), _yellowLightNodeName(yellowLightNodeName), _greenLightNodeName(greenLighNodeName),
 	_redLightMaterial(nullptr), _yellowLightMaterial(nullptr), _greenLightMaterial(nullptr),
 	_redLightColor(1.0f, 0.0f, 0.0f, 1.0f), _yellowLightColor(1.0f, 1.0f, 0.0f, 1.0f), _greenLightColor(0.0f, 1.0f, 0.0f, 1.0f),
-	_timer(0.0f), _currentState(initState), _triggerBox(nullptr), _triggerBoxPosition(triggerBoxPosition)
+	_initState(initState),
+	_timer(0.0f), _currentState(initState),
+	_triggerBox(nullptr), _triggerBoxPosition(triggerBoxPosition)
 {
 
 }
@@ -73,17 +75,26 @@ void TrafficLightsComponent::onAttachedToScenObject()
 
 
 	SceneObject* triggerBoxObject = getSceneObject()->getSceneManager()->addSceneObject(getSceneObject()->getName() + "-triggerBox");
+	triggerBoxObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 
 	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost();
 	triggerBoxObject->addComponent(_triggerBox);
 	triggerBoxObject->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
 
 	
-	setCurrentState(_currentState);
+	setCurrentState(_initState);
 }
 
 
-void TrafficLightsComponent::setCurrentState(TrafficLightsState state)
+void TrafficLightsComponent::setInitState(TrafficLightsState state)
+{
+	_initState = state;
+
+	setCurrentState(state, true);
+}
+
+
+void TrafficLightsComponent::setCurrentState(TrafficLightsState state, bool initialization/* = false*/)
 {
 	_currentState = state;
 
@@ -95,7 +106,11 @@ void TrafficLightsComponent::setCurrentState(TrafficLightsState state)
 	{
 		_redLightMaterial->emissiveColor = _redLightColor;
 
-		_timer = 10.0f;
+		_timer = 16.0f;
+		if (initialization)
+		{
+			_timer -= 2.0f;
+		}
 	}
 	else if (_currentState == TLS_RED_AND_YELLOW)
 	{

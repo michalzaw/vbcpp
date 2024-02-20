@@ -6,6 +6,7 @@
 #include "../Game/AI/AIAgentVehicle.h"
 #include "../Game/AI/PathComponent.h"
 #include "../Game/AI/StopComponent.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
@@ -421,6 +422,19 @@ void SceneLoader::loadStopComponent(tinyxml2::XMLElement* componentElement, Scen
 }
 
 
+void SceneLoader::loadTrafficLightComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::string initStateStr = XmlUtils::getAttributeStringOptional(componentElement, "initState");
+
+	TrafficLightsComponent* component = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+	if (!initStateStr.empty())
+	{
+		TrafficLightsState initState = !initStateStr.empty() ? getTrafficLightsStateFromString(initStateStr) : TLS_RED;
+		component->setInitState(initState);
+	}
+}
+
+
 void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
 	std::string name = XmlUtils::getAttributeString(componentElement, "name");
@@ -511,6 +525,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiStop")
 			{
 				loadStopComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "trafficLights")
+			{
+				loadTrafficLightComponent(componentElement, sceneObject);
 			}
 
 			if (componentType == "busStartPoint")

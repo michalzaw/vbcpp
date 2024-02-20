@@ -9,6 +9,7 @@
 #include "../Game/AI/AIAgentVehicle.h"
 #include "../Game/AI/PathComponent.h"
 #include "../Game/AI/StopComponent.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 
@@ -265,6 +266,17 @@ void SceneSaver::saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2
 }
 
 
+void SceneSaver::saveTrafficLightsComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, TrafficLightsComponent* trafficLightsComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "trafficLights");
+	componentElement->SetAttribute("initState", trafficLightsStateStrings[trafficLightsComponent->getInitState()].c_str());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
 {
 	XMLElement* componentElement = doc.NewElement("Component");
@@ -340,6 +352,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (stopComponent)
 	{
 		saveStopComponent(objectElement, doc, stopComponent);
+	}
+
+	TrafficLightsComponent* trafficLightsComponent = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+	if (trafficLightsComponent)
+	{
+		saveTrafficLightsComponent(objectElement, doc, trafficLightsComponent);
 	}
 
 	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));
