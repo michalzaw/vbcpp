@@ -10,6 +10,22 @@
 
 
 class Material;
+class PhysicalBody;
+
+
+enum TrafficLightsState
+{
+	TLS_RED,
+	TLS_RED_AND_YELLOW,
+	TLS_GREEN,
+	TLS_YELLOW,
+
+	TLS_STATE_COUNT
+};
+
+
+const std::string trafficLightsStateStrings[] = { "red", "red_and_yellow", "green", "yellow" };
+TrafficLightsState getTrafficLightsStateFromString(const std::string& name);
 
 
 class TrafficLightsComponent : public Component
@@ -28,15 +44,23 @@ class TrafficLightsComponent : public Component
 		glm::vec4 _greenLightColor;
 
 		float _timer;
-		int _currentLight;
+		TrafficLightsState _currentState;
+
+		PhysicalBody* _triggerBox;
+		glm::vec3 _triggerBoxPosition;
 
 	protected:
 		void onAttachedToScenObject() override;
 
 	public:
-		TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName);
+		TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName, const glm::vec3& triggerBoxPosition,
+							   const TrafficLightsState initState);
 		~TrafficLightsComponent();
 
+		inline TrafficLightsState getCurrentState() { return _currentState; }
+		void setCurrentState(TrafficLightsState state);
+
+		void changedTransform() override;
 		void update(float deltaTime) override;
 
 };

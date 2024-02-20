@@ -21,6 +21,7 @@ class StopComponent;
 class TrafficLightsComponent;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
+enum TrafficLightsState;
 
 
 struct PendingPathConnection final
@@ -60,7 +61,8 @@ class GameLogicSystem final
 		AIAgentPhysicalVechicle* addAIAgentPhysicalVechicle();
 		AIAgentVehicle* addAIAgentVehicle();
 		StopComponent* addStopComponent();
-		TrafficLightsComponent* addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName);
+		TrafficLightsComponent* addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
+														  const glm::vec3& triggerBoxPosition, const TrafficLightsState initState);
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 

@@ -6,11 +6,11 @@
 
 	<Components>
 	
-		<Component type="render" model="trafficLights.fbx" />
+		<Component type="render" model="trafficLights.fbx" normalsSmoothing="false" loadWithHierarchy="true" />
 	
-		<Component type="physics" mass="25" body="dynamic" />
+		<!--<Component type="physics" mass="25" body="dynamic" />-->
 
-		<Component type="trafficLights" redLightNodeName="RedLight" yellowLightNodeName="YellowLight" greenLightNodeName="GreenLight" />
+		<Component type="trafficLights" redLightNodeName="Red" yellowLightNodeName="Yellow" greenLightNodeName="Green" triggerBoxPosition="-2.0,0.0,5.0" initState="green" />
 	</Components>
 	
 </Object>

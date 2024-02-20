@@ -1,16 +1,32 @@
 #include "TrafficLightsComponent.h"
 
+#include "AIAgentVehicle.h"
+
 #include "../../Graphics/RenderObject.h"
 
+#include "../../Scene/SceneManager.h"
 #include "../../Scene/SceneObject.h"
 
 
-TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName)
+TrafficLightsState getTrafficLightsStateFromString(const std::string& name)
+{
+	for (int i = 0; i < TLS_STATE_COUNT; ++i)
+	{
+		if (trafficLightsStateStrings[i] == name)
+			return static_cast<TrafficLightsState>(i);
+	}
+
+	return TLS_STATE_COUNT;
+}
+
+
+TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName, const glm::vec3& triggerBoxPosition,
+											   const TrafficLightsState initState)
 	: Component(CT_TRAFFIC_LIGHTS),
 	_redLightNodeName(redLightNodeName), _yellowLightNodeName(yellowLightNodeName), _greenLightNodeName(greenLighNodeName),
 	_redLightMaterial(nullptr), _yellowLightMaterial(nullptr), _greenLightMaterial(nullptr),
 	_redLightColor(1.0f, 0.0f, 0.0f, 1.0f), _yellowLightColor(1.0f, 1.0f, 0.0f, 1.0f), _greenLightColor(0.0f, 1.0f, 0.0f, 1.0f),
-	_timer(0.0f), _currentLight(0)
+	_timer(0.0f), _currentState(initState), _triggerBox(nullptr), _triggerBoxPosition(triggerBoxPosition)
 {
 
 }
@@ -18,7 +34,10 @@ TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeNa
 
 TrafficLightsComponent::~TrafficLightsComponent()
 {
-
+	if (_triggerBox != nullptr)
+	{
+		getSceneObject()->getSceneManager()->removeSceneObject(_triggerBox->getSceneObject());
+	}
 }
 
 
@@ -27,36 +46,7 @@ void TrafficLightsComponent::onAttachedToScenObject()
 	RenderObject* renderObject = dynamic_cast<RenderObject*>(getSceneObject()->getComponent(CT_RENDER_OBJECT));
 	if (renderObject != nullptr)
 	{
-		//for (int i = 0; i < renderObject->getModelRootNode()->getChildrenCount(); ++i)
-		//{
-			ModelNode* modelNode = renderObject->getModelRootNode();
-			for (int j = 0; j < modelNode->getMeshesCount(); ++j)
-			{
-				ModelNodeMesh* mesh = modelNode->getMesh(j);
-				if (mesh->material->name == _redLightNodeName)
-				{
-					_redLightMaterial = mesh->material;
-					//_redLightColor = _redLightMaterial->emissiveColor;
-					_redLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-				}
-				if (mesh->material->name == _yellowLightNodeName)
-				{
-					_yellowLightMaterial = mesh->material;
-					//_yellowLightColor = _yellowLightMaterial->emissiveColor;
-					_yellowLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-				}
-				if (mesh->material->name == _greenLightNodeName)
-				{
-					_greenLightMaterial = mesh->material;
-					//_greenLightColor = _greenLightMaterial->emissiveColor;
-					_greenLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-				}
-			}
-		//}
-
-		// Saver materia³ów nie zapisuje emmisive color
-
-		/*ModelNode* redLightModelNode = renderObject->getModelNodeByName(_redLightNodeName);
+		ModelNode* redLightModelNode = renderObject->getModelNodeByName(_redLightNodeName);
 		if (redLightModelNode)
 		{
 			_redLightMaterial = redLightModelNode->getMesh(0)->material;
@@ -78,91 +68,90 @@ void TrafficLightsComponent::onAttachedToScenObject()
 			_greenLightMaterial = greenLightModelNode->getMesh(0)->material;
 			_greenLightColor = _greenLightMaterial->emissiveColor;
 			_greenLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		}*/
+		}
+	}
+
+
+	SceneObject* triggerBoxObject = getSceneObject()->getSceneManager()->addSceneObject(getSceneObject()->getName() + "-triggerBox");
+
+	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost();
+	triggerBoxObject->addComponent(_triggerBox);
+	triggerBoxObject->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
+
+	
+	setCurrentState(_currentState);
+}
+
+
+void TrafficLightsComponent::setCurrentState(TrafficLightsState state)
+{
+	_currentState = state;
+
+	_greenLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	_yellowLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	_redLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+	if (_currentState == TLS_RED)
+	{
+		_redLightMaterial->emissiveColor = _redLightColor;
+
+		_timer = 10.0f;
+	}
+	else if (_currentState == TLS_RED_AND_YELLOW)
+	{
+		_redLightMaterial->emissiveColor = _redLightColor;
+		_yellowLightMaterial->emissiveColor = _yellowLightColor;
+
+		_timer = 1.0f;
+	}
+	else if (_currentState == TLS_GREEN)
+	{
+		_greenLightMaterial->emissiveColor = _greenLightColor;
+
+		_timer = 10.0f;
+	}
+	else if (_currentState == TLS_YELLOW)
+	{
+		_yellowLightMaterial->emissiveColor = _yellowLightColor;
+
+		_timer = 3.0f;
+	}
+}
+
+
+void TrafficLightsComponent::changedTransform()
+{
+	if (_triggerBox != nullptr)
+	{
+		_triggerBox->getSceneObject()->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
 	}
 }
 
 
 void TrafficLightsComponent::update(float deltaTime)
 {
-	/*_timer += deltaTime;
-
-	if (_timer > 1.0f)
-	{
-		_timer -= 1.0f;
-
-		if (_currentLight == 0)
-		{
-			_currentLight = 1;
-			_yellowLightMaterial->emissiveColor = _yellowLightColor;
-		}
-		else if (_currentLight == 1)
-		{
-			_currentLight = 0;
-			_yellowLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		}
-	}*/
-
-	/*_timer += deltaTime;
-
-	if (_timer > 3.0f)
-	{
-		_timer -= 3.0f;
-
-		_currentLight = (_currentLight + 1) % 3;
-
-		_greenLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		_yellowLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		_redLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		if (_currentLight == 0)
-		{
-			_redLightMaterial->emissiveColor = _redLightColor;
-		}
-		else if (_currentLight == 1)
-		{
-			_yellowLightMaterial->emissiveColor = _yellowLightColor;
-		}
-		else if (_currentLight == 2)
-		{
-			_greenLightMaterial->emissiveColor = _greenLightColor;
-		}
-	}*/
-
 	_timer -= deltaTime;
+
 	if (_timer <= 0.0f)
 	{
-		_currentLight = (_currentLight + 1) % 4;
-		LOG_DEBUG(LOG_VARIABLE(_currentLight));
+		setCurrentState((TrafficLightsState) ((_currentState + 1) % TLS_STATE_COUNT));
+	}
 
-		_greenLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		_yellowLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-		_redLightMaterial->emissiveColor = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-		if (_currentLight == 0)
+	if (_triggerBox != nullptr)
+	{
+		if (_currentState == TLS_RED || _currentState == TLS_YELLOW)
 		{
-			_redLightMaterial->emissiveColor = _redLightColor;
-			
-			_timer = 10.0f;
-		}
-		else if (_currentLight == 1)
-		{
-			_redLightMaterial->emissiveColor = _redLightColor;
-			_yellowLightMaterial->emissiveColor = _yellowLightColor;
+			for (PhysicalBody* body : _triggerBox->getObjectsBeginCollision())
+			{
+				Component* aiAgentVehicleComponent = body->getSceneObject()->getComponent(CT_AI_AGENT_VEHICLE);
+				if (aiAgentVehicleComponent != nullptr)
+				{
+					AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(aiAgentVehicleComponent);
 
-			_timer = 1.0f;
-		}
-		else if (_currentLight == 2)
-		{
-			_greenLightMaterial->emissiveColor = _greenLightColor;
-
-			_timer = 10.0f;
-		}
-		else if (_currentLight == 3)
-		{
-			_yellowLightMaterial->emissiveColor = _yellowLightColor;
-
-			_timer = 3.0f;
+					LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
+					aiAgentVehicle->stop(5.0f);
+				}
+			}
 		}
 	}
 }

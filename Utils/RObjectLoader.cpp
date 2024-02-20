@@ -109,7 +109,9 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
 	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows", "true");
 	object->getComponents()[componentIndex]["normalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "normalsSmoothing", "true");
+	object->getComponents()[componentIndex]["loadWithHierarchy"] = XmlUtils::getAttributeStringOptional(componentElement, "loadWithHierarchy", "false");
 	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
+	object->getComponents()[componentIndex]["lowPolyLoadWithHierarchy"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyLoadWithHierarchy", "false");
 	object->getComponents()[componentIndex]["animated"] = XmlUtils::getAttributeStringOptional(componentElement, "animated");
 }
 
@@ -259,16 +261,22 @@ void RObjectLoader::loadTrafficLightsComponent(tinyxml2::XMLElement* componentEl
 	object->getComponents()[componentIndex]["redLightNodeName"] = componentElement->Attribute("redLightNodeName");
 	object->getComponents()[componentIndex]["yellowLightNodeName"] = componentElement->Attribute("yellowLightNodeName");
 	object->getComponents()[componentIndex]["greenLightNodeName"] = componentElement->Attribute("greenLightNodeName");
+	object->getComponents()[componentIndex]["triggerBoxPosition"] = componentElement->Attribute("triggerBoxPosition");
+	object->getComponents()[componentIndex]["initState"] = componentElement->Attribute("initState");
 }
 
 
-// flag normalSmoothing only for non animated objects
-RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, RStaticModel* hightPollyModel/* = nullptr*/)
+// flag normalSmoothing and loadWithHierarchy only for non animated objects
+RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, bool loadWithHierarchy, RStaticModel* hightPollyModel/* = nullptr*/)
 {
 	if (isAnimated)
 	{
 		return ResourceManager::getInstance().loadAnimatedModel(modelPath, objectDirPath,
 																hightPollyModel != nullptr ? static_cast<RAnimatedModel*>(hightPollyModel)->getBoneInfos() : std::unordered_map<std::string, BoneInfo*>());
+	}
+	else if (loadWithHierarchy)
+	{
+		return ResourceManager::getInstance().loadModelWithHierarchy(modelPath, objectDirPath, normalSmoothing);
 	}
 	else
 	{
@@ -348,8 +356,10 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			const std::string& modelFile = components[i]["model"];
 			const std::string& modelPath = objectDirPath + modelFile;
 			bool isAnimated = toBool(components[i]["animated"]);
+			bool normalsSmoothing = toBool(components[i]["normalsSmoothing"]);
+			bool loadWithHierarchy = toBool(components[i]["loadWithHierarchy"]);
 
-			model = loadModel(modelPath, objectDirPath, isAnimated, toBool(components[i]["normalsSmoothing"]));
+			model = loadModel(modelPath, objectDirPath, isAnimated, normalsSmoothing, loadWithHierarchy);
 
 			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
 			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
@@ -359,8 +369,10 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			if (!lowPolyModeFile.empty())
 			{
 				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
+				bool lowPolyNormalsSmoothing = toBool(components[i]["lowPolyModelNormalsSmoothing"]);
+				bool lowPolyLoadWithHierarchy = toBool(components[i]["lowPolyLoadWithHierarchy"]);
 
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, toBool(components[i]["lowPolyModelNormalsSmoothing"]), model);
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
@@ -613,8 +625,13 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			const std::string& redLightNodeName = components[i]["redLightNodeName"];
 			const std::string& yellowLightNodeName = components[i]["yellowLightNodeName"];
 			const std::string& greenLightNodeName = components[i]["greenLightNodeName"];
+			const std::string& triggerBoxPositionStr = components[i]["triggerBoxPosition"].c_str();
+			const std::string& initStateStr = components[i]["initState"];
 
-			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName);
+			glm::vec3 triggerBoxPosition = !triggerBoxPositionStr.empty() ? XMLstringToVec3(triggerBoxPositionStr.c_str()) : glm::vec3(0.0f, 0.0f, 0.0f);
+			TrafficLightsState initState = !initStateStr.empty() ? getTrafficLightsStateFromString(initStateStr) : TLS_RED;
+
+			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName, triggerBoxPosition, initState);
 
 			sceneObject->addComponent(trafficLights);
 		}

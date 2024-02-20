@@ -20,6 +20,7 @@
 #include "../../Game/AI/AIAgentVehicle.h"
 #include "../../Game/AI/PathComponent.h"
 #include "../../Game/AI/StopComponent.h"
+#include "../../Game/AI/TrafficLightsComponent.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
 
@@ -468,10 +469,13 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 
 
 template<typename TYPE>
-void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex)
+void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
 {
-	outItemsString += " ";
-	outItemsString += '\0';
+	if (addEmptyElement)
+	{
+		outItemsString += " ";
+		outItemsString += '\0';
+	}
 
 	for (int i = 0; i < items.size(); ++i)
 	{
@@ -479,8 +483,39 @@ void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& select
 
 		if (items[i] == selectedItemValue)
 		{
-			outSelectedItemIndex = i + 1;
+			outSelectedItemIndex = i;
 		}
+	}
+
+	if (addEmptyElement)
+	{
+		outSelectedItemIndex += 1;
+	}
+}
+
+
+template<typename TYPE>
+void convertVectorToComboData(const TYPE* items, unsigned int itemsCount, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
+{
+	if (addEmptyElement)
+	{
+		outItemsString += " ";
+		outItemsString += '\0';
+	}
+
+	for (int i = 0; i < itemsCount; ++i)
+	{
+		outItemsString += Strings::toString(items[i]) + '\0';
+
+		if (items[i] == selectedItemValue)
+		{
+			outSelectedItemIndex = i;
+		}
+	}
+
+	if (addEmptyElement)
+	{
+		outSelectedItemIndex += 1;
 	}
 }
 
@@ -1160,6 +1195,37 @@ void showStopComponentDetails(StopComponent* component)
 }
 
 
+void showTrafficLightsComponentDetails(TrafficLightsComponent* component)
+{
+	if (ImGui::CollapsingHeader("Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BezierCurveComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Init state")
+		{
+			const std::string& currentValue = trafficLightsStateStrings[component->getCurrentState()];
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(&trafficLightsStateStrings[0], (unsigned int) TLS_STATE_COUNT, currentValue, comboItems, selectedItemIndex, false);
+
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				component->setCurrentState((TrafficLightsState) selectedItemIndex);
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showBezierCurveComponentDetails(BezierCurve* component)
 {
 	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1412,6 +1478,12 @@ void showObjectProperties()
 			if (stopComponent)
 			{
 				showStopComponentDetails(stopComponent);
+			}
+
+			TrafficLightsComponent* trafficLightsComponent = dynamic_cast<TrafficLightsComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+			if (trafficLightsComponent)
+			{
+				showTrafficLightsComponentDetails(trafficLightsComponent);
 			}
 
 			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
