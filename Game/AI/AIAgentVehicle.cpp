@@ -97,6 +97,10 @@ void AIAgentVehicle::lookForward()
 	glm::vec3 rayDirection = glm::normalize(glm::vec3(forwardVector.x(), forwardVector.y(), forwardVector.z()));
 	//LOG_DEBUG(LOG_VARIABLE(rayDirection));
 	float rayLength = std::max(_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() / 2.0f, 0.5f);// 30.0f;
+	if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 1.0f)
+	{
+		rayLength = 5.0f;
+	}
 
 	short RAY_TEST_FILTER_MASK = btBroadphaseProxy::AllFilter;// COL_ENV | COL_BUS;
 	short RAY_TEST_FILTER_GROUP = btBroadphaseProxy::DefaultFilter;// COL_WHEEL;
@@ -120,7 +124,11 @@ void AIAgentVehicle::lookForward()
 		//if (!_isStop)
 		{
 			LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
-			stop(distanceToObject - 5);
+			if (distanceToObject > 5.0f)
+			{
+				distanceToObject = distanceToObject - 5.0f;
+			}
+			stop(distanceToObject);
 		}
 	}
 	else
