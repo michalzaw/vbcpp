@@ -32,7 +32,7 @@ class CameraControlComponent : public Component
 		void setMovmentControl(bool isEnable);
 		void setRotationControl(bool isEnable);
 		void setChangePositionOffsetSpeed(float speed);
-		bool isMOvementControl();
+		bool isMovementControl();
 		bool isRotationControl();
 		float getChangePositionOffsetSpeed();
 

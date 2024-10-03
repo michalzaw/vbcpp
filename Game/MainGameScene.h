@@ -55,6 +55,8 @@ class MainGameScene final : public GameScene
 
 		void rayTestWithModelNode(RenderObject* renderObject, ModelNode* modelNode, glm::vec3 rayStart, glm::vec3 rayDir, glm::mat4 parentTransform = glm::mat4(1.0f));
 
+		void setCameraControll(bool isCameraControll);
+
 	public:
 		explicit MainGameScene(Window* window);
 		virtual ~MainGameScene();
