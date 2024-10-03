@@ -1,8 +1,13 @@
 #include "PhysicalBodyGhost.h"
 
+#include "../Game/GameConfig.h"
 
-PhysicalBodyGhost::PhysicalBodyGhost()
-	: PhysicalBody(0.0f)
+#include "../Scene/SceneManager.h"
+
+
+PhysicalBodyGhost::PhysicalBodyGhost(const btVector3& size)
+	: PhysicalBody(0.0f),
+    _size(size)
 {
 	updateBody();
 }
@@ -60,12 +65,33 @@ void PhysicalBodyGhost::onAttachedToScenObject()
     {
         _ghostObject->setUserPointer((PhysicalBody*) this);
     }
+
+    if (GameConfig::getInstance().mode == GM_EDITOR)
+    {
+        // create editor helper
+        SceneObject* helperSceneObject = getSceneObject()->getSceneManager()->addSceneObject("editor#StopComponent helper");
+        helperSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
+
+        Material* material = new Material;
+        material->shader = NOTEXTURE_MATERIAL;
+        material->shininess = 96.0f;
+        material->diffuseColor = glm::vec4(0.32f, 0.0f, 0.0f, 0.5f);
+
+        Cube* cube = new Cube(1, material);
+        cube->init();
+        cube->setCastShadows(false);
+        getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
+
+        helperSceneObject->setScale(_size.x(), _size.y(), _size.z());
+
+        getSceneObject()->addChild(helperSceneObject);
+    }
 }
 
 
 void PhysicalBodyGhost::updateBody()
 {
-    _collShape.reset(new btBoxShape(btVector3(1.0f, 1.0f, 1.0f)));
+    _collShape.reset(new btBoxShape(_size * 0.5f));
 
     _ghostObject = new btGhostObject;
     _ghostObject->setCollisionShape(_collShape.get());

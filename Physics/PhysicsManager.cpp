@@ -378,9 +378,9 @@ PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVe
 }
 
 
-PhysicalBodyGhost* PhysicsManager::createPhysicalBodyGhost()
+PhysicalBodyGhost* PhysicsManager::createPhysicalBodyGhost(const btVector3& size)
 {
-    PhysicalBodyGhost* b = new PhysicalBodyGhost();
+    PhysicalBodyGhost* b = new PhysicalBodyGhost(size);
 
     _dynamicsWorld->addCollisionObject(b->getBulletObject(), COL_ENV, COL_BUS | COL_WHEEL);
 

@@ -77,7 +77,7 @@ void TrafficLightsComponent::onAttachedToScenObject()
 	SceneObject* triggerBoxObject = getSceneObject()->getSceneManager()->addSceneObject(getSceneObject()->getName() + "-triggerBox");
 	triggerBoxObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 
-	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost();
+	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost(btVector3(3, 2, 4));
 	triggerBoxObject->addComponent(_triggerBox);
 	triggerBoxObject->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
 

@@ -29,7 +29,7 @@ void StopComponent::onAttachedToScenObject()
 	}*/
 
 	//_physicalBody = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyBox(btVector3(1.0f, 1.0f, 1.0f), 0.0f, COL_ENV, COL_BUS | COL_WHEEL);
-	_physicalBody = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost();
+	_physicalBody = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost(btVector3(2.0f, 2.0f, 2.0f));
 	getSceneObject()->addComponent(_physicalBody);
 
 	if (GameConfig::getInstance().mode == GM_EDITOR)

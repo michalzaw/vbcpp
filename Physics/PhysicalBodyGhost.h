@@ -10,7 +10,7 @@
 class PhysicalBodyGhost : virtual public PhysicalBody
 {
     public:
-        PhysicalBodyGhost();
+        PhysicalBodyGhost(const btVector3& size);
         virtual ~PhysicalBodyGhost();
 
         void update() override;
@@ -22,6 +22,8 @@ class PhysicalBodyGhost : virtual public PhysicalBody
         void onAttachedToScenObject() override;
 
     private:
+        btVector3 _size;
+
         btGhostObject* _ghostObject;
 
         void updateBody();
