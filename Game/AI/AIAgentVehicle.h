@@ -8,6 +8,7 @@
 class PhysicalBodyRaycastVehicle;
 class PathComponent;
 class BezierCurve;
+class TrafficLightsComponent;
 
 
 class AIAgentVehicle final : public Component
@@ -17,6 +18,8 @@ class AIAgentVehicle final : public Component
 
 		PathComponent* _currentPath;
 		BezierCurve* _currentPathBezierCurve;
+
+		TrafficLightsComponent* _nextTrafficLights;
 
 		bool _isStop;
 		float _timeToStart;
@@ -37,6 +40,7 @@ class AIAgentVehicle final : public Component
 		inline PathComponent* getCurrentPath() { return _currentPath; }
 
 		void stop(float distance);
+		void stopOnTrafficLights(float distance, TrafficLightsComponent* trafficLights);
 
 		void update(float deltaTime) override;
 };

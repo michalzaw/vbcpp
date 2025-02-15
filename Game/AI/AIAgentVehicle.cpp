@@ -1,6 +1,7 @@
 #include "AIAgentVehicle.h"
 
 #include "PathComponent.h"
+#include "TrafficLightsComponent.h"
 
 #include "../../Graphics/BezierCurve.h"
 
@@ -12,6 +13,7 @@
 AIAgentVehicle::AIAgentVehicle()
 	: Component(CT_AI_AGENT_VEHICLE),
 	_vehicle(nullptr), _currentPath(nullptr), _currentPathBezierCurve(nullptr),
+	_nextTrafficLights(nullptr),
 	_isStop(false), _timeToStart(0.0f)
 {
 
@@ -123,7 +125,7 @@ void AIAgentVehicle::lookForward()
 
 		//if (!_isStop)
 		{
-			LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
+			//LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
 			if (distanceToObject > 5.0f)
 			{
 				distanceToObject = distanceToObject - 5.0f;
@@ -150,6 +152,20 @@ void AIAgentVehicle::stop(float distance)
 }
 
 
+void AIAgentVehicle::stopOnTrafficLights(float distance, TrafficLightsComponent* trafficLights)
+{
+	_nextTrafficLights = trafficLights;
+
+	_isStop = true;
+	_timeToStart = 1.0f;
+
+	float v0 = _vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() * 1000.0f / 3600.0f; // m/s
+	float a = (v0 * v0) / (2.0f * distance);
+	float mass = _vehicle->getMass();
+	_brakeForce = mass * a;
+}
+
+
 void AIAgentVehicle::update(float deltaTime)
 {
 	if (_currentPath == nullptr || _vehicle == nullptr)
@@ -165,6 +181,19 @@ void AIAgentVehicle::update(float deltaTime)
 
 	if (!_isStop)
 	{
+		if (_nextTrafficLights != nullptr)
+		{
+			if (_nextTrafficLights->getCurrentState() != TLS_GREEN)
+			{
+				_isStop = true;
+				_timeToStart = 1.0f;
+			}
+			else
+			{
+				_nextTrafficLights = nullptr;
+			}
+		}
+
 		if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 40.0f)
 		{
 			_vehicle->setBrakeValue(0.0f);

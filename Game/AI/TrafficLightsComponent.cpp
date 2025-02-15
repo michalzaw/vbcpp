@@ -164,7 +164,7 @@ void TrafficLightsComponent::update(float deltaTime)
 					AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(aiAgentVehicleComponent);
 
 					LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
-					aiAgentVehicle->stop(5.0f);
+					aiAgentVehicle->stopOnTrafficLights(5.0f, this);
 				}
 			}
 		}
