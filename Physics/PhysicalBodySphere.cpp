@@ -4,7 +4,7 @@
 #include "../Utils/Logger.h"
 
 PhysicalBodySphere::PhysicalBodySphere(btScalar r, btScalar mass)
-: PhysicalBody(mass),
+: PhysicalBody(PhysicalBodyType::SPHERE, mass),
 _radius(r)
 {
     updateBody();

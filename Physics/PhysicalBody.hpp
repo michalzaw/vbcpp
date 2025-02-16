@@ -24,10 +24,23 @@ enum collisiontypes {
     COL_ENV = BIT(4)
 };
 
+enum class PhysicalBodyType
+{
+    BOX,
+    BVT_TRIANGLE_MESH,
+    CONVEX_HULL,
+    CYLINDER,
+    GHOST,
+    RAYCAST_VEHICLE,
+    SPHERE,
+    STATIC_PLANE,
+    WHEEL
+};
+
 class PhysicalBody : public Component
 {
     public:
-        PhysicalBody(btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
+        PhysicalBody(PhysicalBodyType physicalBodyType, btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         virtual ~PhysicalBody();
 
         btRigidBody* getRigidBody() { return _rigidBody.get(); }
@@ -37,6 +50,8 @@ class PhysicalBody : public Component
         btScalar getMass() { return _mass; }
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
+
+        inline PhysicalBodyType getPhysicalBodyType() { return _physicalBodyType; }
 
         void addConstraint(Constraint* c)
         {
@@ -89,6 +104,8 @@ class PhysicalBody : public Component
         btVector3               _oldScale;
 		bool					_centerOfMassOffset;
 		btVector3				_centerOfMassOffsetValue;
+
+        PhysicalBodyType        _physicalBodyType;
 
         std::vector<Constraint*> _constraints;
 

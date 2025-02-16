@@ -8,6 +8,8 @@ PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(Vertex* vertices, unsigne
     _physMgr(physicsManager),
     _maxSteeringAngle(DEFAULT_MAX_STEERING_ANGLE), _steeringValue(0.0f), _engineForce(0.0f), _brakeValue(1.0f)
 {
+    _physicalBodyType = PhysicalBodyType::RAYCAST_VEHICLE;
+
     _rayCaster = new RayCasterWithCollisionGroups(_physMgr->getDynamicsWorld());
 
     updateBody();
@@ -19,6 +21,8 @@ PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(glm::vec3* vertices, unsi
     _physMgr(physicsManager),
     _maxSteeringAngle(DEFAULT_MAX_STEERING_ANGLE), _steeringValue(0.0f), _engineForce(0.0f), _brakeValue(1.0f)
 {
+    _physicalBodyType = PhysicalBodyType::RAYCAST_VEHICLE;
+
     _rayCaster = new RayCasterWithCollisionGroups(_physMgr->getDynamicsWorld());
 
     updateBody();
@@ -30,6 +34,8 @@ PhysicalBodyRaycastVehicle::PhysicalBodyRaycastVehicle(std::vector<glm::vec3>& v
     _physMgr(physicsManager),
     _maxSteeringAngle(DEFAULT_MAX_STEERING_ANGLE), _steeringValue(0.0f), _engineForce(0.0f), _brakeValue(1.0f)
 {
+    _physicalBodyType = PhysicalBodyType::RAYCAST_VEHICLE;
+
     _rayCaster = new RayCasterWithCollisionGroups(_physMgr->getDynamicsWorld());
 
     updateBody();

@@ -4,7 +4,7 @@
 #include "../Utils/Logger.h"
 
 PhysicalBodyCylinder::PhysicalBodyCylinder(btVector3 dim, btScalar mass, ShapeAlign align)
-: PhysicalBody(mass),
+: PhysicalBody(PhysicalBodyType::CYLINDER, mass),
 _dimensions(dim), _align(align)
 {
     updateBody();

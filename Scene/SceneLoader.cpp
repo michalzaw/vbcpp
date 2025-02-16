@@ -424,9 +424,25 @@ void SceneLoader::loadStopComponent(tinyxml2::XMLElement* componentElement, Scen
 
 void SceneLoader::loadTrafficLightComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
+	std::string triggerBoxPosition = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxPosition");
+	std::string triggerBoxRotation = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxRotation");
+	std::string triggerBoxSize = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxSize");
 	std::string initStateStr = XmlUtils::getAttributeStringOptional(componentElement, "initState");
 
 	TrafficLightsComponent* component = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+	if (!triggerBoxPosition.empty())
+	{
+		component->getTriggerBox()->getSceneObject()->setPosition(XMLstringToVec3(triggerBoxPosition.c_str()));
+	}
+	if (!triggerBoxRotation.empty())
+	{
+		component->getTriggerBox()->getSceneObject()->setRotation(XMLstringToVec3(triggerBoxRotation.c_str()));
+	}
+	if (!triggerBoxSize.empty())
+	{
+		component->getTriggerBox()->setSize(XMLstringToBtVec3(triggerBoxSize.c_str()));
+	}
+
 	if (!initStateStr.empty())
 	{
 		TrafficLightsState initState = !initStateStr.empty() ? getTrafficLightsStateFromString(initStateStr) : TLS_RED;

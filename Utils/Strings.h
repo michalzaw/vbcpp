@@ -11,6 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include <btBulletDynamicsCommon.h>
+
 
 // Convert number to string
 template <typename TYPE>
@@ -40,6 +42,14 @@ inline std::string vec4ToString(const glm::vec4& vector)
 {
 	std::ostringstream Stream;
 	Stream << vector.x << "," << vector.y << "," << vector.z << "," << vector.w;
+	return Stream.str();
+}
+
+
+inline std::string btVector3ToString(const btVector3& vector)
+{
+	std::ostringstream Stream;
+	Stream << vector.x() << "," << vector.y() << "," << vector.z();
 	return Stream.str();
 }
 

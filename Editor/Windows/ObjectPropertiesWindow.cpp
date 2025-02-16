@@ -30,6 +30,8 @@
 #include "../../Graphics/SkeletalAnimationComponent2.h"
 #include "../../Graphics/SkeletalAnimationHelperComponent.h"
 
+#include "../../Physics/PhysicalBodyGhost.h"
+
 #include "../../Utils/FilesHelper.h"
 
 
@@ -546,6 +548,13 @@ bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 #define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
 glm::vec3 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_btVector3(component, propertyName, additionalParams)																		\
+btVector3 value = component->get##propertyName();																								\
+float valueArray[] = { value.getX(), value.getY(), value.getZ() };																				\
+bool result = ImGui::DragFloat3("##value", valueArray);																				\
+value.setValue(valueArray[0], valueArray[1], valueArray[2]);
 
 
 #define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
@@ -1382,6 +1391,36 @@ void showBusStartComponentDetails(BusStartPoint* component)
 }
 
 
+void showPhysicalBodyDetails(PhysicalBody* component)
+{
+	if (component->getPhysicalBodyType() == PhysicalBodyType::GHOST)
+	{
+		PhysicalBodyGhost* ghostComponent = static_cast<PhysicalBodyGhost*>(component);
+		if (ImGui::CollapsingHeader("Trigger box", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Columns(2);
+			ImGui::Separator();
+			ImGui::PushID("TriggerBoxDetails");
+			
+			COMPONENT_PROPERTY_EDIT(ghostComponent, Size, btVector3, "Size")
+
+			ImGui::PopID();
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
+	}
+	else
+	{
+		if (ImGui::CollapsingHeader("Physics Component", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1407,10 +1446,7 @@ void showObjectProperties()
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
 			if (physicsComponent)
 			{
-				if (ImGui::CollapsingHeader("Physics Component", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-
-				}
+				showPhysicalBodyDetails(physicsComponent);
 			}
 
 			Grass* grassComponent = dynamic_cast<Grass*>(vbEditor::_selectedSceneObject->getComponent(CT_GRASS));

@@ -4,7 +4,7 @@
 #include "../Utils/Logger.h"
 
 PhysicalBodyBox::PhysicalBodyBox(btVector3 halfExtents, btScalar mass)
-: PhysicalBody(mass),
+: PhysicalBody(PhysicalBodyType::BOX, mass),
 _halfExtents(halfExtents)
 {
     updateBody();

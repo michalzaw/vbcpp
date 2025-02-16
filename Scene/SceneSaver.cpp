@@ -271,6 +271,9 @@ void SceneSaver::saveTrafficLightsComponent(tinyxml2::XMLElement* objectElement,
 	XMLElement* componentElement = doc.NewElement("Component");
 
 	componentElement->SetAttribute("type", "trafficLights");
+	componentElement->SetAttribute("triggerBoxPosition", vec3ToString(trafficLightsComponent->getTriggerBox()->getSceneObject()->getPosition()).c_str());
+	componentElement->SetAttribute("triggerBoxRotation", vec3ToString(trafficLightsComponent->getTriggerBox()->getSceneObject()->getRotation()).c_str());
+	componentElement->SetAttribute("triggerBoxSize", btVector3ToString(trafficLightsComponent->getTriggerBox()->getSize()).c_str());
 	componentElement->SetAttribute("initState", trafficLightsStateStrings[trafficLightsComponent->getInitState()].c_str());
 
 	objectElement->InsertEndChild(componentElement);

@@ -8,11 +8,12 @@
 // =========================================
 // CONSTRUCTOR & DESTRUCTOR
 
-PhysicalBody::PhysicalBody(btScalar m, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
+PhysicalBody::PhysicalBody(PhysicalBodyType physicalBodyType, btScalar m, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
 : Component(CT_PHYSICAL_BODY),
 _rigidBody(nullptr), _collShape(nullptr), _motionState(nullptr),
 _mass(m), _position(btVector3(0,0,0)), _oldScale(btVector3(1,1,1)),
 _centerOfMassOffset(centerOfMassOffset), _centerOfMassOffsetValue(centerOfMassOffsetValue),
+_physicalBodyType(physicalBodyType),
 _isUpdateTransformFromObject(true)
 {
 

@@ -2,7 +2,7 @@
 
 
 PhysicalBodyWheel::PhysicalBodyWheel(btRaycastVehicle* vehicle, int index)
-    : PhysicalBody(0), _vehicle(vehicle), _index(index)
+    : PhysicalBody(PhysicalBodyType::WHEEL, 0), _vehicle(vehicle), _index(index)
 {
     _steeringValue = _vehicle->getSteeringValue(_index);
 }

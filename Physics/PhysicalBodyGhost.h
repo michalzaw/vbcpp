@@ -7,11 +7,14 @@
 #include "PhysicalBody.hpp"
 
 
-class PhysicalBodyGhost : virtual public PhysicalBody
+class PhysicalBodyGhost : public PhysicalBody
 {
     public:
         PhysicalBodyGhost(const btVector3& size);
         virtual ~PhysicalBodyGhost();
+
+        void setSize(const btVector3& size);
+        const btVector3& getSize();
 
         void update() override;
         void changedTransform() override;
@@ -25,6 +28,8 @@ class PhysicalBodyGhost : virtual public PhysicalBody
         btVector3 _size;
 
         btGhostObject* _ghostObject;
+
+        SceneObject* _helperSceneObject;
 
         void updateBody();
 };

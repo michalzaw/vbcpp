@@ -6,8 +6,10 @@
 
 
 PhysicalBodyGhost::PhysicalBodyGhost(const btVector3& size)
-	: PhysicalBody(0.0f),
-    _size(size)
+	: PhysicalBody(PhysicalBodyType::GHOST, 0.0f),
+    _size(size),
+    _ghostObject(nullptr),
+    _helperSceneObject(nullptr)
 {
 	updateBody();
 }
@@ -16,6 +18,28 @@ PhysicalBodyGhost::PhysicalBodyGhost(const btVector3& size)
 PhysicalBodyGhost::~PhysicalBodyGhost()
 {
 
+}
+
+
+void PhysicalBodyGhost::setSize(const btVector3& size)
+{
+    _size = size;
+
+    _collShape.reset(new btBoxShape(_size * 0.5f));
+
+    _ghostObject->setCollisionShape(_collShape.get());
+
+
+    if (_helperSceneObject != nullptr)
+    {
+        _helperSceneObject->setScale(_size.x(), _size.y(), _size.z());
+    }
+}
+
+
+const btVector3& PhysicalBodyGhost::getSize()
+{
+    return _size;
 }
 
 
@@ -69,8 +93,8 @@ void PhysicalBodyGhost::onAttachedToScenObject()
     if (GameConfig::getInstance().mode == GM_EDITOR)
     {
         // create editor helper
-        SceneObject* helperSceneObject = getSceneObject()->getSceneManager()->addSceneObject("editor#StopComponent helper");
-        helperSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
+        _helperSceneObject = getSceneObject()->getSceneManager()->addSceneObject("editor#StopComponent helper");
+        _helperSceneObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SELECTABLE_ON_SCENE | SOF_NOT_SERIALIZABLE);
 
         Material* material = new Material;
         material->shader = NOTEXTURE_MATERIAL;
@@ -80,11 +104,11 @@ void PhysicalBodyGhost::onAttachedToScenObject()
         Cube* cube = new Cube(1, material);
         cube->init();
         cube->setCastShadows(false);
-        getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
+        getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, _helperSceneObject);
 
-        helperSceneObject->setScale(_size.x(), _size.y(), _size.z());
+        _helperSceneObject->setScale(_size.x(), _size.y(), _size.z());
 
-        getSceneObject()->addChild(helperSceneObject);
+        getSceneObject()->addChild(_helperSceneObject);
     }
 }
 

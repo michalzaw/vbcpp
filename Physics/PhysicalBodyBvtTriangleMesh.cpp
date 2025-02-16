@@ -1,7 +1,7 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
 PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
-    : PhysicalBody(0)
+    : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0)
 {
     LOG_INFO("BvtTriangleMeshShape - Konstruktor");
 
@@ -11,7 +11,7 @@ PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
 
 
 PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& models)
-    : PhysicalBody(0),
+    : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0),
     _models(models)
 {
     LOG_INFO("BvtTriangleMeshShape - Konstruktor");
@@ -25,7 +25,7 @@ PhysicalBodyBvtTriangleMesh::~PhysicalBodyBvtTriangleMesh()
     LOG_INFO("BvtTriangleMeshShape - Destruktor");
 }
 
- 
+
 void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* triMesh, StaticModelNode* staticModelNode, unsigned int primitiveType, glm::mat4 parentTransform)
 {
     glm::mat4 nodeTransform = parentTransform * staticModelNode->transform.getTransformMatrix();

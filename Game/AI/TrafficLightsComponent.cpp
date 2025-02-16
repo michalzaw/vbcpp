@@ -20,7 +20,8 @@ TrafficLightsState getTrafficLightsStateFromString(const std::string& name)
 }
 
 
-TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName, const glm::vec3& triggerBoxPosition,
+TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
+											   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
 											   const TrafficLightsState initState)
 	: Component(CT_TRAFFIC_LIGHTS),
 	_redLightNodeName(redLightNodeName), _yellowLightNodeName(yellowLightNodeName), _greenLightNodeName(greenLighNodeName),
@@ -28,7 +29,7 @@ TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeNa
 	_redLightColor(1.0f, 0.0f, 0.0f, 1.0f), _yellowLightColor(1.0f, 1.0f, 0.0f, 1.0f), _greenLightColor(0.0f, 1.0f, 0.0f, 1.0f),
 	_initState(initState),
 	_timer(0.0f), _currentState(initState),
-	_triggerBox(nullptr), _triggerBoxPosition(triggerBoxPosition)
+	_triggerBox(nullptr), _triggerBoxPositionInitialValue(triggerBoxPosition), _triggerBoxRotationInitialValue(triggerBoxRotation), _triggerBoxSizeInitialValue(triggerBoxSize)
 {
 
 }
@@ -75,12 +76,14 @@ void TrafficLightsComponent::onAttachedToScenObject()
 
 
 	SceneObject* triggerBoxObject = getSceneObject()->getSceneManager()->addSceneObject(getSceneObject()->getName() + "-triggerBox");
-	triggerBoxObject->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
+	triggerBoxObject->setFlags(SOF_NOT_SERIALIZABLE);
 
-	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost(btVector3(3, 2, 4));
+	_triggerBox = getSceneObject()->getSceneManager()->getPhysicsManager()->createPhysicalBodyGhost(btVector3(_triggerBoxSizeInitialValue.x, _triggerBoxSizeInitialValue.y, _triggerBoxSizeInitialValue.z));
 	triggerBoxObject->addComponent(_triggerBox);
-	triggerBoxObject->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
+	triggerBoxObject->setPosition(_triggerBoxPositionInitialValue);
+	triggerBoxObject->setRotation(_triggerBoxRotationInitialValue);
 
+	getSceneObject()->addChild(triggerBoxObject);
 	
 	setCurrentState(_initState);
 }
@@ -136,10 +139,7 @@ void TrafficLightsComponent::setCurrentState(TrafficLightsState state, bool init
 
 void TrafficLightsComponent::changedTransform()
 {
-	if (_triggerBox != nullptr)
-	{
-		_triggerBox->getSceneObject()->setPosition(getSceneObject()->transformLocalPointToGlobal(_triggerBoxPosition));
-	}
+
 }
 
 

@@ -10,7 +10,7 @@
 
 
 class Material;
-class PhysicalBody;
+class PhysicalBodyGhost;
 
 
 enum TrafficLightsState
@@ -48,14 +48,17 @@ class TrafficLightsComponent : public Component
 		float _timer;
 		TrafficLightsState _currentState;
 
-		PhysicalBody* _triggerBox;
-		glm::vec3 _triggerBoxPosition;
+		PhysicalBodyGhost* _triggerBox;
+		glm::vec3 _triggerBoxPositionInitialValue;
+		glm::vec3 _triggerBoxRotationInitialValue;
+		glm::vec3 _triggerBoxSizeInitialValue;
 
 	protected:
 		void onAttachedToScenObject() override;
 
 	public:
-		TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName, const glm::vec3& triggerBoxPosition,
+		TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
+							   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
 							   const TrafficLightsState initState);
 		~TrafficLightsComponent();
 
@@ -64,6 +67,8 @@ class TrafficLightsComponent : public Component
 
 		inline TrafficLightsState getCurrentState() { return _currentState; }
 		void setCurrentState(TrafficLightsState state, bool initialization = false);
+
+		inline PhysicalBodyGhost* getTriggerBox() { return _triggerBox; }
 
 		void changedTransform() override;
 		void update(float deltaTime) override;

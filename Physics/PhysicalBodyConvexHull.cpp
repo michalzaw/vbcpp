@@ -3,7 +3,7 @@
 #include "../Utils/Logger.h"
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(Vertex* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
-: PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
+: PhysicalBody(PhysicalBodyType::CONVEX_HULL, mass, centerOfMassOffset, centerOfMassOffsetValue),
 _vertices(vertices), _vertexCount(vertexCount), _verticesvec(nullptr)
 {
     updateBody();
@@ -11,7 +11,7 @@ _vertices(vertices), _vertexCount(vertexCount), _verticesvec(nullptr)
 
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
-: PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
+: PhysicalBody(PhysicalBodyType::CONVEX_HULL, mass, centerOfMassOffset, centerOfMassOffsetValue),
 _verticesvec(vertices), _vertexCount(vertexCount), _vertices(nullptr)
 {
     updateBody();
@@ -19,7 +19,7 @@ _verticesvec(vertices), _vertexCount(vertexCount), _vertices(nullptr)
 
 
 PhysicalBodyConvexHull::PhysicalBodyConvexHull(std::vector<glm::vec3> vertices, btScalar mass, bool centerOfMassOffset, btVector3 centerOfMassOffsetValue)
-	: PhysicalBody(mass, centerOfMassOffset, centerOfMassOffsetValue),
+	: PhysicalBody(PhysicalBodyType::CONVEX_HULL, mass, centerOfMassOffset, centerOfMassOffsetValue),
 	_verticesVector(vertices), _verticesvec(nullptr), _vertexCount(0), _vertices(nullptr)
 {
 	updateBody();
