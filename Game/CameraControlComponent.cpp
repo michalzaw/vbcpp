@@ -85,7 +85,15 @@ void CameraControlComponent::updateCameraPositionOffset(float deltaTime)
 	}
 
 	_deltaPositionOffset -= delta;
-	_camera->setPositionOffset(_camera->getPositionOffset() + delta);
+	float newOffset = _camera->getPositionOffset() + delta;
+	if (newOffset >= _camera->getMinPositionOffset() && newOffset <= _camera->getMaxPositionOffset())
+	{
+		_camera->setPositionOffset(newOffset);
+	}
+	else
+	{
+		_deltaPositionOffset = 0.0f;
+	}
 }
 
 
@@ -121,7 +129,7 @@ void CameraControlComponent::setChangePositionOffsetSpeed(float speed)
 }
 
 
-bool CameraControlComponent::isMOvementControl()
+bool CameraControlComponent::isMovementControl()
 {
 	return _movmentControl;
 }

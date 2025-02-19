@@ -209,6 +209,8 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 			}
 		}
 	}
+
+	setCameraControll(_isCameraControll);
 }
 
 
@@ -487,7 +489,7 @@ void MainGameScene::startGame()
 	_physicsManager->play();
 	_soundManager->setMute(false);
 
-	glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
+	setCameraControll(_isCameraControll);
 }
 
 
@@ -513,10 +515,7 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 
 	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
 
-	if (_isCameraControll)
-	{
-		_sceneManager->getGameLogicSystem()->update(deltaTime);
-	}
+	_sceneManager->getGameLogicSystem()->update(deltaTime);
 }
 
 
@@ -836,10 +835,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 	// mouse
 	if (input.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
 	{
-		_isCameraControll = !_isCameraControll;
-		glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
-
-		_window->setCursorMode(_isCameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+		setCameraControll(!_isCameraControll);
 	}
 
 	if (input.isMouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT))
@@ -896,4 +892,20 @@ void MainGameScene::rayTestWithModelNode(RenderObject* renderObject, ModelNode* 
 	{
 		rayTestWithModelNode(renderObject, modelNode->getChildren()[i], rayStart, rayDir, modelMatrix);
 	}
+}
+
+
+void MainGameScene::setCameraControll(bool isCameraControll)
+{
+	_isCameraControll = isCameraControll;
+
+	Component* cameraControlComponent = _activeCamera->getSceneObject()->getComponent(CT_CAMERA_CONTROL);
+	if (cameraControlComponent != nullptr)
+	{
+		static_cast<CameraControlComponent*>(cameraControlComponent)->setRotationControl(_isCameraControll);
+	}
+
+	glfwSetCursorPos(_window->getWindow(), _window->getWidth() / 2, _window->getHeight() / 2);
+
+	_window->setCursorMode(_isCameraControll ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
 }
