@@ -21,7 +21,7 @@ AIAgentVehicle::AIAgentVehicle()
 
 void AIAgentVehicle::onAttachedToScenObject()
 {
-	_vehicle = dynamic_cast<PhysicalBodyRaycastVehicle*>(getSceneObject()->getComponent(CT_PHYSICAL_BODY));
+	_vehicle = getSceneObject()->getComponentWithCasting<PhysicalBodyRaycastVehicle>(CT_PHYSICAL_BODY);
 	if (_vehicle != nullptr)
 	{
 
@@ -42,15 +42,6 @@ void AIAgentVehicle::setCurrentPath(PathComponent* path)
 
 	_currentPath = path;
 	_currentPathBezierCurve = dynamic_cast<BezierCurve*>(_currentPath->getSceneObject()->getComponent(CT_BEZIER_CURVE));
-}
-
-
-// todo: obecnie nieuzywane
-const glm::vec3& AIAgentVehicle::getVehicleDimesions()
-{
-	// todo: implement
-	//return glm::vec3(3.0f, 2.0f, 6.0f);
-	return glm::vec3(3.0f, 2.0f, 3.4f);
 }
 
 
@@ -103,16 +94,10 @@ void AIAgentVehicle::lookForward()
 
 	btVector3 forwardVector = _vehicle->getRayCastVehicle()->getForwardVector();
 
-	//glm::vec3 rayOrigin = _vehicle->getSceneObject()->getPosition() + glm::vec3(0.0f, 0.5f, 0.0f);
-	glm::vec3 rayOrigin = getSceneObject()->transformLocalPointToGlobal(_frontSensorPosition) + glm::vec3(0.0f, 0.5f, 0.0f);
+	glm::vec3 rayOrigin = getSceneObject()->transformLocalPointToGlobal(_frontSensorPosition);
 	glm::vec3 rayDirection = glm::normalize(glm::vec3(forwardVector.x(), forwardVector.y(), forwardVector.z()));
 
-	//LOG_DEBUG(LOG_VARIABLE(rayDirection));
 	float rayLength = std::max(_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() / 2.0f, 1.1f);// 30.0f;
-	/*if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 1.0f)
-	{
-		rayLength = 3.0f;
-	}*/
 
 	short RAY_TEST_FILTER_MASK = btBroadphaseProxy::AllFilter;// COL_ENV | COL_BUS;
 	short RAY_TEST_FILTER_GROUP = btBroadphaseProxy::DefaultFilter;// COL_WHEEL;
@@ -124,39 +109,15 @@ void AIAgentVehicle::lookForward()
 	{
 		float distanceToObject = glm::distance(outPosition, rayOrigin);
 
-		if (outObject != nullptr)
+		if (distanceToObject > 1.0f)
 		{
-			//LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
+			distanceToObject = distanceToObject - 1.0f;
 		}
 		else
 		{
-
+			distanceToObject = 0.0f;
 		}
-
-		//if (!_isStop)
-		{
-			//LOG_DEBUG(getSceneObject()->getName() + " - Ray collision with: " + outObject->getSceneObject()->getName() + " " + LOG_VARIABLE(distanceToObject));
-			if (distanceToObject > 1.0f)
-			{
-				LOG_DEBUG(LOG_VARIABLE(distanceToObject));
-				distanceToObject = distanceToObject - 1.0f;
-			}
-			/*else if (_vehicle->getRayCastVehicle()->getCurrentSpeedKmHour() > 1.0f)
-			{
-				LOG_DEBUG("222222222222");
-				distanceToObject = distanceToObject - 3.0f;
-			}*/
-			else
-			{
-				//LOG_DEBUG("333333333333" + LOG_VARIABLE(distanceToObject));
-				distanceToObject = 0.0f;
-			}
-			stop(distanceToObject);
-		}
-	}
-	else
-	{
-
+		stop(distanceToObject);
 	}
 }
 
@@ -182,11 +143,9 @@ void AIAgentVehicle::stop(float distance)
 
 void AIAgentVehicle::stopOnPoint(const glm::vec3& position)
 {
-	float vehicleLength = getVehicleDimesions().z;
-
 	float distance = glm::distance(position, getSceneObject()->getPosition());
 
-	distance -= vehicleLength / 2.0f;
+	distance -= _frontSensorPosition.z;
 
 	stop(distance);
 }
@@ -227,7 +186,6 @@ void AIAgentVehicle::update(float deltaTime)
 		if (_timeToStart <= 0.0f)
 		{
 			_isStop = false;
-			//_brakeForce = 0.0f;
 		}
 	}
 }

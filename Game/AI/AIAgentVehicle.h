@@ -24,8 +24,6 @@ class AIAgentVehicle final : public Component
 		float _timeToStart;
 		float _brakeForce;
 
-		const glm::vec3& getVehicleDimesions();
-
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
 
