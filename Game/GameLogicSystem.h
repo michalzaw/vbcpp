@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 
 #include "AI/PathComponent.h"
+#include "AI/TrafficLightsComponent.h"
 
 
 class CameraControlComponent;
@@ -21,7 +22,6 @@ class StopComponent;
 class TrafficLightsComponent;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
-enum TrafficLightsState;
 
 
 struct PendingPathConnection final
