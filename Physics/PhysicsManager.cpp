@@ -132,6 +132,8 @@ int PhysicsManager::createPhysicsWorld()
     // Setting gravity force (we use 10 for simplicity)
     _dynamicsWorld->setGravity(btVector3(0, -10, 0));
 
+    _dynamicsWorld->getPairCache()->setInternalGhostPairCallback(new btGhostPairCallback);
+
     return 0;
 }
 
@@ -160,6 +162,41 @@ void PhysicsManager::simulate(btScalar timeStep)
         for (int i = 0; i < _physicalBodies.size(); i++)
         {
             _physicalBodies[i]->update();
+        }
+
+        // collision detection
+        btDispatcher* dispatcher = _dynamicsWorld->getDispatcher();
+        for (int i = 0; i < dispatcher->getNumManifolds(); ++i)
+        {
+            btPersistentManifold* manifold = dispatcher->getManifoldByIndexInternal(i);
+            if (manifold->getNumContacts() > 0)
+            {
+                const btCollisionObject* body1 = manifold->getBody0();
+                const btCollisionObject* body2 = manifold->getBody1();
+
+                PhysicalBody* physicalBody1 = static_cast<PhysicalBody*>(body1->getUserPointer());
+                PhysicalBody* physicalBody2 = static_cast<PhysicalBody*>(body2->getUserPointer());
+
+                if (physicalBody1 != nullptr && physicalBody2 != nullptr)
+                {
+                    physicalBody1->setCollisionWith(physicalBody2);
+                    physicalBody2->setCollisionWith(physicalBody1);
+                }
+            }
+            else
+            {
+                const btCollisionObject* body1 = manifold->getBody0();
+                const btCollisionObject* body2 = manifold->getBody1();
+
+                PhysicalBody* physicalBody1 = static_cast<PhysicalBody*>(body1->getUserPointer());
+                PhysicalBody* physicalBody2 = static_cast<PhysicalBody*>(body2->getUserPointer());
+
+                if (physicalBody1 != nullptr && physicalBody2 != nullptr)
+                {
+                    physicalBody1->setNotCollisionWith(physicalBody2);
+                    physicalBody2->setNotCollisionWith(physicalBody1);
+                }
+            }
         }
 
 		if (_debugRendeignEnable && _debugRenderer != nullptr)
@@ -326,6 +363,18 @@ PhysicalBodyWheel* PhysicsManager::createPhysicalBodyWheel(PhysicalBodyRaycastVe
 }
 
 
+PhysicalBodyGhost* PhysicsManager::createPhysicalBodyGhost(const btVector3& size)
+{
+    PhysicalBodyGhost* b = new PhysicalBodyGhost(size);
+
+    _dynamicsWorld->addCollisionObject(b->getBulletObject(), COL_ENV, COL_BUS | COL_WHEEL);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
+
 void PhysicsManager::removePhysicalBody(PhysicalBody* physicalBody)
 {
 	std::vector<Constraint*>& constraints = physicalBody->getConstraints();
@@ -407,7 +456,14 @@ void PhysicsManager::removeConstraint(Constraint* c)
 }
 
 
-bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength)
+bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, float rayLength)
+{
+    PhysicalBody* object;
+    return rayTest(rayOrigin, rayDir, filterMask, filterGroup, outPosition, object, rayLength);
+}
+
+
+bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, PhysicalBody*& outObject, float rayLength)
 {
 	const glm::vec3 rayEnd = rayOrigin + (rayDir * rayLength);
 
@@ -425,9 +481,20 @@ bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir
 		rayCallback
 	);
 
+    if (_debugRendeignEnable)
+    {
+        _debugRenderer->drawLine(btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z), btVector3(rayEnd.x, rayEnd.y, rayEnd.z), btVector3(0.0f, 0.0f, 0.0f));
+    }
+
 	if (rayCallback.hasHit())
 	{
-		position = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+        if (_debugRendeignEnable)
+        {
+            _debugRenderer->drawContactPoint(rayCallback.m_hitPointWorld, rayCallback.m_hitNormalWorld, 0.5f, 1, btVector3(1.0f, 0.0f, 0.0f));
+        }
+
+        outPosition = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
+        outObject = static_cast<PhysicalBody*>(rayCallback.m_collisionObject->getUserPointer());
 
 		return true;
 	}

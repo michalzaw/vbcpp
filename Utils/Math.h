@@ -20,5 +20,10 @@ inline float lerp(float a, float b, float t)
     return a + t * (b - a);
 }
 
+inline float mapRange(float a1, float a2, float b1, float b2, float value)
+{
+    return b1 + (value - a1) * (b2 - b1) / (a2 - a1);
+}
+
 
 #endif // MATH_H_INCLUDED

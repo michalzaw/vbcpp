@@ -2,23 +2,53 @@
 
 #include "PathComponent.h"
 
-#include "../Physics/PhysicalBodyRaycastVehicle.h"
+#include "../../Physics/PhysicalBodyRaycastVehicle.h"
 
-#include "../Scene/SceneObject.h"
-#include "../Scene/SceneManager.h"
+#include "../../Scene/SceneObject.h"
+#include "../../Scene/SceneManager.h"
 
-#include "../Utils/QuaternionUtils.h"
+#include "../../Utils/QuaternionUtils.h"
 
 
-AIAgentPhysicalVechicle::AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle)
-	: _vechicle(vechicle)
+AIAgentPhysicalVechicle::AIAgentPhysicalVechicle()
+	: _vechicle(nullptr)
 {
 	_isInitializedStartPosition = true;
 }
 
 
+void AIAgentPhysicalVechicle::onAttachedToScenObject()
+{
+	_vechicle = dynamic_cast<PhysicalBodyRaycastVehicle*>(getSceneObject()->getComponent(CT_PHYSICAL_BODY));
+	if (_vechicle != nullptr)
+	{
+
+	}
+}
+
+
+void AIAgentPhysicalVechicle::moveToStartPoint()
+{
+	const glm::vec3 firstPointPosition = _currentPath->getCurvePoints()[_currentPointIndex];
+
+	const auto& point1 = _currentPath->getCurvePoints()[_currentPointIndex];
+	const auto& point2 = _currentPath->getCurvePoints()[_currentPointIndex + 1];
+
+	glm::vec3 dir1 = glm::normalize(point2 - point1);
+	glm::quat startRotation = QuaternionUtils::rotationBetweenVectors(glm::vec3(0.0f, 0.0f, 1.0f), dir1);
+
+	getSceneObject()->setPosition(firstPointPosition - 5 * dir1);
+	getSceneObject()->setRotationQuaternion(startRotation);
+}
+
+
 void AIAgentPhysicalVechicle::update(float deltaTime)
 {
+	if (_currentPath == nullptr)
+	{
+		return;
+	}
+
 	const btTransform& wheel1Transform = _vechicle->getRayCastVehicle()->getWheelTransformWS(0);
 	const btTransform& wheel2Transform = _vechicle->getRayCastVehicle()->getWheelTransformWS(1);
 	float radius1 = _vechicle->getRayCastVehicle()->getWheelInfo(0).m_wheelsRadius;
@@ -34,7 +64,7 @@ void AIAgentPhysicalVechicle::update(float deltaTime)
 	//LOG_DEBUG(LOG_VARIABLE(centerPoint));
 	//LOG_DEBUG(LOG_VARIABLE(distance));
 	//if (distance < 0.5f)
-	if (getSceneObject()->getSceneManager()->getPhysicsManager()->isPointInObject(glm::vec3(currentPoint.x, currentPoint.y + 2.0f, currentPoint.z), _vechicle))
+	if (getSceneObject()->getSceneManager()->getPhysicsManager()->isPointInObject(glm::vec3(currentPoint.x, currentPoint.y + 0.5f, currentPoint.z), _vechicle))
 	{
 		++_currentPointIndex;
 		LOG_DEBUG(toString(_currentPointIndex) + "/" + toString(_currentPath->getCurvePoints().size()));
@@ -86,8 +116,11 @@ void AIAgentPhysicalVechicle::update(float deltaTime)
 
 	_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle, 0);
 	_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle, 1);
-	_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle * -0.5, 4);
-	_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle * -0.5, 5);
+	if (_vechicle->getRayCastVehicle()->getNumWheels() > 4)
+	{
+		_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle * -0.5, 4);
+		_vechicle->getRayCastVehicle()->setSteeringValue(_currentAngle * -0.5, 5);
+	}
 
 	if (_vechicle->getRayCastVehicle()->getCurrentSpeedKmHour() < 40.0f)
 	{

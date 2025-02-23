@@ -1,11 +1,14 @@
 #include "SceneObject.h"
 #include "SceneManager.h"
 
-#include "../Game/AIAgent.h"
+#include "../Game/AI/AIAgent.h"
+#include "../Game/AI/AIAgentVehicle.h"
+#include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/CameraControlComponent.h"
 #include "../Game/GameLogicSystem.h"
-#include "../Game/PathComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
@@ -142,6 +145,18 @@ SceneObject::~SceneObject()
                 _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(*i));
                 break;
 
+            case CT_AI_AGENT_VEHICLE:
+                _sceneManager->getGameLogicSystem()->removeAIAgentVehicle(static_cast<AIAgentVehicle*>(*i));
+                break;
+
+            case CT_STOP_COMPONENT:
+                _sceneManager->getGameLogicSystem()->removeStopComponent(static_cast<StopComponent*>(*i));
+                break;
+
+            case CT_TRAFFIC_LIGHTS:
+                _sceneManager->getGameLogicSystem()->removeTrafficLightsComponent(static_cast<TrafficLightsComponent*>(*i));
+                break;
+
             case CT_PATH:
                 _sceneManager->getGameLogicSystem()->removePathComponent(static_cast<PathComponent*>(*i));
                 break;
@@ -241,6 +256,8 @@ void SceneObject::addChild(SceneObject* child)
 
     child->removeParent();
     child->_parent = this;
+
+    child->changedTransform();
 }
 
 
@@ -423,6 +440,18 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_AI_AGENT:
                     _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(component));
+                    break;
+
+                case CT_AI_AGENT_VEHICLE:
+                    _sceneManager->getGameLogicSystem()->removeAIAgentVehicle(static_cast<AIAgentVehicle*>(component));
+                    break;
+
+                case CT_STOP_COMPONENT:
+                    _sceneManager->getGameLogicSystem()->removeStopComponent(static_cast<StopComponent*>(component));
+                    break;
+
+                case CT_TRAFFIC_LIGHTS:
+                    _sceneManager->getGameLogicSystem()->removeTrafficLightsComponent(static_cast<TrafficLightsComponent*>(component));
                     break;
 
                 case CT_PATH:

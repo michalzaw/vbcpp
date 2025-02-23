@@ -16,16 +16,21 @@
 #include "../FileDialogs.h"
 #include "../Utils/AIPathGenerator.h"
 
-#include "../../Game/AIAgent.h"
+#include "../../Game/AI/AIAgent.h"
+#include "../../Game/AI/AIAgentVehicle.h"
+#include "../../Game/AI/PathComponent.h"
+#include "../../Game/AI/StopComponent.h"
+#include "../../Game/AI/TrafficLightsComponent.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
-#include "../../Game/PathComponent.h"
 
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
 #include "../../Graphics/SkeletalAnimationHelperComponent.h"
+
+#include "../../Physics/PhysicalBodyGhost.h"
 
 #include "../../Utils/FilesHelper.h"
 
@@ -466,10 +471,13 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 
 
 template<typename TYPE>
-void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex)
+void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
 {
-	outItemsString += " ";
-	outItemsString += '\0';
+	if (addEmptyElement)
+	{
+		outItemsString += " ";
+		outItemsString += '\0';
+	}
 
 	for (int i = 0; i < items.size(); ++i)
 	{
@@ -477,8 +485,39 @@ void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& select
 
 		if (items[i] == selectedItemValue)
 		{
-			outSelectedItemIndex = i + 1;
+			outSelectedItemIndex = i;
 		}
+	}
+
+	if (addEmptyElement)
+	{
+		outSelectedItemIndex += 1;
+	}
+}
+
+
+template<typename TYPE>
+void convertVectorToComboData(const TYPE* items, unsigned int itemsCount, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
+{
+	if (addEmptyElement)
+	{
+		outItemsString += " ";
+		outItemsString += '\0';
+	}
+
+	for (int i = 0; i < itemsCount; ++i)
+	{
+		outItemsString += Strings::toString(items[i]) + '\0';
+
+		if (items[i] == selectedItemValue)
+		{
+			outSelectedItemIndex = i;
+		}
+	}
+
+	if (addEmptyElement)
+	{
+		outSelectedItemIndex += 1;
 	}
 }
 
@@ -509,6 +548,13 @@ bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 #define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
 glm::vec3 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_btVector3(component, propertyName, additionalParams)																		\
+btVector3 value = component->get##propertyName();																								\
+float valueArray[] = { value.getX(), value.getY(), value.getZ() };																				\
+bool result = ImGui::DragFloat3("##value", valueArray);																				\
+value.setValue(valueArray[0], valueArray[1], valueArray[2]);
 
 
 #define IMGUI_INPUT_bool(component, propertyName, additionalParams)																				\
@@ -1082,6 +1128,114 @@ void showAiAgentComponentDetails(AIAgent* component)
 }
 
 
+void showAiAgentVehicleComponentDetails(AIAgentVehicle* component)
+{
+	if (ImGui::CollapsingHeader("AI agent Vehicle", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("AIAgentVehicleComponentDetails");
+
+		const auto& pathComponents = vbEditor::_sceneManager->getGameLogicSystem()->getPathComponents();
+		std::vector<std::string> availablePaths;
+		availablePaths.reserve(pathComponents.size());
+
+		for (auto pathComponent : pathComponents)
+		{
+			availablePaths.push_back(pathComponent->getSceneObject()->getName());
+		}
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
+		{
+			const std::vector<std::string>& itemsNames = availablePaths;
+			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+
+			bool result = false;
+			std::string value = "";
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				result = true;
+				if (selectedItemIndex > 0)
+					value = itemsNames[selectedItemIndex - 1];
+			}
+
+			if (result)
+			{
+				if (selectedItemIndex > 0)
+				{
+					component->setCurrentPath(pathComponents[selectedItemIndex - 1]);
+				}
+				else
+				{
+					component->setCurrentPath(nullptr);
+				}
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showStopComponentDetails(StopComponent* component)
+{
+	if (ImGui::CollapsingHeader("Stop Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("BezierCurveComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, DistanceToStop, float, "Distance to stop")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showTrafficLightsComponentDetails(TrafficLightsComponent* component)
+{
+	if (ImGui::CollapsingHeader("Traffic Lights", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("TrafficLightsComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, StopPointPosition, vec3, "Stop point")
+		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Init state")
+		{
+			const std::string& currentValue = trafficLightsStateStrings[component->getInitState()];
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			convertVectorToComboData(&trafficLightsStateStrings[0], (unsigned int) TLS_STATE_COUNT, currentValue, comboItems, selectedItemIndex, false);
+
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				component->setInitState((TrafficLightsState) selectedItemIndex);
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showBezierCurveComponentDetails(BezierCurve* component)
 {
 	if (ImGui::CollapsingHeader("Bezier curve", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1238,6 +1392,36 @@ void showBusStartComponentDetails(BusStartPoint* component)
 }
 
 
+void showPhysicalBodyDetails(PhysicalBody* component)
+{
+	if (component->getPhysicalBodyType() == PhysicalBodyType::GHOST)
+	{
+		PhysicalBodyGhost* ghostComponent = static_cast<PhysicalBodyGhost*>(component);
+		if (ImGui::CollapsingHeader("Trigger box", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+			ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+			ImGui::Columns(2);
+			ImGui::Separator();
+			ImGui::PushID("TriggerBoxDetails");
+			
+			COMPONENT_PROPERTY_EDIT(ghostComponent, Size, btVector3, "Size")
+
+			ImGui::PopID();
+			ImGui::Columns(1);
+			ImGui::Separator();
+			ImGui::PopStyleVar();
+		}
+	}
+	else
+	{
+		if (ImGui::CollapsingHeader("Physics Component", ImGuiTreeNodeFlags_DefaultOpen))
+		{
+
+		}
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1263,10 +1447,7 @@ void showObjectProperties()
 			PhysicalBody* physicsComponent = dynamic_cast<PhysicalBody*>(vbEditor::_selectedSceneObject->getComponent(CT_PHYSICAL_BODY));
 			if (physicsComponent)
 			{
-				if (ImGui::CollapsingHeader("Physics Component", ImGuiTreeNodeFlags_DefaultOpen))
-				{
-
-				}
+				showPhysicalBodyDetails(physicsComponent);
 			}
 
 			Grass* grassComponent = dynamic_cast<Grass*>(vbEditor::_selectedSceneObject->getComponent(CT_GRASS));
@@ -1322,6 +1503,24 @@ void showObjectProperties()
 			if (aiAgent)
 			{
 				showAiAgentComponentDetails(aiAgent);
+			}
+
+			AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(vbEditor::_selectedSceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+			if (aiAgentVehicle)
+			{
+				showAiAgentVehicleComponentDetails(aiAgentVehicle);
+			}
+
+			StopComponent* stopComponent = dynamic_cast<StopComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_STOP_COMPONENT));
+			if (stopComponent)
+			{
+				showStopComponentDetails(stopComponent);
+			}
+
+			TrafficLightsComponent* trafficLightsComponent = dynamic_cast<TrafficLightsComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+			if (trafficLightsComponent)
+			{
+				showTrafficLightsComponentDetails(trafficLightsComponent);
 			}
 
 			BezierCurve* bezierCurve = dynamic_cast<BezierCurve*>(vbEditor::_selectedSceneObject->getComponent(CT_BEZIER_CURVE));

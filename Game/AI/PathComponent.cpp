@@ -1,14 +1,14 @@
 #include "PathComponent.h"
 
-#include "GameConfig.h"
+#include "../GameConfig.h"
 
-#include "../Graphics/BezierCurve.h"
-#include "../Graphics/GraphicsManager.h"
+#include "../../Graphics/BezierCurve.h"
+#include "../../Graphics/GraphicsManager.h"
 
-#include "../Scene/SceneManager.h"
+#include "../../Scene/SceneManager.h"
 
-#include "../Utils/BezierCurvesUtils.h"
-#include "../Utils/ResourceManager.h"
+#include "../../Utils/BezierCurvesUtils.h"
+#include "../../Utils/ResourceManager.h"
 
 
 RRoadProfile* helperProfile = nullptr;
@@ -44,6 +44,40 @@ PathComponent::PathComponent(PathDirection direction)
 	_bezierCurveComponent(nullptr), _pathHelperComponent(nullptr)
 {
 
+}
+
+
+PathComponent::~PathComponent()
+{
+	for (const ConnectedPath& connectedPath : _nextPaths)
+	{
+		if (connectedPath.path != this)
+		{
+			for (auto i = connectedPath.path->_previousPaths.begin(); i != connectedPath.path->_previousPaths.end(); ++i)
+			{
+				if (i->path == this)
+				{
+					connectedPath.path->_previousPaths.erase(i);
+					break;
+				}
+			}
+		}
+	}
+
+	for (const ConnectedPath& connectedPath : _previousPaths)
+	{
+		if (connectedPath.path != this)
+		{
+			for (auto i = connectedPath.path->_nextPaths.begin(); i != connectedPath.path->_nextPaths.end(); ++i)
+			{
+				if (i->path == this)
+				{
+					connectedPath.path->_nextPaths.erase(i);
+					break;
+				}
+			}
+		}
+	}
 }
 
 

@@ -2,12 +2,15 @@
 
 #include <memory>
 
-#include "AIAgent.h"
-#include "AIAgentPhysicalVechicle.h"
+#include "AI/AIAgent.h"
+#include "AI/AIAgentPhysicalVechicle.h"
+#include "AI/AIAgentVehicle.h"
+#include "AI/PathComponent.h"
+#include "AI/StopComponent.h"
+#include "AI/TrafficLightsComponent.h"
 #include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
-#include "PathComponent.h"
 
 #include "../Graphics/CameraFPS.hpp"
 
@@ -63,11 +66,43 @@ AIAgent* GameLogicSystem::addAIAgent()
 }
 
 
-AIAgent* GameLogicSystem::addAIAgent(PhysicalBodyRaycastVehicle* vechicle)
+AIAgentPhysicalVechicle* GameLogicSystem::addAIAgentPhysicalVechicle()
 {
-	AIAgent* component = new AIAgentPhysicalVechicle(vechicle);
+	AIAgentPhysicalVechicle* component = new AIAgentPhysicalVechicle();
 
 	_aiAgents.push_back(component);
+
+	return component;
+}
+
+
+AIAgentVehicle* GameLogicSystem::addAIAgentVehicle()
+{
+	AIAgentVehicle* component = new AIAgentVehicle();
+
+	_aiAgentVehicles.push_back(component);
+
+	return component;
+}
+
+
+StopComponent* GameLogicSystem::addStopComponent()
+{
+	StopComponent* component = new StopComponent();
+
+	_stopComponents.push_back(component);
+
+	return component;
+}
+
+
+TrafficLightsComponent* GameLogicSystem::addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
+																   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
+																   const glm::vec3& stopPointPosition, const TrafficLightsState initState)
+{
+	TrafficLightsComponent* component = new TrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLighNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, stopPointPosition, initState);
+
+	_trafficLightsComponents.push_back(component);
 
 	return component;
 }
@@ -148,6 +183,54 @@ void GameLogicSystem::removeAIAgent(AIAgent* component)
 		if (*i == component)
 		{
 			i = _aiAgents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
+void GameLogicSystem::removeAIAgentVehicle(AIAgentVehicle* component)
+{
+	for (std::vector<AIAgentVehicle*>::iterator i = _aiAgentVehicles.begin(); i != _aiAgentVehicles.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _aiAgentVehicles.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
+void GameLogicSystem::removeStopComponent(StopComponent* component)
+{
+	for (std::vector<StopComponent*>::iterator i = _stopComponents.begin(); i != _stopComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _stopComponents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
+void GameLogicSystem::removeTrafficLightsComponent(TrafficLightsComponent* component)
+{
+	for (std::vector<TrafficLightsComponent*>::iterator i = _trafficLightsComponents.begin(); i != _trafficLightsComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _trafficLightsComponents.erase(i);
 
 			delete component;
 
@@ -244,7 +327,34 @@ void GameLogicSystem::update(float deltaTime)
 
 	for (AIAgent* component : _aiAgents)
 	{
-		component->update(deltaTime);
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
+	for (AIAgentVehicle* component : _aiAgentVehicles)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
+	for (StopComponent* component : _stopComponents)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
+	for (TrafficLightsComponent* component : _trafficLightsComponents)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
 	}
 
 	/*for (BusStopComponent* component : _busStops)
@@ -283,6 +393,27 @@ void GameLogicSystem::destroy()
 	}
 
 	_aiAgents.clear();
+
+	for (std::vector<AIAgentVehicle*>::iterator i = _aiAgentVehicles.begin(); i != _aiAgentVehicles.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_aiAgentVehicles.clear();
+
+	for (std::vector<StopComponent*>::iterator i = _stopComponents.begin(); i != _stopComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_stopComponents.clear();
+
+	for (std::vector<TrafficLightsComponent*>::iterator i = _trafficLightsComponents.begin(); i != _trafficLightsComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_trafficLightsComponents.clear();
 
 	for (std::vector<BusStartPoint*>::iterator i = _busStartPoints.begin(); i != _busStartPoints.end(); ++i)
 	{

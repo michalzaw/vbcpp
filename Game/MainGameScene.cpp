@@ -1,13 +1,10 @@
 #include "MainGameScene.h"
 
-#include "AIAgent.h"
-#include "AIAgentPhysicalVechicle.h"
 #include "BusStartPoint.h"
 #include "CameraControlComponent.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
-#include "PathComponent.h"
 #include "MainGameScene/MirrorImage.h"
 
 #include "../Bus/BusLoader.h"
@@ -255,7 +252,7 @@ void MainGameScene::loadScene()
 	Bus* bus = busLoader.loadBus(busModel, busVariables);
 	_buses.push_back(bus);
 
-	/*for (int i = 0; i < 1; ++i)
+	/*for (int i = 0; i < 10; ++i)
 	{
 		BusConfigurationsLoader::loadBusPredefinedConfigurationByName(busModel, "Typ 2", busVariables);
 		Bus* bus2 = busLoader.loadBus(busModel, busVariables);
@@ -282,6 +279,9 @@ void MainGameScene::loadScene()
 	_cameras[GC_DRIVER]->getSceneObject()->setRotation(0, 0, 0);
 
 	bus->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
+	//AIAgentVehicle* v = _sceneManager->getGameLogicSystem()->getAIAgentVehicles()[0];
+	//v->getSceneObject()->addChild(_cameras[GC_BUS]->getSceneObject());
+
 
 	/*CameraStatic* camera = _graphicsManager->getCurrentCamera();
 	camera->getSceneObject()->setPosition(_sceneManager->getBusStart().position + glm::vec3(-8.0f, -3.0f, -3.0f));

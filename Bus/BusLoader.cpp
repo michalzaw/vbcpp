@@ -19,7 +19,7 @@ const glm::vec3 DISPLAY_DEFAULT_TEXT_COLOR = glm::vec3(1.92, 0.536, 0.044);
 
 BusLoader::BusLoader(SceneManager* sceneManager, GraphicsManager* gmgr, PhysicsManager* physicsManager, SoundManager* soundManager)
     : _sMgr(sceneManager), _gMgr(gmgr), _pMgr(physicsManager), _sndMgr(soundManager),
-    _busCollidesWith(COL_TERRAIN | COL_ENV), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
+    _busCollidesWith(COL_TERRAIN | COL_ENV | COL_BUS), _wheelCollidesWith(COL_TERRAIN | COL_ENV), _doorCollidesWith(COL_TERRAIN | COL_ENV),
     _currentBusModel(nullptr)
 {
 

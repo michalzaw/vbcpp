@@ -9,6 +9,7 @@
 #include "../Utils/Math.h"
 
 #include <memory>
+#include <set>
 
 class PhysicsManager;
 class Constraint;
@@ -23,10 +24,23 @@ enum collisiontypes {
     COL_ENV = BIT(4)
 };
 
+enum class PhysicalBodyType
+{
+    BOX,
+    BVT_TRIANGLE_MESH,
+    CONVEX_HULL,
+    CYLINDER,
+    GHOST,
+    RAYCAST_VEHICLE,
+    SPHERE,
+    STATIC_PLANE,
+    WHEEL
+};
+
 class PhysicalBody : public Component
 {
     public:
-        PhysicalBody(btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
+        PhysicalBody(PhysicalBodyType physicalBodyType, btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         virtual ~PhysicalBody();
 
         btRigidBody* getRigidBody() { return _rigidBody.get(); }
@@ -36,6 +50,8 @@ class PhysicalBody : public Component
         btScalar getMass() { return _mass; }
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
+
+        inline PhysicalBodyType getPhysicalBodyType() { return _physicalBodyType; }
 
         void addConstraint(Constraint* c)
         {
@@ -71,6 +87,14 @@ class PhysicalBody : public Component
 
         virtual void changedTransform();
 
+        // functions is called internally by PhysicsManager - do not call manually
+        void setCollisionWith(PhysicalBody* body);
+        void setNotCollisionWith(PhysicalBody* body);
+
+        inline const std::set<PhysicalBody*>& getObjectsCollidesWith() { return _collidesWith; }
+        inline const std::vector<PhysicalBody*>& getObjectsBeginCollision() { return _objectsBeginCollision; }
+        inline const std::vector<PhysicalBody*>& getObjectsEndCollision() { return _objectsEndCollision; }
+
     protected:
         btDiscreteDynamicsWorld*                _dynamicsWorld;
         std::unique_ptr<btRigidBody>            _rigidBody;
@@ -82,7 +106,13 @@ class PhysicalBody : public Component
 		bool					_centerOfMassOffset;
 		btVector3				_centerOfMassOffsetValue;
 
+        PhysicalBodyType        _physicalBodyType;
+
         std::vector<Constraint*> _constraints;
+
+        std::set<PhysicalBody*> _collidesWith;
+        std::vector<PhysicalBody*> _objectsBeginCollision;
+        std::vector<PhysicalBody*> _objectsEndCollision;
 
         bool _isUpdateTransformFromObject;
 
@@ -91,7 +121,7 @@ class PhysicalBody : public Component
         virtual void onAttachedToScenObject()
         {
             if (_rigidBody)
-                _rigidBody->setUserPointer(_object);
+                _rigidBody->setUserPointer(this);
         }
 };
 

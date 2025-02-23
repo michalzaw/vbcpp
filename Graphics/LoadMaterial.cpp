@@ -97,6 +97,7 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
     sMaterial->ambientColor = XMLstringToVec4(materialElement->Attribute("ambient"));
     sMaterial->diffuseColor = XMLstringToVec4(materialElement->Attribute("diffuse"));
     sMaterial->specularColor = XMLstringToVec4(materialElement->Attribute("specular"));
+	sMaterial->emissiveColor = XmlUtils::getAttributeVec4Optional(materialElement, "emissive", glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
     sMaterial->shininess = (float)atof(materialElement->Attribute("shininess"));
 

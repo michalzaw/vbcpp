@@ -1,6 +1,10 @@
 set (GAME_SOURCES
-	Game/AIAgent.cpp
-	Game/AIAgentPhysicalVechicle.cpp
+	Game/AI/AIAgent.cpp
+	Game/AI/AIAgentPhysicalVechicle.cpp
+	Game/AI/AIAgentVehicle.cpp
+	Game/AI/PathComponent.cpp
+	Game/AI/StopComponent.cpp
+	Game/AI/TrafficLightsComponent.cpp
 	Game/BusStartPoint.cpp
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
@@ -13,14 +17,17 @@ set (GAME_SOURCES
 	Game/LoadingScreenScene.cpp
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp
-	Game/PathComponent.cpp
 	Game/TestScene.cpp
 	Game/MainGameScene/MirrorImage.cpp
 )
 
 set (GAME_HEADERS 
-	Game/AIAgent.h
-	Game/AIAgentPhysicalVechicle.h
+	Game/AI/AIAgent.h
+	Game/AI/AIAgentPhysicalVechicle.h
+	Game/AI/AIAgentVehicle.h
+	Game/AI/PathComponent.h
+	Game/AI/StopComponent.h
+	Game/AI/TrafficLightsComponent.h
 	Game/BusStartPoint.h
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h
@@ -35,7 +42,6 @@ set (GAME_HEADERS
 	Game/LoadingScreenScene.h
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h
-	Game/PathComponent.h
 	Game/TestScene.h
 	Game/MainGameScene/MirrorImage.h
     

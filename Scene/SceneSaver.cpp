@@ -5,10 +5,13 @@
 #include "SceneManager.h"
 #include "SceneLoader.h"
 
-#include "../Game/AIAgent.h"
+#include "../Game/AI/AIAgent.h"
+#include "../Game/AI/AIAgentVehicle.h"
+#include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
-#include "../Game/PathComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/RenderObject.h"
@@ -232,6 +235,52 @@ void SceneSaver::saveAIAgentComponent(XMLElement* objectElement, XMLDocument& do
 }
 
 
+void SceneSaver::saveAIAgentVehicleComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgentVehicle* aiAgent)
+{
+	if (aiAgent->getCurrentPath() != nullptr)
+	{
+		XMLElement* componentElement = doc.NewElement("Component");
+
+		componentElement->SetAttribute("type", "aiAgentVehicle");
+		//componentElement->SetAttribute("path", aiAgent->getCurrentPath()->getSceneObject()->getName().c_str());
+		// path is now loaded from parent object
+		// todo: save other agent params
+
+		objectElement->InsertEndChild(componentElement);
+	}
+	else
+	{
+		LOG_DEBUG("Path is null. Skip saving component data to map file");
+	}
+}
+
+
+void SceneSaver::saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, StopComponent* stopComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "aiStop");
+	componentElement->SetAttribute("distance", stopComponent->getDistanceToStop());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveTrafficLightsComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, TrafficLightsComponent* trafficLightsComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "trafficLights");
+	componentElement->SetAttribute("triggerBoxPosition", vec3ToString(trafficLightsComponent->getTriggerBox()->getSceneObject()->getPosition()).c_str());
+	componentElement->SetAttribute("triggerBoxRotation", vec3ToString(trafficLightsComponent->getTriggerBox()->getSceneObject()->getRotation()).c_str());
+	componentElement->SetAttribute("triggerBoxSize", btVector3ToString(trafficLightsComponent->getTriggerBox()->getSize()).c_str());
+	componentElement->SetAttribute("stopPointPosition", vec3ToString(trafficLightsComponent->getStopPointPosition()).c_str());
+	componentElement->SetAttribute("initState", trafficLightsStateStrings[trafficLightsComponent->getInitState()].c_str());
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint)
 {
 	XMLElement* componentElement = doc.NewElement("Component");
@@ -295,6 +344,24 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (aiAgentComponent)
 	{
 		saveAIAgentComponent(objectElement, doc, aiAgentComponent);
+	}
+
+	AIAgentVehicle* aiAgentVehicleComponent = static_cast<AIAgentVehicle*>(sceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+	if (aiAgentVehicleComponent)
+	{
+		saveAIAgentVehicleComponent(objectElement, doc, aiAgentVehicleComponent);
+	}
+
+	StopComponent* stopComponent = static_cast<StopComponent*>(sceneObject->getComponent(CT_STOP_COMPONENT));
+	if (stopComponent)
+	{
+		saveStopComponent(objectElement, doc, stopComponent);
+	}
+
+	TrafficLightsComponent* trafficLightsComponent = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+	if (trafficLightsComponent)
+	{
+		saveTrafficLightsComponent(objectElement, doc, trafficLightsComponent);
 	}
 
 	BusStartPoint* busStartPointComponent = static_cast<BusStartPoint*>(sceneObject->getComponent(CT_BUS_START_POINT));

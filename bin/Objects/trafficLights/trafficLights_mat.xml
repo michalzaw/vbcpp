@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Materials>
+    <Material type="no_texture" name="Black" ambient="0,0,0,1" diffuse="0,0,0,1" specular="0.2,0.2,0.2,1" emissive="0,0,0,0" shininess="25" transparency="0" offset="0,0" scale="1,1"/>
+    <Material type="no_texture" name="YellowLight" ambient="0,0,0,1" diffuse="0.0686275,0.0686275,0.0686275,1" specular="0.2,0.2,0.2,1" emissive="1,1,0,0" shininess="25" transparency="0" offset="0,0" scale="1,1" requireSeparateInstance="true"/>
+    <Material type="no_texture" name="RedLight" ambient="0,0,0,1" diffuse="0.0686275,0.0686275,0.0686275,1" specular="0.2,0.2,0.2,1" emissive="1,0,0,0" shininess="25" transparency="0" offset="0,0" scale="1,1" requireSeparateInstance="true"/>
+    <Material type="no_texture" name="GreenLight" ambient="0,0,0,1" diffuse="0.0686275,0.0686275,0.0686275,1" specular="0.2,0.2,0.2,1" emissive="0,1,0,0" shininess="25" transparency="0" offset="0,0" scale="1,1" requireSeparateInstance="true"/>
+</Materials>

@@ -9,11 +9,12 @@
 
 //#include "../Bus/BusLoader.h"
 
-#include "../Game/AIAgent.h"
+#include "../Game/AI/AIAgent.h"
+#include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
-#include "../Game/PathComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -1404,6 +1405,16 @@ namespace vbEditor
 
 						aiAgent->setCurrentPath(_sceneManager->getGameLogicSystem()->getPathComponents()[0]);
 					}
+				}
+
+				if (ImGui::MenuItem("Add Stop Componet", NULL))
+				{
+					SceneObject* sceneObject = _sceneManager->addSceneObject("Stop component");
+
+					StopComponent* stopComponent = _sceneManager->getGameLogicSystem()->addStopComponent();
+					sceneObject->addComponent(stopComponent);
+
+					setSelectedSceneObject(sceneObject);
 				}
 				ImGui::Separator();
 

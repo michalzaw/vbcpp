@@ -15,8 +15,13 @@ class AIAgentPhysicalVechicle final : public AIAgent
 
 		glm::vec3 _centerPoint;
 
+	protected:
+		void onAttachedToScenObject() override;
+
 	public:
-		AIAgentPhysicalVechicle(PhysicalBodyRaycastVehicle* vechicle);
+		AIAgentPhysicalVechicle();
+
+		void moveToStartPoint();
 
 		void update(float deltaTime) override;
 };

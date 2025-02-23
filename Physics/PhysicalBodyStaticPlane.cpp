@@ -4,7 +4,7 @@
 #include "../Utils/Logger.h"
 
 PhysicalBodyStaticPlane::PhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset)
-: PhysicalBody(0),
+: PhysicalBody(PhysicalBodyType::STATIC_PLANE, 0),
 _offset(offset)
 {
     updateBody();

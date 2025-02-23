@@ -73,12 +73,31 @@ class PhysicalBodyRaycastVehicle : public PhysicalBodyConvexHull
 
         btRaycastVehicle* getRayCastVehicle();
 
+        void setMaxSteeringAngle(float maxSteeringAngle);
+        float getMaxSteeringAngle();
+
+        // steering value from -1 to 1
+        void setSteeringValue(float steering);
+        float getSteeringValue();
+        void setEngineForce(float engineForce);
+        float getEngineForce();
+        void setBrakeValue(float brakeValue);
+        float getBrakeValue();
+
     private:
+        static constexpr float DEFAULT_MAX_STEERING_ANGLE = 0.55f;
+
         PhysicsManager* _physMgr;
 
         btRaycastVehicle::btVehicleTuning _vehicleTuning;
         RayCasterWithCollisionGroups* _rayCaster;
         btRaycastVehicle* _rayCastVehicle;
+
+        float _maxSteeringAngle;
+
+        float _steeringValue;
+        float _engineForce;
+        float _brakeValue;
 
         virtual void updateBody();
 };

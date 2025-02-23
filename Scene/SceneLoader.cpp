@@ -2,11 +2,14 @@
 
 #include "SceneManager.h"
 
-#include "../Game/AIAgent.h"
+#include "../Game/AI/AIAgent.h"
+#include "../Game/AI/AIAgentVehicle.h"
+#include "../Game/AI/PathComponent.h"
+#include "../Game/AI/StopComponent.h"
+#include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
-#include "../Game/PathComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"
@@ -392,6 +395,68 @@ void SceneLoader::loadAIAgentComponent(XMLElement* componentElement, SceneObject
 }
 
 
+void SceneLoader::loadAIAgentVehicleComponent(XMLElement* componentElement, SceneObject* sceneObject)
+{
+	SceneObject* parent = sceneObject->getParent();
+	if (parent != nullptr)
+	{
+		AIAgentVehicle* component = static_cast<AIAgentVehicle*>(sceneObject->getComponent(CT_AI_AGENT_VEHICLE));
+
+		PathComponent* pathComponent = static_cast<PathComponent*>(parent->getComponent(CT_PATH));
+		if (pathComponent != nullptr)
+		{
+			component->setCurrentPath(pathComponent);
+		}
+	}
+}
+
+
+void SceneLoader::loadStopComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	float distanceToStop = XmlUtils::getAttributeFloatOptional(componentElement, "distance", 10.0f);
+
+	StopComponent* stopComponent = _sceneManager->getGameLogicSystem()->addStopComponent();
+	stopComponent->setDistanceToStop(distanceToStop);
+
+	sceneObject->addComponent(stopComponent);
+}
+
+
+void SceneLoader::loadTrafficLightComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	std::string triggerBoxPosition = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxPosition");
+	std::string triggerBoxRotation = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxRotation");
+	std::string triggerBoxSize = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxSize");
+	std::string stopPointPosition = XmlUtils::getAttributeStringOptional(componentElement, "stopPointPosition");
+	std::string initStateStr = XmlUtils::getAttributeStringOptional(componentElement, "initState");
+
+	TrafficLightsComponent* component = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
+	if (!triggerBoxPosition.empty())
+	{
+		component->getTriggerBox()->getSceneObject()->setPosition(XMLstringToVec3(triggerBoxPosition.c_str()));
+	}
+	if (!triggerBoxRotation.empty())
+	{
+		component->getTriggerBox()->getSceneObject()->setRotation(XMLstringToVec3(triggerBoxRotation.c_str()));
+	}
+	if (!triggerBoxSize.empty())
+	{
+		component->getTriggerBox()->setSize(XMLstringToBtVec3(triggerBoxSize.c_str()));
+	}
+
+	if (!stopPointPosition.empty())
+	{
+		component->setStopPointPosition(XMLstringToVec3(stopPointPosition.c_str()));
+	}
+
+	if (!initStateStr.empty())
+	{
+		TrafficLightsState initState = !initStateStr.empty() ? getTrafficLightsStateFromString(initStateStr) : TLS_RED;
+		component->setInitState(initState);
+	}
+}
+
+
 void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
 	std::string name = XmlUtils::getAttributeString(componentElement, "name");
@@ -472,6 +537,21 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "aiAgent")
 			{
 				loadAIAgentComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiAgentVehicle")
+			{
+				loadAIAgentVehicleComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "aiStop")
+			{
+				loadStopComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "trafficLights")
+			{
+				loadTrafficLightComponent(componentElement, sceneObject);
 			}
 
 			if (componentType == "busStartPoint")

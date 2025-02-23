@@ -26,6 +26,9 @@ struct ResourceDescription;
 class Prefab;
 class PathComponent;
 class AIAgent;
+class AIAgentVehicle;
+class StopComponent;
+class TrafficLightsComponent;
 class BezierCurve;
 class BusStartPoint;
 
@@ -60,6 +63,9 @@ class SceneSaver
 		void saveBezierCurveComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BezierCurve* bezierCurve);
 		void savePathComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, PathComponent* pathComponent);
 		void saveAIAgentComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgent* aiAgent);
+		void saveAIAgentVehicleComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, AIAgentVehicle* aiAgent);
+		void saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, StopComponent* stopComponent);
+		void saveTrafficLightsComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, TrafficLightsComponent* trafficLightsComponent);
 		void saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint);
 
 		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);

@@ -11,6 +11,7 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 #include "PhysicalBodyRaycastVehicle.h"
 #include "PhysicalBodyWheel.h"
+#include "PhysicalBodyGhost.h"
 
 #include "ConstraintHinge.hpp"
 #include "ConstraintHinge2.hpp"
@@ -61,6 +62,7 @@ class PhysicsManager : virtual public RefCounter
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(std::vector<glm::vec3>& vertices, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyWheel*              createPhysicalBodyWheel(PhysicalBodyRaycastVehicle* vehicle, btVector3 connectionPoint, float suspensionRestLength, float radius, bool isFrontWheel);
+        PhysicalBodyGhost*              createPhysicalBodyGhost(const btVector3& size);
 
         // Funkcja wywolywana przez SceneObject, nie wywolywac recznie
         void removePhysicalBody(PhysicalBody* physicalBody);
@@ -72,7 +74,8 @@ class PhysicsManager : virtual public RefCounter
         void addConstraint(Constraint* c);
         void removeConstraint(Constraint* c);
 
-		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& position, float rayLength = 1000.0f);
+		bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, float rayLength = 1000.0f);
+        bool rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir, short int filterMask, short int filterGroup, glm::vec3& outPosition, PhysicalBody*& outObject, float rayLength = 1000.0f);
         bool isPointInObject(const glm::vec3& point, PhysicalBody* physicalBody);
 
 		void setDebugRenderer(btIDebugDraw* debugRenderer);

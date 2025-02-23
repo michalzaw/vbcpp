@@ -8,6 +8,7 @@ set (PHYSICS_SOURCES
 	Physics/PhysicalBodyBvtTriangleMesh.cpp
 	Physics/PhysicalBodyConvexHull.cpp
 	Physics/PhysicalBodyCylinder.cpp
+	Physics/PhysicalBodyGhost.cpp
 	Physics/PhysicalBodyRaycastVehicle.cpp
 	Physics/PhysicalBodySphere.cpp
 	Physics/PhysicalBodyStaticPlane.cpp
@@ -25,6 +26,7 @@ set (PHYSICS_HEADERS
 	Physics/PhysicalBodyBvtTriangleMesh.hpp
 	Physics/PhysicalBodyConvexHull.hpp
 	Physics/PhysicalBodyCylinder.hpp
+	Physics/PhysicalBodyGhost.h
 	Physics/PhysicalBodyRaycastVehicle.h
 	Physics/PhysicalBodySphere.hpp
 	Physics/PhysicalBodyStaticPlane.hpp
