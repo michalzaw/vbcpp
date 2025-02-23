@@ -152,10 +152,6 @@ int PhysicsManager::destroyPhysicsWorld()
 }
 
 
-bool collision1 = false;
-bool collision2 = false;
-
-
 void PhysicsManager::simulate(btScalar timeStep)
 {
     if (_running)
@@ -165,15 +161,10 @@ void PhysicsManager::simulate(btScalar timeStep)
 
         for (int i = 0; i < _physicalBodies.size(); i++)
         {
-            if (_physicalBodies[i]->getRigidBody() != nullptr)
-            {
-                //SceneObject* object = static_cast<SceneObject*>(_physicalBodies[i]->getRigidBody()->getUserPointer());
-                //LOG_DEBUG(LOG_VARIABLE(object->getName()));
-            }
-
             _physicalBodies[i]->update();
         }
 
+        // collision detection
         btDispatcher* dispatcher = _dynamicsWorld->getDispatcher();
         for (int i = 0; i < dispatcher->getNumManifolds(); ++i)
         {
@@ -188,9 +179,6 @@ void PhysicsManager::simulate(btScalar timeStep)
 
                 if (physicalBody1 != nullptr && physicalBody2 != nullptr)
                 {
-                    const std::string& body1Name = physicalBody1->getSceneObject()->getName();
-                    const std::string& body2Name = physicalBody2->getSceneObject()->getName();
-
                     physicalBody1->setCollisionWith(physicalBody2);
                     physicalBody2->setCollisionWith(physicalBody1);
                 }
@@ -205,9 +193,6 @@ void PhysicsManager::simulate(btScalar timeStep)
 
                 if (physicalBody1 != nullptr && physicalBody2 != nullptr)
                 {
-                    const std::string& body1Name = physicalBody1->getSceneObject()->getName();
-                    const std::string& body2Name = physicalBody2->getSceneObject()->getName();
-
                     physicalBody1->setNotCollisionWith(physicalBody2);
                     physicalBody2->setNotCollisionWith(physicalBody1);
                 }

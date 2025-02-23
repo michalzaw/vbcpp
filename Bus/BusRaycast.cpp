@@ -513,16 +513,6 @@ float BusRaycast::getBusSpeed()
 
 void BusRaycast::update(float deltaTime)
 {
-    for (PhysicalBody* body : _modules[0].rayCastVehicle->getObjectsBeginCollision())
-    {
-        LOG_DEBUG("Bus collision begin with: " + body->getSceneObject()->getName());
-    }
-
-    for (PhysicalBody* body : _modules[0].rayCastVehicle->getObjectsEndCollision())
-    {
-        LOG_DEBUG("Bus collision end with: " + body->getSceneObject()->getName());
-    }
-
     _engine->update(deltaTime);
 
 	if (_engine->getState() == ES_STARTING && !isSoundPlay(ST_START_ENGINE))

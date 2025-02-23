@@ -128,7 +128,7 @@ float PhysicalBodyRaycastVehicle::getEngineForce()
 
 void PhysicalBodyRaycastVehicle::setBrakeValue(float brakeValue)
 {
-    _brakeValue = std::max(brakeValue, 0.1f);
+    _brakeValue = std::max(brakeValue, 0.0f);
 
     for (int i = 0; i < _rayCastVehicle->getNumWheels(); ++i)
     {
