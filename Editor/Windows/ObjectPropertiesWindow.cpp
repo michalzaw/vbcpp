@@ -1213,6 +1213,7 @@ void showTrafficLightsComponentDetails(TrafficLightsComponent* component)
 		ImGui::Separator();
 		ImGui::PushID("TrafficLightsComponentDetails");
 
+		COMPONENT_PROPERTY_EDIT(component, StopPointPosition, vec3, "Stop point")
 		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Init state")
 		{
 			const std::string& currentValue = trafficLightsStateStrings[component->getInitState()];

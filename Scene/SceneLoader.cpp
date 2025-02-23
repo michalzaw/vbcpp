@@ -427,6 +427,7 @@ void SceneLoader::loadTrafficLightComponent(tinyxml2::XMLElement* componentEleme
 	std::string triggerBoxPosition = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxPosition");
 	std::string triggerBoxRotation = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxRotation");
 	std::string triggerBoxSize = XmlUtils::getAttributeStringOptional(componentElement, "triggerBoxSize");
+	std::string stopPointPosition = XmlUtils::getAttributeStringOptional(componentElement, "stopPointPosition");
 	std::string initStateStr = XmlUtils::getAttributeStringOptional(componentElement, "initState");
 
 	TrafficLightsComponent* component = static_cast<TrafficLightsComponent*>(sceneObject->getComponent(CT_TRAFFIC_LIGHTS));
@@ -441,6 +442,11 @@ void SceneLoader::loadTrafficLightComponent(tinyxml2::XMLElement* componentEleme
 	if (!triggerBoxSize.empty())
 	{
 		component->getTriggerBox()->setSize(XMLstringToBtVec3(triggerBoxSize.c_str()));
+	}
+
+	if (!stopPointPosition.empty())
+	{
+		component->setStopPointPosition(XMLstringToVec3(stopPointPosition.c_str()));
 	}
 
 	if (!initStateStr.empty())

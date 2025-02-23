@@ -98,9 +98,9 @@ StopComponent* GameLogicSystem::addStopComponent()
 
 TrafficLightsComponent* GameLogicSystem::addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
 																   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
-																   const TrafficLightsState initState)
+																   const glm::vec3& stopPointPosition, const TrafficLightsState initState)
 {
-	TrafficLightsComponent* component = new TrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLighNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, initState);
+	TrafficLightsComponent* component = new TrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLighNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, stopPointPosition, initState);
 
 	_trafficLightsComponents.push_back(component);
 

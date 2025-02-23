@@ -63,7 +63,7 @@ class GameLogicSystem final
 		StopComponent* addStopComponent();
 		TrafficLightsComponent* addTrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
 														  const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
-														  const TrafficLightsState initState);
+														  const glm::vec3& stopPointPosition, const TrafficLightsState initState);
 		BusStartPoint* addBusStartPoint(const std::string& name);
 		//BusStopComponent* addBusStopComponent(std::string name);
 

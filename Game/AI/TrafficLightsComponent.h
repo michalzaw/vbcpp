@@ -61,7 +61,7 @@ class TrafficLightsComponent : public Component
 	public:
 		TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
 							   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
-							   const TrafficLightsState initState);
+							   const glm::vec3& stopPointPosition, const TrafficLightsState initState);
 		~TrafficLightsComponent();
 
 		inline TrafficLightsState getInitState() { return _initState; }
@@ -71,6 +71,9 @@ class TrafficLightsComponent : public Component
 		void setCurrentState(TrafficLightsState state, bool initialization = false);
 
 		inline PhysicalBodyGhost* getTriggerBox() { return _triggerBox; }
+
+		inline const glm::vec3& getStopPointPosition() { return _stopPoint; }
+		inline void setStopPointPosition(const glm::vec3& stopPointPosition) { _stopPoint = stopPointPosition; }
 
 		void changedTransform() override;
 		void update(float deltaTime) override;

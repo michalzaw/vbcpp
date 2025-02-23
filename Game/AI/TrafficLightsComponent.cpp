@@ -22,16 +22,17 @@ TrafficLightsState getTrafficLightsStateFromString(const std::string& name)
 
 TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeName, const std::string& yellowLightNodeName, const std::string& greenLighNodeName,
 											   const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
-											   const TrafficLightsState initState)
+											   const glm::vec3& stopPointPosition, const TrafficLightsState initState)
 	: Component(CT_TRAFFIC_LIGHTS),
 	_redLightNodeName(redLightNodeName), _yellowLightNodeName(yellowLightNodeName), _greenLightNodeName(greenLighNodeName),
 	_redLightMaterial(nullptr), _yellowLightMaterial(nullptr), _greenLightMaterial(nullptr),
 	_redLightColor(1.0f, 0.0f, 0.0f, 1.0f), _yellowLightColor(1.0f, 1.0f, 0.0f, 1.0f), _greenLightColor(0.0f, 1.0f, 0.0f, 1.0f),
 	_initState(initState),
 	_timer(0.0f), _currentState(initState),
-	_triggerBox(nullptr), _triggerBoxPositionInitialValue(triggerBoxPosition), _triggerBoxRotationInitialValue(triggerBoxRotation), _triggerBoxSizeInitialValue(triggerBoxSize)
+	_triggerBox(nullptr), _triggerBoxPositionInitialValue(triggerBoxPosition), _triggerBoxRotationInitialValue(triggerBoxRotation), _triggerBoxSizeInitialValue(triggerBoxSize),
+	_stopPoint(stopPointPosition)
 {
-	_stopPoint = glm::vec3(-2.0f, 0.0f, 1.0f);
+
 }
 
 
@@ -166,21 +167,5 @@ void TrafficLightsComponent::update(float deltaTime)
 				}
 			}
 		}
-
-
-		/*if (_currentState == TLS_RED || _currentState == TLS_YELLOW)
-		{
-			for (PhysicalBody* body : _triggerBox->getObjectsBeginCollision())
-			{
-				Component* aiAgentVehicleComponent = body->getSceneObject()->getComponent(CT_AI_AGENT_VEHICLE);
-				if (aiAgentVehicleComponent != nullptr)
-				{
-					AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(aiAgentVehicleComponent);
-
-					//LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
-					aiAgentVehicle->stopOnTrafficLights(5.0f, this);
-				}
-			}
-		}*/
 	}
 }

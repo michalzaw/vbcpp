@@ -264,6 +264,7 @@ void RObjectLoader::loadTrafficLightsComponent(tinyxml2::XMLElement* componentEl
 	object->getComponents()[componentIndex]["triggerBoxPosition"] = componentElement->Attribute("triggerBoxPosition");
 	object->getComponents()[componentIndex]["triggerBoxRotation"] = componentElement->Attribute("triggerBoxRotation");
 	object->getComponents()[componentIndex]["triggerBoxSize"] = componentElement->Attribute("triggerBoxSize");
+	object->getComponents()[componentIndex]["stopPointPosition"] = componentElement->Attribute("stopPointPosition");
 	object->getComponents()[componentIndex]["initState"] = componentElement->Attribute("initState");
 }
 
@@ -633,14 +634,16 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			const std::string& triggerBoxPositionStr = components[i]["triggerBoxPosition"].c_str();
 			const std::string& triggerBoxRotationStr = components[i]["triggerBoxRotation"].c_str();
 			const std::string& triggerBoxSizeStr = components[i]["triggerBoxSize"].c_str();
+			const std::string& stopPointPositionStr = components[i]["stopPointPosition"].c_str();
 			const std::string& initStateStr = components[i]["initState"];
 
 			glm::vec3 triggerBoxPosition = !triggerBoxPositionStr.empty() ? XMLstringToVec3(triggerBoxPositionStr.c_str()) : glm::vec3(0.0f, 0.0f, 0.0f);
 			glm::vec3 triggerBoxRotation = !triggerBoxPositionStr.empty() ? XMLstringToVec3(triggerBoxRotationStr.c_str()) : glm::vec3(0.0f, 0.0f, 0.0f);
 			glm::vec3 triggerBoxSize = !triggerBoxPositionStr.empty() ? XMLstringToVec3(triggerBoxSizeStr.c_str()) : glm::vec3(1.0f, 1.0f, 1.0f);
+			glm::vec3 stopPointPosition = !stopPointPositionStr.empty() ? XMLstringToVec3(stopPointPositionStr.c_str()) : glm::vec3(0.0f, 0.0f, 0.0f);
 			TrafficLightsState initState = !initStateStr.empty() ? getTrafficLightsStateFromString(initStateStr) : TLS_RED;
 
-			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, initState);
+			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, stopPointPosition, initState);
 
 			sceneObject->addComponent(trafficLights);
 		}
