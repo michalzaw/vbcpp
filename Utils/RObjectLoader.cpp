@@ -252,7 +252,7 @@ void RObjectLoader::loadAiAgent(tinyxml2::XMLElement* componentElement, RObject*
 
 void RObjectLoader::loadAiAgentVehicle(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
-	// not contains additional parameters
+	object->getComponents()[componentIndex]["frontSensorPosition"] = componentElement->Attribute("frontSensorPosition");
 }
 
 
@@ -618,7 +618,10 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		}
 		else if (componentType == "aiAgentVehicle")
 		{
+			glm::vec3 frontSensorPosition = XMLstringToVec3(components[i]["frontSensorPosition"].c_str());
+
 			AIAgentVehicle* aiAgent = sceneManager->getGameLogicSystem()->addAIAgentVehicle();
+			aiAgent->setFrontSensorPosition(frontSensorPosition);
 
 			sceneObject->addComponent(aiAgent);
 		}

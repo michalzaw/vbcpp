@@ -496,8 +496,18 @@ bool PhysicsManager::rayTest(const glm::vec3& rayOrigin, const glm::vec3& rayDir
 		rayCallback
 	);
 
+    if (_debugRendeignEnable)
+    {
+        _debugRenderer->drawLine(btVector3(rayOrigin.x, rayOrigin.y, rayOrigin.z), btVector3(rayEnd.x, rayEnd.y, rayEnd.z), btVector3(0.0f, 0.0f, 0.0f));
+    }
+
 	if (rayCallback.hasHit())
 	{
+        if (_debugRendeignEnable)
+        {
+            _debugRenderer->drawContactPoint(rayCallback.m_hitPointWorld, rayCallback.m_hitNormalWorld, 0.5f, 1, btVector3(1.0f, 0.0f, 0.0f));
+        }
+
         outPosition = glm::vec3(rayCallback.m_hitPointWorld.x(), rayCallback.m_hitPointWorld.y(), rayCallback.m_hitPointWorld.z());
         outObject = static_cast<PhysicalBody*>(rayCallback.m_collisionObject->getUserPointer());
 

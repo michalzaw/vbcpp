@@ -31,7 +31,7 @@ TrafficLightsComponent::TrafficLightsComponent(const std::string& redLightNodeNa
 	_timer(0.0f), _currentState(initState),
 	_triggerBox(nullptr), _triggerBoxPositionInitialValue(triggerBoxPosition), _triggerBoxRotationInitialValue(triggerBoxRotation), _triggerBoxSizeInitialValue(triggerBoxSize)
 {
-
+	_stopPoint = glm::vec3(-2.0f, 0.0f, 1.0f);
 }
 
 
@@ -154,7 +154,21 @@ void TrafficLightsComponent::update(float deltaTime)
 
 	if (_triggerBox != nullptr)
 	{
-		if (_currentState == TLS_RED || _currentState == TLS_YELLOW)
+		for (PhysicalBody* body : _triggerBox->getObjectsCollidesWith())
+		{
+			AIAgentVehicle* aiAgentVehicle = body->getSceneObject()->getComponentWithCasting<AIAgentVehicle>(CT_AI_AGENT_VEHICLE);
+			if (aiAgentVehicle != nullptr)
+			{
+				if (_currentState == TLS_RED || _currentState == TLS_YELLOW)
+				{
+					glm::vec3 stopPosition = getSceneObject()->transformLocalPointToGlobal(_stopPoint);
+					aiAgentVehicle->stopOnPoint(stopPosition);
+				}
+			}
+		}
+
+
+		/*if (_currentState == TLS_RED || _currentState == TLS_YELLOW)
 		{
 			for (PhysicalBody* body : _triggerBox->getObjectsBeginCollision())
 			{
@@ -163,10 +177,10 @@ void TrafficLightsComponent::update(float deltaTime)
 				{
 					AIAgentVehicle* aiAgentVehicle = dynamic_cast<AIAgentVehicle*>(aiAgentVehicleComponent);
 
-					LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
+					//LOG_DEBUG(getSceneObject()->getName() + " - Collision with agent: " + aiAgentVehicle->getSceneObject()->getName());
 					aiAgentVehicle->stopOnTrafficLights(5.0f, this);
 				}
 			}
-		}
+		}*/
 	}
 }

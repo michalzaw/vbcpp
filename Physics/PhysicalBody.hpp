@@ -91,6 +91,7 @@ class PhysicalBody : public Component
         void setCollisionWith(PhysicalBody* body);
         void setNotCollisionWith(PhysicalBody* body);
 
+        inline const std::set<PhysicalBody*>& getObjectsCollidesWith() { return _collidesWith; }
         inline const std::vector<PhysicalBody*>& getObjectsBeginCollision() { return _objectsBeginCollision; }
         inline const std::vector<PhysicalBody*>& getObjectsEndCollision() { return _objectsEndCollision; }
 

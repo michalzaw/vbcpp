@@ -8,7 +8,6 @@
 class PhysicalBodyRaycastVehicle;
 class PathComponent;
 class BezierCurve;
-class TrafficLightsComponent;
 
 
 class AIAgentVehicle final : public Component
@@ -19,11 +18,13 @@ class AIAgentVehicle final : public Component
 		PathComponent* _currentPath;
 		BezierCurve* _currentPathBezierCurve;
 
-		TrafficLightsComponent* _nextTrafficLights;
+		glm::vec3 _frontSensorPosition;
 
 		bool _isStop;
 		float _timeToStart;
 		float _brakeForce;
+
+		const glm::vec3& getVehicleDimesions();
 
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
@@ -39,8 +40,11 @@ class AIAgentVehicle final : public Component
 		void setCurrentPath(PathComponent* path);
 		inline PathComponent* getCurrentPath() { return _currentPath; }
 
+		inline void setFrontSensorPosition(const glm::vec3& position) { _frontSensorPosition = position;}
+		inline const glm::vec3 getFrontSensorPosition() { return _frontSensorPosition; }
+
 		void stop(float distance);
-		void stopOnTrafficLights(float distance, TrafficLightsComponent* trafficLights);
+		void stopOnPoint(const glm::vec3& position);
 
 		void update(float deltaTime) override;
 };

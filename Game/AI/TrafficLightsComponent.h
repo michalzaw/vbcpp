@@ -53,6 +53,8 @@ class TrafficLightsComponent : public Component
 		glm::vec3 _triggerBoxRotationInitialValue;
 		glm::vec3 _triggerBoxSizeInitialValue;
 
+		glm::vec3 _stopPoint;
+
 	protected:
 		void onAttachedToScenObject() override;
 

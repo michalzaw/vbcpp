@@ -100,6 +100,14 @@ class SceneObject
         Component*          getComponent(unsigned int index);
         Component*          getComponent(ComponentType type);
 
+        template<typename TYPE>
+        TYPE* getComponentWithCasting(ComponentType type)
+        {
+            Component* component = getComponent(type);
+            if (component != nullptr) return static_cast<TYPE*>(component);
+            else return nullptr;
+        }
+
         unsigned int        getComponentsCount();
 
 
