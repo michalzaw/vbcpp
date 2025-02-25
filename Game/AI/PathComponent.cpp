@@ -38,9 +38,10 @@ RRoadProfile* getHelperProfile()
 }
 
 
-PathComponent::PathComponent(PathDirection direction)
+PathComponent::PathComponent(PathDirection direction, float maxSpeed/* = 40.0f*/)
 	: Component(CT_PATH),
 	_direction(direction),
+	_maxSpeed(maxSpeed),
 	_bezierCurveComponent(nullptr), _pathHelperComponent(nullptr)
 {
 

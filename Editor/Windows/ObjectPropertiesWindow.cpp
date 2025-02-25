@@ -1322,6 +1322,8 @@ void showPathComponentDetails(PathComponent* component)
 		ImGui::Separator();
 		ImGui::PushID("PathComponentDetails");
 
+		COMPONENT_PROPERTY_EDIT(component, MaxSpeed, float, "Max speed")
+
 		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
 		{
 			for (const auto& connectedPath : component->getNextPaths())

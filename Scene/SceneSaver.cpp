@@ -194,6 +194,7 @@ void SceneSaver::savePathComponent(XMLElement* objectElement, XMLDocument& doc, 
 
 	componentElement->SetAttribute("type", "path");
 	componentElement->SetAttribute("direction", Strings::toString(static_cast<int>(pathComponent->getDirection())).c_str());
+	componentElement->SetAttribute("maxSpeed", toString(pathComponent->getMaxSpeed()).c_str());
 
 	const auto& nextPaths = pathComponent->getNextPaths();
 	if (nextPaths.size() > 0)
