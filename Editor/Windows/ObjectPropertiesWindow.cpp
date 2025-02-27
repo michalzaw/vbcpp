@@ -473,10 +473,14 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 template<typename TYPE>
 void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
 {
+	outSelectedItemIndex = 0;
+
 	if (addEmptyElement)
 	{
 		outItemsString += " ";
 		outItemsString += '\0';
+
+		outSelectedItemIndex = -1;
 	}
 
 	for (int i = 0; i < items.size(); ++i)

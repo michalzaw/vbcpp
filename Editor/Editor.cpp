@@ -1764,7 +1764,7 @@ namespace vbEditor
 
 				_graphicsManager->update(TIME_STEP);
 
-				_sceneManager->getGameLogicSystem()->update(deltaTime);
+				//_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
 
 

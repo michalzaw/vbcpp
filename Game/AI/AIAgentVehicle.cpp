@@ -35,19 +35,20 @@ void AIAgentVehicle::onAttachedToScenObject()
 
 void AIAgentVehicle::setCurrentPath(PathComponent* path)
 {
+	_currentPath = path;
+
 	if (path != nullptr)
 	{
-		path->getSceneObject()->addChild(getSceneObject());
+		_currentPath->getSceneObject()->addChild(getSceneObject());
+
+		_currentPathBezierCurve = dynamic_cast<BezierCurve*>(_currentPath->getSceneObject()->getComponent(CT_BEZIER_CURVE));
+
+		_targetSpeed = _currentPath->getMaxSpeed();
 	}
 	else
 	{
 		getSceneObject()->getParent()->removeChild(getSceneObject());
 	}
-
-	_currentPath = path;
-	_currentPathBezierCurve = dynamic_cast<BezierCurve*>(_currentPath->getSceneObject()->getComponent(CT_BEZIER_CURVE));
-
-	_targetSpeed = _currentPath->getMaxSpeed();
 }
 
 
