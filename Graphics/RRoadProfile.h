@@ -9,12 +9,27 @@
 #include "../Utils/Resource.h"
 
 
+enum AIPathIntersectionMode
+{
+	APIM_INNER,
+	APIM_OUTER,
+	APIM_IGNORE,
+
+	APIM_COUNT
+};
+
+
+const std::string aIPathIntersectionModeStrings[] = { "inner", "outer", "ignore" };
+AIPathIntersectionMode getAIPathIntersectionModeFromString(const std::string& name);
+
+
 struct AIPath final
 {
 	std::string name;
 	float x;
 	float y;
 	int direction;
+	AIPathIntersectionMode intersectionMode;
 
 };
 

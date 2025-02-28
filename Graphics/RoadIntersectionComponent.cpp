@@ -354,6 +354,13 @@ void RoadIntersectionComponent::updateEdgeRoadProfile()
 		_edgeRoadProfile->getRoadLanes().push_back(newLane);
 	}
 
+	const std::vector<AIPath>& aiPaths = _originalEdgeRoadProfile->getAIPaths();
+	for (int i = 0; i < aiPaths.size(); ++i)
+	{
+		AIPath newPath = aiPaths[i];
+		_edgeRoadProfile->getAIPaths().push_back(newPath);
+	}
+
 	if (getSceneObject() != nullptr)
 	{
 		for (auto childObject : getSceneObject()->getChildren())

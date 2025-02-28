@@ -466,6 +466,13 @@ void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
 		{
 			component->createPolygon();
 		}
+
+		ImGui::Separator();
+
+		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
+		{
+			AIPathGenerator::generateAIPaths(component, vbEditor::_sceneManager);
+		}
 	}
 }
 
