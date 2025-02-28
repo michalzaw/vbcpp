@@ -8,6 +8,7 @@
 #include "RoadGenerator.h"
 #include "RoadObject.h"
 
+#include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
 
@@ -432,6 +433,9 @@ void RoadIntersectionComponent::onAttachedToScenObject()
 		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
 
 		getSceneObject()->addChild(helperSceneObject);
+
+		InternalHelperComponent* helper = new InternalHelperComponent(getSceneObject());
+		helperSceneObject->addComponent(helper);
 	}
 }
 

@@ -19,6 +19,7 @@
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
 
+#include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
@@ -800,6 +801,14 @@ namespace vbEditor
 				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
 				{
 					setSelectedSceneObject(sceneObject);
+				}
+				else if (sceneObject != nullptr && (sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					InternalHelperComponent* helperComponent = sceneObject->getComponentWithCasting<InternalHelperComponent>(CT_INTERNAL_HELPER);
+					if (helperComponent != nullptr)
+					{
+						setSelectedSceneObject(helperComponent->getReferenceObject());
+					}
 				}
 			}
 			else

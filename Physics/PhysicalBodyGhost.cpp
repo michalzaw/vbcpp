@@ -2,6 +2,7 @@
 
 #include "../Game/GameConfig.h"
 
+#include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneManager.h"
 
 
@@ -109,6 +110,9 @@ void PhysicalBodyGhost::onAttachedToScenObject()
         _helperSceneObject->setScale(_size.x(), _size.y(), _size.z());
 
         getSceneObject()->addChild(_helperSceneObject);
+
+        InternalHelperComponent* helper = new InternalHelperComponent(getSceneObject());
+        _helperSceneObject->addComponent(helper);
     }
 }
 

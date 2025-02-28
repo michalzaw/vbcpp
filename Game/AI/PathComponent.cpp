@@ -5,6 +5,7 @@
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/GraphicsManager.h"
 
+#include "../../Scene/InternalHelperComponent.h"
 #include "../../Scene/SceneManager.h"
 
 #include "../../Utils/BezierCurvesUtils.h"
@@ -115,6 +116,9 @@ void PathComponent::onAttachedToScenObject()
 																										false,
 																										pathHelperSceneObject);
 		_pathHelperComponent->setCastShadows(false);
+
+		InternalHelperComponent* helper = new InternalHelperComponent(getSceneObject());
+		pathHelperSceneObject->addComponent(helper);
 	}
 
 	recalculate();

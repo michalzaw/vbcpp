@@ -8,6 +8,7 @@
 
 #include "../../Physics/PhysicalBody.hpp"
 
+#include "../../Scene/InternalHelperComponent.h"
 #include "../../Scene/SceneManager.h"
 
 
@@ -49,6 +50,9 @@ void StopComponent::onAttachedToScenObject()
 		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
 
 		getSceneObject()->addChild(helperSceneObject);
+
+		InternalHelperComponent* helper = new InternalHelperComponent(getSceneObject());
+		helperSceneObject->addComponent(helper);
 	}
 }
 
