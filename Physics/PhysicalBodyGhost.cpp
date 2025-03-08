@@ -100,7 +100,7 @@ void PhysicalBodyGhost::onAttachedToScenObject()
         Material* material = new Material;
         material->shader = NOTEXTURE_MATERIAL;
         material->shininess = 96.0f;
-        material->diffuseColor = glm::vec4(0.32f, 0.0f, 0.0f, 0.5f);
+        material->diffuseColor = glm::vec4(0.32f, 0.32f, 0.32f, 1.0f);
 
         Cube* cube = new Cube(1, material);
         cube->init();
