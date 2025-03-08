@@ -570,17 +570,16 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				wheelObj->setFlags(SOF_NOT_SELECTABLE | SOF_NOT_SERIALIZABLE);
 
 				// obracamy model kola je¿li jest po lewej stronie
-				WheelSide wheelSide;
+				// tak naprawde powinnismy obracac kolo po prawej stronie, ale przez AXLE ustawione na -1, 0, 0 bullet obraca nam kola o 180 stopni. Dlatego my obracamy lewe
+
 				float wheelAngle;
-				if (side == "right")
+				if (GameConfig::getInstance().mode == GM_GAME)
 				{
-					wheelAngle = 0.0f;
-					wheelSide = WS_RIGHT;
+					wheelAngle = side == "right" ? 0.0f : 180.0f;
 				}
 				else
 				{
-					wheelAngle = 180.0f;
-					wheelSide = WS_LEFT;
+					wheelAngle = side == "right" ? 180.0f : 0.0f;
 				}
 
 
@@ -606,6 +605,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				wheelInfo.m_wheelsDampingRelaxation = dampingRelaxation * 2 * sqrt(wheelInfo.m_suspensionStiffness);
 				wheelInfo.m_frictionSlip = frictionSlip;
 				wheelInfo.m_rollInfluence = rollInfluence;
+
+				if (GameConfig::getInstance().mode == GM_EDITOR)
+				{
+					wheelObj->setPosition(wheelPosition - glm::vec3(0.0f, suspensionRestLength, 0.0f));
+					sceneObject->addChild(wheelObj);
+				}
 			}
 		}
 		else if (componentType == "aiAgent")

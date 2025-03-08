@@ -6,6 +6,7 @@
 
 
 const btVector3 WHEEL_DIRECTION = btVector3(0.0f, -1.0f, 0.0f);
+// AXLE powinn byc 1, 0, 0 - tylko to wymagalo by obrocenia wszystkich pojazdow o 180 stopni wzgledem osi y. Za to wtedy kola zachowywaly by sie prawidowo i nie byly przez bulleta obracane o 180 stopni
 const btVector3 WHEEL_AXLE = btVector3(-1.0f, 0.0f, 0.0f);
 
 
