@@ -39,6 +39,7 @@ set (UTILS_HEADERS
 	Utils/Engine.h
 	Utils/FilesHelper.h
 	Utils/Gearbox.h
+	Utils/GeometryUtils.h
 	Utils/GlmUtils.h
 	Utils/Helpers.hpp
 	Utils/InputSystem.h

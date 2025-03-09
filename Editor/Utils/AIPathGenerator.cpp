@@ -11,6 +11,7 @@
 #include "../../Scene/SceneManager.h"
 
 #include "../../Utils/BezierCurvesUtils.h"
+#include "../../Utils/GeometryUtils.h"
 
 
 namespace AIPathGenerator
@@ -73,7 +74,8 @@ namespace AIPathGenerator
 
 	void generateAIPathForIntersection(const std::string& name, RoadIntersectionComponent* roadIntersectionComponent, const AIPath& aiPath, int road1Index, int road2Index, int quality, float curveFactor,
 									   const std::vector<glm::vec3>& roadsCenterPoints, const std::vector<glm::vec3>& roadsDirections, const std::vector<glm::vec3>& roadsRightVectors,
-									   SceneObject* rootObject, SceneManager* sceneManager)
+									   SceneObject* rootObject, SceneManager* sceneManager,
+									   float speedOnStraightPaths, float speedOnCurvedPaths)
 	{
 		std::vector<glm::vec3> bezierCurve1(4);
 		bezierCurve1[0] = roadsCenterPoints[road1Index] + roadsRightVectors[road1Index] * aiPath.x;
@@ -91,9 +93,107 @@ namespace AIPathGenerator
 		pathObject->addComponent(path);
 
 		rootObject->addChild(pathObject);
+
+		float distance1 = GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[1]);
+		float distance2 = GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[2]);
+
+		if (GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[1]) <= 2.0f &&
+			GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[2]) <= 2.0f)
+		{
+			path->setMaxSpeed(speedOnStraightPaths);
+		}
+		else
+		{
+			path->setMaxSpeed(speedOnCurvedPaths);
+		}
 	}
 
-	void generateAIPaths(RoadIntersectionComponent* roadIntersectionComponent, SceneManager* sceneManager, int pathQuality/* = 20*/, float innerPathCurveFactor/* = 2.0f*/, float outerPathCurveFactor/* = 1.0f*/)
+	struct PathConnectionPoint final
+	{
+		PathComponent* pathComponent;
+		int index;
+	};
+
+	bool findClosestConnectionPointForPathComponent(PathComponent* selectedPathComponent, int selectedPointIndex, SceneManager* sceneManager, float maxDistanceToCreateConnection, PathConnectionPoint& outConnectionPoint)
+	{
+		int selectedPathPointsCount = selectedPathComponent->getCurvePoints().size();
+		if (selectedPathPointsCount < 2)
+		{
+			LOG_WARNING("Cannot find closest connection point. Current path has 0 or 1 point.");
+			return false;
+		}
+
+		glm::vec3 selectedPointPosition = selectedPathComponent->getCurvePoints()[selectedPointIndex == 0 ? 0 : selectedPathComponent->getCurvePoints().size() - 1];
+
+		float minDistance = 50.0f;
+
+		bool result = false;
+
+		const auto& pathComponents = sceneManager->getGameLogicSystem()->getPathComponents();
+		for (auto path : pathComponents)
+		{
+			if (path == selectedPathComponent)
+			{
+				continue;
+			}
+
+			glm::vec3 connectionPointPosition;
+			int connectionPointIndex;
+			if (path->getCurvePoints().size() > 0 && selectedPointIndex == 1)
+			{
+				connectionPointPosition = path->getCurvePoints()[0];
+				connectionPointIndex = 0;
+			}
+			if (path->getCurvePoints().size() > 1 && selectedPointIndex == 0)
+			{
+				connectionPointPosition = path->getCurvePoints()[path->getCurvePoints().size() - 1];
+				connectionPointIndex = 1;
+			}
+
+			float distance = glm::distance(selectedPointPosition, connectionPointPosition);
+			if (distance < maxDistanceToCreateConnection && distance < minDistance)
+			{
+				minDistance = distance;
+				outConnectionPoint = { path, connectionPointIndex };
+
+				result = true;
+			}
+		}
+
+		return result;
+	}
+
+	void connectGeneratedPathsWithExistingPathsOnScene(SceneManager* sceneManager, SceneObject* rootObject, float maxDistanceToCreateConnection)
+	{
+		for (SceneObject* pathObject : rootObject->getChildren())
+		{
+			PathComponent* pathComponent = pathObject->getComponentWithCasting<PathComponent>(CT_PATH);
+			if (pathComponent != nullptr)
+			{
+				PathConnectionPoint connectionPoint;
+				if (findClosestConnectionPointForPathComponent(pathComponent, 0, sceneManager, maxDistanceToCreateConnection, connectionPoint))
+				{
+					if (connectionPoint.pathComponent->getSceneObject()->getParent() != rootObject)
+					{
+						pathComponent->setConnection(0, connectionPoint.pathComponent, connectionPoint.index);
+					}
+				}
+
+				if (findClosestConnectionPointForPathComponent(pathComponent, 1, sceneManager, maxDistanceToCreateConnection, connectionPoint))
+				{
+					if (connectionPoint.pathComponent->getSceneObject()->getParent() != rootObject)
+					{
+						pathComponent->setConnection(1, connectionPoint.pathComponent, connectionPoint.index);
+					}
+				}
+			}
+		}
+	}
+
+	void generateAIPaths(RoadIntersectionComponent* roadIntersectionComponent, SceneManager* sceneManager,
+						 int pathQuality/* = 20*/, float innerPathCurveFactor/* = 2.0f*/, float outerPathCurveFactor/* = 1.0f*/,
+						 bool connectWithExistingPaths/* = true*/, float maxDistanceToCreateConnection/* = 5.0f*/,
+						 float speedOnStraightPaths/* = 40.0f*/, float speedOnCurvedPaths/* = 20.0f*/)
 	{
 		std::vector<RoadConnectionPointData*> temp(2, nullptr);
 
@@ -144,7 +244,8 @@ namespace AIPathGenerator
 
 						generateAIPathForIntersection(pathName, roadIntersectionComponent, aiPath, road1Index, road2Index, pathQuality, innerPathCurveFactor,
 							roadsCenterPoints, roadsDirections, roadsRightVectors,
-							rootObject, sceneManager);
+							rootObject, sceneManager,
+							speedOnStraightPaths, speedOnCurvedPaths);
 					}
 				}
 			}
@@ -160,9 +261,15 @@ namespace AIPathGenerator
 
 					generateAIPathForIntersection(pathName, roadIntersectionComponent, aiPath, road1Index, road2Index, pathQuality, outerPathCurveFactor,
 						roadsCenterPoints, roadsDirections, roadsRightVectors,
-						rootObject, sceneManager);
+						rootObject, sceneManager,
+						speedOnStraightPaths, speedOnCurvedPaths);
 				}
 			}
+		}
+
+		if (connectWithExistingPaths)
+		{
+			connectGeneratedPathsWithExistingPathsOnScene(sceneManager, rootObject, maxDistanceToCreateConnection);
 		}
 	}
 }
