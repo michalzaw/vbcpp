@@ -357,7 +357,14 @@ void SceneLoader::loadBezierCurveComponent(XMLElement* componentElement, SceneOb
 void SceneLoader::loadPathComponent(XMLElement* componentElement, SceneObject* sceneObject)
 {
 	PathDirection direction = static_cast<PathDirection>(XmlUtils::getAttributeInt(componentElement, "direction"));
+	float maxSpeed = XmlUtils::getAttributeFloatOptional(componentElement, "maxSpeed");
+
 	PathComponent* pathComponent = _sceneManager->getGameLogicSystem()->addPathComponent(direction);
+
+	if (maxSpeed != 0.0f)
+	{
+		pathComponent->setMaxSpeed(maxSpeed);
+	}
 
 	sceneObject->addComponent(pathComponent);
 

@@ -382,6 +382,7 @@ void BusLoader::loadWheels(XMLElement* moduleElement, BusRayCastModule& busModul
         SceneObject* wheelObj = _sMgr->addSceneObject(wheelName);
 
         // obracamy model kola je¿li jest po lewej stronie
+        // tak naprawde powinnismy obracac kolo po prawej stronie, ale przez AXLE ustawione na -1, 0, 0 bullet obraca nam kola o 180 stopni. Dlatego my obracamy lewe
         WheelSide wheelSide;
         float wheelAngle;
         if (side == "right")

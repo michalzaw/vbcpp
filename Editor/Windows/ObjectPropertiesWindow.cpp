@@ -302,6 +302,26 @@ void shwoRoadProfileEdit(const std::string& roadProfileName, const std::function
 }
 
 
+void shwoRoadProfileEdit2(const std::string& roadProfileName, const std::function<void(const std::string&)>& onRoadProfileSelectedCallback)
+{
+	ImGui::SetNextItemWidth(-30);
+
+	char buffer[1024] = { '\0' };
+	strncpy(buffer, roadProfileName.c_str(), sizeof buffer);
+	buffer[sizeof buffer - 1] = '\0';
+
+	ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("...", ImVec2(20, 0)))
+	{
+		*(vbEditor::_selectRoadProfileDialogWindow->getOpenFlagPointer()) = true;
+		vbEditor::_selectRoadProfileDialogWindow->setOnOkClickCallback(onRoadProfileSelectedCallback);
+	}
+}
+
+
 void showRoadComponentDetails(RoadObject* roadComponent)
 {
 	if (ImGui::CollapsingHeader("Road component", ImGuiTreeNodeFlags_DefaultOpen))
@@ -397,86 +417,17 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 }
 
 
-void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
-{
-	if (ImGui::CollapsingHeader("Road intersection", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
-		for (const auto& connectedRoad : component->getConnectedRoads())
-		{
-			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
-		}
-
-		ImGui::Separator();
-
-		static bool modifyAllConnectedRoads = true;
-		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
-
-		int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
-		for (int i = 0; i < numberOfRoads; ++i)
-		{
-			ImGui::PushID(i);
-
-			ImGui::Text("#%d", i + 1);
-
-			float length = component->getLength(i);
-			if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
-			{
-				component->setLength(i, length, modifyAllConnectedRoads);
-			}
-			float width = component->getWidth(i);
-			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
-			{
-				component->setWidth(i, width, modifyAllConnectedRoads);
-			}
-			float arc = component->getArc(i);
-			if (ImGui::DragFloat("Arc", &arc, 0.1f, 0.0f, 20.0f))
-			{
-				component->setArc(i, arc, modifyAllConnectedRoads);
-			}
-
-			ImGui::PopID();
-		}
-
-		ImGui::Separator();
-
-		float quality = component->getQuality();
-		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
-		{
-			component->setQuality(quality);
-		}
-
-		ImGui::Separator();
-
-		shwoRoadProfileEdit(component->getEdgeRoadProfile()->getName(), [component](const std::string& newRoadProfile)
-			{
-				component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
-			});
-
-		int numberOfLanesToRemove = component->getEdgeRoadProfileNumberOfLanesToRemove();
-		if (ImGui::DragInt("Lanes to remove", &numberOfLanesToRemove, 1.0f, 1, 20))
-		{
-			component->setEdgeRoadProfileNumberOfLanesToRemove(numberOfLanesToRemove);
-		}
-
-		ImGui::Separator();
-
-
-		if (ImGui::Button("Generate polygon"))
-		{
-			component->createPolygon();
-		}
-	}
-}
-
-
 template<typename TYPE>
 void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
 {
+	outSelectedItemIndex = 0;
+
 	if (addEmptyElement)
 	{
 		outItemsString += " ";
 		outItemsString += '\0';
+
+		outSelectedItemIndex = -1;
 	}
 
 	for (int i = 0; i < items.size(); ++i)
@@ -687,9 +638,30 @@ bool newNode(const char* name, const char* descriptionFmt, ...)
 }
 
 
+bool newNode(const char* name, ImGuiTreeNodeFlags flags, const char* descriptionFmt, ...)
+{
+	ImGui::PushID(name);
+	ImGui::AlignTextToFramePadding();
+	bool nodeOpen = ImGui::TreeNodeEx("treeNode", flags, name);
+
+	ImGui::NextColumn();
+
+	ImGui::AlignTextToFramePadding();
+
+	va_list args;
+	va_start(args, descriptionFmt);
+	ImGui::TextV(descriptionFmt, args);
+	va_end(args);
+
+	ImGui::NextColumn();
+
+	return nodeOpen;
+}
+
+
 void showRenderComponentDetails(RenderObject* renderComponent)
 {
-	if (ImGui::CollapsingHeader("Render Component"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
+	if (ImGui::CollapsingHeader("Render Component (Old)"/*, ImGuiTreeNodeFlags_DefaultOpen*/))
 	{
 		for (int i = 0; i < renderComponent->getNumberOfLod(); ++i)
 		{
@@ -773,7 +745,7 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 	}
 
 
-	if (ImGui::CollapsingHeader("Render Component (WIP)", ImGuiTreeNodeFlags_DefaultOpen))
+	if (ImGui::CollapsingHeader("Render Component", ImGuiTreeNodeFlags_DefaultOpen))
 	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
@@ -844,6 +816,284 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 		ImGui::Columns(1);
 		ImGui::Separator();
 		ImGui::PopStyleVar();
+	}
+}
+
+
+void showRoadIntersectionComponentDetails(RoadIntersectionComponent* component)
+{
+	if (ImGui::CollapsingHeader("Road intersection", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RoadIntersectionComponentDetails");
+
+		if (newNode("Number of connected roads", ImGuiTreeNodeFlags_DefaultOpen, "%d", component->getConnectedRoads().size()))
+		{
+			for (const auto& connectedRoad : component->getConnectedRoads())
+			{
+				ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
+			}
+
+			ImGui::TreePop(); // newNode
+		}
+		ImGui::PopID(); // newNode
+
+		ImGui::Separator();
+
+		ImGui::PushID("ConnectedRoads");
+
+		if (newNode("Connected roads", ImGuiTreeNodeFlags_DefaultOpen, ""))
+		{
+			static bool modifyAllConnectedRoads = true;
+			COMPONENT_PROPERTY_EDIT_BEGIN(modifyAllConnectedRoads, "Modify all connected roads")
+			{
+				ImGui::Checkbox("", &modifyAllConnectedRoads);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			ImGui::Separator();
+
+			int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
+			for (int i = 0; i < numberOfRoads; ++i)
+			{
+				ImGui::PushID(i);
+
+				if (newNode("Road", ImGuiTreeNodeFlags_DefaultOpen, "%d", i + 1))
+				{
+					COMPONENT_PROPERTY_EDIT_BEGIN(Length, "Length")
+					{
+						float length = component->getLength(i);
+						if (ImGui::DragFloat("", &length, 1.0f, 0.0f, 100.0f))
+						{
+							component->setLength(i, length, modifyAllConnectedRoads);
+						}
+					}
+					COMPONENT_PROPERTY_EDIT_END
+
+					COMPONENT_PROPERTY_EDIT_BEGIN(Width, "Width")
+					{
+						float width = component->getWidth(i);
+						if (ImGui::DragFloat("", &width, 1.0f, 0.0f, 20.0f))
+						{
+							component->setWidth(i, width, modifyAllConnectedRoads);
+						}
+					}
+					COMPONENT_PROPERTY_EDIT_END
+
+					COMPONENT_PROPERTY_EDIT_BEGIN(Arc, "Arc")
+					{
+						float arc = component->getArc(i);
+						if (ImGui::DragFloat("", &arc, 0.1f, 0.0f, 20.0f))
+						{
+							component->setArc(i, arc, modifyAllConnectedRoads);
+						}
+					}
+					COMPONENT_PROPERTY_EDIT_END
+
+					ImGui::TreePop(); // newNode Road
+				}
+				ImGui::PopID(); // newNode Road
+
+				ImGui::PopID(); // i
+			}
+
+			ImGui::Separator();
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(Quality, "Quality")
+			{
+				float quality = component->getQuality();
+				if (ImGui::DragFloat("", &quality, 2.0f, 3.0f, 21.0f))
+				{
+					component->setQuality(quality);
+				}
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			ImGui::TreePop(); // newNode Connected roads
+		}
+		ImGui::PopID(); // newNode Connected roads
+
+		ImGui::PopID(); // ConnectedRoads
+
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(RoadProfile, "Road profile")
+		{
+			shwoRoadProfileEdit2(component->getEdgeRoadProfile()->getName(), [component](const std::string& newRoadProfile)
+				{
+					component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
+				});
+		}
+		COMPONENT_PROPERTY_EDIT_END
+
+		COMPONENT_PROPERTY_EDIT(component, EdgeRoadProfileNumberOfLanesToRemove, int, "Lanes to remove")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+
+		if (ImGui::Button("Refresh intersection geometry", ImVec2(-1.0f, 0.0f)))
+		{
+			component->createPolygon();
+		}
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RoadIntersectionComponentDetails");
+
+		if (newNode("AI path generator", ImGuiTreeNodeFlags_DefaultOpen, ""))
+		{
+			static bool connectGeneratedPaths = true;
+			static float maxDistanceToCreateConnection = 5.0f;
+			static int pathQuality = 20;
+			static float innerPathCurveFactor = 2.0f;
+			static float outerPathCurveFactor = 1.0f;
+			static float speedOnStraightPaths = 40.0f;
+			static float speedOnCurvedPaths = 20.0f;
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(connectGeneratedPaths, "Connect with other paths on scene")
+			{
+				ImGui::Checkbox("", &connectGeneratedPaths);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(maxDistanceToCreateConnection, "Max distance to create connection")
+			{
+				ImGui::DragFloat("", &maxDistanceToCreateConnection, 1.0f, 1, 30);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(pathQuality, "Path quality")
+			{
+				ImGui::DragInt("", &pathQuality, 1.0f, 4, 100);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(innerPathCurveFactor, "Inner path curve factor")
+			{
+				ImGui::DragFloat("", &innerPathCurveFactor, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(outerPathCurveFactor, "Outer path curve factor")
+			{
+				ImGui::DragFloat("", &outerPathCurveFactor, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnStraightPaths, "Speed on straight paths")
+			{
+				ImGui::DragFloat("", &speedOnStraightPaths, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnCurvedPaths, "Sped on curved paths")
+			{
+				ImGui::DragFloat("", &speedOnCurvedPaths, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			ImGui::Columns(1);
+
+			if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
+			{
+				AIPathGenerator::generateAIPaths(component, vbEditor::_sceneManager, pathQuality, innerPathCurveFactor, outerPathCurveFactor, connectGeneratedPaths, maxDistanceToCreateConnection,
+												 speedOnStraightPaths, speedOnCurvedPaths);
+			}
+
+			ImGui::Columns(2);
+
+			ImGui::TreePop(); // newNode
+		}
+		ImGui::PopID(); // newNode
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+
+	if (ImGui::CollapsingHeader("Road intersection (Old)"))
+	{
+		ImGui::Text("Number of connected roads: %d", component->getConnectedRoads().size());
+		for (const auto& connectedRoad : component->getConnectedRoads())
+		{
+			ImGui::BulletText("%s (%d)", connectedRoad.road->getSceneObject()->getName().c_str(), connectedRoad.connectionPointInRoadIndex);
+		}
+
+		ImGui::Separator();
+
+		static bool modifyAllConnectedRoads = true;
+		ImGui::Checkbox("Modify all connected roads", &modifyAllConnectedRoads);
+
+		int numberOfRoads = modifyAllConnectedRoads && component->getConnectedRoads().size() > 0 ? 1 : component->getConnectedRoads().size();
+		for (int i = 0; i < numberOfRoads; ++i)
+		{
+			ImGui::PushID(i);
+
+			ImGui::Text("#%d", i + 1);
+
+			float length = component->getLength(i);
+			if (ImGui::DragFloat("Length", &length, 1.0f, 0.0f, 100.0f))
+			{
+				component->setLength(i, length, modifyAllConnectedRoads);
+			}
+			float width = component->getWidth(i);
+			if (ImGui::DragFloat("Width", &width, 1.0f, 0.0f, 20.0f))
+			{
+				component->setWidth(i, width, modifyAllConnectedRoads);
+			}
+			float arc = component->getArc(i);
+			if (ImGui::DragFloat("Arc", &arc, 0.1f, 0.0f, 20.0f))
+			{
+				component->setArc(i, arc, modifyAllConnectedRoads);
+			}
+
+			ImGui::PopID();
+		}
+
+		ImGui::Separator();
+
+		float quality = component->getQuality();
+		if (ImGui::DragFloat("Quality", &quality, 2.0f, 3.0f, 21.0f))
+		{
+			component->setQuality(quality);
+		}
+
+		ImGui::Separator();
+
+		shwoRoadProfileEdit(component->getEdgeRoadProfile()->getName(), [component](const std::string& newRoadProfile)
+			{
+				component->setEdgeRoadProfile(ResourceManager::getInstance().loadRoadProfile(newRoadProfile));
+			});
+
+		int numberOfLanesToRemove = component->getEdgeRoadProfileNumberOfLanesToRemove();
+		if (ImGui::DragInt("Lanes to remove", &numberOfLanesToRemove, 1.0f, 1, 20))
+		{
+			component->setEdgeRoadProfileNumberOfLanesToRemove(numberOfLanesToRemove);
+		}
+
+		ImGui::Separator();
+
+
+		if (ImGui::Button("Generate polygon"))
+		{
+			component->createPolygon();
+		}
+
+		ImGui::Separator();
+
+		static bool connectGeneratedPaths = true;
+		ImGui::Checkbox("Connect with other paths on scene", &connectGeneratedPaths);
+
+		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
+		{
+			AIPathGenerator::generateAIPaths(component, vbEditor::_sceneManager, connectGeneratedPaths);
+		}
 	}
 }
 
@@ -1321,6 +1571,8 @@ void showPathComponentDetails(PathComponent* component)
 		ImGui::Columns(2);
 		ImGui::Separator();
 		ImGui::PushID("PathComponentDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, MaxSpeed, float, "Max speed")
 
 		if (newNode("Next paths", "[%d]", component->getNextPaths().size()))
 		{

@@ -3,6 +3,7 @@
 #include "LoadMaterial.h"
 
 #include "../Utils/Logger.h"
+#include "../Utils/XmlUtils.h"
 
 #include "../Utils/tinyxml2.h"
 using namespace tinyxml2;
@@ -118,6 +119,7 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 			aiPath.x = toFloat(pathElement->Attribute("x"));
 			aiPath.y = toFloat(pathElement->Attribute("y"));
 			aiPath.direction = toInt(pathElement->Attribute("direction"));
+			aiPath.intersectionMode = getAIPathIntersectionModeFromString(XmlUtils::getAttributeStringOptional(pathElement, "intersectionMode", aIPathIntersectionModeStrings[APIM_IGNORE]));
 
 			roadProfile->getAIPaths().push_back(aiPath);
 

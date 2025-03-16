@@ -37,6 +37,8 @@ class PathComponent final : public Component
 	private:
 		PathDirection _direction;
 
+		float _maxSpeed;
+
 		BezierCurve* _bezierCurveComponent;
 		RoadObject* _pathHelperComponent;
 
@@ -48,15 +50,17 @@ class PathComponent final : public Component
 		void onAttachedToScenObject() override;
 
 	public:
-		PathComponent(PathDirection direction);
+		PathComponent(PathDirection direction, float maxSpeed = 40.0f);
 		~PathComponent();
 
 		inline PathDirection getDirection() { return _direction; }
+		inline float getMaxSpeed() { return _maxSpeed; }
 		inline const std::vector<glm::vec3>& getCurvePoints() { return _curvePoints; }
 		inline const std::vector<ConnectedPath>& getNextPaths() { return _nextPaths; }
 		inline const std::vector<ConnectedPath>& getPreviousPaths() { return _previousPaths; }
 
 		inline void setPathDirection(PathDirection direction) { _direction = direction; }
+		inline void setMaxSpeed(float maxSpeed) { _maxSpeed = maxSpeed; }
 
 		void setConnection(int index, PathComponent* otherPath, int indexInOtherPath);
 

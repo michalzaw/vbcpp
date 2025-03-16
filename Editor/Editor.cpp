@@ -10,6 +10,7 @@
 //#include "../Bus/BusLoader.h"
 
 #include "../Game/AI/AIAgent.h"
+#include "../Game/AI/AIAgentVehicle.h"
 #include "../Game/AI/PathComponent.h"
 #include "../Game/AI/StopComponent.h"
 #include "../Game/BusStartPoint.h"
@@ -19,6 +20,7 @@
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
 
+#include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
@@ -624,6 +626,12 @@ namespace vbEditor
 			renderObject->setIsHighlighted(isHighlighted);
 			return;
 		}
+		renderObject = static_cast<RenderObject*>(object->getComponent(CT_ROAD_OBJECT));
+		if (renderObject != nullptr)
+		{
+			renderObject->setIsHighlighted(isHighlighted);
+			return;
+		}
 	}
 
 	void setObjectsHighlighting(std::vector<SceneObject*> objects, bool isHighlighted)
@@ -801,6 +809,14 @@ namespace vbEditor
 				{
 					setSelectedSceneObject(sceneObject);
 				}
+				else if (sceneObject != nullptr && (sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					InternalHelperComponent* helperComponent = sceneObject->getComponentWithCasting<InternalHelperComponent>(CT_INTERNAL_HELPER);
+					if (helperComponent != nullptr)
+					{
+						setSelectedSceneObject(helperComponent->getReferenceObject());
+					}
+				}
 			}
 			else
 			{
@@ -909,6 +925,43 @@ namespace vbEditor
 					glm::vec3 rightVector = glm::cross(direction, upVector);
 
 					_objectToAdd->setRotationQuaternion(QuaternionUtils::rotationBetweenVectors(glm::vec3(1.0f, 0.0f, 0.0f), direction));
+				}
+			}
+		}
+	}
+
+	PathComponent* _pathComponentUnderMouse = nullptr;
+	bool _isVehicleMovement = false;
+	void handleVehicleMouseMovement()
+	{
+		double xpos, ypos;
+		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
+		ypos = window.getHeight() - ypos;
+
+		// reset
+		if (_pathComponentUnderMouse != nullptr)
+		{
+			setObjectHighlighting(_pathComponentUnderMouse->getSceneObject(), false);
+			_pathComponentUnderMouse = nullptr;
+		}
+
+		// find new
+		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		if (objectId > 0)
+		{
+			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+			if (sceneObject != nullptr)
+			{
+				InternalHelperComponent* helperComponent = sceneObject->getComponentWithCasting<InternalHelperComponent>(CT_INTERNAL_HELPER);
+				if (helperComponent != nullptr)
+				{
+					PathComponent* path = helperComponent->getReferenceObject()->getComponentWithCasting<PathComponent>(CT_PATH);
+					if (path != nullptr)
+					{
+						_pathComponentUnderMouse = path;
+						setObjectHighlighting(sceneObject, true);
+						return;
+					}
 				}
 			}
 		}
@@ -1764,7 +1817,7 @@ namespace vbEditor
 
 				_graphicsManager->update(TIME_STEP);
 
-				_sceneManager->getGameLogicSystem()->update(deltaTime);
+				//_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
 
 
@@ -1933,6 +1986,35 @@ namespace vbEditor
 		if (ImGuizmo::IsUsing())
 		{
 			_selectedSceneObject->setTransformFromMatrix(modelMatrix);
+		}
+
+		AIAgentVehicle* aiAgentVehicle = _selectedSceneObject->getComponentWithCasting<AIAgentVehicle>(CT_AI_AGENT_VEHICLE);
+		AIAgent* aiAgent = _selectedSceneObject->getComponentWithCasting<AIAgent>(CT_AI_AGENT);
+		if (aiAgentVehicle != nullptr || aiAgent != nullptr)
+		{
+			if (ImGuizmo::IsUsing())
+			{
+				_isVehicleMovement = true;
+				handleVehicleMouseMovement();
+			}
+			else if (_isVehicleMovement)
+			{
+				if (_pathComponentUnderMouse != nullptr)
+				{
+					if (aiAgentVehicle != nullptr)
+					{
+						aiAgentVehicle->setCurrentPath(_pathComponentUnderMouse);
+					}
+					else if (aiAgent != nullptr)
+					{
+						aiAgent->setCurrentPath(_pathComponentUnderMouse);
+					}
+
+					setObjectHighlighting(_pathComponentUnderMouse->getSceneObject(), false);
+				}
+				_pathComponentUnderMouse = nullptr;
+				_isVehicleMovement = false;
+			}
 		}
 
 		Component* roadIntersectionComponent = _selectedSceneObject->getComponent(CT_ROAD_INTERSECTION);

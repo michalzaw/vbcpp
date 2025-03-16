@@ -141,6 +141,10 @@ SceneObject::~SceneObject()
                 _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
                 break;
 
+            case CT_INTERNAL_HELPER:
+                delete *i;
+                break;
+
             case CT_AI_AGENT:
                 _sceneManager->getGameLogicSystem()->removeAIAgent(static_cast<AIAgent*>(*i));
                 break;
@@ -436,6 +440,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_BEZIER_CURVE:
                     _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
+                    break;
+
+                case CT_INTERNAL_HELPER:
+                    delete component;
                     break;
 
                 case CT_AI_AGENT:

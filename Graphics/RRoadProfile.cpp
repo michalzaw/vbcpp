@@ -1,6 +1,16 @@
 #include "RRoadProfile.h"
 
 
+AIPathIntersectionMode getAIPathIntersectionModeFromString(const std::string& name)
+{
+	for (int i = 0; i < APIM_COUNT; ++i)
+	{
+		if (aIPathIntersectionModeStrings[i] == name)
+			return static_cast<AIPathIntersectionMode>(i);
+	}
+}
+
+
 RRoadProfile::RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial, float intersectionRoadY)
 	: Resource(RT_ROAD_PROFILE, path),
 	_author(author), _name(name), _comment(comment),

@@ -2,6 +2,7 @@
 
 #include "GameConfig.h"
 
+#include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneManager.h"
 
 
@@ -32,5 +33,8 @@ void BusStartPoint::onAttachedToScenObject()
 		getSceneObject()->getSceneManager()->getGraphicsManager()->addRenderObject(cube, helperSceneObject);
 
 		getSceneObject()->addChild(helperSceneObject);
+
+		InternalHelperComponent* helper = new InternalHelperComponent(getSceneObject());
+		helperSceneObject->addComponent(helper);
 	}
 }

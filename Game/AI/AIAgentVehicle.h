@@ -18,16 +18,25 @@ class AIAgentVehicle final : public Component
 		PathComponent* _currentPath;
 		BezierCurve* _currentPathBezierCurve;
 
+		PathComponent* _nextPath;
+
 		glm::vec3 _frontSensorPosition;
 
 		bool _isStop;
 		float _timeToStart;
 		float _brakeForce;
 
+		float _targetSpeed;
+
+		int _nextPointIndex;
+
 		float getSteeringValue();
 		float calculateDestinationRotation(const glm::vec3& destinationPoint);
 
 		void lookForward();
+
+		bool isNearToPathEnd(float expectedDistance);
+		void chooseNextPath();
 
 	protected:
 		void onAttachedToScenObject() override;
@@ -43,6 +52,7 @@ class AIAgentVehicle final : public Component
 
 		void stop(float distance);
 		void stopOnPoint(const glm::vec3& position);
+		void brake(float brakeForce);
 
 		void update(float deltaTime) override;
 };
