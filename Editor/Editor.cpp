@@ -1152,6 +1152,16 @@ namespace vbEditor
 		_sceneManager = newSceneManager;
 	}
 
+	Framebuffer* createSceneViewFramebufer(unsigned int width, unsigned int height)
+	{
+		Framebuffer* framebuffer = OGLDriver::getInstance().createFramebuffer();
+		framebuffer->addTexture(Renderer::getInstance().getFramebufferTextureFormat(), width, height, false);
+		framebuffer->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
+		framebuffer->init();
+
+		return framebuffer;
+	}
+
 	void initializeEngineSubsystems()
 	{
 		srand(static_cast<unsigned int>(time(NULL)));
@@ -1172,10 +1182,7 @@ namespace vbEditor
 		_soundManager = new SoundManager;
 		_sceneManager = new SceneManager(_graphicsManager, _physicsManager, _soundManager);
 
-		_mainFramebuffer = OGLDriver::getInstance().createFramebuffer();
-		_mainFramebuffer->addTexture(Renderer::getInstance().getFramebufferTextureFormat(), window.getWidth(), window.getHeight(), false);
-		_mainFramebuffer->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
-		_mainFramebuffer->init();
+		_mainFramebuffer = createSceneViewFramebufer(window.getWidth(), window.getHeight());
 
 		Renderer& renderer = Renderer::getInstance();
 		renderer.setGraphicsManager(_graphicsManager);
@@ -1743,6 +1750,26 @@ namespace vbEditor
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 
+	void handleMainSceneViewResising()
+	{
+		const glm::uvec2& viewSize = _mainSceneViewWindow->getAvailableViewSize();
+		if (_camera)
+		{
+			if (viewSize.x != _camera->getWindowWidth() || viewSize.y != _camera->getWindowHeight())
+			{
+				_camera->setWindowDimensions(viewSize.x, viewSize.y);
+
+				OGLDriver::getInstance().deleteFramebuffer(_mainFramebuffer);
+
+				_mainFramebuffer = createSceneViewFramebufer(viewSize.x, viewSize.y);
+
+				Renderer::getInstance().setOutFramebuffer(_mainFramebuffer);
+
+				Renderer::getInstance().setWindowDimensions(viewSize.x, viewSize.y);
+			}
+		}
+	}
+
 	void run()
 	{
 		Renderer& renderer = Renderer::getInstance();
@@ -1828,33 +1855,7 @@ namespace vbEditor
 			}
 
 
-			const glm::uvec2& viewSize = _mainSceneViewWindow->getAvailableViewSize();
-			if (_camera)
-			{
-				if (viewSize.x != _camera->getWindowWidth() || viewSize.y != _camera->getWindowHeight())
-				{
-					_camera->setWindowDimensions(viewSize.x, viewSize.y);
-
-					OGLDriver::getInstance().deleteFramebuffer(_mainFramebuffer);
-
-					_mainFramebuffer = OGLDriver::getInstance().createFramebuffer();
-					_mainFramebuffer->addTexture(Renderer::getInstance().getFramebufferTextureFormat(), viewSize.x, viewSize.y, false);
-					_mainFramebuffer->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
-					_mainFramebuffer->init();
-
-					Renderer::getInstance().setOutFramebuffer(_mainFramebuffer);
-
-					Renderer::getInstance().setWindowDimensions(viewSize.x, viewSize.y);
-
-					/*_camera->setWindowDimensions(viewSize.x, viewSize.y);
-					Renderer::getInstance()._screenWidth = viewSize.x;
-					Renderer::getInstance()._screenHeight = viewSize.y;
-
-					//OGLDriver::getInstance().deleteFramebuffer(Renderer::getInstance()._postProcessingFramebuffers[0]);
-					//OGLDriver::getInstance().deleteFramebuffer(Renderer::getInstance()._postProcessingFramebuffers[1]);
-					Renderer::getInstance().recreateAllFramebuffers();*/
-				}
-			}
+			handleMainSceneViewResising();
 
 			// rendering
 			renderer.renderAll();
