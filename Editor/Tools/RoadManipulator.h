@@ -8,6 +8,7 @@
 
 
 struct RoadSegment;
+class ImDrawList;
 
 
 // todo: zmienic nazwe - juz nie tylko road
@@ -22,6 +23,9 @@ namespace RoadManipulator
 
 	// call BeginFrame right after ImGui_XXXX_NewFrame();
 	void BeginFrame();
+	void SetDrawlist(ImDrawList* drawlist);
+
+	bool IsUsing();
 
 	void SetRect(float x, float y, float width, float height);
 	void SetAvailableConnectionPoints(std::vector<glm::vec3>* availableConnectionPoints);

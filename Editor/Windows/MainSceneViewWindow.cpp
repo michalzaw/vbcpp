@@ -4,7 +4,14 @@
 #include <ImGuizmo.h>
 #include "glm/gtc/type_ptr.hpp"
 
+#include "../Editor.h"
+#include "../Tools/AxisTool.h"
+#include "../Tools/RoadManipulator.h"
+
+#include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/OGLDriver.h"
+#include "../../Graphics/RoadObject.h"
+#include "../../Graphics/ShapePolygonComponent.h"
 
 
 namespace vbEditor
@@ -47,30 +54,30 @@ void MainSceneViewWindow::calculateViewport()
 }
 
 
-void MainSceneViewWindow::showGizmo()
+void MainSceneViewWindow::showTools()
 {
-	if (vbEditor::_selectedSceneObject == nullptr)
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+	if (vbEditor::_selectedSceneObject)
 	{
-		return;
+		ImGuizmo::SetDrawlist(drawList);
+		RoadManipulator::SetDrawlist(drawList);
+
+		RoadObject* roadComponent = vbEditor::_selectedSceneObject->getComponentWithCasting<RoadObject>(CT_ROAD_OBJECT);
+		ShapePolygonComponent* shapePolygonComponent = vbEditor::_selectedSceneObject->getComponentWithCasting<ShapePolygonComponent>(CT_SHAPE_POLYGON);
+		BezierCurve* bezierCurveComponent = vbEditor::_selectedSceneObject->getComponentWithCasting<BezierCurve>(CT_BEZIER_CURVE);
+
+		if (roadComponent && roadComponent->getRoadType() != RoadType::BEZIER_CURVES)
+			vbEditor::showRoadTools();
+		else if (shapePolygonComponent)
+			vbEditor::showPolygonEditTool();
+		else if (bezierCurveComponent)
+			vbEditor::showBezierCurveTool();
+		else
+			vbEditor::ShowTransformGizmo();
 	}
 
-	glm::mat4 modelMatrix = vbEditor::_selectedSceneObject->getLocalTransformMatrix();
-	glm::mat4 viewMatrix = vbEditor::_camera->getViewMatrix();
-
-	static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
-	static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
-
-	//ImGuiIO& io = ImGui::GetIO();
-	const UintRect& viewport = _sceneViewport;
-	ImGuizmo::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
-	ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(vbEditor::_camera->getProjectionMatrix()),
-		mCurrentGizmoOperation, mCurrentGizmoMode,
-		glm::value_ptr(modelMatrix),
-		NULL,
-		NULL,
-		NULL,
-		NULL
-	);
+	AxisTool::SetDrawlist(drawList);
+	vbEditor::showAxisTool();
 }
 
 
@@ -86,16 +93,13 @@ void MainSceneViewWindow::drawWindow()
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		_availableViewSize = glm::uvec2(std::max((unsigned int) viewportPanelSize.x, 2u), std::max((unsigned int) viewportPanelSize.y, 2u));
 
-		_isWindowHovered = ImGui::IsWindowHovered();
-
 		_texture->setClampMode(TCM_REPEAT);
 		ImGui::Image((ImTextureID)_texture->getID(), ImVec2(_texture->getSize().x, _texture->getSize().y) , ImVec2(0, 1), ImVec2(1, 0));
 		_texture->setClampMode(TCM_CLAMP_TO_EDGE);
 
-		ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+		showTools();
 
-		showGizmo();
-
+		_isWindowHovered = ImGui::IsWindowHovered() && !ImGuizmo::IsUsing() && !RoadManipulator::IsUsing();
 	}
 	ImGui::End();
 }

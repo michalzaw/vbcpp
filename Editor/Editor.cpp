@@ -1635,8 +1635,8 @@ namespace vbEditor
 		drawMainDockSpace();
 
 		//ImGuizmo::BeginFrame();
-		RoadManipulator::BeginFrame();
-		AxisTool::BeginFrame();
+		//RoadManipulator::BeginFrame();
+		//AxisTool::BeginFrame();
 
 		if (_clickMode == CM_ADD_OBJECT)
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
@@ -1719,7 +1719,7 @@ namespace vbEditor
 
 			//if (_showRoadTools)
 			//{
-				RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
+				/*RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
 				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
 				BezierCurve* bezierCurveComponent = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
 
@@ -1729,20 +1729,12 @@ namespace vbEditor
 					showPolygonEditTool();
 				else if (bezierCurveComponent)
 					showBezierCurveTool();
-				//else
-					//ShowTransformGizmo();
+				else
+					ShowTransformGizmo();*/
 			//}
 		}
 
-
-		glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), _camera->getDirection(), _camera->getUpVector());
-
-		float width = _camera->getWindowWidth() / 7.0f;
-		float height = _camera->getWindowHeight() / 7.0f;
-		float x = 150.0f;
-		float y = _camera->getWindowHeight() - height;
-		AxisTool::SetRect(x, y, width, height);
-		AxisTool::Show(viewMatrix, _camera->getProjectionMatrix(), _camera->getDirection());
+		//showAxisTool();
 
 		LoggerWindow::drawWindow();
 
@@ -2125,7 +2117,8 @@ namespace vbEditor
 		createAvailableConnectionPointsList(connectionPointsPositions, connectionPoints);
 
 		ImGuiIO& io = ImGui::GetIO();
-		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		const UintRect& viewport = _mainSceneViewWindow->getSceneViewport();
+		RoadManipulator::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::SetCurvePoints({});
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
@@ -2165,7 +2158,8 @@ namespace vbEditor
 		std::vector<glm::vec3> connectionPointsPositions;
 
 		ImGuiIO& io = ImGui::GetIO();
-		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		const UintRect& viewport = _mainSceneViewWindow->getSceneViewport();
+		RoadManipulator::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::SetCurvePoints(component->getPoints());
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
@@ -2203,7 +2197,8 @@ namespace vbEditor
 		}
 
 		ImGuiIO& io = ImGui::GetIO();
-		RoadManipulator::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		const UintRect& viewport = _mainSceneViewWindow->getSceneViewport();
+		RoadManipulator::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
 		RoadManipulator::SetAvailableConnectionPoints(&connectionPointsPositions);
 		RoadManipulator::SetCurvePoints(component->getCurvePoints());
 		RoadManipulator::Manipulate(_camera->getViewMatrix(), _camera->getProjectionMatrix(),
@@ -2241,6 +2236,20 @@ namespace vbEditor
 				pathComponent->setConnection(connectionPointIndex, pathConnectionPoints[newConnectionIndex].pathComponent, pathConnectionPoints[newConnectionIndex].index);
 			}
 		}
+	}
+
+	void showAxisTool()
+	{
+		glm::mat4 viewMatrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), _camera->getDirection(), _camera->getUpVector());
+
+		const UintRect& scenceViewport = _mainSceneViewWindow->getSceneViewport();
+
+		float width = scenceViewport.size.x / 7.0f;
+		float height = scenceViewport.size.y / 7.0f;
+		float x = scenceViewport.position.x;
+		float y = scenceViewport.position.y + scenceViewport.size.y - height;
+		AxisTool::SetRect(x, y, width, height);
+		AxisTool::Show(viewMatrix, _camera->getProjectionMatrix(), _camera->getDirection());
 	}
 
 } // namespace

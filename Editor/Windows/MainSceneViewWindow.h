@@ -25,7 +25,7 @@ class MainSceneViewWindow final : public ImGuiWindow
 		void calculateCursorPositionOnSceneView();
 		void calculateViewport();
 
-		void showGizmo();
+		void showTools();
 
 		virtual void drawWindow() override;
 

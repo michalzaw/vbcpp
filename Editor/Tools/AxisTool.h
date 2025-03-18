@@ -6,11 +6,15 @@
 
 #include <glm/glm.hpp>
 
+class ImDrawList;
+
 
 namespace AxisTool
 {
 	// call BeginFrame right after ImGui_XXXX_NewFrame();
 	void BeginFrame();
+
+	void SetDrawlist(ImDrawList* drawlist);
 
 	void SetRect(float x, float y, float width, float height);
 

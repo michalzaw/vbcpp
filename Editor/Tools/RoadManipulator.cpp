@@ -56,6 +56,8 @@ namespace RoadManipulator
 
 		bool isUsingGizmo = false;
 		bool isUsingGizmoLastFrame = false;
+
+		bool isUsing = false;
 	};
 
 	static Context context;
@@ -77,6 +79,16 @@ namespace RoadManipulator
 		ImGui::End();
 		ImGui::PopStyleVar();
 		ImGui::PopStyleColor(2);
+	}
+
+	void SetDrawlist(ImDrawList* drawlist)
+	{
+		context.drawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
+	}
+
+	bool IsUsing()
+	{
+		return context.isUsingGizmo || context.isUsing;
 	}
 
 	void SetRect(float x, float y, float width, float height)
@@ -234,7 +246,7 @@ namespace RoadManipulator
 		{
 			glm::mat4 modelMatrix = glm::translate(glm::vec3(position));
 
-			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+			ImGuizmo::SetRect(context.x, context.y, context.width, context.height);
 			ImGuizmo::Manipulate(glm::value_ptr(context.viewMatrix), glm::value_ptr(context.projectionMatrix),
 				ImGuizmo::TRANSLATE, ImGuizmo::WORLD,
 				glm::value_ptr(modelMatrix),
@@ -262,6 +274,8 @@ namespace RoadManipulator
 		{
 			context.activePoint = index;
 			context.activeSegment = CalculateActiveSegment(context.activePoint);
+
+			context.isUsing = true;
 		}
 
 		return newPosition;
@@ -342,6 +356,8 @@ namespace RoadManipulator
 					{
 						context.isCreatedNewConnection = true;
 						context.newConnectionIndex = i;
+
+						context.isUsing = true;
 					}
 				}
 			}
@@ -483,6 +499,11 @@ namespace RoadManipulator
 			context.curvePoints != nullptr && context.curvePoints->size() > 1)
 		{
 			drawCurve(*context.curvePoints, cameraPosition);
+		}
+
+		if (!io.MouseDown[0])
+		{
+			context.isUsing = false;
 		}
 	}
 
