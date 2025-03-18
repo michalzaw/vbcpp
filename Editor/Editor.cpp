@@ -45,6 +45,7 @@
 #include "Windows/GenerateObjectsAlongCurveWindow.h"
 #include "Windows/LoggerWindow.h"
 #include "Windows/ComputeShaderTestWindow.h"
+#include "Windows/MainSceneViewWindow.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/ShapePolygonComponent.h"
@@ -533,6 +534,8 @@ namespace vbEditor
 	int _windowWidth = 1024;
 	int _windowHeight = 768;
 
+	Framebuffer* _mainFramebuffer;
+
 	GraphicsManager* _graphicsManager = nullptr;
 	PhysicsManager* _physicsManager = nullptr;
 	SoundManager* _soundManager = nullptr;
@@ -573,6 +576,7 @@ namespace vbEditor
 	OpenDialogWindow* _addSceneObjectDialogWindow = nullptr;
 	OpenDialogWindow* _selectRoadProfileDialogWindow = nullptr;
 	ComputeShaderTestWindow* _computeShaderTestWindow = nullptr;
+	MainSceneViewWindow* _mainSceneViewWindow = nullptr;
 
 	Window* _backgroundWindow = nullptr;
 	std::future<void> _loadingSceneFuture;
@@ -749,28 +753,24 @@ namespace vbEditor
 
 	bool getCursorPositionIn3D(GLFWwindow* glfwWindow, glm::vec3& outCursorPosition)
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(glfwWindow, &xpos, &ypos);
-		ypos = window.getHeight() - ypos;
+		glm::vec2 cursorPosition = _mainSceneViewWindow->getCursorPositionOnSceneView();
 
 		glm::vec3 rayStart;
 		glm::vec3 rayDir;
-		calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+		calculateRay(cursorPosition.x, cursorPosition.y, _camera, rayStart, rayDir);
 
 		return _sceneManager->getPhysicsManager()->rayTest(rayStart, rayDir, COL_TERRAIN, COL_WHEEL, outCursorPosition);
 	}
 
 	void selectClickedObject()
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
-		ypos = window.getHeight() - ypos;
+		glm::vec2 cursorPosition = _mainSceneViewWindow->getCursorPositionOnSceneView();
 
 		if (_objectPickingMode == OPM_RAY_CAST)
 		{
 			glm::vec3 rayStart;
 			glm::vec3 rayDir;
-			calculateRay(xpos, ypos, _camera, rayStart, rayDir);
+			calculateRay(cursorPosition.x, cursorPosition.y, _camera, rayStart, rayDir);
 
 			// collision with render objects
 			SceneObject* selectedObject = nullptr;
@@ -801,7 +801,7 @@ namespace vbEditor
 		}
 		else
 		{
-			unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+			unsigned int objectId = Renderer::getInstance().pickObject(cursorPosition.x, cursorPosition.y);
 			if (objectId > 0)
 			{
 				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
@@ -827,7 +827,7 @@ namespace vbEditor
 
 	void mouseButtonCallback(GLFWwindow* glfwWindow, int button, int action, int mods)
 	{
-		if (getGUIhasFocus())
+		if (getGUIhasFocus() && !_mainSceneViewWindow->isWindowHovered())
 		{
 			return;
 		}
@@ -889,11 +889,9 @@ namespace vbEditor
 
 	void adjustNewObjectRotationToCurve()
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
-		ypos = window.getHeight() - ypos;
+		glm::vec2 cursorPosition = _mainSceneViewWindow->getCursorPositionOnSceneView();
 
-		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		unsigned int objectId = Renderer::getInstance().pickObject(cursorPosition.x, cursorPosition.y);
 		if (objectId > 0)
 		{
 			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
@@ -934,9 +932,7 @@ namespace vbEditor
 	bool _isVehicleMovement = false;
 	void handleVehicleMouseMovement()
 	{
-		double xpos, ypos;
-		glfwGetCursorPos(window.getWindow(), &xpos, &ypos);
-		ypos = window.getHeight() - ypos;
+		glm::vec2 cursorPosition = _mainSceneViewWindow->getCursorPositionOnSceneView();
 
 		// reset
 		if (_pathComponentUnderMouse != nullptr)
@@ -946,7 +942,7 @@ namespace vbEditor
 		}
 
 		// find new
-		unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+		unsigned int objectId = Renderer::getInstance().pickObject(cursorPosition.x, cursorPosition.y);
 		if (objectId > 0)
 		{
 			SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
@@ -1038,15 +1034,16 @@ namespace vbEditor
 
 	void changeFramebufferSizeCallback(GLFWwindow* glfwWindow, int width, int height)
 	{
-		Renderer::getInstance().setWindowDimensions(width, height);
+		Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+		defaultFramebuffer->setViewport(UintRect(0, 0, width, height));
+
 		window.setWindowSize(width, height);
 
 	}
 
 	void changeWindowSizeCallback(GLFWwindow* window, int width, int height)
 	{
-		if (_camera)
-			_camera->setWindowDimensions(width, height);
+
 	}
 
 	bool createWindow()
@@ -1175,8 +1172,14 @@ namespace vbEditor
 		_soundManager = new SoundManager;
 		_sceneManager = new SceneManager(_graphicsManager, _physicsManager, _soundManager);
 
+		_mainFramebuffer = OGLDriver::getInstance().createFramebuffer();
+		_mainFramebuffer->addTexture(Renderer::getInstance().getFramebufferTextureFormat(), window.getWidth(), window.getHeight(), false);
+		_mainFramebuffer->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
+		_mainFramebuffer->init();
+
 		Renderer& renderer = Renderer::getInstance();
 		renderer.setGraphicsManager(_graphicsManager);
+		renderer.setOutFramebuffer(_mainFramebuffer);
 		renderer.setMsaaAntialiasing(true);
 		renderer.setMsaaAntialiasingLevel(4);
 		renderer.setBloom(false);
@@ -1238,6 +1241,9 @@ namespace vbEditor
 
 		_computeShaderTestWindow = new ComputeShaderTestWindow(false);
 		_imGuiInterface->addWindow(_computeShaderTestWindow);
+
+		_mainSceneViewWindow = new MainSceneViewWindow(true);
+		_imGuiInterface->addWindow(_mainSceneViewWindow);
 	}
 
 	void loadNewObjectToAdd()
@@ -1576,6 +1582,7 @@ namespace vbEditor
 			{
 				ImGui::MenuItem("Demo", NULL, &_showDemoWindow);
 				ImGui::MenuItem("Compute shader test", NULL, _computeShaderTestWindow->getOpenFlagPointer());
+				ImGui::MenuItem("Scene window", NULL, _mainSceneViewWindow->getOpenFlagPointer());
 				ImGui::EndMenu();
 			}
 
@@ -1620,7 +1627,7 @@ namespace vbEditor
 
 		drawMainDockSpace();
 
-		ImGuizmo::BeginFrame();
+		//ImGuizmo::BeginFrame();
 		RoadManipulator::BeginFrame();
 		AxisTool::BeginFrame();
 
@@ -1715,8 +1722,8 @@ namespace vbEditor
 					showPolygonEditTool();
 				else if (bezierCurveComponent)
 					showBezierCurveTool();
-				else
-					ShowTransformGizmo();
+				//else
+					//ShowTransformGizmo();
 			//}
 		}
 
@@ -1786,9 +1793,9 @@ namespace vbEditor
 
 			
 			// input
-			if (!getGUIhasFocus())
+			if (!(getGUIhasFocus() && !_mainSceneViewWindow->isWindowHovered()))
 			{
-			processInput(deltaTime);
+				processInput(deltaTime);
 				
 
 				glfwGetCursorPos(window.getWindow(), &xPos, &yPos);
@@ -1820,6 +1827,34 @@ namespace vbEditor
 				//_sceneManager->getGameLogicSystem()->update(deltaTime);
 			}
 
+
+			const glm::uvec2& viewSize = _mainSceneViewWindow->getAvailableViewSize();
+			if (_camera)
+			{
+				if (viewSize.x != _camera->getWindowWidth() || viewSize.y != _camera->getWindowHeight())
+				{
+					_camera->setWindowDimensions(viewSize.x, viewSize.y);
+
+					OGLDriver::getInstance().deleteFramebuffer(_mainFramebuffer);
+
+					_mainFramebuffer = OGLDriver::getInstance().createFramebuffer();
+					_mainFramebuffer->addTexture(Renderer::getInstance().getFramebufferTextureFormat(), viewSize.x, viewSize.y, false);
+					_mainFramebuffer->setTextureFiltering(0, TFM_LINEAR, TFM_LINEAR);
+					_mainFramebuffer->init();
+
+					Renderer::getInstance().setOutFramebuffer(_mainFramebuffer);
+
+					Renderer::getInstance().setWindowDimensions(viewSize.x, viewSize.y);
+
+					/*_camera->setWindowDimensions(viewSize.x, viewSize.y);
+					Renderer::getInstance()._screenWidth = viewSize.x;
+					Renderer::getInstance()._screenHeight = viewSize.y;
+
+					//OGLDriver::getInstance().deleteFramebuffer(Renderer::getInstance()._postProcessingFramebuffers[0]);
+					//OGLDriver::getInstance().deleteFramebuffer(Renderer::getInstance()._postProcessingFramebuffers[1]);
+					Renderer::getInstance().recreateAllFramebuffers();*/
+				}
+			}
 
 			// rendering
 			renderer.renderAll();
@@ -1973,7 +2008,8 @@ namespace vbEditor
 		glm::mat4 modelMatrix = _selectedSceneObject->getLocalTransformMatrix();
 
 		ImGuiIO& io = ImGui::GetIO();
-		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+		const UintRect& viewport = _mainSceneViewWindow->getSceneViewport();
+		ImGuizmo::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
 		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
 			mCurrentGizmoOperation, mCurrentGizmoMode,
 			glm::value_ptr(modelMatrix),

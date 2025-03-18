@@ -33,6 +33,8 @@ Renderer::Renderer()
     _requiredRebuildStaticLighting(false),
     _objectsIdsTextureData(nullptr), _pickingComputeShader(nullptr), _pickingSSBO(nullptr)
 {
+    _outFramebuffer = _defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
+
     float indices[24] = {0, 1, 1, 3, 3, 2, 2, 0, 4, 5, 5, 7, 7, 6, 6, 4, 1, 5, 3, 7, 2, 6, 0, 4};
 
     _aabbVbo = OGLDriver::getInstance().createVBO(24 * sizeof(float));
@@ -1037,8 +1039,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-    _defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
-    _defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+    _outFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
     _depthFramebuffer = OGLDriver::getInstance().createFramebuffer();
     _depthFramebuffer->addTexture(TF_DEPTH_COMPONENT, _screenWidth, _screenHeight);
@@ -1331,6 +1332,18 @@ void Renderer::setGraphicsManager(GraphicsManager* graphicsManager)
 }
 
 
+void Renderer::setOutFramebuffer(Framebuffer* outFramebuffer)
+{
+    _outFramebuffer = outFramebuffer;
+}
+
+
+Framebuffer* Renderer::getOutFramebuffer()
+{
+    return _outFramebuffer;
+}
+
+
 void Renderer::setAlphaToCoverage(bool isEnable)
 {
     _alphaToCoverage = isEnable;
@@ -1598,10 +1611,11 @@ void Renderer::setWindowDimensions(unsigned int screenWidth, unsigned int screen
     _screenWidth = screenWidth;
     _screenHeight = screenHeight;
 
-    Framebuffer* defaultFramebuffer = OGLDriver::getInstance().getDefaultFramebuffer();
-    defaultFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
+    _outFramebuffer->setViewport(UintRect(0, 0, _screenWidth, _screenHeight));
 
 	recreateAllFramebuffers();
+
+    _shadowCameraFrustumDiagonalIsCalculated = false;
 }
 
 
@@ -1719,10 +1733,16 @@ void Renderer::renderAll()
 
 		Framebuffer * output = _postProcessingFramebuffers[i % 2];
 		if (i == _postProcessingEffectsStack.size() - 1)
-			output = _defaultFramebuffer;
+			output = _outFramebuffer;
 
 		_postProcessingEffectsStack[i]->run(input, output);
 	}
+
+    if (_outFramebuffer != _defaultFramebuffer)
+    {
+        _defaultFramebuffer->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
 
 
     glEnable(GL_DEPTH_TEST);

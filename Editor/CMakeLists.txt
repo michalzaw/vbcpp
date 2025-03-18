@@ -15,6 +15,7 @@ set (EDITOR_SOURCES
 	Editor/Windows/GenerateObjectsAlongCurveWindow.cpp
 	Editor/Windows/LoggerWindow.cpp
 	Editor/Windows/ComputeShaderTestWindow.cpp
+	Editor/Windows/MainSceneViewWindow.cpp
 	Editor/Tools/AxisTool.cpp
 	Editor/Tools/RoadManipulator.cpp
 	Editor/Utils/AIPathGenerator.cpp
@@ -41,6 +42,7 @@ set (EDITOR_HEADERS
 	Editor/Windows/GenerateObjectsAlongCurveWindow.h
 	Editor/Windows/LoggerWindow.h
 	Editor/Windows/ComputeShaderTestWindow.h
+	Editor/Windows/MainSceneViewWindow.h
 	Editor/Tools/AxisTool.h
 	Editor/Tools/RoadManipulator.h
 	Editor/Utils/AIPathGenerator.h
