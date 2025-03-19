@@ -1903,61 +1903,11 @@ namespace vbEditor
 
 	void ShowTransformGizmo()
 	{
-
 		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 		//static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
 		static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::LOCAL);
-		/*
-		if (ImGui::IsKeyPressed(69)) // E key
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		if (ImGui::IsKeyPressed(82)) // R key
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		if (ImGui::IsKeyPressed(84)) // T key
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
-		*/
-		if (ImGui::RadioButton("Global", mCurrentGizmoMode == ImGuizmo::WORLD))
-			mCurrentGizmoMode = ImGuizmo::WORLD;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-			mCurrentGizmoMode = ImGuizmo::LOCAL;
-
-		if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
-			mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
-			mCurrentGizmoOperation = ImGuizmo::ROTATE;
-		ImGui::SameLine();
-		if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
-			mCurrentGizmoOperation = ImGuizmo::SCALE;
-		/*
-		float matrixTranslation[3], matrixRotation[3], matrixScale[3];
-
-		glm::mat4 objMat = glm::mat4(1.);
-		ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(obj->getGlobalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
-		ImGui::InputFloat3("Tr", matrixTranslation, 3);
-		ImGui::InputFloat3("Rt", matrixRotation, 3);
-		ImGui::InputFloat3("Sc", matrixScale, 3);
-		ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(obj->getGlobalTransformMatrix()));
-		*/
-		/*
-		if (mCurrentGizmoOperation != ImGuizmo::SCALE)
-		{
-			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
-				mCurrentGizmoMode = ImGuizmo::LOCAL;
-			ImGui::SameLine();
-			if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
-				mCurrentGizmoMode = ImGuizmo::WORLD;
-		}
-		*/
 
 		static bool useSnap(false);
-
-		if (ImGui::IsKeyPressed(80))
-			useSnap = !useSnap;
-		ImGui::Checkbox("##usesnapCheckBox", &useSnap);
-
-		ImGui::SameLine();
-
 		//vec_t snap;
 		static float snap[3] = { 1.f, 1.f, 1.f };
 		static float bounds[] = { -0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f };
@@ -1966,31 +1916,84 @@ namespace vbEditor
 		static bool boundSizing = false;
 		static bool boundSizingSnap = false;
 
-		switch (mCurrentGizmoOperation)
+		if (ImGui::Begin("Guizmo properties"))
 		{
-		case ImGuizmo::TRANSLATE:
-			//snap = config.mSnapTranslation;
-			ImGui::InputFloat3("Snap", &snap[0]);
-			break;
-		case ImGuizmo::ROTATE:
-			//snap = config.mSnapRotation;
-			ImGui::InputFloat("Angle Snap", &snap[0]);
-			break;
-		case ImGuizmo::SCALE:
-			//snap = config.mSnapScale;
-			ImGui::InputFloat("Scale Snap", &snap[0]);
-			break;
-		}
-
-		ImGui::Checkbox("Bound Sizing", &boundSizing);
-		if (boundSizing)
-		{
-			ImGui::PushID(3);
-			ImGui::Checkbox("", &boundSizingSnap);
+			/*
+			if (ImGui::IsKeyPressed(69)) // E key
+				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+			if (ImGui::IsKeyPressed(82)) // R key
+				mCurrentGizmoOperation = ImGuizmo::ROTATE;
+			if (ImGui::IsKeyPressed(84)) // T key
+				mCurrentGizmoOperation = ImGuizmo::SCALE;
+			*/
+			if (ImGui::RadioButton("Global", mCurrentGizmoMode == ImGuizmo::WORLD))
+				mCurrentGizmoMode = ImGuizmo::WORLD;
 			ImGui::SameLine();
-			ImGui::InputFloat3("Snap", boundsSnap);
-			ImGui::PopID();
+			if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+				mCurrentGizmoMode = ImGuizmo::LOCAL;
+
+			if (ImGui::RadioButton("Translate", mCurrentGizmoOperation == ImGuizmo::TRANSLATE))
+				mCurrentGizmoOperation = ImGuizmo::TRANSLATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Rotate", mCurrentGizmoOperation == ImGuizmo::ROTATE))
+				mCurrentGizmoOperation = ImGuizmo::ROTATE;
+			ImGui::SameLine();
+			if (ImGui::RadioButton("Scale", mCurrentGizmoOperation == ImGuizmo::SCALE))
+				mCurrentGizmoOperation = ImGuizmo::SCALE;
+			/*
+			float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+
+			glm::mat4 objMat = glm::mat4(1.);
+			ImGuizmo::DecomposeMatrixToComponents(glm::value_ptr(obj->getGlobalTransformMatrix()), matrixTranslation, matrixRotation, matrixScale);
+			ImGui::InputFloat3("Tr", matrixTranslation, 3);
+			ImGui::InputFloat3("Rt", matrixRotation, 3);
+			ImGui::InputFloat3("Sc", matrixScale, 3);
+			ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, glm::value_ptr(obj->getGlobalTransformMatrix()));
+			*/
+			/*
+			if (mCurrentGizmoOperation != ImGuizmo::SCALE)
+			{
+				if (ImGui::RadioButton("Local", mCurrentGizmoMode == ImGuizmo::LOCAL))
+					mCurrentGizmoMode = ImGuizmo::LOCAL;
+				ImGui::SameLine();
+				if (ImGui::RadioButton("World", mCurrentGizmoMode == ImGuizmo::WORLD))
+					mCurrentGizmoMode = ImGuizmo::WORLD;
+			}
+			*/
+
+			if (ImGui::IsKeyPressed(80))
+				useSnap = !useSnap;
+			ImGui::Checkbox("##usesnapCheckBox", &useSnap);
+
+			ImGui::SameLine();
+
+			switch (mCurrentGizmoOperation)
+			{
+			case ImGuizmo::TRANSLATE:
+				//snap = config.mSnapTranslation;
+				ImGui::InputFloat3("Snap", &snap[0]);
+				break;
+			case ImGuizmo::ROTATE:
+				//snap = config.mSnapRotation;
+				ImGui::InputFloat("Angle Snap", &snap[0]);
+				break;
+			case ImGuizmo::SCALE:
+				//snap = config.mSnapScale;
+				ImGui::InputFloat("Scale Snap", &snap[0]);
+				break;
+			}
+
+			ImGui::Checkbox("Bound Sizing", &boundSizing);
+			if (boundSizing)
+			{
+				ImGui::PushID(3);
+				ImGui::Checkbox("", &boundSizingSnap);
+				ImGui::SameLine();
+				ImGui::InputFloat3("Snap", boundsSnap);
+				ImGui::PopID();
+			}
 		}
+		ImGui::End();
 
 		glm::mat4 viewMatrix = _camera->getViewMatrix();
 		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
