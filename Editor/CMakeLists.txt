@@ -29,6 +29,7 @@ set (EDITOR_HEADERS
 	Editor/EditorEvent.h
 	Editor/EditorGUI.h
 	Editor/FileDialogs.h
+	Editor/GuizmoParams.h
 	Editor/Windows/CameraSettingsWindow.h
 	Editor/Windows/EditorWindow.h
 	Editor/Windows/NewDialogWindow.h

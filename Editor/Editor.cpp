@@ -37,6 +37,7 @@
 #include "glm/gtc/type_ptr.hpp"
 
 #include "EditorContext.h"
+#include "GuizmoParams.h"
 #include "Windows/OpenDialogWindow.h"
 #include "Windows/SceneGraphWindow.h"
 #include "Windows/ObjectPropertiesWindow.h"
@@ -586,6 +587,8 @@ namespace vbEditor
 	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
 
 	SceneObject* _groupingSceneObject = nullptr;
+
+	GuizmoParams _guizmoParams;
 
 	void setClickMode(ClickMode clickMode)
 	{
@@ -1901,7 +1904,7 @@ namespace vbEditor
 
 	}
 
-	void ShowTransformGizmo()
+	void ShowTransformGizmoOld()
 	{
 		static ImGuizmo::OPERATION mCurrentGizmoOperation(ImGuizmo::TRANSLATE);
 		//static ImGuizmo::MODE mCurrentGizmoMode(ImGuizmo::WORLD);
@@ -2013,6 +2016,72 @@ namespace vbEditor
 			useSnap ? &snap[0] : NULL,
 			boundSizing ? bounds : NULL,
 			boundSizingSnap ? boundsSnap : NULL
+		);
+
+		if (ImGuizmo::IsUsing())
+		{
+			_selectedSceneObject->setTransformFromMatrix(modelMatrix);
+		}
+
+		AIAgentVehicle* aiAgentVehicle = _selectedSceneObject->getComponentWithCasting<AIAgentVehicle>(CT_AI_AGENT_VEHICLE);
+		AIAgent* aiAgent = _selectedSceneObject->getComponentWithCasting<AIAgent>(CT_AI_AGENT);
+		if (aiAgentVehicle != nullptr || aiAgent != nullptr)
+		{
+			if (ImGuizmo::IsUsing())
+			{
+				_isVehicleMovement = true;
+				handleVehicleMouseMovement();
+			}
+			else if (_isVehicleMovement)
+			{
+				if (_pathComponentUnderMouse != nullptr)
+				{
+					if (aiAgentVehicle != nullptr)
+					{
+						aiAgentVehicle->setCurrentPath(_pathComponentUnderMouse);
+					}
+					else if (aiAgent != nullptr)
+					{
+						aiAgent->setCurrentPath(_pathComponentUnderMouse);
+					}
+
+					setObjectHighlighting(_pathComponentUnderMouse->getSceneObject(), false);
+				}
+				_pathComponentUnderMouse = nullptr;
+				_isVehicleMovement = false;
+			}
+		}
+
+		Component* roadIntersectionComponent = _selectedSceneObject->getComponent(CT_ROAD_INTERSECTION);
+		if (roadIntersectionComponent != nullptr)
+		{
+			if (ImGuizmo::IsUsing())
+			{
+				dynamic_cast<RoadIntersectionComponent*>(roadIntersectionComponent)->needRebuildConnectedRoad();
+			}
+		}
+	}
+
+	void ShowTransformGizmo()
+	{
+		glm::mat4 viewMatrix = _camera->getViewMatrix();
+		if (_selectedSceneObject != nullptr && _selectedSceneObject->getParent() != nullptr)
+		{
+			viewMatrix = viewMatrix * _selectedSceneObject->getParent()->getGlobalTransformMatrix();
+		}
+
+		glm::mat4 modelMatrix = _selectedSceneObject->getLocalTransformMatrix();
+
+		ImGuiIO& io = ImGui::GetIO();
+		const UintRect& viewport = _mainSceneViewWindow->getSceneViewport();
+		ImGuizmo::SetRect(viewport.position.x, viewport.position.y, viewport.size.x, viewport.size.y);
+		ImGuizmo::Manipulate(glm::value_ptr(viewMatrix), glm::value_ptr(_camera->getProjectionMatrix()),
+			_guizmoParams.currentOperation, _guizmoParams.currentMode,
+			glm::value_ptr(modelMatrix),
+			NULL,
+			_guizmoParams.getCurrentSnapValues(),
+			NULL,
+			NULL
 		);
 
 		if (ImGuizmo::IsUsing())

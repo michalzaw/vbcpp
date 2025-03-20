@@ -7,7 +7,6 @@
 #include "../../Graphics/ShaderStorageBuffer.h"
 
 
-class RShader;
 class RTexture;
 
 
@@ -22,9 +21,14 @@ class MainSceneViewWindow final : public ImGuiWindow
 		glm::vec2 _cursorPositionOnSceneView;
 		UintRect _sceneViewport;
 
+		RTexture* _translationButtonTexture;
+		RTexture* _rotationButtonTexture;
+		RTexture* _scaleButtonTexture;
+
 		void calculateCursorPositionOnSceneView();
 		void calculateViewport();
 
+		void showImGuizmoToolbar();
 		void showTools();
 
 		virtual void drawWindow() override;
