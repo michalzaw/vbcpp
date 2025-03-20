@@ -10,6 +10,13 @@
 class RTexture;
 
 
+enum class GuizmoToolbarMode
+{
+	FLOATING_TOOLBAR,
+	BOTTOM_BAR
+};
+
+
 class MainSceneViewWindow final : public ImGuiWindow
 {
 	private:
@@ -25,9 +32,13 @@ class MainSceneViewWindow final : public ImGuiWindow
 		RTexture* _rotationButtonTexture;
 		RTexture* _scaleButtonTexture;
 
+		GuizmoToolbarMode _guizmoToolbarMode;
+
 		void calculateCursorPositionOnSceneView();
 		void calculateViewport();
 
+		void showImGuizmoToolbarAsWindow();
+		void showImGuizmoToolbarAsBottomBar();
 		void showImGuizmoToolbar();
 		void showTools();
 
@@ -42,6 +53,9 @@ class MainSceneViewWindow final : public ImGuiWindow
 		inline const glm::vec2 getCursorPositionOnSceneView() { return _cursorPositionOnSceneView; }
 
 		inline const UintRect& getSceneViewport() { return _sceneViewport; }
+
+		inline GuizmoToolbarMode getGuizmoToolbarMode() { return _guizmoToolbarMode; }
+		inline void setGuizmoToolbarMode(GuizmoToolbarMode mode) { _guizmoToolbarMode = mode; }
 
 };
 

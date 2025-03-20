@@ -27,7 +27,8 @@ namespace vbEditor
 MainSceneViewWindow::MainSceneViewWindow(bool isOpen/* = false*/)
 	: ImGuiWindow(nullptr, isOpen),
 	_availableViewSize(2, 2),
-	_isWindowHovered(false)
+	_isWindowHovered(false),
+	_guizmoToolbarMode(GuizmoToolbarMode::BOTTOM_BAR)
 {
 	_translationButtonTexture = ResourceManager::getInstance().loadTexture("Icons/materialSymols/translateIcon.png");
 	_rotationButtonTexture = ResourceManager::getInstance().loadTexture("Icons/materialSymols/rotateIcon.png");
@@ -57,10 +58,8 @@ void MainSceneViewWindow::calculateViewport()
 }
 
 
-void MainSceneViewWindow::showImGuizmoToolbar()
+void MainSceneViewWindow::showImGuizmoToolbarAsWindow()
 {
-	ImGuiIO& io = ImGui::GetIO();
-
 	int margin = 5;
 	int expectedWidth = 641;
 	int width = expectedWidth;
@@ -79,6 +78,25 @@ void MainSceneViewWindow::showImGuizmoToolbar()
 	//if (ImGui::BeginChild("Tools", ImVec2(800, 40), false, flags))
 	if (ImGui::Begin("Tools", nullptr, flags))
 	{
+		showImGuizmoToolbar();
+	}
+	ImGui::End();
+	//ImGui::EndChild();
+}
+
+
+void MainSceneViewWindow::showImGuizmoToolbarAsBottomBar()
+{
+	_availableViewSize.y -= 30;
+
+	ImGui::Separator();
+
+	showImGuizmoToolbar();
+}
+
+
+void MainSceneViewWindow::showImGuizmoToolbar()
+{
 		ImGuiStyle& style = ImGui::GetStyle();
 
 		{
@@ -174,9 +192,6 @@ void MainSceneViewWindow::showImGuizmoToolbar()
 			}
 			ImGui::PopID();
 		}
-	}
-	ImGui::End();
-	//ImGui::EndChild();
 }
 
 
@@ -222,8 +237,16 @@ void MainSceneViewWindow::drawWindow()
 		_texture->setClampMode(TCM_REPEAT);
 		ImGui::Image((ImTextureID)_texture->getID(), ImVec2(_texture->getSize().x, _texture->getSize().y) , ImVec2(0, 1), ImVec2(1, 0));
 		_texture->setClampMode(TCM_CLAMP_TO_EDGE);
-		
-		showImGuizmoToolbar();
+
+		if (_guizmoToolbarMode == GuizmoToolbarMode::FLOATING_TOOLBAR)
+		{
+			showImGuizmoToolbarAsWindow();
+		}
+		else
+		{
+			showImGuizmoToolbarAsBottomBar();
+		}
+
 		showTools();
 
 		_isWindowHovered = ImGui::IsWindowHovered() && !ImGuizmo::IsUsing() && !RoadManipulator::IsUsing();

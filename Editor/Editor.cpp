@@ -1508,6 +1508,21 @@ namespace vbEditor
 			if (ImGui::BeginMenu("Settings"))
 			{
 				ImGui::MenuItem("Camera Settings", NULL, &_showCameraSettingsWindow);
+
+				if (ImGui::BeginMenu("Guizmo toolbar"))
+				{
+					if (ImGui::MenuItem("Floating toolbar", NULL, _mainSceneViewWindow->getGuizmoToolbarMode() == GuizmoToolbarMode::FLOATING_TOOLBAR))
+					{
+						_mainSceneViewWindow->setGuizmoToolbarMode(GuizmoToolbarMode::FLOATING_TOOLBAR);
+					}
+					if (ImGui::MenuItem("Bottom bar", NULL, _mainSceneViewWindow->getGuizmoToolbarMode() == GuizmoToolbarMode::BOTTOM_BAR))
+					{
+						_mainSceneViewWindow->setGuizmoToolbarMode(GuizmoToolbarMode::BOTTOM_BAR);
+					}
+
+					ImGui::EndMenu();
+				}
+
 				ImGui::EndMenu();
 			}
 
