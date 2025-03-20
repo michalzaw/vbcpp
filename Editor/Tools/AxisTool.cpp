@@ -58,6 +58,11 @@ namespace AxisTool
 		ImGui::PopStyleColor(2);
 	}
 
+	void SetDrawlist(ImDrawList* drawlist)
+	{
+		context.drawList = drawlist ? drawlist : ImGui::GetWindowDrawList();
+	}
+
 	void SetRect(float x, float y, float width, float height)
 	{
 		context.x = x;

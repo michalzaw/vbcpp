@@ -138,6 +138,7 @@ class Renderer
 		bool _renderObjectIdsForPicking;
 
 		Framebuffer* _defaultFramebuffer;
+		Framebuffer* _outFramebuffer;
 		Framebuffer* _depthFramebuffer;
 
         //OGLDriver* _OGLDriver;
@@ -242,6 +243,9 @@ class Renderer
         void init(unsigned int screenWidth, unsigned int screenHeight);
 
 		void setGraphicsManager(GraphicsManager* graphicsManager);
+
+		void setOutFramebuffer(Framebuffer* outFramebuffer);
+		Framebuffer* getOutFramebuffer();
 
         void setAlphaToCoverage(bool isEnable);
         bool isAlphaToCoverageEnable();

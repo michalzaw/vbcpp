@@ -90,6 +90,12 @@ namespace vbEditor
 	void loadMapData();
 	void saveMapData();
 
+	void ShowTransformGizmo();
+	void showRoadTools();
+	void showPolygonEditTool();
+	void showBezierCurveTool();
+	void showAxisTool();
+
 } // namespace
 
 #endif // EDITOR_H_INCLUDED
