@@ -1652,10 +1652,6 @@ namespace vbEditor
 
 		drawMainDockSpace();
 
-		//ImGuizmo::BeginFrame();
-		//RoadManipulator::BeginFrame();
-		//AxisTool::BeginFrame();
-
 		if (_clickMode == CM_ADD_OBJECT)
 			ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
 
@@ -1730,29 +1726,6 @@ namespace vbEditor
 				_showGenerateObjectsAlongCurveWindow = false;
 			}
 		}
-
-		if (_selectedSceneObject)
-		{
-			//ShowTransformGizmo();
-
-			//if (_showRoadTools)
-			//{
-				/*RoadObject* roadComponent = dynamic_cast<RoadObject*>(_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
-				ShapePolygonComponent* shapePolygonComponent = dynamic_cast<ShapePolygonComponent*>(_selectedSceneObject->getComponent(CT_SHAPE_POLYGON));
-				BezierCurve* bezierCurveComponent = dynamic_cast<BezierCurve*>(_selectedSceneObject->getComponent(CT_BEZIER_CURVE));
-
-				if (roadComponent && roadComponent->getRoadType() != RoadType::BEZIER_CURVES)
-					showRoadTools();
-				else if (shapePolygonComponent)
-					showPolygonEditTool();
-				else if (bezierCurveComponent)
-					showBezierCurveTool();
-				else
-					ShowTransformGizmo();*/
-			//}
-		}
-
-		//showAxisTool();
 
 		LoggerWindow::drawWindow();
 
