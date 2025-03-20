@@ -5,6 +5,11 @@
 #include <ImGuizmo.h>
 
 
+const int availableTranslationSnapValues[] = { 1, 5, 10 };
+const int availableRotationSnapValues[] = { 1, 5, 10 };
+const int availableScaleSnapValues[] = { 1, 5, 10 };
+
+
 struct GuizmoParams final
 {
 	ImGuizmo::OPERATION currentOperation;
@@ -13,10 +18,6 @@ struct GuizmoParams final
 	bool translationSnap;
 	bool rotationSnap;
 	bool scaleSnap;
-
-	static constexpr int availableTranslationSnapValues[] = { 1, 5, 10 };
-	static constexpr int availableRotationSnapValues[] = { 1, 5, 10 };
-	static constexpr int availableScaleSnapValues[] = { 1, 5, 10 };
 
 	int currentTranslationSnapValueIndex;
 	int currentRotationSnapValueIndex;
