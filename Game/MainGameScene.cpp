@@ -6,6 +6,7 @@
 #include "GameLogicSystem.h"
 #include "Hud.h"
 #include "MainGameScene/MirrorImage.h"
+#include "MainGameScene/MapView.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -41,7 +42,8 @@ MainGameScene::MainGameScene(Window* window)
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
 	_hud(nullptr),
-	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1)
+	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1),
+	_mapView(nullptr)
 {
 
 }
@@ -59,6 +61,8 @@ MainGameScene::~MainGameScene()
 			delete _mirrorsImages[i];
 		}
 	}
+
+	delete _mapView;
 }
 
 
@@ -373,6 +377,9 @@ void MainGameScene::initGui()
 	_mirrorsImagesVisibility.push_back(false);
 	_mirrorsImagesVisibility.push_back(false);
 	_mirrorsImagesVisibility.push_back(false);
+
+
+	_mapView = new MapView(_gui, _sceneManager);
 }
 
 
@@ -420,6 +427,8 @@ void MainGameScene::startGame()
 	_soundManager->setMute(false);
 
 	setCameraControll(_isCameraControll);
+
+	_mapView->init(_sceneManager);
 }
 
 
@@ -450,6 +459,8 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 void MainGameScene::update(double deltaTime)
 {
 	_hud->update(deltaTime);
+	
+	_mapView->update(_activeBus);
 
 	for (auto* mirrorImage : _mirrorsImages)
 	{
