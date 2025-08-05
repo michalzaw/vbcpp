@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<Profile>
+<Profile type="road">
 	<Description author="fr0zi" name="steep_slope" comment="Steep slope" />
 
 	<Lanes>

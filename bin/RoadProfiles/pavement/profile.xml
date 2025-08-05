@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
 
-<Profile>
+<Profile type="pavement">
 	<Description author="mich" name="pavement" comment="Test profile" />
 
 	<Lanes>

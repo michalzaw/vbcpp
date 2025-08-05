@@ -106,9 +106,9 @@ void MapView::init(SceneManager* sceneManager)
 	// drogi
 	for (RoadObject* roadObject : sceneManager->getGraphicsManager()->getRoadObjects())
 	{
-		if (roadObject->getSceneObject()->getParent() != nullptr)
+		if (roadObject->getSceneObject()->getParent() != nullptr ||			// pomijam te ktore sa czscia skrzyzowan
+			roadObject->getRoadProfile()->getType() == RPT_PAVEMENT)		// pomijam te ktorych typ to pavement
 		{
-			// pomijam te ktore sa czscia skrzyzowan
 			continue;
 		}
 
@@ -144,16 +144,23 @@ void MapView::init(SceneManager* sceneManager)
 
 		roadIntersectionSceneObject->addComponent(newRoadIntersection);
 
+		int newRoadIndex = 0;
 		for (int i = 0; i < roadIntersection->getConnectedRoads().size(); ++i)
 		{
 			const RoadConnectedToIntersection& connectionPoint = roadIntersection->getConnectedRoads()[i];
 			const std::string& name = connectionPoint.road->getSceneObject()->getName();
 
-			findRoadObjectBySceneObjectName(_sceneManager, name)->setConnectionPointWithRoadIntersection(connectionPoint.connectionPointInRoadIndex, newRoadIntersection);
+			RoadObject* connectedRoad = findRoadObjectBySceneObjectName(_sceneManager, name);
+			if (connectedRoad != nullptr)
+			{
+				connectedRoad->setConnectionPointWithRoadIntersection(connectionPoint.connectionPointInRoadIndex, newRoadIntersection);
 
-			newRoadIntersection->setLength(i, roadIntersection->getLength(i));
-			newRoadIntersection->setWidth(i, roadIntersection->getWidth(i));
-			newRoadIntersection->setArc(i, roadIntersection->getArc(i));
+				newRoadIntersection->setLength(newRoadIndex, roadIntersection->getLength(i));
+				newRoadIntersection->setWidth(newRoadIndex, roadIntersection->getWidth(i));
+				newRoadIntersection->setArc(newRoadIndex, roadIntersection->getArc(i));
+
+				++newRoadIndex;
+			}
 		}
 	}
 

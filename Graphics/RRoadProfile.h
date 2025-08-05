@@ -9,6 +9,19 @@
 #include "../Utils/Resource.h"
 
 
+enum RoadProfileType
+{
+	RPT_ROAD,
+	RPT_PAVEMENT,
+
+	RPT_COUNT
+};
+
+
+const std::string roadProfileTypeStrings[] = { "road", "pavement" };
+RoadProfileType getRoadProfileTypeFromString(const std::string& name);
+
+
 enum AIPathIntersectionMode
 {
 	APIM_INNER,
@@ -41,6 +54,8 @@ class RRoadProfile : public Resource
 		std::string _name;
 		std::string _comment;
 
+		RoadProfileType _type;
+
 		std::vector<RoadLane> _roadLanes;
 
 		std::vector<glm::vec2> _edges; // todo: remove (unused)
@@ -54,8 +69,10 @@ class RRoadProfile : public Resource
 		float _minX;			bool _minXIsCalculated;
 
 	public:
-		RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial = nullptr, float intersectionRoadY = 0.0f);
+		RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial = nullptr, float intersectionRoadY = 0.0f, RoadProfileType type = RPT_ROAD);
 		~RRoadProfile();
+
+		RoadProfileType getType();
 
 		std::string getAuthor();
 		std::string getName();
