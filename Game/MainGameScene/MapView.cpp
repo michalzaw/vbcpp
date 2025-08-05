@@ -25,14 +25,17 @@
 
 
 MapView::MapView(GUIManager* gui, SceneManager* sceneManager)
-	: _gui(gui)
+	: _gui(gui),
+	_showPavements(false)
 {
 	_framebuffer = OGLDriver::getInstance().createFramebuffer();
-	_framebuffer->addTexture(TF_RGB, 200, 200);
+	_framebuffer->addTexture(TF_RGBA, 200, 200);
 	_framebuffer->init();
 
 	_image = gui->addImage(_framebuffer->getTexture());
 	_image->setInvertY(false);
+
+	_image->setPosition(Renderer::getInstance().getWindowDimensions().x - _image->getSize().x, 0.0f);
 
 	//init(sceneManager);
 }
@@ -95,19 +98,34 @@ void MapView::init(SceneManager* sceneManager)
 	RRoadProfile* roadProfile = new RRoadProfile("", "", "", "", laneMaterial);
 
 	RoadLane lane;
-	lane.r1 = -2.0f;
-	lane.r2 = 2.0f;
+	lane.r1 = -5.5f;
+	lane.r2 = 5.5f;
 	lane.height1 = 0.0f;
 	lane.height2 = 0.0f;
 	lane.material = laneMaterial;
 	roadProfile->getRoadLanes().push_back(lane);
 
+	Material* pavementMaterial = new Material;
+	pavementMaterial->shader = MINIMAP_MATERIAL;
+	pavementMaterial->diffuseColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	pavementMaterial->shininess = 96.0f;
+
+	RRoadProfile* pavementProfile = new RRoadProfile("", "", "", "", pavementMaterial);
+
+	RoadLane lane2;
+	lane2.r1 = -1.0f;
+	lane2.r2 = 1.0f;
+	lane2.height1 = 0.0f;
+	lane2.height2 = 0.0f;
+	lane2.material = pavementMaterial;
+	pavementProfile->getRoadLanes().push_back(lane2);
+
 
 	// drogi
 	for (RoadObject* roadObject : sceneManager->getGraphicsManager()->getRoadObjects())
 	{
-		if (roadObject->getSceneObject()->getParent() != nullptr ||			// pomijam te ktore sa czscia skrzyzowan
-			roadObject->getRoadProfile()->getType() == RPT_PAVEMENT)		// pomijam te ktorych typ to pavement
+		if (roadObject->getSceneObject()->getParent() != nullptr ||								// pomijam te ktore sa czscia skrzyzowan
+			(!_showPavements) && roadObject->getRoadProfile()->getType() == RPT_PAVEMENT)		// pomijam te ktorych typ to pavement i flaga _showPavements=true
 		{
 			continue;
 		}
@@ -128,7 +146,9 @@ void MapView::init(SceneManager* sceneManager)
 			roadSceneObject->addComponent(newBezierCurve);
 		}
 
-		RoadObject* newRoadObject = _sceneManager->getGraphicsManager()->addRoadObject(roadObject->getRoadType(), roadProfile, roadObject->getPoints(), roadObject->getSegments(), false, roadSceneObject);
+		RRoadProfile* profile = roadObject->getRoadProfile()->getType() == RPT_ROAD ? roadProfile : pavementProfile;
+
+		RoadObject* newRoadObject = _sceneManager->getGraphicsManager()->addRoadObject(roadObject->getRoadType(), profile, roadObject->getPoints(), roadObject->getSegments(), false, roadSceneObject);
 	}
 
 	
@@ -185,7 +205,7 @@ void MapView::init(SceneManager* sceneManager)
 	material->shininess = 96.0f;
 
 	SceneObject* cubeSceneObject = _sceneManager->addSceneObject("cube");
-	Cube* cube = new Cube(3.0f, material);
+	Cube* cube = new Cube(8.0f, material);
 	cube->init();
 	_sceneManager->getGraphicsManager()->addRenderObject(cube, cubeSceneObject);
 }
@@ -211,7 +231,7 @@ void MapView::update(Bus* bus)
 
 		_camera->getSceneObject()->setRotation(degToRad(-45.0f), yAngle, 0.0f);
 
-		_camera->getSceneObject()->move(busDirection.x * -15.0f, 30.0f, busDirection.y * -15.0f);
+		_camera->getSceneObject()->move(busDirection.x * -15.0f * 2.75f, 30.0f * 2.75f, busDirection.y * -15.0f * 2.75f);
 		//_camera->getSceneObject()->move(_camera->getDirection() * -40.0f);
 	}
 
@@ -259,6 +279,6 @@ void MapView::update(Bus* bus)
 		}
 	}
 
-	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
 	Renderer::getInstance().renderScene(renderData);
 }

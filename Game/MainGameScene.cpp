@@ -380,6 +380,7 @@ void MainGameScene::initGui()
 
 
 	_mapView = new MapView(_gui, _sceneManager);
+	_mapView->setShowPavements(false);
 }
 
 
