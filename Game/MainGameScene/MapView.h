@@ -2,6 +2,8 @@
 #define MAPVIEW_H_INCLUDED
 
 
+#include <vector>
+
 #include <glm/glm.hpp>
 
 
@@ -13,23 +15,41 @@ class SceneManager;
 class Bus;
 
 
+enum MapViewMode
+{
+	MVM_WORLD_MAP,
+	MVM_NAVIGATION,
+	MVM_DISABLE,
+
+	MVM_COUNT
+};
+
+
 class MapView
 {
 	private:
 		GUIManager* _gui;
 
-		Image* _image;
+		std::vector<Image*> _images;
 
 		SceneManager* _sceneManager;
 
-		Framebuffer* _framebuffer;
+		std::vector<Framebuffer*> _framebuffers;
 
-		CameraStatic* _camera;
+		std::vector<CameraStatic*> _cameras;
+
+		MapViewMode _mode;
 
 		bool _showPavements;
 
+		CameraStatic* createCameraForWorldMapMode();
+		CameraStatic* createCameraFormNavigationMode();
+
 	public:
 		MapView(GUIManager* gui, SceneManager* sceneManager);
+
+		void setMode(MapViewMode mode);
+		MapViewMode getMode();
 
 		inline void setShowPavements(bool showPavements) { _showPavements = showPavements; }
 		inline bool getShowPavements() { return _showPavements; }

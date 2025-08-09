@@ -26,18 +26,93 @@
 
 MapView::MapView(GUIManager* gui, SceneManager* sceneManager)
 	: _gui(gui),
+	_mode(MVM_NAVIGATION),
 	_showPavements(false)
 {
-	_framebuffer = OGLDriver::getInstance().createFramebuffer();
-	_framebuffer->addTexture(TF_RGBA, 200, 200);
-	_framebuffer->init();
+	const glm::vec2& windowSize = Renderer::getInstance().getWindowDimensions();
 
-	_image = gui->addImage(_framebuffer->getTexture());
-	_image->setInvertY(false);
 
-	_image->setPosition(Renderer::getInstance().getWindowDimensions().x - _image->getSize().x, 0.0f);
+	Framebuffer* framebuffer1 = OGLDriver::getInstance().createFramebuffer();
+	framebuffer1->addTexture(TF_RGBA, windowSize.y * 0.9f, windowSize.y * 0.9f);
+	framebuffer1->init();
+
+	Framebuffer* framebuffer2 = OGLDriver::getInstance().createFramebuffer();
+	framebuffer2->addTexture(TF_RGBA, windowSize.x * 0.15f, windowSize.x * 0.15f);
+	framebuffer2->init();
+
+	_framebuffers.push_back(framebuffer1);
+	_framebuffers.push_back(framebuffer2);
+
+
+	Image* image1 = gui->addImage(_framebuffers[0]->getTexture());
+	image1->setInvertY(false);
+	image1->setPosition((windowSize.x - image1->getSize().x) / 2.0f, (windowSize.y - image1->getSize().y) / 2.0f);
+	image1->setIsActive(false);
+
+	Image* image2 = gui->addImage(_framebuffers[1]->getTexture());
+	image2->setInvertY(false);
+	image2->setPosition(windowSize.x - image2->getSize().x, 0.0f);
+	image2->setIsActive(false);
+
+	_images.push_back(image1);
+	_images.push_back(image2);
+
+	_images[_mode]->setIsActive(true);
 
 	//init(sceneManager);
+}
+
+
+CameraStatic* MapView::createCameraForWorldMapMode()
+{
+	SceneObject* cameraObject = _sceneManager->addSceneObject("mapViewCameraWorldMapMode");
+
+	CameraStatic* camera = _sceneManager->getGraphicsManager()->addCameraStatic(CPT_ORTHOGRAPHIC);
+	camera->setOrthoProjectionParams(-500.0f, 500.0f, -500.0f, 500.0f, 1000.0f, -1000.0f);
+	cameraObject->addComponent(camera);
+
+	cameraObject->setRotation(-90.0f, 0.0f, 0.0f);
+
+	return camera;
+}
+
+
+CameraStatic* MapView::createCameraFormNavigationMode()
+{
+	SceneObject* cameraObject = _sceneManager->addSceneObject("mapViewCameraNavigationMode");
+
+	CameraStatic* camera = _sceneManager->getGraphicsManager()->addCameraStatic(CPT_PERSPECTIVE);
+	camera->setWindowDimensions(200, 200);
+	camera->setViewAngle(degToRad(45.0f));
+	camera->setNearValue(0.01f);
+	camera->setFarValue(1000.0f);
+	cameraObject->addComponent(camera);
+
+	cameraObject->setRotation(-90.0f, 0.0f, 0.0f);
+
+	return camera;
+}
+
+
+void MapView::setMode(MapViewMode mode)
+{
+	if (_mode != MVM_DISABLE)
+	{
+		_images[_mode]->setIsActive(false);
+	}
+
+	_mode = mode;
+
+	if (_mode != MVM_DISABLE)
+	{
+		_images[_mode]->setIsActive(true);
+	}
+}
+
+
+MapViewMode MapView::getMode()
+{
+	return _mode;
 }
 
 
@@ -74,21 +149,8 @@ void MapView::init(SceneManager* sceneManager)
 	soundManager->setMute(true);
 	_sceneManager = new SceneManager(graphicsManager, physicsManager, soundManager);
 
-
-	SceneObject* cameraObject = _sceneManager->addSceneObject("mapViewCamera");
-
-	//_camera = _sceneManager->getGraphicsManager()->addCameraStatic(CPT_ORTHOGRAPHIC);
-	//_camera->setOrthoProjectionParams(-250.0f, 250.0f, -250.0f, 250.0f, 1000.0f, -1000.0f);
-
-	_camera = _sceneManager->getGraphicsManager()->addCameraStatic(CPT_PERSPECTIVE);
-	_camera->setWindowDimensions(200, 200);
-	_camera->setViewAngle(degToRad(45.0f));
-	_camera->setNearValue(0.01f);
-	_camera->setFarValue(1000.0f);
-	cameraObject->addComponent(_camera);
-
-	cameraObject->setRotation(-90.0f, 0.0f, 0.0f);
-
+	_cameras.push_back(createCameraForWorldMapMode());
+	_cameras.push_back(createCameraFormNavigationMode());
 
 	Material* laneMaterial = new Material;
 	laneMaterial->shader = MINIMAP_MATERIAL;
@@ -213,26 +275,34 @@ void MapView::init(SceneManager* sceneManager)
 
 void MapView::update(Bus* bus)
 {
+	if (_mode == MVM_DISABLE)
+	{
+		return;
+	}
+
 	SceneObject* cubeObject = _sceneManager->getSceneObject("cube");
 	cubeObject->setPosition(bus->getSceneObject()->getPosition());
 	cubeObject->setRotationQuaternion(bus->getSceneObject()->getRotationQuaternion());
 
 
-	_camera->getSceneObject()->setPosition(bus->getSceneObject()->getPosition());
-
-	PhysicalBodyRaycastVehicle* rayCastVehicle = bus->getSceneObject()->getComponentWithCasting<PhysicalBodyRaycastVehicle>(CT_PHYSICAL_BODY);
-	if (rayCastVehicle != nullptr)
+	if (_mode == MVM_NAVIGATION)
 	{
-		const btVector3& dir = rayCastVehicle->getRayCastVehicle()->getForwardVector();
-		glm::vec2 busDirection = glm::normalize(glm::vec2(dir.x(), dir.z()));
+		_cameras[_mode]->getSceneObject()->setPosition(bus->getSceneObject()->getPosition());
 
-		//float cosTheta = glm::dot(glm::vec3(1.0f, 0.0f, 0.0f), glm::normalize(busDirection));
-		float yAngle = atan2(busDirection.x, busDirection.y);
+		PhysicalBodyRaycastVehicle* rayCastVehicle = bus->getSceneObject()->getComponentWithCasting<PhysicalBodyRaycastVehicle>(CT_PHYSICAL_BODY);
+		if (rayCastVehicle != nullptr)
+		{
+			const btVector3& dir = rayCastVehicle->getRayCastVehicle()->getForwardVector();
+			glm::vec2 busDirection = glm::normalize(glm::vec2(dir.x(), dir.z()));
 
-		_camera->getSceneObject()->setRotation(degToRad(-45.0f), yAngle, 0.0f);
+			//float cosTheta = glm::dot(glm::vec3(1.0f, 0.0f, 0.0f), glm::normalize(busDirection));
+			float yAngle = atan2(busDirection.x, busDirection.y);
 
-		_camera->getSceneObject()->move(busDirection.x * -15.0f * 2.75f, 30.0f * 2.75f, busDirection.y * -15.0f * 2.75f);
-		//_camera->getSceneObject()->move(_camera->getDirection() * -40.0f);
+			_cameras[_mode]->getSceneObject()->setRotation(degToRad(-45.0f), yAngle, 0.0f);
+
+			_cameras[_mode]->getSceneObject()->move(busDirection.x * -15.0f * 2.75f, 30.0f * 2.75f, busDirection.y * -15.0f * 2.75f);
+			//_camera->getSceneObject()->move(_camera->getDirection() * -40.0f);
+		}
 	}
 
 	//_camera->getSceneObject()->setRotationQuaternion(bus->getSceneObject()->getRotationQuaternion());
@@ -241,8 +311,8 @@ void MapView::update(Bus* bus)
 	//_camera->getSceneObject()->move(0.0f, 10.0f, 0.0f);
 
 	RenderData* renderData = new RenderData;
-	renderData->camera = _camera;
-	renderData->framebuffer = _framebuffer;
+	renderData->camera = _cameras[_mode];
+	renderData->framebuffer = _framebuffers[_mode];
 	renderData->renderPass = RP_CUSTOM;
 
 	renderData->MVMatrix = renderData->camera->getProjectionMatrix() * renderData->camera->getViewMatrix();
@@ -279,6 +349,6 @@ void MapView::update(Bus* bus)
 		}
 	}
 
-	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.7f);
 	Renderer::getInstance().renderScene(renderData);
 }

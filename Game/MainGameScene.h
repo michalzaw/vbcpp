@@ -34,7 +34,9 @@ class MainGameScene final : public GameScene
 		Hud* _hud;
 		std::vector<MirrorImage*> _mirrorsImages;
 		std::vector<bool>		  _mirrorsImagesVisibility;
+
 		MapView* _mapView;
+		bool _isNavigationVisible;
 
 		bool _isCameraControll;
 		bool _isMirrorControll;
