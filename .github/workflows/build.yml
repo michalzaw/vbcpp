@@ -15,7 +15,7 @@ env:
 jobs:
   build-on-windows:
     # See: https://docs.github.com/en/actions/using-github-hosted-runners/about-github-hosted-runners
-    runs-on: windows-2019
+    runs-on: windows-2022
 
     steps:
     - uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
     - name: Configure CMake
       run: |
           New-Item -Path 'build' -ItemType Directory
-          cmake -G"Visual Studio 16 2019" -B build
+          cmake -G"Visual Studio 17 2022" -B build
     
     - name: Show generated VS Project files
       run: |
@@ -43,7 +43,7 @@ jobs:
     
     - name: Build project
       run: |
-          pushd "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build"
+          pushd "C:\Program Files (x86)\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
           cmd /c "vcvars64.bat&set" |
           foreach {
             if ($_ -match "=") {
