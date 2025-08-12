@@ -22,5 +22,7 @@ We are using:
 - [Dear ImGui 1.72](https://github.com/ocornut/imgui)
 - [ImGuizmo 1.61](https://github.com/CedricGuillemet/ImGuizmo)
 - [Portable File Dialogs](https://github.com/samhocevar/portable-file-dialogs)
+- [Lua 5.4.8](https://www.lua.org/)
+- [sol2 3.3.0](https://github.com/ThePhD/sol2)
 
 For more information, please look at [Virtual Bus webpage](https://www.facebook.com/VirtualBus.info/).
