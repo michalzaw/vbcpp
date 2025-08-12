@@ -6,6 +6,7 @@
 #include "GameLogicSystem.h"
 #include "Hud.h"
 #include "MainGameScene/MirrorImage.h"
+#include "MainGameScene/MapView.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -41,7 +42,8 @@ MainGameScene::MainGameScene(Window* window)
 	_activeBus(nullptr),
 	_activeCamera(nullptr),
 	_hud(nullptr),
-	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1)
+	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1),
+	_mapView(nullptr), _isNavigationVisible(true)
 {
 
 }
@@ -373,6 +375,10 @@ void MainGameScene::initGui()
 	_mirrorsImagesVisibility.push_back(false);
 	_mirrorsImagesVisibility.push_back(false);
 	_mirrorsImagesVisibility.push_back(false);
+
+
+	_mapView = new MapView(_gui, _sceneManager);
+	_mapView->setShowPavements(false);
 }
 
 
@@ -420,6 +426,8 @@ void MainGameScene::startGame()
 	_soundManager->setMute(false);
 
 	setCameraControll(_isCameraControll);
+
+	_mapView->init(_sceneManager);
 }
 
 
@@ -450,6 +458,8 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 void MainGameScene::update(double deltaTime)
 {
 	_hud->update(deltaTime);
+	
+	_mapView->update(_activeBus);
 
 	for (auto* mirrorImage : _mirrorsImages)
 	{
@@ -725,7 +735,31 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 			_mirrorsImages[1]->setIsActive(_mirrorsImagesVisibility[1]);
 		}
 	}
+	if (input.isKeyPressed(GLFW_KEY_4))
+	{
+		_isNavigationVisible = !_isNavigationVisible;
+		
+		if (_isNavigationVisible && _mapView->getMode() == MVM_DISABLE)
+		{
+			_mapView->setMode(MVM_NAVIGATION);
+		}
+		else if (!_isNavigationVisible && _mapView->getMode() == MVM_NAVIGATION)
+		{
+			_mapView->setMode(MVM_DISABLE);
+		}
+	}
 
+	if (input.isKeyPressed(GLFW_KEY_N))
+	{
+		if (_mapView->getMode() != MVM_WORLD_MAP)
+		{
+			_mapView->setMode(MVM_WORLD_MAP);
+		}
+		else
+		{
+			_mapView->setMode(_isNavigationVisible ? MVM_NAVIGATION : MVM_DISABLE);
+		}
+	}
 
 	// debug
 	if (GameConfig::getInstance().developmentMode)
@@ -793,6 +827,8 @@ void MainGameScene::terminate()
 	{
 		delete _buses[i];
 	}
+
+	delete _mapView;
 }
 
 

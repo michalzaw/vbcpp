@@ -1279,6 +1279,8 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // WIREFRAME_MATERIAL
     _shaderList[WIREFRAME_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
 
+    _shaderList[MINIMAP_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/minimap.vert", "Shaders/minimap.frag");
+
     _shaderListForMirrorRendering.resize(NUMBER_OF_SHADERS);
     _shaderListForMirrorRendering[SOLID_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[NOTEXTURE_MATERIAL] = MIRROR_SOLID_MATERIAL;

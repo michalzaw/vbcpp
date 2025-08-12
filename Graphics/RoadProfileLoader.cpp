@@ -29,6 +29,9 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 		return nullptr;
 	}
 
+	std::string profileTypeStr = XmlUtils::getAttributeStringOptional(profileElement, "type", roadProfileTypeStrings[RPT_ROAD]);
+	RoadProfileType profileType = getRoadProfileTypeFromString(profileTypeStr);
+
 	XMLElement* profileDesc = profileElement->FirstChildElement("Description");
 	if (profileDesc == nullptr)
 	{
@@ -62,7 +65,7 @@ RRoadProfile* RoadProfileLoader::loadRoadProfile(std::string dirPath)
 	}
 
 
-	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment, intersectionMaterial, intersectionRoadY);
+	RRoadProfile* roadProfile = new RRoadProfile(dirPath, author, profName, comment, intersectionMaterial, intersectionRoadY, profileType);
 
 
 	XMLElement* lanesElement = profileElement->FirstChildElement("Lanes");

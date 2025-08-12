@@ -1,6 +1,16 @@
 #include "RRoadProfile.h"
 
 
+RoadProfileType getRoadProfileTypeFromString(const std::string& name)
+{
+	for (int i = 0; i < RPT_COUNT; ++i)
+	{
+		if (roadProfileTypeStrings[i] == name)
+			return static_cast<RoadProfileType>(i);
+	}
+}
+
+
 AIPathIntersectionMode getAIPathIntersectionModeFromString(const std::string& name)
 {
 	for (int i = 0; i < APIM_COUNT; ++i)
@@ -11,8 +21,9 @@ AIPathIntersectionMode getAIPathIntersectionModeFromString(const std::string& na
 }
 
 
-RRoadProfile::RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial, float intersectionRoadY)
+RRoadProfile::RRoadProfile(std::string path, std::string author, std::string name, std::string comment, Material* intersectionMaterial, float intersectionRoadY, RoadProfileType type)
 	: Resource(RT_ROAD_PROFILE, path),
+	_type(type),
 	_author(author), _name(name), _comment(comment),
 	_intersectionMaterial(intersectionMaterial), _intersectionRoadY(intersectionRoadY),
 	_maxX(0.0f), _minX(0.0f), _maxXIsCalculated(false), _minXIsCalculated(false)
@@ -24,6 +35,12 @@ RRoadProfile::RRoadProfile(std::string path, std::string author, std::string nam
 RRoadProfile::~RRoadProfile()
 {
 	
+}
+
+
+RoadProfileType RRoadProfile::getType()
+{
+	return _type;
 }
 
 

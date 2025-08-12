@@ -18,6 +18,7 @@ set (GAME_SOURCES
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp
 	Game/TestScene.cpp
+	Game/MainGameScene/MapView.cpp
 	Game/MainGameScene/MirrorImage.cpp
 )
 
@@ -43,6 +44,7 @@ set (GAME_HEADERS
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h
 	Game/TestScene.h
+	Game/MainGameScene/MapView.h
 	Game/MainGameScene/MirrorImage.h
     
 )

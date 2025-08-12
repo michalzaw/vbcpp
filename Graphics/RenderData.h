@@ -24,7 +24,8 @@ enum RenderPass
 {
     RP_SHADOWS,
     RP_MIRROR,
-    RP_NORMAL
+    RP_NORMAL,
+    RP_CUSTOM
 };
 
 
