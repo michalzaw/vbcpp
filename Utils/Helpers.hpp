@@ -17,7 +17,7 @@ template<typename T> void safe_delete(T*& a) {
 }
 
 template <typename T>
-T clamp(const T& what, const T& a, const T& b)
+T clampValue(const T& what, const T& a, const T& b)
 {
        return std::min(b, std::max(what, a));
 }

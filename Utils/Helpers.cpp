@@ -98,7 +98,7 @@ btVector3 XMLstringToBtVec3(const char* xmlstring)
 
 float getValueFromCurveInPoint(const std::vector<glm::vec2>& curve, float point)
 {
-    const float p = clamp(point, curve[0].x, curve[curve.size() - 1].x);
+    const float p = clampValue(point, curve[0].x, curve[curve.size() - 1].x);
     for (int i = 1; i < curve.size(); ++i)
     {
         if (p <= curve[i].x)

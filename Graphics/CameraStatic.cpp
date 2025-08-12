@@ -374,7 +374,7 @@ void CameraStatic::setMaxPositionOffset(GLfloat maxValue)
 
 void CameraStatic::setPositionOffset(GLfloat positionOffset)
 {
-	_positionOffset = clamp(positionOffset, _minPositionOffset, _maxPositionOffset);
+	_positionOffset = clampValue(positionOffset, _minPositionOffset, _maxPositionOffset);
 
 	changedTransform();
 	_projectionMatrixIs = false;
