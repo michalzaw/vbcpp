@@ -27,7 +27,8 @@
 MapView::MapView(GUIManager* gui, SceneManager* sceneManager)
 	: _gui(gui),
 	_mode(MVM_NAVIGATION),
-	_showPavements(false)
+	_showPavements(false),
+	_isInitialized(false)
 {
 	const glm::vec2& windowSize = Renderer::getInstance().getWindowDimensions();
 
@@ -58,8 +59,42 @@ MapView::MapView(GUIManager* gui, SceneManager* sceneManager)
 	_images.push_back(image2);
 
 	_images[_mode]->setIsActive(true);
+}
 
-	//init(sceneManager);
+
+MapView::~MapView()
+{
+	for (Framebuffer* framebuffer : _framebuffers)
+	{
+		OGLDriver::getInstance().deleteFramebuffer(framebuffer);
+	}
+
+	_framebuffers.clear();
+
+
+	for (Image* image : _images)
+	{
+		_gui->removeObject(image);
+	}
+
+	_images.clear();
+
+
+	if (_isInitialized)
+	{
+		delete _sceneManager;
+
+		for (RRoadProfile* profile : _profiles)
+		{
+			delete profile;
+		}
+
+		_profiles.clear();
+	}
+
+	
+	_isInitialized = false;
+
 }
 
 
@@ -91,6 +126,69 @@ CameraStatic* MapView::createCameraFormNavigationMode()
 	cameraObject->setRotation(-90.0f, 0.0f, 0.0f);
 
 	return camera;
+}
+
+
+// todo: uzycie tych funkcji powoduje exception :(
+RRoadProfile* MapView::createRoadProfile()
+{
+	Material* laneMaterial = new Material;
+	laneMaterial->shader = MINIMAP_MATERIAL;
+	laneMaterial->diffuseColor = glm::vec4(0.96f, 0.83f, 0.37f, 1.0f);
+	laneMaterial->shininess = 96.0f;
+
+	Material* laneIntersectionMaterial = new Material;
+	laneIntersectionMaterial->shader = MINIMAP_MATERIAL;
+	laneIntersectionMaterial->diffuseColor = glm::vec4(0.96f, 0.83f, 0.37f, 1.0f);
+	laneIntersectionMaterial->shininess = 96.0f;
+
+	// nie dodaje laneMaterial do _materials poniewaz zostaje on usuniety w destruktorze RoadLane
+	_materials.push_back(laneIntersectionMaterial);
+
+	RRoadProfile* roadProfile = new RRoadProfile("", "", "", "", laneIntersectionMaterial);
+
+	RoadLane lane;
+	lane.r1 = -5.5f;
+	lane.r2 = 5.5f;
+	lane.height1 = 0.0f;
+	lane.height2 = 0.0f;
+	lane.material = laneMaterial;
+	roadProfile->getRoadLanes().push_back(lane);
+
+	_profiles.push_back(roadProfile);
+
+	return roadProfile;
+}
+
+
+RRoadProfile* MapView::createPavementProfile()
+{
+	Material* pavementMaterial = new Material;
+	pavementMaterial->shader = MINIMAP_MATERIAL;
+	pavementMaterial->diffuseColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	pavementMaterial->shininess = 96.0f;
+
+	Material* pavementIntersectionMaterial = new Material;
+	pavementIntersectionMaterial->shader = MINIMAP_MATERIAL;
+	pavementIntersectionMaterial->diffuseColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
+	pavementIntersectionMaterial->shininess = 96.0f;
+
+	// nie dodaje pavementMaterial do _materials poniewaz zostaje on usuniety w destruktorze RoadLane
+	_materials.push_back(pavementIntersectionMaterial);
+
+	RRoadProfile* pavementProfile = new RRoadProfile("", "", "", "", pavementIntersectionMaterial);
+
+	RoadLane lane2;
+	lane2.r1 = -1.0f;
+	lane2.r2 = 1.0f;
+	lane2.height1 = 0.0f;
+	lane2.height2 = 0.0f;
+	lane2.material = pavementMaterial;
+	pavementProfile->getRoadLanes().push_back(lane2);
+
+	_profiles.push_back(pavementProfile);
+
+	return pavementProfile;
 }
 
 
@@ -152,35 +250,9 @@ void MapView::init(SceneManager* sceneManager)
 	_cameras.push_back(createCameraForWorldMapMode());
 	_cameras.push_back(createCameraFormNavigationMode());
 
-	Material* laneMaterial = new Material;
-	laneMaterial->shader = MINIMAP_MATERIAL;
-	laneMaterial->diffuseColor = glm::vec4(0.96f, 0.83f, 0.37f, 1.0f);
-	laneMaterial->shininess = 96.0f;
 
-	RRoadProfile* roadProfile = new RRoadProfile("", "", "", "", laneMaterial);
-
-	RoadLane lane;
-	lane.r1 = -5.5f;
-	lane.r2 = 5.5f;
-	lane.height1 = 0.0f;
-	lane.height2 = 0.0f;
-	lane.material = laneMaterial;
-	roadProfile->getRoadLanes().push_back(lane);
-
-	Material* pavementMaterial = new Material;
-	pavementMaterial->shader = MINIMAP_MATERIAL;
-	pavementMaterial->diffuseColor = glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-	pavementMaterial->shininess = 96.0f;
-
-	RRoadProfile* pavementProfile = new RRoadProfile("", "", "", "", pavementMaterial);
-
-	RoadLane lane2;
-	lane2.r1 = -1.0f;
-	lane2.r2 = 1.0f;
-	lane2.height1 = 0.0f;
-	lane2.height2 = 0.0f;
-	lane2.material = pavementMaterial;
-	pavementProfile->getRoadLanes().push_back(lane2);
+	RRoadProfile* roadProfile = createRoadProfile();
+	RRoadProfile* pavementProfile = createPavementProfile();
 
 
 	// drogi
@@ -270,6 +342,13 @@ void MapView::init(SceneManager* sceneManager)
 	Cube* cube = new Cube(8.0f, material);
 	cube->init();
 	_sceneManager->getGraphicsManager()->addRenderObject(cube, cubeSceneObject);
+
+
+	physicsManager->drop();
+	soundManager->drop();
+
+
+	_isInitialized = true;
 }
 
 

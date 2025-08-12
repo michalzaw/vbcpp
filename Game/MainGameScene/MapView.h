@@ -13,6 +13,8 @@ class Framebuffer;
 class CameraStatic;
 class SceneManager;
 class Bus;
+class RRoadProfile;
+class Material;
 
 
 enum MapViewMode
@@ -37,16 +39,24 @@ class MapView
 		std::vector<Framebuffer*> _framebuffers;
 
 		std::vector<CameraStatic*> _cameras;
+		std::vector<Material*> _materials;
+		std::vector<RRoadProfile*> _profiles;
 
 		MapViewMode _mode;
 
 		bool _showPavements;
 
+		bool _isInitialized;
+
 		CameraStatic* createCameraForWorldMapMode();
 		CameraStatic* createCameraFormNavigationMode();
 
+		RRoadProfile* createRoadProfile();
+		RRoadProfile* createPavementProfile();
+
 	public:
 		MapView(GUIManager* gui, SceneManager* sceneManager);
+		~MapView();
 
 		void setMode(MapViewMode mode);
 		MapViewMode getMode();

@@ -61,8 +61,6 @@ MainGameScene::~MainGameScene()
 			delete _mirrorsImages[i];
 		}
 	}
-
-	delete _mapView;
 }
 
 
@@ -829,6 +827,8 @@ void MainGameScene::terminate()
 	{
 		delete _buses[i];
 	}
+
+	delete _mapView;
 }
 
 
