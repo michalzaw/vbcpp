@@ -17,7 +17,8 @@ enum ResourceType
 	RT_ROAD_PROFILE,
 	RT_DISPLAY_FONT,
     RT_MATERIALS_COLLECTION,
-    RT_ANIMATION
+    RT_ANIMATION,
+    RT_SCRIPT
 };
 
 class Resource

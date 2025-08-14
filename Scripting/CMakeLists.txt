@@ -1,9 +1,11 @@
 set (SCRIPTING_SOURCES
+	Scripting/RScriptFile.cpp
 	Scripting/ScriptComponent.cpp
 	Scripting/ScriptingManager.cpp
 )
 
 set (SCRIPTING_HEADERS 
+	Scripting/RScriptFile.h
 	Scripting/ScriptComponent.h
 	Scripting/ScriptingManager.h
 )

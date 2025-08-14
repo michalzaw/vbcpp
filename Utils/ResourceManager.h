@@ -15,6 +15,7 @@
 #include "SoundLoader.h"
 #include "RObject.h"
 #include "RObjectLoader.h"
+#include "../Scripting/RScriptFile.h"
 
 #include <iostream>
 #include <list>
@@ -78,6 +79,8 @@ class ResourceManager
 		RDisplayFont* loadDisplayFont(std::string name);
 
         RMaterialsCollection* loadMaterialsCollection(std::string path);
+
+        RScriptFile* loadScriptFile(const std::string& path);
 
 		void setAlternativeResourcePath(std::string path);
 		std::string getAlternativeResourcePath();

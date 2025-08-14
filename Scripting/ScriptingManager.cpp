@@ -9,9 +9,9 @@ ScriptingManager::ScriptingManager()
 }
 
 
-ScriptComponent* ScriptingManager::addScript(const std::string& fileName)
+ScriptComponent* ScriptingManager::addScript(RScriptFile* scriptFile)
 {
-	ScriptComponent* script = new ScriptComponent(fileName, _luaState);
+	ScriptComponent* script = new ScriptComponent(scriptFile, _luaState);
 
 	_scripts.push_back(script);
 

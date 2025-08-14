@@ -20,7 +20,7 @@ class ScriptingManager final
 	public:
 		ScriptingManager();
 
-		ScriptComponent* addScript(const std::string& fileName);
+		ScriptComponent* addScript(RScriptFile* scriptFile);
 
 		void removeScript(ScriptComponent* script);
 

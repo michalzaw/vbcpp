@@ -668,7 +668,10 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		{
 			const std::string& fileName = components[i]["fileName"];
 
-			ScriptComponent* scriptComponent = sceneManager->getScriptingManager()->addScript(fileName);
+			const std::string& scriptPath = objectDirPath + fileName;
+			RScriptFile* scriptFile = ResourceManager::getInstance().loadScriptFile(scriptPath);
+
+			ScriptComponent* scriptComponent = sceneManager->getScriptingManager()->addScript(scriptFile);
 
 			sceneObject->addComponent(scriptComponent);
 		}
