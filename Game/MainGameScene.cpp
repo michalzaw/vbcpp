@@ -23,6 +23,8 @@
 
 #include "../Scene/SceneLoader.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/InputSystem.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/RaycastingUtils.h"
@@ -448,6 +450,8 @@ void MainGameScene::initialize()
 void MainGameScene::fixedStepUpdate(double deltaTime)
 {
 	_activeBus->update(deltaTime);
+
+	_sceneManager->getScriptingManager()->update(deltaTime);
 
 	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
 

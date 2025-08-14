@@ -16,5 +16,12 @@ ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState)
 
 void ScriptComponent::update(float deltaTime)
 {
+	(*_luaState)["sceneManager"] = getSceneObject()->getSceneManager();
+
+	sol::function updateFunction = (*_luaState)["update"];
+	if (updateFunction.valid())
+	{
+		updateFunction(deltaTime);
+	}
 
 }
