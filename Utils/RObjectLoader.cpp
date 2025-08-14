@@ -24,6 +24,8 @@ using namespace tinyxml2;
 
 #include "../Scene/SceneManager.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/ResourceManager.h"
 
 
@@ -93,6 +95,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		else if (componentType == "trafficLights")
 		{
 			loadTrafficLightsComponent(componentElement, object, componentIndex);
+		}
+		else if (componentType == "script")
+		{
+			loadScriptComponent(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -266,6 +272,12 @@ void RObjectLoader::loadTrafficLightsComponent(tinyxml2::XMLElement* componentEl
 	object->getComponents()[componentIndex]["triggerBoxSize"] = componentElement->Attribute("triggerBoxSize");
 	object->getComponents()[componentIndex]["stopPointPosition"] = componentElement->Attribute("stopPointPosition");
 	object->getComponents()[componentIndex]["initState"] = componentElement->Attribute("initState");
+}
+
+
+void RObjectLoader::loadScriptComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	object->getComponents()[componentIndex]["fileName"] = componentElement->Attribute("fileName");
 }
 
 
@@ -651,6 +663,14 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			TrafficLightsComponent* trafficLights = sceneManager->getGameLogicSystem()->addTrafficLightsComponent(redLightNodeName, yellowLightNodeName, greenLightNodeName, triggerBoxPosition, triggerBoxRotation, triggerBoxSize, stopPointPosition, initState);
 
 			sceneObject->addComponent(trafficLights);
+		}
+		else if (componentType == "script")
+		{
+			const std::string& fileName = components[i]["fileName"];
+
+			ScriptComponent* scriptComponent = sceneManager->getScriptingManager()->addScript(fileName);
+
+			sceneObject->addComponent(scriptComponent);
 		}
 	}
 

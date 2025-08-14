@@ -134,6 +134,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PHYSICS_SOURCES} ${PHYSICS
 add_subdirectory(Scene)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
 
+add_subdirectory(Scripting)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCRIPTING_SOURCES} ${SCRIPTING_HEADERS})
+
 add_subdirectory(Utils)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
 
@@ -215,6 +218,8 @@ add_executable(${BIN_NAME}
                     ${PHYSICS_HEADERS}
                     ${SCENE_SOURCES}
                     ${SCENE_HEADERS}
+                    ${SCRIPTING_SOURCES}
+                    ${SCRIPTING_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}
@@ -241,6 +246,8 @@ add_executable(${EDITOR_BIN_NAME}
                     ${PHYSICS_HEADERS}
                     ${SCENE_SOURCES}
                     ${SCENE_HEADERS}
+                    ${SCRIPTING_SOURCES}
+                    ${SCRIPTING_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}
