@@ -924,6 +924,25 @@ RScriptFile* ResourceManager::loadScriptFile(const std::string& path)
 }
 
 
+void ResourceManager::reloadScriptFile(RScriptFile* scriptFile)
+{
+    const std::string& fileName = scriptFile->getPath();
+    scriptFile->setScript(RScriptFile::loadScriptFromFile(fileName));
+}
+
+
+void ResourceManager::reloadAllScriptsFiles()
+{
+    for (auto& resource : _resources)
+    {
+        if (resource->getType() == RT_SCRIPT)
+        {
+            reloadScriptFile(dynamic_cast<RScriptFile*>(resource.get()));
+        }
+    }
+}
+
+
 void ResourceManager::setAlternativeResourcePath(std::string path)
 {
 	_alternativeResourcePath = path;

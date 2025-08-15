@@ -43,6 +43,15 @@ void ScriptingManager::removeScript(ScriptComponent* script)
 }
 
 
+void ScriptingManager::reloadAllScripts()
+{
+	for (ScriptComponent* script : _scripts)
+	{
+		script->reloadScriptFromResource();
+	}
+}
+
+
 void ScriptingManager::update(float deltaTime)
 {
 	for (ScriptComponent* script : _scripts)

@@ -796,6 +796,11 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		{
 			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
 		}
+		if (input.isKeyPressed(GLFW_KEY_MINUS) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			ResourceManager::getInstance().reloadAllScriptsFiles();
+			_sceneManager->getScriptingManager()->reloadAllScripts();
+		}
 	}
 
 	// mouse

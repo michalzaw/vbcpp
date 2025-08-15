@@ -52,6 +52,19 @@ void ScriptComponent::setupScriptEnvironment()
 }
 
 
+void ScriptComponent::reloadScriptFromResource()
+{
+	sol::protected_function_result result = _luaState->script(_scriptFile->getScript(), _scriptEnvironment);
+	if (!result.valid())
+	{
+		sol::error error = result;
+		LOG_ERROR(error.what());
+	}
+
+	setupScriptEnvironment();
+}
+
+
 void ScriptComponent::changedTransform()
 {
 	if (_changeTransformFunction.valid())

@@ -81,6 +81,8 @@ class ResourceManager
         RMaterialsCollection* loadMaterialsCollection(std::string path);
 
         RScriptFile* loadScriptFile(const std::string& path);
+        void reloadScriptFile(RScriptFile* scriptFile);
+        void reloadAllScriptsFiles();
 
 		void setAlternativeResourcePath(std::string path);
 		std::string getAlternativeResourcePath();

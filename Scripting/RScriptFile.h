@@ -13,6 +13,7 @@ class RScriptFile final : public Resource
 	public:
 		RScriptFile(const std::string& path, const std::string& script);
 
+		inline void setScript(const std::string& newScript) { _script = newScript; }
 		inline const std::string& getScript() { return _script; }
 
 		static std::string loadScriptFromFile(const std::string& fileName);

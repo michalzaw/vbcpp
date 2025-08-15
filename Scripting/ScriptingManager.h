@@ -24,6 +24,8 @@ class ScriptingManager final
 
 		void removeScript(ScriptComponent* script);
 
+		void reloadAllScripts();
+
 		void update(float deltaTime);
 
 };

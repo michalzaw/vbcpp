@@ -30,6 +30,8 @@ class ScriptComponent final : public Component
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState);
 
+		void reloadScriptFromResource();
+
 		void changedTransform() override;
 		void update(float deltaTime) override;
 
