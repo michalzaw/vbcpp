@@ -28,3 +28,7 @@ end
 function onInit()
 	log_debug("Biedronka: initialized")
 end
+
+function onDestroy()
+	log_debug("Biedronka: usuwamy obiekt")
+end

@@ -15,6 +15,8 @@
 #include "../Graphics/SkeletalAnimationComponent2.h"
 #include "../Graphics/SkeletalAnimationHelperComponent.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/GlmUtils.h"
 
 
@@ -139,6 +141,10 @@ SceneObject::~SceneObject()
 
             case CT_BEZIER_CURVE:
                 _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
+                break;
+
+            case CT_SCRIPT:
+                _sceneManager->getScriptingManager()->removeScript(static_cast<ScriptComponent*>(*i));
                 break;
 
             case CT_INTERNAL_HELPER:
@@ -440,6 +446,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_BEZIER_CURVE:
                     _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
+                    break;
+
+                case CT_SCRIPT:
+                    _sceneManager->getScriptingManager()->removeScript(static_cast<ScriptComponent*>(component));
                     break;
 
                 case CT_INTERNAL_HELPER:

@@ -21,6 +21,20 @@ ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState)
 }
 
 
+ScriptComponent::~ScriptComponent()
+{
+	if (_destroyFunction.valid())
+	{
+		sol::protected_function_result result = _destroyFunction();
+		if (!result.valid())
+		{
+			sol::error error = result;
+			LOG_ERROR(error.what());
+		}
+	}
+}
+
+
 void ScriptComponent::onAttachedToScenObject()
 {
 	setupScriptEnvironment();
@@ -49,6 +63,7 @@ void ScriptComponent::setupScriptEnvironment()
 	_initFunction = _scriptEnvironment["onInit"];
 	_changeTransformFunction = _scriptEnvironment["onChangeTransform"];
 	_updateFunction = _scriptEnvironment["onUpdate"];
+	_destroyFunction = _scriptEnvironment["onDestroy"];
 }
 
 

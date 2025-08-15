@@ -22,6 +22,7 @@ class ScriptComponent final : public Component
 		sol::function _initFunction;
 		sol::function _changeTransformFunction;
 		sol::function _updateFunction;
+		sol::function _destroyFunction;
 
 		void onAttachedToScenObject() override;
 
@@ -29,6 +30,7 @@ class ScriptComponent final : public Component
 
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState);
+		~ScriptComponent();
 
 		inline RScriptFile* getScriptFile() { return _scriptFile; }
 
