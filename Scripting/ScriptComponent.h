@@ -19,6 +19,8 @@ class ScriptComponent final : public Component
 
 		RScriptFile* _scriptFile;
 
+		bool _isInitialized;
+
 		sol::function _initFunction;
 		sol::function _changeTransformFunction;
 		sol::function _updateFunction;
@@ -29,11 +31,14 @@ class ScriptComponent final : public Component
 		void setupScriptEnvironment();
 
 	public:
-		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState);
+		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate = true);
 		~ScriptComponent();
 
 		inline RScriptFile* getScriptFile() { return _scriptFile; }
 
+		inline bool isInitialized() { return _isInitialized; }
+
+		void loadScript(bool setUpEnvironmentAndCallInitCallback = true);
 		void reloadScriptFromResource();
 
 		void changedTransform() override;

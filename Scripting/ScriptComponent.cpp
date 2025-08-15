@@ -4,19 +4,16 @@
 #include "../Scene/SceneManager.h"
 
 
-ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState)
+ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate/* = true*/)
 	: Component(CT_SCRIPT),
 	_luaState(luaState),
 	_scriptEnvironment(*luaState, sol::create, luaState->globals()),
-	_scriptFile(scriptFile)
+	_scriptFile(scriptFile),
+	_isInitialized(false)
 {
-	// todo: _luaState->load()
-
-	sol::protected_function_result result = _luaState->script(_scriptFile->getScript(), _scriptEnvironment);
-	if (!result.valid())
+	if (loadAfterCreate)
 	{
-		sol::error error = result;
-		LOG_ERROR(error.what());
+		loadScript(false);
 	}
 }
 
@@ -37,6 +34,11 @@ ScriptComponent::~ScriptComponent()
 
 void ScriptComponent::onAttachedToScenObject()
 {
+	if (!_isInitialized)
+	{
+		LOG_DEBUG("Script is not initialized. Skip setupScriptEnvironment and init callback.");
+	}
+
 	setupScriptEnvironment();
 
 	if (_initFunction.valid())
@@ -67,8 +69,10 @@ void ScriptComponent::setupScriptEnvironment()
 }
 
 
-void ScriptComponent::reloadScriptFromResource()
+void ScriptComponent::loadScript(bool setUpEnvironmentAndCallInitCallback/* = true*/)
 {
+	// todo: _luaState->load()
+
 	sol::protected_function_result result = _luaState->script(_scriptFile->getScript(), _scriptEnvironment);
 	if (!result.valid())
 	{
@@ -76,7 +80,18 @@ void ScriptComponent::reloadScriptFromResource()
 		LOG_ERROR(error.what());
 	}
 
-	setupScriptEnvironment();
+	_isInitialized = true;
+
+	if (setUpEnvironmentAndCallInitCallback)
+	{
+		onAttachedToScenObject();
+	}
+}
+
+
+void ScriptComponent::reloadScriptFromResource()
+{
+	loadScript();
 }
 
 

@@ -1124,6 +1124,8 @@ namespace vbEditor
 		SoundManager* soundManager = new SoundManager;
 		_newSceneManager = new SceneManager(graphicsManager, physicsManager, soundManager);
 
+		_newSceneManager->getScriptingManager()->setEnabled(false);
+
 		if (_backgroundWindow == nullptr)
 		{
 			_backgroundWindow = new Window;
@@ -1607,6 +1609,14 @@ namespace vbEditor
 					}
 					ImGui::EndMenu();
 				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Lua scripts", NULL, _sceneManager->getScriptingManager()->isEnabled()))
+				{
+					_sceneManager->getScriptingManager()->setEnabled(!_sceneManager->getScriptingManager()->isEnabled());
+				}
+
 				ImGui::EndMenu();
 			}
 

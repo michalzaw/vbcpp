@@ -39,6 +39,8 @@ SceneManager::~SceneManager()
     _soundManager->drop();
     delete _graphicsManager;
 
+    delete _scriptingManager;
+
     delete _gameLogicSystem;
     delete _busStopSystem;
 

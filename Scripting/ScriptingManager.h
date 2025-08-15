@@ -16,9 +16,16 @@ class ScriptingManager final
 		sol::state* _luaState;
 
 		std::list<ScriptComponent*> _scripts;
+		std::list<ScriptComponent*> _unloadedScripts;
+
+		bool _enabled;
 
 	public:
 		ScriptingManager();
+		~ScriptingManager();
+
+		void setEnabled(bool enabled);
+		bool isEnabled();
 
 		ScriptComponent* addScript(RScriptFile* scriptFile);
 
