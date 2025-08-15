@@ -30,6 +30,8 @@ class ScriptComponent final : public Component
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState);
 
+		inline RScriptFile* getScriptFile() { return _scriptFile; }
+
 		void reloadScriptFromResource();
 
 		void changedTransform() override;

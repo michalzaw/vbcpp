@@ -24,6 +24,8 @@
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
@@ -1536,6 +1538,11 @@ namespace vbEditor
 				{
 					ResourceManager::getInstance().reloadAllTextures();
 				}
+				if (ImGui::MenuItem("Reload all scripts", NULL))
+				{
+					ResourceManager::getInstance().reloadAllScriptsFiles();
+					_sceneManager->getScriptingManager()->reloadAllScripts();
+				}
 
 				ImGui::Separator();
 
@@ -1835,6 +1842,7 @@ namespace vbEditor
 				_graphicsManager->update(TIME_STEP);
 
 				//_sceneManager->getGameLogicSystem()->update(deltaTime);
+				_sceneManager->getScriptingManager()->update(deltaTime);
 			}
 
 
