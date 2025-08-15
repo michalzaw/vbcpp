@@ -1,4 +1,4 @@
-print("Hello World from lua")
+log_debug("Hello World from lua: biedronka")
 
 counter = 0
 direction = 1;
@@ -26,5 +26,5 @@ function onChangeTransform()
 end
 
 function onInit()
-	print("Biedronka: initialized")
+	log_debug("Biedronka: initialized")
 end

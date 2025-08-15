@@ -1,5 +1,6 @@
 set (SCRIPTING_SOURCES
 	Scripting/Bindings/ComponentLuaBindings.cpp
+	Scripting/Bindings/LoggerLuaBindings.cpp
 	Scripting/Bindings/LuaBindings.cpp
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
@@ -11,6 +12,7 @@ set (SCRIPTING_SOURCES
 
 set (SCRIPTING_HEADERS 
 	Scripting/Bindings/ComponentLuaBindings.h
+	Scripting/Bindings/LoggerLuaBindings.h
 	Scripting/Bindings/LuaBindings.h
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h

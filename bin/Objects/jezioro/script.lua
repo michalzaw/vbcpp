@@ -1,4 +1,4 @@
-print("Hello World from lua. Script 2")
+log_info("Hello World from lua. Script 2")
 
 counter = 0
 direction = 1;
@@ -18,5 +18,5 @@ function onUpdate(deltaTime)
 end
 
 function onChangeTransform()
-	print("Roation\n\n")
+	log_info("Roation")
 end
