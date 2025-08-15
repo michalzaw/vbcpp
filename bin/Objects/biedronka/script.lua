@@ -15,15 +15,16 @@ function onUpdate(deltaTime)
 
 	-- print("Jetem biedronka: " .. counter)
 
-	biedronkaObject = sceneManager:getSceneObject("biedronka")
+	--biedronkaObject = sceneManager:getSceneObject("biedronka")
+	biedronkaObject = self:getSceneObject()
 	biedronkaObject:move(2 * deltaTime, 0, 0)
 	biedronkaObject:rotate(0, 2 * direction * deltaTime, 0)
 end
 
 function onChangeTransform()
-	print("Biedronka: change transform")
+	-- print("Biedronka: change transform")
 end
 
 function onInit()
-	print("Biedronka initialized")
+	print("Biedronka: initialized")
 end
