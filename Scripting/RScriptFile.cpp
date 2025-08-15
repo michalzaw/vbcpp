@@ -35,7 +35,7 @@ std::string RScriptFile::loadScriptFromFile(const std::string& fileName)
 	std::string fileContent = stringstream.str();
 
 	LOG_DEBUG("New script loaded");
-	LOG_DEBUG(fileContent);
+	//LOG_DEBUG(fileContent);
 
 	return fileContent;
 }

@@ -15,6 +15,8 @@ class ScriptComponent final : public Component
 	private:
 		sol::state* _luaState;
 
+		sol::environment _scriptEnvironment;
+
 		RScriptFile* _scriptFile;
 
 	public:
