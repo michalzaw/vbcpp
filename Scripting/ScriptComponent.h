@@ -19,9 +19,18 @@ class ScriptComponent final : public Component
 
 		RScriptFile* _scriptFile;
 
+		sol::function _initFunction;
+		sol::function _changeTransformFunction;
+		sol::function _updateFunction;
+
+		void onAttachedToScenObject() override;
+
+		void setupScriptEnvironment();
+
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState);
 
+		void changedTransform() override;
 		void update(float deltaTime) override;
 
 };

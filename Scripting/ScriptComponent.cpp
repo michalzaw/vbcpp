@@ -21,19 +21,60 @@ ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState)
 }
 
 
-void ScriptComponent::update(float deltaTime)
+void ScriptComponent::onAttachedToScenObject()
 {
-	_scriptEnvironment["sceneManager"] = getSceneObject()->getSceneManager();
+	setupScriptEnvironment();
 
-	sol::function updateFunction = _scriptEnvironment["update"];
-	if (updateFunction.valid())
+	if (_initFunction.valid())
 	{
-		sol::protected_function_result result = updateFunction(deltaTime);
+		sol::protected_function_result result = _initFunction();
 		if (!result.valid())
 		{
 			sol::error error = result;
 			LOG_ERROR(error.what());
 		}
 	}
+}
 
+
+void ScriptComponent::setupScriptEnvironment()
+{
+	// global varibles
+	_scriptEnvironment["sceneManager"] = getSceneObject()->getSceneManager();
+
+	// this/self
+	_scriptEnvironment["self"] = this;
+
+	// callbacks
+	_initFunction = _scriptEnvironment["onInit"];
+	_changeTransformFunction = _scriptEnvironment["onChangeTransform"];
+	_updateFunction = _scriptEnvironment["onUpdate"];
+}
+
+
+void ScriptComponent::changedTransform()
+{
+	if (_changeTransformFunction.valid())
+	{
+		sol::protected_function_result result = _changeTransformFunction();
+		if (!result.valid())
+		{
+			sol::error error = result;
+			LOG_ERROR(error.what());
+		}
+	}
+}
+
+
+void ScriptComponent::update(float deltaTime)
+{
+	if (_updateFunction.valid())
+	{
+		sol::protected_function_result result = _updateFunction(deltaTime);
+		if (!result.valid())
+		{
+			sol::error error = result;
+			LOG_ERROR(error.what());
+		}
+	}
 }
