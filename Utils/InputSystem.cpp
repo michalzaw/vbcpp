@@ -31,7 +31,12 @@ void inputSystemScrollCallback(GLFWwindow* window, double xOffset, double yOffse
 InputSystem::InputSystem()
 	: _isInitialized(false), _window(nullptr)
 {
+	_keys.resize(GLFW_KEY_LAST + 1);
+	_keysPressed.resize(GLFW_KEY_LAST + 1);
+	_keysReleased.resize(GLFW_KEY_LAST + 1);
 
+	_mouseButtonPressed.resize(GLFW_MOUSE_BUTTON_LAST + 1);
+	_mouseButtonReleased.resize(GLFW_MOUSE_BUTTON_LAST + 1);
 }
 
 
@@ -57,13 +62,6 @@ void InputSystem::init(Window* window)
 	glfwSetKeyCallback(_window->getWindow(), inputSystemKeyCallback);
 	glfwSetMouseButtonCallback(_window->getWindow(), inputSystemMouseButtonCallback);
 	glfwSetScrollCallback(_window->getWindow(), inputSystemScrollCallback);
-
-	_keys.resize(GLFW_KEY_LAST + 1);
-	_keysPressed.resize(GLFW_KEY_LAST + 1);
-	_keysReleased.resize(GLFW_KEY_LAST + 1);
-	
-	_mouseButtonPressed.resize(GLFW_MOUSE_BUTTON_LAST + 1);
-	_mouseButtonReleased.resize(GLFW_MOUSE_BUTTON_LAST + 1);
 
 	_isInitialized = true;
 }

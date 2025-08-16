@@ -69,6 +69,16 @@ ScriptComponent* ScriptingManager::addScript(RScriptFile* scriptFile)
 
 void ScriptingManager::removeScript(ScriptComponent* script)
 {
+	for (std::list<ScriptComponent*>::iterator i = _unloadedScripts.begin(); i != _unloadedScripts.end(); ++i)
+	{
+		if (*i == script)
+		{
+			i = _unloadedScripts.erase(i);
+
+			break;
+		}
+	}
+
 	for (std::list<ScriptComponent*>::iterator i = _scripts.begin(); i != _scripts.end(); ++i)
 	{
 		if (*i == script)

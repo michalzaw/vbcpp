@@ -3,6 +3,8 @@
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
 
+#include "../Utils/InputSystem.h"
+
 
 ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate/* = true*/)
 	: Component(CT_SCRIPT),
@@ -57,6 +59,7 @@ void ScriptComponent::setupScriptEnvironment()
 {
 	// global varibles
 	_scriptEnvironment["sceneManager"] = getSceneObject()->getSceneManager();
+	_scriptEnvironment["input"] = &InputSystem::getInstance();
 
 	// this/self
 	_scriptEnvironment["self"] = this;
