@@ -9,7 +9,7 @@
 	
 		<Component type="physics" body="static" />
 
-		<Component type="script" fileName="script.lua" />
+		<!--<Component type="script" fileName="script.lua" />-->
 	</Components>
 	
 </Object>
