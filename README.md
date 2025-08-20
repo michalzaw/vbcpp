@@ -14,7 +14,7 @@ We are using:
 - [GLEW 2.1.0](http://glew.sourceforge.net/)
 - [GLM](https://github.com/g-truc/glm)
 - [Bullet Physics 2.83.7](https://github.com/bulletphysics/bullet3)
-- [OpenAL Soft 1.19.1](https://github.com/kcat/openal-soft)
+- [OpenAL Soft 1.24.3](https://github.com/kcat/openal-soft)
 - [Freealut](https://github.com/vancegroup/freealut)
 - [Assimp 4.0.1](https://github.com/assimp/assimp)
 - [STB Image 2.22](https://github.com/kcat/openal-soft)
