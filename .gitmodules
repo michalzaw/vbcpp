@@ -4,3 +4,6 @@
 [submodule "libs/ImGuizmo"]
 	path = libs/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "libs/openal-soft"]
+	path = libs/openal-soft
+	url = https://github.com/kcat/openal-soft.git
