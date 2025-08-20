@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ "master", "develop", "fix/**" ]
+    branches: [ "master", "develop" ]
   pull_request:
-    branches: [ "master", "develop", "feature/**" ]
+    branches: [ "master", "develop", "feature/**", "fix/**" ]
   # See: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
   workflow_dispatch:
 
