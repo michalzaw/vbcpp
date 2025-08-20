@@ -1,7 +1,7 @@
 #include "MapView.h"
 
 // nie do konca wiem po co to tutaj, ale bez tego jest blad ze gl jest includowane przed glew
-#include <gl/glew.h>
+#include <GL/glew.h>
 
 #include <btBulletDynamicsCommon.h>
 
