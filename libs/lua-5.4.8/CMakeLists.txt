@@ -25,3 +25,8 @@ add_executable(${LUA_EXECUTABLE} ${LUA_MAIN})
 add_executable(${LUAC_EXECUTABLE} ${LUAC_MAIN})
 target_link_libraries(${LUA_EXECUTABLE} PRIVATE lua_static)
 target_link_libraries(${LUAC_EXECUTABLE} PRIVATE lua_static)
+
+if (UNIX)
+    target_link_libraries(lua PRIVATE m)
+    target_link_libraries(lua_static PRIVATE m)
+endif()
