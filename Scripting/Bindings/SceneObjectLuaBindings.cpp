@@ -16,9 +16,8 @@ namespace SceneObjectLuaBindings
 			"setFlags", &SceneObject::setFlags,
 			"addFlag", &SceneObject::addFlag,
 			"getFlags", &SceneObject::getFlags,
-			"getComponent", sol::overload(
-				sol::resolve<Component*(unsigned int)>(&SceneObject::getComponent),
-				sol::resolve<Component*(ComponentType)>(&SceneObject::getComponent)),
+			"getComponent", sol::resolve<Component*(unsigned int)>(&SceneObject::getComponent),
+			"getComponentByType", sol::resolve<Component*(ComponentType)>(&SceneObject::getComponent),
 			"getComponentsCount", &SceneObject::getComponentsCount,
 			"setPosition", sol::overload(
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::setPosition),
