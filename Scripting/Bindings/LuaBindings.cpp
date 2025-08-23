@@ -8,6 +8,8 @@
 #include "SceneObjectLuaBindings.h"
 #include "ScriptComponentLuaBindings.h"
 
+#include "Generated/RenderObjectLuaBindings.h"
+
 
 namespace LuaBindings
 {
@@ -20,5 +22,7 @@ namespace LuaBindings
 		SceneManagerLuaBindings::bind(lua);
 		SceneObjectLuaBindings::bind(lua);
 		ScriptComponentLuaBindings::bind(lua);
+
+		RenderObjectLuaBindings::bind(lua);
 	}
 }

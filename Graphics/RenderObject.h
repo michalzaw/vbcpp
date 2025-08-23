@@ -11,12 +11,9 @@
 
 #include "../Utils/RStaticModel.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include "../Scene/Component.h"
-
-
-#define LUAF
-#define LUAR
-#define LUAC
 
 
 struct ModelData
@@ -62,7 +59,7 @@ class RenderObject : public Component
         LUAF void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
         LUAF RStaticModel* getModel(int lod = 0);
         LUAF ModelNode* getModelRootNode(int lod = 0);
-        ModelNode* getModelNodeByName(std::string name, int lod = 0);
+        LUAR ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
         LUAF void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
         LUAF void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);

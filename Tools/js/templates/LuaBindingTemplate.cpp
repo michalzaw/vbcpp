@@ -1,6 +1,6 @@
-#include "SceneObjectLuaBindings.h"
+#include "{{ className }}LuaBindings.h"
 
-#include "../../Scene/SceneObject.h"
+#include "../../../{{{ fileName }}}"
 
 
 namespace {{ className }}LuaBindings
@@ -8,9 +8,17 @@ namespace {{ className }}LuaBindings
     void bind(sol::state* lua)
     {
         lua->new_usertype<{{ className }}>("{{ className }}",
+            {{ #baseClasses }}
+            sol::base_classes, sol::bases<{{.}}>(),
+            {{ /baseClasses }}
+
             {{ #functions }}
             "{{ name }}", &{{ className }}::{{ name }}{{^last}},{{/last}}
             {{ /functions }}
+
+            {{ #functionsToResolve }}
+            "{{ name }}", sol::resolve<{{ returnType }}({{ #args }}{{{ type }}}{{^lastArg}}, {{/lastArg}}{{ /args }})>(&{{ className }}::{{ name }}){{^last}},{{/last}}
+            {{ /functionsToResolve }}
 
             {{ #overloadedFunctions }}
             "{{ name }}", sol::overload(

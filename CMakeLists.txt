@@ -159,6 +159,9 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCENE_SOURCES} ${SCENE_HEA
 add_subdirectory(Scripting)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCRIPTING_SOURCES} ${SCRIPTING_HEADERS})
 
+add_subdirectory(Scripting/Bindings/Generated)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCRIPTING_GENERATED_SOURCES} ${SCRIPTING_GENERATED_HEADERS})
+
 add_subdirectory(Utils)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
 
@@ -242,6 +245,8 @@ add_executable(${BIN_NAME}
                     ${SCENE_HEADERS}
                     ${SCRIPTING_SOURCES}
                     ${SCRIPTING_HEADERS}
+                    ${SCRIPTING_GENERATED_SOURCES}
+                    ${SCRIPTING_GENERATED_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}
@@ -270,6 +275,8 @@ add_executable(${EDITOR_BIN_NAME}
                     ${SCENE_HEADERS}
                     ${SCRIPTING_SOURCES}
                     ${SCRIPTING_HEADERS}
+                    ${SCRIPTING_GENERATED_SOURCES}
+                    ${SCRIPTING_GENERATED_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}

@@ -1,5 +1,3 @@
-const fs = require('fs')
-
 function parseArguments(argumentsStr) {
     let arguments = argumentsStr.split(",");
 
@@ -29,13 +27,28 @@ function parseArguments(argumentsStr) {
     return arguments;
 }
 
-function findFunctions(fileName) {
-    const code = fs.readFileSync(fileName, "utf-8");
+function findFunctions(fileContent) {
     const regex = /(LUAF)(\s+)(.+)(\s+)(\S+)\((.*)\)/g;
 
     let match, functions = [];
 
-    while (match = regex.exec(code.toString())) {
+    while (match = regex.exec(fileContent.toString())) {
+        functions.push({
+            returnType: match[3],
+            name: match[5],
+            args: parseArguments(match[6])
+        });
+    }
+
+    return functions;
+}
+
+function findFunctionsToResolve(fileContent) {
+    const regex = /(LUAR)(\s+)(.+)(\s+)(\S+)\((.*)\)/g;
+
+    let match, functions = [];
+
+    while (match = regex.exec(fileContent.toString())) {
         functions.push({
             returnType: match[3],
             name: match[5],
@@ -74,4 +87,4 @@ function createFunctionsMapAsObject(functions) {
     return map2;
 }
 
-module.exports = { findFunctions, createFunctionsMap, createFunctionsMapAsObject }
+module.exports = { findFunctions, findFunctionsToResolve, createFunctionsMap, createFunctionsMapAsObject }

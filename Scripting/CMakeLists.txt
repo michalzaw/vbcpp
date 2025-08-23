@@ -21,6 +21,7 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
 	Scripting/Bindings/ScriptComponentLuaBindings.h
+	Scripting/Utils/LuaMacros.h
 	Scripting/RScriptFile.h
 	Scripting/ScriptComponent.h
 	Scripting/ScriptingManager.h

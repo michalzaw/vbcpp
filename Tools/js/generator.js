@@ -1,12 +1,16 @@
-const { findFunctions, createFunctionsMap, createFunctionsMapAsObject } = require('./functions');
-const { readFileSync, writeFileSync } = require('fs');
+const { findFunctions, findFunctionsToResolve, createFunctionsMap, createFunctionsMapAsObject } = require('./functions');
+const { findBaseClass } = require('./classes');
+const fs = require('fs')
 const mustache = require('mustache');
 
-function createMoustacheView(functionsMap) {
+function createMoustacheView(className, fileName, functionsMap, functionsToResolve, baseClass) {
     const view = {
-        className: "RenderObject",
+        className: className,
+        fileName: fileName,
+        baseClasses: [baseClass],
         functions: [],
-        overloadedFunctions: []
+        overloadedFunctions: [],
+        functionsToResolve: functionsToResolve
     };
 
     for (let f of functionsMap) {
@@ -21,8 +25,12 @@ function createMoustacheView(functionsMap) {
         }
     }
 
-    if (view.functions.length > 0 && view.overloadedFunctions.length === 0) {
+    if (view.functions.length > 0 && view.overloadedFunctions.length === 0 && view.functionsToResolve.length === 0) {
         view.functions[view.functions.length - 1].last = true;
+    }
+
+    if (view.functionsToResolve.length > 0 && view.overloadedFunctions.length === 0) {
+        view.functionsToResolve[view.functionsToResolve.length - 1].last = true;
     }
 
     if (view.overloadedFunctions.length > 0) {
@@ -32,23 +40,50 @@ function createMoustacheView(functionsMap) {
     return view;
 }
 
-let functions = findFunctions("../../Graphics/RenderObject.h")
-let functionsMap = createFunctionsMapAsObject(functions);
+function generateHeaderFile(className) {
+    const view = {
+        className: className,
+        classNameUpperCase: className.toUpperCase()
+    };
 
-for (let f of functions) {
-    console.log(f);
+    const template = fs.readFileSync("templates/LuaBindingTemplate.h").toString();
+    
+    const data = mustache.render(template, view);
+    
+    fs.writeFileSync("../../Scripting/Bindings/Generated/" + className + "LuaBindings.h", data);
 }
 
-console.log("Mapa")
+function generateCppFile(className, classFileName) {
 
-console.log(functionsMap);
+    const fileContent = fs.readFileSync("../../" + classFileName, "utf-8");
+    let functions = findFunctions(fileContent);
+    let functionsMap = createFunctionsMapAsObject(functions);
 
-functions[functions.length - 1].last = true;
+    let functionsToResolve = findFunctionsToResolve(fileContent);
 
-const view = createMoustacheView(functionsMap);
+    let baseClass = findBaseClass(fileContent);
 
-const template = readFileSync("templates/LuaBindingTemplate.cpp").toString();
+    /*for (let f of functions) {
+        console.log(f);
+    }
 
-const data = mustache.render(template, view);
+    console.log("Mapa")
+    console.log(functionsMap);
+    console.log("Funkcje z resolve")
+    console.log(functionsToResolve);*/
 
-writeFileSync("RenderObjectLuaBinding_generated.cpp", data);
+    functions[functions.length - 1].last = true;
+
+    const view = createMoustacheView(className, classFileName, functionsMap, functionsToResolve, baseClass);
+    const template = fs.readFileSync("templates/LuaBindingTemplate.cpp").toString();
+
+    const data = mustache.render(template, view);
+
+    fs.writeFileSync("../../Scripting/Bindings/Generated/" + className + "LuaBindings.cpp", data);
+}
+
+let classFileName = process.argv[2];
+let className = process.argv[3];
+
+generateHeaderFile(className);
+generateCppFile(className, classFileName);

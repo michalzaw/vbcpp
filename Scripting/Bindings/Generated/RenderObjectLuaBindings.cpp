@@ -1,6 +1,6 @@
-#include "SceneObjectLuaBindings.h"
+#include "RenderObjectLuaBindings.h"
 
-#include "../../Scene/SceneObject.h"
+#include "../../../Graphics/RenderObject.h"
 
 
 namespace RenderObjectLuaBindings
@@ -8,6 +8,8 @@ namespace RenderObjectLuaBindings
     void bind(sol::state* lua)
     {
         lua->new_usertype<RenderObject>("RenderObject",
+            sol::base_classes, sol::bases<Component>(),
+
             "getModel", &RenderObject::getModel,
             "getModelRootNode", &RenderObject::getModelRootNode,
             "updateLocalMaterialFromModel", &RenderObject::updateLocalMaterialFromModel,
@@ -25,6 +27,8 @@ namespace RenderObjectLuaBindings
             "getAABB", &RenderObject::getAABB,
             "getNumberOfLod", &RenderObject::getNumberOfLod,
             "changedTransform", &RenderObject::changedTransform,
+
+            "getModelNodeByName", sol::resolve<ModelNode*(std::string, int)>(&RenderObject::getModelNodeByName),
 
             "setModel", sol::overload(
                 sol::resolve<void(RStaticModel*, int)>(&RenderObject::setModel),
