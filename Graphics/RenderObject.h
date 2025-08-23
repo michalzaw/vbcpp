@@ -14,6 +14,11 @@
 #include "../Scene/Component.h"
 
 
+#define LUAF
+#define LUAR
+#define LUAC
+
+
 struct ModelData
 {
 	RStaticModel* model;
@@ -52,34 +57,34 @@ class RenderObject : public Component
         RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject = false);
         virtual ~RenderObject();
 
-        void setModel(RStaticModel* model, int lod = 0);
-        void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
-        void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
-        RStaticModel* getModel(int lod = 0);
-        ModelNode* getModelRootNode(int lod = 0);
+        LUAF void setModel(RStaticModel* model, int lod = 0);
+        LUAF void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
+        LUAF void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
+        LUAF RStaticModel* getModel(int lod = 0);
+        LUAF ModelNode* getModelRootNode(int lod = 0);
         ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
-		void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
-        void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
+        LUAF void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
+        LUAF void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
 
-        void addMirrorMaterial(Material* material);
-        const std::vector<Material*>& getMirrorMaterials();
+        LUAF void addMirrorMaterial(Material* material);
+        LUAF const std::vector<Material*>& getMirrorMaterials();
 
-        void setCastShadows(bool isCastShadows);
-        bool isCastShadows();
-		void setDynamicObject(bool isDynamic);
-		bool isDynamicObject();
+        LUAF void setCastShadows(bool isCastShadows);
+        LUAF bool isCastShadows();
+        LUAF void setDynamicObject(bool isDynamic);
+        LUAF bool isDynamicObject();
 
-        void setIsHighlighted(bool isHighlighted);
-        bool isHighlighted();
-        inline void setIsRenderObjectId(bool isRenderObjectId) { _isRenderObjectId = isRenderObjectId; }
-        inline bool isRenderObjectId() { return _isRenderObjectId; }
+        LUAF void setIsHighlighted(bool isHighlighted);
+        LUAF bool isHighlighted();
+        LUAF inline void setIsRenderObjectId(bool isRenderObjectId) { _isRenderObjectId = isRenderObjectId; }
+        LUAF inline bool isRenderObjectId() { return _isRenderObjectId; }
 
-        AABB* getAABB();
+        LUAF AABB* getAABB();
 
-		unsigned int getNumberOfLod();
+        LUAF unsigned int getNumberOfLod();
 
-        virtual void changedTransform();
+        LUAF virtual void changedTransform();
 
 };
 
