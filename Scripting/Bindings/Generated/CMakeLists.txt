@@ -1,8 +1,12 @@
 set (SCRIPTING_GENERATED_SOURCES
+	Scripting/Bindings/Generated/GeneratedLuaBinding.cpp
+	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.cpp
 	Scripting/Bindings/Generated/RenderObjectLuaBindings.cpp
 )
 
 set (SCRIPTING_GENERATED_HEADERS 
+	Scripting/Bindings/Generated/GeneratedLuaBindings.h
+	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.h
 	Scripting/Bindings/Generated/RenderObjectLuaBindings.h
 )
 

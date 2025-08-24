@@ -1,6 +1,7 @@
 #include "ScriptingManager.h"
 
 #include "Bindings/LuaBindings.h"
+#include "Bindings/Generated/GeneratedLuaBindings.h"
 
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
@@ -15,6 +16,7 @@ ScriptingManager::ScriptingManager()
 
 
 	LuaBindings::bind(_luaState);
+	GeneratedLuaBindings::bind(_luaState);
 }
 
 

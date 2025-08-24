@@ -1,5 +1,7 @@
 const { findFunctions, findFunctionsToResolve, createFunctionsMap, createFunctionsMapAsObject } = require('./functions');
 const { findBaseClass } = require('./classes');
+const { generateCMakeFile } = require('./cmakeGenerator');
+const { generateLuaBindingsFile } = require('./allBindingsFileGenerator')
 const fs = require('fs')
 const mustache = require('mustache');
 
@@ -87,3 +89,5 @@ let className = process.argv[3];
 
 generateHeaderFile(className);
 generateCppFile(className, classFileName);
+generateLuaBindingsFile("../../Scripting/Bindings/Generated/");
+generateCMakeFile("../../Scripting/Bindings/Generated/");

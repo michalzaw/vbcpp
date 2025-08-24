@@ -4,6 +4,8 @@
 
 #include "PhysicalBody.hpp"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 
 class PhysicalBodyWheel : public PhysicalBody
 {
@@ -11,20 +13,20 @@ class PhysicalBodyWheel : public PhysicalBody
         PhysicalBodyWheel(btRaycastVehicle* vehicle, int index);
         virtual ~PhysicalBodyWheel();
 
-        float getSteeringValue();
-        void setSteeringValue(float angle);
+        LUAF float getSteeringValue();
+        LUAF void setSteeringValue(float angle);
 
-        void setBrake(float brake)
+        LUAF void setBrake(float brake)
         {
             _vehicle->setBrake(brake, _index);
         }
 
-        void applyEngineForce(float force)
+        LUAF void applyEngineForce(float force)
         {
             _vehicle->applyEngineForce(force, _index);
         }
 
-        btWheelInfo& getWheelInfo();
+        LUAF btWheelInfo& getWheelInfo();
 
     private:
         btRaycastVehicle* _vehicle;
