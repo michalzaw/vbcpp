@@ -18,6 +18,8 @@ struct Vertex;
 
 class ShapePolygonComponent final : public Component
 {
+	VBCPP_COMPONENT(ShapePolygonComponent, CT_SHAPE_POLYGON)
+
 	private:
 		static const unsigned int DEFAULT_ROAD_BUFFER_SIZE = 1024 * 1024; // ~ 4600 vertices
 

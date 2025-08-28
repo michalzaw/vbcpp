@@ -9,6 +9,8 @@
 
 class PhysicalBodyWheel : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyWheel, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyWheel(btRaycastVehicle* vehicle, int index);
         virtual ~PhysicalBodyWheel();

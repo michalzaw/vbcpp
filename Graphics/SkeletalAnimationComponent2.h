@@ -33,6 +33,8 @@ struct FinalSkeletonNode final
 
 class SkeletalAnimationComponent2 final : public Component
 {
+	VBCPP_COMPONENT(SkeletalAnimationComponent2, CT_SKELETAL_ANIMATION_2)
+
 	public:
 		static const int MAX_BONES = 100;
 

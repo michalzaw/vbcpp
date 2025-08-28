@@ -54,6 +54,9 @@ enum ComponentType
 };
 
 
+#define VBCPP_COMPONENT(className, type)
+
+
 class Component
 {
     protected:

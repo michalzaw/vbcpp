@@ -23,6 +23,8 @@ PrefabType getPrefabTypeFromString(const std::string& name);
 
 class Prefab : public RenderObject
 {
+    VBCPP_COMPONENT(Prefab, CT_PREFAB)
+
     protected:
         PrefabType _prefabType;
 

@@ -4,12 +4,15 @@
 
 #include "../../Graphics/RenderObject.h"
 
+#include "Generated/ComponentsGetters.h"
+
 
 namespace SceneObjectLuaBindings
 {
 	void bind(sol::state* lua)
 	{
 		lua->new_usertype<SceneObject>("SceneObject",
+			COMPONENTS_GETTERS,
 			"setName", &SceneObject::setName,
 			"setIsActive", &SceneObject::setIsActive,
 			"getName", &SceneObject::getName,
@@ -21,7 +24,6 @@ namespace SceneObjectLuaBindings
 			"getComponent", sol::resolve<Component*(unsigned int)>(&SceneObject::getComponent),
 			"getComponentByType", sol::resolve<Component*(ComponentType)>(&SceneObject::getComponent),
 			"getComponentsCount", &SceneObject::getComponentsCount,
-			"getRenderObject", [](SceneObject& sceneObject) { return sceneObject.getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT); },
 			"setPosition", sol::overload(
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::setPosition),
 				sol::resolve<void(float, float, float)>(&SceneObject::setPosition)),

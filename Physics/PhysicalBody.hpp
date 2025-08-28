@@ -39,6 +39,8 @@ enum class PhysicalBodyType
 
 class PhysicalBody : public Component
 {
+    VBCPP_COMPONENT(PhysicalBody, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBody(PhysicalBodyType physicalBodyType, btScalar m, bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         virtual ~PhysicalBody();

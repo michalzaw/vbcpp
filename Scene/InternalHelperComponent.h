@@ -7,6 +7,8 @@
 
 class InternalHelperComponent : public Component
 {
+    VBCPP_COMPONENT(InternalHelperComponent, CT_INTERNAL_HELPER)
+
     private:
         SceneObject* _referenceObject;
 

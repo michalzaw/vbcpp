@@ -5,6 +5,7 @@ set (SCRIPTING_GENERATED_SOURCES
 )
 
 set (SCRIPTING_GENERATED_HEADERS 
+	Scripting/Bindings/Generated/ComponentsGetters.h
 	Scripting/Bindings/Generated/GeneratedLuaBindings.h
 	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.h
 	Scripting/Bindings/Generated/RenderObjectLuaBindings.h

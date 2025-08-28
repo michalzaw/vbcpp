@@ -3,8 +3,10 @@
 
 #include "PhysicalBody.hpp"
 
-class PhysicalBodySphere : virtual public PhysicalBody
+class PhysicalBodySphere : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodySphere, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodySphere(btScalar r, btScalar mass);
         virtual ~PhysicalBodySphere();

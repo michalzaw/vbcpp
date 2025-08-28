@@ -37,6 +37,8 @@ struct LightAttenuation
 
 class Light : public Component
 {
+    VBCPP_COMPONENT(Light, CT_LIGHT)
+
     private:
         LightType   _lightType;
 

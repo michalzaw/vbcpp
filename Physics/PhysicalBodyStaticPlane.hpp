@@ -5,6 +5,8 @@
 
 class PhysicalBodyStaticPlane : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyStaticPlane, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyStaticPlane(btVector3 planeNormal, btScalar offset);
         virtual ~PhysicalBodyStaticPlane();

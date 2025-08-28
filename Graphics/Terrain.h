@@ -7,6 +7,8 @@
 
 class Terrain : public RenderObject
 {
+	VBCPP_COMPONENT(Terrain, CT_TERRAIN)
+
 	private:
 		std::string _heightmapFileName;
 		std::string _materialName;

@@ -10,6 +10,8 @@ class PhysicalBodyRaycastVehicle;
 
 class AIAgentPhysicalVechicle final : public AIAgent
 {
+	VBCPP_COMPONENT(AIAgentPhysicalVechicle, CT_AI_AGENT)
+
 	private:
 		PhysicalBodyRaycastVehicle* _vechicle;
 

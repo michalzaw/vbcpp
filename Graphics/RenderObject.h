@@ -30,6 +30,8 @@ struct ModelData
 
 class RenderObject : public Component
 {
+    VBCPP_COMPONENT(RenderObject, CT_RENDER_OBJECT)
+
     protected:
 		std::vector<ModelData> _modelsDatas;
 

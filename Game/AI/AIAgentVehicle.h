@@ -12,6 +12,8 @@ class BezierCurve;
 
 class AIAgentVehicle final : public Component
 {
+	VBCPP_COMPONENT(AIAgentVehicle, CT_AI_AGENT_VEHICLE)
+
 	private:
 		PhysicalBodyRaycastVehicle* _vehicle;
 

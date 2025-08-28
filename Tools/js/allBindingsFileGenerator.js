@@ -2,13 +2,13 @@ const fs = require('fs')
 const mustache = require('mustache');
 
 const EXTENSION_H = ".h";
-const IGNORE = "GeneratedLuaBindings";
+const IGNORE = ["GeneratedLuaBindings.h", "ComponentsGetters.h"];
 
 function generateLuaBindingsFile(directory) {
     let files = fs.readdirSync(directory);
 
     let headerFiles = files
-        .filter(file => file.endsWith(EXTENSION_H) && !file.startsWith(IGNORE))
+        .filter(file => file.endsWith(EXTENSION_H) && !IGNORE.includes(file))
         .map(file => file.substring(0, file.length - 2));
 
     const view = {

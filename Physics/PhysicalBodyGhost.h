@@ -9,6 +9,8 @@
 
 class PhysicalBodyGhost : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyGhost, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyGhost(const btVector3& size);
         virtual ~PhysicalBodyGhost();

@@ -18,11 +18,12 @@ function onUpdate(deltaTime)
 		--jezioroObject = sceneManager:getSceneObject("jezioro")
 		--jezioroObject:rotate(math.rad(90), 0, 0)
 
-		local scriptComponent = self:getSceneObject():getComponentByType(ComponentType.CT_SCRIPT)
+		local scriptComponent = self:getSceneObject():getScriptComponent()
 		--scriptComponent:setIsActive(false)
 
 		if scriptComponent == self then
 			log_debug("wszystko ok")
+			log_debug("isInitialized: " .. scriptComponent:isInitialized())
 		else
 			log_debug("cos to nie dziala")
 		end
@@ -37,14 +38,24 @@ function onUpdate(deltaTime)
 
 	local position = biedronkaObject:getPosition()
 	position.x = position.x + 2 * deltaTime;
-	biedronkaObject:setPosition(position);
+	--biedronkaObject:setPosition(position);
 
 	local rotation = biedronkaObject:getRotation()
 	rotation.y = rotation.y + 2 * direction * deltaTime
-	biedronkaObject:setRotation(rotation.x, rotation.y, rotation.z)
+	--biedronkaObject:setRotation(rotation.x, rotation.y, rotation.z)
 
-	if input:isKeyDown(Keys.KEY_K) then
+	if input:isKeyPressed(Keys.KEY_K) then
 		log_debug("KKKKKK")
+
+		local renderObject = self:getSceneObject():getRenderObject()
+		--local renderObjectComponent = renderObject:as(RenderObject);
+		if renderObject == nil then
+			log_error("NULL")
+		else
+			log_error("NIE NULL")
+			log_error("type: " .. type(renderObject))
+			renderObject:setCastShadows(not renderObject:isCastShadows())
+		end
 	end
 
 	if input:isMouseButtonPressed(MouseButtons.LEFT_BUTTON) then

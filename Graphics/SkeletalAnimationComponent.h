@@ -24,6 +24,8 @@ const int MAX_BONES = 100;
 // animation without retargeting
 class SkeletalAnimationComponent final : public Component
 {
+	VBCPP_COMPONENT(SkeletalAnimationComponent, CT_SKELETAL_ANIMATION)
+
 	private:
 		RAnimation* _animation;
 		RAnimatedModel* _animatedModel;

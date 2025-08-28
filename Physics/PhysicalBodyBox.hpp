@@ -5,6 +5,8 @@
 
 class PhysicalBodyBox : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyBox, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyBox(btVector3 halfExtents, btScalar mass);
         virtual ~PhysicalBodyBox();

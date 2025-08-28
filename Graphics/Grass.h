@@ -7,6 +7,8 @@
 
 class Grass : public RenderObject
 {
+    VBCPP_COMPONENT(Grass, CT_GRASS)
+
     private:
         RTexture2D* _terrainHeightmap;
         RTexture2D* _grassDensityTexture;

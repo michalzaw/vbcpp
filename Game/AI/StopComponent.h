@@ -10,6 +10,8 @@ class PhysicalBody;
 
 class StopComponent : public Component
 {
+	VBCPP_COMPONENT(StopComponent, CT_STOP_COMPONENT)
+
 	private:
 		PhysicalBody* _physicalBody;
 

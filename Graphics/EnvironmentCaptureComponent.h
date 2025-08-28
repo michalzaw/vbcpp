@@ -14,6 +14,8 @@ class Cube;
 
 class EnvironmentCaptureComponent : public Component
 {
+	VBCPP_COMPONENT(EnvironmentCaptureComponent, CT_ENVIRONMENT_CAPTURE_COMPONENT)
+
     private:
         RTextureCubeMap* _environmentMap;
 		RTextureCubeMap* _irradianceMap;

@@ -12,6 +12,8 @@
 
 class ScriptComponent final : public Component
 {
+	VBCPP_COMPONENT(ScriptComponent, CT_SCRIPT)
+
 	private:
 		sol::state* _luaState;
 

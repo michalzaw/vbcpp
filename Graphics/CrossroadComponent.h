@@ -28,6 +28,8 @@ struct CrossroadConnectionPoint
 
 class CrossroadComponent : public Component
 {
+	VBCPP_COMPONENT(CrossroadComponent, CT_CROSSROAD)
+
 	private:
 		std::vector<CrossroadConnectionPoint> _connectionPoints;
 

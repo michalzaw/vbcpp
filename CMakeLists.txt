@@ -305,6 +305,11 @@ set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTOR
 
 target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut lua_static)
 
+# /bigobj - for SceneObjectLuaBindings
+if(MSVC)
+    target_compile_options(${BIN_NAME} PRIVATE /bigobj)
+    target_compile_options(${EDITOR_BIN_NAME} PRIVATE /bigobj)
+endif()
 
 
 #EDITOR_BIN_NAME

@@ -37,6 +37,8 @@ class Framebuffer;
 
 class DisplayComponent : public Component
 {
+	VBCPP_COMPONENT(DisplayComponent, CT_DISPLAY)
+
 	private:
 		RShader* _tabGeneratorShader;
 
