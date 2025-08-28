@@ -1,5 +1,7 @@
 #include "InputSystemLuaBindings.h"
 
+#include "../Utils/LuaUtils.h"
+
 // Include GLU header with GLFW
 #define GLFW_INCLUDE_GLU
 #include <GLFW/glfw3.h>
@@ -10,31 +12,6 @@
 
 namespace InputSystemLuaBindings
 {
-	const std::string LUA_PREFIX = "[LUA] ";
-
-	void createConstantTable(sol::state* lua, const std::string& constName, const sol::table& table)
-	{
-		sol::table constProxy = lua->create_table();
-
-		sol::table metatable = lua->create_table();
-		metatable[sol::meta_function::index] = table;
-		metatable[sol::meta_function::new_index] = [&constName](sol::object value, sol::object key) {
-			if (key.is<std::string>())
-			{
-				std::string keyName = key.as<std::string>();
-				LOG_ERROR(LUA_PREFIX + "Cannot change value in const table for key: " + keyName);
-			}
-			else
-			{
-				LOG_ERROR(LUA_PREFIX + "Cannot change value in const table");
-			}
-		};
-
-		constProxy[sol::metatable_key] = metatable;
-
-		(*lua)[constName] = constProxy;
-	}
-
 	void bind(sol::state* lua)
 	{
 		lua->new_usertype<InputSystem>("InputSystem",
@@ -53,7 +30,7 @@ namespace InputSystemLuaBindings
 		mouseButtonsConstants["LEFT_BUTTON"] = GLFW_MOUSE_BUTTON_LEFT;
 		mouseButtonsConstants["RIGHT_BUTTON"] = GLFW_MOUSE_BUTTON_RIGHT;
 		mouseButtonsConstants["MIDDLE_BUTTON"] = GLFW_MOUSE_BUTTON_MIDDLE;
-		createConstantTable(lua, "MouseButtons", mouseButtonsConstants);
+		LuaUtils::createConstantTable(lua, "MouseButtons", mouseButtonsConstants);
 
 		sol::table keysConstants = lua->create_table();
 		keysConstants["KEY_SPACE"]          = GLFW_KEY_SPACE;
@@ -179,6 +156,6 @@ namespace InputSystemLuaBindings
 		keysConstants["KEY_RIGHT_SUPER"]    = GLFW_KEY_RIGHT_SUPER;
 		keysConstants["KEY_MENU"]           = GLFW_KEY_MENU;
 
-		createConstantTable(lua, "Keys", keysConstants);
+		LuaUtils::createConstantTable(lua, "Keys", keysConstants);
 	}
 }
