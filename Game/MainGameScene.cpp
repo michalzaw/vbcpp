@@ -23,6 +23,8 @@
 
 #include "../Scene/SceneLoader.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/InputSystem.h"
 #include "../Utils/ResourceManager.h"
 #include "../Utils/RaycastingUtils.h"
@@ -449,6 +451,8 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 {
 	_activeBus->update(deltaTime);
 
+	_sceneManager->getScriptingManager()->update(deltaTime);
+
 	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
 
 	_sceneManager->getGameLogicSystem()->update(deltaTime);
@@ -791,6 +795,11 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		if (input.isKeyPressed(GLFW_KEY_8) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
 		{
 			Renderer::getInstance().setBloom(!(Renderer::getInstance().isBloomEnable()));
+		}
+		if (input.isKeyPressed(GLFW_KEY_MINUS) && input.isKeyDown(GLFW_KEY_LEFT_CONTROL))
+		{
+			ResourceManager::getInstance().reloadAllScriptsFiles();
+			_sceneManager->getScriptingManager()->reloadAllScripts();
 		}
 	}
 

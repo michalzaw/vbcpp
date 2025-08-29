@@ -9,6 +9,8 @@
 
 class TreeComponent : public Component
 {
+    VBCPP_COMPONENT(TreeComponent, CT_TREE_COMPONENT)
+
     private:
         glm::vec3 _windDirectionFactor;
         float _windVelocityFactor;
@@ -20,7 +22,7 @@ class TreeComponent : public Component
             setRandomWindFactor();
         }
 
-        ~TreeComponent();
+        ~TreeComponent() {}
 
         void setRandomWindFactor()
         {

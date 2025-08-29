@@ -12,6 +12,8 @@
 
 class BusStopComponent : public Component
 {
+    VBCPP_COMPONENT(BusStopComponent, CT_BUS_STOP)
+
     friend class BusStopSystem;
 
     private:

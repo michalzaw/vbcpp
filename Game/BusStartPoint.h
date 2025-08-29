@@ -9,6 +9,8 @@
 
 class BusStartPoint final : public Component
 {
+	VBCPP_COMPONENT(BusStartPoint, CT_BUS_START_POINT)
+
 	private:
 		std::string _name;
 

@@ -8,6 +8,8 @@
 
 class PhysicalBodyBvtTriangleMesh : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyBvtTriangleMesh, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyBvtTriangleMesh(RStaticModel* model);
         PhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& model);

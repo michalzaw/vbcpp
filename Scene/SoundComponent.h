@@ -30,8 +30,10 @@ enum SoundType
 **/
 
 
-class SoundComponent : virtual public Component
+class SoundComponent : public Component
 {
+    VBCPP_COMPONENT(SoundComponent, CT_SOUND)
+
     public:
         SoundComponent(RSound* sound, SoundType type, bool looping = false)
         : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10)

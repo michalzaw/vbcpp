@@ -1,0 +1,14 @@
+set (SCRIPTING_GENERATED_SOURCES
+    {{ #sourceFiles }}
+	Scripting/Bindings/Generated/{{.}}
+    {{ /sourceFiles }}
+)
+
+set (SCRIPTING_GENERATED_HEADERS 
+    {{ #headerFiles }}
+	Scripting/Bindings/Generated/{{.}}
+    {{ /headerFiles }}
+)
+
+set (SCRIPTING_GENERATED_SOURCES ${SCRIPTING_GENERATED_SOURCES} PARENT_SCOPE)
+set (SCRIPTING_GENERATED_HEADERS ${SCRIPTING_GENERATED_HEADERS} PARENT_SCOPE)

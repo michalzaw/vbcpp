@@ -174,7 +174,7 @@ void Game::swapScenesImpl(float deltaTime)
 	if (speed < 0 && sceneVisibility > 0.0f || speed > 0 && sceneVisibility < 1.0f)
 	{
 		sceneVisibility += speed * deltaTime;
-		sceneVisibility = clamp(sceneVisibility, 0.0f, 1.0f);
+		sceneVisibility = clampValue(sceneVisibility, 0.0f, 1.0f);
 		Renderer::getInstance().setSceneVisibility(sceneVisibility);
 	}
 
@@ -228,7 +228,7 @@ void Game::run()
 
 		deltaTime = std::max(0.0, deltaTime);
 		accumulator += deltaTime;
-		accumulator = clamp(accumulator, 0.0, MAX_ACCUMULATED_TIME);
+		accumulator = clampValue(accumulator, 0.0, MAX_ACCUMULATED_TIME);
 
 		updateFpsCounter(timePhysicsCurr);
 

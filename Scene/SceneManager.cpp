@@ -2,6 +2,8 @@
 
 #include "../Game/GameLogicSystem.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 
 SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundManager* sndMgr)
     : _graphicsManager(gMgr), _physicsManager(pMgr), _soundManager(sndMgr),
@@ -10,6 +12,8 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
     LOG_DEBUG("Create SceneManager");
     _physicsManager->grab();
     _soundManager->grab();
+
+    _scriptingManager = new ScriptingManager;
 
     _gameLogicSystem = new GameLogicSystem;
     _busStopSystem = new BusStopSystem;
@@ -34,6 +38,8 @@ SceneManager::~SceneManager()
     _physicsManager->drop();
     _soundManager->drop();
     delete _graphicsManager;
+
+    delete _scriptingManager;
 
     delete _gameLogicSystem;
     delete _busStopSystem;

@@ -15,6 +15,7 @@
 #include "../Game/BusStopSystem.h"
 
 
+class ScriptingManager;
 class GameLogicSystem;
 
 
@@ -27,6 +28,7 @@ class SceneManager
         GraphicsManager*    _graphicsManager;
         PhysicsManager*     _physicsManager;
         SoundManager*       _soundManager;
+        ScriptingManager*   _scriptingManager;
         GameLogicSystem*    _gameLogicSystem;
         BusStopSystem*      _busStopSystem;
 
@@ -44,6 +46,7 @@ class SceneManager
         inline GraphicsManager*    getGraphicsManager() { return _graphicsManager; };
         inline PhysicsManager*     getPhysicsManager() { return _physicsManager; };
         inline SoundManager*       getSoundManager() { return _soundManager; };
+        inline ScriptingManager*   getScriptingManager() { return _scriptingManager; }
         inline GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
         inline BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
 

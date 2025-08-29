@@ -36,6 +36,7 @@ class RObjectLoader
 		static void loadAiAgent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadAiAgentVehicle(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 		static void loadTrafficLightsComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
+		static void loadScriptComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex);
 
 		static RStaticModel* loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, bool loadWithHierarchy, RStaticModel* hightPollyModel = nullptr);
 	

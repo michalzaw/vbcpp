@@ -28,6 +28,8 @@ struct RoadConnectedToIntersection final
 
 class RoadIntersectionComponent final : public Component
 {
+	VBCPP_COMPONENT(RoadIntersectionComponent, CT_ROAD_INTERSECTION)
+
 	private:
 		static const unsigned int DEFAULT_BUFFER_SIZE = 1024 * 1024; // ~ 4600 vertices
 

@@ -61,6 +61,8 @@ class RayCasterWithCollisionGroups : public btVehicleRaycaster
 
 class PhysicalBodyRaycastVehicle : public PhysicalBodyConvexHull
 {
+    VBCPP_COMPONENT(PhysicalBodyRaycastVehicle, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyRaycastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, PhysicsManager* physicsManager);
         PhysicalBodyRaycastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, PhysicsManager* physicsManager);

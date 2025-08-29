@@ -34,6 +34,8 @@ struct ConnectedPath final
 
 class PathComponent final : public Component
 {
+	VBCPP_COMPONENT(PathComponent, CT_PATH)
+
 	private:
 		PathDirection _direction;
 

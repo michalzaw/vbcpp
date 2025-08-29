@@ -32,6 +32,8 @@
 
 #include "../../Physics/PhysicalBodyGhost.h"
 
+#include "../../Scripting/ScriptComponent.h"
+
 #include "../../Utils/FilesHelper.h"
 
 
@@ -1674,6 +1676,27 @@ void showPhysicalBodyDetails(PhysicalBody* component)
 }
 
 
+void showScriptComponentDetails(ScriptComponent* component)
+{
+	if (ImGui::CollapsingHeader("Script", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("ScriptCpmponentDetails");
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(ScriptFile, "Script file")
+		ImGui::Text(component->getScriptFile()->getPath().c_str());
+		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1791,6 +1814,12 @@ void showObjectProperties()
 			if (busStartPoint)
 			{
 				showBusStartComponentDetails(busStartPoint);
+			}
+
+			ScriptComponent* scriptComponent = dynamic_cast<ScriptComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SCRIPT));
+			if (scriptComponent)
+			{
+				showScriptComponentDetails(scriptComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

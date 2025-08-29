@@ -893,6 +893,56 @@ RMaterialsCollection* ResourceManager::loadMaterialsCollection(std::string path)
 }
 
 
+RScriptFile* ResourceManager::loadScriptFile(const std::string& path)
+{
+    Resource* res = findResource(path);
+    if (res != 0)
+    {
+        RScriptFile* scriptFile = dynamic_cast<RScriptFile*>(res);
+        return scriptFile;
+    }
+
+    std::string finalPath = path;
+
+#ifdef DEVELOPMENT_RESOURCES
+    if (!FilesHelper::isFileExists(path))
+        finalPath = _alternativeResourcePath + path;
+#endif // DEVELOPMENT_RESOURCES
+
+    std::unique_ptr<RScriptFile> script(new RScriptFile(path, RScriptFile::loadScriptFromFile(finalPath)));
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + script.get()->getPath());
+
+    RScriptFile* s = dynamic_cast<RScriptFile*>(script.get());
+
+    if (s)
+    {
+        _resources.push_back(std::move(script));
+        return s;
+    }
+    else
+        return 0;
+}
+
+
+void ResourceManager::reloadScriptFile(RScriptFile* scriptFile)
+{
+    const std::string& fileName = scriptFile->getPath();
+    scriptFile->setScript(RScriptFile::loadScriptFromFile(fileName));
+}
+
+
+void ResourceManager::reloadAllScriptsFiles()
+{
+    for (auto& resource : _resources)
+    {
+        if (resource->getType() == RT_SCRIPT)
+        {
+            reloadScriptFile(dynamic_cast<RScriptFile*>(resource.get()));
+        }
+    }
+}
+
+
 void ResourceManager::setAlternativeResourcePath(std::string path)
 {
 	_alternativeResourcePath = path;

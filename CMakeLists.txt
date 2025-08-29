@@ -9,7 +9,7 @@ set(EDITOR_BIN_NAME editor)
 # subfolders in VS
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 #bin in project main dir
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin)
@@ -35,6 +35,7 @@ add_subdirectory(libs/assimp-4.0.1)
 add_subdirectory(libs/freetype)
 add_subdirectory(libs/openal-soft)
 add_subdirectory(libs/freealut)
+add_subdirectory(libs/lua-5.4.8)
 #add_subdirectory(libs/stb_image)
 
 #SET_TARGET_PROPERTIES(UpdateAssimpLibsDebugSymbolsAndDLLs PROPERTIES FOLDER "Libs/assimp")
@@ -94,7 +95,6 @@ SET_TARGET_PROPERTIES(OpenAL_Tests PROPERTIES FOLDER "Libs/OpenAL")
 ENDIF(TARGET OpenAL_Tests)
 SET_TARGET_PROPERTIES(openal-info PROPERTIES FOLDER "Libs/OpenAL")
 SET_TARGET_PROPERTIES(alut PROPERTIES FOLDER "Libs/alut")
-
 #SET_TARGET_PROPERTIES(hello_world PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(playfile PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_errorstuff PROPERTIES FOLDER "Libs/alut")
@@ -102,6 +102,9 @@ SET_TARGET_PROPERTIES(alut PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_memoryloader PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_version PROPERTIES FOLDER "Libs/alut")
 #SET_TARGET_PROPERTIES(test_waveforms PROPERTIES FOLDER "Libs/alut")
+SET_TARGET_PROPERTIES(lua PROPERTIES FOLDER "Libs/lua")
+SET_TARGET_PROPERTIES(luac PROPERTIES FOLDER "Libs/lua")
+SET_TARGET_PROPERTIES(lua_static PROPERTIES FOLDER "Libs/lua")
 
 set (IMGUI_SOURCES
 	libs/imgui/imgui.cpp
@@ -152,6 +155,12 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${PHYSICS_SOURCES} ${PHYSICS
 
 add_subdirectory(Scene)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCENE_SOURCES} ${SCENE_HEADERS})
+
+add_subdirectory(Scripting)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCRIPTING_SOURCES} ${SCRIPTING_HEADERS})
+
+add_subdirectory(Scripting/Bindings/Generated)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SCRIPTING_GENERATED_SOURCES} ${SCRIPTING_GENERATED_HEADERS})
 
 add_subdirectory(Utils)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UTILS_SOURCES} ${UTILS_HEADERS})
@@ -210,6 +219,11 @@ include_directories (libs/PortableFileDialogs)
 include_directories (libs/imgui)
 include_directories (libs/ImGuizmo)
 
+find_library(lua_static PATHS lib)
+include_directories (libs/lua-5.4.8/src)
+
+include_directories (libs/sol2)
+
 add_executable(${BIN_NAME}
                     ${BUS_SOURCES}
                     ${BUS_HEADERS}
@@ -229,6 +243,10 @@ add_executable(${BIN_NAME}
                     ${PHYSICS_HEADERS}
                     ${SCENE_SOURCES}
                     ${SCENE_HEADERS}
+                    ${SCRIPTING_SOURCES}
+                    ${SCRIPTING_HEADERS}
+                    ${SCRIPTING_GENERATED_SOURCES}
+                    ${SCRIPTING_GENERATED_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}
@@ -255,6 +273,10 @@ add_executable(${EDITOR_BIN_NAME}
                     ${PHYSICS_HEADERS}
                     ${SCENE_SOURCES}
                     ${SCENE_HEADERS}
+                    ${SCRIPTING_SOURCES}
+                    ${SCRIPTING_HEADERS}
+                    ${SCRIPTING_GENERATED_SOURCES}
+                    ${SCRIPTING_GENERATED_HEADERS}
                     ${UTILS_SOURCES}
                     ${UTILS_HEADERS}
                     ${WINDOW_SOURCES}
@@ -270,7 +292,7 @@ set_target_properties(${BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIR
 #VS working dir
 set_target_properties(${BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut lua_static)
 
 #set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 #set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
@@ -281,8 +303,13 @@ set_target_properties(${EDITOR_BIN_NAME} glew alut OpenAL PROPERTIES RUNTIME_OUT
 #VS working dir
 set_target_properties(${EDITOR_BIN_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut)
+target_link_libraries(${EDITOR_BIN_NAME} glfw glew BulletDynamics BulletCollision BulletSoftBody LinearMath assimp freetype OpenAL alut lua_static)
 
+# /bigobj - for SceneObjectLuaBindings
+if(MSVC)
+    target_compile_options(${BIN_NAME} PRIVATE /bigobj)
+    target_compile_options(${EDITOR_BIN_NAME} PRIVATE /bigobj)
+endif()
 
 
 #EDITOR_BIN_NAME

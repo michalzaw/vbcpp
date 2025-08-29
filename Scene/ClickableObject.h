@@ -9,6 +9,8 @@
 
 class ClickableObject : public Component
 {
+    VBCPP_COMPONENT(ClickableObject, CT_CLICKABLE_OBJECT)
+
     private:
         bool _isClicked;
 

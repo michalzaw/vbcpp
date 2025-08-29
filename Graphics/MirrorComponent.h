@@ -7,6 +7,8 @@
 
 class MirrorComponent : public CameraStatic
 {
+    VBCPP_COMPONENT(MirrorComponent, CT_MIRROR)
+
     private:
         std::string  _name;
         Framebuffer* _framebuffer;

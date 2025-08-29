@@ -10,6 +10,8 @@ class CameraFPS;
 
 class CameraControlComponent : public Component
 {
+	VBCPP_COMPONENT(CameraControlComponent, CT_CAMERA_CONTROL)
+
 	private:
 		const short int RAY_TEST_FILTER_MASK;
 		const short int RAY_TEST_FILTER_GROUP;

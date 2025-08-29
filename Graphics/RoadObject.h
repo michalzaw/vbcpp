@@ -39,6 +39,8 @@ struct RoadConnectionPoint
 
 class RoadObject : public RenderObject
 {
+	VBCPP_COMPONENT(RoadObject, CT_ROAD_OBJECT)
+
 	private:
 		RoadType _roadType;
 

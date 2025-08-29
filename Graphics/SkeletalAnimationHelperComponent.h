@@ -29,6 +29,8 @@ struct BoneHelperData2 final
 
 class SkeletalAnimationHelperComponent final : public Component
 {
+	VBCPP_COMPONENT(SkeletalAnimationHelperComponent, CT_SKELETAL_ANIMATION_HELPER)
+
 	private:
 		RAnimation* _animation;
 		RAnimatedModel* _animatedModel;

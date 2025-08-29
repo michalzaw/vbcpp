@@ -12,6 +12,8 @@
 
 class BezierCurve final : public Component
 {
+	VBCPP_COMPONENT(BezierCurve, CT_BEZIER_CURVE)
+
 	private:
 		std::vector<glm::vec3> _points;
 		std::vector<int> _segmentsPointsCount;

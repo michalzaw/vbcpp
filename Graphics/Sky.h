@@ -8,6 +8,7 @@
 
 class Sky : public Cube
 {
+	VBCPP_COMPONENT(Sky, CT_SKY)
 private:
 
 

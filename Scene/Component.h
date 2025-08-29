@@ -36,6 +36,8 @@ enum ComponentType
     CT_SKELETAL_ANIMATION_HELPER,
     CT_BEZIER_CURVE,
 
+    CT_SCRIPT,
+
     CT_INTERNAL_HELPER,
 
     CT_BUS_STOP,
@@ -50,6 +52,9 @@ enum ComponentType
 
     COMPONENTS_TYPE_SIZE
 };
+
+
+#define VBCPP_COMPONENT(className, type)
 
 
 class Component

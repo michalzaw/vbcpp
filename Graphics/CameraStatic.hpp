@@ -28,6 +28,8 @@ enum CameraProjectionType
 
 class CameraStatic : public Component
 {
+	VBCPP_COMPONENT(CameraStatic, CT_CAMERA)
+
 	public:
 		//CameraStatic(int width = 800, int height = 600, GLfloat viewAngle = 45.0f, GLfloat nearValue = 0.1f, GLfloat farValue = 1000.0f);
         CameraStatic(CameraProjectionType projectionType);

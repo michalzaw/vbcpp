@@ -30,6 +30,8 @@ TrafficLightsState getTrafficLightsStateFromString(const std::string& name);
 
 class TrafficLightsComponent : public Component
 {
+	VBCPP_COMPONENT(TrafficLightsComponent, CT_TRAFFIC_LIGHTS)
+
 	private:
 		std::string _redLightNodeName;
 		std::string _yellowLightNodeName;

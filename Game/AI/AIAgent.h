@@ -13,6 +13,8 @@ class SkeletalAnimationComponent;
 
 class AIAgent : public Component
 {
+	VBCPP_COMPONENT(AIAgent, CT_AI_AGENT)
+
 	protected:
 		float _speed;
 

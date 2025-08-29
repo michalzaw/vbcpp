@@ -24,6 +24,8 @@
 #include "../Scene/SceneLoader.h"
 #include "../Scene/SceneSaver.h"
 
+#include "../Scripting/ScriptingManager.h"
+
 #include "../Utils/GlmUtils.h"
 #include "../Utils/RaycastingUtils.h"
 #include "../Utils/FilesHelper.h"
@@ -1122,6 +1124,8 @@ namespace vbEditor
 		SoundManager* soundManager = new SoundManager;
 		_newSceneManager = new SceneManager(graphicsManager, physicsManager, soundManager);
 
+		_newSceneManager->getScriptingManager()->setEnabled(false);
+
 		if (_backgroundWindow == nullptr)
 		{
 			_backgroundWindow = new Window;
@@ -1536,6 +1540,11 @@ namespace vbEditor
 				{
 					ResourceManager::getInstance().reloadAllTextures();
 				}
+				if (ImGui::MenuItem("Reload all scripts", NULL))
+				{
+					ResourceManager::getInstance().reloadAllScriptsFiles();
+					_sceneManager->getScriptingManager()->reloadAllScripts();
+				}
 
 				ImGui::Separator();
 
@@ -1600,6 +1609,14 @@ namespace vbEditor
 					}
 					ImGui::EndMenu();
 				}
+
+				ImGui::Separator();
+
+				if (ImGui::MenuItem("Lua scripts", NULL, _sceneManager->getScriptingManager()->isEnabled()))
+				{
+					_sceneManager->getScriptingManager()->setEnabled(!_sceneManager->getScriptingManager()->isEnabled());
+				}
+
 				ImGui::EndMenu();
 			}
 
@@ -1835,6 +1852,7 @@ namespace vbEditor
 				_graphicsManager->update(TIME_STEP);
 
 				//_sceneManager->getGameLogicSystem()->update(deltaTime);
+				_sceneManager->getScriptingManager()->update(deltaTime);
 			}
 
 

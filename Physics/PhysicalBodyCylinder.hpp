@@ -10,8 +10,10 @@ enum ShapeAlign
     Z_AXIS
 };
 
-class PhysicalBodyCylinder : virtual public PhysicalBody
+class PhysicalBodyCylinder : public PhysicalBody
 {
+    VBCPP_COMPONENT(PhysicalBodyCylinder, CT_PHYSICAL_BODY)
+
     public:
         PhysicalBodyCylinder(btVector3 dim, btScalar mass, ShapeAlign align = Y_AXIS);
         virtual ~PhysicalBodyCylinder();
