@@ -3,7 +3,7 @@
 
 
 {{ #components }}
-#include "{{ filePath }}"
+#include "{{{ filePath }}}"
 {{ /components }}
 
 

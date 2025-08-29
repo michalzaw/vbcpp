@@ -32,7 +32,7 @@ function readFilesRecursively(directory, components, space = "") {
                     components.push({
                         className: className,
                         type: type,
-                        filePath: fullPath
+                        filePath: "../" + fullPath.replaceAll("\\", "/")
                     });
                 }
             }
