@@ -23,7 +23,11 @@ function onUpdate(deltaTime)
 
 		if scriptComponent == self then
 			log_debug("wszystko ok")
-			log_debug("isInitialized: " .. scriptComponent:isInitialized())
+			if scriptComponent:isInitialized() then
+				log_debug("isInitialized: true")
+			else
+				log_debug("isInitialized: false")
+			end
 		else
 			log_debug("cos to nie dziala")
 		end

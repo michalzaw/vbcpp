@@ -6,7 +6,6 @@ set (SCRIPTING_SOURCES
 	Scripting/Bindings/LuaBindings.cpp
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
-	Scripting/Bindings/ScriptComponentLuaBindings.cpp
 	Scripting/Utils/LuaUtils.cpp
 	Scripting/RScriptFile.cpp
 	Scripting/ScriptComponent.cpp
@@ -21,7 +20,6 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/LuaBindings.h
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
-	Scripting/Bindings/ScriptComponentLuaBindings.h
 	Scripting/Utils/LuaUtils.h
 	Scripting/Utils/LuaMacros.h
 	Scripting/RScriptFile.h

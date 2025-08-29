@@ -2,6 +2,7 @@
 
 #include "PhysicalBodyWheelLuaBindings.h"
 #include "RenderObjectLuaBindings.h"
+#include "ScriptComponentLuaBindings.h"
 
 
 namespace GeneratedLuaBindings
@@ -10,5 +11,6 @@ namespace GeneratedLuaBindings
     {
         PhysicalBodyWheelLuaBindings::bind(lua);
         RenderObjectLuaBindings::bind(lua);
+        ScriptComponentLuaBindings::bind(lua);
     }
 }

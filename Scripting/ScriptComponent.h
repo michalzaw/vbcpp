@@ -6,6 +6,7 @@
 #include <sol/sol.hpp>
 
 #include "RScriptFile.h"
+#include "Utils/LuaMacros.h"
 
 #include "../Scene/Component.h"
 
@@ -38,7 +39,7 @@ class ScriptComponent final : public Component
 
 		inline RScriptFile* getScriptFile() { return _scriptFile; }
 
-		inline bool isInitialized() { return _isInitialized; }
+		LUAF inline bool isInitialized() { return _isInitialized; }
 
 		void loadScript(bool setUpEnvironmentAndCallInitCallback = true);
 		void reloadScriptFromResource();
