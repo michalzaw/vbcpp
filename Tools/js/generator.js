@@ -9,11 +9,15 @@ function createMoustacheView(className, fileName, functionsMap, functionsToResol
     const view = {
         className: className,
         fileName: fileName,
-        baseClasses: [baseClass],
+        baseClasses: [],
         functions: [],
         overloadedFunctions: [],
         functionsToResolve: functionsToResolve
     };
+
+    if (baseClass !== null) {
+        view.baseClasses.push(baseClass);
+    }
 
     for (let f of functionsMap) {
         if (f.functions.length === 1) {
