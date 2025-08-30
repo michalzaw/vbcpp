@@ -50,3 +50,8 @@ TODO
     
 {{ /functions }}
 {{ /overloadedFunctions }}
+
+{{ #fields }}
+- `{{name}}`
+    
+{{ /fields }}

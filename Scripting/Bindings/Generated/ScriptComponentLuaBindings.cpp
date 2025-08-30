@@ -1,3 +1,4 @@
+// Generated file
 #include "ScriptComponentLuaBindings.h"
 
 #include "../../../Scripting/ScriptComponent.h"
@@ -11,6 +12,7 @@ namespace ScriptComponentLuaBindings
             sol::base_classes, sol::bases<Component>(),
 
             "isInitialized", &ScriptComponent::isInitialized
+
 
 
         );

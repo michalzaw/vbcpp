@@ -1,3 +1,4 @@
+// Generated file
 #include "RenderObjectLuaBindings.h"
 
 #include "../../../Graphics/RenderObject.h"

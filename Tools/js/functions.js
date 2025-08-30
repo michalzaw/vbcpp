@@ -87,4 +87,18 @@ function createFunctionsMapAsObject(functions) {
     return map2;
 }
 
-module.exports = { findFunctions, findFunctionsToResolve, createFunctionsMap, createFunctionsMapAsObject }
+function findFields(fileContent) {
+    const regex = /(LUAV)(\s+)(.+)(\s+)(\S+)\;/g;
+
+    let match, fields = [];
+
+    while (match = regex.exec(fileContent.toString())) {
+        fields.push({
+            name: match[5]
+        });
+    }
+
+    return fields;
+}
+
+module.exports = { findFunctions, findFunctionsToResolve, createFunctionsMap, createFunctionsMapAsObject, findFields }
