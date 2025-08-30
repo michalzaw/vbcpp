@@ -55,7 +55,7 @@ function generateHeaderFile(className) {
     fs.writeFileSync("../../Scripting/Bindings/Generated/" + className + "LuaBindings.h", data);
 }
 
-function generateCppFile(className, classFileName) {
+function generateCppFile(className, classFileName, generateDocumentation) {
 
     const fileContent = fs.readFileSync("../../" + classFileName, "utf-8");
     let functions = findFunctions(fileContent);
@@ -82,12 +82,21 @@ function generateCppFile(className, classFileName) {
     const data = mustache.render(template, view);
 
     fs.writeFileSync("../../Scripting/Bindings/Generated/" + className + "LuaBindings.cpp", data);
+
+    if (generateDocumentation) {
+        const template = fs.readFileSync("templates/LuaBindingsDocumentationTemplate.md").toString();
+    
+        const data = mustache.render(template, view);
+    
+        fs.writeFileSync("docs/" + className + "Docs.md", data);
+    }
 }
 
 let classFileName = process.argv[2];
 let className = process.argv[3];
+let generateDocumentation = process.argv[4];
 
 generateHeaderFile(className);
-generateCppFile(className, classFileName);
+generateCppFile(className, classFileName, generateDocumentation);
 generateLuaBindingsFile("../../Scripting/Bindings/Generated/");
 generateCMakeFile("../../Scripting/Bindings/Generated/");
