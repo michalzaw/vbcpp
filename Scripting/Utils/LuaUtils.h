@@ -7,6 +7,7 @@
 
 
 #define LUA_MAP_ENUM(enumValue) #enumValue, enumValue
+#define LUA_MAP_ENUM_CLASS(enumName, enumValue) #enumValue, enumName::enumValue
 
 
 namespace LuaUtils

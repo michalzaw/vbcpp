@@ -3,6 +3,7 @@
 
 #include "MaterialLuaBindings.h"
 #include "ModelNodeLuaBindings.h"
+#include "PhysicalBodyLuaBindings.h"
 #include "PhysicalBodyWheelLuaBindings.h"
 #include "RenderObjectLuaBindings.h"
 #include "ScriptComponentLuaBindings.h"
@@ -16,6 +17,7 @@ namespace GeneratedLuaBindings
     {
         MaterialLuaBindings::bind(lua);
         ModelNodeLuaBindings::bind(lua);
+        PhysicalBodyLuaBindings::bind(lua);
         PhysicalBodyWheelLuaBindings::bind(lua);
         RenderObjectLuaBindings::bind(lua);
         ScriptComponentLuaBindings::bind(lua);
