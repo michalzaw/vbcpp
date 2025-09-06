@@ -9,6 +9,9 @@
 #include <AL/alut.h>
 
 #include "Component.h"
+#include "SceneObject.h" // todo: usunac po podzieleniu na h i cpp
+
+#include "../Scripting/Utils/LuaMacros.h"
 
 #include "../Utils/RSound.h"
 
@@ -92,14 +95,14 @@ class SoundComponent : public Component
 
         }
 
-        void setPosition(glm::vec3 newPos)
+        LUAF void setPosition(glm::vec3 newPos)
         {
             _soundPosition = newPos;
 
             update();
         }
 
-        glm::vec3 getPosition()
+        LUAF glm::vec3 getPosition()
         {
             if (_object)
                 return _object->getGlobalPosition() + _soundPosition;
@@ -107,18 +110,18 @@ class SoundComponent : public Component
                 return _soundPosition;
         }
 
-        const ALint getPlayDistance() const
+        LUAF const ALint getPlayDistance() const
         {
             return _playDistance;
         }
 
-        void setPlayDistance(const ALint distance)
+        LUAF void setPlayDistance(const ALint distance)
         {
             _playDistance = distance;
             alSourcei( _source, AL_MAX_DISTANCE, _playDistance);
         }
 
-        void play()
+        LUAF void play()
         {
             ALenum state;
 
@@ -128,13 +131,13 @@ class SoundComponent : public Component
                 alSourcePlay(_source);
         }
 
-        void stop()
+        LUAF void stop()
         {
             if (!_mute)
                 alSourceStop(_source);
         }
 
-		ALenum getState()
+        LUAF ALenum getState()
 		{
 			ALenum state;
 			alGetSourcei(_source, AL_SOURCE_STATE, &state);
@@ -148,17 +151,17 @@ class SoundComponent : public Component
             return _type;
         }
 
-        void setGain(ALfloat gain)
+        LUAF void setGain(ALfloat gain)
         {
             alSourcef( _source, AL_GAIN, gain );
         }
 
-        void setPitch(ALfloat pitch)
+        LUAF void setPitch(ALfloat pitch)
         {
             alSourcef( _source, AL_PITCH, pitch );
         }
 
-        void setMute(const bool mute)
+        LUAF void setMute(const bool mute)
         {
             _mute = mute;
         }

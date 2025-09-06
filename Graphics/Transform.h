@@ -10,6 +10,8 @@
 
 #include "RotationMode.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 
 class Transform
 {
@@ -35,27 +37,27 @@ class Transform
         Transform(const Transform& t);
         ~Transform();
 
-        void setPosition(glm::vec3 position);                               // Set in local space
-        void setPosition(float x, float y, float z);
-        void setRotation(glm::vec3 rotation);                               // Rotations in radians
-        void setRotation(float x, float y, float z);
+        LUAF void setPosition(glm::vec3 position);                               // Set in local space
+        LUAF void setPosition(float x, float y, float z);
+        LUAF void setRotation(glm::vec3 rotation);                               // Rotations in radians
+        LUAF void setRotation(float x, float y, float z);
         void setRotationQuaternion(glm::quat rotation);
-        void setRotationQuaternion(float x, float y, float z, float w);
-        void setScale(glm::vec3 scale);
-        void setScale(float x, float y, float z);
-        void setScale(float scale);
+        LUAR void setRotationQuaternion(float x, float y, float z, float w);
+        LUAF void setScale(glm::vec3 scale);
+        LUAF void setScale(float x, float y, float z);
+        LUAF void setScale(float scale);
 
-        void move(glm::vec3 deltaPosition);
-        void move(float dx, float dy, float dz);
-        void rotate(glm::vec3 deltaRotation);
-        void rotate(float dx, float dy, float dz);
-        void scale(glm::vec3 scale);
-        void scale(float x, float y, float z);
+        LUAF void move(glm::vec3 deltaPosition);
+        LUAF void move(float dx, float dy, float dz);
+        LUAF void rotate(glm::vec3 deltaRotation);
+        LUAF void rotate(float dx, float dy, float dz);
+        LUAF void scale(glm::vec3 scale);
+        LUAF void scale(float x, float y, float z);
 
-        glm::vec3 getPosition() const;                                      // In local space
-        glm::vec3 getRotation() const;
+        LUAF glm::vec3 getPosition() const;                                      // In local space
+        LUAF glm::vec3 getRotation() const;
         glm::quat getRotationQuaternion() const;
-        glm::vec3 getScale() const;
+        LUAF glm::vec3 getScale() const;
 
         glm::mat4& getTransformMatrix() const;
         glm::mat4& getNormalMatrix() const;

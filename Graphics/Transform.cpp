@@ -145,6 +145,12 @@ void Transform::setScale(float x, float y, float z)
 }
 
 
+void Transform::setScale(float scale)
+{
+    setScale(glm::vec3(scale, scale, scale));
+}
+
+
 void Transform::move(glm::vec3 deltaPosition)
 {
     _position += deltaPosition;
