@@ -8,6 +8,7 @@
 class Hud;
 class MirrorImage;
 class MapView;
+class LuaGameContext;
 
 
 enum GameState
@@ -41,6 +42,8 @@ class MainGameScene final : public GameScene
 		bool _isCameraControll;
 		bool _isMirrorControll;
 		int _mirrorControllIndex;
+
+		LuaGameContext* _luaGameContext;
 
 		void getBusConfigurationVariablesFromSceneParams(const std::unordered_map<std::string, std::string>& sceneParams,
 														 std::unordered_map<std::string, std::string>& outBusConfigurationVariables);

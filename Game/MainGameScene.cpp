@@ -5,6 +5,7 @@
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
+#include "LuaGameContext.h"
 #include "MainGameScene/MirrorImage.h"
 #include "MainGameScene/MapView.h"
 
@@ -47,7 +48,8 @@ MainGameScene::MainGameScene(Window* window)
 	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1),
 	_mapView(nullptr), _isNavigationVisible(true)
 {
-
+	_luaGameContext = new LuaGameContext(_sceneManager->getScriptingManager());
+	_luaGameContext->setSceneManager(_sceneManager);
 }
 
 
@@ -63,6 +65,8 @@ MainGameScene::~MainGameScene()
 			delete _mirrorsImages[i];
 		}
 	}
+
+	delete _luaGameContext;
 }
 
 
@@ -210,6 +214,8 @@ void MainGameScene::setActiveCamera(CameraFPS* camera)
 	}
 
 	setCameraControll(_isCameraControll);
+
+	_luaGameContext->setActiveCamera(_activeCamera->getSceneObject());
 }
 
 
@@ -267,6 +273,7 @@ void MainGameScene::loadScene()
 	}*/
 
 	_activeBus = bus;
+	_luaGameContext->setActiveBus(_activeBus->getSceneObject());
 
 	SceneLoader sceneLoader(_sceneManager);
 	sceneLoader.loadMap(GameConfig::getInstance().mapFile);

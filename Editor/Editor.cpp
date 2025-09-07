@@ -16,6 +16,7 @@
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/LuaGameContext.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -585,6 +586,8 @@ namespace vbEditor
 	std::future<void> _loadingSceneFuture;
 	bool _isLoading = false;
 	SceneManager* _newSceneManager = nullptr;
+
+	LuaGameContext* _luaGameContext;
 
 	ObjectPickingMode _objectPickingMode = OPM_GRAPHICS;
 
@@ -1157,6 +1160,11 @@ namespace vbEditor
 		_physicsManager = newSceneManager->getPhysicsManager();
 		_soundManager = newSceneManager->getSoundManager();
 		_sceneManager = newSceneManager;
+
+		delete _luaGameContext;
+		_luaGameContext = new LuaGameContext(_sceneManager->getScriptingManager());
+		_luaGameContext->setSceneManager(_sceneManager);
+		_luaGameContext->setActiveCamera(_cameraObject);
 	}
 
 	Framebuffer* createSceneViewFramebufer(unsigned int width, unsigned int height)
@@ -1888,6 +1896,8 @@ namespace vbEditor
 		_soundManager->drop();
 		_physicsManager->drop();
 		delete _sceneManager;
+
+		delete _luaGameContext;
 
 		if (_backgroundWindow != nullptr)
 		{
