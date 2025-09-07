@@ -56,18 +56,18 @@ class RenderObject : public Component
         RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject = false);
         virtual ~RenderObject();
 
-        LUAF void setModel(RStaticModel* model, int lod = 0);
-        LUAF void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
-        LUAF void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
-        LUAF RStaticModel* getModel(int lod = 0);
+        void setModel(RStaticModel* model, int lod = 0);
+        void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
+        void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
+        RStaticModel* getModel(int lod = 0);
         LUAF ModelNode* getModelRootNode(int lod = 0);
         LUAR ModelNode* getModelNodeByName(std::string name, int lod = 0);
 
-        LUAF void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
-        LUAF void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
+        void updateLocalMaterialFromModel(unsigned int index, int lod = 0);
+        void replaceMaterialsByName(const std::vector<Material*>& materials, int lod = 0);
 
-        LUAF void addMirrorMaterial(Material* material);
-        LUAF const std::vector<Material*>& getMirrorMaterials();
+        void addMirrorMaterial(Material* material);
+        const std::vector<Material*>& getMirrorMaterials();
 
         LUAF void setCastShadows(bool isCastShadows);
         LUAF bool isCastShadows();
@@ -79,11 +79,11 @@ class RenderObject : public Component
         LUAF inline void setIsRenderObjectId(bool isRenderObjectId) { _isRenderObjectId = isRenderObjectId; }
         LUAF inline bool isRenderObjectId() { return _isRenderObjectId; }
 
-        LUAF AABB* getAABB();
+        AABB* getAABB();
 
         LUAF unsigned int getNumberOfLod();
 
-        LUAF virtual void changedTransform();
+        virtual void changedTransform();
 
 };
 

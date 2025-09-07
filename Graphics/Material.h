@@ -10,6 +10,8 @@
 #include <memory>
 using namespace std;
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include "../Utils/RTexture.h"
 
 
@@ -32,12 +34,12 @@ class Material
         { }
 
     // ! Jakie parametry !
-    std::string name;
+    LUAV std::string name;
 
-    glm::vec4 ambientColor;
-    glm::vec4 diffuseColor;
-    glm::vec4 specularColor;
-    glm::vec4 emissiveColor;
+    LUAV glm::vec4 ambientColor;
+    LUAV glm::vec4 diffuseColor;
+    LUAV glm::vec4 specularColor;
+    LUAV glm::vec4 emissiveColor;
 
     RTexture* diffuseTexture;
     RTexture* normalmapTexture;
@@ -51,15 +53,15 @@ class Material
     EnvironmentMapType reflectionTexture1;
     EnvironmentMapType reflectionTexture2;
 
-    float shininess;
-    float transparency;
+    LUAV float shininess;
+    LUAV float transparency;
 
-	float metalnessValue;
-	float roughnessValue;
+    LUAV float metalnessValue;
+    LUAV float roughnessValue;
 
-	float fixDisappearanceAlpha;
-	float alphaTestThreshold;
-	float shadowmappingAlphaTestThreshold;
+    LUAV float fixDisappearanceAlpha;
+    LUAV float alphaTestThreshold;
+    LUAV float shadowmappingAlphaTestThreshold;
 
     glm::vec2 offset;
     glm::vec2 scale;

@@ -1,3 +1,4 @@
+// Generated file
 #ifndef {{ classNameUpperCase }}LUABINDINGS_H_INCLUDED
 #define {{ classNameUpperCase }}LUABINDINGS_H_INCLUDED
 

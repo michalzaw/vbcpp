@@ -1,3 +1,4 @@
+// Generated file
 #include "{{ className }}LuaBindings.h"
 
 #include "../../../{{{ fileName }}}"
@@ -27,6 +28,10 @@ namespace {{ className }}LuaBindings
                 {{ /functions }}
             ){{^last}},{{/last}}
             {{ /overloadedFunctions }}
+
+            {{ #fields }}
+            "{{ name }}", &{{ className }}::{{ name }}{{^last}},{{/last}}
+            {{ /fields }}
         );
     }
 }

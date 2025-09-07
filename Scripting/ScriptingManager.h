@@ -35,7 +35,17 @@ class ScriptingManager final
 
 		void update(float deltaTime);
 
+		template<typename TYPE>
+		void setGlobalVariable(const std::string& name, const TYPE& value);
+
 };
+
+
+template<typename TYPE>
+void ScriptingManager::setGlobalVariable(const std::string& name, const TYPE& value)
+{
+	(*_luaState)[name] = value;
+}
 
 
 #endif // SCRIPTINGMANAGER_H_INCLUDED

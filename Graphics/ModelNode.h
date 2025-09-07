@@ -4,6 +4,8 @@
 
 #include "Transform.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include "../Utils/RStaticModel.h"
 
 
@@ -51,19 +53,19 @@ class ModelNode
         ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, ModelNode* parent = NULL);
         ~ModelNode();
 
-        std::string getName();
+        LUAF std::string getName();
 		AABB* getAABB();
-        Transform& getTransformNode();
-        Transform& getTransform();
+        LUAF Transform& getTransformNode();
+        LUAF Transform& getTransform();
         glm::mat4& getTransformMatrix();
         glm::mat4& getNormalMatrix();
 
-        ModelNodeMesh* getMesh(unsigned int i);
-        unsigned int getMeshesCount();
+        LUAF ModelNodeMesh* getMesh(unsigned int i);
+        LUAF unsigned int getMeshesCount();
 
-        ModelNode* getParent();
-        std::vector<ModelNode*>& getChildren();
-        unsigned int getChildrenCount();
+        LUAF ModelNode* getParent();
+        LUAF std::vector<ModelNode*>& getChildren();
+        LUAF unsigned int getChildrenCount();
 
         void replaceMaterialsByName(const std::vector<Material*>& materials);
 

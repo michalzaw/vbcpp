@@ -10,8 +10,11 @@
 // jesli udostepnianych jest kilka przeciazanych funckji nalezy uzyc makra LUAF
 #define LUAR
 
-// Konstruktor udostepniony w skryptach lua
+// Konstruktor udostepniony w skryptach lua - obecnie nieobslugiwane
 #define LUAC
+
+// Pole publiczne udostepnione w skryptach lua
+#define LUAV
 
 
 #endif // LUAMACROS_H_INCLUDED

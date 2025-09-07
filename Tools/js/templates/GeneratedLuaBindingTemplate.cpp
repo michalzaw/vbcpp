@@ -1,3 +1,4 @@
+// Generated file
 #include "GeneratedLuaBindings.h"
 
 {{ #headerFiles }}

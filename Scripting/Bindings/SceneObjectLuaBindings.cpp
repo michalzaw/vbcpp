@@ -13,7 +13,11 @@ namespace SceneObjectLuaBindings
 	{
 		lua->new_usertype<SceneObject>("SceneObject",
 			COMPONENTS_GETTERS,
-			"setName", &SceneObject::setName,
+			"hasParent", &SceneObject::hasParent,
+			"getParent", &SceneObject::getParent,
+			"addChild", &SceneObject::addChild,
+			"removeChild", &SceneObject::removeChild,
+			"getChildren", &SceneObject::getChildren,
 			"setIsActive", &SceneObject::setIsActive,
 			"getName", &SceneObject::getName,
 			"getId", &SceneObject::getId,
@@ -30,7 +34,9 @@ namespace SceneObjectLuaBindings
 			"setRotation", sol::overload(
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::setRotation),
 				sol::resolve<void(float, float, float)>(&SceneObject::setRotation)),
-			"setScale", sol::overload(sol::resolve<void(const glm::vec3&)>(&SceneObject::setScale),
+			"setRotationQuaternion", sol::resolve<void(float, float, float, float)>(&SceneObject::setRotationQuaternion),
+			"setScale", sol::overload(
+				sol::resolve<void(const glm::vec3&)>(&SceneObject::setScale),
 				sol::resolve<void(float, float, float)>(&SceneObject::setScale),
 				sol::resolve<void(float)>(&SceneObject::setScale)),
 			"move", sol::overload(
@@ -44,7 +50,10 @@ namespace SceneObjectLuaBindings
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::scale)),
 			"getPosition", &SceneObject::getPosition,
 			"getRotation", &SceneObject::getRotation,
-			"getScale", &SceneObject::getScale
+			"getScale", &SceneObject::getScale,
+			"getGlobalPosition", &SceneObject::getGlobalPosition,
+			"transformLocalPointToGlobal", &SceneObject::transformLocalPointToGlobal,
+			"transformLocalVectorToGlobal", &SceneObject::transformLocalVectorToGlobal
 		);
 	}
 }

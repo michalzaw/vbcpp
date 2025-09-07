@@ -57,10 +57,6 @@ void ScriptComponent::onAttachedToScenObject()
 
 void ScriptComponent::setupScriptEnvironment()
 {
-	// global varibles
-	_scriptEnvironment["sceneManager"] = getSceneObject()->getSceneManager();
-	_scriptEnvironment["input"] = &InputSystem::getInstance();
-
 	// this/self
 	_scriptEnvironment["self"] = this;
 

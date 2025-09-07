@@ -1,3 +1,4 @@
+// Generated file
 #include "PhysicalBodyWheelLuaBindings.h"
 
 #include "../../../Physics/PhysicalBodyWheel.h"
@@ -15,6 +16,7 @@ namespace PhysicalBodyWheelLuaBindings
             "setBrake", &PhysicalBodyWheel::setBrake,
             "applyEngineForce", &PhysicalBodyWheel::applyEngineForce,
             "getWheelInfo", &PhysicalBodyWheel::getWheelInfo
+
 
 
         );

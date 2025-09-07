@@ -53,7 +53,7 @@ class PhysicalBody : public Component
 
         void setRestitution(btScalar rest) { _rigidBody->setRestitution(rest); }
 
-        inline PhysicalBodyType getPhysicalBodyType() { return _physicalBodyType; }
+        LUAF inline PhysicalBodyType getPhysicalBodyType() { return _physicalBodyType; }
 
         void addConstraint(Constraint* c)
         {
@@ -93,9 +93,9 @@ class PhysicalBody : public Component
         void setCollisionWith(PhysicalBody* body);
         void setNotCollisionWith(PhysicalBody* body);
 
-        inline const std::set<PhysicalBody*>& getObjectsCollidesWith() { return _collidesWith; }
-        inline const std::vector<PhysicalBody*>& getObjectsBeginCollision() { return _objectsBeginCollision; }
-        inline const std::vector<PhysicalBody*>& getObjectsEndCollision() { return _objectsEndCollision; }
+        LUAF inline const std::set<PhysicalBody*>& getObjectsCollidesWith() { return _collidesWith; }
+        LUAF inline const std::vector<PhysicalBody*>& getObjectsBeginCollision() { return _objectsBeginCollision; }
+        LUAF inline const std::vector<PhysicalBody*>& getObjectsEndCollision() { return _objectsEndCollision; }
 
     protected:
         btDiscreteDynamicsWorld*                _dynamicsWorld;
