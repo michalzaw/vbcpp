@@ -6,6 +6,7 @@
 
 
 class Bus;
+class GameClock;
 
 
 class Hud
@@ -31,6 +32,8 @@ class Hud
 		std::vector<Image*> _imagesDoorClosed;
 		std::vector<Image*> _imagesDoorOpened;
 
+		Label* _labelTime;
+
 
 		Label* _labelBusStop;
 		Label* _labelBusStop2;
@@ -38,12 +41,13 @@ class Hud
 
 
 		Bus* _bus;
+		GameClock* _gameClock;
 
 		std::string getGearAsString(int gear);
 		std::string createStatsString(int fps);
 
 	public:
-		Hud(GUIManager* gui, Bus* bus);
+		Hud(GUIManager* gui, Bus* bus, GameClock* gameClock);
 		~Hud();
 
 		void update(int fps);

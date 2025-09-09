@@ -11,19 +11,22 @@
 #include "BusStartPoint.h"
 #include "BusStopComponent.h"
 #include "CameraControlComponent.h"
+#include "GameClock.h"
 
 #include "../Graphics/CameraFPS.hpp"
 
 
 GameLogicSystem::GameLogicSystem()
 {
-
+	_gameClock = new GameClock();
 }
 
 
 GameLogicSystem::~GameLogicSystem()
 {
 	destroy();
+
+	delete _gameClock;
 }
 
 
@@ -361,6 +364,8 @@ void GameLogicSystem::update(float deltaTime)
 	{
 		component->update(deltaTime);
 	}*/
+
+	_gameClock->update(deltaTime);
 }
 
 

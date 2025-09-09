@@ -22,6 +22,7 @@ class StopComponent;
 class TrafficLightsComponent;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
+class GameClock;
 
 
 struct PendingPathConnection final
@@ -49,6 +50,8 @@ class GameLogicSystem final
 		//std::vector<BusStopComponent*> _busStops;
 
 		std::vector<PendingPathConnection> _pendingPathConnections;
+
+		GameClock* _gameClock;
 
 	public:
 		GameLogicSystem();
@@ -85,6 +88,8 @@ class GameLogicSystem final
 		inline const std::vector<AIAgentVehicle*>& getAIAgentVehicles() { return _aiAgentVehicles; }
 		inline const std::vector<StopComponent*>& getStopComponents() { return _stopComponents; }
 		inline const std::vector<BusStartPoint*>& getBusStartPoints() { return _busStartPoints; }
+
+		inline GameClock* getGameClock() { return _gameClock; }
 
 		void update(float deltaTime);
 

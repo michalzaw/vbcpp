@@ -2,6 +2,7 @@
 
 #include "BusStartPoint.h"
 #include "CameraControlComponent.h"
+#include "GameClock.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
@@ -317,12 +318,14 @@ void MainGameScene::loadScene()
 	{
 		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
 	}*/
+
+	_sceneManager->getGameLogicSystem()->getGameClock()->setRandomTime();
 }
 
 
 void MainGameScene::initGui()
 {
-	_hud = new Hud(_gui, _activeBus);
+	_hud = new Hud(_gui, _activeBus, _sceneManager->getGameLogicSystem()->getGameClock());
 
 	glm::vec2 mirrorsMargin(
 		0.01f * Renderer::getInstance().getWindowDimensions().x,
