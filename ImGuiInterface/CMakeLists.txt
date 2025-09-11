@@ -3,6 +3,7 @@ set (IMGUI_INTERFACE_SOURCES
 	ImGuiInterface/ImGuiWindow.cpp
 	ImGuiInterface/BusLineAndDirectionWindow.cpp
 	ImGuiInterface/BusParametersWindow.cpp
+	ImGuiInterface/BusRoutesWindow.cpp
 	ImGuiInterface/ColorsWindow.cpp
 	ImGuiInterface/MenuBar.cpp
 	ImGuiInterface/MenuSelectBusInterfaceWindow.cpp
@@ -16,6 +17,7 @@ set (IMGUI_INTERFACE_HEADERS
 	ImGuiInterface/ImGuiWindow.h
 	ImGuiInterface/BusLineAndDirectionWindow.h
 	ImGuiInterface/BusParametersWindow.h
+	ImGuiInterface/BusRoutesWindow.h
 	ImGuiInterface/ColorsWindow.h
 	ImGuiInterface/MenuBar.h
 	ImGuiInterface/MenuSelectBusInterfaceWindow.h

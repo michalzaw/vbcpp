@@ -35,6 +35,7 @@
 #include "../../Scripting/ScriptComponent.h"
 
 #include "../../Utils/FilesHelper.h"
+#include "../../Utils/ImGuiUtils.h"
 
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
@@ -419,62 +420,6 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 }
 
 
-template<typename TYPE>
-void convertVectorToComboData(const std::vector<TYPE>& items, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
-{
-	outSelectedItemIndex = 0;
-
-	if (addEmptyElement)
-	{
-		outItemsString += " ";
-		outItemsString += '\0';
-
-		outSelectedItemIndex = -1;
-	}
-
-	for (int i = 0; i < items.size(); ++i)
-	{
-		outItemsString += Strings::toString(items[i]) + '\0';
-
-		if (items[i] == selectedItemValue)
-		{
-			outSelectedItemIndex = i;
-		}
-	}
-
-	if (addEmptyElement)
-	{
-		outSelectedItemIndex += 1;
-	}
-}
-
-
-template<typename TYPE>
-void convertVectorToComboData(const TYPE* items, unsigned int itemsCount, const TYPE& selectedItemValue, std::string& outItemsString, int& outSelectedItemIndex, bool addEmptyElement = true)
-{
-	if (addEmptyElement)
-	{
-		outItemsString += " ";
-		outItemsString += '\0';
-	}
-
-	for (int i = 0; i < itemsCount; ++i)
-	{
-		outItemsString += Strings::toString(items[i]) + '\0';
-
-		if (items[i] == selectedItemValue)
-		{
-			outSelectedItemIndex = i;
-		}
-	}
-
-	if (addEmptyElement)
-	{
-		outSelectedItemIndex += 1;
-	}
-}
-
-
 typedef glm::vec2 vec2;
 typedef glm::vec3 vec3;
 typedef std::string str;
@@ -554,7 +499,7 @@ if (ImGui::Button("...", ImVec2(20, 0)))																										\
 const std::vector<std::string>& itemsNames = additionalParams;																					\
 std::string comboItems;																															\
 int selectedItemIndex = 0;																														\
-convertVectorToComboData(itemsNames, component->get##propertyName(), comboItems, selectedItemIndex);											\
+ImGuiUtils::convertVectorToComboData(itemsNames, component->get##propertyName(), comboItems, selectedItemIndex);								\
 																																				\
 bool result = false;																															\
 std::string value = "";																															\
@@ -1347,7 +1292,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
 			std::string comboItems;
 			int selectedItemIndex = 0;
-			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+			ImGuiUtils::convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
 		
 			bool result = false;
 			std::string value = "";
@@ -1404,7 +1349,7 @@ void showAiAgentVehicleComponentDetails(AIAgentVehicle* component)
 			const std::string& currentValue = component->getCurrentPath() != nullptr ? component->getCurrentPath()->getSceneObject()->getName() : "";
 			std::string comboItems;
 			int selectedItemIndex = 0;
-			convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
+			ImGuiUtils::convertVectorToComboData(itemsNames, currentValue, comboItems, selectedItemIndex);
 
 			bool result = false;
 			std::string value = "";
@@ -1471,7 +1416,7 @@ void showTrafficLightsComponentDetails(TrafficLightsComponent* component)
 			const std::string& currentValue = trafficLightsStateStrings[component->getInitState()];
 			std::string comboItems;
 			int selectedItemIndex = 0;
-			convertVectorToComboData(&trafficLightsStateStrings[0], (unsigned int) TLS_STATE_COUNT, currentValue, comboItems, selectedItemIndex, false);
+			ImGuiUtils::convertVectorToComboData(&trafficLightsStateStrings[0], (unsigned int) TLS_STATE_COUNT, currentValue, comboItems, selectedItemIndex, false);
 
 			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
 			{

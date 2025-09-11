@@ -9,6 +9,7 @@
 #include "LuaGameContext.h"
 #include "MainGameScene/MirrorImage.h"
 #include "MainGameScene/MapView.h"
+#include "Transit/BusRoutesLoader.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -16,6 +17,7 @@
 
 #include "../ImGuiInterface/BusLineAndDirectionWindow.h"
 #include "../ImGuiInterface/BusParametersWindow.h"
+#include "../ImGuiInterface/BusRoutesWindow.h"
 #include "../ImGuiInterface/ColorsWindow.h"
 #include "../ImGuiInterface/PhysicsDebuggerWindow.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -396,18 +398,22 @@ void MainGameScene::initGui()
 
 void MainGameScene::initImGuiInterface()
 {
-	// windows
-	ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, &_buses);
+	BusRoutes* routes = RoutesLoader::loadRoutes("Maps/Demo/routes.xml");
 
-	_imGuiInterface->addWindow(busLineAndDirectionWindow);
+	// windows
+	ImGuiWindow* busRoutesWindow = new BusRoutesWindow(_sceneManager, &_buses, routes);
+
+	_imGuiInterface->addWindow(busRoutesWindow);
 
 	if (GameConfig::getInstance().developmentMode)
 	{
+		ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, &_buses);
 		ImGuiWindow* colorsWindow = new ColorsWindow(_sceneManager);
 		ImGuiWindow* physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
 		ImGuiWindow* variablesWindow = new VariablesWindow(_sceneManager, false);
 		ImGuiWindow* busParametersWindow = new BusParametersWindow(_sceneManager, _buses);
 
+		_imGuiInterface->addWindow(busLineAndDirectionWindow);
 		_imGuiInterface->addWindow(colorsWindow);
 		_imGuiInterface->addWindow(physicsDebuggerWindow);
 		_imGuiInterface->addWindow(variablesWindow);
@@ -415,6 +421,7 @@ void MainGameScene::initImGuiInterface()
 
 		// menu
 		std::vector<MenuItem> windowMenuItems;
+		windowMenuItems.push_back(MenuItem("Bus routes", busRoutesWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Bus line and direction", busLineAndDirectionWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Colors", colorsWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Physics debugger", physicsDebuggerWindow->getOpenFlagPointer()));

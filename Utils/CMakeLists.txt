@@ -42,6 +42,7 @@ set (UTILS_HEADERS
 	Utils/GeometryUtils.h
 	Utils/GlmUtils.h
 	Utils/Helpers.hpp
+	Utils/ImGuiUtils.h
 	Utils/InputSystem.h
 	Utils/LocalizationSystem.h
 	Utils/Logger.h

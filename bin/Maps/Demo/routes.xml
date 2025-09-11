@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!-- <!DOCTYPE PLAY SYSTEM "play.dtd"> -->
+
+<Routes>
+	<Description author="mich" />
+
+	<Line id="101" number="101 BIS">
+		<Route id="1" direction="Zajezdnia Maczno" type="1" head="101 BIS" line1="Zajezdnia" line2="Maczno" />
+		<Route id="2" direction="Plac Mlynarza" type="0" head="101 BIS" line1="Plac Mlynarza" line2="" />
+	</Line>
+
+	<Line id="9999" number="9999">
+		<Route id="1" direction="PRZEJAZD TECHNICZNY" type="0" head="" line1="PRZEJAZD TECHNICZNY" line2="" />
+		<Route id="2" direction="ZJAZD DO ZAJEZDNI" type="0" head="" line1="ZJAZD DO ZAJEZDNI" line2="" />
+		<Route id="3" direction="Awaria" type="0" head="" line1="AWARIA" line2="" />
+		<Route id="4" direction="Virtual Bus" type="2" head="" line1="Virtual Bus CPP" line2="v. 0.4" />
+		<Route id="5" direction="Virtual Bus 2" type="0" head="" line1="Virtual Bus" line2="" />
+	</Line>
+</Routes>

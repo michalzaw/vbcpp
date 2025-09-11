@@ -26,6 +26,7 @@ class GameClock final
 		void setTime(int hour = 0, int minute = 0, int seconds = 0);
 		void setRandomTime();
 		void setCurrentSystemTime();
+
 };
 
 
