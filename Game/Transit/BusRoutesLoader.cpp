@@ -8,7 +8,7 @@
 using namespace tinyxml2;
 
 
-namespace RoutesLoader
+namespace BusRoutesLoader
 {
 	void loadRoute(XMLElement* routeElement, std::unordered_map<std::string, BusRoute>& routes)
 	{

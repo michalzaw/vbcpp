@@ -1,5 +1,8 @@
 #include "XmlUtils.h"
 
+#include "Strings.h"
+
+
 namespace XmlUtils
 {
 
@@ -46,6 +49,14 @@ namespace XmlUtils
 	{
 		const char* cValue = xmlElement->Attribute(attributeName);
 		return XMLstringToBtVec3(cValue);
+
+	}
+
+	Time getAttributeTime(XMLElement* xmlElement, const char* attributeName)
+	{
+		const char* cValue = xmlElement->Attribute(attributeName);
+		std::vector<std::string> valueParsed = split(cValue, ':');
+		return Time(toInt(valueParsed[0]), toInt(valueParsed[1]), toInt(valueParsed[2]));
 
 	}
 
@@ -116,6 +127,20 @@ namespace XmlUtils
 			return XMLstringToBtVec3(cValue);
 		else
 			return defaultValue;
+	}
+
+	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, Time& defaultValue/* = Time(0, 0)*/)
+	{
+		const char* cValue = xmlElement->Attribute(attributeName);
+		if (cValue != NULL)
+		{
+			std::vector<std::string> valueParsed = split(cValue, ':');
+			return Time(toInt(valueParsed[0]), toInt(valueParsed[1]), toInt(valueParsed[2]));
+		}
+		else
+		{
+			return defaultValue;
+		}
 	}
 
 	void loadCurveFromXmlFile(tinyxml2::XMLElement* element, std::vector<glm::vec2>& curve, const std::string& xParamName, const std::string yParamName)

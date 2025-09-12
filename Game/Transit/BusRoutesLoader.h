@@ -5,7 +5,7 @@
 #include "BusRoutes.h"
 
 
-namespace RoutesLoader
+namespace BusRoutesLoader
 {
 	BusRoutes* loadRoutes(const std::string& fileName);
 }

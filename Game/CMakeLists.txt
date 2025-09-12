@@ -6,6 +6,7 @@ set (GAME_SOURCES
 	Game/AI/StopComponent.cpp
 	Game/AI/TrafficLightsComponent.cpp
 	Game/Transit/BusRoutesLoader.cpp
+	Game/Transit/ScheduleLoader.cpp
 	Game/BusStartPoint.cpp
     Game/BusStopComponent.cpp
 	Game/BusStopSystem.cpp
@@ -34,6 +35,8 @@ set (GAME_HEADERS
 	Game/AI/TrafficLightsComponent.h
 	Game/Transit/BusRoutes.h
 	Game/Transit/BusRoutesLoader.h
+	Game/Transit/Schedule.h
+	Game/Transit/ScheduleLoader.h
 	Game/BusStartPoint.h
 	Game/BusStopComponent.h
 	Game/BusStopSystem.h

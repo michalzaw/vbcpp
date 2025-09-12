@@ -10,6 +10,7 @@
 #include "MainGameScene/MirrorImage.h"
 #include "MainGameScene/MapView.h"
 #include "Transit/BusRoutesLoader.h"
+#include "Transit/ScheduleLoader.h"
 
 #include "../Bus/BusLoader.h"
 #include "../Bus/BusConfigurationsLoader.h"
@@ -398,7 +399,8 @@ void MainGameScene::initGui()
 
 void MainGameScene::initImGuiInterface()
 {
-	BusRoutes* routes = RoutesLoader::loadRoutes("Maps/Demo/routes.xml");
+	BusRoutes* routes = BusRoutesLoader::loadRoutes("Maps/Demo/routes.xml");
+	Schedule* schedule = ScheduleLoader::loadSchedule("Maps/Demo/schedule.xml");
 
 	// windows
 	ImGuiWindow* busRoutesWindow = new BusRoutesWindow(_sceneManager, &_buses, routes);
