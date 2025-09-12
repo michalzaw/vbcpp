@@ -321,7 +321,7 @@ void MainGameScene::loadScene()
 		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
 	}*/
 
-	_sceneManager->getGameLogicSystem()->getGameClock()->setRandomTime();
+	(*_sceneManager->getGameLogicSystem()->getGameClock()) = Time::randomTime();
 }
 
 

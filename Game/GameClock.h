@@ -2,30 +2,22 @@
 #define GAMECLOCK_H_INCLUDED
 
 
+#include "../Utils/Time.h"
 #include <chrono>
 #include <string>
 
 
-class GameClock final
+class GameClock final : public Time
 {
-	private:
-		std::chrono::milliseconds _time;
-
 	public:
 		GameClock();
 		~GameClock();
 
 		void update(float deltaTime);
 
-		int getHours();
-		int getMinutes();
-		int getSeconds();
+		void setTime(int hour = 0, int minutes = 0, int seconds = 0);
 
-		std::string getFormatedTime();
-
-		void setTime(int hour = 0, int minute = 0, int seconds = 0);
-		void setRandomTime();
-		void setCurrentSystemTime();
+		GameClock& operator=(const Time& time);
 
 };
 

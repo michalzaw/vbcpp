@@ -151,7 +151,7 @@ void Hud::update(int fps)
 		_imagesDoorOpened[i]->setIsActive(_bus->getDoor(i)->getState() == EDS_OPENING);
 	}
 
-	_labelTime->setText(_gameClock->getFormatedTime());
+	_labelTime->setText(_gameClock->toString());
 
 	// todo: graphicsManager refactor
 	BusStopSystem* busStopSystem = _bus->getSceneObject()->getSceneManager()->getBusStopSystem();

@@ -28,6 +28,7 @@ set (UTILS_SOURCES
 	Utils/SoundLoader.cpp
 	Utils/stb_image.cpp
 	Utils/Strings.cpp
+	Utils/Time.cpp
 	Utils/tinyxml2.cpp
 	Utils/XmlUtils.cpp
 )
@@ -68,6 +69,7 @@ set (UTILS_HEADERS
 	Utils/ResourceManager.h
 	Utils/SoundLoader.h
 	Utils/Strings.h
+	Utils/Time.h
 	Utils/Timer.h
 	Utils/tinyxml2.h
 	Utils/XmlUtils.h
