@@ -4,9 +4,6 @@
 #include <sstream>
 
 
-typedef std::chrono::time_point<std::chrono::system_clock, std::chrono::milliseconds> TimePoint;
-
-
 GameClock::GameClock()
 	: Time(std::chrono::milliseconds(0))
 {
@@ -20,22 +17,25 @@ GameClock::~GameClock()
 }
 
 
-void GameClock::update(float deltaTime)
+TimePoint GameClock::getCurrentTime()
 {
 	auto now = std::chrono::system_clock::now();
-	auto nowMs = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
 
-	static auto lastTime = nowMs;
+	return std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+}
 
-	auto delta = nowMs - lastTime;
 
-	lastTime = nowMs;
+void GameClock::update(float deltaTime)
+{
+	static TimePoint timePrevious = getCurrentTime();
 
-	auto ms = nowMs.time_since_epoch().count();
+	TimePoint timeCurrent = getCurrentTime();
 
-	auto deltaTimeDuration = std::chrono::duration<float>(deltaTime);
+	auto deltaTimeInMs = timeCurrent - timePrevious;
 
-	_time += std::chrono::duration_cast<std::chrono::milliseconds>(delta);
+	timePrevious = timeCurrent;
+
+	_time += std::chrono::duration_cast<std::chrono::milliseconds>(deltaTimeInMs);
 }
 
 
