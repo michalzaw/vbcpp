@@ -23,103 +23,19 @@ class TransitSystem
         float _distanceToCurrentBusStop;
 
     public:
-        TransitSystem()
-        {
-            _currentBusStop = NULL;
-            _distanceToCurrentBusStop = 0.0f;
-        }
+        TransitSystem();
+        ~TransitSystem();
 
-        ~TransitSystem()
-        {
-            for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
-            {
-                delete *i;
-            }
-        }
+        BusStopComponent* addBusStopComponent(const std::string& name);
 
-        BusStopComponent* addBusStopComponent(std::string name)
-        {
-            BusStopComponent* busStop = new BusStopComponent(name);
-            busStop->setNumberOfPassengers(rand() % MAX_NUMBER_OF_PASSENGERS);
+        void removeBusStop(BusStopComponent* busStop);
 
-            _busStops.push_back(busStop);
+        inline BusStopComponent* getCurrentBusStop() { return _currentBusStop; }
+        inline float getDistanceToCurrentBusStop() { return _distanceToCurrentBusStop; }
+        inline BusStopComponent* getBusStop(int index) { return _busStops[index]; }
+        inline int getBusStopsCount() { return _busStops.size(); }
 
-            return busStop;
-        }
-
-        void removeBusStop(BusStopComponent* busStop)
-        {
-            for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
-            {
-                if (*i == busStop)
-                {
-                    i = _busStops.erase(i);
-
-                    delete busStop;
-
-                    return;
-                }
-            }
-        }
-
-        BusStopComponent* getCurrentBusStop()
-        {
-            return _currentBusStop;
-        }
-
-        float getDistanceToCurrentBusStop()
-        {
-            return _distanceToCurrentBusStop;
-        }
-
-        BusStopComponent* getBusStop(int index)
-        {
-            return _busStops[index];
-        }
-
-        int getBusStopsCount()
-        {
-            return _busStops.size();
-        }
-
-        void update(float deltaTime, Bus* bus)
-        {
-            BusStopComponent* nearestBusStop = NULL;
-            float minDistance = FLT_MAX;
-            for (int i = 0; i < _busStops.size(); ++i)
-            {
-                float distance = glm::length(bus->getSceneObject()->getPosition() - _busStops[i]->getSceneObject()->getPosition());
-                if (distance < minDistance)
-                {
-                    minDistance = distance;
-                    nearestBusStop = _busStops[i];
-                }
-
-                if (distance < 50.0f && !_busStops[i]->getAnnouncementIsPlay())
-                {
-                    bus->getAnnouncementSource()->setSound(_busStops[i]->getAnnouncementSound());
-                    bus->getAnnouncementSource()->play();
-
-                    _busStops[i]->setAnnouncementIsPlay(true);
-                }
-            }
-
-            if (minDistance < MIN_DISTANCE_TO_BUS_STOP)
-            {
-                _distanceToCurrentBusStop = minDistance;
-
-                if (_currentBusStop != NULL && _currentBusStop != nearestBusStop)
-                {
-                    _currentBusStop->_time = 0.0f;
-                }
-                _currentBusStop = nearestBusStop;
-                _currentBusStop->onTrigger(deltaTime, bus);
-            }
-            else
-            {
-                _currentBusStop = NULL;
-            }
-        }
+        void update(float deltaTime, Bus* bus);
 
 };
 
