@@ -10,7 +10,7 @@
 #include "../../../Game/AI/StopComponent.h"
 #include "../../../Game/AI/TrafficLightsComponent.h"
 #include "../../../Game/BusStartPoint.h"
-#include "../../../Game/BusStopComponent.h"
+#include "../../../Game/Transit/BusStopComponent.h"
 #include "../../../Game/CameraControlComponent.h"
 #include "../../../Graphics/BezierCurve.h"
 #include "../../../Graphics/CameraStatic.hpp"

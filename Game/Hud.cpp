@@ -3,7 +3,7 @@
 #include <iomanip>
 
 #include "../Bus/Bus.h"
-#include "../Game/BusStopSystem.h"
+#include "../Game/Transit/TransitSystem.h"
 #include "../Game/GameClock.h"
 
 #include "../Scene/SceneManager.h"
@@ -154,11 +154,11 @@ void Hud::update(int fps)
 	_labelTime->setText(_gameClock->toString());
 
 	// todo: graphicsManager refactor
-	BusStopSystem* busStopSystem = _bus->getSceneObject()->getSceneManager()->getBusStopSystem();
-	if (busStopSystem->getCurrentBusStop() != NULL)
+	TransitSystem* transitSystem = _bus->getSceneObject()->getSceneManager()->getTransitSystem();
+	if (transitSystem->getCurrentBusStop() != NULL)
 	{
-		_labelBusStop->setText(busStopSystem->getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem->getDistanceToCurrentBusStop()) + "m)");
-		_labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem->getCurrentBusStop()->getNumberOfPassengers()));
+		_labelBusStop->setText(transitSystem->getCurrentBusStop()->getName() + " (" + toString((int)transitSystem->getDistanceToCurrentBusStop()) + "m)");
+		_labelBusStop2->setText("Liczba pasazerow: " + toString(transitSystem->getCurrentBusStop()->getNumberOfPassengers()));
 	}
 	else
 	{

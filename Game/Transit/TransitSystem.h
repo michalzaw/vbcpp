@@ -1,5 +1,5 @@
-#ifndef BUSSTOPSYSTEM_H_INCLUDED
-#define BUSSTOPSYSTEM_H_INCLUDED
+#ifndef TRANSITSYSTEM_H_INCLUDED
+#define TRANSITSYSTEM_H_INCLUDED
 
 
 #include <vector>
@@ -8,10 +8,10 @@
 
 #include "BusStopComponent.h"
 
-#include "../Bus/Bus.h"
+#include "../../Bus/Bus.h"
 
 
-class BusStopSystem
+class TransitSystem
 {
     private:
         static const int MAX_NUMBER_OF_PASSENGERS = 30;
@@ -23,13 +23,13 @@ class BusStopSystem
         float _distanceToCurrentBusStop;
 
     public:
-        BusStopSystem()
+        TransitSystem()
         {
             _currentBusStop = NULL;
             _distanceToCurrentBusStop = 0.0f;
         }
 
-        ~BusStopSystem()
+        ~TransitSystem()
         {
             for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
             {
@@ -124,4 +124,4 @@ class BusStopSystem
 };
 
 
-#endif // BUSSTOPSYSTEM_H_INCLUDED
+#endif // TRANSITSYSTEM_H_INCLUDED

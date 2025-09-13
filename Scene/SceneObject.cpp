@@ -88,7 +88,7 @@ SceneObject::~SceneObject()
                 break;
 
             case CT_BUS_STOP:
-                _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
+                _sceneManager->getTransitSystem()->removeBusStop(static_cast<BusStopComponent*>(*i));
                 break;
 
             case CT_ENVIRONMENT_CAPTURE_COMPONENT:
@@ -393,7 +393,7 @@ void SceneObject::removeComponent(Component* component)
                     break;
 
                 case CT_BUS_STOP:
-                    _sceneManager->getBusStopSystem()->removeBusStop(static_cast<BusStopComponent*>(component));
+                    _sceneManager->getTransitSystem()->removeBusStop(static_cast<BusStopComponent*>(component));
                     break;
 
                 case CT_ENVIRONMENT_CAPTURE_COMPONENT:

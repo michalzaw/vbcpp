@@ -5,16 +5,16 @@
 #include <string>
 #include <cmath>
 
-#include "../Scene/Component.h"
+#include "../../Scene/Component.h"
 
-#include "../Bus/Bus.h"
+#include "../../Bus/Bus.h"
 
 
 class BusStopComponent : public Component
 {
     VBCPP_COMPONENT(BusStopComponent, CT_BUS_STOP)
 
-    friend class BusStopSystem;
+    friend class TransitSystem;
 
     private:
         static const int MAX_NUMBER_OF_PASSENGERS = 30;

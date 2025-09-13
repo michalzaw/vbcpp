@@ -476,7 +476,7 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 
 	_sceneManager->getScriptingManager()->update(deltaTime);
 
-	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
+	_sceneManager->getTransitSystem()->update(deltaTime, _activeBus);
 
 	_sceneManager->getGameLogicSystem()->update(deltaTime);
 }

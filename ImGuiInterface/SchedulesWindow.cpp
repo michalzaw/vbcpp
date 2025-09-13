@@ -1,6 +1,6 @@
 #include "SchedulesWindow.h"
 
-#include "../Game/BusStopSystem.h"
+#include "../Game/Transit/TransitSystem.h"
 #include "../Game/GameLogicSystem.h"
 
 #include "../Game/Transit/Schedule.h"
@@ -19,10 +19,10 @@ SchedulesWindow::SchedulesWindow(SceneManager* sceneManager, std::vector<Bus*>* 
 
 BusStopComponent* SchedulesWindow::findBusStopById(int id)
 {
-	BusStopSystem* busStopSystem = _sceneManager->getBusStopSystem();
-	for (int i = 0; i < busStopSystem->getBusStopsCount(); ++i)
+	TransitSystem* transitSystem = _sceneManager->getTransitSystem();
+	for (int i = 0; i < transitSystem->getBusStopsCount(); ++i)
 	{
-		BusStopComponent* busStop = busStopSystem->getBusStop(i);
+		BusStopComponent* busStop = transitSystem->getBusStop(i);
 		if (busStop->getId() == id)
 		{
 			return busStop;

@@ -9,11 +9,14 @@
 #include "AI/StopComponent.h"
 #include "AI/TrafficLightsComponent.h"
 #include "BusStartPoint.h"
-#include "BusStopComponent.h"
 #include "CameraControlComponent.h"
 #include "GameClock.h"
 
 #include "../Graphics/CameraFPS.hpp"
+
+#include "../Scene/SceneObject.h"
+
+#include "../Utils/Logger.h"
 
 
 GameLogicSystem::GameLogicSystem()
@@ -119,16 +122,6 @@ BusStartPoint* GameLogicSystem::addBusStartPoint(const std::string& name)
 
 	return component;
 }
-
-
-/*BusStopComponent* GameLogicSystem::addBusStopComponent(std::string name)
-{
-	BusStopComponent* busStop = new BusStopComponent(name);
-
-	_busStops.push_back(busStop);
-
-	return busStop;
-}*/
 
 
 /*void GameLogicSystem::removeBus(Bus* bus)
@@ -259,22 +252,6 @@ void GameLogicSystem::removeBusStartPoint(BusStartPoint* component)
 }
 
 
-/*void GameLogicSystem::removeBusStop(BusStopComponent* busStop)
-{
-	for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
-	{
-		if (*i == busStop)
-		{
-			i = _busStops.erase(i);
-
-			delete busStop;
-
-			return;
-		}
-	}
-}*/
-
-
 void GameLogicSystem::setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound/* = true*/)
 {
 	auto path2 = std::find_if(_pathComponents.begin(), _pathComponents.end(), [&path2Name](PathComponent* path)
@@ -360,11 +337,6 @@ void GameLogicSystem::update(float deltaTime)
 		}
 	}
 
-	/*for (BusStopComponent* component : _busStops)
-	{
-		component->update(deltaTime);
-	}*/
-
 	_gameClock->update(deltaTime);
 }
 
@@ -426,11 +398,4 @@ void GameLogicSystem::destroy()
 	}
 
 	_busStartPoints.clear();
-
-	/*for (std::vector<BusStopComponent*>::iterator i = _busStops.begin(); i != _busStops.end(); ++i)
-	{
-		delete* i;
-	}
-
-	_busStops.clear();*/
 }

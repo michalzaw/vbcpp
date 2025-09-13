@@ -46,8 +46,6 @@ class GameLogicSystem final
 		std::vector<StopComponent*> _stopComponents;
 		std::vector<TrafficLightsComponent*> _trafficLightsComponents;
 		std::vector<BusStartPoint*> _busStartPoints; // todo: dodawac defaultowy Start point po wczytaniu sceny jesli vector jest pusty
-		// todo: Przeniesc obsluge przystankow do tego systemu
-		//std::vector<BusStopComponent*> _busStops;
 
 		std::vector<PendingPathConnection> _pendingPathConnections;
 
@@ -68,7 +66,6 @@ class GameLogicSystem final
 														  const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
 														  const glm::vec3& stopPointPosition, const TrafficLightsState initState);
 		BusStartPoint* addBusStartPoint(const std::string& name);
-		//BusStopComponent* addBusStopComponent(std::string name);
 
 		//void removeBus(Bus* bus);
 		void removeCameraControlComponent(CameraControlComponent* component);
@@ -78,7 +75,6 @@ class GameLogicSystem final
 		void removeStopComponent(StopComponent* component);
 		void removeTrafficLightsComponent(TrafficLightsComponent* component);
 		void removeBusStartPoint(BusStartPoint* component);
-		//void removeBusStop(BusStopComponent* busStop);
 
 		void setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound = true);
 		void createPendingPathConnections();

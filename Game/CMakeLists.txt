@@ -5,11 +5,13 @@ set (GAME_SOURCES
 	Game/AI/PathComponent.cpp
 	Game/AI/StopComponent.cpp
 	Game/AI/TrafficLightsComponent.cpp
+	Game/MainGameScene/MapView.cpp
+	Game/MainGameScene/MirrorImage.cpp
 	Game/Transit/BusRoutesLoader.cpp
+    Game/Transit/BusStopComponent.cpp
+	Game/Transit/TransitSystem.cpp
 	Game/Transit/ScheduleLoader.cpp
 	Game/BusStartPoint.cpp
-    Game/BusStopComponent.cpp
-	Game/BusStopSystem.cpp
 	Game/CameraControlComponent.cpp
 	Game/GameClock.cpp
 	Game/GameConfig.cpp
@@ -22,8 +24,6 @@ set (GAME_SOURCES
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp
 	Game/TestScene.cpp
-	Game/MainGameScene/MapView.cpp
-	Game/MainGameScene/MirrorImage.cpp
 )
 
 set (GAME_HEADERS 
@@ -33,13 +33,15 @@ set (GAME_HEADERS
 	Game/AI/PathComponent.h
 	Game/AI/StopComponent.h
 	Game/AI/TrafficLightsComponent.h
+	Game/MainGameScene/MapView.h
+	Game/MainGameScene/MirrorImage.h
 	Game/Transit/BusRoutes.h
 	Game/Transit/BusRoutesLoader.h
+	Game/Transit/BusStopComponent.h
+	Game/Transit/TransitSystem.h
 	Game/Transit/Schedule.h
 	Game/Transit/ScheduleLoader.h
 	Game/BusStartPoint.h
-	Game/BusStopComponent.h
-	Game/BusStopSystem.h
 	Game/CameraControlComponent.h
 	Game/Directories.h
 	Game/GameClock.h
@@ -54,8 +56,6 @@ set (GAME_HEADERS
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h
 	Game/TestScene.h
-	Game/MainGameScene/MapView.h
-	Game/MainGameScene/MirrorImage.h
     
 )
 

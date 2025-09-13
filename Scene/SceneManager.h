@@ -12,7 +12,7 @@
 #include "SoundManager.h"
 #include "SceneObject.h"
 
-#include "../Game/BusStopSystem.h"
+#include "../Game/Transit/TransitSystem.h"
 
 
 class ScriptingManager;
@@ -30,7 +30,7 @@ class SceneManager
         SoundManager*       _soundManager;
         ScriptingManager*   _scriptingManager;
         GameLogicSystem*    _gameLogicSystem;
-        BusStopSystem*      _busStopSystem;
+        TransitSystem*      _transitSystem;
 
         std::list<SceneObject*> _sceneObjects;
         std::unordered_map<ObjectId, SceneObject*> _sceneObjectsMap;
@@ -48,7 +48,7 @@ class SceneManager
         inline SoundManager*       getSoundManager() { return _soundManager; };
         inline ScriptingManager*   getScriptingManager() { return _scriptingManager; }
         inline GameLogicSystem*    getGameLogicSystem() { return _gameLogicSystem; };
-        inline BusStopSystem*      getBusStopSystem() { return _busStopSystem; };
+        inline TransitSystem*      getTransitSystem() { return _transitSystem; };
 
 
         SceneObject*    addSceneObject(const std::string& name, ObjectId id = 0u, RObject* objectDefinition = nullptr);
