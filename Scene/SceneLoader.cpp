@@ -7,6 +7,8 @@
 #include "../Game/AI/PathComponent.h"
 #include "../Game/AI/StopComponent.h"
 #include "../Game/AI/TrafficLightsComponent.h"
+#include "../Game/Transit/BusRoutesLoader.h"
+#include "../Game/Transit/ScheduleLoader.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
@@ -961,6 +963,26 @@ RoadObject* SceneLoader::findRoadObjectBySceneObjectName(const std::string& name
 }
 
 
+void SceneLoader::loadBusRoutes(tinyxml2::XMLElement* routesElement)
+{
+	std::string fileName = XmlUtils::getAttributeString(routesElement, "file");
+
+	BusRoutes* routes = BusRoutesLoader::loadRoutes(_dirPath + fileName);
+
+	_sceneManager->getTransitSystem()->setRoutes(routes);
+}
+
+
+void SceneLoader::loadSchedules(tinyxml2::XMLElement* schedulesElement)
+{
+	std::string fileName = XmlUtils::getAttributeString(schedulesElement, "file");
+
+	Schedule* schedule = ScheduleLoader::loadSchedule(_dirPath + fileName);
+
+	_sceneManager->getTransitSystem()->setSchedule(schedule);
+}
+
+
 void SceneLoader::loadMap(std::string name)
 {
 	_dirPath = GameDirectories::MAPS + name + "/";
@@ -1019,6 +1041,14 @@ void SceneLoader::loadMap(std::string name)
 
 	// todo: auto call after scene creation
 	_sceneManager->getGameLogicSystem()->createPendingPathConnections();
+	
+	XMLElement* routesElement = scnElement->FirstChildElement("BusRoutes");
+	if (routesElement)
+		loadBusRoutes(routesElement);
+
+	XMLElement* schedulesElement = scnElement->FirstChildElement("Schedules");
+	if (schedulesElement)
+		loadSchedules(schedulesElement);
 }
 
 

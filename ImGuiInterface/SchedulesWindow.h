@@ -5,7 +5,6 @@
 #include "ImGuiWindow.h"
 
 
-struct Schedule;
 class BusStopComponent;
 
 
@@ -13,7 +12,6 @@ class SchedulesWindow : public ImGuiWindow
 {
 	private:
 		std::vector<Bus*>* _buses;
-		Schedule* _schedules;
 
 		int _selectedLineIndex;
 		int _selectedBrigadeIndex;
@@ -24,7 +22,8 @@ class SchedulesWindow : public ImGuiWindow
 		virtual void drawWindow() override;
 
 	public:
-		SchedulesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, Schedule* schedules, bool isOpen = true);
+		SchedulesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+
 
 };
 

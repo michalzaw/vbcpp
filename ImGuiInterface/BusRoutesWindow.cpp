@@ -7,9 +7,9 @@
 #include "../../Utils/ImGuiUtils.h"
 
 
-BusRoutesWindow::BusRoutesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, BusRoutes* routes, bool isOpen)
+BusRoutesWindow::BusRoutesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen)
 	: ImGuiWindow(sceneManager, isOpen),
-	_buses(buses), _routes(routes)
+	_buses(buses)
 {
 
 }
@@ -23,13 +23,15 @@ DisplayTextType from(BusRouteDisplayType type)
 
 void BusRoutesWindow::drawWindow()
 {
+	BusRoutes* availabelRoutes = _sceneManager->getTransitSystem()->getRoutes();
+
 	if (ImGui::Begin("Routes", &_isOpen))
 	{
 		static std::string selectedLineValue = " ";
 		static std::string selectedRouteValue = " ";
 
 		std::vector<std::string> lines;
-		for (const auto& pair : _routes->lines) {
+		for (const auto& pair : availabelRoutes->lines) {
 			lines.push_back(pair.first);
 		}
 
@@ -54,7 +56,7 @@ void BusRoutesWindow::drawWindow()
 		std::vector<std::string> routes;
 		if (selectedLineValue != " ")
 		{
-			for (const auto& pair : _routes->lines[selectedLineValue].routes) {
+			for (const auto& pair : availabelRoutes->lines[selectedLineValue].routes) {
 				routes.push_back(pair.first);
 			}
 		}
@@ -77,7 +79,7 @@ void BusRoutesWindow::drawWindow()
 
 		if (selectedLineValue != " " && selectedRouteValue != " ")
 		{
-			BusLine& selectedLine = _routes->lines[selectedLineValue];
+			BusLine& selectedLine = availabelRoutes->lines[selectedLineValue];
 			BusRoute& selectedRoute = selectedLine.routes[selectedRouteValue];
 
 			ImGui::Text("Line: %s", selectedLine.number.c_str());

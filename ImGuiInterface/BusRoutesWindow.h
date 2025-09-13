@@ -5,19 +5,16 @@
 #include "ImGuiWindow.h"
 
 
-struct BusRoutes;
-
-
 class BusRoutesWindow : public ImGuiWindow
 {
 	private:
 		std::vector<Bus*>* _buses;
-		BusRoutes* _routes;
 
 		virtual void drawWindow() override;
 
 	public:
-		BusRoutesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, BusRoutes* routes, bool isOpen = true);
+		BusRoutesWindow(SceneManager* sceneManager, std::vector<Bus*>* buses, bool isOpen = true);
+
 };
 
 

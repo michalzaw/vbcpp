@@ -11,6 +11,10 @@
 #include "../../Bus/Bus.h"
 
 
+struct BusRoutes;
+struct Schedule;
+
+
 class TransitSystem
 {
     private:
@@ -21,6 +25,9 @@ class TransitSystem
 
         BusStopComponent* _currentBusStop;
         float _distanceToCurrentBusStop;
+
+        BusRoutes* _routes;
+        Schedule* _schedule;
 
     public:
         TransitSystem();
@@ -34,6 +41,12 @@ class TransitSystem
         inline float getDistanceToCurrentBusStop() { return _distanceToCurrentBusStop; }
         inline BusStopComponent* getBusStop(int index) { return _busStops[index]; }
         inline int getBusStopsCount() { return _busStops.size(); }
+
+        void setRoutes(BusRoutes* routes);
+        void setSchedule(Schedule* schedule);
+
+        inline BusRoutes* getRoutes() { return _routes; }
+        inline Schedule* getSchedule() { return _schedule; }
 
         void update(float deltaTime, Bus* bus);
 

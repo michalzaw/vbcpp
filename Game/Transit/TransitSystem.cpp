@@ -1,10 +1,14 @@
 #include "TransitSystem.h"
 
+#include "BusRoutes.h"
+#include "Schedule.h"
+
 
 TransitSystem::TransitSystem()
     : _currentBusStop(nullptr), _distanceToCurrentBusStop(0.0f)
 {
-
+    _routes = new BusRoutes;
+    _schedule = new Schedule;
 }
 
 
@@ -14,6 +18,9 @@ TransitSystem::~TransitSystem()
     {
         delete* i;
     }
+
+    delete _routes;
+    delete _schedule;
 }
 
 
@@ -41,6 +48,28 @@ void TransitSystem::removeBusStop(BusStopComponent* busStop)
             return;
         }
     }
+}
+
+
+void TransitSystem::setRoutes(BusRoutes* routes)
+{
+    if (_routes != nullptr)
+    {
+        delete _routes;
+    }
+
+    _routes = routes;
+}
+
+
+void TransitSystem::setSchedule(Schedule* schedule)
+{
+    if (_schedule != nullptr)
+    {
+        delete _schedule;
+    }
+
+    _schedule = schedule;
 }
 
 
