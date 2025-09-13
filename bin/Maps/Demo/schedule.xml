@@ -7,37 +7,37 @@
 	<Line id="101 BIS" number="101 BIS">
 		<Brigade id="1" name="">
 			<Route direction="Plac Mlynarza" startTime="08:00:00">
-				<Stop id="1" time="08:03:00" />
-				<Stop id="2" time="08:05:00" />
-				<Stop id="3" time="08:08:00" />
-				<Stop id="4" time="08:10:00" />
-				<Stop id="5" time="08:15:00" />
+				<Stop id="0" time="08:03:00" />
+				<Stop id="1" time="08:05:00" />
+				<Stop id="2" time="08:08:00" />
+				<Stop id="3" time="08:10:00" />
+				<Stop id="4" time="08:15:00" />
 			</Route>
 
 			<Route direction="Plac Mlynarza" startTime="08:30:00">
-				<Stop id="1" time="08:33:00" />
-				<Stop id="2" time="08:35:00" />
-				<Stop id="3" time="08:38:00" />
-				<Stop id="4" time="08:40:00" />
-				<Stop id="5" time="08:45:00" />
+				<Stop id="0" time="08:33:00" />
+				<Stop id="1" time="08:35:00" />
+				<Stop id="2" time="08:38:00" />
+				<Stop id="3" time="08:40:00" />
+				<Stop id="4" time="08:45:00" />
 			</Route>
 		</Brigade>
 
 		<Brigade id="2" name="">
 			<Route direction="Zajezdnia Maczno" startTime="08:00:00">
-				<Stop id="5" time="08:03:00" />
-				<Stop id="4" time="08:08:00" />
-				<Stop id="3" time="08:10:00" />
-				<Stop id="2" time="08:13:00" />
-				<Stop id="1" time="08:15:00" />
+				<Stop id="4" time="08:03:00" />
+				<Stop id="3" time="08:08:00" />
+				<Stop id="2" time="08:10:00" />
+				<Stop id="1" time="08:13:00" />
+				<Stop id="0" time="08:15:00" />
 			</Route>
 
 			<Route direction="Zajezdnia Maczno" startTime="08:30:00">
-				<Stop id="5" time="08:33:00" />
-				<Stop id="4" time="08:38:00" />
-				<Stop id="3" time="08:40:00" />
-				<Stop id="2" time="08:43:00" />
-				<Stop id="1" time="08:45:00" />
+				<Stop id="4" time="08:33:00" />
+				<Stop id="3" time="08:38:00" />
+				<Stop id="2" time="08:40:00" />
+				<Stop id="1" time="08:43:00" />
+				<Stop id="0" time="08:45:00" />
 			</Route>
 		</Brigade>
 	</Line>

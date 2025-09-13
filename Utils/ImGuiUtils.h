@@ -62,6 +62,36 @@ namespace ImGuiUtils
 			outSelectedItemIndex += 1;
 		}
 	}
+
+	template<typename TYPE>
+	void convertVectorToComboData(const std::vector<TYPE>& items, std::string& outItemsString, bool addEmptyElement = true)
+	{
+		if (addEmptyElement)
+		{
+			outItemsString += " ";
+			outItemsString += '\0';
+		}
+
+		for (int i = 0; i < items.size(); ++i)
+		{
+			outItemsString += Strings::toString(items[i]) + '\0';
+		}
+	}
+
+	template<typename TYPE>
+	void convertVectorToComboData(const TYPE* items, unsigned int itemsCount, std::string& outItemsString, bool addEmptyElement = true)
+	{
+		if (addEmptyElement)
+		{
+			outItemsString += " ";
+			outItemsString += '\0';
+		}
+
+		for (int i = 0; i < itemsCount; ++i)
+		{
+			outItemsString += Strings::toString(items[i]) + '\0';
+		}
+	}
 }
 
 

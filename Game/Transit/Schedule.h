@@ -19,6 +19,7 @@ struct ScheduleStop final
 	{
 
 	}
+
 };
 
 
@@ -34,6 +35,12 @@ struct ScheduleRoute final
 	{
 
 	}
+
+	std::string toString() const
+	{
+		return direction + " [" + startTime.toString() +"]";
+	}
+
 };
 
 
@@ -49,6 +56,12 @@ struct ScheduleBrigade final
 	{
 
 	}
+
+	std::string toString() const
+	{
+		return id + " [" + name + "]";
+	}
+
 };
 
 
@@ -64,6 +77,12 @@ struct ScheduleLine final
 	{
 
 	}
+
+	std::string toString() const
+	{
+		return id + " [" + number + "]";
+	}
+
 };
 
 

@@ -8,6 +8,7 @@ set (IMGUI_INTERFACE_SOURCES
 	ImGuiInterface/MenuBar.cpp
 	ImGuiInterface/MenuSelectBusInterfaceWindow.cpp
 	ImGuiInterface/PhysicsDebuggerWindow.cpp
+	ImGuiInterface/SchedulesWindow.cpp
 	ImGuiInterface/VariablesWindow.cpp
 )
 
@@ -22,6 +23,7 @@ set (IMGUI_INTERFACE_HEADERS
 	ImGuiInterface/MenuBar.h
 	ImGuiInterface/MenuSelectBusInterfaceWindow.h
 	ImGuiInterface/PhysicsDebuggerWindow.h
+	ImGuiInterface/SchedulesWindow.h
 	ImGuiInterface/VariablesWindow.h
 )
 

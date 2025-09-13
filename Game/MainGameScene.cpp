@@ -21,6 +21,7 @@
 #include "../ImGuiInterface/BusRoutesWindow.h"
 #include "../ImGuiInterface/ColorsWindow.h"
 #include "../ImGuiInterface/PhysicsDebuggerWindow.h"
+#include "../ImGuiInterface/SchedulesWindow.h"
 #include "../ImGuiInterface/VariablesWindow.h"
 #include "../ImGuiInterface/MenuBar.h"
 
@@ -404,8 +405,10 @@ void MainGameScene::initImGuiInterface()
 
 	// windows
 	ImGuiWindow* busRoutesWindow = new BusRoutesWindow(_sceneManager, &_buses, routes);
+	ImGuiWindow* schedulesWindow = new SchedulesWindow(_sceneManager, &_buses, schedule);
 
 	_imGuiInterface->addWindow(busRoutesWindow);
+	_imGuiInterface->addWindow(schedulesWindow);
 
 	if (GameConfig::getInstance().developmentMode)
 	{
@@ -424,6 +427,7 @@ void MainGameScene::initImGuiInterface()
 		// menu
 		std::vector<MenuItem> windowMenuItems;
 		windowMenuItems.push_back(MenuItem("Bus routes", busRoutesWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Bus schedules", schedulesWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Bus line and direction", busLineAndDirectionWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Colors", colorsWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Physics debugger", physicsDebuggerWindow->getOpenFlagPointer()));
