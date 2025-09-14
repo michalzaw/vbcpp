@@ -192,8 +192,8 @@ RStaticModel* TerrainLoader::loadTerrainFromHeightmap(const char* heightmapFilen
 
 
             terrainVertices[z * width + x].position = vertexPosition;
-            terrainVertices[z * width + x].texCoord = glm::vec2(static_cast<float>(x) / width * material->scale.x + material->offset.x,
-                                                                static_cast<float>(z) / height * material->scale.y + material->offset.y);
+            terrainVertices[z * width + x].texCoord = glm::vec2(static_cast<float>(x) * material->scale.x + material->offset.x,
+                                                                static_cast<float>(z) * material->scale.y + material->offset.y);
             terrainVertices[z * width + x].normal = glm::vec3(0.0f, 0.0f, 0.0f);
             terrainVertices[z * width + x].tangent = glm::vec3(0.0f, 0.0f, 0.0f);
             terrainVertices[z * width + x].bitangent = glm::vec3(0.0f, 0.0f, 0.0f);
