@@ -40,6 +40,11 @@ const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 finalBonesMatrices[MAX_BONES];
 #endif
 
+#ifdef TERRAIN
+uniform vec2 textureScale;
+uniform vec2 textureOffset;
+#endif
+
 #ifdef ANIMATED
 mat4 calculateVertexTransform()
 {
@@ -83,6 +88,10 @@ void main()
 
 	PositionVert = (ModelMatrix * totalPosition).xyz;
 	TexCoord = VertexUV;
+
+#ifdef TERRAIN
+	TexCoord = PositionVert.xz * textureScale + textureOffset;
+#endif
 
 //#ifdef SOLID
 	mat4 finalNormalMatrix = NormalMatrix;

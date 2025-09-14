@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Materials>
-	<Material type="solid" name="terrain" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="0,0,0,1" diffuse_texture="grassTexture.jpg" normalmap_texture="" shininess="96" transparency="0" offset="0,0" scale="400,400"/>
+	<Material type="terrain" name="terrain" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="0,0,0,1" diffuse_texture="grassTexture.jpg" normalmap_texture="" shininess="96" transparency="0" offset="0,0" scale="0.390625,0.390625"/>
 	<Material type="normalmapping" name="asfalt" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="1,1,1,1" diffuse_texture="road.jpg" normalmap_texture="road_n.jpg" shininess="96" transparency="0" offset="0,0" scale="1,0.25"/>
 	<Material type="normalmapping" name="kostka" ambient="0.8,0.8,0.8,1" diffuse="0.8,0.8,0.8,1" specular="0,0,0,1" diffuse_texture="kostka.bmp" normalmap_texture="kostka_n.bmp" shininess="96" transparency="0" offset="0,0" scale="1,1"/>
 

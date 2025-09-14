@@ -289,6 +289,8 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
 	_uniformsNames[UNIFORM_EMISSIVE_TEXTURE] = "emissiveTexture";
     _uniformsNames[UNIFORM_OBJECT_ID] = "objectId";
+    _uniformsNames[UNIFORM_TEX_SCALE] = "textureScale";
+    _uniformsNames[UNIFORM_TEX_OFFSET] = "textureOffset";
 
 	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
 	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
@@ -1131,6 +1133,14 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
 
+    // TERRAIN_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("TERRAIN");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[TERRAIN_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // DECAL_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -1294,6 +1304,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[TERRAIN_MATERIAL] = SOLID_MATERIAL;
     _shaderListForMirrorRendering[DECAL_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
@@ -2310,6 +2321,11 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(shader->getUniformLocation("depthMap"), _depthFramebuffer->getTexture(0));
             shader->setUniform(shader->getUniformLocation("viewProjMatrixInv"), viewProjMatrixInv);
             shader->setUniform(shader->getUniformLocation("modelMatrixInv"), modelMatrixInv);
+        }
+        if (material->shader == TERRAIN_MATERIAL)
+        {
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_TEX_SCALE], material->scale);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_TEX_OFFSET], material->offset);
         }
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_1], color1);
