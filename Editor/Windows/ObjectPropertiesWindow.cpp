@@ -15,6 +15,7 @@
 #include "../Tools/RoadManipulator.h"
 #include "../FileDialogs.h"
 #include "../Utils/AIPathGenerator.h"
+#include "../Utils/FoliageGenerator.h"
 
 #include "../../Game/AI/AIAgent.h"
 #include "../../Game/AI/AIAgentVehicle.h"
@@ -396,24 +397,6 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 		if (ImGui::Button("Generate AI paths", ImVec2(-1.0f, 0.0f)))
 		{
 			AIPathGenerator::generateAIPaths(roadComponent, vbEditor::_sceneManager);
-		}
-	}
-}
-
-
-void showShapePolygonComponentDetails(ShapePolygonComponent* component)
-{
-	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::Text("Number of points: %d", component->getPoints().size());
-
-		if (ImGui::Button("Generate Triangle Mesh"))
-		{
-			component->buildAndCreateRenderObject(true);
-		}
-		if (ImGui::Button("Generate Triangle Mesh (without mesh mender)"))
-		{
-			component->buildAndCreateRenderObject(false);
 		}
 	}
 }
@@ -1688,6 +1671,88 @@ void showScriptComponentDetails(ScriptComponent* component)
 		COMPONENT_PROPERTY_EDIT_BEGIN(ScriptFile, "Script file")
 		ImGui::Text(component->getScriptFile()->getPath().c_str());
 		COMPONENT_PROPERTY_EDIT_END
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showShapePolygonComponentDetails(ShapePolygonComponent* component)
+{
+	if (ImGui::CollapsingHeader("Polygon Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::Text("Number of points: %d", component->getPoints().size());
+
+		if (ImGui::Button("Generate Triangle Mesh"))
+		{
+			component->buildAndCreateRenderObject(true);
+		}
+		if (ImGui::Button("Generate Triangle Mesh (without mesh mender)"))
+		{
+			component->buildAndCreateRenderObject(false);
+		}
+
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RoadIntersectionComponentDetails");
+
+		if (newNode("Random objects", ImGuiTreeNodeFlags_DefaultOpen, ""))
+		{
+			static float minDistance = 5.0f;
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(maxDistanceToCreateConnection, "Min distance")
+			{
+				ImGui::DragFloat("", &minDistance, 1.0f, 1, 30);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			/*COMPONENT_PROPERTY_EDIT_BEGIN(pathQuality, "Path quality")
+			{
+				ImGui::DragInt("", &pathQuality, 1.0f, 4, 100);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(innerPathCurveFactor, "Inner path curve factor")
+			{
+				ImGui::DragFloat("", &innerPathCurveFactor, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(outerPathCurveFactor, "Outer path curve factor")
+			{
+				ImGui::DragFloat("", &outerPathCurveFactor, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnStraightPaths, "Speed on straight paths")
+			{
+				ImGui::DragFloat("", &speedOnStraightPaths, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END
+
+			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnCurvedPaths, "Sped on curved paths")
+			{
+				ImGui::DragFloat("", &speedOnCurvedPaths, 1.0f, 1, 10);
+			}
+			COMPONENT_PROPERTY_EDIT_END*/
+
+			ImGui::Columns(1);
+
+			if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
+			{
+				FoliageGenerator::FoliageGeneratorData generatorData = { "trees/spruce", minDistance };
+				FoliageGenerator::generateFoliage(component->getPoints(), generatorData, component->getSceneObject(), vbEditor::_sceneManager);
+			}
+
+			ImGui::Columns(2);
+
+			ImGui::TreePop(); // newNode
+		}
+		ImGui::PopID(); // newNode
 
 		ImGui::PopID();
 		ImGui::Columns(1);

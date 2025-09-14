@@ -15,6 +15,7 @@
 #include "../Graphics/CrossroadComponent.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
+#include "../Graphics/ShapePolygonComponent.h"
 
 #include "../Utils/Logger.h"
 #include "../Utils/RObject.h"
@@ -474,6 +475,24 @@ void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElem
 }
 
 
+void SceneLoader::loadShapePolygonComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	ShapePolygonComponent* shapePolygon = new ShapePolygonComponent;
+
+	XMLElement* pointElement = componentElement->FirstChildElement("Point");
+	while (pointElement != nullptr)
+	{
+		glm::vec3 point = XmlUtils::getAttributeVec3(pointElement, "position");
+
+		shapePolygon->addPoint(point);
+
+		pointElement = pointElement->NextSiblingElement("Point");
+	}
+
+	sceneObject->addComponent(shapePolygon);
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -564,6 +583,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "busStartPoint")
 			{
 				loadBusStartPointComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "polygon")
+			{
+				loadShapePolygonComponent(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");

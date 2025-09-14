@@ -15,6 +15,7 @@
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/RenderObject.h"
+#include "../Graphics/ShapePolygonComponent.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
@@ -293,6 +294,25 @@ void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement,
 }
 
 
+void SceneSaver::saveShapePolygonComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, ShapePolygonComponent* shapePolygonComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "polygon");
+
+	for (const glm::vec3& point : shapePolygonComponent->getPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetAttribute("position", vec3ToString(point).c_str());
+
+		componentElement->InsertEndChild(pointElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -369,6 +389,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (busStartPointComponent)
 	{
 		saveBusStartPointComponent(objectElement, doc, busStartPointComponent);
+	}
+
+	ShapePolygonComponent* shapePolygonComponent = static_cast<ShapePolygonComponent*>(sceneObject->getComponent(CT_SHAPE_POLYGON));
+	if (shapePolygonComponent)
+	{
+		saveShapePolygonComponent(objectElement, doc, shapePolygonComponent);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

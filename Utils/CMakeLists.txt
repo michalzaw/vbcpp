@@ -10,6 +10,7 @@ set (UTILS_SOURCES
 	Utils/InputSystem.cpp
 	Utils/LocalizationSystem.cpp
 	Utils/Logger.cpp
+	Utils/PoissonDiscSampler.cpp
 	Utils/PolygonGenerator.cpp
 	Utils/QuaternionUtils.cpp
 	Utils/RAnimatedModel.cpp
@@ -46,6 +47,7 @@ set (UTILS_HEADERS
 	Utils/LocalizationSystem.h
 	Utils/Logger.h
 	Utils/Math.h
+	Utils/PoissonDiscSampler.h
 	Utils/PolygonGenerator.h
 	Utils/QuaternionUtils.h
 	Utils/RAnimatedModel.h
