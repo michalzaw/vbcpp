@@ -600,6 +600,28 @@ void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderL
 }
 
 
+void Renderer::addInstancedStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
+{
+    glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
+    glm::mat4 n = parentNormalMatrix * modelNode->getNormalMatrix();
+    tempRenderElement.transformMatrix = t;
+    tempRenderElement.normalMatrix = n;
+
+    for (int j = 0; j < modelNode->getMeshesCount(); ++j)
+    {
+        tempRenderElement.mesh = modelNode->getMesh(j);
+        tempRenderElement.material = tempRenderElement.mesh->material;
+        //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
+        renderList.push_back(tempRenderElement);
+    }
+
+    for (int i = 0; i < modelNode->getChildrenCount(); ++i)
+    {
+        addInstancedStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, t, n);
+    }
+}
+
+
 void Renderer::prepareRenderData()
 {
     for (int i = 0; i < _renderDataList.size(); ++i)
@@ -702,6 +724,36 @@ void Renderer::prepareRenderData()
         addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList);
     }
 
+    RenderListElement tempRenderElementInstanced;
+    for (std::list<MultiRenderObject*>::iterator i = _graphicsManager->_multiRenderObjects.begin(); i != _graphicsManager->_multiRenderObjects.end(); ++i)
+    {
+        MultiRenderObject* object = *i;
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < _renderDataList.size(); ++j)
+        {
+            RenderPass renderPass = _renderDataList[j]->renderPass;
+            bool isCastShadows = object->isCastShadows();
+
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) /*&&
+                isObjectInCamera(object, _renderDataList[j]->camera)*/) // todo: culling
+            {
+
+                tempRenderElementInstanced.type = RET_MULTI;
+                tempRenderElementInstanced.model = object->getModel();
+                tempRenderElementInstanced.object = object->getSceneObject();
+                tempRenderElementInstanced.renderObject = object;
+                tempRenderElementInstanced.instancesPositionsVBO = object->getInstancesPositionVBO();
+                tempRenderElementInstanced.instancesCount = object->getInstancesPositions().size();
+
+                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataList[j]->renderList);
+            }
+        }
+    }
+
 
 	RenderObject* sky = _graphicsManager->getSky();
 	if (sky != NULL)
@@ -771,6 +823,36 @@ void Renderer::prepareRenderDataForStaticShadowmaps()
 			}
 		}
 	}
+
+    RenderListElement tempRenderElementInstanced;
+    for (std::list<MultiRenderObject*>::iterator i = _graphicsManager->_multiRenderObjects.begin(); i != _graphicsManager->_multiRenderObjects.end(); ++i)
+    {
+        MultiRenderObject* object = *i;
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < _renderDataListForStaticShadowmapping.size(); ++j)
+        {
+            RenderPass renderPass = _renderDataListForStaticShadowmapping[j]->renderPass;
+            bool isCastShadows = object->isCastShadows();
+
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) /*&&
+                isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera)*/) // todo: culling
+            {
+
+                tempRenderElementInstanced.type = RET_MULTI;
+                tempRenderElementInstanced.model = object->getModel();
+                tempRenderElementInstanced.object = object->getSceneObject();
+                tempRenderElementInstanced.renderObject = object;
+                tempRenderElementInstanced.instancesPositionsVBO = object->getInstancesPositionVBO();
+                tempRenderElementInstanced.instancesCount = object->getInstancesPositions().size();
+
+                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataListForStaticShadowmapping[j]->renderList);
+            }
+        }
+    }
 }
 
 
@@ -1223,6 +1305,12 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("ALPHA_TEST");
     _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
 
+    // SHADOWMAP_ALPHA_TEST_MULTI_SHADER
+    defines.clear();
+    defines.push_back("ALPHA_TEST");
+    defines.push_back("INSTANCING");
+    _shaderList[SHADOWMAP_ALPHA_TEST_MULTI_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
     // SHADOWMAP_ANIMATED_SHADER
     defines.clear();
     defines.push_back("ANIMATED");
@@ -1282,6 +1370,15 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
+
+    // NEW_TREE_2_MATERIAL_MULTI
+    defines.clear();
+    defines.push_back("NORMALMAPPING");
+    defines.push_back("TREE");
+    defines.push_back("INSTANCING");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[NEW_TREE_2_MATERIAL_MULTI] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
 
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
@@ -1790,6 +1887,8 @@ void Renderer::renderDepth(RenderData* renderData)
             shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
         else if (isAnimated)
             shaderType = SHADOWMAP_ANIMATED_SHADER;
+        else if (material->shader == NEW_TREE_2_MATERIAL_MULTI) // todo: dedykowany material
+            shaderType = SHADOWMAP_ALPHA_TEST_MULTI_SHADER;
         else
             shaderType = SHADOWMAP_SHADER;
 
@@ -1807,7 +1906,7 @@ void Renderer::renderDepth(RenderData* renderData)
 				glEnable(GL_CULL_FACE);
 			}
 
-			if (material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
+			if (material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL || material->shader == NEW_TREE_2_MATERIAL_MULTI)
 			{
 				glDisable(GL_CULL_FACE);
 			}
@@ -1828,7 +1927,7 @@ void Renderer::renderDepth(RenderData* renderData)
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)0);
 
-        if (isAlphaTest)
+        if (isAlphaTest || material->shader == NEW_TREE_2_MATERIAL_MULTI)
         {
             glEnableVertexAttribArray(1);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, mesh->vertexSize, (void*)(sizeof(float) * 3));
@@ -1859,10 +1958,28 @@ void Renderer::renderDepth(RenderData* renderData)
         }
 
         mesh->ibo->bind();
-        glDrawElements(model->getPrimitiveType(),
-                       mesh->indicesCount,
-                       GL_UNSIGNED_INT,
-                       (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        if (i->type == RET_SINGLE)
+        {
+            glDrawElements(model->getPrimitiveType(),
+                           mesh->indicesCount,
+                           GL_UNSIGNED_INT,
+                           (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        }
+        else if (i->type == RET_MULTI)
+        {
+            i->instancesPositionsVBO->bind();
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glVertexAttribDivisor(7, 1);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                mesh->indicesCount,
+                GL_UNSIGNED_INT,
+                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                (int)i->instancesCount);
+
+            glDisableVertexAttribArray(7);
+        }
 
         glDisableVertexAttribArray(0);
         if (isAlphaTest)
@@ -1904,7 +2021,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         {
             shader->enable();
 
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL || currentShader == NEW_TREE_2_MATERIAL_MULTI)
             {
                 glEnable(GL_CULL_FACE);
             }
@@ -1917,7 +2034,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
                 glDisable(GL_BLEND);
             }
 
-            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL)
+            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL || shaderType == NEW_TREE_2_MATERIAL_MULTI)
             {
                 glDisable(GL_CULL_FACE);
             }
@@ -2094,7 +2211,7 @@ void Renderer::renderScene(RenderData* renderData)
         {
             shader->enable();
 
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL || currentShader == NEW_TREE_2_MATERIAL_MULTI)
             {
                 glEnable(GL_CULL_FACE);
             }
@@ -2119,7 +2236,7 @@ void Renderer::renderScene(RenderData* renderData)
                 glEnable(GL_DEPTH_TEST);
             }
 
-            if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
+            if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL || material->shader == NEW_TREE_2_MATERIAL_MULTI)
             {
                 glDisable(GL_CULL_FACE);
             }
@@ -2342,14 +2459,14 @@ void Renderer::renderScene(RenderData* renderData)
             glColorMaski(2, GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         }
 
-        if (i->type != RET_GRASS)
+        if (i->type == RET_SINGLE)
         {
             glDrawElements(model->getPrimitiveType(),
                            mesh->indicesCount,
                            GL_UNSIGNED_INT,
                            (void*)(mesh->firstVertex * sizeof(unsigned int)));
         }
-        else
+        else if (i->type == RET_GRASS)
         {
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_VP], renderData->MVMatrix);
 
@@ -2391,6 +2508,21 @@ void Renderer::renderScene(RenderData* renderData)
                                 (int)a);
 
             glEnable(GL_CULL_FACE);
+        }
+        else if (i->type == RET_MULTI)
+        {
+            i->instancesPositionsVBO->bind();
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glVertexAttribDivisor(7, 1);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                mesh->indicesCount,
+                GL_UNSIGNED_INT,
+                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                (int)i->instancesCount);
+
+            glDisableVertexAttribArray(7);
         }
 
         if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())

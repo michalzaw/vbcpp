@@ -212,6 +212,9 @@ class Renderer
 	private:
         void addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList,
                                                  glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
+
+		void addInstancedStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList,
+													 glm::mat4 parentTransform = glm::mat4(1.0f), glm::mat4 parentNormalMatrix = glm::mat4(1.0f));
         void prepareRenderData();
 		void prepareRenderDataForStaticShadowmaps();
 

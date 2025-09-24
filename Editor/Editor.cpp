@@ -1374,7 +1374,7 @@ namespace vbEditor
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
-					polygonSceneObject->addComponent(new ShapePolygonComponent);
+					polygonSceneObject->addComponent(_graphicsManager->addShapePolygon());
 
 					setSelectedSceneObject(polygonSceneObject);
 				}

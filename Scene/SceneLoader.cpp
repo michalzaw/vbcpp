@@ -477,7 +477,7 @@ void SceneLoader::loadBusStartPointComponent(tinyxml2::XMLElement* componentElem
 
 void SceneLoader::loadShapePolygonComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
 {
-	ShapePolygonComponent* shapePolygon = new ShapePolygonComponent;
+	ShapePolygonComponent* shapePolygon = _sceneManager->getGraphicsManager()->addShapePolygon();
 
 	XMLElement* pointElement = componentElement->FirstChildElement("Point");
 	while (pointElement != nullptr)

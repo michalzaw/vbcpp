@@ -90,13 +90,41 @@ namespace FoliageGenerator
 		sampler.generate(points);
 
 		//RObject* objectDefinition = ResourceManager::getInstance().loadRObject("trees2023/spruce");
-		RObject* objectDefinition = ResourceManager::getInstance().loadRObject(generatorData.objectName);
+		/*RObject* objectDefinition = ResourceManager::getInstance().loadRObject("trees/spruce");
 		for (const auto& point : points)
 		{
 			glm::vec2 newPoint = point + minCoords;
 			SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(objectDefinition, objectDefinition->getName(), glm::vec3(newPoint.x, 0.0f, newPoint.y), glm::vec3(0.0f, 0.0f, 0.0f), sceneManager);
 			parentObject->addChild(newObject);
+		}*/
+
+
+		RObject* objectDefinition = ResourceManager::getInstance().loadRObject("trees/spruce_multi");
+		//RObject* objectDefinition = ResourceManager::getInstance().loadRObject("trees2023/maple_multi");
+		SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(objectDefinition, objectDefinition->getName(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sceneManager);
+		MultiRenderObject* multiRenderObject = newObject->getComponentWithCasting<MultiRenderObject>(CT_MULTI_RENDER_OBJECT);
+		for (const auto& point : points)
+		{
+			glm::vec2 newPoint = point + minCoords;
+			multiRenderObject->getInstancesPositions().emplace_back(newPoint.x, 0.0f, newPoint.y);
 		}
+		multiRenderObject->recreateInstancesPositionVBO();
+		parentObject->addChild(newObject);
+
+		/*SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(objectDefinition, objectDefinition->getName(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sceneManager);
+		ShapePolygonComponent* polygonComponent = parentObject->getComponentWithCasting<ShapePolygonComponent>(CT_SHAPE_POLYGON);
+		for (const auto& point : points)
+		{
+			polygonComponent->subObjectsPosition.emplace_back(point.x, 0.0f, point.y);
+		}
+		polygonComponent->subObjectsPositionsVBO = OGLDriver::getInstance().createVBO(points.size() * sizeof(glm::vec3));
+		polygonComponent->subObjectsPositionsVBO->addVertexData(&polygonComponent->subObjectsPosition[0], polygonComponent->subObjectsPosition.size());
+
+		polygonComponent->subObjectsModel = newObject->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT);
+		for (Material* material : polygonComponent->subObjectsModel->getMaterials())
+		{
+			material->shader = NEW_TREE_2_MATERIAL_MULTI;
+		}*/
 
 		LOG_DEBUG("Generated " + Strings::toString(points.size()) + " objects.");
 	}

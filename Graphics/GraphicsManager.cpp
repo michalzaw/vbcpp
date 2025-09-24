@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "BezierCurve.h"
+#include "ShapePolygonComponent.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 #include "SkeletalAnimationHelperComponent.h"
@@ -90,6 +91,11 @@ GraphicsManager::~GraphicsManager()
         delete* i;
     }
 
+    for (std::vector<ShapePolygonComponent*>::iterator i = _shapePolygons.begin(); i != _shapePolygons.end(); ++i)
+    {
+        delete* i;
+    }
+
 	if (_sky != NULL)
 	{
 		delete _sky;
@@ -120,6 +126,16 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
             registerPendingMaterialForMirrorComponent(material);
         }
     }
+
+    return object;
+}
+
+MultiRenderObject* GraphicsManager::addMultiRenderObject(MultiRenderObject* object, SceneObject* owner)
+{
+    owner->addComponent(object);
+
+    _multiRenderObjects.push_back(object);
+    //_quadTree->addObject(object);
 
     return object;
 }
@@ -329,6 +345,15 @@ BezierCurve* GraphicsManager::addBezierCurve(const std::vector<glm::vec3>& point
 }
 
 
+ShapePolygonComponent* GraphicsManager::addShapePolygon()
+{
+    ShapePolygonComponent* shapePolygon = new ShapePolygonComponent;
+
+    _shapePolygons.push_back(shapePolygon);
+
+    return shapePolygon;
+}
+
 
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
@@ -337,6 +362,21 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
         if (*i == object)
         {
             i = _renderObjects.erase(i);
+
+            delete object;
+
+            return;
+        }
+    }
+}
+
+void GraphicsManager::removeMultiRenderObject(MultiRenderObject* object)
+{
+    for (std::list<MultiRenderObject*>::iterator i = _multiRenderObjects.begin(); i != _multiRenderObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _multiRenderObjects.erase(i);
 
             delete object;
 
@@ -578,6 +618,22 @@ void GraphicsManager::removeBezierCurve(BezierCurve* bezierCurve)
             i = _bezierCurves.erase(i);
 
             delete bezierCurve;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeShapePolygon(ShapePolygonComponent* shapePolygon)
+{
+    for (std::vector<ShapePolygonComponent*>::iterator i = _shapePolygons.begin(); i != _shapePolygons.end(); ++i)
+    {
+        if (*i == shapePolygon)
+        {
+            i = _shapePolygons.erase(i);
+
+            delete shapePolygon;
 
             return;
         }

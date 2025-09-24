@@ -45,6 +45,8 @@ set (GRAPHICS_SOURCES
 		Graphics/ModelGenerator.h
 		Graphics/ModelNode.cpp
 		Graphics/ModelNode.h
+		Graphics/MultiRenderObject.cpp
+		Graphics/MultiRenderObject.h
 		Graphics/NVMeshMender/NVMeshMender.cpp
 		Graphics/NVMeshMender/NVMeshMender.h
 		Graphics/OGLDriver.cpp
