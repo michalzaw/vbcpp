@@ -737,8 +737,8 @@ void Renderer::prepareRenderData()
             RenderPass renderPass = _renderDataList[j]->renderPass;
             bool isCastShadows = object->isCastShadows();
 
-            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) /*&&
-                isObjectInCamera(object, _renderDataList[j]->camera)*/) // todo: culling
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
+                isObjectInCamera(object, _renderDataList[j]->camera))
             {
 
                 tempRenderElementInstanced.type = RET_MULTI;
@@ -748,10 +748,32 @@ void Renderer::prepareRenderData()
                 tempRenderElementInstanced.instancesPositionsVBO = object->getInstancesPositionVBO();
                 tempRenderElementInstanced.instancesCount = object->getInstancesPositions().size();
 
-                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                ModelNode* modelNode;
+                int lod = 0;
+                if (tempRenderElementInstanced.renderObject->getNumberOfLod() == 1 || renderPass == RP_SHADOWS)
+                {
+                    modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                }
+                else
+                {
+                    AABB* aabb = tempRenderElementInstanced.renderObject->getAABB();
+
+                    if (calculatePointToAABBDistnce(*aabb, _renderDataList[j]->camera->getPosition()) > 30.0f)
+                    {
+                        modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(1);
+                        lod = 1;
+                    }
+                    else
+                    {
+                        modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(0);
+                    }
+                }
                 addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataList[j]->renderList);
             }
         }
+#ifdef DRAW_AABB
+        _renderObjectsInCurrentFrame.push_back(*i);
+#endif // DRAW_AABB
     }
 
 
@@ -837,18 +859,19 @@ void Renderer::prepareRenderDataForStaticShadowmaps()
             RenderPass renderPass = _renderDataListForStaticShadowmapping[j]->renderPass;
             bool isCastShadows = object->isCastShadows();
 
-            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) /*&&
-                isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera)*/) // todo: culling
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
+                isObjectInCamera(object, _renderDataListForStaticShadowmapping[j]->camera))
             {
+                int lod = object->getNumberOfLod() > 1 ? 1 : 0;
 
                 tempRenderElementInstanced.type = RET_MULTI;
-                tempRenderElementInstanced.model = object->getModel();
+                tempRenderElementInstanced.model = object->getModel(lod);
                 tempRenderElementInstanced.object = object->getSceneObject();
                 tempRenderElementInstanced.renderObject = object;
                 tempRenderElementInstanced.instancesPositionsVBO = object->getInstancesPositionVBO();
                 tempRenderElementInstanced.instancesCount = object->getInstancesPositions().size();
 
-                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(lod);
                 addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataListForStaticShadowmapping[j]->renderList);
             }
         }

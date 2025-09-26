@@ -11,6 +11,9 @@ bool isAABBIntersectFrustum(Frustum& frustum, AABB& aabb);
 bool isAABBInAABB(AABB& aabb1, AABB& aabb2);
 bool isAABBIntersectAABB(AABB& aabb1, AABB& aabb2);
 bool isAABBInFrustum(Frustum& frustum, AABB& aabb);
+bool isPointInAABB(AABB& aabb, glm::vec3 point);
+
+float calculatePointToAABBDistnce(AABB& aabb, const glm::vec3& point);
 
 // http://www.opengl-tutorial.org/miscellaneous/clicking-on-objects/picking-with-custom-ray-obb-function/
 // this function does not work with scaled objects

@@ -46,7 +46,7 @@ class RenderObject : public Component
         AABB _aabb;
         bool _isCalculatedAABB;
 
-        void calculateNewAABB();
+        virtual void calculateNewAABB();
 
         ModelNode* getModelNodeByName(std::string name, ModelNode* node, int lod = 0);
 

@@ -13,6 +13,8 @@ class MultiRenderObject : public RenderObject
 		std::vector<glm::vec3> _instancesPositions;
 		VBO* _instancesPositionsVBO;
 
+		void calculateNewAABB() override;
+
 	public:
 		MultiRenderObject(RStaticModel* model = nullptr, bool isDynamicObject = false);
 		MultiRenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject = false);
