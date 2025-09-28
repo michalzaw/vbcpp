@@ -13,6 +13,7 @@
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/CrossroadComponent.h"
+#include "../Graphics/FoliagePatch.h"
 #include "../Graphics/LoadMaterial.h"
 #include "../Graphics/LoadTerrainModel.h"
 #include "../Graphics/ShapePolygonComponent.h"
@@ -493,6 +494,28 @@ void SceneLoader::loadShapePolygonComponent(tinyxml2::XMLElement* componentEleme
 }
 
 
+void SceneLoader::loadFoliagePatch(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject)
+{
+	FoliagePatch* foliagePatch = _sceneManager->getGraphicsManager()->addFoliagePatch();
+
+	XMLElement* layerElement = componentElement->FirstChildElement("Layer");
+	while (layerElement != nullptr)
+	{
+		std::string objectName = XmlUtils::getAttributeString(layerElement, "objectName");
+		float minDistance = XmlUtils::getAttributeFloatOptional(layerElement, "minDistance", 5.0f);
+		int seed = XmlUtils::getAttributeInt(layerElement, "seed");
+
+		foliagePatch->addLayer(objectName, minDistance, seed);
+
+		layerElement = layerElement->NextSiblingElement("Layer");
+	}
+
+	sceneObject->addComponent(foliagePatch);
+
+	foliagePatch->generateFoliage();
+}
+
+
 void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 {
 	while (objectElement != nullptr)
@@ -588,6 +611,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 			if (componentType == "polygon")
 			{
 				loadShapePolygonComponent(componentElement, sceneObject);
+			}
+
+			if (componentType == "foliage")
+			{
+				loadFoliagePatch(componentElement, sceneObject);
 			}
 
 			componentElement = componentElement->NextSiblingElement("Component");

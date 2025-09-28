@@ -14,6 +14,7 @@
 #include "../Game/Directories.h"
 
 #include "../Graphics/BezierCurve.h"
+#include "../Graphics/FoliagePatch.h"
 #include "../Graphics/RenderObject.h"
 #include "../Graphics/ShapePolygonComponent.h"
 
@@ -313,6 +314,29 @@ void SceneSaver::saveShapePolygonComponent(tinyxml2::XMLElement* objectElement, 
 }
 
 
+void SceneSaver::saveFoliagePatch(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, FoliagePatch* foliagePatch)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "foliage");
+
+	for (int i = 0; i < foliagePatch->getLayersCount(); ++i)
+	{
+		const FoliagePatchLayer& layer = foliagePatch->getLayer(i);
+
+		XMLElement* layerElement = doc.NewElement("Layer");
+
+		layerElement->SetAttribute("objectName", layer.objectName.c_str());
+		layerElement->SetAttribute("minDistance", layer.minDistance);
+		layerElement->SetAttribute("seed", layer.seed);
+
+		componentElement->InsertEndChild(layerElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -395,6 +419,12 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (shapePolygonComponent)
 	{
 		saveShapePolygonComponent(objectElement, doc, shapePolygonComponent);
+	}
+
+	FoliagePatch* foliagePatch = static_cast<FoliagePatch*>(sceneObject->getComponent(CT_FOLIAGE_PATCH));
+	if (foliagePatch)
+	{
+		saveFoliagePatch(objectElement, doc, foliagePatch);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

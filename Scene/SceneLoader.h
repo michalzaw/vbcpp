@@ -62,6 +62,7 @@ class SceneLoader
 		void loadTrafficLightComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadBusStartPointComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadShapePolygonComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
+		void loadFoliagePatch(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 
 	public:
 		SceneLoader(SceneManager* sceneManager);

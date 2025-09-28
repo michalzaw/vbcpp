@@ -42,7 +42,7 @@ class FoliagePatch : public Component
 		FoliagePatch();
 		~FoliagePatch();
 
-		FoliagePatchLayer& addLayer(const std::string& objectName, float minDistance = 5.0f);
+		FoliagePatchLayer& addLayer(const std::string& objectName, float minDistance = 5.0f, unsigned int seed = (unsigned int)std::time(0));
 		FoliagePatchLayer& getLayer(unsigned int index);
 		void removeLayer(unsigned int index);
 

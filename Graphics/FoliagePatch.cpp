@@ -65,13 +65,15 @@ void FoliagePatch::generateFoliage(const std::vector<glm::vec3>& polygonPoints, 
 	multiRenderObject->recreateInstancesPositionVBO();
 	parentObject->addChild(newObject);
 
+	newObject->setFlags(SOF_NOT_SERIALIZABLE);
+
 	LOG_DEBUG("Generated " + Strings::toString(points.size()) + " objects.");
 }
 
 
-FoliagePatchLayer& FoliagePatch::addLayer(const std::string& objectName, float minDistance/* = 5.0f*/)
+FoliagePatchLayer& FoliagePatch::addLayer(const std::string& objectName, float minDistance/* = 5.0f*/, unsigned int seed/* = (unsigned int)std::time(0)*/)
 {
-	_layers.emplace_back(objectName, minDistance);
+	_layers.emplace_back(objectName, minDistance, seed);
 
 	return _layers[_layers.size() - 1];
 }
