@@ -5,6 +5,7 @@ set (UTILS_SOURCES
 	Utils/Engine.cpp
 	Utils/FilesHelper.cpp
 	Utils/Gearbox.cpp
+	Utils/GeometryUtils.cpp
 	Utils/GlmUtils.cpp
 	Utils/Helpers.cpp
 	Utils/InputSystem.cpp

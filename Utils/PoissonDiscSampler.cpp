@@ -1,11 +1,11 @@
 #include "PoissonDiscSampler.h"
 
 
-PoissonDiscSampler::PoissonDiscSampler(float width, float height, float minDistance, int k/* = 30*/)
+PoissonDiscSampler::PoissonDiscSampler(float width, float height, float minDistance, unsigned int seed/* = (unsigned int)std::time(0)*/, int k/* = 30*/)
     : _width(width), _height(height), _minDistance(minDistance), _k(k),
     _cellSize(minDistance / std::sqrt(2.0f)),
     _grid((int)(_width / _cellSize) + 1, std::vector<int>((int)(_height / _cellSize) + 1, -1)),
-    _randomGenerator((unsigned int)std::time(0)), _distAngle(0.0f, 2.0f * PI), _distRadius(_minDistance, 2 * _minDistance)
+    _randomGenerator(seed), _distAngle(0.0f, 2.0f * PI), _distRadius(_minDistance, 2 * _minDistance)
 {
     _pointValidationFunction = [this](const glm::vec2& point) {
         if (point.x < 0 || point.y < 0 || point.x >= _width || point.y >= _height)

@@ -2,6 +2,7 @@
 
 #include "Renderer.h"
 #include "BezierCurve.h"
+#include "FoliagePatch.h"
 #include "ShapePolygonComponent.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
@@ -22,6 +23,11 @@ GraphicsManager::GraphicsManager()
 GraphicsManager::~GraphicsManager()
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::list<MultiRenderObject*>::iterator i = _multiRenderObjects.begin(); i != _multiRenderObjects.end(); ++i)
     {
         delete *i;
     }
@@ -94,6 +100,11 @@ GraphicsManager::~GraphicsManager()
     for (std::vector<ShapePolygonComponent*>::iterator i = _shapePolygons.begin(); i != _shapePolygons.end(); ++i)
     {
         delete* i;
+    }
+
+    for (std::vector<FoliagePatch*>::iterator i = _foliagePatches.begin(); i != _foliagePatches.end(); ++i)
+    {
+        delete *i;
     }
 
 	if (_sky != NULL)
@@ -352,6 +363,16 @@ ShapePolygonComponent* GraphicsManager::addShapePolygon()
     _shapePolygons.push_back(shapePolygon);
 
     return shapePolygon;
+}
+
+
+FoliagePatch* GraphicsManager::addFoliagePatch()
+{
+    FoliagePatch* foliagePatch = new FoliagePatch;
+
+    _foliagePatches.push_back(foliagePatch);
+
+    return foliagePatch;
 }
 
 
@@ -634,6 +655,22 @@ void GraphicsManager::removeShapePolygon(ShapePolygonComponent* shapePolygon)
             i = _shapePolygons.erase(i);
 
             delete shapePolygon;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeFoliagePatch(FoliagePatch* foliagePatch)
+{
+    for (std::vector<FoliagePatch*>::iterator i = _foliagePatches.begin(); i != _foliagePatches.end(); ++i)
+    {
+        if (*i == foliagePatch)
+        {
+            i = _foliagePatches.erase(i);
+
+            delete foliagePatch;
 
             return;
         }

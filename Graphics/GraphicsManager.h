@@ -45,6 +45,7 @@ class SkeletalAnimationHelperComponent;
 class RAnimation;
 class BezierCurve;
 class ShapePolygonComponent;
+class FoliagePatch;
 
 
 class GraphicsManager
@@ -69,6 +70,7 @@ class GraphicsManager
         std::vector<SkeletalAnimationHelperComponent*>_skeletalAnimationHelpers;
         std::vector<BezierCurve*>                   _bezierCurves;
         std::vector<ShapePolygonComponent*>         _shapePolygons;
+        std::vector<FoliagePatch*>                  _foliagePatches;
 
 		Sky*						_sky;
 
@@ -120,6 +122,7 @@ class GraphicsManager
         SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
         BezierCurve*    addBezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {}, float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
         ShapePolygonComponent* addShapePolygon();
+        FoliagePatch*   addFoliagePatch();
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -142,6 +145,7 @@ class GraphicsManager
         void removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
         void removeBezierCurve(BezierCurve* bezierCurve);
         void removeShapePolygon(ShapePolygonComponent* shapePolygon);
+        void removeFoliagePatch(FoliagePatch* foliagePatch);
 
 
         void setCurrentCamera(CameraStatic* camera);

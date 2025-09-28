@@ -15,7 +15,6 @@
 #include "../Tools/RoadManipulator.h"
 #include "../FileDialogs.h"
 #include "../Utils/AIPathGenerator.h"
-#include "../Utils/FoliageGenerator.h"
 
 #include "../../Game/AI/AIAgent.h"
 #include "../../Game/AI/AIAgentVehicle.h"
@@ -26,6 +25,7 @@
 #include "../../Game/GameLogicSystem.h"
 
 #include "../../Graphics/BezierCurve.h"
+#include "../../Graphics/FoliagePatch.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -279,6 +279,7 @@ namespace vbEditor
 
 	extern bool _showGenerateObjectsAlongCurveWindow;
 
+	extern OpenDialogWindow* _addSceneObjectDialogWindow;
 	extern OpenDialogWindow* _selectRoadProfileDialogWindow;
 
 	extern SceneObject* _groupingSceneObject;
@@ -321,6 +322,26 @@ void shwoRoadProfileEdit2(const std::string& roadProfileName, const std::functio
 	{
 		*(vbEditor::_selectRoadProfileDialogWindow->getOpenFlagPointer()) = true;
 		vbEditor::_selectRoadProfileDialogWindow->setOnOkClickCallback(onRoadProfileSelectedCallback);
+	}
+}
+
+
+void showObjectSelectEdit(const std::string& objectName, const std::function<void(const std::string&)>& onObjectSelectedCallback)
+{
+	ImGui::SetNextItemWidth(-30);
+
+	char buffer[1024] = { '\0' };
+	strncpy(buffer, objectName.c_str(), sizeof buffer);
+	buffer[sizeof buffer - 1] = '\0';
+
+	ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("...", ImVec2(20, 0)))
+	{
+		*(vbEditor::_addSceneObjectDialogWindow->getOpenFlagPointer()) = true;
+		vbEditor::_addSceneObjectDialogWindow->setOnOkClickCallback(onObjectSelectedCallback);
 	}
 }
 
@@ -1694,65 +1715,91 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 		{
 			component->buildAndCreateRenderObject(false);
 		}
+	}
+}
 
+
+void showFoliagePatchDetails(FoliagePatch* component)
+{
+	if (ImGui::CollapsingHeader("Foliage Patch", ImGuiTreeNodeFlags_DefaultOpen))
+	{
 		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
 		ImGui::Columns(2);
 		ImGui::Separator();
-		ImGui::PushID("RoadIntersectionComponentDetails");
+		ImGui::PushID("RenderComponentDetails");
 
-		if (newNode("Random objects", ImGuiTreeNodeFlags_DefaultOpen, ""))
+		ImGui::PushID("Layers");
+		for (int i = 0; i < component->getLayersCount(); ++i)
 		{
-			static float minDistance = 5.0f;
-
-			COMPONENT_PROPERTY_EDIT_BEGIN(maxDistanceToCreateConnection, "Min distance")
+			ImGui::PushID(i);
+			if (newNode("Layer", ImGuiTreeNodeFlags_DefaultOpen, "%d", i))
 			{
-				ImGui::DragFloat("", &minDistance, 1.0f, 1, 30);
+				FoliagePatchLayer& layer = component->getLayer(i);
+
+				COMPONENT_PROPERTY_EDIT_BEGIN(RoadProfile, "Object")
+				{
+					showObjectSelectEdit(layer.objectName, [&layer](const std::string& newObjectName)
+						{
+							layer.objectName = newObjectName;
+						});
+				}
+				COMPONENT_PROPERTY_EDIT_END
+
+				COMPONENT_PROPERTY_EDIT_BEGIN(minDistance, "Min distance")
+				{
+					ImGui::DragFloat("", &layer.minDistance, 1.0f, 1, 30);
+				}
+				COMPONENT_PROPERTY_EDIT_END
+
+				COMPONENT_PROPERTY_EDIT_BEGIN(seed, "Seed")
+				{
+					ImGui::SetNextItemWidth(-60);
+					int seed = layer.seed;
+					ImGui::InputInt("", &seed, 0, 0);
+					layer.seed = seed;
+
+					ImGui::SameLine();
+
+					if (ImGui::Button("Refresh", ImVec2(50, 0)))
+					{
+						layer.seed = (unsigned int)std::time(0);
+						component->generateFoliage();
+					}
+				}
+				COMPONENT_PROPERTY_EDIT_END
+
+				if (ImGui::Button("Delete layer", ImVec2(-1.0f, 0.0f)))
+				{
+					component->removeLayer(i);
+				}
+				ImGui::NextColumn();
+				ImGui::NextColumn();
+
+				ImGui::TreePop();
 			}
-			COMPONENT_PROPERTY_EDIT_END
+			ImGui::PopID();
 
-			/*COMPONENT_PROPERTY_EDIT_BEGIN(pathQuality, "Path quality")
-			{
-				ImGui::DragInt("", &pathQuality, 1.0f, 4, 100);
-			}
-			COMPONENT_PROPERTY_EDIT_END
-
-			COMPONENT_PROPERTY_EDIT_BEGIN(innerPathCurveFactor, "Inner path curve factor")
-			{
-				ImGui::DragFloat("", &innerPathCurveFactor, 1.0f, 1, 10);
-			}
-			COMPONENT_PROPERTY_EDIT_END
-
-			COMPONENT_PROPERTY_EDIT_BEGIN(outerPathCurveFactor, "Outer path curve factor")
-			{
-				ImGui::DragFloat("", &outerPathCurveFactor, 1.0f, 1, 10);
-			}
-			COMPONENT_PROPERTY_EDIT_END
-
-			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnStraightPaths, "Speed on straight paths")
-			{
-				ImGui::DragFloat("", &speedOnStraightPaths, 1.0f, 1, 10);
-			}
-			COMPONENT_PROPERTY_EDIT_END
-
-			COMPONENT_PROPERTY_EDIT_BEGIN(speedOnCurvedPaths, "Sped on curved paths")
-			{
-				ImGui::DragFloat("", &speedOnCurvedPaths, 1.0f, 1, 10);
-			}
-			COMPONENT_PROPERTY_EDIT_END*/
-
-			ImGui::Columns(1);
-
-			if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
-			{
-				FoliageGenerator::FoliageGeneratorData generatorData = { "trees/spruce", minDistance };
-				FoliageGenerator::generateFoliage(component->getPoints(), generatorData, component->getSceneObject(), vbEditor::_sceneManager);
-			}
-
-			ImGui::Columns(2);
-
-			ImGui::TreePop(); // newNode
+			ImGui::PopID(); // i
 		}
-		ImGui::PopID(); // newNode
+		ImGui::PopID(); // Layers
+
+		ImGui::Columns(1);
+
+		ImGui::Separator();
+
+		if (ImGui::Button("Add layer", ImVec2(-1.0f, 0.0f)))
+		{
+			component->addLayer("");
+		}
+
+		ImGui::Separator();
+
+		if (ImGui::Button("Generate objects", ImVec2(-1.0f, 0.0f)))
+		{
+			component->generateFoliage();
+		}
+
+		ImGui::Columns(2);
 
 		ImGui::PopID();
 		ImGui::Columns(1);
@@ -1885,6 +1932,12 @@ void showObjectProperties()
 			if (scriptComponent)
 			{
 				showScriptComponentDetails(scriptComponent);
+			}
+
+			FoliagePatch* foliagePatch = dynamic_cast<FoliagePatch*>(vbEditor::_selectedSceneObject->getComponent(CT_FOLIAGE_PATCH));
+			if (foliagePatch)
+			{
+				showFoliagePatchDetails(foliagePatch);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

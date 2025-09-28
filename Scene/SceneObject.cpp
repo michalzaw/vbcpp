@@ -11,6 +11,7 @@
 #include "../Game/GameLogicSystem.h"
 
 #include "../Graphics/BezierCurve.h"
+#include "../Graphics/FoliagePatch.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -146,6 +147,10 @@ SceneObject::~SceneObject()
 
             case CT_MULTI_RENDER_OBJECT:
                 _sceneManager->getGraphicsManager()->removeMultiRenderObject(static_cast<MultiRenderObject*>(*i));
+                break;
+
+            case CT_FOLIAGE_PATCH:
+                _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(*i));
                 break;
 
             case CT_SCRIPT:
@@ -455,6 +460,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_MULTI_RENDER_OBJECT:
                     _sceneManager->getGraphicsManager()->removeMultiRenderObject(static_cast<MultiRenderObject*>(component));
+                    break;
+
+                case CT_FOLIAGE_PATCH:
+                    _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(component));
                     break;
 
                 case CT_SCRIPT:

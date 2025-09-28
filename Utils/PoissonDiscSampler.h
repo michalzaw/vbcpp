@@ -41,7 +41,7 @@ class PoissonDiscSampler
         bool isValid(const glm::vec2& p, const std::vector<glm::vec2>& points);
 
     public:
-        PoissonDiscSampler(float width, float height, float radius, int k = 30);
+        PoissonDiscSampler(float width, float height, float radius, unsigned int seed = (unsigned int)std::time(0), int k = 30);
 
         void setPointValidationFunction(const std::function<bool(const glm::vec2&)>& pointValidationFunction) { _pointValidationFunction = pointValidationFunction; }
 
