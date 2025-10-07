@@ -52,10 +52,6 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		{
 			loadRenderComponent(componentElement, object, componentIndex);
 		}
-		if (componentType == "multiRender")
-		{
-			loadRenderComponent(componentElement, object, componentIndex);
-		}
 		else if (componentType == "physics")
 		{
 			loadPhysicsComponent(componentElement, object, componentIndex);
@@ -381,33 +377,6 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			model = loadModel(modelPath, objectDirPath, isAnimated, normalsSmoothing, loadWithHierarchy);
 
 			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
-			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
-			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
-
-			const std::string& lowPolyModeFile = components[i]["lowPolyModel"];
-			if (!lowPolyModeFile.empty())
-			{
-				const std::string lowPolyModelPath = objectDirPath + lowPolyModeFile;
-				bool lowPolyNormalsSmoothing = toBool(components[i]["lowPolyModelNormalsSmoothing"]);
-				bool lowPolyLoadWithHierarchy = toBool(components[i]["lowPolyLoadWithHierarchy"]);
-
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
-				renderObject->setModel(lowPolyModel, 1);
-			}
-		}
-		else if (componentType == "multiRender")
-		{
-			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
-
-			const std::string& modelFile = components[i]["model"];
-			const std::string& modelPath = objectDirPath + modelFile;
-			bool isAnimated = toBool(components[i]["animated"]);
-			bool normalsSmoothing = toBool(components[i]["normalsSmoothing"]);
-			bool loadWithHierarchy = toBool(components[i]["loadWithHierarchy"]);
-
-			model = loadModel(modelPath, objectDirPath, isAnimated, normalsSmoothing, loadWithHierarchy);
-
-			MultiRenderObject* renderObject = graphicsManager->addMultiRenderObject(new MultiRenderObject(model), sceneObject);
 			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
 			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
 

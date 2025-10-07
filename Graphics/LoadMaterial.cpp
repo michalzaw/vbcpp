@@ -288,8 +288,6 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 		sMaterial->shader = NEW_TREE_MATERIAL;
 	else if (strcmp(type, "new_tree2") == 0)
 		sMaterial->shader = NEW_TREE_2_MATERIAL;
-	else if (strcmp(type, "new_tree2_multi") == 0)
-		sMaterial->shader = NEW_TREE_2_MATERIAL_MULTI;
 	else if (strcmp(type, "solid_animated") == 0)
 		sMaterial->shader = SOLID_ANIMATED_MATERIAL;
 	else if (strcmp(type, "normalmapping_animated") == 0)

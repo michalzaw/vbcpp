@@ -114,6 +114,20 @@ enum UniformName
 };
 
 
+struct DebugRenderInfo final
+{
+	AABB* aabb;
+	AABB* obb;
+	SceneObject* sceneObject;
+
+	DebugRenderInfo(AABB* aabb, AABB* obb, SceneObject* sceneObject)
+		: aabb(aabb), obb(obb), sceneObject(sceneObject)
+	{
+
+	}
+};
+
+
 class Renderer
 {
     private:
@@ -146,6 +160,8 @@ class Renderer
         //OGLDriver* _OGLDriver;
         std::vector<RShader*> _shaderList;
         std::vector<ShaderType> _shaderListForMirrorRendering;
+		std::vector<ShaderType> _shaderListForMirrorMultiRendering;
+		std::vector<ShaderType> _shaderListForMultiRendering;
         UBO* _lightUBO;
 		const char* _uniformsNames[NUMBER_OF_UNIFORMS];
 		GLint _uniformsLocations[NUMBER_OF_SHADERS][NUMBER_OF_UNIFORMS];
@@ -165,7 +181,7 @@ class Renderer
 
         // Data for debug rendering
         VBO* _aabbVbo;
-        std::vector<RenderObject*> _renderObjectsInCurrentFrame;
+        std::vector<DebugRenderInfo> _renderObjectsInCurrentFrame;
         bool _renderObjectsAAABB;
         bool _renderObjectsOBB;
 
@@ -220,6 +236,8 @@ class Renderer
 
 
         bool isObjectInCamera(RenderObject* object, CameraStatic* camera);
+		bool isObjectInCamera(MultiRenderObject* object, CameraStatic* camera);
+		bool isObjectInCamera(AABB& aabb, CameraStatic* camera);
 
         void createRenderDatasForShadowMap(ShadowMap* shadowMap);
         void deleteRenderDatasForShadowMap(ShadowMap* shadowMap);

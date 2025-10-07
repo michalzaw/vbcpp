@@ -56,13 +56,17 @@ void FoliagePatch::generateFoliage(const std::vector<glm::vec3>& polygonPoints, 
 
 	RObject* objectDefinition = ResourceManager::getInstance().loadRObject(foliageData.objectName);
 	SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(objectDefinition, objectDefinition->getName(), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f), sceneManager);
-	MultiRenderObject* multiRenderObject = newObject->getComponentWithCasting<MultiRenderObject>(CT_MULTI_RENDER_OBJECT);
+	RenderObject* renderObject = newObject->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT);
+	MultiRenderObject* multiRenderObject = sceneManager->getGraphicsManager()->addMultiRenderObject(renderObject);
 	for (const auto& point : points)
 	{
 		glm::vec2 newPoint = point + minCoords;
 		multiRenderObject->getInstancesPositions().emplace_back(newPoint.x, 0.0f, newPoint.y);
 	}
 	multiRenderObject->recreateInstancesPositionVBO();
+
+	newObject->addComponent(multiRenderObject);
+
 	parentObject->addChild(newObject);
 
 	newObject->setFlags(SOF_NOT_SERIALIZABLE);

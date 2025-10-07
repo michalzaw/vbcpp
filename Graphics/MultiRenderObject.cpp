@@ -1,29 +1,31 @@
 #include "MultiRenderObject.h"
 
 
-MultiRenderObject::MultiRenderObject(RStaticModel* model/* = nullptr*/, bool isDynamicObject/* = false*/)
-	: RenderObject(model, isDynamicObject)
+MultiRenderObject::MultiRenderObject(RenderObject* renderObject)
+	: Component(CT_MULTI_RENDER_OBJECT),
+	_renderObject(renderObject),
+	_isCalculatedAABB(false)
 {
-	_type = CT_MULTI_RENDER_OBJECT;
+
 }
 
 
-MultiRenderObject::MultiRenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject/* = false*/)
-	: RenderObject(model, nodesToSkip, isDynamicObject)
+MultiRenderObject::~MultiRenderObject()
 {
-	_type = CT_MULTI_RENDER_OBJECT;
-}
-
-
-MultiRenderObject::MultiRenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject/* = false*/)
-	: RenderObject(model, modelNode, isDynamicObject)
-{
-	_type = CT_MULTI_RENDER_OBJECT;
+	if (_renderObject != nullptr)
+	{
+		delete _renderObject;
+	}
 }
 
 
 void MultiRenderObject::calculateNewAABB()
 {
+	if (_renderObject == nullptr)
+	{
+		return;
+	}
+
 	glm::vec3 newMin(FLT_MAX, FLT_MAX, FLT_MAX);
 	glm::vec3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
@@ -66,7 +68,7 @@ void MultiRenderObject::calculateNewAABB()
 		}
 	}
 
-	RStaticModel* model = _modelsDatas[0].model;
+	RStaticModel* model = _renderObject->getModel(0);
 	glm::vec3 minFromModel = model->getAABB()->getMinCoords();
 	glm::vec3 maxFromModel = model->getAABB()->getMaxCoords();
 
@@ -82,9 +84,28 @@ void MultiRenderObject::calculateNewAABB()
 }
 
 
+AABB* MultiRenderObject::getAABB()
+{
+    if (!_isCalculatedAABB)
+    {
+        calculateNewAABB();
+
+        _isCalculatedAABB = true;
+    }
+
+    return &_aabb;
+}
+
+
 void MultiRenderObject::recreateInstancesPositionVBO()
 {
 
 	_instancesPositionsVBO = OGLDriver::getInstance().createVBO(_instancesPositions.size() * sizeof(glm::vec3));
 	_instancesPositionsVBO->addVertexData(&_instancesPositions[0], _instancesPositions.size());
+}
+
+
+void MultiRenderObject::changedTransform()
+{
+	_isCalculatedAABB = false;
 }

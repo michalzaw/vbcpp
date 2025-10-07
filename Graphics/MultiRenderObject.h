@@ -5,25 +5,35 @@
 #include "RenderObject.h"
 
 
-class MultiRenderObject : public RenderObject
+class MultiRenderObject : public Component
 {
 	VBCPP_COMPONENT(MultiRenderObject, CT_MULTI_RENDER_OBJECT)
 
 	private:
+		RenderObject* _renderObject;
+
 		std::vector<glm::vec3> _instancesPositions;
 		VBO* _instancesPositionsVBO;
 
-		void calculateNewAABB() override;
+		AABB _aabb;
+		bool _isCalculatedAABB;
+
+		void calculateNewAABB();
 
 	public:
-		MultiRenderObject(RStaticModel* model = nullptr, bool isDynamicObject = false);
-		MultiRenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject = false);
-		MultiRenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject = false);
+		MultiRenderObject(RenderObject* renderObject);
+		~MultiRenderObject();
+
+		inline RenderObject* getRenderObject() { return _renderObject; }
 
 		inline std::vector<glm::vec3>& getInstancesPositions() { return _instancesPositions; }
 		inline VBO* getInstancesPositionVBO() { return _instancesPositionsVBO; }
 
+		AABB* getAABB();
+
 		void recreateInstancesPositionVBO();
+
+		void changedTransform() override;
 
 };
 

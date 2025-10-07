@@ -141,14 +141,23 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     return object;
 }
 
-MultiRenderObject* GraphicsManager::addMultiRenderObject(MultiRenderObject* object, SceneObject* owner)
+MultiRenderObject* GraphicsManager::addMultiRenderObject(RenderObject* object)
 {
-    owner->addComponent(object);
-
-    _multiRenderObjects.push_back(object);
+    MultiRenderObject* multiRenderObject = new MultiRenderObject(object);
+    _multiRenderObjects.push_back(multiRenderObject);
     //_quadTree->addObject(object);
 
-    return object;
+    for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _renderObjects.erase(i);
+
+            break;
+        }
+    }
+
+    return multiRenderObject;
 }
 
 RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)

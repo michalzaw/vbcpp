@@ -100,7 +100,7 @@ class GraphicsManager
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
-        MultiRenderObject* addMultiRenderObject(MultiRenderObject* object, SceneObject* owner); //Model* model = NULL);
+        MultiRenderObject* addMultiRenderObject(RenderObject* object); //Model* model = NULL);
 		RoadObject*		addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner);
 		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
