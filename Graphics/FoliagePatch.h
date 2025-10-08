@@ -34,7 +34,12 @@ class FoliagePatch : public Component
 	VBCPP_COMPONENT(FoliagePatch, CT_FOLIAGE_PATCH)
 
 	private:
+		const short int RAY_TEST_FILTER_MASK;
+		const short int RAY_TEST_FILTER_GROUP;
+
 		std::vector<FoliagePatchLayer> _layers;
+
+		float calculateInstancePositionY(float x, float z);
 
 		void generateFoliage(const std::vector<glm::vec3>& polygonPoints, const FoliagePatchLayer& foliageData, SceneObject* parentObject, SceneManager* sceneManager);
 

@@ -11,7 +11,9 @@
 
 
 FoliagePatch::FoliagePatch()
-	: Component(CT_FOLIAGE_PATCH)
+	: Component(CT_FOLIAGE_PATCH),
+	RAY_TEST_FILTER_MASK(COL_TERRAIN | COL_ENV),
+	RAY_TEST_FILTER_GROUP(COL_WHEEL)
 {
 
 }
@@ -20,6 +22,20 @@ FoliagePatch::FoliagePatch()
 FoliagePatch::~FoliagePatch()
 {
 
+}
+
+
+float FoliagePatch::calculateInstancePositionY(float x, float z)
+{
+	glm::vec3 rayDirection = glm::vec3(0.0f, -1.0f, 0.0f);
+	glm::vec3 hitPosition;
+
+	if (getSceneObject()->getSceneManager()->getPhysicsManager()->rayTest(glm::vec3(x, 100.0f, z), rayDirection, RAY_TEST_FILTER_MASK, RAY_TEST_FILTER_GROUP, hitPosition))
+	{
+		return hitPosition.y;
+	}
+
+	return 0.0f;
 }
 
 
@@ -61,7 +77,10 @@ void FoliagePatch::generateFoliage(const std::vector<glm::vec3>& polygonPoints, 
 	for (const auto& point : points)
 	{
 		glm::vec2 newPoint = point + minCoords;
-		multiRenderObject->getInstancesPositions().emplace_back(newPoint.x, 0.0f, newPoint.y);
+
+		float y = calculateInstancePositionY(newPoint.x, newPoint.y);
+
+		multiRenderObject->getInstancesPositions().emplace_back(newPoint.x, y, newPoint.y);
 	}
 	multiRenderObject->recreateInstancesPositionVBO();
 
