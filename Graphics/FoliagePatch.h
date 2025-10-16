@@ -12,6 +12,7 @@
 
 
 class SceneManager;
+class MultiRenderObject;
 
 
 struct FoliagePatchLayer final
@@ -40,6 +41,8 @@ class FoliagePatch : public Component
 		std::vector<FoliagePatchLayer> _layers;
 
 		float calculateInstancePositionY(float x, float z);
+
+		void generateCollisionMesh(MultiRenderObject* multiRenderObject, std::vector<glm::vec3>& outCollisionMesh);
 
 		void generateFoliage(const std::vector<glm::vec3>& polygonPoints, const FoliagePatchLayer& foliageData, SceneObject* parentObject, SceneManager* sceneManager);
 

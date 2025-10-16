@@ -309,6 +309,17 @@ PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(c
     return b;
 }
 
+PhysicalBodyBvtTriangleMesh* PhysicsManager::createPhysicalBodyBvtTriangleMesh(std::vector<glm::vec3>&& vertices, short collisionGroup, short collisionFilter)
+{
+    PhysicalBodyBvtTriangleMesh* b = new PhysicalBodyBvtTriangleMesh(std::move(vertices));
+
+    _dynamicsWorld->addRigidBody(b->getRigidBody(), collisionGroup, collisionFilter);
+
+    _physicalBodies.push_back(b);
+
+    return b;
+}
+
 
 btCompoundShape* PhysicsManager::createCompoundShape()
 {

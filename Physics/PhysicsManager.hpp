@@ -57,6 +57,7 @@ class PhysicsManager : virtual public RefCounter
                                                                      bool centerOfMassOffset = false, btVector3 centerOfMassOffsetValue = btVector3(0.0f, 0.0f, 0.0f));
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(RStaticModel* model, short collisionGroup, short collisionFilter);
         PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& models, short collisionGroup, short collisionFilter);
+        PhysicalBodyBvtTriangleMesh*    createPhysicalBodyBvtTriangleMesh(std::vector<glm::vec3>&& vertices, short collisionGroup, short collisionFilter);
         btCompoundShape*                createCompoundShape();
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(Vertex* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);
         PhysicalBodyRaycastVehicle*     createPhysicalBodyRayCastVehicle(glm::vec3* vertices, unsigned int vertexCount, btScalar mass, short collisionGroup, short collisionFilter);

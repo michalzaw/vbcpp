@@ -39,6 +39,25 @@ float FoliagePatch::calculateInstancePositionY(float x, float z)
 }
 
 
+void FoliagePatch::generateCollisionMesh(MultiRenderObject* multiRenderObject, std::vector<glm::vec3>& outCollisionMesh)
+{
+	unsigned int instancesCount = multiRenderObject->getInstancesPositions().size();
+	unsigned int collisionMeshSize = multiRenderObject->getRenderObject()->getModel()->getCollisionMeshSize();
+	glm::vec3* collisionMesh = multiRenderObject->getRenderObject()->getModel()->getCollisionMesh();
+
+	outCollisionMesh.clear();
+	outCollisionMesh.reserve(instancesCount * collisionMeshSize);
+
+	for (const glm::vec3& position : multiRenderObject->getInstancesPositions())
+	{
+		for (int i = 0; i < collisionMeshSize; ++i)
+		{
+			outCollisionMesh.emplace_back(collisionMesh[i] + position);
+		}
+	}
+}
+
+
 void FoliagePatch::generateFoliage(const std::vector<glm::vec3>& polygonPoints, const FoliagePatchLayer& foliageData, SceneObject* parentObject, SceneManager* sceneManager)
 {
 	std::vector<glm::vec2> polygonPointsVec2;
@@ -89,6 +108,25 @@ void FoliagePatch::generateFoliage(const std::vector<glm::vec3>& polygonPoints, 
 	parentObject->addChild(newObject);
 
 	newObject->setFlags(SOF_NOT_SERIALIZABLE);
+
+
+	std::vector<glm::vec3> collisionMesh;
+	generateCollisionMesh(multiRenderObject, collisionMesh);
+
+	if (collisionMesh.size() > 0)
+	{
+		Component* existingPhysicalBody = newObject->getComponent(CT_PHYSICAL_BODY);
+		if (existingPhysicalBody != nullptr)
+		{
+			newObject->removeComponent(existingPhysicalBody);
+		}
+
+		int collidesWith = COL_WHEEL | COL_BUS | COL_DOOR | COL_ENV;
+		PhysicalBodyBvtTriangleMesh* physicalBody = sceneManager->getPhysicsManager()->createPhysicalBodyBvtTriangleMesh(std::move(collisionMesh), COL_ENV, collidesWith);
+
+		newObject->addComponent(physicalBody);
+	}
+
 
 	LOG_DEBUG("Generated " + Strings::toString(points.size()) + " objects.");
 }
