@@ -442,8 +442,7 @@ void RoadIntersectionComponent::onAttachedToScenObject()
 
 void RoadIntersectionComponent::createDebugPolygonComponent(const std::vector<std::vector<glm::vec3>>& pointsOnRoadAxis, const std::vector<std::vector<glm::vec3>>& bezierCurves)
 {
-	// todo
-	auto shapePolygonComponent = new ShapePolygonComponent;
+	auto shapePolygonComponent = getSceneObject()->getSceneManager()->getGraphicsManager()->addShapePolygon();
 	getSceneObject()->removeComponent(getSceneObject()->getComponent(CT_SHAPE_POLYGON));
 	getSceneObject()->addComponent(shapePolygonComponent);
 

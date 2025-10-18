@@ -2039,7 +2039,7 @@ void Renderer::renderDepth(RenderData* renderData)
 				glEnable(GL_CULL_FACE);
 			}
 
-			if (material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL/* || material->shader == NEW_TREE_2_MATERIAL_MULTI*/)
+			if (material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
 			{
 				glDisable(GL_CULL_FACE);
 			}
@@ -2155,7 +2155,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             shader->enable();
 
             // todo: ten if tak naprawde nie dziala
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL/* || currentShader == NEW_TREE_2_MATERIAL_MULTI*/)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
             {
                 glEnable(GL_CULL_FACE);
             }
@@ -2169,7 +2169,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             }
 
             // todo: ten if tak naprawde nie dziala
-            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL/* || shaderType == NEW_TREE_2_MATERIAL_MULTI*/)
+            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }

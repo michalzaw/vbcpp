@@ -83,7 +83,7 @@ class RenderObject : public Component
 
         LUAF unsigned int getNumberOfLod();
 
-        virtual void changedTransform();
+        void changedTransform();
 
 };
 
