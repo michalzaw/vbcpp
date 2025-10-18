@@ -16,7 +16,8 @@
 enum RenderElementType
 {
     RET_SINGLE,
-    RET_GRASS
+    RET_GRASS,
+    RET_MULTI
 };
 
 
@@ -44,6 +45,9 @@ struct RenderListElement
 
     glm::mat4           transformMatrix;
     glm::mat4           normalMatrix;
+
+    VBO*                instancesPositionsVBO; // instanced rendering
+    unsigned int        instancesCount;
 
     RenderListElement();
 

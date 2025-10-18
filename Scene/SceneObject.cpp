@@ -11,6 +11,8 @@
 #include "../Game/GameLogicSystem.h"
 
 #include "../Graphics/BezierCurve.h"
+#include "../Graphics/FoliagePatch.h"
+#include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
 #include "../Graphics/SkeletalAnimationHelperComponent.h"
@@ -116,7 +118,7 @@ SceneObject::~SceneObject()
 				break;
 
             case CT_SHAPE_POLYGON:
-                delete* i;
+                _sceneManager->getGraphicsManager()->removeShapePolygon(static_cast<ShapePolygonComponent*>(*i));
                 break;
 
             case CT_CROSSROAD:
@@ -141,6 +143,14 @@ SceneObject::~SceneObject()
 
             case CT_BEZIER_CURVE:
                 _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(*i));
+                break;
+
+            case CT_MULTI_RENDER_OBJECT:
+                _sceneManager->getGraphicsManager()->removeMultiRenderObject(static_cast<MultiRenderObject*>(*i));
+                break;
+
+            case CT_FOLIAGE_PATCH:
+                _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(*i));
                 break;
 
             case CT_SCRIPT:
@@ -421,7 +431,7 @@ void SceneObject::removeComponent(Component* component)
 					break;
 
                 case CT_SHAPE_POLYGON:
-                    delete component;
+                    _sceneManager->getGraphicsManager()->removeShapePolygon(static_cast<ShapePolygonComponent*>(component));
                     break;
 
                 case CT_CROSSROAD:
@@ -446,6 +456,14 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_BEZIER_CURVE:
                     _sceneManager->getGraphicsManager()->removeBezierCurve(static_cast<BezierCurve*>(component));
+                    break;
+
+                case CT_MULTI_RENDER_OBJECT:
+                    _sceneManager->getGraphicsManager()->removeMultiRenderObject(static_cast<MultiRenderObject*>(component));
+                    break;
+
+                case CT_FOLIAGE_PATCH:
+                    _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(component));
                     break;
 
                 case CT_SCRIPT:

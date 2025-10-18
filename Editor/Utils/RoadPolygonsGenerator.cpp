@@ -112,6 +112,7 @@ namespace RoadPolygonsGenerator
 		}
 
 		SceneObject* polygonSceneObject = sceneManager->addSceneObject("Polygon");
+		// todo
 		polygonSceneObject->addComponent(new ShapePolygonComponent(points));
 	}
 }

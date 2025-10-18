@@ -3,6 +3,9 @@
 layout (location = 0) in vec3 VertexPosition;
 layout (location = 1) in vec2 VertexUV;
 layout (location = 2) in vec3 VertexNormal;
+#ifdef INSTANCING
+layout (location = 7) in vec3 positionOffset;
+#endif
 
 const int CASCADES_COUNT = 2;
 
@@ -25,6 +28,10 @@ void main()
 	vec3 pos = VertexPosition;
 	if (pos.y > 0.0f)
 		pos += d;
+
+#ifdef INSTANCING
+	pos.xyz = positionOffset + pos.xyz;
+#endif
 	
 	gl_Position = MVP * vec4(pos, 1.0f);
 
@@ -37,7 +44,7 @@ void main()
 	//Normal = n;
 	for (int i = 0; i < CASCADES_COUNT; ++i)
 	{
-		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
+		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(pos, 1.0f);
 	}
 	
 	ClipSpacePositionZ = gl_Position.z;

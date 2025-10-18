@@ -6,6 +6,9 @@ layout (location = 1) in vec2 UV;
 layout (location = 2) in vec3 VertexNormal;
 layout (location = 3) in vec3 VertexTangent;
 layout (location = 4) in vec3 VertexBitangent;
+#ifdef INSTANCING
+layout (location = 7) in vec3 positionOffset;
+#endif
 
 uniform mat4 MVP;
 uniform mat4 ModelMatrix;
@@ -25,8 +28,15 @@ out float ClipSpacePositionZ;
 
 void main()
 {
-	gl_Position = MVP * vec4(VertexPosition, 1.0f);
-	Position = (ModelMatrix * vec4(VertexPosition, 1.0f)).xyz;
+
+	vec4 totalPosition = vec4(VertexPosition, 1.0f);
+
+#ifdef INSTANCING
+	totalPosition.xyz = positionOffset + totalPosition.xyz;
+#endif
+
+	gl_Position = MVP * totalPosition;
+	Position = (ModelMatrix * totalPosition).xyz;
 
 	TexCoord = vec2(1 * UV.x, 1 * UV.y);
 	
@@ -37,7 +47,7 @@ void main()
 	
 	for (int i = 0; i < 3; ++i)
 	{
-		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * vec4(VertexPosition, 1.0f);
+		PositionLightSpace[i] = LightSpaceMatrix[i] * ModelMatrix * totalPosition;
 	}
 	
 	ClipSpacePositionZ = gl_Position.z;

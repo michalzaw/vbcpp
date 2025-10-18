@@ -11,6 +11,9 @@ layout (location = 4) in vec3 VertexBitangent;
 layout (location = 5) in ivec4 boneIds;
 layout (location = 6) in vec4 weights;
 #endif
+#ifdef INSTANCING
+layout (location = 7) in vec3 positionOffset;
+#endif
 
 const int CASCADES_COUNT = 2;
 
@@ -78,6 +81,10 @@ void main()
 #endif
 
 	vec4 totalPosition = vec4(pos, 1.0f);
+
+#ifdef INSTANCING
+	totalPosition.xyz = positionOffset + totalPosition.xyz;
+#endif
 
 #ifdef ANIMATED
 	mat4 vertexTransform = calculateVertexTransform();

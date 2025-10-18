@@ -91,6 +91,38 @@ bool isAABBInFrustum(Frustum& frustum, AABB& aabb)
 }
 
 
+bool isPointInAABB(AABB& aabb, glm::vec3 point)
+{
+    return point.x > aabb.getMinCoords().x &&
+           point.x < aabb.getMaxCoords().x &&
+           point.y > aabb.getMinCoords().y &&
+           point.y < aabb.getMaxCoords().y &&
+           point.z > aabb.getMinCoords().z &&
+           point.z < aabb.getMaxCoords().z;
+}
+
+
+float calculatePointToAABBDistnce(AABB& aabb, const glm::vec3& point)
+{
+    glm::vec3 delta;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (point[i] < aabb.getMinCoords()[i]) {
+            delta[i] = aabb.getMinCoords()[i] - point[i];
+        }
+        else if (point[i] > aabb.getMaxCoords()[i]) {
+            delta[i] = point[i] - aabb.getMaxCoords()[i];
+        }
+        else {
+            delta[i] = 0.0f;
+        }
+    }
+
+    return glm::length(delta);
+}
+
+
 bool isRayIntersectOBB(glm::vec3 rayOrigin, glm::vec3 rayDirection, AABB& aabb, glm::mat4 modelMatrix, float& intersectionDistance)
 {
     float min = 0.0f;

@@ -14,7 +14,9 @@
 #include "../Game/Directories.h"
 
 #include "../Graphics/BezierCurve.h"
+#include "../Graphics/FoliagePatch.h"
 #include "../Graphics/RenderObject.h"
+#include "../Graphics/ShapePolygonComponent.h"
 
 #include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
@@ -293,6 +295,48 @@ void SceneSaver::saveBusStartPointComponent(tinyxml2::XMLElement* objectElement,
 }
 
 
+void SceneSaver::saveShapePolygonComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, ShapePolygonComponent* shapePolygonComponent)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "polygon");
+
+	for (const glm::vec3& point : shapePolygonComponent->getPoints())
+	{
+		XMLElement* pointElement = doc.NewElement("Point");
+
+		pointElement->SetAttribute("position", vec3ToString(point).c_str());
+
+		componentElement->InsertEndChild(pointElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
+void SceneSaver::saveFoliagePatch(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, FoliagePatch* foliagePatch)
+{
+	XMLElement* componentElement = doc.NewElement("Component");
+
+	componentElement->SetAttribute("type", "foliage");
+
+	for (int i = 0; i < foliagePatch->getLayersCount(); ++i)
+	{
+		const FoliagePatchLayer& layer = foliagePatch->getLayer(i);
+
+		XMLElement* layerElement = doc.NewElement("Layer");
+
+		layerElement->SetAttribute("objectName", layer.objectName.c_str());
+		layerElement->SetAttribute("minDistance", layer.minDistance);
+		layerElement->SetAttribute("seed", layer.seed);
+
+		componentElement->InsertEndChild(layerElement);
+	}
+
+	objectElement->InsertEndChild(componentElement);
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -369,6 +413,18 @@ void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneO
 	if (busStartPointComponent)
 	{
 		saveBusStartPointComponent(objectElement, doc, busStartPointComponent);
+	}
+
+	ShapePolygonComponent* shapePolygonComponent = static_cast<ShapePolygonComponent*>(sceneObject->getComponent(CT_SHAPE_POLYGON));
+	if (shapePolygonComponent)
+	{
+		saveShapePolygonComponent(objectElement, doc, shapePolygonComponent);
+	}
+
+	FoliagePatch* foliagePatch = static_cast<FoliagePatch*>(sceneObject->getComponent(CT_FOLIAGE_PATCH));
+	if (foliagePatch)
+	{
+		saveFoliagePatch(objectElement, doc, foliagePatch);
 	}
 
 	objectsElement->InsertEndChild(objectElement);

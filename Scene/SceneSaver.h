@@ -31,6 +31,8 @@ class StopComponent;
 class TrafficLightsComponent;
 class BezierCurve;
 class BusStartPoint;
+class ShapePolygonComponent;
+class FoliagePatch;
 
 
 class SceneSaver
@@ -67,6 +69,8 @@ class SceneSaver
 		void saveStopComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, StopComponent* stopComponent);
 		void saveTrafficLightsComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, TrafficLightsComponent* trafficLightsComponent);
 		void saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint);
+		void saveShapePolygonComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, ShapePolygonComponent* shapePolygonComponent);
+		void saveFoliagePatch(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, FoliagePatch* foliagePatch);
 
 		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);
 
