@@ -7,7 +7,7 @@
 
 namespace ScheduleLoader
 {
-	Schedule* loadSchedule(const std::string& fileName);
+	Schedule* loadSchedule(const std::string& dirPath, const std::string& fileName);
 }
 
 

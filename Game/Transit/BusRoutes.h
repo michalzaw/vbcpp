@@ -58,6 +58,7 @@ struct BusLine final
 
 struct BusRoutes final
 {
+	std::string fileName;
 	ResourceDescription description;
 
 	std::unordered_map<std::string, BusLine> lines;

@@ -77,10 +77,10 @@ namespace ScheduleLoader
 	}
 
 
-	Schedule* loadSchedule(const std::string& fileName)
+	Schedule* loadSchedule(const std::string& dirPath, const std::string& fileName)
 	{
 		XMLDocument doc;
-		XMLError result = doc.LoadFile(fileName.c_str());
+		XMLError result = doc.LoadFile((dirPath + fileName).c_str());
 		if (result != XML_SUCCESS)
 		{
 			LOG_ERROR("Cannot read xml file: " + fileName + "! Result: " + Strings::toString((int)result));
@@ -102,6 +102,7 @@ namespace ScheduleLoader
 		}
 
 		Schedule* schedule = new Schedule;
+		schedule->fileName = fileName;
 
 		ResourceDescriptionUtils::loadResourceDescription(routesDesc, schedule->description);
 

@@ -88,6 +88,7 @@ struct ScheduleLine final
 
 struct Schedule final
 {
+	std::string fileName;
 	ResourceDescription description;
 
 	std::vector<ScheduleLine> lines;

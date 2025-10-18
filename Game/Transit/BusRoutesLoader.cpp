@@ -65,10 +65,10 @@ namespace BusRoutesLoader
 	}
 
 
-	BusRoutes* loadRoutes(const std::string& fileName)
+	BusRoutes* loadRoutes(const std::string& dirPath, const std::string& fileName)
 	{
 		XMLDocument doc;
-		XMLError result = doc.LoadFile(fileName.c_str());
+		XMLError result = doc.LoadFile((dirPath + fileName).c_str());
 		if (result != XML_SUCCESS)
 		{
 			LOG_ERROR("Cannot read xml file: " + fileName + "! Result: " + Strings::toString((int)result));
@@ -90,6 +90,7 @@ namespace BusRoutesLoader
 		}
 
 		BusRoutes* routes = new BusRoutes;
+		routes->fileName = fileName;
 
 		ResourceDescriptionUtils::loadResourceDescription(routesDesc, routes->description);
 

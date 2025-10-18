@@ -7,7 +7,7 @@
 
 namespace BusRoutesLoader
 {
-	BusRoutes* loadRoutes(const std::string& fileName);
+	BusRoutes* loadRoutes(const std::string& dirPath, const std::string& fileName);
 }
 
 

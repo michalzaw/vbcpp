@@ -1019,7 +1019,7 @@ void SceneLoader::loadBusRoutes(tinyxml2::XMLElement* routesElement)
 {
 	std::string fileName = XmlUtils::getAttributeString(routesElement, "file");
 
-	BusRoutes* routes = BusRoutesLoader::loadRoutes(_dirPath + fileName);
+	BusRoutes* routes = BusRoutesLoader::loadRoutes(_dirPath, fileName);
 
 	_sceneManager->getTransitSystem()->setRoutes(routes);
 }
@@ -1029,7 +1029,7 @@ void SceneLoader::loadSchedules(tinyxml2::XMLElement* schedulesElement)
 {
 	std::string fileName = XmlUtils::getAttributeString(schedulesElement, "file");
 
-	Schedule* schedule = ScheduleLoader::loadSchedule(_dirPath + fileName);
+	Schedule* schedule = ScheduleLoader::loadSchedule(_dirPath, fileName);
 
 	_sceneManager->getTransitSystem()->setSchedule(schedule);
 }

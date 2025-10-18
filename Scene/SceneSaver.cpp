@@ -10,6 +10,8 @@
 #include "../Game/AI/PathComponent.h"
 #include "../Game/AI/StopComponent.h"
 #include "../Game/AI/TrafficLightsComponent.h"
+#include "../Game/Transit/BusRoutes.h"
+#include "../Game/Transit/Schedule.h"
 #include "../Game/BusStartPoint.h"
 #include "../Game/Directories.h"
 
@@ -337,6 +339,30 @@ void SceneSaver::saveFoliagePatch(tinyxml2::XMLElement* objectElement, tinyxml2:
 }
 
 
+void SceneSaver::saveBusRoutes(tinyxml2::XMLElement* busRoutesElement, tinyxml2::XMLDocument& doc)
+{
+	BusRoutes* busRoutes = _sceneManager->getTransitSystem()->getRoutes();
+	if (busRoutes != nullptr && !busRoutes->fileName.empty())
+	{
+		busRoutesElement->SetAttribute("file", busRoutes->fileName.c_str());
+
+		_rootNode->InsertAfterChild(_skyElement, busRoutesElement);
+	}
+}
+
+
+void SceneSaver::saveSchedules(tinyxml2::XMLElement* schedulesElement, tinyxml2::XMLDocument& doc)
+{
+	Schedule* schedule = _sceneManager->getTransitSystem()->getSchedule();
+	if (schedule != nullptr && !schedule->fileName.empty())
+	{
+		schedulesElement->SetAttribute("file", schedule->fileName.c_str());
+
+		_rootNode->InsertAfterChild(_skyElement, schedulesElement);
+	}
+}
+
+
 void SceneSaver::saveObject(XMLElement* objectsElement, XMLDocument& doc, SceneObject* sceneObject, RObject* objectDefinition)
 {
 	XMLElement* objectElement = doc.NewElement("Object");
@@ -620,31 +646,37 @@ void SceneSaver::saveMap(std::string name, const ResourceDescription& sceneDescr
 	XMLDeclaration* declaration = doc.NewDeclaration();
 	doc.InsertFirstChild(declaration);
 
-	XMLNode* rootNode = doc.NewElement("Scene");
-	doc.InsertEndChild(rootNode);
+	_rootNode = doc.NewElement("Scene");
+	doc.InsertEndChild(_rootNode);
 
 	XMLElement* descriptionElement = doc.NewElement("Description");
-	rootNode->InsertEndChild(descriptionElement);
+	_rootNode->InsertEndChild(descriptionElement);
 
 	_terrainElement = doc.NewElement("Terrain");
-	rootNode->InsertEndChild(_terrainElement);
+	_rootNode->InsertEndChild(_terrainElement);
 
 	_grassElement = doc.NewElement("Grass");
 
 	_sunElement = doc.NewElement("Light");
-	rootNode->InsertEndChild(_sunElement);
+	_rootNode->InsertEndChild(_sunElement);
 
 	_skyElement = doc.NewElement("Sky");
-	rootNode->InsertEndChild(_skyElement);
+	_rootNode->InsertEndChild(_skyElement);
+
+	_busRoutesElement = doc.NewElement("BusRoutes");
+	_schedulesElement = doc.NewElement("Schedules");
 
 	_objectsElement = doc.NewElement("Objects");
-	rootNode->InsertEndChild(_objectsElement);
+	_rootNode->InsertEndChild(_objectsElement);
 
 	_roadsElement = doc.NewElement("Roads");
 	_roadsElement->SetAttribute("version", "2");
-	rootNode->InsertEndChild(_roadsElement);
+	_rootNode->InsertEndChild(_roadsElement);
 	
 	ResourceDescriptionUtils::saveResourceDescription(descriptionElement, sceneDescription);
+
+	saveSchedules(_schedulesElement, doc);
+	saveBusRoutes(_busRoutesElement, doc);
 
 	for (SceneObject* sceneObject : _sceneManager->getSceneObjects())
 	{
