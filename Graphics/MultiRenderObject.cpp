@@ -4,6 +4,7 @@
 MultiRenderObject::MultiRenderObject(RenderObject* renderObject)
 	: Component(CT_MULTI_RENDER_OBJECT),
 	_renderObject(renderObject),
+	_instancesPositionsVBO(nullptr),
 	_isCalculatedAABB(false)
 {
 
@@ -15,6 +16,11 @@ MultiRenderObject::~MultiRenderObject()
 	if (_renderObject != nullptr)
 	{
 		delete _renderObject;
+	}
+
+	if (_instancesPositionsVBO != nullptr)
+	{
+		OGLDriver::getInstance().deleteVBO(_instancesPositionsVBO);
 	}
 }
 
@@ -99,9 +105,23 @@ AABB* MultiRenderObject::getAABB()
 
 void MultiRenderObject::recreateInstancesPositionVBO()
 {
+	unsigned int instancesCount = _instancesPositions.size();
+	unsigned int bufferSize = instancesCount * sizeof(glm::vec3);
+	if (_instancesPositionsVBO != nullptr && _instancesPositionsVBO->getBufferSize() <= bufferSize)
+	{
+		LOG_DEBUG("Update existing VBO");
 
-	_instancesPositionsVBO = OGLDriver::getInstance().createVBO(_instancesPositions.size() * sizeof(glm::vec3));
-	_instancesPositionsVBO->addVertexData(&_instancesPositions[0], _instancesPositions.size());
+		_instancesPositionsVBO->updateVertexData(&_instancesPositions[0], instancesCount);
+	}
+	else
+	{
+		LOG_DEBUG("Create new VBO");
+
+		OGLDriver::getInstance().deleteVBO(_instancesPositionsVBO);
+
+		_instancesPositionsVBO = OGLDriver::getInstance().createVBO(bufferSize);
+		_instancesPositionsVBO->addVertexData(&_instancesPositions[0], instancesCount);
+	}
 }
 
 
