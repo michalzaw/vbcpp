@@ -1,7 +1,8 @@
 #include "PhysicalBodyBvtTriangleMesh.hpp"
 
 PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
-    : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0)
+    : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0),
+    _mode(PhysicalBodyBvtTriangleMeshMode::MODELS)
 {
     LOG_INFO("BvtTriangleMeshShape - Konstruktor");
 
@@ -12,7 +13,19 @@ PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(RStaticModel* model)
 
 PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(const std::list<RStaticModel*>& models)
     : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0),
-    _models(models)
+    _models(models),
+    _mode(PhysicalBodyBvtTriangleMeshMode::MODELS)
+{
+    LOG_INFO("BvtTriangleMeshShape - Konstruktor");
+
+    updateBody();
+}
+
+
+PhysicalBodyBvtTriangleMesh::PhysicalBodyBvtTriangleMesh(std::vector<glm::vec3>&& vertices)
+    : PhysicalBody(PhysicalBodyType::BVT_TRIANGLE_MESH, 0),
+    _vertices(std::move(vertices)),
+    _mode(PhysicalBodyBvtTriangleMeshMode::VERTICES)
 {
     LOG_INFO("BvtTriangleMeshShape - Konstruktor");
 
@@ -93,7 +106,7 @@ void PhysicalBodyBvtTriangleMesh::addModelNodeToTriangleMesh(btTriangleMesh* tri
 }
 
 
-btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
+btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMeshInModelMode()
 {
     btTriangleMesh* triMesh = new btTriangleMesh(true, false);
 
@@ -108,9 +121,32 @@ btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMesh()
         return triMesh;
 }
 
+
+btTriangleMesh* PhysicalBodyBvtTriangleMesh::buildTriangleMeshInVerticesMode()
+{
+    if (_vertices.size() < 3 || _vertices.size() % 3 != 0)
+    {
+        LOG_ERROR("Invalid vertices size=" + Strings::toString(_vertices.size()));
+        return nullptr;
+    }
+
+    btTriangleMesh* triMesh = new btTriangleMesh(true, false);
+
+    for (int i = 0; i < _vertices.size(); i += 3)
+    {
+        triMesh->addTriangle(btVector3(_vertices[i + 0].x, _vertices[i + 0].y, _vertices[i + 0].z),
+                             btVector3(_vertices[i + 1].x, _vertices[i + 1].y, _vertices[i + 1].z),
+                             btVector3(_vertices[i + 2].x, _vertices[i + 2].y, _vertices[i + 2].z));
+    }
+
+    return triMesh;
+}
+
+
 void PhysicalBodyBvtTriangleMesh::updateBody()
 {
-    _collShape.reset( new btBvhTriangleMeshShape( buildTriangleMesh(), true, true) );
+    btTriangleMesh* mesh = _mode == PhysicalBodyBvtTriangleMeshMode::MODELS ? buildTriangleMeshInModelMode() : buildTriangleMeshInVerticesMode();
+    _collShape.reset( new btBvhTriangleMeshShape( mesh, true, true) );
 
     btVector3 inertia(0, 0, 0);
 

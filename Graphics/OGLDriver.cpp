@@ -10,8 +10,8 @@ OGLDriver::OGLDriver()
 {
     //_defaultVAO = NULL;
 
-    vbos = new std::vector<VBO*>[25];
-    ibos = new std::vector<IBO*>[25];
+    vbos = new std::vector<VBO*>[26];
+    ibos = new std::vector<IBO*>[26];
 }
 
 

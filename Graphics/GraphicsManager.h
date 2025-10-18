@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include "RenderObject.h"
+#include "MultiRenderObject.h"
 #include "RoadObject.h"
 #include "Terrain.h"
 #include "RenderData.h"
@@ -43,6 +44,8 @@ class SkeletalAnimationComponent2;
 class SkeletalAnimationHelperComponent;
 class RAnimation;
 class BezierCurve;
+class ShapePolygonComponent;
+class FoliagePatch;
 
 
 class GraphicsManager
@@ -51,6 +54,7 @@ class GraphicsManager
 
     private:
         std::list<RenderObject*>                    _renderObjects;
+        std::list<MultiRenderObject*>               _multiRenderObjects;
         std::list<Grass*>                           _grassComponents;
         std::vector<CameraStatic*>                  _cameras;
         std::list<Light*>                           _lights;
@@ -65,6 +69,8 @@ class GraphicsManager
         std::vector<SkeletalAnimationComponent2*>   _skeletalAnimations2;
         std::vector<SkeletalAnimationHelperComponent*>_skeletalAnimationHelpers;
         std::vector<BezierCurve*>                   _bezierCurves;
+        std::vector<ShapePolygonComponent*>         _shapePolygons;
+        std::vector<FoliagePatch*>                  _foliagePatches;
 
 		Sky*						_sky;
 
@@ -94,6 +100,7 @@ class GraphicsManager
         //                                glm::vec3 rotation = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 scale = glm::vec3(1.0f, 1.0f, 1.0f)*/);
 
         RenderObject*   addRenderObject(RenderObject* object, SceneObject* owner); //Model* model = NULL);
+        MultiRenderObject* addMultiRenderObject(RenderObject* object); //Model* model = NULL);
 		RoadObject*		addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner);
 		Terrain*		addTerrain(std::string heightmapFileName, std::string dirPath, std::string materialName, float maxHeight, bool is16bitTexture, SceneObject* owner);
         Grass*          addGrassComponent(RStaticModel* model, RTexture2D* terrainHeightmap, RTexture2D* grassDensityTexture);
@@ -114,10 +121,13 @@ class GraphicsManager
         SkeletalAnimationComponent2* addSkeletalAnimation2(RAnimation* animation, const std::unordered_map<std::string, std::string>& animationNodeNameToBoneNameInModelMap);
         SkeletalAnimationHelperComponent* addSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
         BezierCurve*    addBezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {}, float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
+        ShapePolygonComponent* addShapePolygon();
+        FoliagePatch*   addFoliagePatch();
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
         void removeRenderObject(RenderObject* object);
+        void removeMultiRenderObject(MultiRenderObject* object);
 		void removeRoadObject(RoadObject* object);
 		void removeTerrain(Terrain* object);
         void removeGrassComponent(Grass* grass);
@@ -134,6 +144,8 @@ class GraphicsManager
         void removeSkeletalAnimation2(SkeletalAnimationComponent2* skeletalAnimationComponent);
         void removeSkeletalAnimationHelper(SkeletalAnimationHelperComponent* component);
         void removeBezierCurve(BezierCurve* bezierCurve);
+        void removeShapePolygon(ShapePolygonComponent* shapePolygon);
+        void removeFoliagePatch(FoliagePatch* foliagePatch);
 
 
         void setCurrentCamera(CameraStatic* camera);

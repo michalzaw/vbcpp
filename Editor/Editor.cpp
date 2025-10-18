@@ -52,6 +52,7 @@
 #include "Windows/MainSceneViewWindow.h"
 
 #include "../Graphics/BezierCurve.h"
+#include "../Graphics/FoliagePatch.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -1374,9 +1375,19 @@ namespace vbEditor
 				if (ImGui::MenuItem("Add new custom polygon", NULL))
 				{
 					SceneObject* polygonSceneObject = _sceneManager->addSceneObject("Polygon");
-					polygonSceneObject->addComponent(new ShapePolygonComponent);
+					polygonSceneObject->addComponent(_graphicsManager->addShapePolygon());
 
 					setSelectedSceneObject(polygonSceneObject);
+				}
+				if (ImGui::MenuItem("Add foliage patch", NULL))
+				{
+					SceneObject* foliageSceneObject = _sceneManager->addSceneObject("Foliage");
+					foliageSceneObject->addComponent(_graphicsManager->addShapePolygon());
+					foliageSceneObject->addComponent(_graphicsManager->addFoliagePatch());
+
+					foliageSceneObject->getComponentWithCasting<FoliagePatch>(CT_FOLIAGE_PATCH)->addLayer("");
+
+					setSelectedSceneObject(foliageSceneObject);
 				}
 				ImGui::Separator();
 				if (ImGui::MenuItem("Add new decal (WIP)", NULL))

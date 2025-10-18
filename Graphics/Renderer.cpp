@@ -289,6 +289,8 @@ void Renderer::initUniformLocations()
 	_uniformsNames[UNIFORM_DEBUG_VERTEX_INDEX_8] = "indices[7]";
 	_uniformsNames[UNIFORM_EMISSIVE_TEXTURE] = "emissiveTexture";
     _uniformsNames[UNIFORM_OBJECT_ID] = "objectId";
+    _uniformsNames[UNIFORM_TEX_SCALE] = "textureScale";
+    _uniformsNames[UNIFORM_TEX_OFFSET] = "textureOffset";
 
 	_uniformsNames[UNIFORM_ALBEDO_TEXTURE] = "AlbedoTexture";
 	_uniformsNames[UNIFORM_METALIC_TEXTURE] = "MetalicTexture";
@@ -598,6 +600,28 @@ void Renderer::addGrassStaticModelNodeToRenderList(ModelNode* modelNode, RenderL
 }
 
 
+void Renderer::addInstancedStaticModelNodeToRenderList(ModelNode* modelNode, RenderListElement& tempRenderElement, std::list<RenderListElement>& renderList, glm::mat4 parentTransform, glm::mat4 parentNormalMatrix)
+{
+    glm::mat4 t = parentTransform * modelNode->getTransformMatrix();
+    glm::mat4 n = parentNormalMatrix * modelNode->getNormalMatrix();
+    tempRenderElement.transformMatrix = t;
+    tempRenderElement.normalMatrix = n;
+
+    for (int j = 0; j < modelNode->getMeshesCount(); ++j)
+    {
+        tempRenderElement.mesh = modelNode->getMesh(j);
+        tempRenderElement.material = tempRenderElement.mesh->material;
+        //tempRenderElement.material = tempRenderElement.model->getMaterial(tempRenderElement.mesh->materialIndex);
+        renderList.push_back(tempRenderElement);
+    }
+
+    for (int i = 0; i < modelNode->getChildrenCount(); ++i)
+    {
+        addInstancedStaticModelNodeToRenderList(modelNode->getChildren()[i], tempRenderElement, renderList, t, n);
+    }
+}
+
+
 void Renderer::prepareRenderData()
 {
     for (int i = 0; i < _renderDataList.size(); ++i)
@@ -683,7 +707,7 @@ void Renderer::prepareRenderData()
             }
         }
 #ifdef DRAW_AABB
-        _renderObjectsInCurrentFrame.push_back(*i);
+        _renderObjectsInCurrentFrame.emplace_back(object->getAABB(), object->getModel()->getAABB(), object->getSceneObject());
 #endif // DRAW_AABB
     }
 
@@ -698,6 +722,59 @@ void Renderer::prepareRenderData()
 
         ModelNode* modelNode = tempRenderElement.renderObject->getModelRootNode();
         addGrassStaticModelNodeToRenderList(modelNode, tempRenderElement, _renderDataList[_renderDataList.size() - 1]->renderList);
+    }
+
+    RenderListElement tempRenderElementInstanced;
+    for (std::list<MultiRenderObject*>::iterator i = _graphicsManager->_multiRenderObjects.begin(); i != _graphicsManager->_multiRenderObjects.end(); ++i)
+    {
+        MultiRenderObject* multiRenderObject = *i;
+        RenderObject* object = multiRenderObject->getRenderObject();
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < _renderDataList.size(); ++j)
+        {
+            RenderPass renderPass = _renderDataList[j]->renderPass;
+            bool isCastShadows = object->isCastShadows();
+
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
+                isObjectInCamera(multiRenderObject, _renderDataList[j]->camera))
+            {
+
+                tempRenderElementInstanced.type = RET_MULTI;
+                tempRenderElementInstanced.model = object->getModel();
+                tempRenderElementInstanced.object = object->getSceneObject();
+                tempRenderElementInstanced.renderObject = object;
+                tempRenderElementInstanced.instancesPositionsVBO = multiRenderObject->getInstancesPositionVBO();
+                tempRenderElementInstanced.instancesCount = multiRenderObject->getInstancesPositions().size();
+
+                ModelNode* modelNode;
+                int lod = 0;
+                if (tempRenderElementInstanced.renderObject->getNumberOfLod() == 1 || renderPass == RP_SHADOWS)
+                {
+                    modelNode = tempRenderElementInstanced.renderObject->getModelRootNode();
+                }
+                else
+                {
+                    AABB* aabb = multiRenderObject->getAABB();
+
+                    if (calculatePointToAABBDistnce(*aabb, _renderDataList[j]->camera->getPosition()) > 30.0f)
+                    {
+                        modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(1);
+                        lod = 1;
+                    }
+                    else
+                    {
+                        modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(0);
+                    }
+                }
+                addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataList[j]->renderList);
+            }
+        }
+#ifdef DRAW_AABB
+        _renderObjectsInCurrentFrame.emplace_back(multiRenderObject->getAABB(), multiRenderObject->getAABB(), multiRenderObject->getSceneObject());
+#endif // DRAW_AABB
     }
 
 
@@ -769,20 +846,64 @@ void Renderer::prepareRenderDataForStaticShadowmaps()
 			}
 		}
 	}
+
+    RenderListElement tempRenderElementInstanced;
+    for (std::list<MultiRenderObject*>::iterator i = _graphicsManager->_multiRenderObjects.begin(); i != _graphicsManager->_multiRenderObjects.end(); ++i)
+    {
+        MultiRenderObject* multiRenderObject = *i;
+        RenderObject* object = multiRenderObject->getRenderObject();
+
+        if (!(*i)->isActive())
+            continue;
+
+        for (int j = 0; j < _renderDataListForStaticShadowmapping.size(); ++j)
+        {
+            RenderPass renderPass = _renderDataListForStaticShadowmapping[j]->renderPass;
+            bool isCastShadows = object->isCastShadows();
+
+            if ((renderPass == RP_SHADOWS && isCastShadows || renderPass != RP_SHADOWS) &&
+                isObjectInCamera(multiRenderObject, _renderDataListForStaticShadowmapping[j]->camera))
+            {
+                int lod = object->getNumberOfLod() > 1 ? 1 : 0;
+
+                tempRenderElementInstanced.type = RET_MULTI;
+                tempRenderElementInstanced.model = object->getModel(lod);
+                tempRenderElementInstanced.object = object->getSceneObject();
+                tempRenderElementInstanced.renderObject = object;
+                tempRenderElementInstanced.instancesPositionsVBO = multiRenderObject->getInstancesPositionVBO();
+                tempRenderElementInstanced.instancesCount = multiRenderObject->getInstancesPositions().size();
+
+                ModelNode* modelNode = tempRenderElementInstanced.renderObject->getModelRootNode(lod);
+                addInstancedStaticModelNodeToRenderList(modelNode, tempRenderElementInstanced, _renderDataListForStaticShadowmapping[j]->renderList);
+            }
+        }
+    }
 }
 
 
 bool Renderer::isObjectInCamera(RenderObject* object, CameraStatic* camera)
 {
+    return isObjectInCamera(*object->getAABB(), camera);
+}
+
+
+bool Renderer::isObjectInCamera(MultiRenderObject* object, CameraStatic* camera)
+{
+    return isObjectInCamera(*object->getAABB(), camera);
+}
+
+
+bool Renderer::isObjectInCamera(AABB& aabb, CameraStatic* camera)
+{
     if (camera->getProjctionType() == CPT_ORTHOGRAPHIC)
     {
-        if (isAABBIntersectAABB(*(camera->getAABB()), *object->getAABB()))
+        if (isAABBIntersectAABB(*(camera->getAABB()), aabb))
             return true;
     }
     else // CPT_PERSPECTIVE
     {
         Frustum frustum(camera->getProjectionMatrix() * camera->getViewMatrix());
-        if (isAABBIntersectFrustum(frustum, *object->getAABB()))
+        if (isAABBIntersectFrustum(frustum, aabb))
             return true;
     }
 
@@ -1083,8 +1204,20 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MULTI_SOLID_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // NOTEXTURE_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[NOTEXTURE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
+
+    // MULTI_NOTEXTURE_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_NOTEXTURE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader_notexture.frag", defines);
 
     // NORMALMAPPING_MATERIAL
     defines.clear();
@@ -1094,6 +1227,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MULTI_NORMALMAPPING_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_NORMALMAPPING_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
 	// SOLID_EMISSIVE_MATERIAL
 	defines.clear();
 	defines.push_back("SOLID");
@@ -1101,6 +1238,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[SOLID_EMISSIVE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MULTI_SOLID_EMISSIVE_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_SOLID_EMISSIVE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // CAR_PAINT_MATERIAL
     defines.clear();
@@ -1110,6 +1251,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MULTI_CAR_PAINT_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_CAR_PAINT_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // MIRROR_MATERIAL
 	_shaderList[MIRROR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/mirror.frag");
@@ -1122,6 +1267,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MULTI_ALPHA_TEST_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // TREE_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
@@ -1130,6 +1279,18 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
+
+    // MULTI_TREE_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/tree.vert", "Shaders/shader.frag", defines);
+
+    // TERRAIN_MATERIAL
+    defines.clear();
+    defines.push_back("SOLID");
+    defines.push_back("TERRAIN");
+    if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
+    if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
+    _shaderList[TERRAIN_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // DECAL_MATERIAL
     defines.clear();
@@ -1190,6 +1351,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
     _shaderList[GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MULTI_GLASS_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // NOTEXTURE_ALWAYS_VISIBLE_MATERIAL
     _shaderList[NOTEXTURE_ALWAYS_VISIBLE_MATERIAL] = _shaderList[NOTEXTURE_MATERIAL];
 
@@ -1208,10 +1373,19 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     // SHADOWMAP_SHADER
     _shaderList[SHADOWMAP_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag");
 
+    // SHADOWMAP_SHADER
+    defines.clear();
+    defines.push_back("INSTANCING");
+    _shaderList[SHADOWMAP_MULTI_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
     // SHADOWMAP_ALPHA_TEST_SHADER
     defines.clear();
     defines.push_back("ALPHA_TEST");
     _shaderList[SHADOWMAP_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
+
+    // SHADOWMAP_MULTI_ALPHA_TEST_SHADER
+    defines.push_back("INSTANCING");
+    _shaderList[SHADOWMAP_MULTI_ALPHA_TEST_SHADER] = ResourceManager::getInstance().loadShader("Shaders/shadowmap.vert", "Shaders/shadowmap.frag", defines);
 
     // SHADOWMAP_ANIMATED_SHADER
     defines.clear();
@@ -1223,17 +1397,29 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     defines.push_back("SOLID");
 	_shaderList[MIRROR_SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MIRROR_MULTI_SOLID_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MIRROR_MULTI_SOLID_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // MIRROR_ALPHA_TEST_MATERIAL
     defines.clear();
     defines.push_back("SOLID");
     defines.push_back("ALPHA_TEST");
     _shaderList[MIRROR_ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
+    // MIRROR_MULTI_ALPHA_TEST_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MIRROR_MULTI_ALPHA_TEST_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
     // MIRROR_GLASS_MATERIAL
     defines.clear();
     defines.push_back("GLASS");
     defines.push_back("REFLECTION");
     _shaderList[MIRROR_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
+
+    // MIRROR_MULTI_GLASS_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MIRROR_MULTI_GLASS_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/shader.frag", defines);
 
     // MIRROR_SOLID_ANIMATED_MATRIAL
     defines.clear();
@@ -1254,8 +1440,15 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
 
+    // MULTI_PBR_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_PBR_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/pbr.vert", "Shaders/pbr.frag", defines);
+
 	// PBR_TREE_MATERIAL
 	_shaderList[PBR_TREE_MATERIAL] = _shaderList[PBR_MATERIAL];
+
+    // MULTI_PBR_TREE_MATERIAL
+    _shaderList[MULTI_PBR_TREE_MATERIAL] = _shaderList[MULTI_PBR_MATERIAL];
 
 	// NEW_TREE_MATERIAL
 	defines.clear();
@@ -1265,6 +1458,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
 
+    // MULTI_NEW_TREE_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_NEW_TREE_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree.frag", defines);
+
 	// NEW_TREE_2_MATERIAL
 	defines.clear();
 	defines.push_back("NORMALMAPPING");
@@ -1272,6 +1469,10 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
 	if (_isShadowMappingEnable) defines.push_back("SHADOWMAPPING");
     if (_renderObjectIdsForPicking) defines.push_back("RENDER_OBJECT_ID");
 	_shaderList[NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
+
+    // MULTI_NEW_TREE_2_MATERIAL
+    defines.push_back("INSTANCING");
+    _shaderList[MULTI_NEW_TREE_2_MATERIAL] = ResourceManager::getInstance().loadShader("Shaders/shader.vert", "Shaders/newTree2.frag", defines);
 
     // EDITOR_AXIS_SHADER
     _shaderList[EDITOR_AXIS_SHADER] = _shaderList[SOLID_MATERIAL];
@@ -1294,6 +1495,7 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[PBR_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[PBR_TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[TREE_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorRendering[TERRAIN_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[DECAL_MATERIAL] = MIRROR_SOLID_MATERIAL;
     _shaderListForMirrorRendering[SOLID_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
     _shaderListForMirrorRendering[NORMALMAPPING_ANIMATED_MATERIAL] = MIRROR_SOLID_ANIMATED_MATRIAL;
@@ -1301,6 +1503,36 @@ void Renderer::init(unsigned int screenWidth, unsigned int screenHeight)
     _shaderListForMirrorRendering[GRASS_MATERIAL] = MIRROR_ALPHA_TEST_MATERIAL;
     _shaderListForMirrorRendering[SKY_MATERIAL] = SKY_MATERIAL;
     _shaderListForMirrorRendering[GLASS_MATERIAL] = MIRROR_GLASS_MATERIAL;
+
+
+    _shaderListForMirrorMultiRendering.resize(NUMBER_OF_SHADERS);
+    _shaderListForMirrorMultiRendering[SOLID_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[NOTEXTURE_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[NORMALMAPPING_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[SOLID_EMISSIVE_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[CAR_PAINT_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[ALPHA_TEST_MATERIAL] = MIRROR_MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorMultiRendering[NEW_TREE_MATERIAL] = MIRROR_MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorMultiRendering[NEW_TREE_2_MATERIAL] = MIRROR_MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorMultiRendering[PBR_MATERIAL] = MIRROR_MULTI_SOLID_MATERIAL;
+    _shaderListForMirrorMultiRendering[PBR_TREE_MATERIAL] = MIRROR_MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorMultiRendering[TREE_MATERIAL] = MIRROR_MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMirrorMultiRendering[GLASS_MATERIAL] = MIRROR_MULTI_GLASS_MATERIAL;
+
+
+    _shaderListForMultiRendering.resize(NUMBER_OF_SHADERS);
+    _shaderListForMultiRendering[SOLID_MATERIAL] = MULTI_SOLID_MATERIAL;
+    _shaderListForMultiRendering[NOTEXTURE_MATERIAL] = MULTI_NOTEXTURE_MATERIAL;
+    _shaderListForMultiRendering[NORMALMAPPING_MATERIAL] = MULTI_NORMALMAPPING_MATERIAL;
+    _shaderListForMultiRendering[SOLID_EMISSIVE_MATERIAL] = MULTI_SOLID_EMISSIVE_MATERIAL;
+    _shaderListForMultiRendering[CAR_PAINT_MATERIAL] = MULTI_CAR_PAINT_MATERIAL;
+    _shaderListForMultiRendering[ALPHA_TEST_MATERIAL] = MULTI_ALPHA_TEST_MATERIAL;
+    _shaderListForMultiRendering[NEW_TREE_MATERIAL] = MULTI_NEW_TREE_MATERIAL;
+    _shaderListForMultiRendering[NEW_TREE_2_MATERIAL] = MULTI_NEW_TREE_2_MATERIAL;
+    _shaderListForMultiRendering[PBR_MATERIAL] = MULTI_PBR_MATERIAL;
+    _shaderListForMultiRendering[PBR_TREE_MATERIAL] = MULTI_PBR_TREE_MATERIAL;
+    _shaderListForMultiRendering[TREE_MATERIAL] = MULTI_TREE_MATERIAL;
+    _shaderListForMultiRendering[GLASS_MATERIAL] = MULTI_GLASS_MATERIAL;
 
 
 	initUniformLocations();
@@ -1775,12 +2007,23 @@ void Renderer::renderDepth(RenderData* renderData)
         ShaderType shaderType;
         bool isAlphaTest = material->shader == ALPHA_TEST_MATERIAL || material->shader == TREE_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL;
         bool isAnimated = material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL;
-        if (isAlphaTest)
-            shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
-        else if (isAnimated)
-            shaderType = SHADOWMAP_ANIMATED_SHADER;
+        bool isMulti = i->type == RET_MULTI;
+        if (!isMulti)
+        {
+            if (isAlphaTest)
+                shaderType = SHADOWMAP_ALPHA_TEST_SHADER;
+            else if (isAnimated)
+                shaderType = SHADOWMAP_ANIMATED_SHADER;
+            else
+                shaderType = SHADOWMAP_SHADER;
+        }
         else
-            shaderType = SHADOWMAP_SHADER;
+        {
+            if (isAlphaTest)
+                shaderType = SHADOWMAP_MULTI_ALPHA_TEST_SHADER;
+            else
+                shaderType = SHADOWMAP_MULTI_SHADER;
+        }
 
         if (material->shader == DECAL_MATERIAL)
         {
@@ -1848,10 +2091,28 @@ void Renderer::renderDepth(RenderData* renderData)
         }
 
         mesh->ibo->bind();
-        glDrawElements(model->getPrimitiveType(),
-                       mesh->indicesCount,
-                       GL_UNSIGNED_INT,
-                       (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        if (i->type == RET_SINGLE)
+        {
+            glDrawElements(model->getPrimitiveType(),
+                           mesh->indicesCount,
+                           GL_UNSIGNED_INT,
+                           (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        }
+        else if (i->type == RET_MULTI)
+        {
+            i->instancesPositionsVBO->bind();
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glVertexAttribDivisor(7, 1);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                mesh->indicesCount,
+                GL_UNSIGNED_INT,
+                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                (int)i->instancesCount);
+
+            glDisableVertexAttribArray(7);
+        }
 
         glDisableVertexAttribArray(0);
         if (isAlphaTest)
@@ -1887,34 +2148,36 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         ModelNodeMesh* mesh = i->mesh;
         Material* material = i->material;
 
-        ShaderType shaderType = _shaderListForMirrorRendering[material->shader];
+        ShaderType shaderType = i->type != RET_MULTI ? _shaderListForMirrorRendering[material->shader] : _shaderListForMirrorMultiRendering[material->shader];
         RShader* shader = _shaderList[shaderType];
         if (shaderType != currentShader)
         {
             shader->enable();
 
+            // todo: ten if tak naprawde nie dziala
             if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
+            else if (currentShader == MIRROR_ALPHA_TEST_MATERIAL || currentShader == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL || currentShader == MIRROR_MULTI_ALPHA_TEST_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-            else if (currentShader == MIRROR_GLASS_MATERIAL)
+            else if (currentShader == MIRROR_GLASS_MATERIAL || currentShader == MIRROR_MULTI_GLASS_MATERIAL)
             {
                 glDisable(GL_BLEND);
             }
 
+            // todo: ten if tak naprawde nie dziala
             if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if (shaderType == MIRROR_ALPHA_TEST_MATERIAL || shaderType == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL)
+            else if (shaderType == MIRROR_ALPHA_TEST_MATERIAL || shaderType == MIRROR_ALPHA_TEST_ANIMATED_MATERIAL || shaderType == MIRROR_MULTI_ALPHA_TEST_MATERIAL)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-            else if (shaderType == MIRROR_GLASS_MATERIAL)
+            else if (shaderType == MIRROR_GLASS_MATERIAL || shaderType == MIRROR_MULTI_GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
             }
@@ -1927,7 +2190,7 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
         }
 
 
-        if (shaderType == MIRROR_GLASS_MATERIAL)
+        if (shaderType == MIRROR_GLASS_MATERIAL || shaderType == MIRROR_MULTI_GLASS_MATERIAL)
         {
             if (material->glassTexture != NULL)
                 shader->bindTexture(_uniformsLocations[shaderType][UNIFORM_GLASS_TEXTURE], material->glassTexture);
@@ -2026,12 +2289,27 @@ void Renderer::renderToMirrorTexture(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
 
-        if (i->type != RET_GRASS)
+        if (i->type == RET_SINGLE)
         {
             glDrawElements(model->getPrimitiveType(),
                            mesh->indicesCount,
                            GL_UNSIGNED_INT,
                            (void*)(mesh->firstVertex * sizeof(unsigned int)));
+        }
+        else if (i->type == RET_MULTI)
+        {
+            i->instancesPositionsVBO->bind();
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glVertexAttribDivisor(7, 1);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                mesh->indicesCount,
+                GL_UNSIGNED_INT,
+                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                (int)i->instancesCount);
+
+            glDisableVertexAttribArray(7);
         }
 
         glDisableVertexAttribArray(0);
@@ -2078,20 +2356,24 @@ void Renderer::renderScene(RenderData* renderData)
         ModelNodeMesh* mesh = i->mesh;
         Material* material = i->material;
 
-        RShader* shader = _shaderList[material->shader];
-        if (material->shader != currentShader)
+        ShaderType shaderType = i->type != RET_MULTI ? material->shader : _shaderListForMultiRendering[material->shader];
+        RShader* shader = _shaderList[shaderType];
+        if (shaderType != currentShader)
         {
             shader->enable();
 
-            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL)
+            if (currentShader == SKY_MATERIAL || currentShader == PBR_TREE_MATERIAL || currentShader == NEW_TREE_2_MATERIAL ||
+                currentShader == MULTI_PBR_TREE_MATERIAL || currentShader == MULTI_NEW_TREE_2_MATERIAL)
             {
                 glEnable(GL_CULL_FACE);
             }
-            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL)
+            else if (currentShader == TREE_MATERIAL || currentShader == ALPHA_TEST_MATERIAL || currentShader == GRASS_MATERIAL || currentShader == NEW_TREE_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL ||
+                     currentShader == MULTI_TREE_MATERIAL || currentShader == MULTI_ALPHA_TEST_MATERIAL || currentShader == MULTI_NEW_TREE_MATERIAL)
             {
                 glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-            else if (currentShader == GLASS_MATERIAL)
+            else if (currentShader == GLASS_MATERIAL ||
+                     currentShader == MULTI_GLASS_MATERIAL)
             {
                 glDisable(GL_BLEND);
             }
@@ -2108,36 +2390,39 @@ void Renderer::renderScene(RenderData* renderData)
                 glEnable(GL_DEPTH_TEST);
             }
 
-            if (material->shader == SKY_MATERIAL || material->shader == PBR_TREE_MATERIAL || material->shader == NEW_TREE_2_MATERIAL)
+            if (shaderType == SKY_MATERIAL || shaderType == PBR_TREE_MATERIAL || shaderType == NEW_TREE_2_MATERIAL ||
+                shaderType == MULTI_PBR_TREE_MATERIAL || shaderType == MULTI_NEW_TREE_2_MATERIAL)
             {
                 glDisable(GL_CULL_FACE);
             }
-            else if ((material->shader == TREE_MATERIAL || material->shader == ALPHA_TEST_MATERIAL || material->shader == GRASS_MATERIAL || material->shader == NEW_TREE_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL) && _alphaToCoverage)
+            else if ((shaderType == TREE_MATERIAL || shaderType == ALPHA_TEST_MATERIAL || shaderType == GRASS_MATERIAL || shaderType == NEW_TREE_MATERIAL || shaderType == ALPHA_TEST_ANIMATED_MATERIAL ||
+                     shaderType == MULTI_TREE_MATERIAL || shaderType == MULTI_ALPHA_TEST_MATERIAL || shaderType == MULTI_NEW_TREE_MATERIAL) && _alphaToCoverage)
             {
                 glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
             }
-            else if (material->shader == GLASS_MATERIAL)
+            else if (shaderType == GLASS_MATERIAL ||
+                     shaderType == MULTI_GLASS_MATERIAL)
             {
                 glEnable(GL_BLEND);
             }
-            else if (material->shader == WIREFRAME_MATERIAL)
+            else if (shaderType == WIREFRAME_MATERIAL)
             {
                 glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
             }
-            else if (material->shader == DECAL_MATERIAL)
+            else if (shaderType == DECAL_MATERIAL)
             {
                 glDepthMask(GL_FALSE);
             }
-            else if (material->shader == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
+            else if (shaderType == NOTEXTURE_ALWAYS_VISIBLE_MATERIAL)
             {
                 glDisable(GL_DEPTH_TEST);
             }
-            else if (material->shader == EDITOR_AXIS_SHADER)
+            else if (shaderType == EDITOR_AXIS_SHADER)
             {
                 glClear(GL_DEPTH_BUFFER_BIT);
             }
 
-            currentShader = material->shader;
+            currentShader = shaderType;
         }
         else
         {
@@ -2145,7 +2430,8 @@ void Renderer::renderScene(RenderData* renderData)
         }
 
 
-        if (material->shader == GLASS_MATERIAL || material->shader == CAR_PAINT_MATERIAL)
+        if (currentShader == GLASS_MATERIAL || currentShader == CAR_PAINT_MATERIAL ||
+            currentShader == MULTI_GLASS_MATERIAL || currentShader == MULTI_CAR_PAINT_MATERIAL)
         {
             if (material->glassTexture != NULL)
                 shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_GLASS_TEXTURE], material->glassTexture);
@@ -2186,7 +2472,8 @@ void Renderer::renderScene(RenderData* renderData)
         shader->setUniform(_uniformsLocations[currentShader][UNIFORM_DAY_NIGHT_RATIO], _dayNightRatio);
 
 
-        if (material->shader == TREE_MATERIAL)
+        if (currentShader == TREE_MATERIAL ||
+            currentShader == MULTI_TREE_MATERIAL)
         {
             glm::vec3 d = _graphicsManager->getWindVector();
 
@@ -2255,7 +2542,7 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_NOTMALMAP_TEXTURE], material->normalmapTexture);
         }
 
-        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
+        if (currentShader == SOLID_ANIMATED_MATERIAL || currentShader == NORMALMAPPING_ANIMATED_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL)
         {
             glEnableVertexAttribArray(5);
             glVertexAttribIPointer(5, 4, GL_INT, mesh->vertexSize, (void*)(sizeof(float) * 14));
@@ -2291,18 +2578,19 @@ void Renderer::renderScene(RenderData* renderData)
 		if (material->emissiveTexture != NULL)
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_EMISSIVE_TEXTURE], material->emissiveTexture);
 
-		if (material->shader == PBR_MATERIAL || material->shader == PBR_TREE_MATERIAL)
+		if (currentShader == PBR_MATERIAL || currentShader == PBR_TREE_MATERIAL ||
+            currentShader == MULTI_PBR_MATERIAL || currentShader == MULTI_PBR_TREE_MATERIAL)
 		{
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_IRRADIANCE_MAP], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_SPECULAR_IRRADIANCE_MAP], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 			shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_BRDF_LUT], _brdfLutTexture);
 		}
-		if (material->shader == SKY_MATERIAL)
+		if (currentShader == SKY_MATERIAL)
 		{
 			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getIrradianceMap());
 			//shader->bindTexture(_uniformsLocations[currentShader][UNIFORM_DIFFUSE_TEXTURE], _graphicsManager->getGlobalEnvironmentCaptureComponent()->getSpecularIrradianceMap());
 		}
-        if (material->shader == DECAL_MATERIAL)
+        if (currentShader == DECAL_MATERIAL)
         {
             glm::mat4 viewProjMatrixInv = glm::inverse(_mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix());
             glm::mat4 modelMatrixInv = glm::inverse(modelMatrix);
@@ -2310,6 +2598,11 @@ void Renderer::renderScene(RenderData* renderData)
             shader->bindTexture(shader->getUniformLocation("depthMap"), _depthFramebuffer->getTexture(0));
             shader->setUniform(shader->getUniformLocation("viewProjMatrixInv"), viewProjMatrixInv);
             shader->setUniform(shader->getUniformLocation("modelMatrixInv"), modelMatrixInv);
+        }
+        if (currentShader == TERRAIN_MATERIAL)
+        {
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_TEX_SCALE], material->scale);
+            shader->setUniform(_uniformsLocations[currentShader][UNIFORM_TEX_OFFSET], material->offset);
         }
 
 		shader->setUniform(_uniformsLocations[currentShader][UNIFORM_COLOR_1], color1);
@@ -2326,14 +2619,14 @@ void Renderer::renderScene(RenderData* renderData)
             glColorMaski(2, GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
         }
 
-        if (i->type != RET_GRASS)
+        if (i->type == RET_SINGLE)
         {
             glDrawElements(model->getPrimitiveType(),
                            mesh->indicesCount,
                            GL_UNSIGNED_INT,
                            (void*)(mesh->firstVertex * sizeof(unsigned int)));
         }
-        else
+        else if (i->type == RET_GRASS)
         {
             shader->setUniform(_uniformsLocations[currentShader][UNIFORM_VP], renderData->MVMatrix);
 
@@ -2376,6 +2669,21 @@ void Renderer::renderScene(RenderData* renderData)
 
             glEnable(GL_CULL_FACE);
         }
+        else if (i->type == RET_MULTI)
+        {
+            i->instancesPositionsVBO->bind();
+            glEnableVertexAttribArray(7);
+            glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+            glVertexAttribDivisor(7, 1);
+
+            glDrawElementsInstanced(model->getPrimitiveType(),
+                mesh->indicesCount,
+                GL_UNSIGNED_INT,
+                (void*)(mesh->firstVertex * sizeof(unsigned int)),
+                (int)i->instancesCount);
+
+            glDisableVertexAttribArray(7);
+        }
 
         if (_renderObjectIdsForPicking && !i->renderObject->isRenderObjectId())
         {
@@ -2390,7 +2698,7 @@ void Renderer::renderScene(RenderData* renderData)
             glDisableVertexAttribArray(3);
             glDisableVertexAttribArray(4);
         }
-        if (material->shader == SOLID_ANIMATED_MATERIAL || material->shader == NORMALMAPPING_ANIMATED_MATERIAL || material->shader == ALPHA_TEST_ANIMATED_MATERIAL)
+        if (currentShader == SOLID_ANIMATED_MATERIAL || currentShader == NORMALMAPPING_ANIMATED_MATERIAL || currentShader == ALPHA_TEST_ANIMATED_MATERIAL)
         {
             glDisableVertexAttribArray(5);
             glDisableVertexAttribArray(6);
@@ -2413,12 +2721,10 @@ void Renderer::renderScene(RenderData* renderData)
 
     if (_renderObjectsAAABB)
     {
-        for (std::vector<RenderObject*>::iterator i = _renderObjectsInCurrentFrame.begin(); i != _renderObjectsInCurrentFrame.end(); ++i)
+        for (DebugRenderInfo& debugRenderObject : _renderObjectsInCurrentFrame)
         {
-            RenderObject* renderObject = *i;
-
-            glm::vec3 min = renderObject->getAABB()->getMinCoords();
-            glm::vec3 max = renderObject->getAABB()->getMaxCoords();
+            glm::vec3 min = debugRenderObject.aabb->getMinCoords();
+            glm::vec3 max = debugRenderObject.aabb->getMaxCoords();
 
             glm::vec3 vertices[8];
             vertices[0] = glm::vec3(min.x, min.y, min.z);
@@ -2446,12 +2752,10 @@ void Renderer::renderScene(RenderData* renderData)
     }
     if (_renderObjectsOBB)
     {
-        for (std::vector<RenderObject*>::iterator i = _renderObjectsInCurrentFrame.begin(); i != _renderObjectsInCurrentFrame.end(); ++i)
+        for (DebugRenderInfo& debugRenderObject : _renderObjectsInCurrentFrame)
         {
-            RenderObject* renderObject = *i;
-
-            glm::vec3 min = renderObject->getModel()->getAABB()->getMinCoords();
-            glm::vec3 max = renderObject->getModel()->getAABB()->getMaxCoords();
+            glm::vec3 min = debugRenderObject.obb->getMinCoords();
+            glm::vec3 max = debugRenderObject.obb->getMaxCoords();
 
             glm::vec3 vertices[8];
             vertices[0] = glm::vec3(min.x, min.y, min.z);
@@ -2463,7 +2767,7 @@ void Renderer::renderScene(RenderData* renderData)
             vertices[6] = glm::vec3(max.x, max.y, min.z);
             vertices[7] = glm::vec3(max.x, max.y, max.z);
 
-            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MVP], _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix() * renderObject->getSceneObject()->getGlobalTransformMatrix());
+            shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MVP], _mainRenderData->camera->getProjectionMatrix() * _mainRenderData->camera->getViewMatrix() * debugRenderObject.sceneObject->getGlobalTransformMatrix());
             shader->setUniform(_uniformsLocations[DEBUG_SHADER][UNIFORM_MATERIAL_EMISSIVE_COLOR], glm::vec4(0.0f, 0.5f, 0.0f, 1.0f));
 
             for (int i = 0; i < 8; ++i)

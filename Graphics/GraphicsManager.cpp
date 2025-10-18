@@ -2,6 +2,8 @@
 
 #include "Renderer.h"
 #include "BezierCurve.h"
+#include "FoliagePatch.h"
+#include "ShapePolygonComponent.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
 #include "SkeletalAnimationHelperComponent.h"
@@ -21,6 +23,11 @@ GraphicsManager::GraphicsManager()
 GraphicsManager::~GraphicsManager()
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
+    {
+        delete *i;
+    }
+
+    for (std::list<MultiRenderObject*>::iterator i = _multiRenderObjects.begin(); i != _multiRenderObjects.end(); ++i)
     {
         delete *i;
     }
@@ -90,6 +97,16 @@ GraphicsManager::~GraphicsManager()
         delete* i;
     }
 
+    for (std::vector<ShapePolygonComponent*>::iterator i = _shapePolygons.begin(); i != _shapePolygons.end(); ++i)
+    {
+        delete* i;
+    }
+
+    for (std::vector<FoliagePatch*>::iterator i = _foliagePatches.begin(); i != _foliagePatches.end(); ++i)
+    {
+        delete *i;
+    }
+
 	if (_sky != NULL)
 	{
 		delete _sky;
@@ -122,6 +139,25 @@ RenderObject* GraphicsManager::addRenderObject(RenderObject* object, SceneObject
     }
 
     return object;
+}
+
+MultiRenderObject* GraphicsManager::addMultiRenderObject(RenderObject* object)
+{
+    MultiRenderObject* multiRenderObject = new MultiRenderObject(object);
+    _multiRenderObjects.push_back(multiRenderObject);
+    //_quadTree->addObject(object);
+
+    for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _renderObjects.erase(i);
+
+            break;
+        }
+    }
+
+    return multiRenderObject;
 }
 
 RoadObject* GraphicsManager::addRoadObject(RoadType roadType, RRoadProfile* roadProfile, const std::vector<glm::vec3>& points, const std::vector<RoadSegment>& segments, bool buildModelAfterCreate, SceneObject* owner)
@@ -329,6 +365,25 @@ BezierCurve* GraphicsManager::addBezierCurve(const std::vector<glm::vec3>& point
 }
 
 
+ShapePolygonComponent* GraphicsManager::addShapePolygon()
+{
+    ShapePolygonComponent* shapePolygon = new ShapePolygonComponent;
+
+    _shapePolygons.push_back(shapePolygon);
+
+    return shapePolygon;
+}
+
+
+FoliagePatch* GraphicsManager::addFoliagePatch()
+{
+    FoliagePatch* foliagePatch = new FoliagePatch;
+
+    _foliagePatches.push_back(foliagePatch);
+
+    return foliagePatch;
+}
+
 
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
@@ -337,6 +392,21 @@ void GraphicsManager::removeRenderObject(RenderObject* object)
         if (*i == object)
         {
             i = _renderObjects.erase(i);
+
+            delete object;
+
+            return;
+        }
+    }
+}
+
+void GraphicsManager::removeMultiRenderObject(MultiRenderObject* object)
+{
+    for (std::list<MultiRenderObject*>::iterator i = _multiRenderObjects.begin(); i != _multiRenderObjects.end(); ++i)
+    {
+        if (*i == object)
+        {
+            i = _multiRenderObjects.erase(i);
 
             delete object;
 
@@ -578,6 +648,38 @@ void GraphicsManager::removeBezierCurve(BezierCurve* bezierCurve)
             i = _bezierCurves.erase(i);
 
             delete bezierCurve;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeShapePolygon(ShapePolygonComponent* shapePolygon)
+{
+    for (std::vector<ShapePolygonComponent*>::iterator i = _shapePolygons.begin(); i != _shapePolygons.end(); ++i)
+    {
+        if (*i == shapePolygon)
+        {
+            i = _shapePolygons.erase(i);
+
+            delete shapePolygon;
+
+            return;
+        }
+    }
+}
+
+
+void GraphicsManager::removeFoliagePatch(FoliagePatch* foliagePatch)
+{
+    for (std::vector<FoliagePatch*>::iterator i = _foliagePatches.begin(); i != _foliagePatches.end(); ++i)
+    {
+        if (*i == foliagePatch)
+        {
+            i = _foliagePatches.erase(i);
+
+            delete foliagePatch;
 
             return;
         }

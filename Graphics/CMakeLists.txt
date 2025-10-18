@@ -15,6 +15,7 @@ set (GRAPHICS_SOURCES
 		Graphics/DisplayComponent.h
 		Graphics/EnvironmentCaptureComponent.cpp
 		Graphics/EnvironmentCaptureComponent.h
+		Graphics/FoliagePatch.cpp
 		Graphics/Framebuffer.cpp
 		Graphics/Framebuffer.h
 		Graphics/Frustum.cpp
@@ -45,6 +46,7 @@ set (GRAPHICS_SOURCES
 		Graphics/ModelGenerator.h
 		Graphics/ModelNode.cpp
 		Graphics/ModelNode.h
+		Graphics/MultiRenderObject.cpp
 		Graphics/NVMeshMender/NVMeshMender.cpp
 		Graphics/NVMeshMender/NVMeshMender.h
 		Graphics/OGLDriver.cpp
@@ -116,6 +118,8 @@ set (GRAPHICS_HEADERS
 		Graphics/BezierCurve.h
 		Graphics/RAnimation.h
 		Graphics/AnimationNodeData.h
+		Graphics/FoliagePatch.h
+		Graphics/MultiRenderObject.h
 		Graphics/ShaderStorageBuffer.h
 		Graphics/SkeletalAnimationComponent.h
 		Graphics/SkeletalAnimationComponent2.h

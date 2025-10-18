@@ -11,6 +11,9 @@ layout (location = 4) in vec3 VertexBitangent;
 layout (location = 5) in ivec4 boneIds;
 layout (location = 6) in vec4 weights;
 #endif
+#ifdef INSTANCING
+layout (location = 7) in vec3 positionOffset;
+#endif
 
 const int CASCADES_COUNT = 2;
 
@@ -38,6 +41,11 @@ out vec4 ClipSpacePosition;
 const int MAX_BONES = 100;
 const int MAX_BONE_INFLUENCE = 4;
 uniform mat4 finalBonesMatrices[MAX_BONES];
+#endif
+
+#ifdef TERRAIN
+uniform vec2 textureScale;
+uniform vec2 textureOffset;
 #endif
 
 #ifdef ANIMATED
@@ -74,6 +82,10 @@ void main()
 
 	vec4 totalPosition = vec4(pos, 1.0f);
 
+#ifdef INSTANCING
+	totalPosition.xyz = positionOffset + totalPosition.xyz;
+#endif
+
 #ifdef ANIMATED
 	mat4 vertexTransform = calculateVertexTransform();
 	totalPosition = vertexTransform * vec4(pos, 1.0f);
@@ -83,6 +95,10 @@ void main()
 
 	PositionVert = (ModelMatrix * totalPosition).xyz;
 	TexCoord = VertexUV;
+
+#ifdef TERRAIN
+	TexCoord = PositionVert.xz * textureScale + textureOffset;
+#endif
 
 //#ifdef SOLID
 	mat4 finalNormalMatrix = NormalMatrix;

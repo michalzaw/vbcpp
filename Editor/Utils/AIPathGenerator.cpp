@@ -94,9 +94,6 @@ namespace AIPathGenerator
 
 		rootObject->addChild(pathObject);
 
-		float distance1 = GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[1]);
-		float distance2 = GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[2]);
-
 		if (GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[1]) <= 2.0f &&
 			GeometryUtils::calculatePointDistanceToStraightLine(bezierCurve1[0], bezierCurve1[3], bezierCurve1[2]) <= 2.0f)
 		{

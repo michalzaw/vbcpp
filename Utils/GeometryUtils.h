@@ -2,25 +2,21 @@
 #define GEOMETRYUTILS_H_INCLUDED
 
 
+#include <vector>
+
 #include <glm/glm.hpp>
 
 
 namespace GeometryUtils
 {
 	// oblicza odleglosc punktu p od prostej wyznaczonej przez punty pointA i pointB
-	float calculatePointDistanceToStraightLine(const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& p)
-	{
-		glm::vec3 directionVector = glm::normalize(pointB - pointA);
-		glm::vec3 v = p - pointA;
+	float calculatePointDistanceToStraightLine(const glm::vec3& pointA, const glm::vec3& pointB, const glm::vec3& p);
 
-		float distanceFromAToProjectionP = glm::dot(directionVector, v);
+	void mapToVec2(const std::vector<glm::vec3>& polygonPoints, std::vector<glm::vec2>& outPolygonPointsVec2);
 
-		glm::vec3 projectionPointP = pointA + directionVector * distanceFromAToProjectionP;
+	void findMinAndMaxCoord(const std::vector<glm::vec2>& polygonPoints, glm::vec2& outMinCoords, glm::vec2& outMaxCoords);
 
-		float distance = glm::distance(p, projectionPointP);
-
-		return distance;
-	}
+	bool isPointInPolygon(const glm::vec2& point, const std::vector<glm::vec2>& polygonPoints);
 }
 
 
