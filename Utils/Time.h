@@ -14,7 +14,7 @@ class Time
 		void setTimeInternal(int hour = 0, int minutes = 0, int seconds = 0);
 
 	public:
-		Time(int hour, int minutes, int seconds = 0);
+		Time(int hour = 0, int minutes = 0, int seconds = 0);
 		Time(std::chrono::milliseconds time);
 
 		int getHour() const;

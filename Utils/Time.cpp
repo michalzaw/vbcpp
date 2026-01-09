@@ -6,7 +6,7 @@
 #include "Logger.h"
 
 
-Time::Time(int hour, int minutes, int seconds/* = 0*/)
+Time::Time(int hour/* = 0*/, int minutes/* = 0*/, int seconds/* = 0*/)
 {
 	setTimeInternal(hour, minutes, seconds);
 }

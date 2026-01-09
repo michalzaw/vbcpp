@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <memory>
 
+#include "CurrentRouteData.h"
 #include "BusStopComponent.h"
 
 #include "../../Bus/Bus.h"
@@ -29,6 +30,8 @@ class TransitSystem
         BusRoutes* _routes;
         Schedule* _schedule;
 
+        CurrentRouteData _currentRouteData;
+
     public:
         TransitSystem();
         ~TransitSystem();
@@ -47,6 +50,10 @@ class TransitSystem
 
         inline BusRoutes* getRoutes() { return _routes; }
         inline Schedule* getSchedule() { return _schedule; }
+
+        inline const CurrentRouteData& getCurrentRouteData() { return _currentRouteData; }
+
+        void setCurrentRoute(int lineIndex, int brigadeIndex, int routeIndex);
 
         void update(float deltaTime, Bus* bus);
 

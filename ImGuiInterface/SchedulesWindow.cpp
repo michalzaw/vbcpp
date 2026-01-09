@@ -73,9 +73,18 @@ void SchedulesWindow::drawWindow()
 
 		}
 
-		if (availableSchedules->lines.size() > 0 && availableSchedules->lines[_selectedLineIndex].brigades.size() > 0 && availableSchedules->lines[_selectedLineIndex].brigades[_selectedBrigadeIndex].routes.size() > 0)
+		if (ImGui::Button("OK"))
 		{
-			const ScheduleRoute& currentRoute = availableSchedules->lines[_selectedLineIndex].brigades[_selectedBrigadeIndex].routes[_selectedRouteIndex];
+			_sceneManager->getTransitSystem()->setCurrentRoute(_selectedLineIndex, _selectedBrigadeIndex, _selectedRouteIndex);
+		}
+
+		ImGui::Separator();
+
+		const CurrentRouteData& currentRouteData = _sceneManager->getTransitSystem()->getCurrentRouteData();
+
+		if (currentRouteData.isSet() && availableSchedules->lines.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades[currentRouteData.currentBrigadeIndex].routes.size() > 0)
+		{
+			const ScheduleRoute& currentRoute = availableSchedules->lines[currentRouteData.currentLineIndex].brigades[currentRouteData.currentBrigadeIndex].routes[currentRouteData.currentRouteIndex];
 
 			ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 			if (ImGui::BeginTable("schedules", 3, tableFlags))

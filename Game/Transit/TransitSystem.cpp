@@ -73,6 +73,34 @@ void TransitSystem::setSchedule(Schedule* schedule)
 }
 
 
+void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIndex)
+{
+    if (lineIndex < 0 || brigadeIndex < 0 || routeIndex < 0)
+    {
+        _currentRouteData.currentLineIndex = -1;
+        _currentRouteData.currentBrigadeIndex = -1;
+        _currentRouteData.currentRouteIndex = -1;
+    }
+    else
+    {
+        if (lineIndex < _schedule->lines.size() && brigadeIndex < _schedule->lines[lineIndex].brigades.size() && routeIndex < _schedule->lines[lineIndex].brigades[brigadeIndex].routes.size())
+        {
+            _currentRouteData.currentLineIndex = lineIndex;
+            _currentRouteData.currentBrigadeIndex = brigadeIndex;
+            _currentRouteData.currentRouteIndex = routeIndex;
+
+            _currentRouteData.busStopsStatsData.clear();
+            _currentRouteData.busStopsStatsData.resize(_schedule->lines[lineIndex].brigades[brigadeIndex].routes[routeIndex].stops.size());
+        }
+        else
+        {
+            LOG_ERROR("Invalid current route data: " + LOG_VARIABLE(lineIndex) + ", " + LOG_VARIABLE(brigadeIndex) + ", " + LOG_VARIABLE(routeIndex));
+        }
+    }
+
+}
+
+
 void TransitSystem::update(float deltaTime, Bus* bus)
 {
     BusStopComponent* nearestBusStop = NULL;
