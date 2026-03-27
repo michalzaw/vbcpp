@@ -3,6 +3,7 @@
 #include "PathComponent.h"
 
 #include "../../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/RAnimation.h"
 
 #include "../../Scene/SceneObject.h"
 
@@ -13,7 +14,7 @@ AIAgent::AIAgent()
 	: Component(CT_AI_AGENT),
 	_speed(10.0f),
 	_currentPath(nullptr), _skeletalAnimationComponent(nullptr),
-	_speedInAnimation(10.0f), _baseAnimationTicksPerSecond(0.0f),
+	_speedInAnimation(10.0f),
 	_currentPointIndex(0), _t(0.0f),
 	_isInitializedStartPosition(false)
 {
@@ -30,11 +31,9 @@ void AIAgent::onAttachedToScenObject()
 		glm::vec3 endPosition = _skeletalAnimationComponent->getRootBonePositionInEndFrame() * _skeletalAnimationComponent->getScale();
 
 		float distanceFromStartToEndPosition = glm::distance(startPosition, endPosition);
-		float animationDuration = _skeletalAnimationComponent->getAnimationDuration() / _skeletalAnimationComponent->getAnimationTicksPerSecond();
+		float animationDuration = _skeletalAnimationComponent->getAnimation()->getDuration() / _skeletalAnimationComponent->getAnimation()->getTicksPerSecond();
 
 		_speedInAnimation = distanceFromStartToEndPosition / animationDuration;
-
-		_baseAnimationTicksPerSecond = _skeletalAnimationComponent->getAnimationTicksPerSecond();
 
 		setSpeed(_speed);
 	}
@@ -123,7 +122,7 @@ void AIAgent::setSpeed(float speed)
 	{
 		float ratio = _speed / _speedInAnimation;
 
-		_skeletalAnimationComponent->setAnimationTicksPerSecond(_baseAnimationTicksPerSecond * ratio);
+		_skeletalAnimationComponent->setAnimationSpeed(ratio);
 	}
 }
 

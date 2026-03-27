@@ -208,9 +208,6 @@ void RObjectLoader::loadCrossroadComponent(tinyxml2::XMLElement* componentElemen
 void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["animation"] = componentElement->Attribute("animation");
-	object->getComponents()[componentIndex]["startFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "startFrame", "0");
-	object->getComponents()[componentIndex]["endFrame"] = XmlUtils::getAttributeStringOptional(componentElement, "endFrame", "0");
-	object->getComponents()[componentIndex]["animationTicksPerSecond"] = XmlUtils::getAttributeStringOptional(componentElement, "animationTicksPerSecond", "0");
 	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
 	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
 	object->getComponents()[componentIndex]["scale"] = XmlUtils::getAttributeStringOptional(componentElement, "scale", "1");
@@ -507,9 +504,6 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			const std::string& animationFile = components[i]["animation"];
 
-			int startFrame = toInt(components[i]["startFrame"]);
-			int endFrame = toInt(components[i]["endFrame"]);
-			int animationTicksPerSecond = toInt(components[i]["animationTicksPerSecond"]);
 			const std::string& rootBone = components[i]["rootBone"];
 			bool lockRootBoneTranslation = toBool(components[i]["lockRootBoneTranslation"]);
 			float scale = toFloat(components[i]["scale"]);
@@ -519,18 +513,6 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			sceneObject->addComponent(skeletalAnimation);
 			sceneObject->setScale(scale);
 
-			if (startFrame != 0)
-			{
-				skeletalAnimation->setStartFrame(startFrame);
-			}
-			if (endFrame != 0)
-			{
-				skeletalAnimation->setEndFrame(endFrame);
-			}
-			if (animationTicksPerSecond != 0)
-			{
-				skeletalAnimation->setAnimationTicksPerSecond(animationTicksPerSecond);
-			}
 			if (!rootBone.empty())
 			{
 				skeletalAnimation->setRootBone(rootBone);

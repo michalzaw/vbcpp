@@ -86,7 +86,7 @@ glm::mat4 Bone::calculatePosition(float animationTime)
 }
 
 
-glm::mat4 Bone::calculateRotation(float animationTime)
+glm::quat Bone::calculateRotationQuat(float animationTime)
 {
 	if (_rotations.size() == 1)
 	{
@@ -99,7 +99,13 @@ glm::mat4 Bone::calculateRotation(float animationTime)
 	float timeFactor = getTimeFactor(_rotations[p0].timestamp, _rotations[p1].timestamp, animationTime);
 	glm::quat rotation = glm::slerp(_rotations[p0].value, _rotations[p1].value, timeFactor);
 
-	return glm::toMat4(rotation);
+	return rotation;
+}
+
+
+glm::mat4 Bone::calculateRotation(float animationTime)
+{
+	return glm::toMat4(calculateRotationQuat(animationTime));
 }
 
 
@@ -132,7 +138,7 @@ glm::mat4 Bone::calculateLocalTransform(float animationTime)
 
 RAnimation::RAnimation(const std::string& path)
 	: Resource(RT_ANIMATION, path),
-	_duration(0.0f), _ticksPerSecond(0)
+	_originalDuration(0.0f), _startFrame(0), _endFrame(0), _ticksPerSecond(0)
 {
 
 }

@@ -22,7 +22,6 @@ class AIAgent : public Component
 		SkeletalAnimationComponent* _skeletalAnimationComponent;
 
 		float _speedInAnimation;
-		float _baseAnimationTicksPerSecond;
 
 		unsigned int _currentPointIndex;
 		float _t;

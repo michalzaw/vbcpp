@@ -34,15 +34,16 @@ class SkeletalAnimationComponent final : public Component
 		bool _finalBoneMatricesIsCalculated;
 		float _currentTime;
 
-		int _startFrame;
-		int _endFrame;
-		int _animationTicksPerSecond;
+		float _animationSpeed;
 
 		bool _play;
 
 		bool _lockRootBoneTranslation;
 		std::string _rootBoneName;
 		int _rootNodeIndex;
+
+		bool _endToStartFrameBlending;
+		float _blendingTime;
 
 		float _scale;
 
@@ -53,6 +54,8 @@ class SkeletalAnimationComponent final : public Component
 		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
 
 		glm::mat4 calculateBoneTranslation(Bone* bone, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
+		glm::mat4 calculateBoneRotation(Bone* bone);
+		glm::mat4 calculateRotationInterpolated(Bone* bone, float animationTime, float timeToEnd, float duration);
 
 		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
@@ -70,23 +73,21 @@ class SkeletalAnimationComponent final : public Component
 		const std::vector<glm::mat4>& getFinalBoneMatrices();
 
 		inline const float getCurrentTime() { return _currentTime; }
-		inline const int getStartFrame() { return _startFrame; }
-		inline const int getEndFrame() { return _endFrame; }
-		inline const int getAnimationTicksPerSecond() { return _animationTicksPerSecond; }
+		inline const float getAnimationSpeed() { return _animationSpeed; }
 		inline const bool isPlay() { return _play; }
 		inline const bool isLockRootBoneTranslation() { return _lockRootBoneTranslation; }
 		inline const std::string& getRootBone() { return _rootBoneName; }
+		inline const bool isEndToStartFrameBlending() { return _endToStartFrameBlending; }
+		inline const float getBlendingTime() { return _blendingTime; }
 		inline const float getScale() { return _scale; }
 
-		inline const float getAnimationDuration() { return _endFrame - _startFrame; }
-
 		inline void setCurrentTime(float currentTime) { _currentTime = currentTime; }
-		inline void setStartFrame(int startFrame) { _startFrame = startFrame; }
-		inline void setEndFrame(int endFrame) { _endFrame = endFrame; }
-		inline void setAnimationTicksPerSecond(int animationTicksPerSecond) { _animationTicksPerSecond = animationTicksPerSecond; }
+		inline void setAnimationSpeed(float animationSpeed) { _animationSpeed = animationSpeed; }
 		inline void setPlay(bool play) { _play = play; }
 		inline void setLockRootBoneTranslation(bool isLock) { _lockRootBoneTranslation = isLock; }
 		void setRootBone(const std::string& boneName);
+		void setEndToStartFrameBlending(bool endToStartFrameBlending) { _endToStartFrameBlending = endToStartFrameBlending; }
+		void setBlendingTime(float blendingTime) { _blendingTime = blendingTime; }
 		inline void setScale(float scale) { _scale = scale; }
 
 		glm::vec3 getRootBonePositionInStartFrame();

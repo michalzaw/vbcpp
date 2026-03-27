@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <glm/gtx/quaternion.hpp>
+
 #include "RAnimation.h"
 #include "RenderObject.h"
 #include "SkeletalAnimationHelperComponent.h"
@@ -17,8 +19,10 @@ SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
 	: Component(CT_SKELETAL_ANIMATION),
 	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)), _finalBoneMatricesIsCalculated(false),
 	_currentTime(0.0f),
+	_animationSpeed(1.0f),
 	_play(true),
 	_lockRootBoneTranslation(true), _rootBoneName(""), _rootNodeIndex(-1),
+	_endToStartFrameBlending(true), _blendingTime(20.0f),
 	_scale(1.0f),
 	_animatedModel(nullptr),
 	_translationMatrices(MAX_BONES, glm::mat4(1.0f))
@@ -88,8 +92,32 @@ glm::mat4 SkeletalAnimationComponent::calculateBoneTranslation(Bone* bone, const
 	}
 	else
 	{
-		return bone->calculatePosition(_currentTime + _startFrame);
+		return bone->calculatePosition(_currentTime + _animation->getStartFrame());
 	}
+}
+
+
+glm::mat4 SkeletalAnimationComponent::calculateBoneRotation(Bone* bone)
+{
+	float duration = _animation->getDuration();
+	float timeToEnd = duration - _currentTime;
+
+	return timeToEnd >= _blendingTime || !_endToStartFrameBlending
+		? bone->calculateRotation(_currentTime + _animation->getStartFrame())
+		: calculateRotationInterpolated(bone, _currentTime + _animation->getStartFrame(), timeToEnd, duration);
+}
+
+
+glm::mat4 SkeletalAnimationComponent::calculateRotationInterpolated(Bone* bone, float animationTime, float timeToEnd, float duration)
+{
+	float blendFactor = 1.0f - (timeToEnd / _blendingTime);
+
+	glm::quat endRotation = bone->calculateRotationQuat(animationTime);
+	glm::quat startRotation = bone->calculateRotationQuat(std::max(animationTime - _animation->getStartFrame() - duration, static_cast<float>(_animation->getStartFrame())));
+
+	glm::quat rotation = glm::slerp(endRotation, startRotation, blendFactor);
+
+	return glm::toMat4(rotation);
 }
 
 
@@ -108,8 +136,8 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 
 		//nodeTransform = bone->calculateLocalTransform(_currentTime + _startFrame);
 		glm::mat4 boneTranslation = calculateBoneTranslation(bone, boneInfo);
-		glm::mat4 boneRotation = bone->calculateRotation(_currentTime + _startFrame);
-		glm::mat4 boneScale = bone->calculateScale(_currentTime + _startFrame);
+		glm::mat4 boneRotation = calculateBoneRotation(bone);
+		glm::mat4 boneScale = bone->calculateScale(_currentTime + _animation->getStartFrame());
 
 		nodeTransform = boneTranslation * boneRotation * boneScale;
 	}
@@ -135,9 +163,9 @@ void SkeletalAnimationComponent::update(float deltaTime)
 {
 	if (_play)
 	{
-		_currentTime += deltaTime * _animationTicksPerSecond;
+		_currentTime += deltaTime * _animation->getTicksPerSecond() * _animationSpeed;
 
-		float animationDuration = getAnimationDuration();
+		float animationDuration = _animation->getDuration();
 
 		_currentTime = fmod(_currentTime, animationDuration);
 
@@ -155,9 +183,6 @@ void SkeletalAnimationComponent::recalculateAllBonesTransform()
 void SkeletalAnimationComponent::setAnimation(RAnimation* animation)
 {
 	_animation = animation;
-	_startFrame = 0;
-	_endFrame = animation->getDuration();
-	_animationTicksPerSecond = animation->getTicksPerSecond();
 }
 
 
@@ -204,7 +229,7 @@ glm::vec3 SkeletalAnimationComponent::getRootBonePositionInStartFrame()
 		auto bone = _animation->getBones().find(_rootBoneName);
 		if (bone != _animation->getBones().end())
 		{
-			glm::mat4 transformMatrix = bone->second->calculatePosition(_startFrame);
+			glm::mat4 transformMatrix = bone->second->calculatePosition(_animation->getStartFrame());
 
 			return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
@@ -221,7 +246,7 @@ glm::vec3 SkeletalAnimationComponent::getRootBonePositionInEndFrame()
 		auto bone = _animation->getBones().find(_rootBoneName);
 		if (bone != _animation->getBones().end())
 		{
-			glm::mat4 transformMatrix = bone->second->calculatePosition(_endFrame - 1);
+			glm::mat4 transformMatrix = bone->second->calculatePosition(_animation->getEndFrame() - 1);
 
 			return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 		}
