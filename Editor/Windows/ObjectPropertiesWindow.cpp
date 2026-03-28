@@ -493,7 +493,7 @@ bool result = ImGui::InputInt("##value", &value, 0, 0, ImGuiInputTextFlags_Enter
 
 #define IMGUI_INPUT_float(component, propertyName, additionalParams)																			\
 float value = component->get##propertyName();																									\
-bool result = ImGui::DragFloat("##value", &value, 1, 0, 0);
+bool result = ImGui::DragFloat("##value", &value, 0.01, 0, 0);
 //bool result = ImGui::InputFloat("##value", &value, 0, 0, "%.2f", ImGuiInputTextFlags_EnterReturnsTrue);
 
 
@@ -1157,6 +1157,7 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
 		COMPONENT_PROPERTY_EDIT(component, EndToStartFrameBlending, bool, "End to start frame blending")
 		COMPONENT_PROPERTY_EDIT(component, BlendingTime, float, "Blending time")
+		COMPONENT_PROPERTY_EDIT(component, BlendingFactor, float, "Blending factor")
 
 		ImGui::PopID();
 		ImGui::Columns(1);

@@ -328,9 +328,9 @@ RoadIntersectionComponent* GraphicsManager::addRoadIntersection(RRoadProfile* ed
 }
 
 
-SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation)
+SkeletalAnimationComponent* GraphicsManager::addSkeletalAnimation(RAnimation* animation, RAnimation* animation2/* = nullptr*/)
 {
-    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation);
+    SkeletalAnimationComponent* skeletalAnimation = new SkeletalAnimationComponent(animation, animation2);
 
     _skeletalAnimations.push_back(skeletalAnimation);
 

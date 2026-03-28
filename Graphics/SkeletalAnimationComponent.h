@@ -10,6 +10,8 @@
 
 #include "../Scene/Component.h"
 
+#include "../Utils/Helpers.hpp"
+
 
 class RAnimation;
 struct AnimationNodeData;
@@ -28,11 +30,13 @@ class SkeletalAnimationComponent final : public Component
 
 	private:
 		RAnimation* _animation;
+		RAnimation* _animation2;
 		RAnimatedModel* _animatedModel;
 
 		std::vector<glm::mat4> _finalBoneMatrices;
 		bool _finalBoneMatricesIsCalculated;
 		float _currentTime;
+		float _currentTime2;
 
 		float _animationSpeed;
 
@@ -45,6 +49,8 @@ class SkeletalAnimationComponent final : public Component
 		bool _endToStartFrameBlending;
 		float _blendingTime;
 
+		float _blendingFactor;
+
 		float _scale;
 
 		std::vector<glm::mat4> _translationMatrices;
@@ -54,13 +60,13 @@ class SkeletalAnimationComponent final : public Component
 		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
 
 		glm::mat4 calculateBoneTranslation(Bone* bone, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
-		glm::mat4 calculateBoneRotation(Bone* bone);
-		glm::mat4 calculateRotationInterpolated(Bone* bone, float animationTime, float timeToEnd, float duration);
+		glm::quat calculateBoneRotation(RAnimation* animation, Bone* bone, float currentTime);
+		glm::quat calculateRotationInterpolated(RAnimation* animation, Bone* bone, float animationTime, float timeToEnd, float duration);
 
 		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
-		SkeletalAnimationComponent(RAnimation* animation);
+		SkeletalAnimationComponent(RAnimation* animation, RAnimation* animation2 = nullptr);
 		~SkeletalAnimationComponent();
 
 		void update(float deltaTime) override;
@@ -68,7 +74,9 @@ class SkeletalAnimationComponent final : public Component
 		void recalculateAllBonesTransform();
 
 		inline RAnimation* getAnimation() { return _animation; }
+		inline RAnimation* getAnimation2() { return _animation2; }
 		void setAnimation(RAnimation* animation);
+		inline void setAnimation2(RAnimation* animation2) { _animation2 = animation2; }
 
 		const std::vector<glm::mat4>& getFinalBoneMatrices();
 
@@ -79,6 +87,7 @@ class SkeletalAnimationComponent final : public Component
 		inline const std::string& getRootBone() { return _rootBoneName; }
 		inline const bool isEndToStartFrameBlending() { return _endToStartFrameBlending; }
 		inline const float getBlendingTime() { return _blendingTime; }
+		inline const float getBlendingFactor() { return _blendingFactor; }
 		inline const float getScale() { return _scale; }
 
 		inline void setCurrentTime(float currentTime) { _currentTime = currentTime; }
@@ -88,6 +97,7 @@ class SkeletalAnimationComponent final : public Component
 		void setRootBone(const std::string& boneName);
 		void setEndToStartFrameBlending(bool endToStartFrameBlending) { _endToStartFrameBlending = endToStartFrameBlending; }
 		void setBlendingTime(float blendingTime) { _blendingTime = blendingTime; }
+		void setBlendingFactor(float blendingFactor) { _blendingFactor = clampValue(blendingFactor, 0.0f, 1.0f); }
 		inline void setScale(float scale) { _scale = scale; }
 
 		glm::vec3 getRootBonePositionInStartFrame();

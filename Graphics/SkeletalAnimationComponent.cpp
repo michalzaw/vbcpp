@@ -15,19 +15,22 @@
 #include "../Utils/RAnimatedModel.h"
 
 
-SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation)
+SkeletalAnimationComponent::SkeletalAnimationComponent(RAnimation* animation, RAnimation* animation2/* = nullptr*/)
 	: Component(CT_SKELETAL_ANIMATION),
 	_finalBoneMatrices(MAX_BONES, glm::mat4(1.0f)), _finalBoneMatricesIsCalculated(false),
 	_currentTime(0.0f),
+	_currentTime2(0.0f),
 	_animationSpeed(1.0f),
 	_play(true),
 	_lockRootBoneTranslation(true), _rootBoneName(""), _rootNodeIndex(-1),
 	_endToStartFrameBlending(true), _blendingTime(20.0f),
+	_blendingFactor(0.0f),
 	_scale(1.0f),
 	_animatedModel(nullptr),
 	_translationMatrices(MAX_BONES, glm::mat4(1.0f))
 {
 	setAnimation(animation);
+	_animation2 = animation2 != nullptr ? animation2 : _animation;
 }
 
 
@@ -97,27 +100,27 @@ glm::mat4 SkeletalAnimationComponent::calculateBoneTranslation(Bone* bone, const
 }
 
 
-glm::mat4 SkeletalAnimationComponent::calculateBoneRotation(Bone* bone)
+glm::quat SkeletalAnimationComponent::calculateBoneRotation(RAnimation* animation, Bone* bone, float currentTime)
 {
-	float duration = _animation->getDuration();
-	float timeToEnd = duration - _currentTime;
+	float duration = animation->getDuration();
+	float timeToEnd = duration - currentTime;
 
 	return timeToEnd >= _blendingTime || !_endToStartFrameBlending
-		? bone->calculateRotation(_currentTime + _animation->getStartFrame())
-		: calculateRotationInterpolated(bone, _currentTime + _animation->getStartFrame(), timeToEnd, duration);
+		? bone->calculateRotationQuat(currentTime + animation->getStartFrame())
+		: calculateRotationInterpolated(animation, bone, currentTime + animation->getStartFrame(), timeToEnd, duration);
 }
 
 
-glm::mat4 SkeletalAnimationComponent::calculateRotationInterpolated(Bone* bone, float animationTime, float timeToEnd, float duration)
+glm::quat SkeletalAnimationComponent::calculateRotationInterpolated(RAnimation* animation, Bone* bone, float animationTime, float timeToEnd, float duration)
 {
 	float blendFactor = 1.0f - (timeToEnd / _blendingTime);
 
 	glm::quat endRotation = bone->calculateRotationQuat(animationTime);
-	glm::quat startRotation = bone->calculateRotationQuat(std::max(animationTime - _animation->getStartFrame() - duration, static_cast<float>(_animation->getStartFrame())));
+	glm::quat startRotation = bone->calculateRotationQuat(std::max(animationTime - animation->getStartFrame() - duration, static_cast<float>(animation->getStartFrame())));
 
 	glm::quat rotation = glm::slerp(endRotation, startRotation, blendFactor);
 
-	return glm::toMat4(rotation);
+	return rotation;
 }
 
 
@@ -130,16 +133,33 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 	auto animationBone = _animation->getBones().find(nodeName);
 	auto boneInfo = _animatedModel->getBoneInfos().find(nodeName);
 
+	glm::mat4 boneTranslation(1.0f);
+	glm::quat boneRotation;
+	glm::mat4 boneScale(1.0f);
+
 	if (animationBone != _animation->getBones().end())
 	{
 		Bone* bone = animationBone->second;
 
 		//nodeTransform = bone->calculateLocalTransform(_currentTime + _startFrame);
-		glm::mat4 boneTranslation = calculateBoneTranslation(bone, boneInfo);
-		glm::mat4 boneRotation = calculateBoneRotation(bone);
-		glm::mat4 boneScale = bone->calculateScale(_currentTime + _animation->getStartFrame());
+		boneTranslation = calculateBoneTranslation(bone, boneInfo);
+		boneRotation = calculateBoneRotation(_animation, bone, _currentTime);
+		boneScale = bone->calculateScale(_currentTime + _animation->getStartFrame());
+	}
 
-		nodeTransform = boneTranslation * boneRotation * boneScale;
+	auto animationBone2 = _animation2->getBones().find(nodeName);
+	if (animationBone2 != _animation2->getBones().end())
+	{
+		Bone* bone = animationBone2->second;
+
+		//nodeTransform = bone->calculateLocalTransform(_currentTime + _startFrame);
+		glm::mat4 boneTranslation2 = calculateBoneTranslation(bone, boneInfo);
+		glm::quat boneRotation2 = calculateBoneRotation(_animation2, bone, _currentTime2);
+		glm::mat4 boneScale2 = bone->calculateScale(_currentTime + _animation->getStartFrame());
+
+		glm::quat boneRotationFinal = glm::slerp(boneRotation, boneRotation2, _blendingFactor);
+
+		nodeTransform = boneTranslation * glm::toMat4(boneRotationFinal) * boneScale;
 	}
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
@@ -164,10 +184,13 @@ void SkeletalAnimationComponent::update(float deltaTime)
 	if (_play)
 	{
 		_currentTime += deltaTime * _animation->getTicksPerSecond() * _animationSpeed;
+		_currentTime2 += deltaTime * _animation2->getTicksPerSecond() * _animationSpeed;
 
 		float animationDuration = _animation->getDuration();
+		float animationDuration2 = _animation2->getDuration();
 
 		_currentTime = fmod(_currentTime, animationDuration);
+		_currentTime2 = fmod(_currentTime2, animationDuration2);
 
 		_finalBoneMatricesIsCalculated = false;
 	}
