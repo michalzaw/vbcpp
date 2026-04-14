@@ -31,7 +31,7 @@ void AIAgent::onAttachedToScenObject()
 		glm::vec3 endPosition = _skeletalAnimationComponent->getRootBonePositionInEndFrame() * _skeletalAnimationComponent->getScale();
 
 		float distanceFromStartToEndPosition = glm::distance(startPosition, endPosition);
-		float animationDuration = _skeletalAnimationComponent->getAnimation()->getDuration() / _skeletalAnimationComponent->getAnimation()->getTicksPerSecond();
+		float animationDuration = _skeletalAnimationComponent->getCurrentAnimationState()->animation->getDuration() / _skeletalAnimationComponent->getCurrentAnimationState()->animation->getTicksPerSecond();
 
 		_speedInAnimation = distanceFromStartToEndPosition / animationDuration;
 

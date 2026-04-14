@@ -207,11 +207,25 @@ void RObjectLoader::loadCrossroadComponent(tinyxml2::XMLElement* componentElemen
 
 void RObjectLoader::loadSkeletalAnimation(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
-	object->getComponents()[componentIndex]["animation"] = componentElement->Attribute("animation");
-	object->getComponents()[componentIndex]["animation2"] = XmlUtils::getAttributeStringOptional(componentElement, "animation2");
 	object->getComponents()[componentIndex]["rootBone"] = XmlUtils::getAttributeStringOptional(componentElement, "rootBone");
 	object->getComponents()[componentIndex]["lockRootBoneTranslation"] = XmlUtils::getAttributeStringOptional(componentElement, "lockRootBoneTranslation", "true");
 	object->getComponents()[componentIndex]["scale"] = XmlUtils::getAttributeStringOptional(componentElement, "scale", "1");
+	object->getComponents()[componentIndex]["endToStartFrameBlending"] = XmlUtils::getAttributeStringOptional(componentElement, "endToStartFrameBlending", "true");
+	object->getComponents()[componentIndex]["endToStartFrameBlendingDuration"] = XmlUtils::getAttributeStringOptional(componentElement, "endToStartFrameBlendingDuration", "20");
+	object->getComponents()[componentIndex]["stateBlendingDuration"] = XmlUtils::getAttributeStringOptional(componentElement, "stateBlendingDuration", "1");
+
+	int index = 0;
+
+	XMLElement* animationStateElement = componentElement->FirstChildElement("AnimationState");
+	while (animationStateElement != nullptr)
+	{
+		object->getComponents()[componentIndex]["name#" + toString(index)] = animationStateElement->Attribute("name");
+		object->getComponents()[componentIndex]["animation#" + toString(index)] = animationStateElement->Attribute("animation");
+
+		++index;
+		animationStateElement = animationStateElement->NextSiblingElement("AnimationState");
+	}
+	object->getComponents()[componentIndex]["statesCount"] = toString(index);
 }
 
 
@@ -503,16 +517,28 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		{
 			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
 
-			const std::string& animationFile = components[i]["animation"];
-			const std::string& animationFile2 = components[i]["animation2"];
-
 			const std::string& rootBone = components[i]["rootBone"];
 			bool lockRootBoneTranslation = toBool(components[i]["lockRootBoneTranslation"]);
 			float scale = toFloat(components[i]["scale"]);
+			bool endToStartFrameBlending = toBool(components[i]["endToStartFrameBlending"]);
+			float endToStartFrameBlendingDuration = toFloat(components[i]["endToStartFrameBlendingDuration"]);
+			float stateBlendingDuration = toFloat(components[i]["stateBlendingDuration"]);
 
-			RAnimation* animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
-			RAnimation* animation2 = animationFile2 != "" ? ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile2) : nullptr;
-			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation(animation, animation2);
+			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation();
+
+			int statesCount = toInt(components[i]["statesCount"]);
+
+			for (int j = 0; j < statesCount; ++j)
+			{
+				AnimationState animationState;
+				animationState.name = components[i]["name#" + toString(j)];
+
+				const std::string& animationFile = components[i]["animation#" + toString(j)];
+				animationState.animation = ResourceManager::getInstance().loadAnimation(GameDirectories::ANIMATIONS + animationFile);
+
+				skeletalAnimation->addAnimationState(std::move(animationState));
+			}
+
 			sceneObject->addComponent(skeletalAnimation);
 			sceneObject->setScale(scale);
 
@@ -522,6 +548,9 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
 			skeletalAnimation->setScale(scale);
+			skeletalAnimation->setEndToStartFrameBlending(endToStartFrameBlending);
+			skeletalAnimation->setEndToStartFrameBlendingTime(endToStartFrameBlendingDuration);
+			skeletalAnimation->setStateBlendingDuration(stateBlendingDuration);
 		}
 		else if (componentType == "vehicle")
 		{

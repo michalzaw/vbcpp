@@ -85,6 +85,10 @@ class RAnimation final : public Resource
 		inline int getEndFrame() { return _endFrame; }
 		inline int getTicksPerSecond() { return _ticksPerSecond; }
 
+		inline void setStartFrame(int startFrame) { _startFrame = startFrame; }
+		inline void setEndFrame(int endFrame) { _endFrame = endFrame; }
+		inline void setTicksPerSecond(int ticksPerSecond) { _ticksPerSecond = ticksPerSecond; }
+
 		inline std::unordered_map<std::string, Bone*>& getBones() { return _bones; }
 		inline AnimationNodeData* getRootNode() { return &_rootNode; }
 

@@ -202,7 +202,7 @@ void SkeletalAnimationHelperComponent::update(float deltaTime)
 				float currentTime;
 				if (skeletalAnimationComponent != nullptr)
 				{
-					currentTime = skeletalAnimationComponent->getCurrentTime();
+					currentTime = skeletalAnimationComponent->getCurrentAnimationState()->currentTime;
 				}
 				else if (skeletalAnimationComponent2 != nullptr)
 				{

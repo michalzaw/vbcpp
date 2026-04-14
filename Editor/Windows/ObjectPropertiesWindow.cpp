@@ -1146,18 +1146,89 @@ void showSkeletalAnimationComponentDetails(SkeletalAnimationComponent* component
 		ImGui::Separator();
 		ImGui::PushID("SkeletalAnimationComponentDetails");
 
-		COMPONENT_RESOURCE_EDIT(component, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
-		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(component, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); }, "")
-		//COMPONENT_PROPERTY_EDIT(component, StartFrame, int, "Start frame")
-		//COMPONENT_PROPERTY_EDIT(component, EndFrame, int, "End frame")
-		//COMPONENT_PROPERTY_EDIT(component, AnimationTicksPerSecond, int, "Ticks per second")
+		if (newNode("Animation states", ""))
+		{
+			const std::string& currentStateName = component->getCurrentAnimationState() != nullptr ? component->getCurrentAnimationState()->name : "";
+			const std::string& nextStateName = component->getNextAnimationState() != nullptr ? component->getNextAnimationState()->name : "";
+
+			int i = 0;
+			for (const auto& animationState : component->getAnimationStates())
+			{
+				ImGui::PushID(i++);
+
+				if (newNode("State", "%s %s", animationState.first.c_str(), currentStateName == animationState.first ? "[current]" : (nextStateName == animationState.first ? "[next]" : "")))
+				{
+					AnimationState* state = const_cast<AnimationState*>(&animationState.second);
+
+					COMPONENT_RESOURCE_EDIT(state, Animation, "Animation file", [](const std::string& path) { return ResourceManager::getInstance().loadAnimation(path); })
+					COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(state, CurrentTime, float, "Current time", [component](float newValue) { component->recalculateAllBonesTransform(); }, "")
+
+					RAnimation* animation = state->getAnimation();
+					COMPONENT_PROPERTY_EDIT(animation, StartFrame, int, "Start frame")
+					COMPONENT_PROPERTY_EDIT(animation, EndFrame, int, "End frame")
+					COMPONENT_PROPERTY_EDIT(animation, TicksPerSecond, int, "Ticks per second")
+
+					ImGui::TreePop();
+				}
+				ImGui::PopID();
+
+				ImGui::PopID(); // i
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+
+		ImGui::Separator();
+
 		COMPONENT_PROPERTY_EDIT(component, AnimationSpeed, float, "Animation speed")
 		COMPONENT_PROPERTY_EDIT(component, Play, bool, "Play")
-		COMPONENT_PROPERTY_EDIT_2(component, RootBone, str_combo, "Root", component->getAnimation()->getBonesNames())
+		COMPONENT_PROPERTY_EDIT_2(component, RootBone, str_combo, "Root", component->getCurrentAnimationState()->getAnimation()->getBonesNames())
 		COMPONENT_PROPERTY_EDIT(component, LockRootBoneTranslation, bool, "Lock translation")
+		ImGui::Separator();
 		COMPONENT_PROPERTY_EDIT(component, EndToStartFrameBlending, bool, "End to start frame blending")
-		COMPONENT_PROPERTY_EDIT(component, BlendingTime, float, "Blending time")
-		COMPONENT_PROPERTY_EDIT(component, BlendingFactor, float, "Blending factor")
+		COMPONENT_PROPERTY_EDIT(component, EndToStartFrameBlendingTime, float, "End to start frame blending time")
+		ImGui::Separator();
+		COMPONENT_PROPERTY_EDIT(component, StateBlendingDuration, float, "State blending duration")
+		ImGui::Separator();
+		COMPONENT_PROPERTY_EDIT(component, Scale, float, "Scale")
+		ImGui::Separator();
+
+		COMPONENT_PROPERTY_EDIT_BEGIN(NextState, "Set next state")
+		{
+			int statesCurrentItem = 0;
+
+			std::string statesComboItems{};
+			statesComboItems += " ";
+			statesComboItems += '\0';
+
+			std::vector<std::string> statesComboItemsVec;
+
+			const std::string& nextAnimationStateName = component->getNextAnimationState() != nullptr ? component->getNextAnimationState()->name : "";
+
+			int i = 0;
+			for (const auto& animationState : component->getAnimationStates())
+			{
+				++i;
+
+				statesComboItems += animationState.first + '\0';
+				statesComboItemsVec.push_back(animationState.first);
+
+				if (animationState.first == nextAnimationStateName)
+				{
+					statesCurrentItem = i;
+				}
+			}
+
+			if (ImGui::Combo("", &statesCurrentItem, statesComboItems.c_str()))
+			{
+				if (statesCurrentItem > 0)
+				{
+					component->setNextAnimationState(statesComboItemsVec[statesCurrentItem - 1]);
+				}
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
 
 		ImGui::PopID();
 		ImGui::Columns(1);
