@@ -30,8 +30,8 @@ struct AnimationState
 
 	float currentTime;
 
-	AnimationState()
-		: name(""), animation(nullptr), currentTime(0.0f)
+	AnimationState(const std::string& name = "", RAnimation* animation = nullptr, float currentTime = 0.0f)
+		: name(name), animation(animation), currentTime(currentTime)
 	{
 
 	}
@@ -89,6 +89,11 @@ class SkeletalAnimationComponent final : public Component
 		glm::quat calculateBoneRotation(RAnimation* animation, Bone* bone, float currentTime);
 		glm::quat calculateRotationInterpolated(RAnimation* animation, Bone* bone, float animationTime, float timeToEnd, float duration);
 
+		void calculateBoneTransformInSingleAnimation(AnimationState* animationState, const std::string& nodeName,
+													 const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
+		void calculateBoneTransformWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const std::string& nodeName,
+															  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
+
 		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
@@ -129,8 +134,8 @@ class SkeletalAnimationComponent final : public Component
 
 		inline glm::mat4 getRootBoneTranslation() { return _rootBoneTranslation; }
 
-		glm::vec3 getRootBonePositionInStartFrame();
-		glm::vec3 getRootBonePositionInEndFrame();
+		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "");
+		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "");
 
 };
 
