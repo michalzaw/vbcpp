@@ -2,7 +2,10 @@
 
 #include <string>
 
+#include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "RAnimation.h"
 #include "RenderObject.h"
@@ -84,13 +87,8 @@ void SkeletalAnimationComponent::calculateModelBonesTranslations(const Animation
 }
 
 
-glm::mat4 SkeletalAnimationComponent::calculateBoneTranslation(Bone* bone, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator)
+glm::mat4 SkeletalAnimationComponent::calculateBoneTranslation(RAnimation* animation, Bone* bone, float currentTime, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator)
 {
-	if (boneInfoIterator != _animatedModel->getBoneInfos().end() && boneInfoIterator->second->id == _rootNodeIndex)
-	{
-		_rootBoneTranslation = bone->calculatePosition(_currentAnimationState->currentTime + _currentAnimationState->animation->getStartFrame());
-	}
-
 	if (boneInfoIterator != _animatedModel->getBoneInfos().end() &&
 		(boneInfoIterator->second->id != _rootNodeIndex || _lockRootBoneTranslation))
 	{
@@ -98,7 +96,7 @@ glm::mat4 SkeletalAnimationComponent::calculateBoneTranslation(Bone* bone, const
 	}
 	else
 	{
-		return bone->calculatePosition(_currentAnimationState->currentTime + _currentAnimationState->animation->getStartFrame());
+		return bone->calculatePosition(currentTime + animation->getStartFrame());
 	}
 }
 
@@ -136,7 +134,7 @@ void SkeletalAnimationComponent::calculateBoneTransformInSingleAnimation(Animati
 	{
 		Bone* bone = animationBone->second;
 
-		glm::mat4 boneTranslation = calculateBoneTranslation(bone, boneInfoIterator);
+		glm::mat4 boneTranslation = calculateBoneTranslation(animationState->animation, bone, animationState->currentTime, boneInfoIterator);
 		glm::quat boneRotation = calculateBoneRotation(animationState->animation, bone, animationState->currentTime);
 		glm::mat4 boneScale = bone->calculateScale(animationState->currentTime + animationState->animation->getStartFrame());
 
@@ -157,7 +155,8 @@ void SkeletalAnimationComponent::calculateBoneTransformWithAnimationStateBlendin
 		Bone* bone1 = animationBoneInCurrentState->second;
 		Bone* bone2 = animationBoneInNextState->second;
 
-		glm::mat4 boneTranslation = calculateBoneTranslation(bone1, boneInfoIterator);
+		// zastanowic sie czy tu tez nie interpolowac translacji miedzy stanami
+		glm::mat4 boneTranslation = calculateBoneTranslation(currentAnimationState->animation, bone1, currentAnimationState->currentTime, boneInfoIterator);
 		glm::quat boneRotation = calculateBoneRotation(currentAnimationState->animation, bone1, currentAnimationState->currentTime);
 		glm::quat boneRotation2 = calculateBoneRotation(nextAnimationState->animation, bone2, nextAnimationState->currentTime);
 		glm::mat4 boneScale = bone1->calculateScale(currentAnimationState->currentTime + currentAnimationState->animation->getStartFrame());
@@ -169,7 +168,8 @@ void SkeletalAnimationComponent::calculateBoneTransformWithAnimationStateBlendin
 }
 
 
-void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
+void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
+														std::vector<glm::mat4>& outFinalBoneMatrices, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
 {
 	const std::string& nodeName = node->name;
 
@@ -177,13 +177,13 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 
 	glm::mat4 nodeTransform = node->transformation;
 
-	if (_nextAnimationState == nullptr)
+	if (nextAnimationState == nullptr)
 	{
-		calculateBoneTransformInSingleAnimation(_currentAnimationState, nodeName, boneInfo, nodeTransform);
+		calculateBoneTransformInSingleAnimation(currentAnimationState, nodeName, boneInfo, nodeTransform);
 	}
 	else
 	{
-		calculateBoneTransformWithAnimationStateBlending(_currentAnimationState, _nextAnimationState, nodeName, boneInfo, nodeTransform);
+		calculateBoneTransformWithAnimationStateBlending(currentAnimationState, nextAnimationState, nodeName, boneInfo, nodeTransform);
 	}
 
 	glm::mat4 globalTransform = parentTransform * nodeTransform;
@@ -193,12 +193,12 @@ void SkeletalAnimationComponent::calculateBoneTransform(const AnimationNodeData*
 		int index = boneInfo->second->id;
 		const glm::mat4& offset = boneInfo->second->offset;
 
-		_finalBoneMatrices[index] = globalTransform * offset;
+		outFinalBoneMatrices[index] = globalTransform * offset;
 	}
 
 	for (int i = 0; i < node->children.size(); ++i)
 	{
-		calculateBoneTransform(&node->children[i], globalTransform);
+		calculateBoneTransform(currentAnimationState, nextAnimationState, &node->children[i], outFinalBoneMatrices, globalTransform);
 	}
 }
 
@@ -285,7 +285,7 @@ const std::vector<glm::mat4>& SkeletalAnimationComponent::getFinalBoneMatrices()
 {
 	if (!_finalBoneMatricesIsCalculated)
 	{
-		calculateBoneTransform(_currentAnimationState->animation->getRootNode());
+		calculateBoneTransform(_currentAnimationState, _nextAnimationState, _currentAnimationState->animation->getRootNode(), _finalBoneMatrices, glm::scale(glm::vec3(_scale, _scale, _scale)));
 
 		_finalBoneMatricesIsCalculated = true;
 	}

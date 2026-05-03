@@ -29,9 +29,14 @@ struct AnimationState
 	RAnimation* animation;
 
 	float currentTime;
+	float previousTime;
+
+	glm::vec3 previousRootPosition;
+	glm::vec3 rootDeltaInLastFrame;
 
 	AnimationState(const std::string& name = "", RAnimation* animation = nullptr, float currentTime = 0.0f)
-		: name(name), animation(animation), currentTime(currentTime)
+		: name(name), animation(animation), currentTime(currentTime), previousTime(previousTime),
+		previousRootPosition(0.0f), rootDeltaInLastFrame(0.0f)
 	{
 
 	}
@@ -79,13 +84,11 @@ class SkeletalAnimationComponent final : public Component
 
 		std::vector<glm::mat4> _translationMatrices;
 
-		glm::mat4 _rootBoneTranslation;
-
 		void onAttachedToScenObject() override;
 
 		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
 
-		glm::mat4 calculateBoneTranslation(Bone* bone, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
+		glm::mat4 calculateBoneTranslation(RAnimation* animation, Bone* bone, float currentTime, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
 		glm::quat calculateBoneRotation(RAnimation* animation, Bone* bone, float currentTime);
 		glm::quat calculateRotationInterpolated(RAnimation* animation, Bone* bone, float animationTime, float timeToEnd, float duration);
 
@@ -94,7 +97,8 @@ class SkeletalAnimationComponent final : public Component
 		void calculateBoneTransformWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const std::string& nodeName,
 															  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
 
-		void calculateBoneTransform(const AnimationNodeData* node, const glm::mat4& parentTransform = glm::mat4(1.0f));
+		void calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
+									std::vector<glm::mat4>& outFinalBoneMatrices, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
 		SkeletalAnimationComponent();
@@ -131,8 +135,6 @@ class SkeletalAnimationComponent final : public Component
 		void setEndToStartFrameBlendingTime(float endToStartFrameBlendingTime) { _endToStartFrameBlendingTime = endToStartFrameBlendingTime; }
 		void setStateBlendingDuration(float stateBlendingDuration) { _stateBlendingDuration = stateBlendingDuration; }
 		inline void setScale(float scale) { _scale = scale; }
-
-		inline glm::mat4 getRootBoneTranslation() { return _rootBoneTranslation; }
 
 		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "");
 		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "");

@@ -540,7 +540,6 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			}
 
 			sceneObject->addComponent(skeletalAnimation);
-			sceneObject->setScale(scale);
 
 			if (!rootBone.empty())
 			{
