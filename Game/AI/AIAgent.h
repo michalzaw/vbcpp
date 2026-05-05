@@ -17,6 +17,7 @@ class AIAgent : public Component
 
 	protected:
 		float _speed;
+		bool _motionFromAnimation;
 
 		PathComponent* _currentPath;
 		SkeletalAnimationComponent* _skeletalAnimationComponent;
@@ -38,6 +39,9 @@ class AIAgent : public Component
 
 		void setSpeed(float speed);
 		float getSpeed();
+
+		inline void setMotionFromAnimation(bool motionFromAnimation) { _motionFromAnimation = motionFromAnimation; }
+		inline bool isMotionFromAnimation() { return _motionFromAnimation; }
 
 		void setCurrentPath(PathComponent* path);
 		PathComponent* getCurrentPath() { return _currentPath; }

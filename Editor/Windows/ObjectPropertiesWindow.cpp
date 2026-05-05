@@ -1419,6 +1419,7 @@ void showAiAgentComponentDetails(AIAgent* component)
 		}
 
 		COMPONENT_PROPERTY_EDIT(component, Speed, float, "Speed")
+		COMPONENT_PROPERTY_EDIT(component, MotionFromAnimation, bool, "Motion from animation")
 
 		COMPONENT_PROPERTY_EDIT_BEGIN(CurrentPath, "Path")
 		{

@@ -169,7 +169,7 @@ void SkeletalAnimationComponent::calculateBoneTransformWithAnimationStateBlendin
 
 
 void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
-														std::vector<glm::mat4>& outFinalBoneMatrices, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
+														std::vector<glm::mat4>& outFinalBoneMatrices, bool rootMotion, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
 {
 	const std::string& nodeName = node->name;
 
@@ -196,25 +196,75 @@ void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentA
 		outFinalBoneMatrices[index] = globalTransform * offset;
 	}
 
+
+	/* root motion */
+
+	if (rootMotion &&
+		boneInfo != _animatedModel->getBoneInfos().end() &&
+		boneInfo->second->id == _rootNodeIndex)
+	{
+		glm::vec4 pos = globalTransform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+		glm::vec3 currentRootPosition(pos.x, pos.y, pos.z);
+
+		currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition;
+
+		//LOG_DEBUG(LOG_VARIABLE(_currentAnimationState->rootDeltaInLastFrame));
+		if (currentAnimationState->currentTime < currentAnimationState->previousTime)
+		{
+			//LOG_DEBUG(LOG_VARIABLE(_loopDelta));
+			//LOG_DEBUG(LOG_VARIABLE(currentAnimationState->rootDeltaInLastFrame));
+
+			currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition + _loopDelta;
+		}
+
+		currentAnimationState->previousRootPosition = currentRootPosition;
+
+		_lockRootBoneTranslation = true;
+		calculateBoneTransformInSingleAnimation(_currentAnimationState, nodeName, boneInfo, nodeTransform);
+		_lockRootBoneTranslation = false;
+
+		// to samo co wy¿ej
+		globalTransform = parentTransform * nodeTransform;
+
+		if (boneInfo != _animatedModel->getBoneInfos().end())
+		{
+			int index = boneInfo->second->id;
+			const glm::mat4& offset = boneInfo->second->offset;
+
+			outFinalBoneMatrices[index] = globalTransform * offset;
+		}
+	}
+
+	/* root motion*/
+
 	for (int i = 0; i < node->children.size(); ++i)
 	{
-		calculateBoneTransform(currentAnimationState, nextAnimationState, &node->children[i], outFinalBoneMatrices, globalTransform);
+		calculateBoneTransform(currentAnimationState, nextAnimationState, &node->children[i], outFinalBoneMatrices, rootMotion, globalTransform);
 	}
 }
 
 
 void SkeletalAnimationComponent::update(float deltaTime)
 {
+	glm::vec3 positionInStartFrame = getRootBonePositionInStartFrame();
+	glm::vec3 positionInEndFrame = getRootBonePositionInEndFrame();
+	_loopDelta = positionInEndFrame - positionInStartFrame;
+	_lockRootBoneTranslation = false;
+
 	if (_play)
 	{
 		if (_currentAnimationState)
 		{
+			_currentAnimationState->previousTime = _currentAnimationState->currentTime;
+
 			_currentAnimationState->currentTime += deltaTime * _currentAnimationState->animation->getTicksPerSecond() * _animationSpeed;
 			_currentAnimationState->currentTime = fmod(_currentAnimationState->currentTime, _currentAnimationState->animation->getDuration());
 		}
 
 		if (_nextAnimationState != nullptr)
 		{
+			_nextAnimationState->previousTime = _nextAnimationState->currentTime;
+
 			_nextAnimationState->currentTime += deltaTime * _nextAnimationState->animation->getTicksPerSecond() * _animationSpeed;
 			_nextAnimationState->currentTime = fmod(_nextAnimationState->currentTime, _nextAnimationState->animation->getDuration());
 
@@ -285,7 +335,7 @@ const std::vector<glm::mat4>& SkeletalAnimationComponent::getFinalBoneMatrices()
 {
 	if (!_finalBoneMatricesIsCalculated)
 	{
-		calculateBoneTransform(_currentAnimationState, _nextAnimationState, _currentAnimationState->animation->getRootNode(), _finalBoneMatrices, glm::scale(glm::vec3(_scale, _scale, _scale)));
+		calculateBoneTransform(_currentAnimationState, _nextAnimationState, _currentAnimationState->animation->getRootNode(), _finalBoneMatrices, true, glm::scale(glm::vec3(_scale, _scale, _scale)));
 
 		_finalBoneMatricesIsCalculated = true;
 	}
@@ -319,6 +369,52 @@ void SkeletalAnimationComponent::setRootBone(const std::string& boneName)
 
 glm::vec3 SkeletalAnimationComponent::getRootBonePositionInStartFrame(const std::string& stateName/* = ""*/)
 {
+	if (_rootBoneName != "")
+	{
+		const auto& animationStateIterator = _animationStates.find(stateName);
+		const AnimationState& animationState = animationStateIterator != _animationStates.end() ? animationStateIterator->second : *_currentAnimationState;
+
+		std::vector<glm::mat4> finalBoneMatricesInStartFrame(MAX_BONES, glm::mat4(1.0f));
+		AnimationState tempState(animationState.name, animationState.animation, 0.0f);
+
+		_lockRootBoneTranslation = false;
+		calculateBoneTransform(&tempState, nullptr, tempState.animation->getRootNode(), finalBoneMatricesInStartFrame, false, glm::scale(glm::vec3(_scale, _scale, _scale)));
+		_lockRootBoneTranslation = true;
+
+		const glm::mat4& transformMatrix = finalBoneMatricesInStartFrame[_rootNodeIndex];
+
+		return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+
+glm::vec3 SkeletalAnimationComponent::getRootBonePositionInEndFrame(const std::string& stateName/* = ""*/)
+{
+	if (_rootBoneName != "")
+	{
+		const auto& animationStateIterator = _animationStates.find(stateName);
+		const AnimationState& animationState = animationStateIterator != _animationStates.end() ? animationStateIterator->second : *_currentAnimationState;
+
+		std::vector<glm::mat4> finalBoneMatricesInStartFrame(MAX_BONES, glm::mat4(1.0f));
+		AnimationState tempState(animationState.name, animationState.animation, animationState.animation->getEndFrame() - animationState.animation->getStartFrame()); // ta lini tylko sie rozni wzgledem getRootBonePositionInStartFrame
+
+		_lockRootBoneTranslation = false;
+		calculateBoneTransform(&tempState, nullptr, tempState.animation->getRootNode(), finalBoneMatricesInStartFrame, false, glm::scale(glm::vec3(_scale, _scale, _scale)));
+		_lockRootBoneTranslation = true;
+
+		const glm::mat4& transformMatrix = finalBoneMatricesInStartFrame[_rootNodeIndex];
+
+		return glm::vec3(transformMatrix * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+	}
+
+	return glm::vec3(0.0f, 0.0f, 0.0f);
+}
+
+
+glm::vec3 SkeletalAnimationComponent::getRootBonePositionInStartFrameOld(const std::string& stateName/* = ""*/)
+{
 	const auto& animationState = _animationStates.find(stateName);
 	RAnimation* animation = animationState != _animationStates.end() ? animationState->second.animation : _currentAnimationState->animation;
 
@@ -337,7 +433,7 @@ glm::vec3 SkeletalAnimationComponent::getRootBonePositionInStartFrame(const std:
 }
 
 
-glm::vec3 SkeletalAnimationComponent::getRootBonePositionInEndFrame(const std::string& stateName/* = ""*/)
+glm::vec3 SkeletalAnimationComponent::getRootBonePositionInEndFrameOld(const std::string& stateName/* = ""*/)
 {
 	const auto& animationState = _animationStates.find(stateName);
 	RAnimation* animation = animationState != _animationStates.end() ? animationState->second.animation : _currentAnimationState->animation;
