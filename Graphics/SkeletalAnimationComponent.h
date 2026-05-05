@@ -92,17 +92,18 @@ class SkeletalAnimationComponent final : public Component
 
 		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
 
-		glm::mat4 calculateBoneTranslation(RAnimation* animation, Bone* bone, float currentTime, const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
+		glm::mat4 calculateBoneTranslation(RAnimation* animation, Bone* bone, float currentTime, bool lockRootBoneTranslation,
+										   const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
 		glm::quat calculateBoneRotation(RAnimation* animation, Bone* bone, float currentTime);
 		glm::quat calculateRotationInterpolated(RAnimation* animation, Bone* bone, float animationTime, float timeToEnd, float duration);
 
-		void calculateBoneTransformInSingleAnimation(AnimationState* animationState, const std::string& nodeName,
+		void calculateBoneTransformInSingleAnimation(AnimationState* animationState, const std::string& nodeName, bool lockRootBoneTranslation,
 													 const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
-		void calculateBoneTransformWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const std::string& nodeName,
+		void calculateBoneTransformWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const std::string& nodeName, bool lockRootBoneTranslation,
 															  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
 
 		void calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
-									std::vector<glm::mat4>& outFinalBoneMatrices, bool rootMotion = true, const glm::mat4& parentTransform = glm::mat4(1.0f));
+									std::vector<glm::mat4>& outFinalBoneMatrices, bool lockRootBoneTranslation, bool rootMotion = true, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
 	public:
 		SkeletalAnimationComponent();
