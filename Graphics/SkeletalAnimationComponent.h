@@ -31,6 +31,8 @@ struct AnimationState
 	float currentTime;
 	float previousTime;
 
+	glm::vec3 rootLoopDeltaPosition;
+
 	glm::vec3 previousRootPosition;
 	glm::vec3 rootDeltaInLastFrame;
 
@@ -84,9 +86,9 @@ class SkeletalAnimationComponent final : public Component
 
 		std::vector<glm::mat4> _translationMatrices;
 
-		glm::vec3 _loopDelta;
-
 		void onAttachedToScenObject() override;
+
+		void calculateRootLoopDelta(AnimationState& animationState);
 
 		void calculateModelBonesTranslations(const AnimationNodeData* nodeData);
 
@@ -140,6 +142,7 @@ class SkeletalAnimationComponent final : public Component
 
 		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "");
 		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "");
+		glm::vec3 getRootBonePositionInFrame(const AnimationState& animationState, int frame);
 		glm::vec3 getRootBonePositionInStartFrameOld(const std::string& stateName = "");
 		glm::vec3 getRootBonePositionInEndFrameOld(const std::string& stateName = "");
 

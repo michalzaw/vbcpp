@@ -526,6 +526,18 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			SkeletalAnimationComponent* skeletalAnimation = graphicsManager->addSkeletalAnimation();
 
+			sceneObject->addComponent(skeletalAnimation);
+
+			if (!rootBone.empty())
+			{
+				skeletalAnimation->setRootBone(rootBone);
+			}
+			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
+			skeletalAnimation->setScale(scale);
+			skeletalAnimation->setEndToStartFrameBlending(endToStartFrameBlending);
+			skeletalAnimation->setEndToStartFrameBlendingTime(endToStartFrameBlendingDuration);
+			skeletalAnimation->setStateBlendingDuration(stateBlendingDuration);
+
 			int statesCount = toInt(components[i]["statesCount"]);
 
 			for (int j = 0; j < statesCount; ++j)
@@ -538,18 +550,6 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 				skeletalAnimation->addAnimationState(std::move(animationState));
 			}
-
-			sceneObject->addComponent(skeletalAnimation);
-
-			if (!rootBone.empty())
-			{
-				skeletalAnimation->setRootBone(rootBone);
-			}
-			skeletalAnimation->setLockRootBoneTranslation(lockRootBoneTranslation);
-			skeletalAnimation->setScale(scale);
-			skeletalAnimation->setEndToStartFrameBlending(endToStartFrameBlending);
-			skeletalAnimation->setEndToStartFrameBlendingTime(endToStartFrameBlendingDuration);
-			skeletalAnimation->setStateBlendingDuration(stateBlendingDuration);
 		}
 		else if (componentType == "vehicle")
 		{
