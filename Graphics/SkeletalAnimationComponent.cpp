@@ -179,6 +179,41 @@ void SkeletalAnimationComponent::calculateBoneTransformWithAnimationStateBlendin
 }
 
 
+void SkeletalAnimationComponent::calculateRootMotionInSingleAnimation(AnimationState* currentAnimationState, const AnimationNodeData* node, const glm::mat4& parentTransform,
+																	  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator)
+{
+	glm::mat4 nodeTransform = node->transformation;
+
+	calculateBoneTransformInSingleAnimation(currentAnimationState, node->name, false, boneInfoIterator, nodeTransform);
+
+	glm::mat4 globalTransform = parentTransform * nodeTransform;
+
+	glm::vec4 pos = globalTransform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec3 currentRootPosition(pos.x, pos.y, pos.z);
+
+	currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition;
+
+	if (currentAnimationState->currentTime < currentAnimationState->previousTime)
+	{
+		currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition + currentAnimationState->rootLoopDeltaPosition;
+	}
+
+	currentAnimationState->previousRootPosition = currentRootPosition;
+}
+
+
+void SkeletalAnimationComponent::calculateRootMotionWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node, const glm::mat4& parentTransform,
+																			   const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator)
+{
+	calculateRootMotionInSingleAnimation(currentAnimationState, node, parentTransform, boneInfoIterator);
+	calculateRootMotionInSingleAnimation(nextAnimationState, node, parentTransform, boneInfoIterator);
+
+	currentAnimationState->rootDeltaInLastFrame = nextAnimationState->rootDeltaInLastFrame = glm::mix(currentAnimationState->rootDeltaInLastFrame,
+																									  nextAnimationState->rootDeltaInLastFrame,
+																									  _stateBlendingFactor);
+}
+
+
 void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
 														std::vector<glm::mat4>& outFinalBoneMatrices, bool lockRootBoneTranslation, bool rootMotion, const glm::mat4& parentTransform /*= glm::mat4(1.0f)*/)
 {
@@ -191,29 +226,6 @@ void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentA
 	if (nextAnimationState == nullptr)
 	{
 		calculateBoneTransformInSingleAnimation(currentAnimationState, nodeName, lockRootBoneTranslation, boneInfo, nodeTransform);
-
-		if (rootMotion &&
-			boneInfo != _animatedModel->getBoneInfos().end() &&
-			boneInfo->second->id == _rootNodeIndex)
-		{
-			glm::mat4 rootNodeTransform = node->transformation;
-
-			calculateBoneTransformInSingleAnimation(currentAnimationState, nodeName, false, boneInfo, rootNodeTransform);
-
-			glm::mat4 rootGlobalTransform = parentTransform * rootNodeTransform;
-
-			glm::vec4 pos = rootGlobalTransform * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-			glm::vec3 currentRootPosition(pos.x, pos.y, pos.z);
-
-			currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition;
-
-			if (currentAnimationState->currentTime < currentAnimationState->previousTime)
-			{
-				currentAnimationState->rootDeltaInLastFrame = currentRootPosition - currentAnimationState->previousRootPosition + currentAnimationState->rootLoopDeltaPosition;
-			}
-
-			currentAnimationState->previousRootPosition = currentRootPosition;
-		}
 	}
 	else
 	{
@@ -228,6 +240,20 @@ void SkeletalAnimationComponent::calculateBoneTransform(AnimationState* currentA
 		const glm::mat4& offset = boneInfo->second->offset;
 
 		outFinalBoneMatrices[index] = globalTransform * offset;
+	}
+
+	if (rootMotion &&
+		boneInfo != _animatedModel->getBoneInfos().end() &&
+		boneInfo->second->id == _rootNodeIndex)
+	{
+		if (nextAnimationState == nullptr)
+		{
+			calculateRootMotionInSingleAnimation(currentAnimationState, node, parentTransform, boneInfo);
+		}
+		else
+		{
+			calculateRootMotionWithAnimationStateBlending(currentAnimationState, nextAnimationState, node, parentTransform, boneInfo);
+		}
 	}
 
 
@@ -351,6 +377,8 @@ void SkeletalAnimationComponent::setNextAnimationState(const std::string& name)
 
 		_stateBlndingTime = 0.0f;
 		_stateBlendingFactor = 0.0f;
+
+		_nextAnimationState->previousRootPosition = getRootBonePositionInFrame(*_nextAnimationState, _nextAnimationState->currentTime);
 	}
 	else
 	{

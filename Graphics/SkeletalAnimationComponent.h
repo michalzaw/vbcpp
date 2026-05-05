@@ -102,6 +102,11 @@ class SkeletalAnimationComponent final : public Component
 		void calculateBoneTransformWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const std::string& nodeName, bool lockRootBoneTranslation,
 															  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator, glm::mat4& outTransform);
 
+		void calculateRootMotionInSingleAnimation(AnimationState* currentAnimationState, const AnimationNodeData* node, const glm::mat4& parentTransform,
+												  const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
+		void calculateRootMotionWithAnimationStateBlending(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node, const glm::mat4& parentTransform,
+														   const std::unordered_map<std::string, BoneInfo*>::const_iterator& boneInfoIterator);
+
 		void calculateBoneTransform(AnimationState* currentAnimationState, AnimationState* nextAnimationState, const AnimationNodeData* node,
 									std::vector<glm::mat4>& outFinalBoneMatrices, bool lockRootBoneTranslation, bool rootMotion = true, const glm::mat4& parentTransform = glm::mat4(1.0f));
 
