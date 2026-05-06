@@ -265,6 +265,7 @@ void RObjectLoader::loadVehicle(tinyxml2::XMLElement* componentElement, RObject*
 void RObjectLoader::loadAiAgent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["speed"] = componentElement->Attribute("speed");
+	object->getComponents()[componentIndex]["motionFromAnimation"] = XmlUtils::getAttributeStringOptional(componentElement, "motionFromAnimation", "true");
 }
 
 
@@ -641,9 +642,11 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		else if (componentType == "aiAgent")
 		{
 			float speed = toFloat(components[i]["speed"]);
+			bool motionFromAnimation = toBool(components[i]["motionFromAnimation"]);
 
 			AIAgent* aiAgent = sceneManager->getGameLogicSystem()->addAIAgent();
 			aiAgent->setSpeed(speed);
+			aiAgent->setMotionFromAnimation(motionFromAnimation);
 
 			sceneObject->addComponent(aiAgent);
 		}
