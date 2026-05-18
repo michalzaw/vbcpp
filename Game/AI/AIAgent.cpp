@@ -168,7 +168,7 @@ void AIAgent::update(float deltaTime)
 		if (_motionFromAnimation)
 		{
 			const glm::vec3& rootDeltaInLastFrame = _skeletalAnimationComponent->getCurrentAnimationState()->rootDeltaInLastFrame;
-			_t += glm::length(glm::vec3(rootDeltaInLastFrame.x, 0.0f, rootDeltaInLastFrame.z));// *0.01;
+			_t += glm::length(glm::vec3(rootDeltaInLastFrame.x, 0.0f, rootDeltaInLastFrame.z));
 		}
 		else
 		{

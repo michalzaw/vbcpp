@@ -146,11 +146,9 @@ class SkeletalAnimationComponent final : public Component
 		void setStateBlendingDuration(float stateBlendingDuration) { _stateBlendingDuration = stateBlendingDuration; }
 		inline void setScale(float scale) { _scale = scale; }
 
-		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "");
-		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "");
-		glm::vec3 getRootBonePositionInFrame(const AnimationState& animationState, int frame);
-		glm::vec3 getRootBonePositionInStartFrameOld(const std::string& stateName = "");
-		glm::vec3 getRootBonePositionInEndFrameOld(const std::string& stateName = "");
+		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "", bool withOffset = false);
+		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "", bool withOffset = false);
+		glm::vec3 getRootBonePositionInFrame(const AnimationState& animationState, int frame, bool withOffset = false);
 
 };
 
