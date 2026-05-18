@@ -3,6 +3,7 @@
 #include "PathComponent.h"
 
 #include "../../Graphics/SkeletalAnimationComponent.h"
+#include "../../Graphics/RAnimation.h"
 
 #include "../../Scene/SceneObject.h"
 
@@ -11,9 +12,9 @@
 
 AIAgent::AIAgent()
 	: Component(CT_AI_AGENT),
-	_speed(10.0f),
+	_speed(10.0f), _motionFromAnimation(true),
 	_currentPath(nullptr), _skeletalAnimationComponent(nullptr),
-	_speedInAnimation(10.0f), _baseAnimationTicksPerSecond(0.0f),
+	_speedInAnimation(10.0f),
 	_currentPointIndex(0), _t(0.0f),
 	_isInitializedStartPosition(false)
 {
@@ -26,15 +27,13 @@ void AIAgent::onAttachedToScenObject()
 	_skeletalAnimationComponent = dynamic_cast<SkeletalAnimationComponent*>(getSceneObject()->getComponent(CT_SKELETAL_ANIMATION));
 	if (_skeletalAnimationComponent != nullptr)
 	{
-		glm::vec3 startPosition = _skeletalAnimationComponent->getRootBonePositionInStartFrame() * _skeletalAnimationComponent->getScale();
-		glm::vec3 endPosition = _skeletalAnimationComponent->getRootBonePositionInEndFrame() * _skeletalAnimationComponent->getScale();
+		glm::vec3 startPosition = _skeletalAnimationComponent->getRootBonePositionInStartFrame();
+		glm::vec3 endPosition = _skeletalAnimationComponent->getRootBonePositionInEndFrame();
 
 		float distanceFromStartToEndPosition = glm::distance(startPosition, endPosition);
-		float animationDuration = _skeletalAnimationComponent->getAnimationDuration() / _skeletalAnimationComponent->getAnimationTicksPerSecond();
+		float animationDuration = _skeletalAnimationComponent->getCurrentAnimationState()->animation->getDuration() / _skeletalAnimationComponent->getCurrentAnimationState()->animation->getTicksPerSecond();
 
 		_speedInAnimation = distanceFromStartToEndPosition / animationDuration;
-
-		_baseAnimationTicksPerSecond = _skeletalAnimationComponent->getAnimationTicksPerSecond();
 
 		setSpeed(_speed);
 	}
@@ -63,6 +62,10 @@ void AIAgent::move(const glm::vec3& point1, const glm::vec3& point2)
 	if (_t < distance)
 	{
 		glm::vec3 position = point1 + _t * dir;
+		if (_motionFromAnimation)
+		{
+			position.y += _skeletalAnimationComponent->getCurrentAnimationState()->rootDeltaInLastFrame.y;
+		}
 
 		getSceneObject()->setPosition(position);
 	}
@@ -123,7 +126,7 @@ void AIAgent::setSpeed(float speed)
 	{
 		float ratio = _speed / _speedInAnimation;
 
-		_skeletalAnimationComponent->setAnimationTicksPerSecond(_baseAnimationTicksPerSecond * ratio);
+		_skeletalAnimationComponent->setAnimationSpeed(ratio);
 	}
 }
 
@@ -162,7 +165,15 @@ void AIAgent::update(float deltaTime)
 		const auto& point1 = _currentPath->getCurvePoints()[_currentPointIndex];
 		const auto& point2 = _currentPath->getCurvePoints()[_currentPointIndex + 1];
 
-		_t += deltaTime * _speed;
+		if (_motionFromAnimation)
+		{
+			const glm::vec3& rootDeltaInLastFrame = _skeletalAnimationComponent->getCurrentAnimationState()->rootDeltaInLastFrame;
+			_t += glm::length(glm::vec3(rootDeltaInLastFrame.x, 0.0f, rootDeltaInLastFrame.z));
+		}
+		else
+		{
+			_t += deltaTime * _speed;
+		}
 
 		move(point1, point2);
 	}

@@ -1,7 +1,11 @@
 #include "AnimationLoader.h"
 
 
+#include "AnimationMetadataLoader.h"
+#include "AnimationMetadataSaver.h"
+
 #include "../Utils/AssimpGlmConverter.h"
+#include "../Utils/FilesHelper.h"
 #include "../Utils/Logger.h"
 
 
@@ -87,11 +91,24 @@ RAnimation* AnimationLoader::loadAnimation(const std::string& fileName)
 
 	RAnimation* animation = new RAnimation(fileName);
 
-	animation->_duration = assimpAnimation->mDuration;
+	animation->_originalDuration = assimpAnimation->mDuration;
 	animation->_ticksPerSecond = assimpAnimation->mTicksPerSecond;
 
 	loadNode(assimpScene->mRootNode, animation->_rootNode);
 	loadBones(assimpAnimation, animation->_bones);
+
+	std::string animationMetadataFileName = AnimationMetadataLoader::createAnimationMetadataFileName(fileName);
+	if (!FilesHelper::isFileExists(animationMetadataFileName))
+	{
+		AnimationMetadataSaver::saveDefaultAnimationMetadata(animationMetadataFileName);
+	}
+
+	AnimationMetadataLoader::loadAnimationMetadata(animationMetadataFileName, animation);
+
+	LOG_DEBUG("Animation metadata: OriginalDuration " + Strings::toString(animation->_originalDuration) +
+			  ", startFrame " + Strings::toString(animation->_startFrame) +
+			  ", endFrame " + Strings::toString(animation->_endFrame) +
+			  ", ticksPerSeconds " + Strings::toString(animation->_ticksPerSecond));
 
 	return animation;
 }
