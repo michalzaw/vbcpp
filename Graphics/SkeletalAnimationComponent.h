@@ -8,7 +8,11 @@
 
 #include <glm/glm.hpp>
 
+#include "AnimationState.h";
+
 #include "../Scene/Component.h"
+
+#include "../Scripting/Utils/LuaMacros.h"
 
 #include "../Utils/Helpers.hpp"
 
@@ -21,35 +25,6 @@ struct BoneInfo;
 
 
 const int MAX_BONES = 100;
-
-
-struct AnimationState
-{
-	std::string name;
-	RAnimation* animation;
-
-	float currentTime;
-	float previousTime;
-
-	glm::vec3 rootLoopDeltaPosition;
-
-	glm::vec3 previousRootPosition;
-	glm::vec3 rootDeltaInLastFrame;
-
-	AnimationState(const std::string& name = "", RAnimation* animation = nullptr, float currentTime = 0.0f)
-		: name(name), animation(animation), currentTime(currentTime), previousTime(currentTime),
-		previousRootPosition(0.0f), rootDeltaInLastFrame(0.0f)
-	{
-
-	}
-
-	inline void setAnimation(RAnimation* animation) { this->animation = animation != nullptr ? animation : this->animation; }
-	inline RAnimation* getAnimation() { return animation; }
-
-	inline void setCurrentTime(float currentTime) { this->currentTime = currentTime; }
-	inline float getCurrentTime() { return currentTime; }
-
-};
 
 
 // animation without retargeting
@@ -121,34 +96,34 @@ class SkeletalAnimationComponent final : public Component
 		inline const std::unordered_map<std::string, AnimationState>& getAnimationStates() { return  _animationStates; }
 
 		void addAnimationState(AnimationState&& animationState);
-		void setCurrentAnimationState(const std::string& name);
-		void setNextAnimationState(const std::string& name);
-		inline AnimationState* getCurrentAnimationState() { return _currentAnimationState; }
-		inline AnimationState* getNextAnimationState() { return _nextAnimationState; }
+		LUAF void setCurrentAnimationState(const std::string& name);
+		LUAF void setNextAnimationState(const std::string& name);
+		LUAF inline AnimationState* getCurrentAnimationState() { return _currentAnimationState; }
+		LUAF inline AnimationState* getNextAnimationState() { return _nextAnimationState; }
 
-		const std::vector<glm::mat4>& getFinalBoneMatrices();
+		LUAF const std::vector<glm::mat4>& getFinalBoneMatrices();
 
-		inline const float getAnimationSpeed() { return _animationSpeed; }
-		inline const bool isPlay() { return _play; }
-		inline const bool isLockRootBoneTranslation() { return _lockRootBoneTranslation; }
-		inline const std::string& getRootBone() { return _rootBoneName; }
-		inline const bool isEndToStartFrameBlending() { return _endToStartFrameBlending; }
-		inline const float getEndToStartFrameBlendingTime() { return _endToStartFrameBlendingTime; }
-		inline const float getStateBlendingDuration() { return _stateBlendingDuration; }
-		inline const float getScale() { return _scale; }
+		LUAF inline const float getAnimationSpeed() { return _animationSpeed; }
+		LUAF inline const bool isPlay() { return _play; }
+		LUAF inline const bool isLockRootBoneTranslation() { return _lockRootBoneTranslation; }
+		LUAF inline const std::string& getRootBone() { return _rootBoneName; }
+		LUAF inline const bool isEndToStartFrameBlending() { return _endToStartFrameBlending; }
+		LUAF inline const float getEndToStartFrameBlendingTime() { return _endToStartFrameBlendingTime; }
+		LUAF inline const float getStateBlendingDuration() { return _stateBlendingDuration; }
+		LUAF inline const float getScale() { return _scale; }
 
-		inline void setAnimationSpeed(float animationSpeed) { _animationSpeed = animationSpeed; }
-		inline void setPlay(bool play) { _play = play; }
-		inline void setLockRootBoneTranslation(bool isLock) { _lockRootBoneTranslation = isLock; }
-		void setRootBone(const std::string& boneName);
-		void setEndToStartFrameBlending(bool endToStartFrameBlending) { _endToStartFrameBlending = endToStartFrameBlending; }
-		void setEndToStartFrameBlendingTime(float endToStartFrameBlendingTime) { _endToStartFrameBlendingTime = endToStartFrameBlendingTime; }
-		void setStateBlendingDuration(float stateBlendingDuration) { _stateBlendingDuration = stateBlendingDuration; }
-		inline void setScale(float scale) { _scale = scale; }
+		LUAF inline void setAnimationSpeed(float animationSpeed) { _animationSpeed = animationSpeed; }
+		LUAF inline void setPlay(bool play) { _play = play; }
+		LUAF inline void setLockRootBoneTranslation(bool isLock) { _lockRootBoneTranslation = isLock; }
+		LUAF void setRootBone(const std::string& boneName);
+		LUAF void setEndToStartFrameBlending(bool endToStartFrameBlending) { _endToStartFrameBlending = endToStartFrameBlending; }
+		LUAF void setEndToStartFrameBlendingTime(float endToStartFrameBlendingTime) { _endToStartFrameBlendingTime = endToStartFrameBlendingTime; }
+		LUAF void setStateBlendingDuration(float stateBlendingDuration) { _stateBlendingDuration = stateBlendingDuration; }
+		LUAF inline void setScale(float scale) { _scale = scale; }
 
-		glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "", bool withOffset = false);
-		glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "", bool withOffset = false);
-		glm::vec3 getRootBonePositionInFrame(const AnimationState& animationState, int frame, bool withOffset = false);
+		LUAF glm::vec3 getRootBonePositionInStartFrame(const std::string& stateName = "", bool withOffset = false);
+		LUAF glm::vec3 getRootBonePositionInEndFrame(const std::string& stateName = "", bool withOffset = false);
+		LUAF glm::vec3 getRootBonePositionInFrame(const AnimationState& animationState, int frame, bool withOffset = false);
 
 };
 
