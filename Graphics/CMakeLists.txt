@@ -119,6 +119,7 @@ set (GRAPHICS_HEADERS
 		Graphics/AnimationLoader.h
 		Graphics/AnimationMetadataLoader.h
 		Graphics/AnimationMetadataSaver.h
+		Graphics/AnimationState.h
 		Graphics/BezierCurve.h
 		Graphics/RAnimation.h
 		Graphics/AnimationNodeData.h

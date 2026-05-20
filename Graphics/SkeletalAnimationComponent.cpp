@@ -294,6 +294,10 @@ void SkeletalAnimationComponent::update(float deltaTime)
 
 		_finalBoneMatricesIsCalculated = false;
 	}
+	else
+	{
+		_currentAnimationState->rootDeltaInLastFrame = glm::vec3(0.0f, 0.0f, 0.0f);
+	}
 }
 
 
