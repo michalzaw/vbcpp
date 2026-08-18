@@ -307,7 +307,8 @@ void TestScene::initAnimation()
 	RenderObject* animatedRenderObject = _graphicsManager->addRenderObject(new RenderObject(animatedModel), animatedObject);
 
 	RAnimation* animation = ResourceManager::getInstance().loadAnimation("Objects/peoples/Krystian3/animation.fbx");
-	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation(animation);
+	SkeletalAnimationComponent* skeletalAnimation = _graphicsManager->addSkeletalAnimation();
+	skeletalAnimation->addAnimationState({ "animation", animation });
 	animatedObject->addComponent(skeletalAnimation);
 }
 

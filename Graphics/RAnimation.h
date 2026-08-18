@@ -50,6 +50,7 @@ class Bone final
 		inline const std::string& getName() { return _name; }
 
 		glm::mat4 calculatePosition(float animationTime);
+		glm::quat calculateRotationQuat(float animationTime);
 		glm::mat4 calculateRotation(float animationTime);
 		glm::mat4 calculateScale(float animationTime);
 
@@ -61,9 +62,12 @@ class Bone final
 class RAnimation final : public Resource
 {
 	friend class AnimationLoader;
+	friend class AnimationMetadataLoader;
 
 	private:
-		float _duration;
+		float _originalDuration;
+		int _startFrame;
+		int _endFrame;
 		int _ticksPerSecond;
 
 		std::unordered_map<std::string, Bone*> _bones;
@@ -75,8 +79,15 @@ class RAnimation final : public Resource
 		RAnimation(const std::string& path);
 		~RAnimation();
 
-		inline float getDuration() { return _duration; }
-		inline float getTicksPerSecond() { return _ticksPerSecond; }
+		inline float getOriginalDuration() { return _originalDuration; }
+		inline float getDuration() { return static_cast<float>(_endFrame - _startFrame); }
+		inline int getStartFrame() { return _startFrame; }
+		inline int getEndFrame() { return _endFrame; }
+		inline int getTicksPerSecond() { return _ticksPerSecond; }
+
+		inline void setStartFrame(int startFrame) { _startFrame = startFrame; }
+		inline void setEndFrame(int endFrame) { _endFrame = endFrame; }
+		inline void setTicksPerSecond(int ticksPerSecond) { _ticksPerSecond = ticksPerSecond; }
 
 		inline std::unordered_map<std::string, Bone*>& getBones() { return _bones; }
 		inline AnimationNodeData* getRootNode() { return &_rootNode; }

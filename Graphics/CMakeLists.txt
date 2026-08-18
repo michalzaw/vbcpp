@@ -2,6 +2,8 @@ set (GRAPHICS_SOURCES
 		Graphics/AABB.h
 		Graphics/AnimatedModelLoader.cpp
 		Graphics/AnimationLoader.cpp
+		Graphics/AnimationMetadataLoader.cpp
+		Graphics/AnimationMetadataSaver.cpp
 		Graphics/BezierCurve.cpp
 		Graphics/Camera.cpp
 		Graphics/Camera.h
@@ -115,6 +117,9 @@ set (GRAPHICS_HEADERS
 		Graphics/StorageBuffer/PickingShaderStorageBufferData.h
 		Graphics/AnimatedModelLoader.h
 		Graphics/AnimationLoader.h
+		Graphics/AnimationMetadataLoader.h
+		Graphics/AnimationMetadataSaver.h
+		Graphics/AnimationState.h
 		Graphics/BezierCurve.h
 		Graphics/RAnimation.h
 		Graphics/AnimationNodeData.h

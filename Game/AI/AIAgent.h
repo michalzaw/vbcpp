@@ -4,10 +4,13 @@
 
 #include <glm/glm.hpp>
 
+#include "PathComponent.h"
+
 #include "../../Scene/Component.h"
 
+#include "../../Scripting/Utils/LuaMacros.h"
 
-class PathComponent;
+
 class SkeletalAnimationComponent;
 
 
@@ -17,12 +20,12 @@ class AIAgent : public Component
 
 	protected:
 		float _speed;
+		bool _motionFromAnimation;
 
 		PathComponent* _currentPath;
 		SkeletalAnimationComponent* _skeletalAnimationComponent;
 
 		float _speedInAnimation;
-		float _baseAnimationTicksPerSecond;
 
 		unsigned int _currentPointIndex;
 		float _t;
@@ -37,11 +40,14 @@ class AIAgent : public Component
 	public:
 		AIAgent();
 
-		void setSpeed(float speed);
-		float getSpeed();
+		LUAF void setSpeed(float speed);
+		LUAF float getSpeed();
 
-		void setCurrentPath(PathComponent* path);
-		PathComponent* getCurrentPath() { return _currentPath; }
+		LUAF inline void setMotionFromAnimation(bool motionFromAnimation) { _motionFromAnimation = motionFromAnimation; }
+		LUAF inline bool isMotionFromAnimation() { return _motionFromAnimation; }
+
+		LUAF void setCurrentPath(PathComponent* path);
+		LUAF inline PathComponent* getCurrentPath() { return _currentPath; }
 
 		void update(float deltaTime) override;
 };
