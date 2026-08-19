@@ -17,25 +17,10 @@ SchedulesWindow::SchedulesWindow(SceneManager* sceneManager, std::vector<Bus*>* 
 }
 
 
-BusStopComponent* SchedulesWindow::findBusStopById(int id)
-{
-	TransitSystem* transitSystem = _sceneManager->getTransitSystem();
-	for (int i = 0; i < transitSystem->getBusStopsCount(); ++i)
-	{
-		BusStopComponent* busStop = transitSystem->getBusStop(i);
-		if (busStop->getId() == id)
-		{
-			return busStop;
-		}
-	}
-
-	return nullptr;
-}
-
-
 void SchedulesWindow::drawWindow()
 {
-	Schedule* availableSchedules = _sceneManager->getTransitSystem()->getSchedule();
+	TransitSystem* transitSytem = _sceneManager->getTransitSystem();
+	Schedule* availableSchedules = transitSytem->getSchedule();
 
 	if (ImGui::Begin("Schedule", &_isOpen))
 	{
@@ -84,8 +69,6 @@ void SchedulesWindow::drawWindow()
 
 		if (currentRouteData.isSet() && availableSchedules->lines.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades[currentRouteData.currentBrigadeIndex].routes.size() > 0)
 		{
-			const ScheduleRoute& currentRoute = availableSchedules->lines[currentRouteData.currentLineIndex].brigades[currentRouteData.currentBrigadeIndex].routes[currentRouteData.currentRouteIndex];
-
 			ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 			if (ImGui::BeginTable("schedules", 3, tableFlags))
 			{
@@ -93,24 +76,28 @@ void SchedulesWindow::drawWindow()
 				ImGui::TableSetupColumn("Stop name", ImGuiTableColumnFlags_WidthFixed);
 				ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableHeadersRow();
-				for (int i = 0; i < currentRoute.stops.size(); ++i)
+				for (int i = 0; i < currentRouteData.currentRoute->stops.size(); ++i)
 				{
-					BusStopComponent* busStopComponent = findBusStopById(currentRoute.stops[i].id);
+					BusStopComponent* busStopComponent = transitSytem->findBusStopById(currentRouteData.currentRoute->stops[i].id);
 
 					ImGui::TableNextRow();
 					{
 						ImGui::TableSetColumnIndex(0);
-						ImGui::Text("Id: %d", currentRoute.stops[i].id);
+						ImGui::Text("Id: %d", currentRouteData.currentRoute->stops[i].id);
 
 						ImGui::TableSetColumnIndex(1);
 						ImGui::Text(busStopComponent != nullptr ? busStopComponent->getName().c_str() : "");
 
 						ImGui::TableSetColumnIndex(2);
-						ImGui::Text(currentRoute.stops[i].time.toString().c_str());
+						ImGui::Text(currentRouteData.currentRoute->stops[i].time.toString().c_str());
 					}
 				}
 				ImGui::EndTable();
 			}
+
+
+			ImGui::Text("Current bus stop: %s", currentRouteData.currentBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.currentBusStopIndex].id)->getName() : "");
+			ImGui::Text("Next bus stop: %s", currentRouteData.nextBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.nextBusStopIndex].id)->getName() : "");
 		}
 	}
 	ImGui::End();

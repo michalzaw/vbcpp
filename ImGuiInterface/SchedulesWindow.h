@@ -17,8 +17,6 @@ class SchedulesWindow : public ImGuiWindow
 		int _selectedBrigadeIndex;
 		int _selectedRouteIndex;
 
-		BusStopComponent* findBusStopById(int id);
-
 		virtual void drawWindow() override;
 
 	public:

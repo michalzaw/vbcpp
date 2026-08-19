@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "Schedule.h"
+
 #include "../../Utils/Time.h"
 
 
@@ -29,17 +31,24 @@ struct CurrentRouteData final
 	int currentBrigadeIndex;
 	int currentRouteIndex;
 
+	ScheduleRoute* currentRoute;
+
+	int currentBusStopIndex;
+	int nextBusStopIndex;
+
 	std::vector<CurrentRouteBusStopsStatsData> busStopsStatsData;
 
 	CurrentRouteData()
-		: currentLineIndex(-1), currentBrigadeIndex(-1), currentRouteIndex(-1)
+		: currentLineIndex(-1), currentBrigadeIndex(-1), currentRouteIndex(-1),
+		currentRoute(nullptr),
+		currentBusStopIndex(-1), nextBusStopIndex(-1)
 	{
 
 	}
 
 	bool isSet() const
 	{
-		return currentLineIndex >= 0 && currentBrigadeIndex >= 0 && currentRouteIndex >= 0;
+		return currentLineIndex >= 0 && currentBrigadeIndex >= 0 && currentRouteIndex >= 0 && currentRoute != nullptr;
 	}
 
 };

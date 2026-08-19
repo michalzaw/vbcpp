@@ -5,7 +5,7 @@
 
 
 TransitSystem::TransitSystem()
-    : _currentBusStop(nullptr), _distanceToCurrentBusStop(0.0f)
+    : _distanceToCurrentBusStop(0.0f)
 {
     _routes = new BusRoutes;
     _schedule = new Schedule;
@@ -51,6 +51,20 @@ void TransitSystem::removeBusStop(BusStopComponent* busStop)
 }
 
 
+BusStopComponent* TransitSystem::findBusStopById(int id)
+{
+    for (BusStopComponent* busStop : _busStops)
+    {
+        if (busStop->getId() == id)
+        {
+            return busStop;
+        }
+    }
+
+    return nullptr;
+}
+
+
 void TransitSystem::setRoutes(BusRoutes* routes)
 {
     if (_routes != nullptr)
@@ -80,6 +94,9 @@ void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIn
         _currentRouteData.currentLineIndex = -1;
         _currentRouteData.currentBrigadeIndex = -1;
         _currentRouteData.currentRouteIndex = -1;
+        _currentRouteData.currentRoute = nullptr;
+        _currentRouteData.currentBusStopIndex = -1;
+        _currentRouteData.nextBusStopIndex = -1;
     }
     else
     {
@@ -88,6 +105,9 @@ void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIn
             _currentRouteData.currentLineIndex = lineIndex;
             _currentRouteData.currentBrigadeIndex = brigadeIndex;
             _currentRouteData.currentRouteIndex = routeIndex;
+            _currentRouteData.currentRoute = &(_schedule->lines[lineIndex].brigades[brigadeIndex].routes[routeIndex]);
+            _currentRouteData.currentBusStopIndex = -1;
+            _currentRouteData.nextBusStopIndex = 0;
 
             _currentRouteData.busStopsStatsData.clear();
             _currentRouteData.busStopsStatsData.resize(_schedule->lines[lineIndex].brigades[brigadeIndex].routes[routeIndex].stops.size());
@@ -103,39 +123,46 @@ void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIn
 
 void TransitSystem::update(float deltaTime, Bus* bus)
 {
-    BusStopComponent* nearestBusStop = NULL;
-    float minDistance = FLT_MAX;
-    for (int i = 0; i < _busStops.size(); ++i)
+    if (_currentRouteData.isSet() && _currentRouteData.nextBusStopIndex >= 0)
     {
-        float distance = glm::length(bus->getSceneObject()->getPosition() - _busStops[i]->getSceneObject()->getPosition());
-        if (distance < minDistance)
-        {
-            minDistance = distance;
-            nearestBusStop = _busStops[i];
-        }
+        BusStopComponent* nextBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.nextBusStopIndex].id);
+        float distance = glm::length(bus->getSceneObject()->getPosition() - nextBusStop->getSceneObject()->getPosition());
 
-        if (distance < 50.0f && !_busStops[i]->getAnnouncementIsPlay())
+        if (distance < 50.0f && !nextBusStop->getAnnouncementIsPlay())
         {
-            bus->getAnnouncementSource()->setSound(_busStops[i]->getAnnouncementSound());
+            bus->getAnnouncementSource()->setSound(nextBusStop->getAnnouncementSound());
             bus->getAnnouncementSource()->play();
 
-            _busStops[i]->setAnnouncementIsPlay(true);
+            nextBusStop->setAnnouncementIsPlay(true);
         }
-    }
 
-    if (minDistance < MIN_DISTANCE_TO_BUS_STOP)
-    {
-        _distanceToCurrentBusStop = minDistance;
-
-        if (_currentBusStop != NULL && _currentBusStop != nearestBusStop)
+        if (distance < MIN_DISTANCE_TO_BUS_STOP && _currentRouteData.currentBusStopIndex < 0)
         {
-            _currentBusStop->_time = 0.0f;
+            _currentRouteData.currentBusStopIndex = _currentRouteData.nextBusStopIndex;
+            _currentRouteData.nextBusStopIndex += 1;
+            if (_currentRouteData.nextBusStopIndex >= _currentRouteData.currentRoute->stops.size())
+            {
+                // koniec trasy
+                _currentRouteData.nextBusStopIndex = -1;
+            }
+
+            BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+
+            currentBusStop->_time = 0.0f;
         }
-        _currentBusStop = nearestBusStop;
-        _currentBusStop->onTrigger(deltaTime, bus);
-    }
-    else
-    {
-        _currentBusStop = NULL;
+
+        if (_currentRouteData.currentBusStopIndex >= 0)
+        {
+            BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+
+            currentBusStop->onTrigger(deltaTime, bus);
+
+            _distanceToCurrentBusStop = glm::length(bus->getSceneObject()->getPosition() - currentBusStop->getSceneObject()->getPosition());
+
+            if (_distanceToCurrentBusStop >= MIN_DISTANCE_TO_BUS_STOP)
+            {
+                _currentRouteData.currentBusStopIndex = -1;
+            }
+        }
     }
 }

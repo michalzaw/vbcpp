@@ -24,7 +24,6 @@ class TransitSystem
 
         std::vector<BusStopComponent*> _busStops;
 
-        BusStopComponent* _currentBusStop;
         float _distanceToCurrentBusStop;
 
         BusRoutes* _routes;
@@ -40,10 +39,11 @@ class TransitSystem
 
         void removeBusStop(BusStopComponent* busStop);
 
-        inline BusStopComponent* getCurrentBusStop() { return _currentBusStop; }
+        inline BusStopComponent* getCurrentBusStop() { return _currentRouteData.isSet() ? findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id) : nullptr; }
         inline float getDistanceToCurrentBusStop() { return _distanceToCurrentBusStop; }
         inline BusStopComponent* getBusStop(int index) { return _busStops[index]; }
         inline int getBusStopsCount() { return _busStops.size(); }
+        BusStopComponent* findBusStopById(int id);
 
         void setRoutes(BusRoutes* routes);
         void setSchedule(Schedule* schedule);
