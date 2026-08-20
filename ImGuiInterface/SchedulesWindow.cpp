@@ -67,7 +67,10 @@ void SchedulesWindow::drawWindow()
 
 		const CurrentRouteData& currentRouteData = _sceneManager->getTransitSystem()->getCurrentRouteData();
 
-		if (currentRouteData.isSet() && availableSchedules->lines.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades.size() > 0 && availableSchedules->lines[currentRouteData.currentLineIndex].brigades[currentRouteData.currentBrigadeIndex].routes.size() > 0)
+		if (currentRouteData.isSet() &&
+			availableSchedules->lines.size() > 0 &&
+			availableSchedules->lines[currentRouteData.getCurrentLineIndex()].brigades.size() > 0 &&
+			availableSchedules->lines[currentRouteData.getCurrentLineIndex()].brigades[currentRouteData.getCurrentBrigadeIndex()].routes.size() > 0)
 		{
 			ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
 			if (ImGui::BeginTable("schedules", 3, tableFlags))
@@ -76,31 +79,32 @@ void SchedulesWindow::drawWindow()
 				ImGui::TableSetupColumn("Stop name", ImGuiTableColumnFlags_WidthFixed);
 				ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableHeadersRow();
-				for (int i = 0; i < currentRouteData.currentRoute->stops.size(); ++i)
+				for (int i = 0; i < currentRouteData.getCurrentRoute()->stops.size(); ++i)
 				{
-					BusStopComponent* busStopComponent = transitSytem->findBusStopById(currentRouteData.currentRoute->stops[i].id);
+					BusStopComponent* busStopComponent = currentRouteData.getBusStopOnRoute(i);
 
 					ImGui::TableNextRow();
 					{
 						ImGui::TableSetColumnIndex(0);
-						ImGui::Text("Id: %d", currentRouteData.currentRoute->stops[i].id);
+						ImGui::Text("Id: %d", currentRouteData.getBusStopScheduleData(i)->id);
 
 						ImGui::TableSetColumnIndex(1);
 						ImGui::Text(busStopComponent != nullptr ? busStopComponent->getName().c_str() : "");
 
 						ImGui::TableSetColumnIndex(2);
-						ImGui::Text(currentRouteData.currentRoute->stops[i].time.toString().c_str());
+						ImGui::Text(currentRouteData.getBusStopScheduleData(i)->time.toString().c_str());
 					}
 				}
 				ImGui::EndTable();
 			}
 
-
-			ImGui::Text("Current bus stop: %s", currentRouteData.currentBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.currentBusStopIndex].id)->getName().c_str() : "");
-			ImGui::Text("Next bus stop: %s", currentRouteData.nextBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.nextBusStopIndex].id)->getName().c_str() : "");
+			BusStopComponent* currentBusStop = currentRouteData.getCurrentBusStop();
+			BusStopComponent* nextBusStop = currentRouteData.getNextBusStop();
+			ImGui::Text("Current bus stop: %s", currentBusStop != nullptr ? currentBusStop->getName().c_str() : "");
+			ImGui::Text("Next bus stop: %s", nextBusStop != nullptr ? nextBusStop->getName().c_str() : "");
 		}
 
-		bool isRouteFinished = currentRouteData.nextBusStopIndex == -1;
+		bool isRouteFinished = true;// !currentRouteData.isNextBusStopSet();
 		if (currentRouteData.isSet() && isRouteFinished)
 		{
 			ImGui::Text("Route statistics");
@@ -118,15 +122,15 @@ void SchedulesWindow::drawWindow()
 				ImGui::TableSetupColumn("Passengers who wanted to get in", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableSetupColumn("Passengers who got in", ImGuiTableColumnFlags_WidthStretch);
 				ImGui::TableHeadersRow();
-				for (int i = 0; i < currentRouteData.busStopsStatsData.size(); ++i)
+				for (int i = 0; i < currentRouteData.getBusStopsStatsData().size(); ++i)
 				{
-					const CurrentRouteBusStopsStatsData& statsData = currentRouteData.busStopsStatsData[i];
-					BusStopComponent* busStopComponent = transitSytem->findBusStopById(currentRouteData.currentRoute->stops[i].id);
+					const CurrentRouteBusStopsStatsData& statsData = currentRouteData.getBusStopsStatsData()[i];
+					BusStopComponent* busStopComponent = currentRouteData.getBusStopOnRoute(i);
 
 					ImGui::TableNextRow();
 					{
 						ImGui::TableSetColumnIndex(0);
-						ImGui::Text("Id: %d", currentRouteData.currentRoute->stops[i].id);
+						ImGui::Text("Id: %d", currentRouteData.getBusStopScheduleData(i)->id);
 
 						ImGui::TableSetColumnIndex(1);
 						ImGui::Text(busStopComponent != nullptr ? busStopComponent->getName().c_str() : "");

@@ -9,6 +9,7 @@ set (GAME_SOURCES
 	Game/MainGameScene/MirrorImage.cpp
 	Game/Transit/BusRoutesLoader.cpp
     Game/Transit/BusStopComponent.cpp
+	Game/Transit/CurrentRouteData.cpp
 	Game/Transit/TransitSystem.cpp
 	Game/Transit/ScheduleLoader.cpp
 	Game/BusStartPoint.cpp

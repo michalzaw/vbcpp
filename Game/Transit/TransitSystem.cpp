@@ -10,7 +10,8 @@
 
 
 TransitSystem::TransitSystem()
-    : _distanceToCurrentBusStop(0.0f)
+    : _distanceToCurrentBusStop(0.0f),
+    _currentRouteData(this)
 {
     _routes = new BusRoutes;
     _schedule = new Schedule;
@@ -94,43 +95,16 @@ void TransitSystem::setSchedule(Schedule* schedule)
 
 void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIndex)
 {
-    if (lineIndex < 0 || brigadeIndex < 0 || routeIndex < 0)
-    {
-        _currentRouteData.currentLineIndex = -1;
-        _currentRouteData.currentBrigadeIndex = -1;
-        _currentRouteData.currentRouteIndex = -1;
-        _currentRouteData.currentRoute = nullptr;
-        _currentRouteData.currentBusStopIndex = -1;
-        _currentRouteData.nextBusStopIndex = -1;
-    }
-    else
-    {
-        if (lineIndex < _schedule->lines.size() && brigadeIndex < _schedule->lines[lineIndex].brigades.size() && routeIndex < _schedule->lines[lineIndex].brigades[brigadeIndex].routes.size())
-        {
-            _currentRouteData.currentLineIndex = lineIndex;
-            _currentRouteData.currentBrigadeIndex = brigadeIndex;
-            _currentRouteData.currentRouteIndex = routeIndex;
-            _currentRouteData.currentRoute = &(_schedule->lines[lineIndex].brigades[brigadeIndex].routes[routeIndex]);
-            _currentRouteData.currentBusStopIndex = -1;
-            _currentRouteData.nextBusStopIndex = 0;
-
-            _currentRouteData.busStopsStatsData.clear();
-            _currentRouteData.busStopsStatsData.resize(_schedule->lines[lineIndex].brigades[brigadeIndex].routes[routeIndex].stops.size());
-        }
-        else
-        {
-            LOG_ERROR("Invalid current route data: " + LOG_VARIABLE(lineIndex) + ", " + LOG_VARIABLE(brigadeIndex) + ", " + LOG_VARIABLE(routeIndex));
-        }
-    }
-
+    _currentRouteData.setRoute(lineIndex, brigadeIndex, routeIndex);
 }
 
 
 void TransitSystem::update(float deltaTime, Bus* bus)
 {
-    if (_currentRouteData.isSet() && _currentRouteData.nextBusStopIndex >= 0)
+    BusStopComponent* nextBusStop = _currentRouteData.getNextBusStop();
+
+    if (_currentRouteData.isSet() && nextBusStop != nullptr)
     {
-        BusStopComponent* nextBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.nextBusStopIndex].id);
         float distance = glm::length(bus->getSceneObject()->getPosition() - nextBusStop->getSceneObject()->getPosition());
 
         // Zapowiedz
@@ -143,34 +117,26 @@ void TransitSystem::update(float deltaTime, Bus* bus)
         }
 
         // Przyjazd
-        if (distance < MIN_DISTANCE_TO_BUS_STOP && _currentRouteData.currentBusStopIndex < 0)
+        if (distance < MIN_DISTANCE_TO_BUS_STOP && !_currentRouteData.isCurrentBusStopSet())
         {
-            _currentRouteData.currentBusStopIndex = _currentRouteData.nextBusStopIndex;
-            _currentRouteData.nextBusStopIndex += 1;
-            if (_currentRouteData.nextBusStopIndex >= _currentRouteData.currentRoute->stops.size())
-            {
-                // koniec trasy
-                _currentRouteData.nextBusStopIndex = -1;
-            }
+            _currentRouteData.enterToNextBusStop();
 
-            BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+            BusStopComponent* currentBusStop = _currentRouteData.getCurrentBusStop();
 
             currentBusStop->_time = 0.0f;
 
             Time* currentTime = currentBusStop->getSceneObject()->getSceneManager()->getGameLogicSystem()->getGameClock();
+            int numberOfPassengersWhoWantedToGetOff = 0; // todo
 
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].isVisited = true;
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].arrivalTime = *currentTime;
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetOff = 0; // todo
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetIn = currentBusStop->getNumberOfPassengers();
+            _currentRouteData.setArrivalStatistics(*currentTime, numberOfPassengersWhoWantedToGetOff, currentBusStop->getNumberOfPassengers());
         }
     }
 
     // Obecny przystanek
-    if (_currentRouteData.currentBusStopIndex >= 0)
-    {
-        BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+    BusStopComponent* currentBusStop = _currentRouteData.getCurrentBusStop();
 
+    if (currentBusStop != nullptr)
+    {
         currentBusStop->onTrigger(deltaTime, bus);
 
         _distanceToCurrentBusStop = glm::length(bus->getSceneObject()->getPosition() - currentBusStop->getSceneObject()->getPosition());
@@ -179,12 +145,12 @@ void TransitSystem::update(float deltaTime, Bus* bus)
         if (_distanceToCurrentBusStop >= MIN_DISTANCE_TO_BUS_STOP)
         {
             Time* currentTime = currentBusStop->getSceneObject()->getSceneManager()->getGameLogicSystem()->getGameClock();
+            int numberOfPassengersWhoGotOff = 0; // todo
+            int numberOfPassengersWhoGotIn = _currentRouteData.getBusStopsStatsData()[_currentRouteData.getCurrentBusStopIndex()].numberOfPassengersWhoWantedToGetIn - currentBusStop->getNumberOfPassengers();
 
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].departureTime = *currentTime;
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoGotOff = 0; // todo
-            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoGotIn = _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetIn - currentBusStop->getNumberOfPassengers();
+            _currentRouteData.setDepartureStatistics(*currentTime, numberOfPassengersWhoGotOff, numberOfPassengersWhoGotIn);
 
-            _currentRouteData.currentBusStopIndex = -1;
+            _currentRouteData.leaveCurrentBusStop();
         }
     }
 }

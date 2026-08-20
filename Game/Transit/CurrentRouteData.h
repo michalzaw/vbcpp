@@ -9,6 +9,10 @@
 #include "../../Utils/Time.h"
 
 
+class TransitSystem;
+class BusStopComponent;
+
+
 struct CurrentRouteBusStopsStatsData final
 {
 	bool isVisited;
@@ -33,31 +37,55 @@ struct CurrentRouteBusStopsStatsData final
 };
 
 
-struct CurrentRouteData final
+class CurrentRouteData final
 {
-	int currentLineIndex;
-	int currentBrigadeIndex;
-	int currentRouteIndex;
+	private:
+		int _currentLineIndex;
+		int _currentBrigadeIndex;
+		int _currentRouteIndex;
 
-	ScheduleRoute* currentRoute;
+		ScheduleRoute* _currentRoute;
 
-	int currentBusStopIndex;
-	int nextBusStopIndex;
+		int _currentBusStopIndex;
+		int _nextBusStopIndex;
 
-	std::vector<CurrentRouteBusStopsStatsData> busStopsStatsData;
+		std::vector<CurrentRouteBusStopsStatsData> _busStopsStatsData;
 
-	CurrentRouteData()
-		: currentLineIndex(-1), currentBrigadeIndex(-1), currentRouteIndex(-1),
-		currentRoute(nullptr),
-		currentBusStopIndex(-1), nextBusStopIndex(-1)
-	{
+		TransitSystem* _transitSystem;
 
-	}
+	public:
+		CurrentRouteData(TransitSystem* transitSystem);
 
-	bool isSet() const
-	{
-		return currentLineIndex >= 0 && currentBrigadeIndex >= 0 && currentRouteIndex >= 0 && currentRoute != nullptr;
-	}
+		bool isSet() const;
+
+		void setRoute(int lineIndex, int brigadeIndex, int routeIndex);
+
+		int getCurrentLineIndex() const;
+		int getCurrentBrigadeIndex() const;
+		int getCurrentRouteIndex() const;
+
+		ScheduleRoute* getCurrentRoute() const;
+
+		ScheduleStop* getBusStopScheduleData(int index) const;
+
+		BusStopComponent* getBusStopOnRoute(int index) const;
+
+		BusStopComponent* getCurrentBusStop() const;
+		BusStopComponent* getNextBusStop() const;
+
+		bool isCurrentBusStopSet() const;
+		bool isNextBusStopSet() const;
+
+		int getCurrentBusStopIndex() const;
+		int getNextBusStopIndex() const;
+
+		void enterToNextBusStop();
+		void leaveCurrentBusStop();
+
+		void setArrivalStatistics(const Time& time, int numberOfPassengersWhoWantedToGetOff, int numberOfPassengersWhoWantedToGetIn);
+		void setDepartureStatistics(const Time& time, int numberOfPassengersWhoGotOff, int numberOfPassengersWhoGotIn);
+
+		const std::vector<CurrentRouteBusStopsStatsData>& getBusStopsStatsData() const;
 
 };
 
