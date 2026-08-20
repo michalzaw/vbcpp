@@ -1,6 +1,8 @@
 set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/AIAgentLuaBindings.cpp
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.cpp
+	Scripting/Bindings/Generated/DisplayComponentLuaBindings.cpp
+	Scripting/Bindings/Generated/DisplayTextLuaBindings.cpp
 	Scripting/Bindings/Generated/GeneratedLuaBinding.cpp
 	Scripting/Bindings/Generated/MaterialLuaBindings.cpp
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.cpp
@@ -17,6 +19,8 @@ set (SCRIPTING_GENERATED_HEADERS
 	Scripting/Bindings/Generated/AIAgentLuaBindings.h
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.h
 	Scripting/Bindings/Generated/ComponentsGetters.h
+	Scripting/Bindings/Generated/DisplayComponentLuaBindings.h
+	Scripting/Bindings/Generated/DisplayTextLuaBindings.h
 	Scripting/Bindings/Generated/GeneratedLuaBindings.h
 	Scripting/Bindings/Generated/MaterialLuaBindings.h
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.h

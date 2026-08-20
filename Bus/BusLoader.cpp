@@ -11,6 +11,9 @@
 #include "../Graphics/DisplayComponent.h"
 
 
+#include "../Scripting/ScriptingManager.h"
+
+
 using namespace tinyxml2;
 
 
@@ -318,6 +321,7 @@ void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busEle
     loadMirrors(moduleElement, busModule);
     loadDisplays(moduleElement, busModule);
     loadCustomElements(moduleElement, busModule);
+    loadScripts(moduleElement, busModule);
 }
 
 
@@ -1243,6 +1247,25 @@ void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& 
         }
 
         childElement = childElement->NextSiblingElement("Element");
+    }
+}
+
+
+void BusLoader::loadScripts(XMLElement* parentElement, BusRayCastModule& busModule)
+{
+    XMLElement* childElement = parentElement->FirstChildElement("Script");
+    while (childElement != nullptr)
+    {
+        LOG_INFO("XML: Lua Script");
+
+        std::string scriptFileName = XmlUtils::getAttributeString(childElement, "fileName");
+
+        ScriptComponent* scriptComponent = _sMgr->getScriptingManager()->addScript(ResourceManager::getInstance().loadScriptFile(_busPath + scriptFileName));
+        SceneObject* scriptObjet = _sMgr->addSceneObject(scriptFileName);
+        busModule.sceneObject->addChild(scriptObjet);
+        scriptObjet->addComponent(scriptComponent);
+
+        childElement = childElement->NextSiblingElement("Script");
     }
 }
 

@@ -18,6 +18,16 @@ namespace SceneObjectLuaBindings
 			"addChild", &SceneObject::addChild,
 			"removeChild", &SceneObject::removeChild,
 			"getChildren", &SceneObject::getChildren,
+			"getChildByName", [](SceneObject* self, const std::string& name) {
+				for (SceneObject* child : self->getChildren())
+				{
+					if (child->getName() == name)
+					{
+						return child;
+					}
+				}
+				return (SceneObject*) nullptr;
+			},
 			"setIsActive", &SceneObject::setIsActive,
 			"getName", &SceneObject::getName,
 			"getId", &SceneObject::getId,

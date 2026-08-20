@@ -3,6 +3,8 @@
 
 #include "AIAgentLuaBindings.h"
 #include "AnimationStateLuaBindings.h"
+#include "DisplayComponentLuaBindings.h"
+#include "DisplayTextLuaBindings.h"
 #include "MaterialLuaBindings.h"
 #include "ModelNodeLuaBindings.h"
 #include "PhysicalBodyLuaBindings.h"
@@ -20,6 +22,8 @@ namespace GeneratedLuaBindings
     {
         AIAgentLuaBindings::bind(lua);
         AnimationStateLuaBindings::bind(lua);
+        DisplayComponentLuaBindings::bind(lua);
+        DisplayTextLuaBindings::bind(lua);
         MaterialLuaBindings::bind(lua);
         ModelNodeLuaBindings::bind(lua);
         PhysicalBodyLuaBindings::bind(lua);

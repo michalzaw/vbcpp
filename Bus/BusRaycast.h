@@ -18,6 +18,8 @@
 #include "../Physics/PhysicalBodyWheel.h"
 #include "../Physics/PhysicalBodyRaycastVehicle.h"
 
+#include "../Scripting/ScriptComponent.h"
+
 
 struct BusRayCastModule
 {
@@ -156,6 +158,8 @@ class BusRaycast : public Bus
         Desktop* _desktop;
         RenderObject* _desktopRenderObject;
         ClickableObject* _desktopClickableObject;
+
+        std::vector<ScriptComponent*> _scripts;
 
         bool isAllDoorClosed();
         void setRandomNumberOfPassengersGettingOff();
