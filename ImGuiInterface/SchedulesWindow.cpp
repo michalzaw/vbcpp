@@ -96,8 +96,65 @@ void SchedulesWindow::drawWindow()
 			}
 
 
-			ImGui::Text("Current bus stop: %s", currentRouteData.currentBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.currentBusStopIndex].id)->getName() : "");
-			ImGui::Text("Next bus stop: %s", currentRouteData.nextBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.nextBusStopIndex].id)->getName() : "");
+			ImGui::Text("Current bus stop: %s", currentRouteData.currentBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.currentBusStopIndex].id)->getName().c_str() : "");
+			ImGui::Text("Next bus stop: %s", currentRouteData.nextBusStopIndex >= 0 ? transitSytem->findBusStopById(currentRouteData.currentRoute->stops[currentRouteData.nextBusStopIndex].id)->getName().c_str() : "");
+		}
+
+		bool isRouteFinished = currentRouteData.nextBusStopIndex == -1;
+		if (currentRouteData.isSet() && isRouteFinished)
+		{
+			ImGui::Text("Route statistics");
+
+			ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable;
+			if (ImGui::BeginTable("Route stats", 9, tableFlags))
+			{
+				ImGui::TableSetupColumn("Stop id", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Stop name", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Is visited", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Arrival time", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Departure time", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Passengers who wanted to get off", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Passengers who got off", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Passengers who wanted to get in", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableSetupColumn("Passengers who got in", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableHeadersRow();
+				for (int i = 0; i < currentRouteData.busStopsStatsData.size(); ++i)
+				{
+					const CurrentRouteBusStopsStatsData& statsData = currentRouteData.busStopsStatsData[i];
+					BusStopComponent* busStopComponent = transitSytem->findBusStopById(currentRouteData.currentRoute->stops[i].id);
+
+					ImGui::TableNextRow();
+					{
+						ImGui::TableSetColumnIndex(0);
+						ImGui::Text("Id: %d", currentRouteData.currentRoute->stops[i].id);
+
+						ImGui::TableSetColumnIndex(1);
+						ImGui::Text(busStopComponent != nullptr ? busStopComponent->getName().c_str() : "");
+
+						ImGui::TableSetColumnIndex(2);
+						ImGui::Text(statsData.isVisited ? "Yes" : "No");
+
+						ImGui::TableSetColumnIndex(3);
+						ImGui::Text(statsData.arrivalTime.toString().c_str());
+
+						ImGui::TableSetColumnIndex(4);
+						ImGui::Text(statsData.departureTime.toString().c_str());
+
+						ImGui::TableSetColumnIndex(5);
+						ImGui::Text(Strings::toString(statsData.numberOfPassengersWhoWantedToGetOff).c_str());
+
+						ImGui::TableSetColumnIndex(6);
+						ImGui::Text(Strings::toString(statsData.numberOfPassengersWhoGotOff).c_str());
+
+						ImGui::TableSetColumnIndex(7);
+						ImGui::Text(Strings::toString(statsData.numberOfPassengersWhoWantedToGetIn).c_str());
+
+						ImGui::TableSetColumnIndex(8);
+						ImGui::Text(Strings::toString(statsData.numberOfPassengersWhoGotIn).c_str());
+					}
+				}
+				ImGui::EndTable();
+			}
 		}
 	}
 	ImGui::End();

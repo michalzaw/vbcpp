@@ -39,7 +39,7 @@ class TransitSystem
 
         void removeBusStop(BusStopComponent* busStop);
 
-        inline BusStopComponent* getCurrentBusStop() { return _currentRouteData.isSet() ? findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id) : nullptr; }
+        inline BusStopComponent* getCurrentBusStop() { return _currentRouteData.isSet() && _currentRouteData.currentBusStopIndex >= 0 ? findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id) : nullptr; }
         inline float getDistanceToCurrentBusStop() { return _distanceToCurrentBusStop; }
         inline BusStopComponent* getBusStop(int index) { return _busStops[index]; }
         inline int getBusStopsCount() { return _busStops.size(); }

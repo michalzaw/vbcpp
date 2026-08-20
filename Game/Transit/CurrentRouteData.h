@@ -22,6 +22,14 @@ struct CurrentRouteBusStopsStatsData final
 	int numberOfPassengersWhoWantedToGetIn;
 	int numberOfPassengersWhoGotIn;
 
+	CurrentRouteBusStopsStatsData()
+		: isVisited(false),
+		numberOfPassengersWhoWantedToGetOff(0), numberOfPassengersWhoGotOff(0),
+		numberOfPassengersWhoWantedToGetIn(0), numberOfPassengersWhoGotIn(0)
+	{
+
+	}
+
 };
 
 

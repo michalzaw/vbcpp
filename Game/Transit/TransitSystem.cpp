@@ -3,6 +3,11 @@
 #include "BusRoutes.h"
 #include "Schedule.h"
 
+#include "../GameClock.h"
+#include "../GameLogicSystem.h"
+
+#include "../../Scene/SceneManager.h"
+
 
 TransitSystem::TransitSystem()
     : _distanceToCurrentBusStop(0.0f)
@@ -128,6 +133,7 @@ void TransitSystem::update(float deltaTime, Bus* bus)
         BusStopComponent* nextBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.nextBusStopIndex].id);
         float distance = glm::length(bus->getSceneObject()->getPosition() - nextBusStop->getSceneObject()->getPosition());
 
+        // Zapowiedz
         if (distance < 50.0f && !nextBusStop->getAnnouncementIsPlay())
         {
             bus->getAnnouncementSource()->setSound(nextBusStop->getAnnouncementSound());
@@ -136,6 +142,7 @@ void TransitSystem::update(float deltaTime, Bus* bus)
             nextBusStop->setAnnouncementIsPlay(true);
         }
 
+        // Przyjazd
         if (distance < MIN_DISTANCE_TO_BUS_STOP && _currentRouteData.currentBusStopIndex < 0)
         {
             _currentRouteData.currentBusStopIndex = _currentRouteData.nextBusStopIndex;
@@ -149,20 +156,35 @@ void TransitSystem::update(float deltaTime, Bus* bus)
             BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
 
             currentBusStop->_time = 0.0f;
+
+            Time* currentTime = currentBusStop->getSceneObject()->getSceneManager()->getGameLogicSystem()->getGameClock();
+
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].isVisited = true;
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].arrivalTime = *currentTime;
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetOff = 0; // todo
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetIn = currentBusStop->getNumberOfPassengers();
         }
+    }
 
-        if (_currentRouteData.currentBusStopIndex >= 0)
+    // Obecny przystanek
+    if (_currentRouteData.currentBusStopIndex >= 0)
+    {
+        BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+
+        currentBusStop->onTrigger(deltaTime, bus);
+
+        _distanceToCurrentBusStop = glm::length(bus->getSceneObject()->getPosition() - currentBusStop->getSceneObject()->getPosition());
+
+        // Odjazd
+        if (_distanceToCurrentBusStop >= MIN_DISTANCE_TO_BUS_STOP)
         {
-            BusStopComponent* currentBusStop = findBusStopById(_currentRouteData.currentRoute->stops[_currentRouteData.currentBusStopIndex].id);
+            Time* currentTime = currentBusStop->getSceneObject()->getSceneManager()->getGameLogicSystem()->getGameClock();
 
-            currentBusStop->onTrigger(deltaTime, bus);
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].departureTime = *currentTime;
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoGotOff = 0; // todo
+            _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoGotIn = _currentRouteData.busStopsStatsData[_currentRouteData.currentBusStopIndex].numberOfPassengersWhoWantedToGetIn - currentBusStop->getNumberOfPassengers();
 
-            _distanceToCurrentBusStop = glm::length(bus->getSceneObject()->getPosition() - currentBusStop->getSceneObject()->getPosition());
-
-            if (_distanceToCurrentBusStop >= MIN_DISTANCE_TO_BUS_STOP)
-            {
-                _currentRouteData.currentBusStopIndex = -1;
-            }
+            _currentRouteData.currentBusStopIndex = -1;
         }
     }
 }
