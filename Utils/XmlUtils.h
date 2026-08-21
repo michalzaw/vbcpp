@@ -33,7 +33,7 @@ namespace XmlUtils
 	glm::vec4 getAttributeVec4Optional(XMLElement* xmlElement, const char* attributeName, glm::vec4 defaultValue = glm::vec4(0, 0, 0, 0));
 	btVector3 getAttributeBtVector3Optional(XMLElement* xmlElement, const char* attributeName, btVector3 defaultValue = btVector3(0, 0, 0));
 
-	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, Time& defaultValue = Time(0, 0));
+	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, const Time& defaultValue = Time(0, 0));
 
 	void loadCurveFromXmlFile(tinyxml2::XMLElement* element, std::vector<glm::vec2>& curve, const std::string& xParamName = "x", const std::string yParamName = "y");
 } // namespace

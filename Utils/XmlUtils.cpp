@@ -129,7 +129,7 @@ namespace XmlUtils
 			return defaultValue;
 	}
 
-	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, Time& defaultValue/* = Time(0, 0)*/)
+	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, const Time& defaultValue/* = Time(0, 0)*/)
 	{
 		const char* cValue = xmlElement->Attribute(attributeName);
 		if (cValue != NULL)
