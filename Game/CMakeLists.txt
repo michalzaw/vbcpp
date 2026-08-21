@@ -39,6 +39,7 @@ set (GAME_HEADERS
 	Game/Transit/BusRoutes.h
 	Game/Transit/BusRoutesLoader.h
 	Game/Transit/BusStopComponent.h
+	Game/Transit/CurrentRouteBusStopsStatsData.h
 	Game/Transit/CurrentRouteData.h
 	Game/Transit/TransitSystem.h
 	Game/Transit/Schedule.h

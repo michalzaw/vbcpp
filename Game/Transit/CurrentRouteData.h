@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "CurrentRouteBusStopsStatsData.h"
 #include "Schedule.h"
 
 #include "../../Utils/Time.h"
@@ -11,30 +12,6 @@
 
 class TransitSystem;
 class BusStopComponent;
-
-
-struct CurrentRouteBusStopsStatsData final
-{
-	bool isVisited;
-
-	Time arrivalTime;
-	Time departureTime;
-
-	int numberOfPassengersWhoWantedToGetOff;
-	int numberOfPassengersWhoGotOff;
-
-	int numberOfPassengersWhoWantedToGetIn;
-	int numberOfPassengersWhoGotIn;
-
-	CurrentRouteBusStopsStatsData()
-		: isVisited(false),
-		numberOfPassengersWhoWantedToGetOff(0), numberOfPassengersWhoGotOff(0),
-		numberOfPassengersWhoWantedToGetIn(0), numberOfPassengersWhoGotIn(0)
-	{
-
-	}
-
-};
 
 
 class CurrentRouteData final
@@ -56,28 +33,28 @@ class CurrentRouteData final
 	public:
 		CurrentRouteData(TransitSystem* transitSystem);
 
-		bool isSet() const;
+		LUAF bool isSet() const;
 
-		void setRoute(int lineIndex, int brigadeIndex, int routeIndex);
+		LUAF void setRoute(int lineIndex, int brigadeIndex, int routeIndex);
 
-		int getCurrentLineIndex() const;
-		int getCurrentBrigadeIndex() const;
-		int getCurrentRouteIndex() const;
+		LUAF int getCurrentLineIndex() const;
+		LUAF int getCurrentBrigadeIndex() const;
+		LUAF int getCurrentRouteIndex() const;
 
-		ScheduleRoute* getCurrentRoute() const;
+		LUAF ScheduleRoute* getCurrentRoute() const;
 
-		ScheduleStop* getBusStopScheduleData(int index) const;
+		LUAF ScheduleStop* getBusStopScheduleData(int index) const;
 
-		BusStopComponent* getBusStopOnRoute(int index) const;
+		LUAF BusStopComponent* getBusStopOnRoute(int index) const;
 
-		BusStopComponent* getCurrentBusStop() const;
-		BusStopComponent* getNextBusStop() const;
+		LUAF BusStopComponent* getCurrentBusStop() const;
+		LUAF BusStopComponent* getNextBusStop() const;
 
-		bool isCurrentBusStopSet() const;
-		bool isNextBusStopSet() const;
+		LUAF bool isCurrentBusStopSet() const;
+		LUAF bool isNextBusStopSet() const;
 
-		int getCurrentBusStopIndex() const;
-		int getNextBusStopIndex() const;
+		LUAF int getCurrentBusStopIndex() const;
+		LUAF int getNextBusStopIndex() const;
 
 		void enterToNextBusStop();
 		void leaveCurrentBusStop();
@@ -85,7 +62,7 @@ class CurrentRouteData final
 		void setArrivalStatistics(const Time& time, int numberOfPassengersWhoWantedToGetOff, int numberOfPassengersWhoWantedToGetIn);
 		void setDepartureStatistics(const Time& time, int numberOfPassengersWhoGotOff, int numberOfPassengersWhoGotIn);
 
-		const std::vector<CurrentRouteBusStopsStatsData>& getBusStopsStatsData() const;
+		LUAF const std::vector<CurrentRouteBusStopsStatsData>& getBusStopsStatsData() const;
 
 };
 

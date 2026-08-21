@@ -1,5 +1,7 @@
 #include "SceneManagerLuaBindings.h"
 
+#include "../../Game/GameLogicSystem.h"
+
 #include "../../Scene/SceneManager.h"
 
 #include "../../Utils/ResourceManager.h"
@@ -16,7 +18,9 @@ namespace SceneManagerLuaBindings
 				SceneObject* newObject = RObjectLoader::createSceneObjectFromRObject(objectDefinition, objectName, position, glm::vec3(0.0f, 0.0f, 0.0f), &sceneManager);
 
 				return newObject;
-			}
+			},
+			"getGameLogicSystem", &SceneManager::getGameLogicSystem,
+			"getTransitSystem", &SceneManager::getTransitSystem
 		);
 	}
 }

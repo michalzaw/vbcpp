@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+#include "GameClock.h"
+
 #include "AI/PathComponent.h"
 #include "AI/TrafficLightsComponent.h"
 
@@ -22,7 +24,6 @@ class StopComponent;
 class TrafficLightsComponent;
 class PhysicalBodyRaycastVehicle;
 class BusStartPoint;
-class GameClock;
 
 
 struct PendingPathConnection final
@@ -85,7 +86,7 @@ class GameLogicSystem final
 		inline const std::vector<StopComponent*>& getStopComponents() { return _stopComponents; }
 		inline const std::vector<BusStartPoint*>& getBusStartPoints() { return _busStartPoints; }
 
-		inline GameClock* getGameClock() { return _gameClock; }
+		LUAF inline GameClock* getGameClock() { return _gameClock; }
 
 		void update(float deltaTime);
 

@@ -94,6 +94,8 @@ void BusRoutesWindow::drawWindow()
 				bus->getDisplayText().line2 = selectedRoute.line2;
 				bus->getDisplayText().type = from(selectedRoute.type);
 				bus->updateDisplays();
+
+				_sceneManager->getTransitSystem()->setCurrentBusRoute(&selectedRoute);
 			}
 		}
 	}

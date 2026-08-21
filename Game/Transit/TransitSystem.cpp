@@ -99,6 +99,18 @@ void TransitSystem::setCurrentRoute(int lineIndex, int brigadeIndex, int routeIn
 }
 
 
+void TransitSystem::setCurrentBusRoute(BusRoute* busRoute)
+{
+    _currentBusRoute = busRoute;
+}
+
+
+BusRoute* TransitSystem::getCurrentBusRoute()
+{
+    return _currentBusRoute;
+}
+
+
 void TransitSystem::update(float deltaTime, Bus* bus)
 {
     BusStopComponent* nextBusStop = _currentRouteData.getNextBusStop();

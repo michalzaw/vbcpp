@@ -21,7 +21,7 @@ class GameClock final : public Time
 
 		void update(float deltaTime);
 
-		void setTime(int hour = 0, int minutes = 0, int seconds = 0);
+		LUAF void setTime(int hour = 0, int minutes = 0, int seconds = 0);
 
 		GameClock& operator=(const Time& time);
 

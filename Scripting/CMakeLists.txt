@@ -1,4 +1,5 @@
 set (SCRIPTING_SOURCES
+	Scripting/Bindings/BusRoutesLuaBindings.cpp
 	Scripting/Bindings/ComponentLuaBindings.cpp
 	Scripting/Bindings/DisplayTextTypeLuaBindings.cpp
 	Scripting/Bindings/GlmLuaBindings.cpp
@@ -8,6 +9,7 @@ set (SCRIPTING_SOURCES
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.cpp
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
+	Scripting/Bindings/ScheduleLuaBindings.cpp
 	Scripting/Utils/LuaUtils.cpp
 	Scripting/RScriptFile.cpp
 	Scripting/ScriptComponent.cpp
@@ -15,6 +17,7 @@ set (SCRIPTING_SOURCES
 )
 
 set (SCRIPTING_HEADERS 
+	Scripting/Bindings/BusRoutesLuaBindings.h
 	Scripting/Bindings/ComponentLuaBindings.h
 	Scripting/Bindings/DisplayTextTypeLuaBindings.h
 	Scripting/Bindings/GlmLuaBindings.h
@@ -24,6 +27,7 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.h
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
+	Scripting/Bindings/ScheduleLuaBindings.h
 	Scripting/Utils/LuaUtils.h
 	Scripting/Utils/LuaMacros.h
 	Scripting/RScriptFile.h

@@ -28,7 +28,8 @@ function parseArguments(argumentsStr) {
 }
 
 function findFunctions(fileContent) {
-    const regex = /(LUAF)(\s+)(.+)(\s+)(\S+)\((.*)\)/g;
+    const regex = /(LUAF)(\s+)(.+?)(\s+)(\S+)\(([^)]*)\)/g;
+
 
     let match, functions = [];
 

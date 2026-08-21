@@ -5,6 +5,8 @@
 #include <chrono>
 #include <string>
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 
 class Time
 {
@@ -14,16 +16,16 @@ class Time
 		void setTimeInternal(int hour = 0, int minutes = 0, int seconds = 0);
 
 	public:
-		Time(int hour = 0, int minutes = 0, int seconds = 0);
+		LUAC Time(int hour = 0, int minutes = 0, int seconds = 0);
 		Time(std::chrono::milliseconds time);
 
-		int getHour() const;
-		int getMinutes() const;
-		int getSeconds() const;
+		LUAF int getHour() const;
+		LUAF int getMinutes() const;
+		LUAF int getSeconds() const;
 
 		inline const std::chrono::milliseconds& getTime() const { return _time; }
 
-		std::string toString() const;
+		LUAF std::string toString() const;
 
 		static Time randomTime();
 		static Time currentSystemTime();
