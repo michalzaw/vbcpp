@@ -909,7 +909,7 @@ RScriptFile* ResourceManager::loadScriptFile(const std::string& path)
         finalPath = _alternativeResourcePath + path;
 #endif // DEVELOPMENT_RESOURCES
 
-    std::unique_ptr<RScriptFile> script(new RScriptFile(path, RScriptFile::loadScriptFromFile(finalPath)));
+    std::unique_ptr<RScriptFile> script(new RScriptFile(finalPath, RScriptFile::loadScriptFromFile(finalPath)));
     LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + script.get()->getPath());
 
     RScriptFile* s = dynamic_cast<RScriptFile*>(script.get());

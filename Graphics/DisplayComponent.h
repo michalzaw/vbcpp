@@ -4,32 +4,13 @@
 
 #include <string>
 
+#include "DisplayText.h"
 #include "RDisplayFont.h"
 #include "RShader.h"
 
 #include "../Scene/Component.h"
 
 #include "../Utils/RTexture2D.h"
-
-
-enum DisplayTextType
-{
-	ONLY_HEAD,
-	ONE_LINE,
-	TWO_LINE,
-	TWO_LINE_FIRST_BIG,
-	TWO_LINE_SECOND_BIG
-};
-
-
-struct DisplayText
-{
-	std::string head;
-	std::string line1;
-	std::string line2;
-
-	DisplayTextType type;
-};
 
 
 class Framebuffer;
@@ -71,8 +52,8 @@ class DisplayComponent : public Component
 		DisplayComponent(RDisplayFont* font, int displayWidth, int displayHeight, glm::vec3 textColor);//2 * vec3(1, 0.4, 0.1) * vec3(0.96, 0.67, 0.22);
 		~DisplayComponent();
 
-		void setText(DisplayText& text);
-		DisplayText& getText();
+		LUAF void setText(DisplayText& text);
+		LUAF DisplayText& getText();
 
 		void init();
 

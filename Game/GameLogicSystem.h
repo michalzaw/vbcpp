@@ -7,6 +7,8 @@
 
 #include <glm/glm.hpp>
 
+#include "GameClock.h"
+
 #include "AI/PathComponent.h"
 #include "AI/TrafficLightsComponent.h"
 
@@ -45,10 +47,10 @@ class GameLogicSystem final
 		std::vector<StopComponent*> _stopComponents;
 		std::vector<TrafficLightsComponent*> _trafficLightsComponents;
 		std::vector<BusStartPoint*> _busStartPoints; // todo: dodawac defaultowy Start point po wczytaniu sceny jesli vector jest pusty
-		// todo: Przeniesc obsluge przystankow do tego systemu
-		//std::vector<BusStopComponent*> _busStops;
 
 		std::vector<PendingPathConnection> _pendingPathConnections;
+
+		GameClock* _gameClock;
 
 	public:
 		GameLogicSystem();
@@ -65,7 +67,6 @@ class GameLogicSystem final
 														  const glm::vec3& triggerBoxPosition, const glm::vec3& triggerBoxRotation, const glm::vec3& triggerBoxSize,
 														  const glm::vec3& stopPointPosition, const TrafficLightsState initState);
 		BusStartPoint* addBusStartPoint(const std::string& name);
-		//BusStopComponent* addBusStopComponent(std::string name);
 
 		//void removeBus(Bus* bus);
 		void removeCameraControlComponent(CameraControlComponent* component);
@@ -75,7 +76,6 @@ class GameLogicSystem final
 		void removeStopComponent(StopComponent* component);
 		void removeTrafficLightsComponent(TrafficLightsComponent* component);
 		void removeBusStartPoint(BusStartPoint* component);
-		//void removeBusStop(BusStopComponent* busStop);
 
 		void setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound = true);
 		void createPendingPathConnections();
@@ -85,6 +85,8 @@ class GameLogicSystem final
 		inline const std::vector<AIAgentVehicle*>& getAIAgentVehicles() { return _aiAgentVehicles; }
 		inline const std::vector<StopComponent*>& getStopComponents() { return _stopComponents; }
 		inline const std::vector<BusStartPoint*>& getBusStartPoints() { return _busStartPoints; }
+
+		LUAF inline GameClock* getGameClock() { return _gameClock; }
 
 		void update(float deltaTime);
 

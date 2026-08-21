@@ -1,6 +1,13 @@
 set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/AIAgentLuaBindings.cpp
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.cpp
+	Scripting/Bindings/Generated/BusStopComponentLuaBindings.cpp
+	Scripting/Bindings/Generated/CurrentRouteBusStopsStatsDataLuaBindings.cpp
+	Scripting/Bindings/Generated/CurrentRouteDataLuaBindings.cpp
+	Scripting/Bindings/Generated/DisplayComponentLuaBindings.cpp
+	Scripting/Bindings/Generated/DisplayTextLuaBindings.cpp
+	Scripting/Bindings/Generated/GameClockLuaBindings.cpp
+	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.cpp
 	Scripting/Bindings/Generated/GeneratedLuaBinding.cpp
 	Scripting/Bindings/Generated/MaterialLuaBindings.cpp
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.cpp
@@ -10,13 +17,22 @@ set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/ScriptComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.cpp
+	Scripting/Bindings/Generated/TimeLuaBindings.cpp
 	Scripting/Bindings/Generated/TransformLuaBindings.cpp
+	Scripting/Bindings/Generated/TransitSystemLuaBindings.cpp
 )
 
 set (SCRIPTING_GENERATED_HEADERS 
 	Scripting/Bindings/Generated/AIAgentLuaBindings.h
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.h
+	Scripting/Bindings/Generated/BusStopComponentLuaBindings.h
 	Scripting/Bindings/Generated/ComponentsGetters.h
+	Scripting/Bindings/Generated/CurrentRouteBusStopsStatsDataLuaBindings.h
+	Scripting/Bindings/Generated/CurrentRouteDataLuaBindings.h
+	Scripting/Bindings/Generated/DisplayComponentLuaBindings.h
+	Scripting/Bindings/Generated/DisplayTextLuaBindings.h
+	Scripting/Bindings/Generated/GameClockLuaBindings.h
+	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.h
 	Scripting/Bindings/Generated/GeneratedLuaBindings.h
 	Scripting/Bindings/Generated/MaterialLuaBindings.h
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.h
@@ -26,7 +42,9 @@ set (SCRIPTING_GENERATED_HEADERS
 	Scripting/Bindings/Generated/ScriptComponentLuaBindings.h
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.h
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.h
+	Scripting/Bindings/Generated/TimeLuaBindings.h
 	Scripting/Bindings/Generated/TransformLuaBindings.h
+	Scripting/Bindings/Generated/TransitSystemLuaBindings.h
 )
 
 set (SCRIPTING_GENERATED_SOURCES ${SCRIPTING_GENERATED_SOURCES} PARENT_SCOPE)

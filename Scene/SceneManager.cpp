@@ -16,7 +16,7 @@ SceneManager::SceneManager(GraphicsManager* gMgr, PhysicsManager* pMgr, SoundMan
     _scriptingManager = new ScriptingManager;
 
     _gameLogicSystem = new GameLogicSystem;
-    _busStopSystem = new BusStopSystem;
+    _transitSystem = new TransitSystem;
 
     //_graphicsManager = new GraphicsManager;
     //_physicsManager = new PhysicsManager;
@@ -42,7 +42,7 @@ SceneManager::~SceneManager()
     delete _scriptingManager;
 
     delete _gameLogicSystem;
-    delete _busStopSystem;
+    delete _transitSystem;
 
     //delete _graphicsManager;
     //delete _physicsManager;

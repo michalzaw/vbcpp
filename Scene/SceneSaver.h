@@ -48,6 +48,8 @@ class SceneSaver
 		tinyxml2::XMLElement* _grassElement;
 		tinyxml2::XMLElement* _sunElement;
 		tinyxml2::XMLElement* _skyElement;
+		tinyxml2::XMLElement* _busRoutesElement;
+		tinyxml2::XMLElement* _schedulesElement;
 		tinyxml2::XMLElement* _objectsElement;
 		tinyxml2::XMLElement* _roadsElement;
 
@@ -71,6 +73,9 @@ class SceneSaver
 		void saveBusStartPointComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, BusStartPoint* busStartPoint);
 		void saveShapePolygonComponent(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, ShapePolygonComponent* shapePolygonComponent);
 		void saveFoliagePatch(tinyxml2::XMLElement* objectElement, tinyxml2::XMLDocument& doc, FoliagePatch* foliagePatch);
+
+		void saveBusRoutes(tinyxml2::XMLElement* busRoutesElement, tinyxml2::XMLDocument& doc);
+		void saveSchedules(tinyxml2::XMLElement* schedulesElement, tinyxml2::XMLDocument& doc);
 
 		void saveSceneObject(tinyxml2::XMLDocument& doc, tinyxml2::XMLElement* parentElement, SceneObject* sceneObject, SceneObject* parentObject = nullptr);
 

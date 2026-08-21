@@ -3,6 +3,7 @@
 
 
 #include "Helpers.hpp"
+#include "Time.h"
 
 #include "tinyxml2.h"
 using namespace tinyxml2;
@@ -20,6 +21,8 @@ namespace XmlUtils
 	glm::vec4 getAttributeVec4(XMLElement* xmlElement, const char* attributeName);
 	btVector3 getAttributeBtVector3(XMLElement* xmlElement, const char* attributeName);
 
+	Time getAttributeTime(XMLElement* xmlElement, const char* attributeName);
+
 	std::string getAttributeStringOptional(XMLElement* xmlElement, const char* attributeName, std::string defaultValue = "");
 	float getAttributeFloatOptional(XMLElement* xmlElement, const char* attributeName, float defaultValue = 0.0f);
 	int getAttributeIntOptional(XMLElement* xmlElement, const char* attributeName, int defaultValue = 0);
@@ -29,6 +32,8 @@ namespace XmlUtils
 	glm::vec3 getAttributeVec3Optional(XMLElement* xmlElement, const char* attributeName, glm::vec3 defaultValue = glm::vec3(0, 0, 0));
 	glm::vec4 getAttributeVec4Optional(XMLElement* xmlElement, const char* attributeName, glm::vec4 defaultValue = glm::vec4(0, 0, 0, 0));
 	btVector3 getAttributeBtVector3Optional(XMLElement* xmlElement, const char* attributeName, btVector3 defaultValue = btVector3(0, 0, 0));
+
+	Time getAttributeTimeOptional(XMLElement* xmlElement, const char* attributeName, const Time& defaultValue = Time(0, 0));
 
 	void loadCurveFromXmlFile(tinyxml2::XMLElement* element, std::vector<glm::vec2>& curve, const std::string& xParamName = "x", const std::string yParamName = "y");
 } // namespace

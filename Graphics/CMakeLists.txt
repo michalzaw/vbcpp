@@ -15,6 +15,7 @@ set (GRAPHICS_SOURCES
 		Graphics/CrossroadComponent.h
 		Graphics/DisplayComponent.cpp
 		Graphics/DisplayComponent.h
+		Graphics/DisplayText.h
 		Graphics/EnvironmentCaptureComponent.cpp
 		Graphics/EnvironmentCaptureComponent.h
 		Graphics/FoliagePatch.cpp

@@ -78,6 +78,7 @@ class BusLoader
         virtual void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
         virtual void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
         virtual void loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule);
+        virtual void loadScripts(XMLElement* parentElement, BusRayCastModule& busModule);
         virtual void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);
 
         void loadDoorSimple(XMLElement* doorElement, BusRayCastModule& busModule, SceneObject* doorObj, RStaticModel* doorModel, float mass, char group,

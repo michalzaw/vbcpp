@@ -5,16 +5,16 @@
 #include <string>
 #include <cmath>
 
-#include "../Scene/Component.h"
+#include "../../Scene/Component.h"
 
-#include "../Bus/Bus.h"
+#include "../../Bus/Bus.h"
 
 
 class BusStopComponent : public Component
 {
     VBCPP_COMPONENT(BusStopComponent, CT_BUS_STOP)
 
-    friend class BusStopSystem;
+    friend class TransitSystem;
 
     private:
         static const int MAX_NUMBER_OF_PASSENGERS = 30;
@@ -46,89 +46,89 @@ class BusStopComponent : public Component
 
         }
 
-        void setNumberOfPassengers(unsigned int numberOfPassengers)
+        LUAF void setNumberOfPassengers(unsigned int numberOfPassengers)
         {
             _numberOfPassengers = numberOfPassengers;
         }
 
-        unsigned int getNumberOfPassengers()
+        LUAF unsigned int getNumberOfPassengers()
         {
             return _numberOfPassengers;
         }
 
-        void setName(std::string name)
+        LUAF void setName(std::string name)
         {
             _name = name;
         }
 
-        std::string getName()
+        LUAF std::string getName()
         {
             return _name;
         }
 
-        void setId(int id)
+        LUAF void setId(int id)
         {
             _id = id;
         }
 
-        int getId()
+        LUAF int getId()
         {
             return _id;
         }
 
-        void setAnnouncementFileName(std::string announcementFileName);
+        LUAF void setAnnouncementFileName(std::string announcementFileName);
 
-        std::string getAnnouncementFileName()
+        LUAF std::string getAnnouncementFileName()
         {
             return _announcementFileName;
         }
 
-        void setDistance(float distance)
+        LUAF void setDistance(float distance)
         {
             _distance = distance;
         }
 
-        float getDistance()
+        LUAF float getDistance()
         {
             return _distance;
         }
 
-        void setRequestStop(bool requestStop)
+        LUAF void setRequestStop(bool requestStop)
         {
             _requestStop = requestStop;
         }
 
-        bool isRequestStop()
+        LUAF bool isRequestStop()
         {
             return _requestStop;
         }
 
-        void setNumberOfPassengersMin(unsigned int numberOfPassengersMin)
+        LUAF void setNumberOfPassengersMin(unsigned int numberOfPassengersMin)
         {
             _numberOfPassengersMin = numberOfPassengersMin;
         }
 
-        unsigned int getNumberOfPassengersMin()
+        LUAF unsigned int getNumberOfPassengersMin()
         {
             return _numberOfPassengersMin;
         }
 
-        void setNumberOfPassengersMax(unsigned int numberOfPassengersMax)
+        LUAF void setNumberOfPassengersMax(unsigned int numberOfPassengersMax)
         {
             _numberOfPassengersMax = numberOfPassengersMax;
         }
 
-        unsigned int getNumberOfPassengersMax()
+        LUAF unsigned int getNumberOfPassengersMax()
         {
             return _numberOfPassengersMax;
         }
 
-        bool getAnnouncementIsPlay()
+        LUAF bool getAnnouncementIsPlay()
         {
             return _announcementIsPlay;
         }
 
-        void setAnnouncementIsPlay(bool announcementIsPlay)
+        LUAF void setAnnouncementIsPlay(bool announcementIsPlay)
         {
             _announcementIsPlay = announcementIsPlay;
         }

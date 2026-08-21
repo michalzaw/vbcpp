@@ -3,7 +3,8 @@
 #include <iomanip>
 
 #include "../Bus/Bus.h"
-#include "../Game/BusStopSystem.h"
+#include "../Game/Transit/TransitSystem.h"
+#include "../Game/GameClock.h"
 
 #include "../Scene/SceneManager.h"
 
@@ -11,8 +12,8 @@
 #include "../Utils/Strings.h"
 
 
-Hud::Hud(GUIManager* gui, Bus* bus)
-	: _gui(gui), _bus(bus)
+Hud::Hud(GUIManager* gui, Bus* bus, GameClock* gameClock)
+	: _gui(gui), _bus(bus), _gameClock(gameClock)
 {
 	RFont* font = ResourceManager::getInstance().loadFont("Fonts/arial.ttf");
 
@@ -75,6 +76,11 @@ Hud::Hud(GUIManager* gui, Bus* bus)
 
 		_imagesDoorOpened.push_back(imageDoor);
 	}
+
+	_labelTime = gui->addLabel(font, "00:00:00");
+	_labelTime->setPosition(72, 84);
+	_labelTime->setColor(glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+	_labelTime->scale(0.4f, 0.4f);
 
 	_labelBusStop = gui->addLabel(font, "");
 	_labelBusStop->setPosition(GameConfig::getInstance().windowWidth / 2.0f - 100, GameConfig::getInstance().windowHeight - 50);
@@ -145,12 +151,14 @@ void Hud::update(int fps)
 		_imagesDoorOpened[i]->setIsActive(_bus->getDoor(i)->getState() == EDS_OPENING);
 	}
 
+	_labelTime->setText(_gameClock->toString());
+
 	// todo: graphicsManager refactor
-	BusStopSystem* busStopSystem = _bus->getSceneObject()->getSceneManager()->getBusStopSystem();
-	if (busStopSystem->getCurrentBusStop() != NULL)
+	TransitSystem* transitSystem = _bus->getSceneObject()->getSceneManager()->getTransitSystem();
+	if (transitSystem->getCurrentBusStop() != NULL)
 	{
-		_labelBusStop->setText(busStopSystem->getCurrentBusStop()->getName() + " (" + toString((int)busStopSystem->getDistanceToCurrentBusStop()) + "m)");
-		_labelBusStop2->setText("Liczba pasazerow: " + toString(busStopSystem->getCurrentBusStop()->getNumberOfPassengers()));
+		_labelBusStop->setText(transitSystem->getCurrentBusStop()->getName() + " (" + toString((int)transitSystem->getDistanceToCurrentBusStop()) + "m)");
+		_labelBusStop2->setText("Liczba pasazerow: " + toString(transitSystem->getCurrentBusStop()->getNumberOfPassengers()));
 	}
 	else
 	{

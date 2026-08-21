@@ -2,6 +2,7 @@
 
 #include "BusStartPoint.h"
 #include "CameraControlComponent.h"
+#include "GameClock.h"
 #include "GameEnvironment.h"
 #include "GameLogicSystem.h"
 #include "Hud.h"
@@ -15,8 +16,10 @@
 
 #include "../ImGuiInterface/BusLineAndDirectionWindow.h"
 #include "../ImGuiInterface/BusParametersWindow.h"
+#include "../ImGuiInterface/BusRoutesWindow.h"
 #include "../ImGuiInterface/ColorsWindow.h"
 #include "../ImGuiInterface/PhysicsDebuggerWindow.h"
+#include "../ImGuiInterface/SchedulesWindow.h"
 #include "../ImGuiInterface/VariablesWindow.h"
 #include "../ImGuiInterface/MenuBar.h"
 
@@ -317,12 +320,14 @@ void MainGameScene::loadScene()
 	{
 		bus2->replaceMaterialsByName(materialsCollection->getMaterials());
 	}*/
+
+	(*_sceneManager->getGameLogicSystem()->getGameClock()) = Time::randomTime();
 }
 
 
 void MainGameScene::initGui()
 {
-	_hud = new Hud(_gui, _activeBus);
+	_hud = new Hud(_gui, _activeBus, _sceneManager->getGameLogicSystem()->getGameClock());
 
 	glm::vec2 mirrorsMargin(
 		0.01f * Renderer::getInstance().getWindowDimensions().x,
@@ -394,17 +399,21 @@ void MainGameScene::initGui()
 void MainGameScene::initImGuiInterface()
 {
 	// windows
-	ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, &_buses);
+	ImGuiWindow* busRoutesWindow = new BusRoutesWindow(_sceneManager, &_buses);
+	ImGuiWindow* schedulesWindow = new SchedulesWindow(_sceneManager, &_buses);
 
-	_imGuiInterface->addWindow(busLineAndDirectionWindow);
+	_imGuiInterface->addWindow(busRoutesWindow);
+	_imGuiInterface->addWindow(schedulesWindow);
 
 	if (GameConfig::getInstance().developmentMode)
 	{
+		ImGuiWindow* busLineAndDirectionWindow = new BusLineAndDirectionWindow(_sceneManager, &_buses);
 		ImGuiWindow* colorsWindow = new ColorsWindow(_sceneManager);
 		ImGuiWindow* physicsDebuggerWindow = new PhysicsDebuggerWindow(_sceneManager, false);
 		ImGuiWindow* variablesWindow = new VariablesWindow(_sceneManager, false);
 		ImGuiWindow* busParametersWindow = new BusParametersWindow(_sceneManager, _buses);
 
+		_imGuiInterface->addWindow(busLineAndDirectionWindow);
 		_imGuiInterface->addWindow(colorsWindow);
 		_imGuiInterface->addWindow(physicsDebuggerWindow);
 		_imGuiInterface->addWindow(variablesWindow);
@@ -412,6 +421,8 @@ void MainGameScene::initImGuiInterface()
 
 		// menu
 		std::vector<MenuItem> windowMenuItems;
+		windowMenuItems.push_back(MenuItem("Bus routes", busRoutesWindow->getOpenFlagPointer()));
+		windowMenuItems.push_back(MenuItem("Bus schedules", schedulesWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Bus line and direction", busLineAndDirectionWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Colors", colorsWindow->getOpenFlagPointer()));
 		windowMenuItems.push_back(MenuItem("Physics debugger", physicsDebuggerWindow->getOpenFlagPointer()));
@@ -460,7 +471,7 @@ void MainGameScene::fixedStepUpdate(double deltaTime)
 
 	_sceneManager->getScriptingManager()->update(deltaTime);
 
-	_sceneManager->getBusStopSystem()->update(deltaTime, _activeBus);
+	_sceneManager->getTransitSystem()->update(deltaTime, _activeBus);
 
 	_sceneManager->getGameLogicSystem()->update(deltaTime);
 }

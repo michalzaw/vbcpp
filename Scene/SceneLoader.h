@@ -64,6 +64,9 @@ class SceneLoader
 		void loadShapePolygonComponent(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 		void loadFoliagePatch(tinyxml2::XMLElement* componentElement, SceneObject* sceneObject);
 
+		void loadBusRoutes(tinyxml2::XMLElement* );
+		void loadSchedules(tinyxml2::XMLElement* );
+
 	public:
 		SceneLoader(SceneManager* sceneManager);
 
