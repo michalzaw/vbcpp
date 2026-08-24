@@ -10,17 +10,20 @@
 #include "../../../Game/AI/StopComponent.h"
 #include "../../../Game/AI/TrafficLightsComponent.h"
 #include "../../../Game/BusStartPoint.h"
-#include "../../../Game/Transit/BusStopComponent.h"
 #include "../../../Game/CameraControlComponent.h"
+#include "../../../Game/Transit/BusStopComponent.h"
 #include "../../../Graphics/BezierCurve.h"
 #include "../../../Graphics/CameraStatic.hpp"
 #include "../../../Graphics/CrossroadComponent.h"
 #include "../../../Graphics/DisplayComponent.h"
 #include "../../../Graphics/EnvironmentCaptureComponent.h"
+#include "../../../Graphics/FoliagePatch.h"
 #include "../../../Graphics/Grass.h"
 #include "../../../Graphics/Light.h"
 #include "../../../Graphics/MirrorComponent.h"
+#include "../../../Graphics/MultiRenderObject.h"
 #include "../../../Graphics/Prefab.h"
+#include "../../../Graphics/RenderableSurface.h"
 #include "../../../Graphics/RenderObject.h"
 #include "../../../Graphics/RoadIntersectionComponent.h"
 #include "../../../Graphics/RoadObject.h"
@@ -57,17 +60,20 @@ GET_COMPONENT(CT_PATH, PathComponent), \
 GET_COMPONENT(CT_STOP_COMPONENT, StopComponent), \
 GET_COMPONENT(CT_TRAFFIC_LIGHTS, TrafficLightsComponent), \
 GET_COMPONENT(CT_BUS_START_POINT, BusStartPoint), \
-GET_COMPONENT(CT_BUS_STOP, BusStopComponent), \
 GET_COMPONENT(CT_CAMERA_CONTROL, CameraControlComponent), \
+GET_COMPONENT(CT_BUS_STOP, BusStopComponent), \
 GET_COMPONENT(CT_BEZIER_CURVE, BezierCurve), \
 GET_COMPONENT(CT_CAMERA, CameraStatic), \
 GET_COMPONENT(CT_CROSSROAD, CrossroadComponent), \
 GET_COMPONENT(CT_DISPLAY, DisplayComponent), \
 GET_COMPONENT(CT_ENVIRONMENT_CAPTURE_COMPONENT, EnvironmentCaptureComponent), \
+GET_COMPONENT(CT_FOLIAGE_PATCH, FoliagePatch), \
 GET_COMPONENT(CT_GRASS, Grass), \
 GET_COMPONENT(CT_LIGHT, Light), \
 GET_COMPONENT(CT_MIRROR, MirrorComponent), \
+GET_COMPONENT(CT_MULTI_RENDER_OBJECT, MultiRenderObject), \
 GET_COMPONENT(CT_PREFAB, Prefab), \
+GET_COMPONENT(CT_RENDERABLE_SURFACE, RenderableSurface), \
 GET_COMPONENT(CT_RENDER_OBJECT, RenderObject), \
 GET_COMPONENT(CT_ROAD_INTERSECTION, RoadIntersectionComponent), \
 GET_COMPONENT(CT_ROAD_OBJECT, RoadObject), \

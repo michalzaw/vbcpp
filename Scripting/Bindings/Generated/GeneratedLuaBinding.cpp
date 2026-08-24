@@ -10,11 +10,19 @@
 #include "DisplayTextLuaBindings.h"
 #include "GameClockLuaBindings.h"
 #include "GameLogicSystemLuaBindings.h"
+#include "GUIObjectLuaBindings.h"
+#include "ImageLuaBindings.h"
+#include "LabelLuaBindings.h"
 #include "MaterialLuaBindings.h"
 #include "ModelNodeLuaBindings.h"
 #include "PhysicalBodyLuaBindings.h"
 #include "PhysicalBodyWheelLuaBindings.h"
+#include "RenderableSurfaceLuaBindings.h"
 #include "RenderObjectLuaBindings.h"
+#include "ResourceManagerLuaBindings.h"
+#include "RFontLuaBindings.h"
+#include "RTexture2DLuaBindings.h"
+#include "RTextureLuaBindings.h"
 #include "ScriptComponentLuaBindings.h"
 #include "SkeletalAnimationComponentLuaBindings.h"
 #include "SoundComponentLuaBindings.h"
@@ -36,11 +44,19 @@ namespace GeneratedLuaBindings
         DisplayTextLuaBindings::bind(lua);
         GameClockLuaBindings::bind(lua);
         GameLogicSystemLuaBindings::bind(lua);
+        GUIObjectLuaBindings::bind(lua);
+        ImageLuaBindings::bind(lua);
+        LabelLuaBindings::bind(lua);
         MaterialLuaBindings::bind(lua);
         ModelNodeLuaBindings::bind(lua);
         PhysicalBodyLuaBindings::bind(lua);
         PhysicalBodyWheelLuaBindings::bind(lua);
+        RenderableSurfaceLuaBindings::bind(lua);
         RenderObjectLuaBindings::bind(lua);
+        ResourceManagerLuaBindings::bind(lua);
+        RFontLuaBindings::bind(lua);
+        RTexture2DLuaBindings::bind(lua);
+        RTextureLuaBindings::bind(lua);
         ScriptComponentLuaBindings::bind(lua);
         SkeletalAnimationComponentLuaBindings::bind(lua);
         SoundComponentLuaBindings::bind(lua);

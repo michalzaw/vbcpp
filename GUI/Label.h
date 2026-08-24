@@ -6,6 +6,8 @@
 
 #include "GUIObject.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include "../Utils/RFont.h"
 
 
@@ -45,17 +47,17 @@ class Label : public GUIObject
         Label(RFont* font = NULL);
         ~Label();
 
-        void setFont(RFont* font);
-        void setText(std::string text);
-        void setMaxWidth(unsigned int maxWidth);
-        void setMaxHeight(unsigned int maxHeight);
+        LUAF void setFont(RFont* font);
+        LUAF void setText(std::string text);
+        LUAF void setMaxWidth(unsigned int maxWidth);
+        LUAF void setMaxHeight(unsigned int maxHeight);
 
-        RFont* getFont();
-        std::string getText();
-        unsigned int getWidth();
-        unsigned int getHeight();
-        unsigned int getMaxWidth();
-        unsigned int getMaxHeight();
+        LUAF RFont* getFont();
+        LUAF std::string getText();
+        LUAF unsigned int getWidth();
+        LUAF unsigned int getHeight();
+        LUAF unsigned int getMaxWidth();
+        LUAF unsigned int getMaxHeight();
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
 

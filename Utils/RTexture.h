@@ -7,6 +7,8 @@
 
 #include "Resource.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 
 enum TextureType
 {
@@ -86,7 +88,7 @@ class RTexture : public Resource
         void setParameter(GLenum name, GLint value);
         void setParameter(GLenum name, GLfloat value);
 
-        glm::uvec2 getSize();
+        LUAF glm::uvec2 getSize();
 
         TextureType getTextureType();
 		TextureFormat getInternalFormat();

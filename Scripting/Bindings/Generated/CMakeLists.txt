@@ -9,11 +9,19 @@ set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/GameClockLuaBindings.cpp
 	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.cpp
 	Scripting/Bindings/Generated/GeneratedLuaBinding.cpp
+	Scripting/Bindings/Generated/GUIObjectLuaBindings.cpp
+	Scripting/Bindings/Generated/ImageLuaBindings.cpp
+	Scripting/Bindings/Generated/LabelLuaBindings.cpp
 	Scripting/Bindings/Generated/MaterialLuaBindings.cpp
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.cpp
 	Scripting/Bindings/Generated/PhysicalBodyLuaBindings.cpp
 	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.cpp
+	Scripting/Bindings/Generated/RenderableSurfaceLuaBindings.cpp
 	Scripting/Bindings/Generated/RenderObjectLuaBindings.cpp
+	Scripting/Bindings/Generated/ResourceManagerLuaBindings.cpp
+	Scripting/Bindings/Generated/RFontLuaBindings.cpp
+	Scripting/Bindings/Generated/RTexture2DLuaBindings.cpp
+	Scripting/Bindings/Generated/RTextureLuaBindings.cpp
 	Scripting/Bindings/Generated/ScriptComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.cpp
@@ -34,11 +42,19 @@ set (SCRIPTING_GENERATED_HEADERS
 	Scripting/Bindings/Generated/GameClockLuaBindings.h
 	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.h
 	Scripting/Bindings/Generated/GeneratedLuaBindings.h
+	Scripting/Bindings/Generated/GUIObjectLuaBindings.h
+	Scripting/Bindings/Generated/ImageLuaBindings.h
+	Scripting/Bindings/Generated/LabelLuaBindings.h
 	Scripting/Bindings/Generated/MaterialLuaBindings.h
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.h
 	Scripting/Bindings/Generated/PhysicalBodyLuaBindings.h
 	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.h
+	Scripting/Bindings/Generated/RenderableSurfaceLuaBindings.h
 	Scripting/Bindings/Generated/RenderObjectLuaBindings.h
+	Scripting/Bindings/Generated/ResourceManagerLuaBindings.h
+	Scripting/Bindings/Generated/RFontLuaBindings.h
+	Scripting/Bindings/Generated/RTexture2DLuaBindings.h
+	Scripting/Bindings/Generated/RTextureLuaBindings.h
 	Scripting/Bindings/Generated/ScriptComponentLuaBindings.h
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.h
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.h

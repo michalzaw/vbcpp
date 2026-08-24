@@ -9,6 +9,7 @@
 #include "../Utils/XmlUtils.h"
 #include "../Utils/tinyxml2.h"
 #include "../Graphics/DisplayComponent.h"
+#include "../Graphics/RenderableSurface.h"
 
 
 #include "../Scripting/ScriptingManager.h"
@@ -320,6 +321,7 @@ void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busEle
     loadEnvironmentCaptureComponents(moduleElement, busModule);
     loadMirrors(moduleElement, busModule);
     loadDisplays(moduleElement, busModule);
+    loadRenderableSurface(moduleElement, busModule);
     loadCustomElements(moduleElement, busModule);
     loadScripts(moduleElement, busModule);
 }
@@ -1222,6 +1224,84 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 
 		displayElement = displayElement->NextSiblingElement("Display");
 	}
+}
+
+
+void BusLoader::loadRenderableSurface(XMLElement* moduleElement, BusRayCastModule& busModule)
+{
+    XMLElement* renderableSurfaceElement = moduleElement->FirstChildElement("RenderableSurface");
+    while (renderableSurfaceElement != nullptr)
+    {
+        LOG_INFO("XML: Renderable surface component data");
+
+        std::string name = XmlUtils::getAttributeString(renderableSurfaceElement, "name");
+        glm::vec3 position = XmlUtils::getAttributeVec3(renderableSurfaceElement, "position");
+        glm::vec3 rotation = XmlUtils::getAttributeVec3(renderableSurfaceElement, "rotation");
+        float width = XmlUtils::getAttributeFloat(renderableSurfaceElement, "width");
+        float height = XmlUtils::getAttributeFloat(renderableSurfaceElement, "height");
+        int textureWidth = XmlUtils::getAttributeInt(renderableSurfaceElement, "textureWidth");
+        int textureHeight = XmlUtils::getAttributeInt(renderableSurfaceElement, "textureHeight");
+        std::string type = XmlUtils::getAttributeString(renderableSurfaceElement, "type");
+        bool createPlane = XmlUtils::getAttributeBoolOptional(renderableSurfaceElement, "createPlane");
+
+        SceneObject* surfaceSceneObject = _sMgr->addSceneObject(name);
+        surfaceSceneObject->setPosition(position);
+        surfaceSceneObject->setRotation(rotation);
+        busModule.sceneObject->addChild(surfaceSceneObject);
+
+        RenderableSurface* renderableSurface = _gMgr->addRenderableSurface(textureWidth, textureHeight);
+        surfaceSceneObject->addComponent(renderableSurface);
+
+        if (createPlane)
+        {
+            Material* material = new Material;
+            material->shininess = 96;
+            if (type == "solid")
+            {
+                material->shader = SOLID_MATERIAL;
+            }
+            else if (type == "emissive")
+            {
+                material->shader = SOLID_EMISSIVE_MATERIAL;
+            }
+            else
+            {
+                LOG_WARNING("Invalid value of type parameter in RenderableSurface. Expected solid or emissive.");
+            }
+            Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+            displayRenderObject->init();
+            displayRenderObject->setDynamicObject(true);
+            _gMgr->addRenderObject(displayRenderObject, surfaceSceneObject);
+
+            displayRenderObject->getModel()->getMaterial(0)->diffuseTexture = renderableSurface->getRenderedTexture();
+            if (material->shader == SOLID_EMISSIVE_MATERIAL)
+            {
+                displayRenderObject->getModel()->getMaterial(0)->emissiveTexture = renderableSurface->getRenderedTexture();
+            }
+
+            {
+                SceneObject* glassSceneObject = _sMgr->addSceneObject(name + "glass");
+                glassSceneObject->setPosition(glm::vec3(0.0f, 0.01f, 0.0f));
+                surfaceSceneObject->addChild(glassSceneObject);
+
+                Material* material = new Material;
+                material->shininess = 8;
+                material->transparency = 0.9f;
+                material->shader = GLASS_MATERIAL;
+                material->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+                material->glassTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+                material->reflectionTexture1 = EMT_GLOBAL;
+                material->reflectionTexture2 = EMT_GLOBAL;
+                Prefab* displayGlassRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+                displayGlassRenderObject->init();
+                displayGlassRenderObject->setDynamicObject(true);
+                _gMgr->addRenderObject(displayGlassRenderObject, glassSceneObject);
+            }
+        }
+
+        renderableSurfaceElement = renderableSurfaceElement->NextSiblingElement("RenderableSurface");
+    }
 }
 
 

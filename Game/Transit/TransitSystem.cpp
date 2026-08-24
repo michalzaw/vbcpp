@@ -11,7 +11,8 @@
 
 TransitSystem::TransitSystem()
     : _distanceToCurrentBusStop(0.0f),
-    _currentRouteData(this)
+    _currentRouteData(this),
+    _currentBusRoute(nullptr)
 {
     _routes = new BusRoutes;
     _schedule = new Schedule;

@@ -77,6 +77,7 @@ class BusLoader
         virtual void loadEnvironmentCaptureComponents(XMLElement* moduleElement, BusRayCastModule& busModule);
         virtual void loadMirrors(XMLElement* moduleElement, BusRayCastModule& busModule);
         virtual void loadDisplays(XMLElement* moduleElement, BusRayCastModule& busModule);
+        virtual void loadRenderableSurface(XMLElement* moduleElement, BusRayCastModule& busModule);
         virtual void loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule);
         virtual void loadScripts(XMLElement* parentElement, BusRayCastModule& busModule);
         virtual void loadModulesConnectionData(XMLElement* moduleElement, BusRayCastModule& busModule);

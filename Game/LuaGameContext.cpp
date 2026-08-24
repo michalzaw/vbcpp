@@ -25,6 +25,7 @@ LuaGameContext::~LuaGameContext()
 void LuaGameContext::initializeConstGlobalObjects()
 {
 	_scriptingManger->setGlobalVariable("input", &InputSystem::getInstance());
+	_scriptingManger->setGlobalVariable("resourceManager", &ResourceManager::getInstance());
 }
 
 

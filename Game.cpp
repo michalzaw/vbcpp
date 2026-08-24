@@ -263,7 +263,7 @@ void Game::run()
 #endif // DRAW_IMGUI
 
 			// Render GUI
-			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
+			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList(), OGLDriver::getInstance().getDefaultFramebuffer(), false);
 		}
 		_window->swapBuffers();
 		//_window->updateEvents();

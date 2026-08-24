@@ -296,6 +296,8 @@ Material* MaterialLoader::loadMaterial(XMLElement* materialElement, const std::s
 		sMaterial->shader = ALPHA_TEST_ANIMATED_MATERIAL;
 	else if (strcmp(type, "terrain") == 0)
 		sMaterial->shader = TERRAIN_MATERIAL;
+	else if (strcmp(type, "emissive") == 0)
+		sMaterial->shader = SOLID_EMISSIVE_MATERIAL;
 
 
     if (sMaterial->shader == GLASS_MATERIAL && sMaterial->glassTexture == NULL)

@@ -13,6 +13,8 @@
 
 #include "GUIRenderListElement.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 
 struct GUIVertex
 {
@@ -46,31 +48,31 @@ class GUIObject
         GUIObject();
         ~GUIObject();
 
-        virtual void setPosition(glm::vec3 position);
-        virtual void setPosition(glm::vec2 position);
-        virtual void setPosition(float x, float y, float z = 0.0f);
-        virtual void setScale(glm::vec2 scale);
-        virtual void setScale(float scaleX, float scaleY);
-        virtual void setRotation(float angle);          // Radians
+        LUAF virtual void setPosition(glm::vec3 position);
+        LUAF virtual void setPosition(glm::vec2 position);
+        LUAF virtual void setPosition(float x, float y, float z = 0.0f);
+        LUAF virtual void setScale(glm::vec2 scale);
+        LUAF virtual void setScale(float scaleX, float scaleY);
+        LUAF virtual void setRotation(float angle);          // Radians
 
-        virtual void move(glm::vec3 delta);
-        virtual void move(glm::vec2 delta);
-        virtual void move(float x, float y, float z = 0.0f);
-        virtual void scale(glm::vec2 delta);
-        virtual void scale(float x, float y);
-        virtual void rotate(float angle);
+        LUAF virtual void move(glm::vec3 delta);
+        LUAF virtual void move(glm::vec2 delta);
+        LUAF virtual void move(float x, float y, float z = 0.0f);
+        LUAF virtual void scale(glm::vec2 delta);
+        LUAF virtual void scale(float x, float y);
+        LUAF virtual void rotate(float angle);
 
-        glm::vec3   getPosition();
-        glm::vec2   getScale();
-        float       getRotation();
-
-
-        void setIsActive(bool isActive);
-        bool isActive();
+        LUAF glm::vec3   getPosition();
+        LUAF glm::vec2   getScale();
+        LUAF float       getRotation();
 
 
-        void            setColor(glm::vec4 color);
-        glm::vec4       getColor();
+        LUAF void setIsActive(bool isActive);
+        LUAF bool isActive();
+
+
+        LUAF void            setColor(glm::vec4 color);
+        LUAF glm::vec4       getColor();
 
 
         VBO*            getVBO(unsigned int index = 0);
