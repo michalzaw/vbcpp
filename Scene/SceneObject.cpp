@@ -22,6 +22,8 @@
 
 #include "../Utils/GlmUtils.h"
 
+#include <glm/gtx/euler_angles.hpp>
+
 
 SceneObject::SceneObject(const std::string& name, ObjectId id, SceneManager* sceneManager, RObject* objectDefinition/* = nullptr*/, SceneObject* parent/* = nullptr*/)
     : _parent(parent),
@@ -218,18 +220,7 @@ void SceneObject::calculateLocalTransformMatrix() const
 {
     glm::mat4 pos = glm::translate(_position);
 
-    glm::mat4 rot;
-
-    if (_rotationMode == RM_EULER_ANGLES)
-    {
-        rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    }
-    else
-    {
-        rot = glm::mat4_cast(_rotationQuaternion);
-    }
+    glm::mat4& rot = _rotationMatrix;
 
     glm::mat4 s = glm::scale(_scale);
 
@@ -621,7 +612,11 @@ void SceneObject::setPosition(float x, float y, float z)
 void SceneObject::setRotation(const glm::vec3& rotation)
 {
     _rotation = rotation;
-    _rotationQuaternion = glm::quat(rotation);
+
+    _rotationMatrix = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    _rotationMatrix *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    _rotationMatrix *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    _rotationQuaternion = glm::quat_cast(_rotationMatrix);
 
     _rotationMode = RM_EULER_ANGLES;
 
@@ -638,7 +633,9 @@ void SceneObject::setRotation(float x, float y, float z)
 void SceneObject::setRotationQuaternion(const glm::quat& rotation)
 {
     _rotationQuaternion = rotation;
-    _rotation = glm::eulerAngles(rotation);
+
+    _rotationMatrix = glm::mat4_cast(_rotationQuaternion);
+    glm::extractEulerAngleXYZ(_rotationMatrix, _rotation.x, _rotation.y, _rotation.z);
 
     _rotationMode = RM_QUATERNION;
 
@@ -652,6 +649,9 @@ void SceneObject::setRotationQuaternion(float x, float y, float z, float w)
     _rotationQuaternion.y = y;
     _rotationQuaternion.z = z;
     _rotationQuaternion.w = w;
+
+    _rotationMatrix = glm::mat4_cast(_rotationQuaternion);
+    glm::extractEulerAngleXYZ(_rotationMatrix, _rotation.x, _rotation.y, _rotation.z);
 
     _rotationMode = RM_QUATERNION;
 
@@ -706,6 +706,22 @@ void SceneObject::rotate(const glm::vec3& deltaRotation)
 void SceneObject::rotate(float dx, float dy, float dz)
 {
     rotate(glm::vec3(dx, dy, dz));
+}
+
+
+void SceneObject::rotateLocal(const glm::vec3& deltaRotation)
+{
+    glm::quat localRotation = glm::angleAxis(deltaRotation.x, transformLocalVectorToGlobal(glm::vec3(1.0f, 0.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.y, transformLocalVectorToGlobal(glm::vec3(0.0f, 1.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.z, transformLocalVectorToGlobal(glm::vec3(0.0f, 0.0f, 1.0f)));
+
+    setRotationQuaternion(localRotation * _rotationQuaternion);
+}
+
+
+void SceneObject::rotateLocal(float dx, float dy, float dz)
+{
+    rotateLocal(dx, dy, dz);
 }
 
 

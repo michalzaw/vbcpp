@@ -54,6 +54,8 @@ class SceneObject
         glm::quat _rotationQuaternion;
         glm::vec3 _scale;
 
+        mutable glm::mat4 _rotationMatrix;
+
         mutable glm::mat4 _localTransformMatrix;            mutable bool _localTransformMatrixIsCalculated;
         mutable glm::mat4 _localNormalMatrix;               mutable bool _localNormalMatrixIsCalculated;
         mutable glm::mat4 _globalTransformMatrix;           mutable bool _globalTransformMatrixIsCalculated;
@@ -128,6 +130,8 @@ class SceneObject
         void move(float dx, float dy, float dz);
         void rotate(const glm::vec3& deltaRotation);
         void rotate(float dx, float dy, float dz);
+        void rotateLocal(const glm::vec3& deltaRotation);
+        void rotateLocal(float dx, float dy, float dz);
         void scale(const glm::vec3& scale);
         void scale(float x, float y, float z);
 
