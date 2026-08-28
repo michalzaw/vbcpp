@@ -707,7 +707,7 @@ void Renderer::prepareRenderData()
             }
         }
 #ifdef DRAW_AABB
-        _renderObjectsInCurrentFrame.emplace_back(object->getAABB(), object->getModel()->getAABB(), object->getSceneObject());
+        _renderObjectsInCurrentFrame.emplace_back(object->getAABB(), object->getOBB(), object->getSceneObject());
 #endif // DRAW_AABB
     }
 

@@ -44,8 +44,8 @@ void RStaticModel::findMinAndMaxVertices(StaticModelNode* node, glm::mat4 parent
 {
     glm::mat4 nodeTransform = parentTransform * node->transform.getTransformMatrix();
 
-    glm::vec3 nodeMin(0, 0, 0);
-    glm::vec3 nodeMax(0, 0, 0);
+    glm::vec3 nodeMin(FLT_MAX, FLT_MAX, FLT_MAX);
+    glm::vec3 nodeMax(-FLT_MAX, -FLT_MAX, -FLT_MAX);
     for (int i = 0; i < node->meshesCount; ++i)
     {
         for (int j = 0; j < node->meshes[i].verticesCount; ++j)

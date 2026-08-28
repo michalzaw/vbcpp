@@ -3,6 +3,7 @@ set (SCENE_SOURCES
 	Scene/SceneLoader.cpp
 	Scene/SceneManager.cpp
 	Scene/SceneObject.cpp
+	Scene/SceneObjectCreator.cpp
 	Scene/SceneSaver.cpp
 )
 
@@ -13,6 +14,7 @@ set (SCENE_HEADERS
 	Scene/SceneLoader.h
 	Scene/SceneManager.h
 	Scene/SceneObject.h
+	Scene/SceneObjectCreator.h
 	Scene/SceneSaver.h
 	Scene/SoundComponent.h
 	Scene/SoundManager.h
