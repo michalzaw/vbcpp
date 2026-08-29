@@ -20,6 +20,7 @@ set (UTILS_SOURCES
 	Utils/RModel.cpp
 	Utils/RObject.cpp
 	Utils/RObjectLoader.cpp
+	Utils/RObjectSaver.cpp
 	Utils/RStaticModel.cpp
 	Utils/RTexture.cpp
 	Utils/RTexture2D.cpp
@@ -59,6 +60,7 @@ set (UTILS_HEADERS
 	Utils/RModel.h
 	Utils/RObject.h
 	Utils/RObjectLoader.h
+	Utils/RObjectSaver.h
 	Utils/RSound.h
 	Utils/RStaticModel.h
 	Utils/RTexture.h

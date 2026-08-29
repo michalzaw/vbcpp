@@ -2,6 +2,8 @@
 
 #include <future>
 
+#include "FileDialogs.h"
+
 #include "Tools/RoadManipulator.h"
 #include "Tools/AxisTool.h"
 
@@ -23,6 +25,7 @@
 
 #include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneLoader.h"
+#include "../Scene/SceneObjectCreator.h"
 #include "../Scene/SceneSaver.h"
 
 #include "../Scripting/ScriptingManager.h"
@@ -1518,6 +1521,19 @@ namespace vbEditor
 					sceneObject->addComponent(busStartPoint);
 
 					setSelectedSceneObject(sceneObject);
+				}
+
+				ImGui::Separator();
+				if (ImGui::MenuItem("Create new hierarchical Scene Object from model file", NULL))
+				{
+					std::vector<std::string> result =FileDialogs::openFile("Choose file...");
+					if (result.size() == 1)
+					{
+						const std::string& modelFileName = result[0];
+						RStaticModel* model = ResourceManager::getInstance().loadModelWithHierarchy(modelFileName, FilesHelper::getPathToDirectoryFromFileName(modelFileName));
+
+						SceneObjectCreator::createHierarchicalSceneObjectWithModel(model, _sceneManager);
+					}
 				}
 
 				ImGui::Separator();

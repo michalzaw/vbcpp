@@ -9,4 +9,9 @@ namespace FileDialogs
 	{
 		return pfd::open_file("Choose texture...").result();
 	}
+
+	std::string selectFolder(const std::string& title)
+	{
+		return pfd::select_folder(title).result();
+	}
 };

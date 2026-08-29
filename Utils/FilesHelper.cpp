@@ -9,6 +9,8 @@
 #include <dirent.h>
 #endif
 
+#include <filesystem>
+
 
 #include "Logger.h"
 
@@ -205,6 +207,30 @@ bool FilesHelper::isInPathSubdir(std::string filePath, std::string dirPath)
 
 	std::size_t pos = filePath.rfind(dirPath);
 	return pos != std::string::npos;
+}
+
+
+std::string FilesHelper::relativePathToFile(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile)
+{
+    std::filesystem::path targetDir = std::filesystem::path(targetFilePath);
+    std::filesystem::path referenceDir = isReferencePathToFile ? std::filesystem::path(referencePath).parent_path() : std::filesystem::path(referencePath);
+
+    std::string relativePath = std::filesystem::relative(targetDir, referenceDir).string();
+    std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
+
+    return relativePath;
+}
+
+
+std::string FilesHelper::relativePathToDir(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile)
+{
+    std::filesystem::path targetDir = std::filesystem::path(targetFilePath).parent_path();
+    std::filesystem::path referenceDir = isReferencePathToFile ? std::filesystem::path(referencePath).parent_path() : std::filesystem::path(referencePath);
+
+    std::string relativePath = std::filesystem::relative(targetDir, referenceDir).string() + "/";
+    std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
+
+    return relativePath;
 }
 
 

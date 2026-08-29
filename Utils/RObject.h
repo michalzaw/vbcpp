@@ -17,6 +17,9 @@ class RObject : public Resource
 
 		std::string _originalName;	// path relative to "Objects" directory
 
+		glm::vec3 _position;	// filed only for children objects, not set in root object
+		glm::vec3 _rotation; // filed only for children objects, not set in root object
+
 		std::vector<std::unordered_map<std::string, std::string>> _components;
 
 		std::vector<RObject*> _children;
@@ -24,6 +27,12 @@ class RObject : public Resource
 	public:
 		RObject(const std::string& path, const std::string& author, const std::string& name, const std::string& comment, const std::string& originalName);
 		~RObject();
+
+		void setPosition(const glm::vec3& position);
+		void setRotation(const glm::vec3& rotation);
+
+		const glm::vec3& getPosition();
+		const glm::vec3& getRotation();
 
 		std::vector<std::unordered_map<std::string, std::string>>& getComponents();
 

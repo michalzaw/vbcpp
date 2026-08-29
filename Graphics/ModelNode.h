@@ -50,7 +50,7 @@ class ModelNode
         std::vector<ModelNode*> _children;
 
     public:
-        ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, bool withChildren = true, ModelNode* parent = NULL);
+        ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, bool singleNodeFromModel = false, ModelNode* parent = NULL);
         ~ModelNode();
 
         LUAF std::string getName();

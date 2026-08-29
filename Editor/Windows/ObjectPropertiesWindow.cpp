@@ -37,6 +37,7 @@
 
 #include "../../Utils/FilesHelper.h"
 #include "../../Utils/ImGuiUtils.h"
+#include "../../Utils/RObjectSaver.h"
 
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
@@ -2191,6 +2192,16 @@ void showObjectProperties()
 			{
 				vbEditor::_sceneManager->removeSceneObject(vbEditor::_selectedSceneObject, true);
 				vbEditor::_selectedSceneObject = nullptr;
+			}
+
+			if (ImGui::Button("Save as object"))
+			{
+				std::string result = FileDialogs::selectFolder("Select folder");
+				if (result != "")
+				{
+					LOG_DEBUG("Save object in: " + result);
+					RObjectSaver::saveObjectToFile(vbEditor::_selectedSceneObject, result);
+				}
 			}
 		}
 	}

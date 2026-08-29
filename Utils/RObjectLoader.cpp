@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
+#include "FilesHelper.h"
 #include "Logger.h"
 #include "Helpers.hpp"
 #include "Strings.h"
@@ -120,7 +121,6 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
 	object->getComponents()[componentIndex]["lowPolyLoadWithHierarchy"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyLoadWithHierarchy", "false");
 	object->getComponents()[componentIndex]["animated"] = XmlUtils::getAttributeStringOptional(componentElement, "animated");
-	object->getComponents()[componentIndex]["texturesPath"] = XmlUtils::getAttributeStringOptional(componentElement, "texturesPath");
 }
 
 
@@ -327,8 +327,19 @@ void RObjectLoader::loadChildren(XMLElement* parentObjectElement, RObject* objec
 	while (objectElement != nullptr)
 	{
 		std::string name = objectElement->Attribute("name");
+		std::string position = XmlUtils::getAttributeStringOptional(objectElement, "position");
+		std::string rotation = XmlUtils::getAttributeStringOptional(objectElement, "rotation");
 
 		RObject* childObject = new RObject(object->getPath(), object->getAuthor(), name, object->getComment(), object->getOriginalName());
+
+		if (position != "")
+		{
+			childObject->setPosition(XMLstringToVec3(position.c_str()));
+		}
+		if (rotation != "")
+		{
+			childObject->setRotation(XMLstringToVec3(rotation.c_str()));
+		}
 
 		loadComponents(objectElement, childObject);
 
@@ -419,11 +430,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			bool normalsSmoothing = toBool(components[i]["normalsSmoothing"]);
 			bool loadWithHierarchy = toBool(components[i]["loadWithHierarchy"]);
 
-			std::string customTexturePath = components[i]["texturesPath"];
+			std::string customTexturePath = FilesHelper::getPathToDirectoryFromFileName(modelFile);
 			std::string texturePath = objectDirPath;
 			if (customTexturePath != "")
 			{
-				texturePath = texturePath + "/" + customTexturePath;
+				texturePath = texturePath + customTexturePath;
+				LOG_DEBUG(LOG_VARIABLE(customTexturePath) + ", " + LOG_VARIABLE(texturePath));
 			}
 
 			model = loadModel(modelPath, texturePath, isAnimated, normalsSmoothing, loadWithHierarchy);
@@ -436,7 +448,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			else
 			{
 				StaticModelNode* modelNode = model->getNodeByName(modelNodeName);
-				tempRenderObject = new RenderObject(model, modelNode);
+				tempRenderObject = new RenderObject(model, modelNode, true);
 
 				sceneObject->setPosition(modelNode->transform.getPosition());
 				sceneObject->setRotation(modelNode->transform.getRotation());
@@ -749,7 +761,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 	std::vector<RObject*>& children = objectDefinition->getChildren();
 	for (int i = 0; i < children.size(); ++i)
 	{
-		SceneObject* child = createSceneObjectFromRObject(children[i], children[i]->getName(), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), sceneManager);
+		SceneObject* child = createSceneObjectFromRObject(children[i], children[i]->getName(), children[i]->getPosition(), children[i]->getRotation(), sceneManager);
 		sceneObject->addChild(child);
 	}
 

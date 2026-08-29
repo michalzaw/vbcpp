@@ -42,11 +42,11 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
 }
 
 
-RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool withChildren/* = true*/, bool isDynamicObject/* = false*/)
+RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, bool isDynamicObject/* = false*/)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isHighlighted(false), _isRenderObjectId(true),
-    _isCalculatedAABB(false), _singleNodeFromModel(!withChildren)
+    _isCalculatedAABB(false), _singleNodeFromModel(singleNodeFromModel)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
 
@@ -54,7 +54,7 @@ RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool
 
     if (model != NULL)
     {
-        setModel(model, modelNode, withChildren);
+        setModel(model, modelNode, singleNodeFromModel);
     }
 }
 
@@ -122,16 +122,16 @@ void RenderObject::setModel(RStaticModel* model, int lod)
 }
 
 
-void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, bool withChildren/* = true*/, int lod/* = 0*/)
+void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, int lod/* = 0*/)
 {
-    setModel(model, std::vector<std::string>{}, modelNode, withChildren, lod);
+    setModel(model, std::vector<std::string>{}, modelNode, singleNodeFromModel, lod);
     _modelsDatas[lod].modelRootNode->getTransformNode().setPosition(0.0f, 0.0f, 0.0f);
     _modelsDatas[lod].modelRootNode->getTransformNode().setRotation(0.0f, 0.0f, 0.0f);
     _modelsDatas[lod].modelRootNode->getTransformNode().setScale(1.0f, 1.0f, 1.0f);
 }
 
 
-void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, bool withChildren/* = true*/, int lod/* = 0*/)
+void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, int lod/* = 0*/)
 {
     if (lod <= _modelsDatas.size())
     {
@@ -144,7 +144,7 @@ void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>&
     {
         delete _modelsDatas[lod].modelRootNode;
     }
-    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this, withChildren);
+    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this, singleNodeFromModel);
 
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
