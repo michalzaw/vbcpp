@@ -11,6 +11,7 @@
 #include "../Graphics/DisplayComponent.h"
 #include "../Graphics/RenderableSurface.h"
 
+#include "../Scene/SceneLoader.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -323,6 +324,7 @@ void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busEle
     loadDisplays(moduleElement, busModule);
     loadRenderableSurface(moduleElement, busModule);
     loadCustomElements(moduleElement, busModule);
+    loadObjects(moduleElement, busModule);
     loadScripts(moduleElement, busModule);
 }
 
@@ -1323,11 +1325,18 @@ void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& 
             customElementSceneObject->setScale(customElementNode->transform.getScale());
             busModule.sceneObject->addChild(customElementSceneObject);
 
-            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, false, true), customElementSceneObject);
         }
 
         childElement = childElement->NextSiblingElement("Element");
     }
+}
+
+
+void BusLoader::loadObjects(XMLElement* parentElement, BusRayCastModule& busModule)
+{
+    SceneLoader sceneLoader(_sMgr, _busPath);
+    sceneLoader.loadObjects(parentElement, busModule.sceneObject);
 }
 
 

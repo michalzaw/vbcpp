@@ -74,7 +74,7 @@ class ResourceManager
 
         LUAF RSound* loadSound(std::string path);
 
-		RObject* loadRObject(std::string name);
+		RObject* loadRObject(std::string name, std::string customObjectsDir = "");
 
 		RRoadProfile* loadRoadProfile(std::string name);
 
