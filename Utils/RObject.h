@@ -19,10 +19,15 @@ class RObject : public Resource
 
 		std::vector<std::unordered_map<std::string, std::string>> _components;
 
+		std::vector<RObject*> _children;
+
 	public:
 		RObject(const std::string& path, const std::string& author, const std::string& name, const std::string& comment, const std::string& originalName);
+		~RObject();
 
 		std::vector<std::unordered_map<std::string, std::string>>& getComponents();
+
+		std::vector<RObject*>& getChildren();
 
 		const std::string& getAuthor();
 		const std::string& getName();

@@ -111,6 +111,7 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 {
 	object->getComponents()[componentIndex]["model"] = componentElement->Attribute("model");
 	object->getComponents()[componentIndex]["lowPolyModel"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModel");
+	object->getComponents()[componentIndex]["modelNodeName"] = XmlUtils::getAttributeStringOptional(componentElement, "modelNodeName");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
 	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows", "true");
@@ -119,6 +120,7 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 	object->getComponents()[componentIndex]["lowPolyModelNormalsSmoothing"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModelNormalsSmoothing", "true");
 	object->getComponents()[componentIndex]["lowPolyLoadWithHierarchy"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyLoadWithHierarchy", "false");
 	object->getComponents()[componentIndex]["animated"] = XmlUtils::getAttributeStringOptional(componentElement, "animated");
+	object->getComponents()[componentIndex]["texturesPath"] = XmlUtils::getAttributeStringOptional(componentElement, "texturesPath");
 }
 
 
@@ -313,6 +315,33 @@ RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::
 }
 
 
+void RObjectLoader::loadChildren(XMLElement* parentObjectElement, RObject* object)
+{
+	XMLElement* objectsElement = parentObjectElement->FirstChildElement("Objects");
+	if (objectsElement == nullptr)
+	{
+		return;
+	}
+
+	XMLElement* objectElement = objectsElement->FirstChildElement("Object");
+	while (objectElement != nullptr)
+	{
+		std::string name = objectElement->Attribute("name");
+
+		RObject* childObject = new RObject(object->getPath(), object->getAuthor(), name, object->getComment(), object->getOriginalName());
+
+		loadComponents(objectElement, childObject);
+
+		loadChildren(objectElement, childObject);
+
+		object->getChildren().push_back(childObject);
+
+		objectElement = objectElement->NextSiblingElement("Object");
+	}
+
+}
+
+
 RObject* RObjectLoader::loadObject(const std::string& dirPath, const std::string& originalName)
 {
 	const std::string& fullPath = dirPath + OBJECT_FILE_NAME;
@@ -355,6 +384,8 @@ RObject* RObjectLoader::loadObject(const std::string& dirPath, const std::string
 
 	loadComponents(objElement, object);
 
+	loadChildren(objElement, object);
+
 
 	return object;
 }
@@ -382,14 +413,36 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
 
 			const std::string& modelFile = components[i]["model"];
+			const std::string& modelNodeName = components[i]["modelNodeName"];
 			const std::string& modelPath = objectDirPath + modelFile;
 			bool isAnimated = toBool(components[i]["animated"]);
 			bool normalsSmoothing = toBool(components[i]["normalsSmoothing"]);
 			bool loadWithHierarchy = toBool(components[i]["loadWithHierarchy"]);
 
-			model = loadModel(modelPath, objectDirPath, isAnimated, normalsSmoothing, loadWithHierarchy);
+			std::string customTexturePath = components[i]["texturesPath"];
+			std::string texturePath = objectDirPath;
+			if (customTexturePath != "")
+			{
+				texturePath = texturePath + "/" + customTexturePath;
+			}
 
-			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
+			model = loadModel(modelPath, texturePath, isAnimated, normalsSmoothing, loadWithHierarchy);
+
+			RenderObject* tempRenderObject;
+			if (modelNodeName == "")
+			{
+				tempRenderObject = new RenderObject(model);
+			}
+			else
+			{
+				StaticModelNode* modelNode = model->getNodeByName(modelNodeName);
+				tempRenderObject = new RenderObject(model, modelNode);
+
+				sceneObject->setPosition(modelNode->transform.getPosition());
+				sceneObject->setRotation(modelNode->transform.getRotation());
+				sceneObject->setScale(modelNode->transform.getScale());
+			}
+			RenderObject* renderObject = graphicsManager->addRenderObject(tempRenderObject, sceneObject);
 			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
 			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
 
@@ -400,7 +453,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				bool lowPolyNormalsSmoothing = toBool(components[i]["lowPolyModelNormalsSmoothing"]);
 				bool lowPolyLoadWithHierarchy = toBool(components[i]["lowPolyLoadWithHierarchy"]);
 
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, texturePath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
@@ -691,6 +744,13 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			sceneObject->addComponent(scriptComponent);
 		}
+	}
+
+	std::vector<RObject*>& children = objectDefinition->getChildren();
+	for (int i = 0; i < children.size(); ++i)
+	{
+		SceneObject* child = createSceneObjectFromRObject(children[i], children[i]->getName(), glm::vec3(0, 0, 0), glm::vec3(0, 0, 0), sceneManager);
+		sceneObject->addChild(child);
 	}
 
 	return sceneObject;
