@@ -15,7 +15,7 @@ namespace SceneObjectCreator
 		sceneObject->setRotation(modelNode->transform.getRotation());
 		sceneObject->setScale(modelNode->transform.getScale());
 
-		RenderObject* renderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(model, modelNode, true), sceneObject);
+		RenderObject* renderObject = sceneManager->getGraphicsManager()->addRenderObject(new RenderObject(model, modelNode, true, true), sceneObject);
 
 		for (StaticModelNode* childNode : modelNode->children)
 		{

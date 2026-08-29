@@ -761,8 +761,22 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 		}
 		ImGui::PopID(); // Models
 
+		
+
 		COMPONENT_PROPERTY_EDIT(renderComponent, CastShadows, bool, "Cast shadows")
-		COMPONENT_PROPERTY_EDIT(renderComponent, DynamicObject, bool, "Dynamic object")
+		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(renderComponent, DynamicObject, bool, "Dynamic object", [renderComponent](bool newValue) {
+				for (SceneObject* child : renderComponent->getSceneObject()->getChildren())
+				{
+					RenderObject* childRenderObject = child->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT);
+					if (childRenderObject != nullptr)
+					{
+						childRenderObject->setDynamicObject(newValue);
+					}
+				}
+			});
+
+
+		
 
 		ImGui::PopID();
 		ImGui::Columns(1);

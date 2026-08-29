@@ -136,7 +136,8 @@ namespace RObjectSaver
 
 			childObjectElement->SetAttribute("name", child->getName().c_str());
 
-			if (!child->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT)->isSingleNodeFromModel())
+			RenderObject* renderObject = child->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT);
+			if (renderObject != nullptr && !renderObject->isSingleNodeFromModel())
 			{
 				childObjectElement->SetAttribute("position", vec3ToString(child->getPosition()).c_str());
 				glm::vec3 rotation = glm::vec3(radToDeg(child->getRotation().x),
