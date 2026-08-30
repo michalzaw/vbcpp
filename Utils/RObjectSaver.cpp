@@ -12,6 +12,8 @@ using namespace tinyxml2;
 
 #include "../Scene/SceneObject.h"
 
+#include "../Scripting/ScriptComponent.h"
+
 
 namespace RObjectSaver
 {
@@ -50,6 +52,15 @@ namespace RObjectSaver
 		}
 		//componentElement->SetAttribute("animated", "false");
 		componentElement->SetAttribute("singleNodeFromModel", component->isSingleNodeFromModel() ? "true" : "false");
+
+	}
+
+	void saveScriptComponent(XMLElement* componentElement, ScriptComponent* component, const std::string& pathToDirectory)
+	{
+		std::string scriptRelativePath = FilesHelper::relativePathToFile(component->getScriptFile()->getPath(), pathToDirectory, false);
+
+		componentElement->SetAttribute("type", "script");
+		componentElement->SetAttribute("fileName", scriptRelativePath.c_str());
 
 	}
 
@@ -102,11 +113,11 @@ namespace RObjectSaver
 		else if (componentType == "trafficLights")
 		{
 			loadTrafficLightsComponent(componentElement, object, componentIndex);
-		}
-		else if (componentType == "script")
-		{
-			loadScriptComponent(componentElement, object, componentIndex);
 		}*/
+		else if (component->getType() == CT_SCRIPT)
+		{
+			saveScriptComponent(componentElement, static_cast<ScriptComponent*>(component), pathToDirectory);
+		}
 	}
 
 	void saveComponents(XMLElement* objectElement, XMLDocument& doc, SceneObject* sceneObject, const std::string& pathToDirectory)

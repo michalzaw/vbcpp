@@ -241,3 +241,12 @@ void FilesHelper::copyFile(const std::string& from, const std::string& to)
 
 	destinationFile << sourceFile.rdbuf();
 }
+
+
+void FilesHelper::createEmptyFile(const std::string& path)
+{
+    if (!isFileExists(path))
+    {
+        std::ofstream plik(path);
+    }
+}

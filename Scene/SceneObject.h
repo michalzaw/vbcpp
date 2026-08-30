@@ -150,6 +150,8 @@ class SceneObject
         glm::vec3 getGlobalPosition();
         glm::vec3 transformLocalPointToGlobal(const glm::vec3& point);
         glm::vec3 transformLocalVectorToGlobal(const glm::vec3& vec);
+        glm::vec3 transformLocalPointToParentSpace(const glm::vec3& point);
+        glm::vec3 transformLocalVectorToParentSpace(const glm::vec3& vec);
 
 };
 

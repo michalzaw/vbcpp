@@ -696,6 +696,7 @@ void SceneObject::move(float dx, float dy, float dz)
 void SceneObject::rotate(const glm::vec3& deltaRotation)
 {
     _rotation += deltaRotation;
+    setRotation(_rotation);
 
     _rotationMode = RM_EULER_ANGLES;
 
@@ -711,9 +712,9 @@ void SceneObject::rotate(float dx, float dy, float dz)
 
 void SceneObject::rotateLocal(const glm::vec3& deltaRotation)
 {
-    glm::quat localRotation = glm::angleAxis(deltaRotation.x, transformLocalVectorToGlobal(glm::vec3(1.0f, 0.0f, 0.0f))) *
-                              glm::angleAxis(deltaRotation.y, transformLocalVectorToGlobal(glm::vec3(0.0f, 1.0f, 0.0f))) *
-                              glm::angleAxis(deltaRotation.z, transformLocalVectorToGlobal(glm::vec3(0.0f, 0.0f, 1.0f)));
+    glm::quat localRotation = glm::angleAxis(deltaRotation.x, transformLocalVectorToParentSpace(glm::vec3(1.0f, 0.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.y, transformLocalVectorToParentSpace(glm::vec3(0.0f, 1.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.z, transformLocalVectorToParentSpace(glm::vec3(0.0f, 0.0f, 1.0f)));
 
     setRotationQuaternion(localRotation * _rotationQuaternion);
 }
@@ -721,7 +722,7 @@ void SceneObject::rotateLocal(const glm::vec3& deltaRotation)
 
 void SceneObject::rotateLocal(float dx, float dy, float dz)
 {
-    rotateLocal(dx, dy, dz);
+    rotateLocal(glm::vec3(dx, dy, dz));
 }
 
 
@@ -853,5 +854,19 @@ glm::vec3 SceneObject::transformLocalPointToGlobal(const glm::vec3& point)
 glm::vec3 SceneObject::transformLocalVectorToGlobal(const glm::vec3& vec)
 {
     glm::vec4 v = getGlobalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
+    return glm::vec3(v.x, v.y, v.z);
+}
+
+
+glm::vec3 SceneObject::transformLocalPointToParentSpace(const glm::vec3& point)
+{
+    glm::vec4 p = getLocalTransformMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
+    return glm::vec3(p.x, p.y, p.z);
+}
+
+
+glm::vec3 SceneObject::transformLocalVectorToParentSpace(const glm::vec3& vec)
+{
+    glm::vec4 v = getLocalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
     return glm::vec3(v.x, v.y, v.z);
 }

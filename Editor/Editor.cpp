@@ -1544,6 +1544,27 @@ namespace vbEditor
 				ImGui::EndMenu();
 			}
 
+			if (ImGui::BeginMenu("Object"))
+			{
+				if (ImGui::MenuItem("Add script", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						std::string selectedFoder = FileDialogs::selectFolder("Select folder");
+						if (selectedFoder != "")
+						{
+							std::string scriptPath = selectedFoder + "/" + _selectedSceneObject->getName() + ".lua";
+							FilesHelper::createEmptyFile(scriptPath);
+							ScriptComponent* scriptComponent = _sceneManager->getScriptingManager()->addScript(ResourceManager::getInstance().loadScriptFile(scriptPath));
+							_selectedSceneObject->addComponent(scriptComponent);
+						}
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
+
 			if (ImGui::BeginMenu("Settings"))
 			{
 				ImGui::MenuItem("Camera Settings", NULL, &_showCameraSettingsWindow);

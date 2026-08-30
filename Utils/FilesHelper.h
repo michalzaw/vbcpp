@@ -39,6 +39,7 @@ class FilesHelper
         static std::string relativePathToDir(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile);
 
 		static void copyFile(const std::string& from, const std::string& to);
+        static void createEmptyFile(const std::string& path);
 
 };
 
