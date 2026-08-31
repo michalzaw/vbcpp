@@ -118,7 +118,7 @@ void RenderObject::calculateNewAABB()
 
 void RenderObject::setModel(RStaticModel* model, int lod)
 {
-    setModel(model, std::vector<std::string>{}, model->getRootNode(), true, lod);
+    setModel(model, std::vector<std::string>{}, model->getRootNode(), false, lod);
 }
 
 
