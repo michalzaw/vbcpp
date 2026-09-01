@@ -7,6 +7,7 @@
 #include <string>
 
 #include "Component.h"
+#include "Events/EventDispatcher.h"
 
 #include "../Graphics/RotationMode.h"
 
@@ -35,6 +36,8 @@ class SceneObject
         std::list<SceneObject*> _childrens;
 
         std::vector<Component*> _components;
+
+        EventDispatcher _events;
 
         std::string     _name;
         ObjectId        _id;
@@ -84,6 +87,9 @@ class SceneObject
 
         void addComponent(Component* component);
         void removeComponent(Component* component);
+
+
+        EventDispatcher&    getEvents();
 
 
 		void			    setName(const std::string& name);

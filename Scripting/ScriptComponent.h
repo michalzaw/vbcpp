@@ -9,6 +9,8 @@
 #include "Utils/LuaMacros.h"
 
 #include "../Scene/Component.h"
+#include "../Scene/Events/Subscription.h"
+#include "../Scene/Events/ObjectClickedEvent.h"
 
 
 class ScriptComponent final : public Component
@@ -28,10 +30,16 @@ class ScriptComponent final : public Component
 		sol::function _changeTransformFunction;
 		sol::function _updateFunction;
 		sol::function _destroyFunction;
+		sol::function _objectClickedFunction;
+
+		Subscription _objectClickedSubscription;
+
 
 		void onAttachedToScenObject() override;
 
 		void setupScriptEnvironment();
+
+		void onObjectClicked(const ObjectClickedEvent& event);
 
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate = true);

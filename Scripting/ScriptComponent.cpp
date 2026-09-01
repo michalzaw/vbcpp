@@ -43,6 +43,11 @@ void ScriptComponent::onAttachedToScenObject()
 
 	setupScriptEnvironment();
 
+	if (_objectClickedFunction.valid())
+	{
+		_objectClickedSubscription = getSceneObject()->getEvents().subscribe<ObjectClickedEvent>(&ScriptComponent::onObjectClicked, this);
+	}
+
 	if (_initFunction.valid())
 	{
 		sol::protected_function_result result = _initFunction();
@@ -65,6 +70,21 @@ void ScriptComponent::setupScriptEnvironment()
 	_changeTransformFunction = _scriptEnvironment["onChangeTransform"];
 	_updateFunction = _scriptEnvironment["onUpdate"];
 	_destroyFunction = _scriptEnvironment["onDestroy"];
+	_objectClickedFunction = _scriptEnvironment["onObjectClicked"];
+}
+
+
+void ScriptComponent::onObjectClicked(const ObjectClickedEvent& event)
+{
+	if (_objectClickedFunction.valid())
+	{
+		sol::protected_function_result result = _objectClickedFunction();
+		if (!result.valid())
+		{
+			sol::error error = result;
+			LOG_ERROR(error.what());
+		}
+	}
 }
 
 

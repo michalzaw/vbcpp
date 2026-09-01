@@ -26,6 +26,7 @@
 #include "../Graphics/Renderer.h"
 
 #include "../Scene/SceneLoader.h"
+#include "../Scene/Events/ObjectClickedEvent.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -871,11 +872,13 @@ void MainGameScene::rayTestWithModelNode(RenderObject* renderObject, ModelNode* 
 
 		if (distance > 0.0f)
 		{
-			ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
+			/*ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
 			if (clickableObject != NULL)
 			{
 				clickableObject->click(modelNode);
-			}
+			}*/
+
+			renderObject->getSceneObject()->getEvents().dispatch<ObjectClickedEvent>({ modelNode });
 		}
 	}
 

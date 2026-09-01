@@ -506,6 +506,12 @@ void SceneObject::removeComponent(Component* component)
 }
 
 
+EventDispatcher& SceneObject::getEvents()
+{
+    return _events;
+}
+
+
 void SceneObject::setName(const std::string& name)
 {
 	_name = name;
