@@ -88,6 +88,27 @@ void ScriptComponent::onObjectClicked(const ObjectClickedEvent& event)
 }
 
 
+void ScriptComponent::exportFunction(const std::string& name, sol::function function)
+{
+	_customFunctions[name] = function;
+}
+
+
+sol::function ScriptComponent::getFunction(const std::string& name)
+{
+	auto result = _customFunctions.find(name);
+	if (result != _customFunctions.end())
+	{
+		return result->second;
+	}
+	else
+	{
+		LOG_ERROR("Cannot find function with name: " + name);
+		return sol::nil;
+	}
+}
+
+
 void ScriptComponent::loadScript(bool setUpEnvironmentAndCallInitCallback/* = true*/)
 {
 	// todo: _luaState->load()

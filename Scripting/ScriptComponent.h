@@ -5,6 +5,8 @@
 #define SOL_ALL_SAFETIES_ON 1
 #include <sol/sol.hpp>
 
+#include <map>
+
 #include "RScriptFile.h"
 #include "Utils/LuaMacros.h"
 
@@ -34,6 +36,7 @@ class ScriptComponent final : public Component
 
 		Subscription _objectClickedSubscription;
 
+		std::map<std::string, sol::function> _customFunctions;
 
 		void onAttachedToScenObject() override;
 
@@ -48,6 +51,9 @@ class ScriptComponent final : public Component
 		inline RScriptFile* getScriptFile() { return _scriptFile; }
 
 		LUAF inline bool isInitialized() { return _isInitialized; }
+
+		LUAF void exportFunction(const std::string& name, sol::function function);
+		LUAF sol::function getFunction(const std::string& name);
 
 		void loadScript(bool setUpEnvironmentAndCallInitCallback = true);
 		void reloadScriptFromResource();
