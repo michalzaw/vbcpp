@@ -38,6 +38,8 @@ class ScriptComponent final : public Component
 
 		std::map<std::string, sol::function> _customFunctions;
 
+		void validateFunctionResult(sol::protected_function_result& result);
+
 		void onAttachedToScenObject() override;
 
 		void setupScriptEnvironment();

@@ -25,11 +25,17 @@ ScriptComponent::~ScriptComponent()
 	if (_destroyFunction.valid())
 	{
 		sol::protected_function_result result = _destroyFunction();
-		if (!result.valid())
-		{
-			sol::error error = result;
-			LOG_ERROR(error.what());
-		}
+		validateFunctionResult(result);
+	}
+}
+
+
+void ScriptComponent::validateFunctionResult(sol::protected_function_result& result)
+{
+	if (!result.valid())
+	{
+		sol::error error = result;
+		LOG_ERROR("LUA Script error [" + _scriptFile->getPath() + "][" + sol::to_string(result.status()) + "]: " + error.what());
 	}
 }
 
@@ -51,11 +57,7 @@ void ScriptComponent::onAttachedToScenObject()
 	if (_initFunction.valid())
 	{
 		sol::protected_function_result result = _initFunction();
-		if (!result.valid())
-		{
-			sol::error error = result;
-			LOG_ERROR(error.what());
-		}
+		validateFunctionResult(result);
 	}
 }
 
@@ -70,6 +72,8 @@ void ScriptComponent::setupScriptEnvironment()
 	_changeTransformFunction = _scriptEnvironment["onChangeTransform"];
 	_updateFunction = _scriptEnvironment["onUpdate"];
 	_destroyFunction = _scriptEnvironment["onDestroy"];
+
+	// callback
 	_objectClickedFunction = _scriptEnvironment["onObjectClicked"];
 }
 
@@ -79,11 +83,7 @@ void ScriptComponent::onObjectClicked(const ObjectClickedEvent& event)
 	if (_objectClickedFunction.valid())
 	{
 		sol::protected_function_result result = _objectClickedFunction();
-		if (!result.valid())
-		{
-			sol::error error = result;
-			LOG_ERROR(error.what());
-		}
+		validateFunctionResult(result);
 	}
 }
 
@@ -103,7 +103,7 @@ sol::function ScriptComponent::getFunction(const std::string& name)
 	}
 	else
 	{
-		LOG_ERROR("Cannot find function with name: " + name);
+		LOG_ERROR("LUA Script error [" + _scriptFile->getPath() + "] Cannot find function with name: " + name);
 		return sol::nil;
 	}
 }
@@ -111,13 +111,19 @@ sol::function ScriptComponent::getFunction(const std::string& name)
 
 void ScriptComponent::loadScript(bool setUpEnvironmentAndCallInitCallback/* = true*/)
 {
-	// todo: _luaState->load()
-
-	sol::protected_function_result result = _luaState->script(_scriptFile->getScript(), _scriptEnvironment);
-	if (!result.valid())
+	sol::load_result loadResult = _luaState->load(_scriptFile->getScript());
+	if (loadResult.valid())
 	{
-		sol::error error = result;
-		LOG_ERROR(error.what());
+		sol::protected_function loadedScript = loadResult;
+		sol::set_environment(_scriptEnvironment, loadedScript);
+
+		sol::protected_function_result result = loadedScript.call();
+		validateFunctionResult(result);
+	}
+	else
+	{
+		sol::error error = loadResult;
+		LOG_ERROR("LUA Script error [" + _scriptFile->getPath() + "][" + sol::to_string(loadResult.status()) + "]: " + error.what());
 	}
 
 	_isInitialized = true;
@@ -140,11 +146,7 @@ void ScriptComponent::changedTransform()
 	if (_changeTransformFunction.valid())
 	{
 		sol::protected_function_result result = _changeTransformFunction();
-		if (!result.valid())
-		{
-			sol::error error = result;
-			LOG_ERROR(error.what());
-		}
+		validateFunctionResult(result);
 	}
 }
 
@@ -154,10 +156,6 @@ void ScriptComponent::update(float deltaTime)
 	if (_updateFunction.valid())
 	{
 		sol::protected_function_result result = _updateFunction(deltaTime);
-		if (!result.valid())
-		{
-			sol::error error = result;
-			LOG_ERROR(error.what());
-		}
+		validateFunctionResult(result);
 	}
 }
