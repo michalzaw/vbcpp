@@ -50,7 +50,8 @@ MainGameScene::MainGameScene(Window* window)
 	_activeCamera(nullptr),
 	_hud(nullptr),
 	_isCameraControll(true), _isMirrorControll(false), _mirrorControllIndex(-1),
-	_mapView(nullptr), _isNavigationVisible(true)
+	_mapView(nullptr), _isNavigationVisible(true),
+	_objectPickingType(OPT_RENDER_ID)
 {
 	_luaGameContext = new LuaGameContext(_sceneManager->getScriptingManager());
 	_luaGameContext->setSceneManager(_sceneManager);
@@ -159,7 +160,7 @@ CameraFPS* MainGameScene::createCameraFPSGlobal()
 	CameraFPS* cameraFPS = _graphicsManager->addCameraFPS(GameConfig::getInstance().windowWidth, GameConfig::getInstance().windowHeight, degToRad(58.0f), 0.1f, 1000.0f);
 	cameraObject->addComponent(cameraFPS);
 	cameraFPS->setRotationSpeed(0.001f);
-	cameraFPS->setMoveSpeed(25);
+	cameraFPS->setMoveSpeed(5);
 	cameraObject->setRotation(0, 0, 0);
 	cameraObject->setPosition(0, 0, 0);
 
@@ -834,16 +835,31 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 		glfwGetCursorPos(_window->getWindow(), &xpos, &ypos);
 		ypos = _window->getHeight() - ypos;
 
-		glm::vec3 rayStart;
-		glm::vec3 rayDir;
-		calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
-
-		// collision with model nodes
-		std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
-		for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+		if (_objectPickingType == OPT_RAYCASTING)
 		{
-			RenderObject* renderObject = *i;
-			rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+			glm::vec3 rayStart;
+			glm::vec3 rayDir;
+			calculateRay(xpos, ypos, _activeCamera, rayStart, rayDir);
+
+			// collision with model nodes
+			std::list<RenderObject*>& renderObjects = _graphicsManager->getRenderObjects();
+			for (std::list<RenderObject*>::iterator i = renderObjects.begin(); i != renderObjects.end(); ++i)
+			{
+				RenderObject* renderObject = *i;
+				rayTestWithModelNode(renderObject, renderObject->getModelRootNode(), rayStart, rayDir, renderObject->getSceneObject()->getGlobalTransformMatrix());
+			}
+		}
+		else
+		{
+			unsigned int objectId = Renderer::getInstance().pickObject(xpos, ypos);
+			if (objectId > 0)
+			{
+				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
+				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
+				{
+					sceneObject->getEvents().dispatch<ObjectClickedEvent>({ nullptr });
+				}
+			}
 		}
 	}
 }
@@ -872,12 +888,6 @@ void MainGameScene::rayTestWithModelNode(RenderObject* renderObject, ModelNode* 
 
 		if (distance > 0.0f)
 		{
-			/*ClickableObject* clickableObject = static_cast<ClickableObject*>(renderObject->getSceneObject()->getComponent(CT_CLICKABLE_OBJECT));
-			if (clickableObject != NULL)
-			{
-				clickableObject->click(modelNode);
-			}*/
-
 			renderObject->getSceneObject()->getEvents().dispatch<ObjectClickedEvent>({ modelNode });
 		}
 	}

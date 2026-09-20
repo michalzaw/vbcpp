@@ -575,7 +575,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
     if (desktopElement != nullptr)
     {
-        LOG_INFO("XML: Desktop data");
+        LOG_INFO("XML: Desktop data (deprecated)");
 
         std::string modelFile = std::string(desktopElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(desktopElement->Attribute("position"));
@@ -593,14 +593,15 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
-        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel), desktopObject);
-		_bus->_desktopRenderObject->setDynamicObject(true);
 
 
         busModule.sceneObject->addChild(desktopObject);
 
         _bus->_desktopObject = desktopObject;
-        _bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
+        _bus->_desktop = new Desktop(nullptr, _bus->_desktopClickableObject);
+        //_bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
+
+        std::vector<std::string> nodeNamesToSkip;
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
@@ -613,19 +614,36 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             float minAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "minAngle");
             glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
-            std::vector<glm::vec2> curve;
-            XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
-            if (curve.size() > 1)
             {
-                for (auto& point : curve)
+                StaticModelNode* indicatorNode = desktopModel->getNodeByName(modelNodeName);
+
+                SceneObject* indicatorSceneObject = _sMgr->addSceneObject(modelNodeName);
+                indicatorSceneObject->setPosition(indicatorNode->transform.getPosition());
+                indicatorSceneObject->setRotation(indicatorNode->transform.getRotation());
+                indicatorSceneObject->setScale(indicatorNode->transform.getScale());
+                desktopObject->addChild(indicatorSceneObject);
+
+                SceneObject* indicatorSubSceneObject = _sMgr->addSceneObject(modelNodeName + "_renderObject");
+                indicatorSceneObject->addChild(indicatorSubSceneObject);
+
+                RenderObject* indicatorRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, indicatorNode, true), indicatorSubSceneObject);
+
+                std::vector<glm::vec2> curve;
+                XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
+                if (curve.size() > 1)
                 {
-                    point.y = degToRad(point.y);
+                    for (auto& point : curve)
+                    {
+                        point.y = degToRad(point.y);
+                    }
+                    _bus->_desktop->addIndicator(indicatorSubSceneObject, variableName, curve, axis);
                 }
-                _bus->_desktop->addIndicator(modelNodeName, variableName, curve, axis);
-            }
-            else
-            {
-                _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+                else
+                {
+                    _bus->_desktop->addIndicator(indicatorSubSceneObject, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+                }
+
+                nodeNamesToSkip.push_back(modelNodeName);
             }
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
@@ -670,7 +688,27 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
                 buttonStateElement = buttonStateElement->NextSiblingElement("State");
             }
 
-            _bus->_desktop->addButton(modelNodeName, rotationAxis, buttonStates, isReturning);
+            {
+                StaticModelNode* buttonNode = desktopModel->getNodeByName(modelNodeName);
+
+                SceneObject* buttonSceneObject = _sMgr->addSceneObject(modelNodeName);
+                buttonSceneObject->setPosition(buttonNode->transform.getPosition());
+                buttonSceneObject->setRotation(buttonNode->transform.getRotation());
+                buttonSceneObject->setScale(buttonNode->transform.getScale());
+                desktopObject->addChild(buttonSceneObject);
+
+                SceneObject* buttonSubSceneObject = _sMgr->addSceneObject(modelNodeName + "_renderObject");
+                buttonSceneObject->addChild(buttonSubSceneObject);
+
+                RenderObject* buttonRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, buttonNode, true), buttonSubSceneObject);
+                ClickableObject* buttonClickableObject = _gMgr->addClickableObject();
+                
+                buttonSubSceneObject->addComponent(buttonClickableObject);
+
+                _bus->_desktop->addButton(buttonSubSceneObject, rotationAxis, buttonStates, isReturning, buttonClickableObject);
+
+                nodeNamesToSkip.push_back(modelNodeName);
+            }
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }
@@ -685,10 +723,24 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             glm::vec3 backlightingColor = XMLstringToVec3(lightElement->Attribute("backlightingColor"));
             glm::vec3 lightColor = XMLstringToVec3(lightElement->Attribute("lightColor"));
 
-            _bus->_desktop->setLight(type, modelNodeName, backlightingColor, lightColor);
+
+            for (SceneObject* child : desktopObject->getChildren())
+            {
+                if (child->getName() == modelNodeName)
+                {
+                    _bus->_desktop->setLight(type, (*child->getChildren().begin())->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT)->getModelRootNode(), backlightingColor, lightColor);
+                }
+                else
+                {
+                    LOG_WARNING("Unimplemented - Light type must be added to indicaotor or button element");
+                }
+            }
 
             lightElement = lightElement->NextSiblingElement("Light");
         }
+
+        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, nodeNamesToSkip), desktopObject);
+        _bus->_desktopRenderObject->setDynamicObject(true);
     }
     else
     {

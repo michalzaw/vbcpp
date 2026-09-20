@@ -66,7 +66,7 @@ DesktopLightType getDesktopLightTypeFromString(std::string name);
 
 struct Indicator
 {
-    ModelNode* modelNode;
+    SceneObject* sceneObject;
     std::string variableName;
 
     std::vector<glm::vec2> rotationCurve;
@@ -77,7 +77,7 @@ struct Indicator
 
     Indicator()
     {
-        modelNode = NULL;
+        sceneObject = NULL;
         currentValue = 0.0f;
     }
 };
@@ -102,10 +102,11 @@ struct DesktopButtonState
 
 struct DesktopButton
 {
-    ModelNode* modelNode;
+    SceneObject* sceneObject;
     unsigned int statesCount;
     glm::vec3 rotationAxis;
     bool isReturning;
+    ClickableObject* clickableObject;
 
     std::vector<DesktopButtonState> states;
 
@@ -115,16 +116,17 @@ struct DesktopButton
 
     DesktopButton()
     {
-        modelNode = NULL;
+        sceneObject = NULL;
     }
 
-    void setData(ModelNode* modelNode, glm::vec3 rotationAxis, std::vector<DesktopButtonState> states, bool isReturning)
+    void setData(SceneObject* sceneObject, glm::vec3 rotationAxis, std::vector<DesktopButtonState> states, bool isReturning, ClickableObject* clickableObject)
     {
-        this->modelNode = modelNode;
+        this->sceneObject = sceneObject;
         this->statesCount = states.size();
         this->states = states;
         this->isReturning = isReturning;
         this->rotationAxis = rotationAxis;
+        this->clickableObject = clickableObject;
 
         this->currentState = 0;
         this->currentRotation = 0.0f;
@@ -154,7 +156,7 @@ class Desktop
     private:
         SceneObject* _desktopSceneObject;
         RenderObject* _desktopRenderObject;
-        ClickableObject* _desktopClickableObject;
+        //ClickableObject* _desktopClickableObject;
 
         std::vector<Indicator> _indicators;
         std::vector<DesktopButton> _buttons;
@@ -165,13 +167,13 @@ class Desktop
     public:
         Desktop(RenderObject* desktopRenderObject, ClickableObject* desktopClickableObject);
 
-        void addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, float maxAngle, float maxValue, float minValue = 0.0f, float minAngle = 0.0f, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
-        void addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
+        void addIndicator(SceneObject* sceneObject, const std::string& variable, float maxAngle, float maxValue, float minValue = 0.0f, float minAngle = 0.0f, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
+        void addIndicator(SceneObject* sceneObject, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis = glm::vec3(0.0f, 0.0f, 1.0f));
         
-        void addButton(std::string buttonNodeNameInModel, glm::vec3 rotationAxix, std::vector<DesktopButtonState> states, bool isReturning);
+        void addButton(SceneObject* sceneObject, glm::vec3 rotationAxix, std::vector<DesktopButtonState> states, bool isReturning, ClickableObject* clickableObject);
         DesktopButton& getButton(int index);
 
-        void setLight(DesktopLightType type, std::string lightNodeNameInModel, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor);
+        void setLight(DesktopLightType type, ModelNode* modelNode, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor);
         DesktopLight& getDesktopLight(DesktopLightType type);
 
         void setButtonState(int index, unsigned int state);
