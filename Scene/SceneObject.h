@@ -91,6 +91,11 @@ class SceneObject
 
         EventDispatcher&    getEvents();
 
+        template<typename Event>
+        void dispatchEvent(const Event& event);
+        template<typename Event>
+        void broadcastEventToChildren(const Event& event);
+
 
 		void			    setName(const std::string& name);
         void                setIsActive(bool is);
@@ -160,6 +165,26 @@ class SceneObject
         glm::vec3 transformLocalVectorToParentSpace(const glm::vec3& vec);
 
 };
+
+
+template<typename Event>
+void SceneObject::dispatchEvent(const Event& event)
+{
+    _events.dispatch(event);
+}
+
+
+template<typename Event>
+void SceneObject::broadcastEventToChildren(const Event& event)
+{
+    _events.dispatch(event);
+
+    for (SceneObject* child : _childrens)
+    {
+        child->broadcastEventToChildren(event);
+    }
+
+}
 
 
 #endif // SCENEOBJECT_H_INCLUDED

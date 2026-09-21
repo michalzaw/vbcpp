@@ -12,6 +12,7 @@
 #include "../Graphics/RenderableSurface.h"
 
 #include "../Scene/SceneLoader.h"
+#include "../Scene/Events/ObjectLoadedEvent.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -90,6 +91,8 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
     }
 
     loadEngineAndGearbox(busElement);
+
+    _bus->getSceneObject()->broadcastEventToChildren<ObjectLoadedEvent>({ _bus->getSceneObject() });
 
     return _bus;
 }

@@ -15,6 +15,8 @@
 #include "LabelLuaBindings.h"
 #include "MaterialLuaBindings.h"
 #include "ModelNodeLuaBindings.h"
+#include "ObjectClickedEventLuaBindings.h"
+#include "ObjectLoadedEventLuaBindings.h"
 #include "PhysicalBodyLuaBindings.h"
 #include "PhysicalBodyWheelLuaBindings.h"
 #include "RenderableSurfaceLuaBindings.h"
@@ -49,6 +51,8 @@ namespace GeneratedLuaBindings
         LabelLuaBindings::bind(lua);
         MaterialLuaBindings::bind(lua);
         ModelNodeLuaBindings::bind(lua);
+        ObjectClickedEventLuaBindings::bind(lua);
+        ObjectLoadedEventLuaBindings::bind(lua);
         PhysicalBodyLuaBindings::bind(lua);
         PhysicalBodyWheelLuaBindings::bind(lua);
         RenderableSurfaceLuaBindings::bind(lua);

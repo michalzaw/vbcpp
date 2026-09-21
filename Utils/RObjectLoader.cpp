@@ -24,6 +24,7 @@ using namespace tinyxml2;
 #include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Scene/SceneManager.h"
+#include "../Scene/Events/ObjectLoadedEvent.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -764,6 +765,8 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		SceneObject* child = createSceneObjectFromRObject(children[i], children[i]->getName(), children[i]->getPosition(), children[i]->getRotation(), sceneManager);
 		sceneObject->addChild(child);
 	}
+
+	sceneObject->broadcastEventToChildren<ObjectLoadedEvent>({ sceneObject });
 
 	return sceneObject;
 }

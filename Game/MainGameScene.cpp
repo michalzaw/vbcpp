@@ -857,7 +857,7 @@ void MainGameScene::fixedStepReadInput(float deltaTime)
 				SceneObject* sceneObject = _sceneManager->getSceneObject(objectId);
 				if (sceneObject != nullptr && !(sceneObject->getFlags() & SOF_NOT_SELECTABLE_ON_SCENE))
 				{
-					sceneObject->getEvents().dispatch<ObjectClickedEvent>({ nullptr });
+					sceneObject->dispatchEvent<ObjectClickedEvent>({ nullptr });
 				}
 			}
 		}
@@ -888,7 +888,7 @@ void MainGameScene::rayTestWithModelNode(RenderObject* renderObject, ModelNode* 
 
 		if (distance > 0.0f)
 		{
-			renderObject->getSceneObject()->getEvents().dispatch<ObjectClickedEvent>({ modelNode });
+			renderObject->getSceneObject()->dispatchEvent<ObjectClickedEvent>({ modelNode });
 		}
 	}
 

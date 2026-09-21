@@ -13,6 +13,7 @@
 #include "../Scene/Component.h"
 #include "../Scene/Events/Subscription.h"
 #include "../Scene/Events/ObjectClickedEvent.h"
+#include "../Scene/Events/ObjectLoadedEvent.h"
 
 
 class ScriptComponent final : public Component
@@ -33,8 +34,10 @@ class ScriptComponent final : public Component
 		sol::function _updateFunction;
 		sol::function _destroyFunction;
 		sol::function _objectClickedFunction;
+		sol::function _objectLoadedFunction;
 
 		Subscription _objectClickedSubscription;
+		Subscription _objectLoadedSubscription;
 
 		std::map<std::string, sol::function> _customFunctions;
 
@@ -45,6 +48,7 @@ class ScriptComponent final : public Component
 		void setupScriptEnvironment();
 
 		void onObjectClicked(const ObjectClickedEvent& event);
+		void onObjectLoaded(const ObjectLoadedEvent& event);
 
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate = true);

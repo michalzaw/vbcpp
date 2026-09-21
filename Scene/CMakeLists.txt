@@ -23,6 +23,7 @@ set (SCENE_HEADERS
 	Scene/Events/EventDispatcher.h
 	Scene/Events/EventTypes.h
 	Scene/Events/ObjectClickedEvent.h
+	Scene/Events/ObjectLoadedEvent.h
 	Scene/Events/Subscription.h
 )
 

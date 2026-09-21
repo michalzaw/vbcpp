@@ -54,6 +54,11 @@ void ScriptComponent::onAttachedToScenObject()
 		_objectClickedSubscription = getSceneObject()->getEvents().subscribe<ObjectClickedEvent>(&ScriptComponent::onObjectClicked, this);
 	}
 
+	if (_objectLoadedFunction.valid())
+	{
+		_objectLoadedSubscription = getSceneObject()->getEvents().subscribe<ObjectLoadedEvent>(&ScriptComponent::onObjectLoaded, this);
+	}
+
 	if (_initFunction.valid())
 	{
 		sol::protected_function_result result = _initFunction();
@@ -75,6 +80,7 @@ void ScriptComponent::setupScriptEnvironment()
 
 	// callback
 	_objectClickedFunction = _scriptEnvironment["onObjectClicked"];
+	_objectLoadedFunction = _scriptEnvironment["onObjectLoaded"];
 }
 
 
@@ -82,7 +88,17 @@ void ScriptComponent::onObjectClicked(const ObjectClickedEvent& event)
 {
 	if (_objectClickedFunction.valid())
 	{
-		sol::protected_function_result result = _objectClickedFunction();
+		sol::protected_function_result result = _objectClickedFunction(event);
+		validateFunctionResult(result);
+	}
+}
+
+
+void ScriptComponent::onObjectLoaded(const ObjectLoadedEvent& event)
+{
+	if (_objectLoadedFunction.valid())
+	{
+		sol::protected_function_result result = _objectLoadedFunction(event);
 		validateFunctionResult(result);
 	}
 }

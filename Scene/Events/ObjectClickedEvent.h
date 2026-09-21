@@ -4,6 +4,8 @@
 
 #include "EventTypes.h"
 
+#include "../../Scripting/Utils/LuaMacros.h"
+
 
 class ModelNode;
 
@@ -11,7 +13,7 @@ class ModelNode;
 VBCPP_EVENT
 struct ObjectClickedEvent
 {
-	ModelNode* modelNode;
+	LUAV ModelNode* modelNode;
 };
 
 

@@ -14,6 +14,8 @@ set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/LabelLuaBindings.cpp
 	Scripting/Bindings/Generated/MaterialLuaBindings.cpp
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.cpp
+	Scripting/Bindings/Generated/ObjectClickedEventLuaBindings.cpp
+	Scripting/Bindings/Generated/ObjectLoadedEventLuaBindings.cpp
 	Scripting/Bindings/Generated/PhysicalBodyLuaBindings.cpp
 	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.cpp
 	Scripting/Bindings/Generated/RenderableSurfaceLuaBindings.cpp
@@ -47,6 +49,8 @@ set (SCRIPTING_GENERATED_HEADERS
 	Scripting/Bindings/Generated/LabelLuaBindings.h
 	Scripting/Bindings/Generated/MaterialLuaBindings.h
 	Scripting/Bindings/Generated/ModelNodeLuaBindings.h
+	Scripting/Bindings/Generated/ObjectClickedEventLuaBindings.h
+	Scripting/Bindings/Generated/ObjectLoadedEventLuaBindings.h
 	Scripting/Bindings/Generated/PhysicalBodyLuaBindings.h
 	Scripting/Bindings/Generated/PhysicalBodyWheelLuaBindings.h
 	Scripting/Bindings/Generated/RenderableSurfaceLuaBindings.h
