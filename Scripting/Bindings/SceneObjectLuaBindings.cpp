@@ -66,7 +66,9 @@ namespace SceneObjectLuaBindings
 			"getScale", &SceneObject::getScale,
 			"getGlobalPosition", &SceneObject::getGlobalPosition,
 			"transformLocalPointToGlobal", &SceneObject::transformLocalPointToGlobal,
-			"transformLocalVectorToGlobal", &SceneObject::transformLocalVectorToGlobal
+			"transformLocalVectorToGlobal", &SceneObject::transformLocalVectorToGlobal,
+			"transformLocalPointToParentSpace", &SceneObject::transformLocalPointToParentSpace,
+			"transformLocalVectorToParentSpace", &SceneObject::transformLocalVectorToParentSpace
 		);
 	}
 }
