@@ -127,7 +127,7 @@ RTexture2D* loadDdsTexture(char const* filename)
 				default: assert(0); break;
 				}
 			}
-	return new RTexture2D(filename, TextureName, glm::uvec2(0, 0), TFM_TRILINEAR, TFM_LINEAR, true);
+	return new RTexture2D(filename, TextureName, glm::uvec2(Extent.x, Extent.y), TFM_TRILINEAR, TFM_LINEAR, true);
 ;
 }
 
