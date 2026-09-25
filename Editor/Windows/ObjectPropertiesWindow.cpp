@@ -26,6 +26,7 @@
 
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/FoliagePatch.h"
+#include "../../Graphics/RenderableSurface.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -427,6 +428,8 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 typedef glm::vec2 vec2;
 typedef glm::vec3 vec3;
+typedef glm::vec4 vec4;
+typedef glm::vec4 color4;
 typedef std::string str;
 typedef std::string path;
 typedef std::string str_combo;
@@ -451,6 +454,16 @@ bool result = ImGui::DragFloat2("##value", glm::value_ptr(value));
 #define IMGUI_INPUT_vec3(component, propertyName, additionalParams)																				\
 glm::vec3 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_vec4(component, propertyName, additionalParams)																				\
+glm::vec4 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat4("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_color4(component, propertyName, additionalParams)																			\
+glm::vec4 value = component->get##propertyName();																								\
+bool result = ImGui::ColorEdit4("##value", glm::value_ptr(value), ImGuiColorEditFlags_NoInputs);
 
 
 #define IMGUI_INPUT_btVector3(component, propertyName, additionalParams)																		\
@@ -1755,6 +1768,27 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 }
 
 
+void showRenderableSurfaceDetails(RenderableSurface* component)
+{
+	if (ImGui::CollapsingHeader("Renderable Surface", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RenderableSurfaceDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, Width, int, "Width")
+		COMPONENT_PROPERTY_EDIT(component, Height, int, "Height")
+		COMPONENT_PROPERTY_EDIT(component, BackgroundColor, color4, "Background color")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showFoliagePatchDetails(FoliagePatch* component)
 {
 	if (ImGui::CollapsingHeader("Foliage Patch", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1974,6 +2008,12 @@ void showObjectProperties()
 			if (foliagePatch)
 			{
 				showFoliagePatchDetails(foliagePatch);
+			}
+
+			RenderableSurface* renderableSurface = dynamic_cast<RenderableSurface*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDERABLE_SURFACE));
+			if (renderableSurface)
+			{
+				showRenderableSurfaceDetails(renderableSurface);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

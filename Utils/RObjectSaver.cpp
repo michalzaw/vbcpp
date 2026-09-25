@@ -9,6 +9,7 @@ using namespace tinyxml2;
 #include "XmlUtils.h"
 
 #include "../Graphics/RenderObject.h"
+#include "../Graphics/RenderableSurface.h"
 
 #include "../Scene/SceneObject.h"
 
@@ -61,7 +62,14 @@ namespace RObjectSaver
 
 		componentElement->SetAttribute("type", "script");
 		componentElement->SetAttribute("fileName", scriptRelativePath.c_str());
+	}
 
+	void saveRenderableSurface(XMLElement* componentElement, RenderableSurface* component)
+	{
+		componentElement->SetAttribute("type", "renderableSurface");
+		componentElement->SetAttribute("textureWidth", component->getWidth());
+		componentElement->SetAttribute("textureHeight", component->getHeight());
+		componentElement->SetAttribute("backgroundColor", vec4ToString(component->getBackgroundColor()).c_str());
 	}
 
 	void saveComponent(XMLElement* componentElement, Component* component, const std::string& pathToDirectory)
@@ -117,6 +125,10 @@ namespace RObjectSaver
 		else if (component->getType() == CT_SCRIPT)
 		{
 			saveScriptComponent(componentElement, static_cast<ScriptComponent*>(component), pathToDirectory);
+		}
+		else if (component->getType() == CT_RENDERABLE_SURFACE)
+		{
+			saveRenderableSurface(componentElement, static_cast<RenderableSurface*>(component));
 		}
 	}
 

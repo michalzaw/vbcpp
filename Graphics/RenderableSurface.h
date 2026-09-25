@@ -23,6 +23,8 @@ class RenderableSurface : public Component
 
 		Framebuffer* _renderTexture;
 
+		void recreateFramebuffer();
+
 	public:
 		RenderableSurface(int width, int height);
 		~RenderableSurface();
@@ -32,6 +34,12 @@ class RenderableSurface : public Component
 
 		LUAF void removeObject(GUIObject* object);
 		LUAF void removeAllObjects();
+
+		LUAF int getWidth();
+		LUAF int getHeight();
+
+		void setWidth(int width, bool recreateFramebuffer = false);
+		void setHeight(int height, bool recreateFramebuffer = false);
 
 		LUAF void setBackgroundColor(const glm::vec4& backgroundColor);
 		LUAF const glm::vec4& getBackgroundColor();

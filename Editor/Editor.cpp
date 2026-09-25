@@ -56,6 +56,7 @@
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/FoliagePatch.h"
+#include "../Graphics/RenderableSurface.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -1558,6 +1559,15 @@ namespace vbEditor
 							ScriptComponent* scriptComponent = _sceneManager->getScriptingManager()->addScript(ResourceManager::getInstance().loadScriptFile(scriptPath));
 							_selectedSceneObject->addComponent(scriptComponent);
 						}
+					}
+				}
+
+				if (ImGui::MenuItem("Add renderable surface", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						RenderableSurface* renderableSurface = _sceneManager->getGraphicsManager()->addRenderableSurface(512, 512);
+						_selectedSceneObject->addComponent(renderableSurface);
 					}
 				}
 

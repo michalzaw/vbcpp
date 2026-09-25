@@ -15,6 +15,8 @@ namespace RenderableSurfaceLuaBindings
             "addLabel", &RenderableSurface::addLabel,
             "removeObject", &RenderableSurface::removeObject,
             "removeAllObjects", &RenderableSurface::removeAllObjects,
+            "getWidth", &RenderableSurface::getWidth,
+            "getHeight", &RenderableSurface::getHeight,
             "setBackgroundColor", &RenderableSurface::setBackgroundColor,
             "getBackgroundColor", &RenderableSurface::getBackgroundColor,
             "getRenderedTexture", &RenderableSurface::getRenderedTexture

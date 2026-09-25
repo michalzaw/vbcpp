@@ -21,6 +21,7 @@ using namespace tinyxml2;
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 
+#include "../Graphics/RenderableSurface.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Scene/SceneManager.h"
@@ -101,6 +102,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		else if (componentType == "script")
 		{
 			loadScriptComponent(componentElement, object, componentIndex);
+		}
+		else if (componentType == "renderableSurface")
+		{
+			loadRenderableSurface(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -294,6 +299,14 @@ void RObjectLoader::loadTrafficLightsComponent(tinyxml2::XMLElement* componentEl
 void RObjectLoader::loadScriptComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
 {
 	object->getComponents()[componentIndex]["fileName"] = componentElement->Attribute("fileName");
+}
+
+
+void RObjectLoader::loadRenderableSurface(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	object->getComponents()[componentIndex]["textureWidth"] = componentElement->Attribute("textureWidth");
+	object->getComponents()[componentIndex]["textureHeight"] = componentElement->Attribute("textureHeight");
+	object->getComponents()[componentIndex]["backgroundColor"] = componentElement->Attribute("backgroundColor");
 }
 
 
@@ -756,6 +769,17 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			ScriptComponent* scriptComponent = sceneManager->getScriptingManager()->addScript(scriptFile);
 
 			sceneObject->addComponent(scriptComponent);
+		}
+		else if (componentType == "renderableSurface")
+		{
+			int textureWidth = toFloat(components[i]["textureWidth"]);
+			int textureHeight = toFloat(components[i]["textureHeight"]);
+			glm::vec4 backgroundColor = XMLstringToVec4(components[i]["backgroundColor"].c_str());
+
+			RenderableSurface* renderableSurface = sceneManager->getGraphicsManager()->addRenderableSurface(textureWidth, textureHeight);
+			renderableSurface->setBackgroundColor(backgroundColor);
+
+			sceneObject->addComponent(renderableSurface);
 		}
 	}
 
