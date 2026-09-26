@@ -59,6 +59,11 @@ void ScriptComponent::onAttachedToScenObject()
 		_objectLoadedSubscription = getSceneObject()->getEvents().subscribe<ObjectLoadedEvent>(&ScriptComponent::onObjectLoaded, this);
 	}
 
+	if (_transformCompletedFunction.valid())
+	{
+		_transformCompletedSubscription = getSceneObject()->getEvents().subscribe<TransformCompletedEvent>(&ScriptComponent::onTransformCompleted, this);
+	}
+
 	if (_initFunction.valid())
 	{
 		sol::protected_function_result result = _initFunction();
@@ -81,6 +86,7 @@ void ScriptComponent::setupScriptEnvironment()
 	// callback
 	_objectClickedFunction = _scriptEnvironment["onObjectClicked"];
 	_objectLoadedFunction = _scriptEnvironment["onObjectLoaded"];
+	_transformCompletedFunction = _scriptEnvironment["onTransformCompleted"];
 }
 
 
@@ -99,6 +105,16 @@ void ScriptComponent::onObjectLoaded(const ObjectLoadedEvent& event)
 	if (_objectLoadedFunction.valid())
 	{
 		sol::protected_function_result result = _objectLoadedFunction(event);
+		validateFunctionResult(result);
+	}
+}
+
+
+void ScriptComponent::onTransformCompleted(const TransformCompletedEvent& event)
+{
+	if (_transformCompletedFunction.valid())
+	{
+		sol::protected_function_result result = _transformCompletedFunction(event);
 		validateFunctionResult(result);
 	}
 }

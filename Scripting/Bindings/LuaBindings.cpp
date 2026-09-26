@@ -10,6 +10,7 @@
 #include "SceneManagerLuaBindings.h"
 #include "SceneObjectLuaBindings.h"
 #include "ScheduleLuaBindings.h"
+#include "TransformCompletedEventTypeLuaBindings.h"
 
 
 namespace LuaBindings
@@ -26,5 +27,6 @@ namespace LuaBindings
 		SceneManagerLuaBindings::bind(lua);
 		SceneObjectLuaBindings::bind(lua);
 		ScheduleLuaBindings::bind(lua);
+		TransformCompletedEventTypeLuaBindings::bind(lua);
 	}
 }

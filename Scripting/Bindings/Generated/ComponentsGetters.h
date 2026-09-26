@@ -11,6 +11,7 @@
 #include "../../../Game/AI/TrafficLightsComponent.h"
 #include "../../../Game/BusStartPoint.h"
 #include "../../../Game/CameraControlComponent.h"
+#include "../../../Game/TransformAnimatorComponent.h"
 #include "../../../Game/Transit/BusStopComponent.h"
 #include "../../../Graphics/BezierCurve.h"
 #include "../../../Graphics/CameraStatic.hpp"
@@ -61,6 +62,7 @@ GET_COMPONENT(CT_STOP_COMPONENT, StopComponent), \
 GET_COMPONENT(CT_TRAFFIC_LIGHTS, TrafficLightsComponent), \
 GET_COMPONENT(CT_BUS_START_POINT, BusStartPoint), \
 GET_COMPONENT(CT_CAMERA_CONTROL, CameraControlComponent), \
+GET_COMPONENT(CT_TRANSFORM_ANIMATOR, TransformAnimatorComponent), \
 GET_COMPONENT(CT_BUS_STOP, BusStopComponent), \
 GET_COMPONENT(CT_BEZIER_CURVE, BezierCurve), \
 GET_COMPONENT(CT_CAMERA, CameraStatic), \

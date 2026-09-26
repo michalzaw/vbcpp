@@ -20,6 +20,7 @@ using namespace tinyxml2;
 #include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/TransformAnimatorComponent.h"
 
 #include "../Graphics/RenderableSurface.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
@@ -106,6 +107,10 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		else if (componentType == "renderableSurface")
 		{
 			loadRenderableSurface(componentElement, object, componentIndex);
+		}
+		else if (componentType == "transformAnimator")
+		{
+			loadTransformAnimatorComponent(componentElement, object, componentIndex);
 		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
@@ -307,6 +312,12 @@ void RObjectLoader::loadRenderableSurface(tinyxml2::XMLElement* componentElement
 	object->getComponents()[componentIndex]["textureWidth"] = componentElement->Attribute("textureWidth");
 	object->getComponents()[componentIndex]["textureHeight"] = componentElement->Attribute("textureHeight");
 	object->getComponents()[componentIndex]["backgroundColor"] = componentElement->Attribute("backgroundColor");
+}
+
+
+void RObjectLoader::loadTransformAnimatorComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	// not contains additional parameters
 }
 
 
@@ -780,6 +791,12 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			renderableSurface->setBackgroundColor(backgroundColor);
 
 			sceneObject->addComponent(renderableSurface);
+		}
+		else if (componentType == "transformAnimator")
+		{
+			TransformAnimatorComponent* transformAnimatorComponent = sceneManager->getGameLogicSystem()->addTransformAnimatorComponent();
+
+			sceneObject->addComponent(transformAnimatorComponent);
 		}
 	}
 

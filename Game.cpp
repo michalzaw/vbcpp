@@ -67,6 +67,7 @@ void Game::initializeEngineSystems()
 	renderer.setFxaaQuality(gameConfig.fxaaQuality);
 	renderer.setBloom(gameConfig.isBloomEnabled);
 	renderer.setIsShadowMappingEnable(gameConfig.isShadowmappingEnable);
+	renderer.setRenderObjectIdsForPicking(true);
 	renderer.init(_window->getWidth(), _window->getHeight());
 	renderer.setDayNightRatio(1.0f);
 	renderer.setAlphaToCoverage(true);

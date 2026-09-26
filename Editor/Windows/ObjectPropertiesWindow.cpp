@@ -23,6 +23,7 @@
 #include "../../Game/AI/TrafficLightsComponent.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
+#include "../../Game/TransformAnimatorComponent.h"	
 
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/FoliagePatch.h"
@@ -1768,27 +1769,6 @@ void showShapePolygonComponentDetails(ShapePolygonComponent* component)
 }
 
 
-void showRenderableSurfaceDetails(RenderableSurface* component)
-{
-	if (ImGui::CollapsingHeader("Renderable Surface", ImGuiTreeNodeFlags_DefaultOpen))
-	{
-		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
-		ImGui::Columns(2);
-		ImGui::Separator();
-		ImGui::PushID("RenderableSurfaceDetails");
-
-		COMPONENT_PROPERTY_EDIT(component, Width, int, "Width")
-		COMPONENT_PROPERTY_EDIT(component, Height, int, "Height")
-		COMPONENT_PROPERTY_EDIT(component, BackgroundColor, color4, "Background color")
-
-		ImGui::PopID();
-		ImGui::Columns(1);
-		ImGui::Separator();
-		ImGui::PopStyleVar();
-	}
-}
-
-
 void showFoliagePatchDetails(FoliagePatch* component)
 {
 	if (ImGui::CollapsingHeader("Foliage Patch", ImGuiTreeNodeFlags_DefaultOpen))
@@ -1870,6 +1850,44 @@ void showFoliagePatchDetails(FoliagePatch* component)
 		}
 
 		ImGui::Columns(2);
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showRenderableSurfaceDetails(RenderableSurface* component)
+{
+	if (ImGui::CollapsingHeader("Renderable Surface", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RenderableSurfaceDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, Width, int, "Width")
+		COMPONENT_PROPERTY_EDIT(component, Height, int, "Height")
+		COMPONENT_PROPERTY_EDIT(component, BackgroundColor, color4, "Background color")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showTransformAnimatorComponentDetails(TransformAnimatorComponent* component)
+{
+	if (ImGui::CollapsingHeader("Transform Animator", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("TransformAnimatorComponent");
 
 		ImGui::PopID();
 		ImGui::Columns(1);
@@ -2014,6 +2032,12 @@ void showObjectProperties()
 			if (renderableSurface)
 			{
 				showRenderableSurfaceDetails(renderableSurface);
+			}
+
+			TransformAnimatorComponent* transformAnimatorComponent = dynamic_cast<TransformAnimatorComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_TRANSFORM_ANIMATOR));
+			if (transformAnimatorComponent)
+			{
+				showTransformAnimatorComponentDetails(transformAnimatorComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

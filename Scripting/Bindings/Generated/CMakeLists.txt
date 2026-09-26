@@ -28,6 +28,8 @@ set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/TimeLuaBindings.cpp
+	Scripting/Bindings/Generated/TransformAnimatorComponentLuaBindings.cpp
+	Scripting/Bindings/Generated/TransformCompletedEventLuaBindings.cpp
 	Scripting/Bindings/Generated/TransformLuaBindings.cpp
 	Scripting/Bindings/Generated/TransitSystemLuaBindings.cpp
 )
@@ -63,6 +65,8 @@ set (SCRIPTING_GENERATED_HEADERS
 	Scripting/Bindings/Generated/SkeletalAnimationComponentLuaBindings.h
 	Scripting/Bindings/Generated/SoundComponentLuaBindings.h
 	Scripting/Bindings/Generated/TimeLuaBindings.h
+	Scripting/Bindings/Generated/TransformAnimatorComponentLuaBindings.h
+	Scripting/Bindings/Generated/TransformCompletedEventLuaBindings.h
 	Scripting/Bindings/Generated/TransformLuaBindings.h
 	Scripting/Bindings/Generated/TransitSystemLuaBindings.h
 )

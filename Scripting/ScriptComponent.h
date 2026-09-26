@@ -10,6 +10,8 @@
 #include "RScriptFile.h"
 #include "Utils/LuaMacros.h"
 
+#include "../Game/TransformCompletedEvent.h"
+
 #include "../Scene/Component.h"
 #include "../Scene/Events/Subscription.h"
 #include "../Scene/Events/ObjectClickedEvent.h"
@@ -35,9 +37,11 @@ class ScriptComponent final : public Component
 		sol::function _destroyFunction;
 		sol::function _objectClickedFunction;
 		sol::function _objectLoadedFunction;
+		sol::function _transformCompletedFunction;
 
 		Subscription _objectClickedSubscription;
 		Subscription _objectLoadedSubscription;
+		Subscription _transformCompletedSubscription;
 
 		std::map<std::string, sol::function> _customFunctions;
 
@@ -49,6 +53,7 @@ class ScriptComponent final : public Component
 
 		void onObjectClicked(const ObjectClickedEvent& event);
 		void onObjectLoaded(const ObjectLoadedEvent& event);
+		void onTransformCompleted(const TransformCompletedEvent& event);
 
 	public:
 		ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate = true);

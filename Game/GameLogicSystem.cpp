@@ -11,6 +11,7 @@
 #include "BusStartPoint.h"
 #include "CameraControlComponent.h"
 #include "GameClock.h"
+#include "TransformAnimatorComponent.h"
 
 #include "../Graphics/CameraFPS.hpp"
 
@@ -119,6 +120,16 @@ BusStartPoint* GameLogicSystem::addBusStartPoint(const std::string& name)
 	BusStartPoint* component = new BusStartPoint(name);
 
 	_busStartPoints.push_back(component);
+
+	return component;
+}
+
+
+TransformAnimatorComponent* GameLogicSystem::addTransformAnimatorComponent()
+{
+	TransformAnimatorComponent* component = new TransformAnimatorComponent;
+
+	_transformAnimatorComponents.push_back(component);
 
 	return component;
 }
@@ -252,6 +263,22 @@ void GameLogicSystem::removeBusStartPoint(BusStartPoint* component)
 }
 
 
+void GameLogicSystem::removeTransformAnimatorComponent(TransformAnimatorComponent* component)
+{
+	for (std::list<TransformAnimatorComponent*>::iterator i = _transformAnimatorComponents.begin(); i != _transformAnimatorComponents.end(); ++i)
+	{
+		if (*i == component)
+		{
+			i = _transformAnimatorComponents.erase(i);
+
+			delete component;
+
+			return;
+		}
+	}
+}
+
+
 void GameLogicSystem::setPathConnection(PathComponent* path1, const std::string& path2Name, int indexInPath1, int indexInPath2, bool registerAsPendingIfNotFound/* = true*/)
 {
 	auto path2 = std::find_if(_pathComponents.begin(), _pathComponents.end(), [&path2Name](PathComponent* path)
@@ -337,6 +364,14 @@ void GameLogicSystem::update(float deltaTime)
 		}
 	}
 
+	for (TransformAnimatorComponent* component : _transformAnimatorComponents)
+	{
+		if (component->isActive())
+		{
+			component->update(deltaTime);
+		}
+	}
+
 	_gameClock->update(deltaTime);
 }
 
@@ -398,4 +433,11 @@ void GameLogicSystem::destroy()
 	}
 
 	_busStartPoints.clear();
+
+	for (std::list<TransformAnimatorComponent*>::iterator i = _transformAnimatorComponents.begin(); i != _transformAnimatorComponents.end(); ++i)
+	{
+		delete* i;
+	}
+
+	_transformAnimatorComponents.clear();
 }

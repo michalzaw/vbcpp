@@ -8,6 +8,8 @@
 using namespace tinyxml2;
 #include "XmlUtils.h"
 
+#include "../Game/TransformAnimatorComponent.h"
+
 #include "../Graphics/RenderObject.h"
 #include "../Graphics/RenderableSurface.h"
 
@@ -72,6 +74,12 @@ namespace RObjectSaver
 		componentElement->SetAttribute("backgroundColor", vec4ToString(component->getBackgroundColor()).c_str());
 	}
 
+
+	void saveTransformAnimatorComponent(XMLElement* componentElement, TransformAnimatorComponent* component)
+	{
+		componentElement->SetAttribute("type", "transformAnimator");
+	}
+
 	void saveComponent(XMLElement* componentElement, Component* component, const std::string& pathToDirectory)
 	{
 		if (component->getType() == CT_RENDER_OBJECT)
@@ -129,6 +137,10 @@ namespace RObjectSaver
 		else if (component->getType() == CT_RENDERABLE_SURFACE)
 		{
 			saveRenderableSurface(componentElement, static_cast<RenderableSurface*>(component));
+		}
+		else if (component->getType() == CT_TRANSFORM_ANIMATOR)
+		{
+			saveTransformAnimatorComponent(componentElement, static_cast<TransformAnimatorComponent*>(component));
 		}
 	}
 

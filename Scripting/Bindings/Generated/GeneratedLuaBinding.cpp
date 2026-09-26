@@ -29,6 +29,8 @@
 #include "SkeletalAnimationComponentLuaBindings.h"
 #include "SoundComponentLuaBindings.h"
 #include "TimeLuaBindings.h"
+#include "TransformAnimatorComponentLuaBindings.h"
+#include "TransformCompletedEventLuaBindings.h"
 #include "TransformLuaBindings.h"
 #include "TransitSystemLuaBindings.h"
 
@@ -65,6 +67,8 @@ namespace GeneratedLuaBindings
         SkeletalAnimationComponentLuaBindings::bind(lua);
         SoundComponentLuaBindings::bind(lua);
         TimeLuaBindings::bind(lua);
+        TransformAnimatorComponentLuaBindings::bind(lua);
+        TransformCompletedEventLuaBindings::bind(lua);
         TransformLuaBindings::bind(lua);
         TransitSystemLuaBindings::bind(lua);
     }

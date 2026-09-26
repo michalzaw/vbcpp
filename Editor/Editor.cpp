@@ -19,6 +19,7 @@
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/LuaGameContext.h"
+#include "../Game/TransformAnimatorComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
@@ -1568,6 +1569,15 @@ namespace vbEditor
 					{
 						RenderableSurface* renderableSurface = _sceneManager->getGraphicsManager()->addRenderableSurface(512, 512);
 						_selectedSceneObject->addComponent(renderableSurface);
+					}
+				}
+
+				if (ImGui::MenuItem("Add transform animator", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						TransformAnimatorComponent* transformAnimatorComponent = _sceneManager->getGameLogicSystem()->addTransformAnimatorComponent();
+						_selectedSceneObject->addComponent(transformAnimatorComponent);
 					}
 				}
 
