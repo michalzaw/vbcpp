@@ -3,7 +3,8 @@
 #include "../Scene/SceneObject.h"
 #include "../Scene/SceneManager.h"
 
-#include "../Utils/InputSystem.h"
+#include "../Utils/FilesHelper.h"
+#include "../Utils/ResourceManager.h"
 
 
 ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, bool loadAfterCreate/* = true*/)
@@ -26,6 +27,25 @@ ScriptComponent::~ScriptComponent()
 	{
 		sol::protected_function_result result = _destroyFunction();
 		validateFunctionResult(result);
+	}
+}
+
+
+void ScriptComponent::loadScript(RScriptFile* scriptFile)
+{
+	sol::load_result loadResult = _luaState->load(scriptFile->getScript());
+	if (loadResult.valid())
+	{
+		sol::protected_function loadedScript = loadResult;
+		sol::set_environment(_scriptEnvironment, loadedScript);
+
+		sol::protected_function_result result = loadedScript.call();
+		validateFunctionResult(result);
+	}
+	else
+	{
+		sol::error error = loadResult;
+		LOG_ERROR("LUA Script error [" + scriptFile->getPath() + "][" + sol::to_string(loadResult.status()) + "]: " + error.what());
 	}
 }
 
@@ -199,20 +219,15 @@ sol::function ScriptComponent::getFunction(const std::string& name)
 
 void ScriptComponent::loadScript(bool setUpEnvironmentAndCallInitCallback/* = true*/)
 {
-	sol::load_result loadResult = _luaState->load(_scriptFile->getScript());
-	if (loadResult.valid())
-	{
-		sol::protected_function loadedScript = loadResult;
-		sol::set_environment(_scriptEnvironment, loadedScript);
+	_scriptEnvironment.set_function("include", [this](const std::string& fileName) {
+			std::string scriptPath = FilesHelper::getPathToDirectoryFromFileName(_scriptFile->getPath());
 
-		sol::protected_function_result result = loadedScript.call();
-		validateFunctionResult(result);
-	}
-	else
-	{
-		sol::error error = loadResult;
-		LOG_ERROR("LUA Script error [" + _scriptFile->getPath() + "][" + sol::to_string(loadResult.status()) + "]: " + error.what());
-	}
+			RScriptFile* includedScript = ResourceManager::getInstance().loadScriptFile(scriptPath + fileName);
+
+			loadScript(includedScript);
+		});
+
+	loadScript(_scriptFile);
 
 	_isInitialized = true;
 

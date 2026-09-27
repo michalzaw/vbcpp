@@ -56,6 +56,8 @@ class ScriptComponent final : public Component
 		std::map<std::string, sol::function> _customFunctions;
 		std::list<LuaCoroutine> _coroutines;
 
+		void loadScript(RScriptFile* scriptFile);
+
 		void validateFunctionResult(sol::protected_function_result& result);
 
 		void onAttachedToScenObject() override;
