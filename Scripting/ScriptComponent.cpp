@@ -89,28 +89,60 @@ void ScriptComponent::setupScriptEnvironment()
 	_transformCompletedFunction = _scriptEnvironment["onTransformCompleted"];
 
 	// coroutines api
-	_scriptEnvironment.set_function("runCoroutine", [this](sol::function function)
-		{
-			sol::thread thread = sol::thread::create(_scriptEnvironment.lua_state());
-			sol::coroutine coroutine = sol::coroutine(thread.state(), function);
+	_scriptEnvironment.set_function("runCoroutine", [this](sol::function function, sol::variadic_args args) { runCoroutine(function, args); });
+}
 
+
+void ScriptComponent::runCoroutine(sol::function function, sol::variadic_args args)
+{
+	sol::thread thread = sol::thread::create(_scriptEnvironment.lua_state());
+	sol::coroutine coroutine = sol::coroutine(thread.state(), function);
+
+	sol::protected_function_result result = coroutine(args);
+	validateFunctionResult(result);
+
+	if (coroutine.status() == sol::call_status::yielded)
+	{
+		float timeToResume = result;
+
+		_coroutines.push_back({ thread, coroutine, timeToResume });
+	}
+}
+
+
+void ScriptComponent::updateCoroutines(float deltaTime)
+{
+	for (std::list<LuaCoroutine>::iterator i = _coroutines.begin(); i != _coroutines.end();)
+	{
+		sol::coroutine& coroutine = i->coroutine;
+
+		i->timeToResume -= deltaTime;
+
+		if (i->timeToResume <= 0.0f)
+		{
 			sol::protected_function_result result = coroutine();
-			//sol::protected_function_result result = function();
 			validateFunctionResult(result);
 
-			// todo: sol::thread
-			//sol::coroutine coroutine = function;
-
-			if (coroutine.status() == sol::call_status::yielded)
+			if (coroutine.status() == sol::call_status::ok)
 			{
-				float timeToResume = result;
-				LOG_DEBUG("Coroutine YIELDED " + LOG_VARIABLE(timeToResume));
-
-				_coroutines.push_back({ thread, coroutine, timeToResume });
+				i = _coroutines.erase(i);
 			}
+			else
+			{
+				if (coroutine.status() == sol::call_status::yielded)
+				{
+					float timeToResume = result;
+					i->timeToResume = timeToResume;
+				}
 
-			//_coroutines.push_back(function);
-		});
+				++i;
+			}
+		}
+		else
+		{
+			++i;
+		}
+	}
 }
 
 
@@ -215,40 +247,5 @@ void ScriptComponent::update(float deltaTime)
 		validateFunctionResult(result);
 	}
 
-
-	for (std::list<LuaCoroutine>::iterator i = _coroutines.begin(); i != _coroutines.end();)
-	{
-		sol::coroutine& coroutine = i->coroutine;
-
-		i->timeToResume -= deltaTime;
-
-		if (i->timeToResume <= 0.0f)
-		{
-			sol::protected_function_result result = coroutine();
-			validateFunctionResult(result);
-
-			if (coroutine.status() == sol::call_status::ok)
-			{
-				LOG_DEBUG("Coroutine END");
-
-				i = _coroutines.erase(i);
-			}
-			else
-			{
-				if (coroutine.status() == sol::call_status::yielded)
-				{
-					float value = result;
-					i->timeToResume = value;
-
-					LOG_DEBUG("Coroutine YIELDED " + LOG_VARIABLE(i->timeToResume));
-				}
-
-				++i;
-			}
-		}
-		else
-		{
-			++i;
-		}
-	}
+	updateCoroutines(deltaTime);
 }

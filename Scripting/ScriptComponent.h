@@ -62,6 +62,9 @@ class ScriptComponent final : public Component
 
 		void setupScriptEnvironment();
 
+		void runCoroutine(sol::function function, sol::variadic_args args);
+		void updateCoroutines(float deltaTime);
+
 		void onObjectClicked(const ObjectClickedEvent& event);
 		void onObjectLoaded(const ObjectLoadedEvent& event);
 		void onTransformCompleted(const TransformCompletedEvent& event);
