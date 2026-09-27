@@ -83,10 +83,34 @@ void ScriptComponent::setupScriptEnvironment()
 	_updateFunction = _scriptEnvironment["onUpdate"];
 	_destroyFunction = _scriptEnvironment["onDestroy"];
 
-	// callback
+	// events
 	_objectClickedFunction = _scriptEnvironment["onObjectClicked"];
 	_objectLoadedFunction = _scriptEnvironment["onObjectLoaded"];
 	_transformCompletedFunction = _scriptEnvironment["onTransformCompleted"];
+
+	// coroutines api
+	_scriptEnvironment.set_function("runCoroutine", [this](sol::function function)
+		{
+			sol::thread thread = sol::thread::create(_scriptEnvironment.lua_state());
+			sol::coroutine coroutine = sol::coroutine(thread.state(), function);
+
+			sol::protected_function_result result = coroutine();
+			//sol::protected_function_result result = function();
+			validateFunctionResult(result);
+
+			// todo: sol::thread
+			//sol::coroutine coroutine = function;
+
+			if (coroutine.status() == sol::call_status::yielded)
+			{
+				float timeToResume = result;
+				LOG_DEBUG("Coroutine YIELDED " + LOG_VARIABLE(timeToResume));
+
+				_coroutines.push_back({ thread, coroutine, timeToResume });
+			}
+
+			//_coroutines.push_back(function);
+		});
 }
 
 
@@ -189,5 +213,42 @@ void ScriptComponent::update(float deltaTime)
 	{
 		sol::protected_function_result result = _updateFunction(deltaTime);
 		validateFunctionResult(result);
+	}
+
+
+	for (std::list<LuaCoroutine>::iterator i = _coroutines.begin(); i != _coroutines.end();)
+	{
+		sol::coroutine& coroutine = i->coroutine;
+
+		i->timeToResume -= deltaTime;
+
+		if (i->timeToResume <= 0.0f)
+		{
+			sol::protected_function_result result = coroutine();
+			validateFunctionResult(result);
+
+			if (coroutine.status() == sol::call_status::ok)
+			{
+				LOG_DEBUG("Coroutine END");
+
+				i = _coroutines.erase(i);
+			}
+			else
+			{
+				if (coroutine.status() == sol::call_status::yielded)
+				{
+					float value = result;
+					i->timeToResume = value;
+
+					LOG_DEBUG("Coroutine YIELDED " + LOG_VARIABLE(i->timeToResume));
+				}
+
+				++i;
+			}
+		}
+		else
+		{
+			++i;
+		}
 	}
 }

@@ -18,6 +18,16 @@
 #include "../Scene/Events/ObjectLoadedEvent.h"
 
 
+struct LuaCoroutine final
+{
+	sol::thread thread;
+	sol::coroutine coroutine;
+
+	float timeToResume;
+
+};
+
+
 class ScriptComponent final : public Component
 {
 	VBCPP_COMPONENT(ScriptComponent, CT_SCRIPT)
@@ -44,6 +54,7 @@ class ScriptComponent final : public Component
 		Subscription _transformCompletedSubscription;
 
 		std::map<std::string, sol::function> _customFunctions;
+		std::list<LuaCoroutine> _coroutines;
 
 		void validateFunctionResult(sol::protected_function_result& result);
 
