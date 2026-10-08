@@ -11,9 +11,7 @@ namespace ScriptComponentLuaBindings
         lua->new_usertype<ScriptComponent>("ScriptComponent",
             sol::base_classes, sol::bases<Component>(),
 
-            "isInitialized", &ScriptComponent::isInitialized,
-            "exportFunction", &ScriptComponent::exportFunction,
-            "getFunction", &ScriptComponent::getFunction
+            "isInitialized", &ScriptComponent::isInitialized
 
 
 

@@ -53,7 +53,7 @@ class ScriptComponent final : public Component
 		Subscription _objectLoadedSubscription;
 		Subscription _transformCompletedSubscription;
 
-		std::map<std::string, sol::function> _customFunctions;
+		sol::table _customMembers;
 		std::list<LuaCoroutine> _coroutines;
 
 		void loadScript(RScriptFile* scriptFile);
@@ -79,8 +79,8 @@ class ScriptComponent final : public Component
 
 		LUAF inline bool isInitialized() { return _isInitialized; }
 
-		LUAF void exportFunction(const std::string& name, sol::function function);
-		LUAF sol::function getFunction(const std::string& name);
+		void addCustomMember(sol::object key, sol::object value);
+		sol::object getCustomMember(sol::object key);
 
 		void loadScript(bool setUpEnvironmentAndCallInitCallback = true);
 		void reloadScriptFromResource();

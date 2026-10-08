@@ -10,6 +10,7 @@ set (SCRIPTING_SOURCES
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
 	Scripting/Bindings/ScheduleLuaBindings.cpp
+	Scripting/Bindings/ScriptComponentLuaBindingsExtension.cpp
 	Scripting/Bindings/TransformCompletedEventTypeLuaBindings.cpp
 	Scripting/Utils/LuaUtils.cpp
 	Scripting/RScriptFile.cpp
@@ -29,6 +30,7 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
 	Scripting/Bindings/ScheduleLuaBindings.h
+	Scripting/Bindings/ScriptComponentLuaBindingsExtension.h
 	Scripting/Bindings/TransformCompletedEventTypeLuaBindings.h
 	Scripting/Utils/LuaUtils.h
 	Scripting/Utils/LuaMacros.h

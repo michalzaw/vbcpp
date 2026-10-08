@@ -15,8 +15,8 @@ ScriptingManager::ScriptingManager()
 	// todo: lua->set_exception_handler(&my_exception_handler);
 
 
-	LuaBindings::bind(_luaState);
 	GeneratedLuaBindings::bind(_luaState);
+	LuaBindings::bind(_luaState);
 }
 
 

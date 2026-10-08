@@ -14,6 +14,8 @@ ScriptComponent::ScriptComponent(RScriptFile* scriptFile, sol::state* luaState, 
 	_scriptFile(scriptFile),
 	_isInitialized(false)
 {
+	_customMembers = luaState->create_table();
+
 	if (loadAfterCreate)
 	{
 		loadScript(false);
@@ -196,24 +198,15 @@ void ScriptComponent::onTransformCompleted(const TransformCompletedEvent& event)
 }
 
 
-void ScriptComponent::exportFunction(const std::string& name, sol::function function)
+void ScriptComponent::addCustomMember(sol::object key, sol::object value)
 {
-	_customFunctions[name] = function;
+	_customMembers[key] = value;
 }
 
 
-sol::function ScriptComponent::getFunction(const std::string& name)
+sol::object ScriptComponent::getCustomMember(sol::object key)
 {
-	auto result = _customFunctions.find(name);
-	if (result != _customFunctions.end())
-	{
-		return result->second;
-	}
-	else
-	{
-		LOG_ERROR("LUA Script error [" + _scriptFile->getPath() + "] Cannot find function with name: " + name);
-		return sol::nil;
-	}
+	return _customMembers[key];
 }
 
 
