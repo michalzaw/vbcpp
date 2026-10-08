@@ -6,6 +6,7 @@
 #include "GlmLuaBindings.h"
 #include "InputSystemLuaBindings.h"
 #include "LoggerLuaBindings.h"
+#include "MathFunctionsLuaBindings.h"
 #include "PhysicalBodyTypeLuaBindings.h"
 #include "SceneManagerLuaBindings.h"
 #include "SceneObjectLuaBindings.h"
@@ -24,6 +25,7 @@ namespace LuaBindings
 		GlmLuaBindings::bind(lua);
 		InputSystemLuaBindings::bind(lua);
 		LoggerLuaBindings::bind(lua);
+		MathFunctionsLuaBindings::bind(lua);
 		PhysicalBodyTypeLuaBindings::bind(lua);
 		SceneManagerLuaBindings::bind(lua);
 		SceneObjectLuaBindings::bind(lua);

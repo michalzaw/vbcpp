@@ -6,6 +6,7 @@ set (SCRIPTING_SOURCES
 	Scripting/Bindings/InputSystemLuaBindings.cpp
 	Scripting/Bindings/LoggerLuaBindings.cpp
 	Scripting/Bindings/LuaBindings.cpp
+	Scripting/Bindings/MathFunctionsLuaBindings.cpp
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.cpp
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
@@ -26,6 +27,7 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/InputSystemLuaBindings.h
 	Scripting/Bindings/LoggerLuaBindings.h
 	Scripting/Bindings/LuaBindings.h
+	Scripting/Bindings/MathFunctionsLuaBindings.h
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.h
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
