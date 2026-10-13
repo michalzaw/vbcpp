@@ -172,6 +172,7 @@ void RObjectLoader::loadSoundComponent(tinyxml2::XMLElement* componentElement, R
 {
 	object->getComponents()[componentIndex]["file"] = componentElement->Attribute("file");
 	object->getComponents()[componentIndex]["looping"] = componentElement->Attribute("looping");
+	object->getComponents()[componentIndex]["soundType"] = XmlUtils::getAttributeStringOptional(componentElement, "soundType", soundTypeStrings[EST_AMBIENT]);
 
 	// if set in config file - we set play distance accordingly (otherwise - play distance is 10.0f by default)
 	std::string playDistance = XmlUtils::getAttributeStringOptional(componentElement, "playDistance", "10.0");
@@ -556,6 +557,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		{
 			std::string soundFile = components[i]["file"];
 			bool looping = toBool(components[i]["looping"]);
+			SoundType soundType = getSoundTypeFromString(components[i]["soundType"]);
 			float playDistance = toFloat(components[i]["playDistance"]);
 			float volume = toFloat(components[i]["volume"]);
 			glm::vec3 soundPosition = XMLstringToVec3(components[i]["position"].c_str());
@@ -563,7 +565,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			std::string soundPath = objectDirPath + soundFile;
 
 			RSound* soundResource = ResourceManager::getInstance().loadSound(soundPath);
-			SoundComponent* sound = new SoundComponent(soundResource, EST_AMBIENT, looping);
+			SoundComponent* sound = new SoundComponent(soundResource, soundType, looping);
 			sceneManager->getSoundManager()->addSoundComponent(sound);
 
 			sound->setPlayDistance(playDistance);

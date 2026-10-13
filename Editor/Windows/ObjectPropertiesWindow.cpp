@@ -491,7 +491,10 @@ bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInput
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
-strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																			\
+if (component != nullptr)																														\
+	strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																		\
+else																																			\
+	buffer[0] = '\0';																															\
 buffer[sizeof buffer - 1] = '\0';																												\
 																																				\
 ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);																\
@@ -1897,6 +1900,42 @@ void showTransformAnimatorComponentDetails(TransformAnimatorComponent* component
 }
 
 
+void showSoundComponentDetails(SoundComponent* component)
+{
+	if (ImGui::CollapsingHeader("Sound Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("SoundComponent");
+
+		COMPONENT_RESOURCE_EDIT(component, Sound, "Sound file", [](const std::string& path) { return ResourceManager::getInstance().loadSound(path); })
+		COMPONENT_PROPERTY_EDIT(component, Looping, bool, "Looping")
+		COMPONENT_PROPERTY_EDIT_BEGIN(component, "Sound type")
+		{
+			const std::string& currentValue = soundTypeStrings[component->getSoundType()];
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			ImGuiUtils::convertVectorToComboData(&soundTypeStrings[0], (unsigned int) EST_COUNT, currentValue, comboItems, selectedItemIndex, false);
+
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				component->setSoundType((SoundType) selectedItemIndex);
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+		COMPONENT_PROPERTY_EDIT(component, PlayDistance, int, "Play distance")
+		COMPONENT_PROPERTY_EDIT(component, Gain, float, "Volume")
+		COMPONENT_PROPERTY_EDIT(component, Position, vec3, "Position")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -2038,6 +2077,12 @@ void showObjectProperties()
 			if (transformAnimatorComponent)
 			{
 				showTransformAnimatorComponentDetails(transformAnimatorComponent);
+			}
+
+			SoundComponent* soundComponent = dynamic_cast<SoundComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SOUND));
+			if (soundComponent)
+			{
+				showSoundComponentDetails(soundComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));

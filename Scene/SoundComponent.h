@@ -19,8 +19,22 @@
 enum SoundType
 {
     EST_PLAYER = 0,
-    EST_AMBIENT
+    EST_AMBIENT,
+
+    EST_COUNT
 };
+
+
+const std::string soundTypeStrings[] = { "player", "ambient" };
+inline SoundType getSoundTypeFromString(const std::string& name)
+{
+    for (int i = 0; i < EST_COUNT; ++i)
+    {
+        if (soundTypeStrings[i] == name)
+            return static_cast<SoundType>(i);
+    }
+}
+
 
 /**
     Sound component - config file attributes:
@@ -39,7 +53,7 @@ class SoundComponent : public Component
 
     public:
         SoundComponent(RSound* sound, SoundType type, bool looping = false)
-        : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10)
+        : Component(CT_SOUND), _source(0), _sound(sound), _looping(looping), _mute(false), _pitch(1.0f), _gain(1.0f), _play(false), _soundPosition(0,0,0), _type(type), _playDistance(10)
         {
             alGenSources( 1, &_source );
 
@@ -62,8 +76,8 @@ class SoundComponent : public Component
                 alSource3f( _source, AL_VELOCITY, 0., 0., 0. );
             }
 
-            alSourcef( _source, AL_PITCH, 1.0f );
-            alSourcef( _source, AL_GAIN, 1. );
+            alSourcef( _source, AL_PITCH, _pitch );
+            alSourcef( _source, AL_GAIN, _gain );
             alSourcei( _source, AL_LOOPING, looping );
 
             alSourcei( _source, AL_REFERENCE_DISTANCE, 1); // 1.0f
@@ -103,6 +117,11 @@ class SoundComponent : public Component
         }
 
         LUAF glm::vec3 getPosition()
+        {
+            return _soundPosition;
+        }
+
+        LUAF glm::vec3 getGlobalPosition()
         {
             if (_object)
                 return _object->getGlobalPosition() + _soundPosition;
@@ -146,6 +165,11 @@ class SoundComponent : public Component
 		}
 
 
+        void setSoundType(SoundType type)
+        {
+            _type = type;
+        }
+
         SoundType getSoundType()
         {
             return _type;
@@ -153,12 +177,26 @@ class SoundComponent : public Component
 
         LUAF void setGain(ALfloat gain)
         {
+            _gain = gain;
+
             alSourcef( _source, AL_GAIN, gain );
+        }
+
+        LUAF float getGain()
+        {
+            return _gain;
         }
 
         LUAF void setPitch(ALfloat pitch)
         {
+            _pitch = pitch;
+
             alSourcef( _source, AL_PITCH, pitch );
+        }
+
+        LUAF float getPitch()
+        {
+            return _pitch;
         }
 
         LUAF void setMute(const bool mute)
@@ -173,11 +211,31 @@ class SoundComponent : public Component
             alSourcei(_source, AL_BUFFER, _sound->getBuffer());
         }
 
+        RSound* getSound()
+        {
+            return _sound;
+        }
+
+        LUAF void setLooping(bool looping)
+        {
+            _looping = looping;
+
+            alSourcei(_source, AL_LOOPING, looping);
+        }
+
+        LUAF bool isLooping()
+        {
+            return _looping;
+        }
+
     protected:
         ALuint  _source;
         RSound* _sound;
         bool    _looping;
         bool    _mute;
+
+        float _pitch;
+        float _gain;
 
         bool    _play;
 

@@ -14,6 +14,7 @@ using namespace tinyxml2;
 #include "../Graphics/RenderableSurface.h"
 
 #include "../Scene/SceneObject.h"
+#include "../Scene/SoundComponent.h"
 
 #include "../Scripting/ScriptComponent.h"
 
@@ -58,6 +59,31 @@ namespace RObjectSaver
 
 	}
 
+	void saveSoundComponent(XMLElement* componentElement, SoundComponent* component, const std::string& pathToDirectory)
+	{
+		std::string soundRelativePath = FilesHelper::relativePathToFile(component->getSound()->getPath(), pathToDirectory, false);
+
+		componentElement->SetAttribute("type", "sound");
+		componentElement->SetAttribute("file", soundRelativePath.c_str());
+		componentElement->SetAttribute("looping", component->isLooping() ? "true" : "false");
+		componentElement->SetAttribute("soundType", soundTypeStrings[component->getSoundType()].c_str());
+
+		if (component->getPlayDistance() != 10.0f)
+		{
+			componentElement->SetAttribute("playDistance", toString(component->getPlayDistance()).c_str());
+		}
+
+		if (component->getGain() != 1.0f)
+		{
+			componentElement->SetAttribute("volume", toString(component->getGain()).c_str());
+		}
+
+		if (component->getPosition().x != 0.0f || component->getPosition().y != 0.0f || component->getPosition().z != 0.0f)
+		{
+			componentElement->SetAttribute("position", vec3ToString(component->getPosition()).c_str());
+		}
+	}
+
 	void saveScriptComponent(XMLElement* componentElement, ScriptComponent* component, const std::string& pathToDirectory)
 	{
 		std::string scriptRelativePath = FilesHelper::relativePathToFile(component->getScriptFile()->getPath(), pathToDirectory, false);
@@ -93,12 +119,12 @@ namespace RObjectSaver
 		else if (componentType == "tree")
 		{
 			loadTreeComponent(componentElement, object, componentIndex);
-		}
-		else if (componentType == "sound")
+		}*/
+		else if (component->getType() == CT_SOUND)
 		{
-			loadSoundComponent(componentElement, object, componentIndex);
+			saveSoundComponent(componentElement, static_cast<SoundComponent*>(component), pathToDirectory);
 		}
-		else if (componentType == "bus-stop")
+		/*else if (componentType == "bus-stop")
 		{
 			loadBusStopComponent(componentElement, object, componentIndex);
 		}

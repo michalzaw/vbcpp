@@ -7,7 +7,7 @@ namespace FileDialogs
 {
 	std::vector<std::string> openFile(const std::string& title)
 	{
-		return pfd::open_file("Choose texture...").result();
+		return pfd::open_file(title).result();
 	}
 
 	std::string selectFolder(const std::string& title)

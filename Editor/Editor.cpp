@@ -1528,7 +1528,7 @@ namespace vbEditor
 				ImGui::Separator();
 				if (ImGui::MenuItem("Create new hierarchical Scene Object from model file", NULL))
 				{
-					std::vector<std::string> result =FileDialogs::openFile("Choose file...");
+					std::vector<std::string> result = FileDialogs::openFile("Choose file...");
 					if (result.size() == 1)
 					{
 						const std::string& modelFileName = result[0];
@@ -1578,6 +1578,20 @@ namespace vbEditor
 					{
 						TransformAnimatorComponent* transformAnimatorComponent = _sceneManager->getGameLogicSystem()->addTransformAnimatorComponent();
 						_selectedSceneObject->addComponent(transformAnimatorComponent);
+					}
+				}
+
+				if (ImGui::MenuItem("Add sound component", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						std::vector<std::string> result = FileDialogs::openFile("Choose file...");
+						if (result.size() == 1)
+						{
+							RSound* sound = ResourceManager::getInstance().loadSound(result[0]);
+							SoundComponent* soundComponent = _sceneManager->getSoundManager()->addSoundComponent(new SoundComponent(sound, EST_PLAYER));
+							_selectedSceneObject->addComponent(soundComponent);
+						}
 					}
 				}
 
