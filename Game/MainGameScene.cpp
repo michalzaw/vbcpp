@@ -279,6 +279,7 @@ void MainGameScene::loadScene()
 
 	_activeBus = bus;
 	_luaGameContext->setActiveBus(_activeBus->getSceneObject());
+	_luaGameContext->setActiveBus(_activeBus);
 
 	SceneLoader sceneLoader(_sceneManager);
 	sceneLoader.loadMap(GameConfig::getInstance().mapFile);

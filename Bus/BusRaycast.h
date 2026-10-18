@@ -109,14 +109,14 @@ class BusRaycast : public Bus
 
         void replaceMaterialsByName(std::vector<Material*>& altMaterials) override;
 
-        void doorOpen(char door);
-        void doorClose(char door);
-        void doorOpenClose(char door);
-        void doorGroupOpen(char doorGroup);
-        void doorGroupClose(char doorGroup);
-        void doorGroupOpenClose(char doorGroup) override;
-        void doorBlock(char door);
-        void doorUnblock(char door);
+        LUAF void doorOpen(char door);
+        LUAF void doorClose(char door);
+        LUAF void doorOpenClose(char door);
+        LUAF void doorGroupOpen(char doorGroup);
+        LUAF void doorGroupClose(char doorGroup);
+        LUAF void doorGroupOpenClose(char doorGroup) override;
+        LUAF void doorBlock(char door);
+        LUAF void doorUnblock(char door);
 
     private:
         std::unique_ptr<Gearbox>    _gearbox;

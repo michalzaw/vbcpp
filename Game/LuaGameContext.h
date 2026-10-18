@@ -5,6 +5,7 @@
 class ScriptingManager;
 class SceneManager;
 class SceneObject;
+class Bus;
 
 
 class LuaGameContext final
@@ -21,6 +22,7 @@ class LuaGameContext final
 		void setSceneManager(SceneManager* sceneManager);
 		void setActiveCamera(SceneObject* activeCameraObject);
 		void setActiveBus(SceneObject* activeBusObject);
+		void setActiveBus(Bus* activeBus);
 
 };
 

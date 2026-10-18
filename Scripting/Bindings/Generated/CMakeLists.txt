@@ -1,13 +1,17 @@
 set (SCRIPTING_GENERATED_SOURCES
 	Scripting/Bindings/Generated/AIAgentLuaBindings.cpp
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.cpp
+	Scripting/Bindings/Generated/BusLuaBindings.cpp
+	Scripting/Bindings/Generated/BusRaycastLuaBindings.cpp
 	Scripting/Bindings/Generated/BusStopComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/CurrentRouteBusStopsStatsDataLuaBindings.cpp
 	Scripting/Bindings/Generated/CurrentRouteDataLuaBindings.cpp
 	Scripting/Bindings/Generated/DisplayComponentLuaBindings.cpp
 	Scripting/Bindings/Generated/DisplayTextLuaBindings.cpp
+	Scripting/Bindings/Generated/EngineLuaBindings.cpp
 	Scripting/Bindings/Generated/GameClockLuaBindings.cpp
 	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.cpp
+	Scripting/Bindings/Generated/GearboxLuaBindings.cpp
 	Scripting/Bindings/Generated/GeneratedLuaBinding.cpp
 	Scripting/Bindings/Generated/GUIObjectLuaBindings.cpp
 	Scripting/Bindings/Generated/ImageLuaBindings.cpp
@@ -37,14 +41,18 @@ set (SCRIPTING_GENERATED_SOURCES
 set (SCRIPTING_GENERATED_HEADERS 
 	Scripting/Bindings/Generated/AIAgentLuaBindings.h
 	Scripting/Bindings/Generated/AnimationStateLuaBindings.h
+	Scripting/Bindings/Generated/BusLuaBindings.h
+	Scripting/Bindings/Generated/BusRaycastLuaBindings.h
 	Scripting/Bindings/Generated/BusStopComponentLuaBindings.h
 	Scripting/Bindings/Generated/ComponentsGetters.h
 	Scripting/Bindings/Generated/CurrentRouteBusStopsStatsDataLuaBindings.h
 	Scripting/Bindings/Generated/CurrentRouteDataLuaBindings.h
 	Scripting/Bindings/Generated/DisplayComponentLuaBindings.h
 	Scripting/Bindings/Generated/DisplayTextLuaBindings.h
+	Scripting/Bindings/Generated/EngineLuaBindings.h
 	Scripting/Bindings/Generated/GameClockLuaBindings.h
 	Scripting/Bindings/Generated/GameLogicSystemLuaBindings.h
+	Scripting/Bindings/Generated/GearboxLuaBindings.h
 	Scripting/Bindings/Generated/GeneratedLuaBindings.h
 	Scripting/Bindings/Generated/GUIObjectLuaBindings.h
 	Scripting/Bindings/Generated/ImageLuaBindings.h

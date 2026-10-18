@@ -3,13 +3,17 @@
 
 #include "AIAgentLuaBindings.h"
 #include "AnimationStateLuaBindings.h"
+#include "BusLuaBindings.h"
+#include "BusRaycastLuaBindings.h"
 #include "BusStopComponentLuaBindings.h"
 #include "CurrentRouteBusStopsStatsDataLuaBindings.h"
 #include "CurrentRouteDataLuaBindings.h"
 #include "DisplayComponentLuaBindings.h"
 #include "DisplayTextLuaBindings.h"
+#include "EngineLuaBindings.h"
 #include "GameClockLuaBindings.h"
 #include "GameLogicSystemLuaBindings.h"
+#include "GearboxLuaBindings.h"
 #include "GUIObjectLuaBindings.h"
 #include "ImageLuaBindings.h"
 #include "LabelLuaBindings.h"
@@ -41,13 +45,17 @@ namespace GeneratedLuaBindings
     {
         AIAgentLuaBindings::bind(lua);
         AnimationStateLuaBindings::bind(lua);
+        BusLuaBindings::bind(lua);
+        BusRaycastLuaBindings::bind(lua);
         BusStopComponentLuaBindings::bind(lua);
         CurrentRouteBusStopsStatsDataLuaBindings::bind(lua);
         CurrentRouteDataLuaBindings::bind(lua);
         DisplayComponentLuaBindings::bind(lua);
         DisplayTextLuaBindings::bind(lua);
+        EngineLuaBindings::bind(lua);
         GameClockLuaBindings::bind(lua);
         GameLogicSystemLuaBindings::bind(lua);
+        GearboxLuaBindings::bind(lua);
         GUIObjectLuaBindings::bind(lua);
         ImageLuaBindings::bind(lua);
         LabelLuaBindings::bind(lua);

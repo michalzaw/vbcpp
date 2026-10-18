@@ -61,42 +61,42 @@ class Bus : public RefCounter
         virtual SceneObject* getSceneObject() = 0;
 
         virtual glm::vec3 getDriverPosition() = 0;
-        virtual SceneObject* getSteeringWheelObject() = 0;
+        LUAF virtual SceneObject* getSteeringWheelObject() = 0;
 
-        virtual void setIsEnableLights(bool is) = 0;
-        virtual bool isEnableLights() = 0;
-        virtual void setIsEnableHeadlights(bool is) = 0;
-        virtual bool isEnableHeadlights() = 0;
+        LUAF virtual void setIsEnableLights(bool is) = 0;
+        LUAF virtual bool isEnableLights() = 0;
+        LUAF virtual void setIsEnableHeadlights(bool is) = 0;
+        LUAF virtual bool isEnableHeadlights() = 0;
 
-        virtual void turnLeft(float dt) = 0;
-        virtual void turnRight(float dt) = 0;
-        virtual void centerSteringWheel(float dt) = 0;
-        virtual void accelerate(float dt) = 0;
-        virtual void idle(float dt) = 0;
-        virtual void brakeOn(float dt) = 0;
-        virtual void brakeOff() = 0;
-        virtual void toggleHandbrake() = 0;
+        LUAF virtual void turnLeft(float dt) = 0;
+        LUAF virtual void turnRight(float dt) = 0;
+        LUAF virtual void centerSteringWheel(float dt) = 0;
+        LUAF virtual void accelerate(float dt) = 0;
+        LUAF virtual void idle(float dt) = 0;
+        LUAF virtual void brakeOn(float dt) = 0;
+        LUAF virtual void brakeOff() = 0;
+        LUAF virtual void toggleHandbrake() = 0;
 
-		virtual bool getHandbrakeState() = 0;
+        LUAF virtual bool getHandbrakeState() = 0;
 
-        virtual Gearbox* getGearbox() = 0;
-        virtual Engine* getEngine() = 0;
-        virtual void startEngine() = 0;
-        virtual void stopEngine() = 0;
+        LUAF virtual Gearbox* getGearbox() = 0;
+        LUAF virtual Engine* getEngine() = 0;
+        LUAF virtual void startEngine() = 0;
+        LUAF virtual void stopEngine() = 0;
 
-        virtual void doorGroupOpenClose(char doorGroup) = 0;
+        LUAF virtual void doorGroupOpenClose(char doorGroup) = 0;
         virtual Door* getDoor(unsigned char doorIndex) = 0;
-        virtual int getDoorsCount() = 0;
+        LUAF virtual int getDoorsCount() = 0;
 
-        virtual MirrorComponent* getMirror(int index) = 0;
-        virtual int getMirrorsCount() = 0;
+        LUAF virtual MirrorComponent* getMirror(int index) = 0;
+        LUAF virtual int getMirrorsCount() = 0;
 
-		virtual DisplayText& getDisplayText() = 0;
-		virtual void updateDisplays() = 0;
+        LUAF virtual DisplayText& getDisplayText() = 0;
+        LUAF virtual void updateDisplays() = 0;
 
         virtual SceneObject* getDesktopObject() = 0;
 
-        virtual float getBusSpeed() = 0;
+        LUAF virtual float getBusSpeed() = 0;
 
         virtual void update(float deltaTime) = 0;
 
@@ -110,7 +110,7 @@ class Bus : public RefCounter
             _numberOfPassengers = number;
         }
 
-        unsigned int getNumberOfPassengers()
+        LUAF unsigned int getNumberOfPassengers()
         {
             return _numberOfPassengers;
         }
@@ -120,27 +120,27 @@ class Bus : public RefCounter
             _numberOfPassengersGettingOff = number;
         }
 
-        unsigned int getNumberOfPassengersGettingOff()
+        LUAF  unsigned int getNumberOfPassengersGettingOff()
         {
             return _numberOfPassengersGettingOff;
         }
 
-        SoundComponent* getAnnouncementSource()
+        LUAF SoundComponent* getAnnouncementSource()
         {
             return _announcementSource;
         }
 
-		SoundComponent* getEngineSoundSource()
+        LUAF SoundComponent* getEngineSoundSource()
 		{
 			return _engineSoundSource;
 		}
 
-		SoundComponent* getEngineStartSoundSource()
+        LUAF SoundComponent* getEngineStartSoundSource()
 		{
 			return _engineStartSoundSource;
 		}
 
-		SoundComponent* getEngineStopSoundSource()
+        LUAF SoundComponent* getEngineStopSoundSource()
 		{
 			return _engineStopSoundSource;
 		}
@@ -155,7 +155,7 @@ class Bus : public RefCounter
             return _texts;
         }
 
-        std::string getText(const std::string& textValueOrId)
+        LUAF std::string getText(const std::string& textValueOrId)
         {
             if (startsWith(textValueOrId, "$"))
             {
