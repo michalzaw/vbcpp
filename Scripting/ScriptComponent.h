@@ -6,6 +6,7 @@
 #include <sol/sol.hpp>
 
 #include <map>
+#include <list>
 
 #include "RScriptFile.h"
 #include "Utils/LuaMacros.h"
