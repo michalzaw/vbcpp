@@ -790,7 +790,8 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 						childRenderObject->setDynamicObject(newValue);
 					}
 				}
-			});
+			},
+			"");
 
 
 		
