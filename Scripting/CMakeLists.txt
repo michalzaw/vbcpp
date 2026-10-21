@@ -6,10 +6,13 @@ set (SCRIPTING_SOURCES
 	Scripting/Bindings/InputSystemLuaBindings.cpp
 	Scripting/Bindings/LoggerLuaBindings.cpp
 	Scripting/Bindings/LuaBindings.cpp
+	Scripting/Bindings/MathFunctionsLuaBindings.cpp
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.cpp
 	Scripting/Bindings/SceneManagerLuaBindings.cpp
 	Scripting/Bindings/SceneObjectLuaBindings.cpp
 	Scripting/Bindings/ScheduleLuaBindings.cpp
+	Scripting/Bindings/ScriptComponentLuaBindingsExtension.cpp
+	Scripting/Bindings/TransformCompletedEventTypeLuaBindings.cpp
 	Scripting/Utils/LuaUtils.cpp
 	Scripting/RScriptFile.cpp
 	Scripting/ScriptComponent.cpp
@@ -24,10 +27,13 @@ set (SCRIPTING_HEADERS
 	Scripting/Bindings/InputSystemLuaBindings.h
 	Scripting/Bindings/LoggerLuaBindings.h
 	Scripting/Bindings/LuaBindings.h
+	Scripting/Bindings/MathFunctionsLuaBindings.h
 	Scripting/Bindings/PhysicalBodyTypeLuaBindings.h
 	Scripting/Bindings/SceneManagerLuaBindings.h
 	Scripting/Bindings/SceneObjectLuaBindings.h
 	Scripting/Bindings/ScheduleLuaBindings.h
+	Scripting/Bindings/ScriptComponentLuaBindingsExtension.h
+	Scripting/Bindings/TransformCompletedEventTypeLuaBindings.h
 	Scripting/Utils/LuaUtils.h
 	Scripting/Utils/LuaMacros.h
 	Scripting/RScriptFile.h

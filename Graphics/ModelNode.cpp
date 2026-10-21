@@ -6,7 +6,7 @@
 #include "../Utils/Helpers.hpp"
 
 
-ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, ModelNode* parent)
+ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode, const std::vector<std::string>& nodesToSkip, RenderObject* renderObject, bool singleNodeFromModel/* = false*/, ModelNode* parent/* = NULL*/)
 {
     _name = staticModelNode->name;
 	_aabb = &(staticModelNode->aabb);
@@ -32,11 +32,14 @@ ModelNode::ModelNode(RStaticModel* staticModel, StaticModelNode* staticModelNode
 
     _parent = parent;
 
-    for (int i = 0; i < staticModelNode->children.size(); ++i)
+    if (!singleNodeFromModel)
     {
-        if (!isVectorContains(nodesToSkip, staticModelNode->children[i]->name))
+        for (int i = 0; i < staticModelNode->children.size(); ++i)
         {
-            _children.push_back(new ModelNode(staticModel, staticModelNode->children[i], nodesToSkip, renderObject, this));
+            if (!isVectorContains(nodesToSkip, staticModelNode->children[i]->name))
+            {
+                _children.push_back(new ModelNode(staticModel, staticModelNode->children[i], nodesToSkip, renderObject, singleNodeFromModel, this));
+            }
         }
     }
 }

@@ -160,7 +160,8 @@ void DisplayComponent::addTextToMatrixTexture(unsigned char* data, int& beginX, 
 				if (fontSize->chars[charIndex][row] & b)
 				{
 					int pointX = beginX + x;
-					int pointY = (_displayHeight - (beginY + row) - 1);
+					//int pointY = (_displayHeight - (beginY + row) - 1);
+					int pointY = beginY + row;
 					if (pointX < _displayWidth && pointY < _displayHeight)
 					{
 						int index = (pointY * _displayWidth + pointX) * 4;

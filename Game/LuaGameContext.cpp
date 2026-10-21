@@ -1,5 +1,7 @@
 #include "LuaGameContext.h"
 
+#include "../Bus/BusRaycast.h"
+
 #include "../Scene/SceneManager.h"
 
 #include "../Scripting/ScriptingManager.h"
@@ -25,6 +27,7 @@ LuaGameContext::~LuaGameContext()
 void LuaGameContext::initializeConstGlobalObjects()
 {
 	_scriptingManger->setGlobalVariable("input", &InputSystem::getInstance());
+	_scriptingManger->setGlobalVariable("resourceManager", &ResourceManager::getInstance());
 }
 
 
@@ -42,4 +45,10 @@ void LuaGameContext::setActiveCamera(SceneObject* activeCameraObject)
 void LuaGameContext::setActiveBus(SceneObject* activeBusObject)
 {
 	_scriptingManger->setGlobalVariable("activeBus", activeBusObject);
+}
+
+
+void LuaGameContext::setActiveBus(Bus* activeBus)
+{
+	_scriptingManger->setGlobalVariable("bus", static_cast<BusRaycast*>(activeBus));
 }

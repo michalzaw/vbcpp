@@ -55,6 +55,9 @@ namespace SceneObjectLuaBindings
 			"rotate", sol::overload(
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::rotate),
 				sol::resolve<void(float, float, float)>(&SceneObject::rotate)),
+			"rotateLocal", sol::overload(
+				sol::resolve<void(const glm::vec3&)>(&SceneObject::rotateLocal),
+				sol::resolve<void(float, float, float)>(&SceneObject::rotateLocal)),
 			"scale", sol::overload(
 				sol::resolve<void(float, float, float)>(&SceneObject::scale),
 				sol::resolve<void(const glm::vec3&)>(&SceneObject::scale)),
@@ -63,7 +66,9 @@ namespace SceneObjectLuaBindings
 			"getScale", &SceneObject::getScale,
 			"getGlobalPosition", &SceneObject::getGlobalPosition,
 			"transformLocalPointToGlobal", &SceneObject::transformLocalPointToGlobal,
-			"transformLocalVectorToGlobal", &SceneObject::transformLocalVectorToGlobal
+			"transformLocalVectorToGlobal", &SceneObject::transformLocalVectorToGlobal,
+			"transformLocalPointToParentSpace", &SceneObject::transformLocalPointToParentSpace,
+			"transformLocalVectorToParentSpace", &SceneObject::transformLocalVectorToParentSpace
 		);
 	}
 }

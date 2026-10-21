@@ -46,6 +46,8 @@ class RenderObject : public Component
         AABB _aabb;
         bool _isCalculatedAABB;
 
+        bool _singleNodeFromModel;
+
         virtual void calculateNewAABB();
 
         ModelNode* getModelNodeByName(std::string name, ModelNode* node, int lod = 0);
@@ -53,12 +55,12 @@ class RenderObject : public Component
     public:
         RenderObject(RStaticModel* model = NULL, bool isDynamicObject = false);
         RenderObject(RStaticModel* model, const std::vector<std::string>& nodesToSkip, bool isDynamicObject = false);
-        RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject = false);
+        RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel = false, bool isDynamicObject = false);
         virtual ~RenderObject();
 
         void setModel(RStaticModel* model, int lod = 0);
-        void setModel(RStaticModel* model, StaticModelNode* modelNode, int lod = 0);
-        void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod = 0);
+        void setModel(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel = false, int lod = 0);
+        void setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, bool singleNodeFromModel = false, int lod = 0);
         RStaticModel* getModel(int lod = 0);
         LUAF ModelNode* getModelRootNode(int lod = 0);
         LUAR ModelNode* getModelNodeByName(std::string name, int lod = 0);
@@ -79,9 +81,12 @@ class RenderObject : public Component
         LUAF inline void setIsRenderObjectId(bool isRenderObjectId) { _isRenderObjectId = isRenderObjectId; }
         LUAF inline bool isRenderObjectId() { return _isRenderObjectId; }
 
+        AABB* getOBB();
         AABB* getAABB();
 
         LUAF unsigned int getNumberOfLod();
+
+        inline bool isSingleNodeFromModel() { return _singleNodeFromModel; }
 
         void changedTransform();
 

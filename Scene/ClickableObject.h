@@ -6,7 +6,10 @@
 
 #include "../Graphics/ModelNode.h"
 
+#include "Events/ObjectClickedEvent.h"
 
+
+// Deprecated - na potrzeby Desktop, obecnie logika klikniecia w obiekt powinna byc definiowana jako subskrybcja na event ObjectClickedEvent w dedykowanym componencie lub w skrypcie Lua
 class ClickableObject : public Component
 {
     VBCPP_COMPONENT(ClickableObject, CT_CLICKABLE_OBJECT)
@@ -15,12 +18,25 @@ class ClickableObject : public Component
         bool _isClicked;
 
         std::vector<ModelNode*> _clickedNodes;
+        
+        Subscription _objectClickedEventSubscription;
+
+	protected:
+        void onAttachedToScenObject() override
+        {
+            _objectClickedEventSubscription = getSceneObject()->getEvents().subscribe<ObjectClickedEvent>(std::bind(&ClickableObject::onObjectClicked, this, std::placeholders::_1));
+        }
 
     public:
         ClickableObject()
             : Component(CT_CLICKABLE_OBJECT)
         {
             clear();
+        }
+
+        void onObjectClicked(ObjectClickedEvent event)
+        {
+            click(event.modelNode);
         }
 
         void click(ModelNode* clickedNode)

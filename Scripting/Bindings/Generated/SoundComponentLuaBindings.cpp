@@ -13,14 +13,19 @@ namespace SoundComponentLuaBindings
 
             "setPosition", &SoundComponent::setPosition,
             "getPosition", &SoundComponent::getPosition,
+            "getGlobalPosition", &SoundComponent::getGlobalPosition,
             "getPlayDistance", &SoundComponent::getPlayDistance,
             "setPlayDistance", &SoundComponent::setPlayDistance,
             "play", &SoundComponent::play,
             "stop", &SoundComponent::stop,
             "getState", &SoundComponent::getState,
             "setGain", &SoundComponent::setGain,
+            "getGain", &SoundComponent::getGain,
             "setPitch", &SoundComponent::setPitch,
-            "setMute", &SoundComponent::setMute
+            "getPitch", &SoundComponent::getPitch,
+            "setMute", &SoundComponent::setMute,
+            "setLooping", &SoundComponent::setLooping,
+            "isLooping", &SoundComponent::isLooping
 
 
 

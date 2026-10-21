@@ -7,6 +7,8 @@
 
 #include "GUIObject.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include "../Graphics/Rect.h"
 #include "../Utils/RTexture.h"
 
@@ -48,19 +50,19 @@ class Image : public GUIObject
         Image(RTexture* texture, const UintRect& textureRect);
         ~Image();
 
-        void setTexture(RTexture* texture, bool isResetRect = true);
-        void setTextureRect(const UintRect& rect);
+        LUAF void setTexture(RTexture* texture, bool isResetRect = true);
+        LUAF void setTextureRect(const UintRect& rect);
 
-        RTexture* getTexture();
-        UintRect& getTextureRect();
+        LUAF RTexture* getTexture();
+        LUAF UintRect& getTextureRect();
 
-        glm::vec2 getSize();
-        glm::vec2 getRealSize();
+        LUAF glm::vec2 getSize();
+        LUAF glm::vec2 getRealSize();
 
-        void setInvertX(bool invertX);
-        void setInvertY(bool invertY);
-        bool getInvertX();
-        bool getInvertY();
+        LUAF void setInvertX(bool invertX);
+        LUAF void setInvertY(bool invertY);
+        LUAF bool getInvertX();
+        LUAF bool getInvertY();
 
         virtual glm::mat4& getVerticesTransformMatrix(unsigned int vboIndex = 0);
         virtual glm::mat4& getTexCoordTransformMatrix(unsigned int vboIndex = 0);

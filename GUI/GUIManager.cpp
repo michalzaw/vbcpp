@@ -9,10 +9,7 @@ GUIManager::GUIManager()
 
 GUIManager::~GUIManager()
 {
-    for (std::vector<GUIObject*>::iterator i = _objects.begin(); i != _objects.end(); ++i)
-    {
-        delete *i;
-    }
+    removeAllObjects();
 }
 
 
@@ -92,6 +89,17 @@ void GUIManager::removeObject(GUIObject* object)
             return;
         }
     }
+}
+
+
+void GUIManager::removeAllObjects()
+{
+    for (std::vector<GUIObject*>::iterator i = _objects.begin(); i != _objects.end(); ++i)
+    {
+        delete* i;
+    }
+
+    _objects.clear();
 }
 
 

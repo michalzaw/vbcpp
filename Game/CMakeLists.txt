@@ -25,6 +25,7 @@ set (GAME_SOURCES
 	Game/MainGameScene.cpp
 	Game/MenuSelectBusScene.cpp
 	Game/TestScene.cpp
+	Game/TransformAnimatorComponent.cpp
 )
 
 set (GAME_HEADERS 
@@ -59,6 +60,8 @@ set (GAME_HEADERS
 	Game/MainGameScene.h
 	Game/MenuSelectBusScene.h
 	Game/TestScene.h
+	Game/TransformAnimatorComponent.h
+	Game/TransformCompletedEvent.h
     
 )
 

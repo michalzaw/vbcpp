@@ -10,7 +10,7 @@ RenderObject::RenderObject(RStaticModel* model, bool isDynamicObject)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isHighlighted(false), _isRenderObjectId(true),
-    _isCalculatedAABB(false)
+    _isCalculatedAABB(false), _singleNodeFromModel(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
 	
@@ -29,7 +29,7 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isHighlighted(false), _isRenderObjectId(true),
-    _isCalculatedAABB(false)
+    _isCalculatedAABB(false), _singleNodeFromModel(false)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
 
@@ -42,11 +42,11 @@ RenderObject::RenderObject(RStaticModel* model, const std::vector<std::string>& 
 }
 
 
-RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool isDynamicObject)
+RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, bool isDynamicObject/* = false*/)
     : Component(CT_RENDER_OBJECT),
     _isCastShadows(true), _isDynamicObject(isDynamicObject),
     _isHighlighted(false), _isRenderObjectId(true),
-    _isCalculatedAABB(false)
+    _isCalculatedAABB(false), _singleNodeFromModel(singleNodeFromModel)
 {
     LOG_DEBUG("*** RenderObject: Konstruktor");
 
@@ -54,7 +54,7 @@ RenderObject::RenderObject(RStaticModel* model, StaticModelNode* modelNode, bool
 
     if (model != NULL)
     {
-        setModel(model, modelNode);
+        setModel(model, modelNode, singleNodeFromModel);
     }
 }
 
@@ -74,13 +74,12 @@ RenderObject::~RenderObject()
 
 void RenderObject::calculateNewAABB()
 {
-	RStaticModel* model = _modelsDatas[0].model;
-
     glm::vec3 newMin(FLT_MAX, FLT_MAX, FLT_MAX); //_object->transformLocalPointToGlobal(aabbVertices[0]);
     glm::vec3 newMax(-FLT_MAX, -FLT_MAX, -FLT_MAX); //_object->transformLocalPointToGlobal(aabbVertices[0]);
 
-    glm::vec3 min = model->getAABB()->getMinCoords();
-    glm::vec3 max = model->getAABB()->getMaxCoords();
+    AABB* obb = getOBB();
+    glm::vec3 min = obb->getMinCoords();
+    glm::vec3 max = obb->getMaxCoords();
 
     glm::vec3 aabbVertices[] = {
         glm::vec3(min.x, min.y, min.z),
@@ -119,20 +118,20 @@ void RenderObject::calculateNewAABB()
 
 void RenderObject::setModel(RStaticModel* model, int lod)
 {
-    setModel(model, std::vector<std::string>{}, model->getRootNode(), lod);
+    setModel(model, std::vector<std::string>{}, model->getRootNode(), false, lod);
 }
 
 
-void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, int lod)
+void RenderObject::setModel(RStaticModel* model, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, int lod/* = 0*/)
 {
-    setModel(model, std::vector<std::string>{}, modelNode, lod);
+    setModel(model, std::vector<std::string>{}, modelNode, singleNodeFromModel, lod);
     _modelsDatas[lod].modelRootNode->getTransformNode().setPosition(0.0f, 0.0f, 0.0f);
     _modelsDatas[lod].modelRootNode->getTransformNode().setRotation(0.0f, 0.0f, 0.0f);
     _modelsDatas[lod].modelRootNode->getTransformNode().setScale(1.0f, 1.0f, 1.0f);
 }
 
 
-void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, int lod)
+void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>& nodesToSkip, StaticModelNode* modelNode, bool singleNodeFromModel/* = false*/, int lod/* = 0*/)
 {
     if (lod <= _modelsDatas.size())
     {
@@ -145,7 +144,7 @@ void RenderObject::setModel(RStaticModel* model, const std::vector<std::string>&
     {
         delete _modelsDatas[lod].modelRootNode;
     }
-    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this);
+    _modelsDatas[lod].modelRootNode = new ModelNode(model, modelNode, nodesToSkip, this, singleNodeFromModel);
 
     for (int i = 0; i < model->getMaterialsCount(); ++i)
     {
@@ -266,6 +265,12 @@ void RenderObject::setIsHighlighted(bool isHighlighted)
 bool RenderObject::isHighlighted()
 {
     return _isHighlighted;
+}
+
+
+AABB* RenderObject::getOBB()
+{
+    return _singleNodeFromModel ? _modelsDatas[0].modelRootNode->getAABB() : _modelsDatas[0].model->getAABB();
 }
 
 

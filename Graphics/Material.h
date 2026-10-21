@@ -41,14 +41,14 @@ class Material
     LUAV glm::vec4 specularColor;
     LUAV glm::vec4 emissiveColor;
 
-    RTexture* diffuseTexture;
-    RTexture* normalmapTexture;
-    RTexture* glassTexture;
-	RTexture* metalicTexture;
-	RTexture* roughnessTexture;
-	RTexture* aoTexture;
-    RTexture* opacityMaskTexture;
-	RTexture* emissiveTexture;
+    LUAV RTexture* diffuseTexture;
+    LUAV RTexture* normalmapTexture;
+    LUAV RTexture* glassTexture;
+    LUAV RTexture* metalicTexture;
+    LUAV RTexture* roughnessTexture;
+    LUAV RTexture* aoTexture;
+    LUAV RTexture* opacityMaskTexture;
+    LUAV RTexture* emissiveTexture;
 
     EnvironmentMapType reflectionTexture1;
     EnvironmentMapType reflectionTexture2;

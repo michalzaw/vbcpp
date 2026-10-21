@@ -189,10 +189,10 @@ RStaticModel* PlanePrefab::generateModel()
     };
 
     glm::vec2 texCoords[4] = {
-        glm::vec2(0.0f, 1.0f),
         glm::vec2(0.0f, 0.0f),
-        glm::vec2(1.0f, 0.0f),
-        glm::vec2(1.0f, 1.0f)
+        glm::vec2(0.0f, 1.0f),
+        glm::vec2(1.0f, 1.0f),
+        glm::vec2(1.0f, 0.0f)
     };
 
     for (int i = 0; i < 4; ++i)

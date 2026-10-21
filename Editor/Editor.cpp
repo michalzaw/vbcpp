@@ -2,6 +2,8 @@
 
 #include <future>
 
+#include "FileDialogs.h"
+
 #include "Tools/RoadManipulator.h"
 #include "Tools/AxisTool.h"
 
@@ -17,12 +19,14 @@
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
 #include "../Game/LuaGameContext.h"
+#include "../Game/TransformAnimatorComponent.h"
 
 #include "../ImGuiInterface/ImGuiInterface.h"
 #include "../ImGuiInterface/VariablesWindow.h"
 
 #include "../Scene/InternalHelperComponent.h"
 #include "../Scene/SceneLoader.h"
+#include "../Scene/SceneObjectCreator.h"
 #include "../Scene/SceneSaver.h"
 
 #include "../Scripting/ScriptingManager.h"
@@ -53,6 +57,7 @@
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/FoliagePatch.h"
+#include "../Graphics/RenderableSurface.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -1521,12 +1526,78 @@ namespace vbEditor
 				}
 
 				ImGui::Separator();
+				if (ImGui::MenuItem("Create new hierarchical Scene Object from model file", NULL))
+				{
+					std::vector<std::string> result = FileDialogs::openFile("Choose file...");
+					if (result.size() == 1)
+					{
+						const std::string& modelFileName = result[0];
+						RStaticModel* model = ResourceManager::getInstance().loadModelWithHierarchy(modelFileName, FilesHelper::getPathToDirectoryFromFileName(modelFileName));
+
+						SceneObjectCreator::createHierarchicalSceneObjectWithModel(model, _sceneManager);
+					}
+				}
+
+				ImGui::Separator();
 				if (ImGui::MenuItem("Bake static shadows", NULL))
 				{
 					Renderer::getInstance().bakeStaticShadows();
 				}
 				ImGui::EndMenu();
 			}
+
+			if (ImGui::BeginMenu("Object"))
+			{
+				if (ImGui::MenuItem("Add script", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						std::string selectedFoder = FileDialogs::selectFolder("Select folder");
+						if (selectedFoder != "")
+						{
+							std::string scriptPath = selectedFoder + "/" + _selectedSceneObject->getName() + ".lua";
+							FilesHelper::createEmptyFile(scriptPath);
+							ScriptComponent* scriptComponent = _sceneManager->getScriptingManager()->addScript(ResourceManager::getInstance().loadScriptFile(scriptPath));
+							_selectedSceneObject->addComponent(scriptComponent);
+						}
+					}
+				}
+
+				if (ImGui::MenuItem("Add renderable surface", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						RenderableSurface* renderableSurface = _sceneManager->getGraphicsManager()->addRenderableSurface(512, 512);
+						_selectedSceneObject->addComponent(renderableSurface);
+					}
+				}
+
+				if (ImGui::MenuItem("Add transform animator", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						TransformAnimatorComponent* transformAnimatorComponent = _sceneManager->getGameLogicSystem()->addTransformAnimatorComponent();
+						_selectedSceneObject->addComponent(transformAnimatorComponent);
+					}
+				}
+
+				if (ImGui::MenuItem("Add sound component", NULL))
+				{
+					if (_selectedSceneObject != nullptr)
+					{
+						std::vector<std::string> result = FileDialogs::openFile("Choose file...");
+						if (result.size() == 1)
+						{
+							RSound* sound = ResourceManager::getInstance().loadSound(result[0]);
+							SoundComponent* soundComponent = _sceneManager->getSoundManager()->addSoundComponent(new SoundComponent(sound, EST_PLAYER));
+							_selectedSceneObject->addComponent(soundComponent);
+						}
+					}
+				}
+
+				ImGui::EndMenu();
+			}
+
 
 			if (ImGui::BeginMenu("Settings"))
 			{

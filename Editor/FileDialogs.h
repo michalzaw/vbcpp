@@ -9,6 +9,7 @@
 namespace FileDialogs
 {
 	std::vector<std::string> openFile(const std::string& title);
+	std::string selectFolder(const std::string& title);
 };
 
 

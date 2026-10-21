@@ -23,9 +23,11 @@
 #include "../../Game/AI/TrafficLightsComponent.h"
 #include "../../Game/BusStartPoint.h"
 #include "../../Game/GameLogicSystem.h"
+#include "../../Game/TransformAnimatorComponent.h"	
 
 #include "../../Graphics/BezierCurve.h"
 #include "../../Graphics/FoliagePatch.h"
+#include "../../Graphics/RenderableSurface.h"
 #include "../../Graphics/ShapePolygonComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent.h"
 #include "../../Graphics/SkeletalAnimationComponent2.h"
@@ -37,6 +39,7 @@
 
 #include "../../Utils/FilesHelper.h"
 #include "../../Utils/ImGuiUtils.h"
+#include "../../Utils/RObjectSaver.h"
 
 
 ObjectPropertiesWindow::ObjectPropertiesWindow(SceneManager* sceneManager, SceneObject*& selectedSceneObject, std::list<EditorEvent>* events, bool isOpen)
@@ -426,6 +429,8 @@ void showRoadComponentDetails(RoadObject* roadComponent)
 
 typedef glm::vec2 vec2;
 typedef glm::vec3 vec3;
+typedef glm::vec4 vec4;
+typedef glm::vec4 color4;
 typedef std::string str;
 typedef std::string path;
 typedef std::string str_combo;
@@ -452,6 +457,16 @@ glm::vec3 value = component->get##propertyName();																								\
 bool result = ImGui::DragFloat3("##value", glm::value_ptr(value));
 
 
+#define IMGUI_INPUT_vec4(component, propertyName, additionalParams)																				\
+glm::vec4 value = component->get##propertyName();																								\
+bool result = ImGui::DragFloat4("##value", glm::value_ptr(value));
+
+
+#define IMGUI_INPUT_color4(component, propertyName, additionalParams)																			\
+glm::vec4 value = component->get##propertyName();																								\
+bool result = ImGui::ColorEdit4("##value", glm::value_ptr(value), ImGuiColorEditFlags_NoInputs);
+
+
 #define IMGUI_INPUT_btVector3(component, propertyName, additionalParams)																		\
 btVector3 value = component->get##propertyName();																								\
 float valueArray[] = { value.getX(), value.getY(), value.getZ() };																				\
@@ -476,7 +491,10 @@ bool result = ImGui::InputText("##value", value, IM_ARRAYSIZE(value), ImGuiInput
 ImGui::SetNextItemWidth(-30);																													\
 																																				\
 char buffer[1024];																																\
-strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																			\
+if (component != nullptr)																														\
+	strncpy(buffer, component->get##propertyName().c_str(), sizeof buffer);																		\
+else																																			\
+	buffer[0] = '\0';																															\
 buffer[sizeof buffer - 1] = '\0';																												\
 																																				\
 ImGui::InputText("", buffer, IM_ARRAYSIZE(buffer), ImGuiInputTextFlags_ReadOnly);																\
@@ -760,8 +778,23 @@ void showRenderComponentDetails(RenderObject* renderComponent)
 		}
 		ImGui::PopID(); // Models
 
+		
+
 		COMPONENT_PROPERTY_EDIT(renderComponent, CastShadows, bool, "Cast shadows")
-		COMPONENT_PROPERTY_EDIT(renderComponent, DynamicObject, bool, "Dynamic object")
+		COMPONENT_PROPERTY_EDIT_WITH_CALLBACK(renderComponent, DynamicObject, bool, "Dynamic object", [renderComponent](bool newValue) {
+				for (SceneObject* child : renderComponent->getSceneObject()->getChildren())
+				{
+					RenderObject* childRenderObject = child->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT);
+					if (childRenderObject != nullptr)
+					{
+						childRenderObject->setDynamicObject(newValue);
+					}
+				}
+			},
+			"");
+
+
+		
 
 		ImGui::PopID();
 		ImGui::Columns(1);
@@ -1830,6 +1863,80 @@ void showFoliagePatchDetails(FoliagePatch* component)
 }
 
 
+void showRenderableSurfaceDetails(RenderableSurface* component)
+{
+	if (ImGui::CollapsingHeader("Renderable Surface", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("RenderableSurfaceDetails");
+
+		COMPONENT_PROPERTY_EDIT(component, Width, int, "Width")
+		COMPONENT_PROPERTY_EDIT(component, Height, int, "Height")
+		COMPONENT_PROPERTY_EDIT(component, BackgroundColor, color4, "Background color")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showTransformAnimatorComponentDetails(TransformAnimatorComponent* component)
+{
+	if (ImGui::CollapsingHeader("Transform Animator", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("TransformAnimatorComponent");
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
+void showSoundComponentDetails(SoundComponent* component)
+{
+	if (ImGui::CollapsingHeader("Sound Component", ImGuiTreeNodeFlags_DefaultOpen))
+	{
+		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(2, 2));
+		ImGui::Columns(2);
+		ImGui::Separator();
+		ImGui::PushID("SoundComponent");
+
+		COMPONENT_RESOURCE_EDIT(component, Sound, "Sound file", [](const std::string& path) { return ResourceManager::getInstance().loadSound(path); })
+		COMPONENT_PROPERTY_EDIT(component, Looping, bool, "Looping")
+		COMPONENT_PROPERTY_EDIT_BEGIN(component, "Sound type")
+		{
+			const std::string& currentValue = soundTypeStrings[component->getSoundType()];
+			std::string comboItems;
+			int selectedItemIndex = 0;
+			ImGuiUtils::convertVectorToComboData(&soundTypeStrings[0], (unsigned int) EST_COUNT, currentValue, comboItems, selectedItemIndex, false);
+
+			if (ImGui::Combo("##value", &selectedItemIndex, comboItems.c_str()))
+			{
+				component->setSoundType((SoundType) selectedItemIndex);
+			}
+		}
+		COMPONENT_PROPERTY_EDIT_END
+		COMPONENT_PROPERTY_EDIT(component, PlayDistance, int, "Play distance")
+		COMPONENT_PROPERTY_EDIT(component, Gain, float, "Volume")
+		COMPONENT_PROPERTY_EDIT(component, Position, vec3, "Position")
+
+		ImGui::PopID();
+		ImGui::Columns(1);
+		ImGui::Separator();
+		ImGui::PopStyleVar();
+	}
+}
+
+
 void showObjectProperties()
 {
 	bool isOpened = true;
@@ -1959,6 +2066,24 @@ void showObjectProperties()
 			if (foliagePatch)
 			{
 				showFoliagePatchDetails(foliagePatch);
+			}
+
+			RenderableSurface* renderableSurface = dynamic_cast<RenderableSurface*>(vbEditor::_selectedSceneObject->getComponent(CT_RENDERABLE_SURFACE));
+			if (renderableSurface)
+			{
+				showRenderableSurfaceDetails(renderableSurface);
+			}
+
+			TransformAnimatorComponent* transformAnimatorComponent = dynamic_cast<TransformAnimatorComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_TRANSFORM_ANIMATOR));
+			if (transformAnimatorComponent)
+			{
+				showTransformAnimatorComponentDetails(transformAnimatorComponent);
+			}
+
+			SoundComponent* soundComponent = dynamic_cast<SoundComponent*>(vbEditor::_selectedSceneObject->getComponent(CT_SOUND));
+			if (soundComponent)
+			{
+				showSoundComponentDetails(soundComponent);
 			}
 
 			//RoadObject* roadComponent = dynamic_cast<RoadObject*>(vbEditor::_selectedSceneObject->getComponent(CT_ROAD_OBJECT));
@@ -2191,6 +2316,16 @@ void showObjectProperties()
 			{
 				vbEditor::_sceneManager->removeSceneObject(vbEditor::_selectedSceneObject, true);
 				vbEditor::_selectedSceneObject = nullptr;
+			}
+
+			if (ImGui::Button("Save as object"))
+			{
+				std::string result = FileDialogs::selectFolder("Select folder");
+				if (result != "")
+				{
+					LOG_DEBUG("Save object in: " + result);
+					RObjectSaver::saveObjectToFile(vbEditor::_selectedSceneObject, result);
+				}
 			}
 		}
 	}

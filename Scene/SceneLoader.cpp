@@ -29,9 +29,10 @@
 using namespace tinyxml2;
 
 
-SceneLoader::SceneLoader(SceneManager* sceneManager)
+SceneLoader::SceneLoader(SceneManager* sceneManager, const std::string& customObjectsDir/* = ""*/)
 	: _sceneManager(sceneManager),
-	_terrainCollidesWith(COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR), _roadCollidesWith(COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR)
+	_terrainCollidesWith(COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR), _roadCollidesWith(COL_WHEEL | COL_BUS | COL_ENV | COL_DOOR),
+	_customObjectsDir(customObjectsDir)
 {
 
 }
@@ -535,9 +536,11 @@ void SceneLoader::loadObject(XMLElement* objectElement, SceneObject* parent)
 		SceneObject* sceneObject;
 		if (!name.empty())
 		{
-			RObject* rObject = ResourceManager::getInstance().loadRObject(name);
+			RObject* rObject = ResourceManager::getInstance().loadRObject(name, _customObjectsDir);
 
 			sceneObject = RObjectLoader::createSceneObjectFromRObject(rObject, objectName, position, rotation, _sceneManager);
+			sceneObject->setPosition(position);
+			sceneObject->setRotation(degToRad(rotation.x), degToRad(rotation.y), degToRad(rotation.z));
 		}
 		else
 		{

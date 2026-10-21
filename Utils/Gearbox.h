@@ -6,6 +6,9 @@
 #include <vector>
 #include <string>
 
+#include "../Scripting/Utils/LuaMacros.h"
+
+
 enum Mode
 {
     EGM_REVERSE = 0,
@@ -20,12 +23,12 @@ class Gearbox
         Gearbox(const std::string filename);
         virtual ~Gearbox();
 
-        const int currentGear() { return _currentGear; }
-        const float currentRatio() { return _gears[_currentGear]; }
+        LUAF const int currentGear() { return _currentGear; }
+        LUAF const float currentRatio() { return _gears[_currentGear]; }
 
-        void shiftUp();
-        void shiftDown();
-        void setNeutral();
+        LUAF void shiftUp();
+        LUAF void shiftDown();
+        LUAF void setNeutral();
 
     protected:
         std::vector<float>  _gears;

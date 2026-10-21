@@ -26,6 +26,8 @@ class RoadObject;
 
 class SceneLoader
 {
+	friend class BusLoader;
+
 	private:
 		static constexpr char* MAP_FILE_NAME = "scene.xml";
 
@@ -37,6 +39,8 @@ class SceneLoader
 		std::string _dirPath;
 
 		ResourceDescription _sceneDescription;
+
+		std::string _customObjectsDir;
 
 		void loadStartPosition(tinyxml2::XMLElement* );
 		bool loadTerrain(tinyxml2::XMLElement* );
@@ -68,7 +72,7 @@ class SceneLoader
 		void loadSchedules(tinyxml2::XMLElement* );
 
 	public:
-		SceneLoader(SceneManager* sceneManager);
+		SceneLoader(SceneManager* sceneManager, const std::string& customObjectsDir = "");
 
 		void loadMap(std::string name);
 

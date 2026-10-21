@@ -6,6 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 struct point
 {
     point() : rpm(0), torque(0) { }
@@ -107,13 +109,13 @@ class Engine
 
 		void setState(EngineState state);
 
-        float getThrottle() { return _throttle; }
+        LUAF float getThrottle() { return _throttle; }
 
-        float getCurrentRPM() { return _currentRPM; }
+        LUAF float getCurrentRPM() { return _currentRPM; }
 
         void setRPM(float wheelAngularVelocity, float gearRatio);
 
-        bool isRunning() { return _state == ES_RUN; }
+        LUAF bool isRunning() { return _state == ES_RUN; }
 
 		EngineState getState() { return _state; }
 
@@ -123,9 +125,9 @@ class Engine
 
         void throttleDown(float dt);
 
-        float getCurrentTorque() { return _currentTorque; }
+        LUAF float getCurrentTorque() { return _currentTorque; }
 
-		float getDifferentialRatio() { return _differentialRatio; }
+        LUAF float getDifferentialRatio() { return _differentialRatio; }
 
         const std::vector<SoundDefinition>& getEngineLoopedSounds() { return _engineLoopedSounds; }
 

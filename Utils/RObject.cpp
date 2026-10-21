@@ -10,9 +10,48 @@ RObject::RObject(const std::string& path, const std::string& author, const std::
 }
 
 
+RObject::~RObject()
+{
+	for (int i = 0; i < _children.size(); ++i)
+	{
+		delete _children[i];
+	}
+}
+
+
+void RObject::setPosition(const glm::vec3& position)
+{
+	_position = position;
+}
+
+
+void RObject::setRotation(const glm::vec3& rotation)
+{
+	_rotation = rotation;
+}
+
+
+const glm::vec3& RObject::getPosition()
+{
+	return _position;
+}
+
+
+const glm::vec3& RObject::getRotation()
+{
+	return _rotation;
+}
+
+
 std::vector<std::unordered_map<std::string, std::string>>& RObject::getComponents()
 {
 	return _components;
+}
+
+
+std::vector<RObject*>& RObject::getChildren()
+{
+	return _children;
 }
 
 

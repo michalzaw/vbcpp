@@ -35,7 +35,11 @@ class FilesHelper
 		static std::string getRelativePathToDirInGameDir(std::string filePath, std::string dirPath);
 		static bool isInPathSubdir(std::string filePath, std::string dirPath);
 
+        static std::string relativePathToFile(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile);
+        static std::string relativePathToDir(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile);
+
 		static void copyFile(const std::string& from, const std::string& to);
+        static void createEmptyFile(const std::string& path);
 
 };
 

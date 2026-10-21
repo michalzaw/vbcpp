@@ -1,0 +1,15 @@
+#ifndef TRANSFORMCOMPLETEDEVENTTYPELUABINDINGS_H_INCLUDED
+#define TRANSFORMCOMPLETEDEVENTTYPELUABINDINGS_H_INCLUDED
+
+
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
+
+
+namespace TransformCompletedEventTypeLuaBindings
+{
+	void bind(sol::state* lua);
+}
+
+
+#endif // TRANSFORMCOMPLETEDEVENTTYPELUABINDINGS_H_INCLUDED

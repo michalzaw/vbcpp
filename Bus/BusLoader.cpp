@@ -9,7 +9,10 @@
 #include "../Utils/XmlUtils.h"
 #include "../Utils/tinyxml2.h"
 #include "../Graphics/DisplayComponent.h"
+#include "../Graphics/RenderableSurface.h"
 
+#include "../Scene/SceneLoader.h"
+#include "../Scene/Events/ObjectLoadedEvent.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -88,6 +91,8 @@ BusRaycast* BusLoader::loadBusRaycast(XMLElement* busElement)
     }
 
     loadEngineAndGearbox(busElement);
+
+    _bus->getSceneObject()->broadcastEventToChildren<ObjectLoadedEvent>({ _bus->getSceneObject() });
 
     return _bus;
 }
@@ -320,7 +325,9 @@ void BusLoader::loadModuleElements(XMLElement* moduleElement, XMLElement* busEle
     loadEnvironmentCaptureComponents(moduleElement, busModule);
     loadMirrors(moduleElement, busModule);
     loadDisplays(moduleElement, busModule);
+    loadRenderableSurface(moduleElement, busModule);
     loadCustomElements(moduleElement, busModule);
+    loadObjects(moduleElement, busModule);
     loadScripts(moduleElement, busModule);
 }
 
@@ -571,7 +578,7 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
     XMLElement* desktopElement = moduleElement->FirstChildElement("Desktop");
     if (desktopElement != nullptr)
     {
-        LOG_INFO("XML: Desktop data");
+        LOG_INFO("XML: Desktop data (deprecated)");
 
         std::string modelFile = std::string(desktopElement->Attribute("model"));
         glm::vec3 position = XMLstringToVec3(desktopElement->Attribute("position"));
@@ -589,14 +596,15 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
 
         std::string modelPath = _busPath + modelFile;
         RStaticModel* desktopModel = ResourceManager::getInstance().loadModelWithHierarchy(modelPath, _texturePath, _normalsSmoothing);
-        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel), desktopObject);
-		_bus->_desktopRenderObject->setDynamicObject(true);
 
 
         busModule.sceneObject->addChild(desktopObject);
 
         _bus->_desktopObject = desktopObject;
-        _bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
+        _bus->_desktop = new Desktop(nullptr, _bus->_desktopClickableObject);
+        //_bus->_desktop = new Desktop(_bus->_desktopRenderObject, _bus->_desktopClickableObject);
+
+        std::vector<std::string> nodeNamesToSkip;
 
         XMLElement* indicatorElement = desktopElement->FirstChildElement("Indicator");
         while (indicatorElement != nullptr)
@@ -609,19 +617,36 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             float minAngle = XmlUtils::getAttributeFloatOptional(indicatorElement, "minAngle");
             glm::vec3 axis = XmlUtils::getAttributeVec3Optional(indicatorElement, "rotationAxis", glm::vec3(0.0f, 0.0f, 1.0f));
 
-            std::vector<glm::vec2> curve;
-            XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
-            if (curve.size() > 1)
             {
-                for (auto& point : curve)
+                StaticModelNode* indicatorNode = desktopModel->getNodeByName(modelNodeName);
+
+                SceneObject* indicatorSceneObject = _sMgr->addSceneObject(modelNodeName);
+                indicatorSceneObject->setPosition(indicatorNode->transform.getPosition());
+                indicatorSceneObject->setRotation(indicatorNode->transform.getRotation());
+                indicatorSceneObject->setScale(indicatorNode->transform.getScale());
+                desktopObject->addChild(indicatorSceneObject);
+
+                SceneObject* indicatorSubSceneObject = _sMgr->addSceneObject(modelNodeName + "_renderObject");
+                indicatorSceneObject->addChild(indicatorSubSceneObject);
+
+                RenderObject* indicatorRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, indicatorNode, true), indicatorSubSceneObject);
+
+                std::vector<glm::vec2> curve;
+                XmlUtils::loadCurveFromXmlFile(indicatorElement, curve, "value", "angle");
+                if (curve.size() > 1)
                 {
-                    point.y = degToRad(point.y);
+                    for (auto& point : curve)
+                    {
+                        point.y = degToRad(point.y);
+                    }
+                    _bus->_desktop->addIndicator(indicatorSubSceneObject, variableName, curve, axis);
                 }
-                _bus->_desktop->addIndicator(modelNodeName, variableName, curve, axis);
-            }
-            else
-            {
-                _bus->_desktop->addIndicator(modelNodeName, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+                else
+                {
+                    _bus->_desktop->addIndicator(indicatorSubSceneObject, variableName, degToRad(maxAngle), maxValue, minValue, degToRad(minAngle), axis);
+                }
+
+                nodeNamesToSkip.push_back(modelNodeName);
             }
 
             indicatorElement = indicatorElement->NextSiblingElement("Indicator");
@@ -666,7 +691,27 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
                 buttonStateElement = buttonStateElement->NextSiblingElement("State");
             }
 
-            _bus->_desktop->addButton(modelNodeName, rotationAxis, buttonStates, isReturning);
+            {
+                StaticModelNode* buttonNode = desktopModel->getNodeByName(modelNodeName);
+
+                SceneObject* buttonSceneObject = _sMgr->addSceneObject(modelNodeName);
+                buttonSceneObject->setPosition(buttonNode->transform.getPosition());
+                buttonSceneObject->setRotation(buttonNode->transform.getRotation());
+                buttonSceneObject->setScale(buttonNode->transform.getScale());
+                desktopObject->addChild(buttonSceneObject);
+
+                SceneObject* buttonSubSceneObject = _sMgr->addSceneObject(modelNodeName + "_renderObject");
+                buttonSceneObject->addChild(buttonSubSceneObject);
+
+                RenderObject* buttonRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, buttonNode, true), buttonSubSceneObject);
+                ClickableObject* buttonClickableObject = _gMgr->addClickableObject();
+                
+                buttonSubSceneObject->addComponent(buttonClickableObject);
+
+                _bus->_desktop->addButton(buttonSubSceneObject, rotationAxis, buttonStates, isReturning, buttonClickableObject);
+
+                nodeNamesToSkip.push_back(modelNodeName);
+            }
 
             buttonElement = buttonElement->NextSiblingElement("Button");
         }
@@ -681,10 +726,24 @@ void BusLoader::loadDesktop(XMLElement* moduleElement, BusRayCastModule& busModu
             glm::vec3 backlightingColor = XMLstringToVec3(lightElement->Attribute("backlightingColor"));
             glm::vec3 lightColor = XMLstringToVec3(lightElement->Attribute("lightColor"));
 
-            _bus->_desktop->setLight(type, modelNodeName, backlightingColor, lightColor);
+
+            for (SceneObject* child : desktopObject->getChildren())
+            {
+                if (child->getName() == modelNodeName)
+                {
+                    _bus->_desktop->setLight(type, (*child->getChildren().begin())->getComponentWithCasting<RenderObject>(CT_RENDER_OBJECT)->getModelRootNode(), backlightingColor, lightColor);
+                }
+                else
+                {
+                    LOG_WARNING("Unimplemented - Light type must be added to indicaotor or button element");
+                }
+            }
 
             lightElement = lightElement->NextSiblingElement("Light");
         }
+
+        _bus->_desktopRenderObject = _gMgr->addRenderObject(new RenderObject(desktopModel, nodeNamesToSkip), desktopObject);
+        _bus->_desktopRenderObject->setDynamicObject(true);
     }
     else
     {
@@ -1225,6 +1284,84 @@ void BusLoader::loadDisplays(XMLElement* moduleElement, BusRayCastModule& busMod
 }
 
 
+void BusLoader::loadRenderableSurface(XMLElement* moduleElement, BusRayCastModule& busModule)
+{
+    XMLElement* renderableSurfaceElement = moduleElement->FirstChildElement("RenderableSurface");
+    while (renderableSurfaceElement != nullptr)
+    {
+        LOG_INFO("XML: Renderable surface component data");
+
+        std::string name = XmlUtils::getAttributeString(renderableSurfaceElement, "name");
+        glm::vec3 position = XmlUtils::getAttributeVec3(renderableSurfaceElement, "position");
+        glm::vec3 rotation = XmlUtils::getAttributeVec3(renderableSurfaceElement, "rotation");
+        float width = XmlUtils::getAttributeFloat(renderableSurfaceElement, "width");
+        float height = XmlUtils::getAttributeFloat(renderableSurfaceElement, "height");
+        int textureWidth = XmlUtils::getAttributeInt(renderableSurfaceElement, "textureWidth");
+        int textureHeight = XmlUtils::getAttributeInt(renderableSurfaceElement, "textureHeight");
+        std::string type = XmlUtils::getAttributeString(renderableSurfaceElement, "type");
+        bool createPlane = XmlUtils::getAttributeBoolOptional(renderableSurfaceElement, "createPlane");
+
+        SceneObject* surfaceSceneObject = _sMgr->addSceneObject(name);
+        surfaceSceneObject->setPosition(position);
+        surfaceSceneObject->setRotation(rotation);
+        busModule.sceneObject->addChild(surfaceSceneObject);
+
+        RenderableSurface* renderableSurface = _gMgr->addRenderableSurface(textureWidth, textureHeight);
+        surfaceSceneObject->addComponent(renderableSurface);
+
+        if (createPlane)
+        {
+            Material* material = new Material;
+            material->shininess = 96;
+            if (type == "solid")
+            {
+                material->shader = SOLID_MATERIAL;
+            }
+            else if (type == "emissive")
+            {
+                material->shader = SOLID_EMISSIVE_MATERIAL;
+            }
+            else
+            {
+                LOG_WARNING("Invalid value of type parameter in RenderableSurface. Expected solid or emissive.");
+            }
+            Prefab* displayRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+            displayRenderObject->init();
+            displayRenderObject->setDynamicObject(true);
+            _gMgr->addRenderObject(displayRenderObject, surfaceSceneObject);
+
+            displayRenderObject->getModel()->getMaterial(0)->diffuseTexture = renderableSurface->getRenderedTexture();
+            if (material->shader == SOLID_EMISSIVE_MATERIAL)
+            {
+                displayRenderObject->getModel()->getMaterial(0)->emissiveTexture = renderableSurface->getRenderedTexture();
+            }
+
+            {
+                SceneObject* glassSceneObject = _sMgr->addSceneObject(name + "glass");
+                glassSceneObject->setPosition(glm::vec3(0.0f, 0.01f, 0.0f));
+                surfaceSceneObject->addChild(glassSceneObject);
+
+                Material* material = new Material;
+                material->shininess = 8;
+                material->transparency = 0.9f;
+                material->shader = GLASS_MATERIAL;
+                material->diffuseColor = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+                material->diffuseTexture = ResourceManager::getInstance().loadDefaultWhiteTexture();
+                material->glassTexture = ResourceManager::getInstance().loadOneColorTexture(glm::vec4(0.0f, 0.0f, 0.0f, 0.0f));
+                material->reflectionTexture1 = EMT_GLOBAL;
+                material->reflectionTexture2 = EMT_GLOBAL;
+                Prefab* displayGlassRenderObject = new PlanePrefab(glm::vec2(width, height), material);
+                displayGlassRenderObject->init();
+                displayGlassRenderObject->setDynamicObject(true);
+                _gMgr->addRenderObject(displayGlassRenderObject, glassSceneObject);
+            }
+        }
+
+        renderableSurfaceElement = renderableSurfaceElement->NextSiblingElement("RenderableSurface");
+    }
+}
+
+
 void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& busModule)
 {
     XMLElement* childElement = parentElement->FirstChildElement("Element");
@@ -1243,11 +1380,18 @@ void BusLoader::loadCustomElements(XMLElement* parentElement, BusRayCastModule& 
             customElementSceneObject->setScale(customElementNode->transform.getScale());
             busModule.sceneObject->addChild(customElementSceneObject);
 
-            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, true), customElementSceneObject);
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(_currentBusModel, customElementNode, false, true), customElementSceneObject);
         }
 
         childElement = childElement->NextSiblingElement("Element");
     }
+}
+
+
+void BusLoader::loadObjects(XMLElement* parentElement, BusRayCastModule& busModule)
+{
+    SceneLoader sceneLoader(_sMgr, _busPath);
+    sceneLoader.loadObjects(parentElement, busModule.sceneObject);
 }
 
 

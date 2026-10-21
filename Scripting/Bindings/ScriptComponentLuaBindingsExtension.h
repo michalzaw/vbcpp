@@ -1,0 +1,15 @@
+#ifndef SCRIPTCOMPONENTLUABINDINGSEXTENSION_H_INCLUDED
+#define SCRIPTCOMPONENTLUABINDINGSEXTENSION_H_INCLUDED
+
+
+#define SOL_ALL_SAFETIES_ON 1
+#include <sol/sol.hpp>
+
+
+namespace ScriptComponentLuaBindingsExtension
+{
+	void bind(sol::state* lua);
+}
+
+
+#endif // SCRIPTCOMPONENTLUABINDINGSEXTENSION_H_INCLUDED

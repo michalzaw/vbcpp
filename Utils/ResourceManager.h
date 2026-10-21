@@ -17,6 +17,8 @@
 #include "RObjectLoader.h"
 #include "../Scripting/RScriptFile.h"
 
+#include "../Scripting/Utils/LuaMacros.h"
+
 #include <iostream>
 #include <list>
 #include <memory>
@@ -38,7 +40,7 @@ class ResourceManager
 
         Resource* findResource(std::string path);
 
-        RTexture2D* loadTexture(std::string path, bool useCompression = true, bool mipmapping = true, bool useAnisotropicFiltering = true);
+        LUAF RTexture2D* loadTexture(std::string path, bool useCompression = true, bool mipmapping = true, bool useAnisotropicFiltering = true);
         // filesNames: pos_x, neg_x, pos_y, neg_y, pos_z, neg_z
         RTextureCubeMap* loadTextureCubeMap(std::string* fileNames);
         void reloadTexture(RTexture2D* texture);
@@ -46,8 +48,8 @@ class ResourceManager
         void reloadTexture(RTextureCubeMap* texture);
         void reloadAllTextures();
 
-        RTexture2D* loadDefaultWhiteTexture();
-		RTexture2D* loadOneColorTexture(glm::vec4 color);
+        LUAF RTexture2D* loadDefaultWhiteTexture();
+		LUAF RTexture2D* loadOneColorTexture(glm::vec4 color);
 
         RShader* loadShader(std::string vertexPath, std::string fragmPath, const std::vector<std::string>& defines = {},
                             const std::unordered_map<std::string, std::string>& constants = {});
@@ -68,11 +70,11 @@ class ResourceManager
         RAnimatedModel* loadAnimatedModel(const std::string& path, const std::string& texturePath, const std::unordered_map<std::string, BoneInfo*>& boneInfosFromExistingModel = {});
         RAnimation* loadAnimation(const std::string& path);
 
-        RFont* loadFont(std::string path, int pixelSize = 32);
+        LUAF RFont* loadFont(std::string path, int pixelSize = 32);
 
-        RSound* loadSound(std::string path);
+        LUAF RSound* loadSound(std::string path);
 
-		RObject* loadRObject(std::string name);
+		RObject* loadRObject(std::string name, std::string customObjectsDir = "");
 
 		RRoadProfile* loadRoadProfile(std::string name);
 

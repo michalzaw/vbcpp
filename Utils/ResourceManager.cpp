@@ -681,7 +681,7 @@ RAnimation* ResourceManager::loadAnimation(const std::string& path)
 
     AnimationLoader loader;
     std::unique_ptr<RAnimation> animation(loader.loadAnimation(finalPath));
-    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + animation.get()->getPath());
+    LOG_INFO("Resource nie istnieje. Tworzenie nowego zasobu... " + finalPath);
 
     RAnimation* a = dynamic_cast<RAnimation*>(animation.get());
 
@@ -762,9 +762,9 @@ RSound* ResourceManager::loadSound(std::string path)
 }
 
 
-RObject* ResourceManager::loadRObject(std::string name)
+RObject* ResourceManager::loadRObject(std::string name, std::string customObjectsDir/* = ""*/)
 {
-	std::string dirPath = GameDirectories::OBJECTS + name + "/";
+	std::string dirPath = customObjectsDir == "" ? GameDirectories::OBJECTS + name + "/" : customObjectsDir + name + "/";
 
 	Resource* res = findResource(dirPath);
 	if (res != 0)

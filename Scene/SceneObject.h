@@ -7,6 +7,7 @@
 #include <string>
 
 #include "Component.h"
+#include "Events/EventDispatcher.h"
 
 #include "../Graphics/RotationMode.h"
 
@@ -36,6 +37,8 @@ class SceneObject
 
         std::vector<Component*> _components;
 
+        EventDispatcher _events;
+
         std::string     _name;
         ObjectId        _id;
         bool            _isActive;
@@ -53,6 +56,8 @@ class SceneObject
         glm::vec3 _rotation;
         glm::quat _rotationQuaternion;
         glm::vec3 _scale;
+
+        mutable glm::mat4 _rotationMatrix;
 
         mutable glm::mat4 _localTransformMatrix;            mutable bool _localTransformMatrixIsCalculated;
         mutable glm::mat4 _localNormalMatrix;               mutable bool _localNormalMatrixIsCalculated;
@@ -82,6 +87,14 @@ class SceneObject
 
         void addComponent(Component* component);
         void removeComponent(Component* component);
+
+
+        EventDispatcher&    getEvents();
+
+        template<typename Event>
+        void dispatchEvent(const Event& event);
+        template<typename Event>
+        void broadcastEventToChildren(const Event& event);
 
 
 		void			    setName(const std::string& name);
@@ -128,6 +141,8 @@ class SceneObject
         void move(float dx, float dy, float dz);
         void rotate(const glm::vec3& deltaRotation);
         void rotate(float dx, float dy, float dz);
+        void rotateLocal(const glm::vec3& deltaRotation);
+        void rotateLocal(float dx, float dy, float dz);
         void scale(const glm::vec3& scale);
         void scale(float x, float y, float z);
 
@@ -146,8 +161,30 @@ class SceneObject
         glm::vec3 getGlobalPosition();
         glm::vec3 transformLocalPointToGlobal(const glm::vec3& point);
         glm::vec3 transformLocalVectorToGlobal(const glm::vec3& vec);
+        glm::vec3 transformLocalPointToParentSpace(const glm::vec3& point);
+        glm::vec3 transformLocalVectorToParentSpace(const glm::vec3& vec);
 
 };
+
+
+template<typename Event>
+void SceneObject::dispatchEvent(const Event& event)
+{
+    _events.dispatch(event);
+}
+
+
+template<typename Event>
+void SceneObject::broadcastEventToChildren(const Event& event)
+{
+    _events.dispatch(event);
+
+    for (SceneObject* child : _childrens)
+    {
+        child->broadcastEventToChildren(event);
+    }
+
+}
 
 
 #endif // SCENEOBJECT_H_INCLUDED

@@ -707,7 +707,7 @@ void Renderer::prepareRenderData()
             }
         }
 #ifdef DRAW_AABB
-        _renderObjectsInCurrentFrame.emplace_back(object->getAABB(), object->getModel()->getAABB(), object->getSceneObject());
+        _renderObjectsInCurrentFrame.emplace_back(object->getAABB(), object->getOBB(), object->getSceneObject());
 #endif // DRAW_AABB
     }
 
@@ -2874,12 +2874,21 @@ void Renderer::renderScene(RenderData* renderData)
 }*/
 
 
-void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIObjectsList)
+void Renderer::renderGUI(GUIRenderList* renderList, Framebuffer* framebuffer, bool flipY)//std::list<GUIObject*>* GUIObjectsList)
 {
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
-    glm::mat4 projectionMatrix = glm::ortho(0.0f, (float)_screenWidth, 0.0f, (float)_screenHeight, 1.0f, -1.5f);
+    if (flipY)
+    {
+        glFrontFace(GL_CW);
+    }
+
+    framebuffer->bind();
+
+    glm::mat4 projectionMatrix = flipY ?
+        glm::ortho(0.0f, (float)framebuffer->getViewport().size.x, (float)framebuffer->getViewport().size.y, 0.0f, 1.0f, -1.5f) :
+        glm::ortho(0.0f, (float)framebuffer->getViewport().size.x, 0.0f, (float)framebuffer->getViewport().size.y, 1.0f, -1.5f);
 
     for (GUIRenderList::iterator i = renderList->begin(); i != renderList->end(); ++i)
     {
@@ -2973,6 +2982,11 @@ void Renderer::renderGUI(GUIRenderList* renderList)//std::list<GUIObject*>* GUIO
     delete renderList;
     glDisable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+
+    if (flipY)
+    {
+        glFrontFace(GL_CCW);
+    }
 }
 
 

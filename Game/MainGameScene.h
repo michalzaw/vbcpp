@@ -18,6 +18,13 @@ enum GameState
 };
 
 
+enum ObjectPickingType
+{
+	OPT_RAYCASTING,
+	OPT_RENDER_ID
+};
+
+
 class MainGameScene final : public GameScene
 {
 	private:
@@ -44,6 +51,8 @@ class MainGameScene final : public GameScene
 		int _mirrorControllIndex;
 
 		LuaGameContext* _luaGameContext;
+
+		ObjectPickingType _objectPickingType;
 
 		void getBusConfigurationVariablesFromSceneParams(const std::unordered_map<std::string, std::string>& sceneParams,
 														 std::unordered_map<std::string, std::string>& outBusConfigurationVariables);

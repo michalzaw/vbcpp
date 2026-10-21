@@ -46,6 +46,7 @@ class RAnimation;
 class BezierCurve;
 class ShapePolygonComponent;
 class FoliagePatch;
+class RenderableSurface;
 
 
 class GraphicsManager
@@ -71,6 +72,7 @@ class GraphicsManager
         std::vector<BezierCurve*>                   _bezierCurves;
         std::vector<ShapePolygonComponent*>         _shapePolygons;
         std::vector<FoliagePatch*>                  _foliagePatches;
+        std::list<RenderableSurface*>               _renderableSurfaces;
 
 		Sky*						_sky;
 
@@ -123,6 +125,7 @@ class GraphicsManager
         BezierCurve*    addBezierCurve(const std::vector<glm::vec3>& points = {}, const std::vector<int>& segmentsPointsCount = {}, float marginBegin = 0.0f, float marginEnd = 0.0f, const glm::vec2& offsetFromBaseCurve = glm::vec2(0.0f, 0.0f));
         ShapePolygonComponent* addShapePolygon();
         FoliagePatch*   addFoliagePatch();
+        RenderableSurface* addRenderableSurface(int width, int height);
 
 
         // Funkcje wywolywana przez SceneObject, nie wywolywac recznie
@@ -146,6 +149,7 @@ class GraphicsManager
         void removeBezierCurve(BezierCurve* bezierCurve);
         void removeShapePolygon(ShapePolygonComponent* shapePolygon);
         void removeFoliagePatch(FoliagePatch* foliagePatch);
+        void removeRenderableSurface(RenderableSurface* renderableSurface);
 
 
         void setCurrentCamera(CameraStatic* camera);

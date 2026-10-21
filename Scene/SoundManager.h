@@ -98,7 +98,7 @@ class SoundManager : virtual public RefCounter
                     if (_camera)
                         cameraPos = _camera->getPosition();
 
-                    glm::vec3 objPos = (*i)->getPosition();
+                    glm::vec3 objPos = (*i)->getGlobalPosition();
                     float playDistance = (*i)->getPlayDistance();
 
                     float distance = glm::distance(cameraPos, objPos);

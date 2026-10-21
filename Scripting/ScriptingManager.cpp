@@ -11,12 +11,12 @@ ScriptingManager::ScriptingManager()
 	: _enabled(true)
 {
 	_luaState = new sol::state; // todo: add panic handler
-	_luaState->open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table);
+	_luaState->open_libraries(sol::lib::base, sol::lib::string, sol::lib::math, sol::lib::table, sol::lib::coroutine);
 	// todo: lua->set_exception_handler(&my_exception_handler);
 
 
-	LuaBindings::bind(_luaState);
 	GeneratedLuaBindings::bind(_luaState);
+	LuaBindings::bind(_luaState);
 }
 
 

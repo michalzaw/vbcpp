@@ -74,6 +74,7 @@ set (GRAPHICS_SOURCES
 		Graphics/RRoadProfile.h
 		Graphics/RShader.h
 		Graphics/Rect.h
+		Graphics/RenderableSurface.cpp
 		Graphics/RenderData.cpp
 		Graphics/RenderData.h
 		Graphics/RenderObject.cpp
@@ -126,6 +127,7 @@ set (GRAPHICS_HEADERS
 		Graphics/AnimationNodeData.h
 		Graphics/FoliagePatch.h
 		Graphics/MultiRenderObject.h
+		Graphics/RenderableSurface.h
 		Graphics/ShaderStorageBuffer.h
 		Graphics/SkeletalAnimationComponent.h
 		Graphics/SkeletalAnimationComponent2.h

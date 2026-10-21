@@ -38,7 +38,7 @@ DesktopLightType getDesktopLightTypeFromString(std::string name)
 
 
 Desktop::Desktop(RenderObject* desktopRenderObject, ClickableObject* desktopClickableObject)
-    : _desktopRenderObject(desktopRenderObject), _desktopClickableObject(desktopClickableObject),
+    : _desktopRenderObject(desktopRenderObject), //_desktopClickableObject(desktopClickableObject),
     _desktopSceneObject(NULL)
 {
     if (_desktopRenderObject != NULL)
@@ -50,28 +50,20 @@ Desktop::Desktop(RenderObject* desktopRenderObject, ClickableObject* desktopClic
 
 void Desktop::catchInput()
 {
-    if (_desktopClickableObject != NULL && _desktopClickableObject->isClicked())
+    for (int i = 0; i < _buttons.size(); ++i)
     {
-        for (ModelNode* modelNode : _desktopClickableObject->getClickedNodes())
+        if (_buttons[i].clickableObject->isClicked())
         {
-            for (int i = 0; i < _buttons.size(); ++i)
-            {
-                if (modelNode == _buttons[i].modelNode)
-                {
-                    clickButton(i);
-                }
-            }
+            clickButton(i);
         }
     }
 }
 
 
-void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, float maxAngle, float maxValue, float minValue, float minAngle, glm::vec3 rotationAxis)
+void Desktop::addIndicator(SceneObject* sceneObject, const std::string& variable, float maxAngle, float maxValue, float minValue, float minAngle, glm::vec3 rotationAxis)
 {
-    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(indicatorNodeNameInModel);
-
     Indicator newIndicator;
-    newIndicator.modelNode = modelNode;
+    newIndicator.sceneObject = sceneObject;
     newIndicator.variableName = variable;
     newIndicator.rotationAxis = rotationAxis;
 
@@ -82,12 +74,10 @@ void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const st
 }
 
 
-void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis)
+void Desktop::addIndicator(SceneObject* sceneObject, const std::string& variable, const std::vector<glm::vec2> rotationCurve, glm::vec3 rotationAxis)
 {
-    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(indicatorNodeNameInModel);
-
     Indicator newIndicator;
-    newIndicator.modelNode = modelNode;
+    newIndicator.sceneObject = sceneObject;
     newIndicator.variableName = variable;
     newIndicator.rotationCurve = rotationCurve;
     newIndicator.rotationAxis = rotationAxis;
@@ -96,12 +86,10 @@ void Desktop::addIndicator(const std::string& indicatorNodeNameInModel, const st
 }
 
 
-void Desktop::addButton(std::string buttonNodeNameInModel, glm::vec3 rotationAxix, std::vector<DesktopButtonState> states, bool isReturning)
+void Desktop::addButton(SceneObject* sceneObject, glm::vec3 rotationAxix, std::vector<DesktopButtonState> states, bool isReturning, ClickableObject* clickableObject)
 {
-    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(buttonNodeNameInModel);
-
     DesktopButton button;
-    button.setData(modelNode, rotationAxix, states, isReturning);
+    button.setData(sceneObject, rotationAxix, states, isReturning, clickableObject);
 
     _buttons.push_back(button);
 }
@@ -113,10 +101,8 @@ DesktopButton& Desktop::getButton(int index)
 }
 
 
-void Desktop::setLight(DesktopLightType type, std::string lightNodeNameInModel, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor)
+void Desktop::setLight(DesktopLightType type, ModelNode* modelNode, glm::vec3 desktopBacklightingColor, glm::vec3 lightColor)
 {
-    ModelNode* modelNode = _desktopRenderObject->getModelNodeByName(lightNodeNameInModel);
-
     _lights[type].modelNode = modelNode;
     _lights[type].desktopBacklightingColor = desktopBacklightingColor;
     _lights[type].lightColor = lightColor;
@@ -132,7 +118,7 @@ DesktopLight& Desktop::getDesktopLight(DesktopLightType type)
 void Desktop::setButtonState(int index, unsigned int state)
 {
     DesktopButton& button = getButton(index);
-    if (button.modelNode == NULL || state >= button.statesCount)
+    if (button.sceneObject == NULL || state >= button.statesCount)
         return;
 
     button.currentState = state;
@@ -145,7 +131,7 @@ void Desktop::setButtonState(int index, unsigned int state)
 void Desktop::clickButton(int index)
 {
     DesktopButton& button = _buttons[index];
-	if (button.modelNode == NULL)
+	if (button.sceneObject == NULL)
 		return;
 
     button.currentState = (button.currentState + 1) % button.statesCount;
@@ -216,10 +202,10 @@ void Desktop::update(float deltaTime)
 
     for (int i = 0; i < _buttons.size(); ++i)
     {
-        if (_buttons[i].modelNode != NULL)
+        if (_buttons[i].sceneObject != NULL)
         {
             glm::vec3 destPos = _buttons[i].states[_buttons[i].currentState].translation;
-            glm::vec3 curPos = _buttons[i].modelNode->getTransform().getPosition();
+            glm::vec3 curPos = _buttons[i].sceneObject->getPosition();
 
             float destRot = _buttons[i].states[_buttons[i].currentState].rotation;
             float curRot = _buttons[i].currentRotation;
@@ -236,9 +222,9 @@ void Desktop::update(float deltaTime)
                 glm::vec3 direction = glm::normalize(destPos - curPos);
                 glm::vec3 deltaPos = direction * deltaTime * 0.025;
 
-                _buttons[i].modelNode->getTransform().move(deltaPos);
+                _buttons[i].sceneObject->move(deltaPos);
 
-                glm::vec3 pos = _buttons[i].modelNode->getTransform().getPosition();
+                glm::vec3 pos = _buttons[i].sceneObject->getPosition();
                 if (direction.x > 0 && pos.x > destPos.x || direction.x < 0 && pos.x < destPos.x)
                     pos.x = destPos.x;
                 if (direction.y > 0 && pos.y > destPos.y || direction.y < 0 && pos.y < destPos.y)
@@ -246,7 +232,7 @@ void Desktop::update(float deltaTime)
                 if (direction.z > 0 && pos.z > destPos.z || direction.z < 0 && pos.z < destPos.z)
                     pos.z = destPos.z;
 
-                _buttons[i].modelNode->getTransform().setPosition(pos);
+                _buttons[i].sceneObject->setPosition(pos);
             }
 
             // rotation
@@ -261,7 +247,7 @@ void Desktop::update(float deltaTime)
                 }
 
                 glm::quat rotation = glm::angleAxis(_buttons[i].currentRotation, _buttons[i].rotationAxis);
-                _buttons[i].modelNode->getTransform().setRotationQuaternion(rotation);
+                _buttons[i].sceneObject->setRotationQuaternion(rotation);
             }
         }
     }
@@ -273,7 +259,7 @@ void Desktop::update(float deltaTime)
 
         indicator.valueFromVariable = -getValueFromCurveInPoint(indicator.rotationCurve, variableValue);
 
-        if (_indicators[i].modelNode != NULL)
+        if (_indicators[i].sceneObject != NULL)
         {
             float destRot = _indicators[i].valueFromVariable;
             float curRot = _indicators[i].currentValue;
@@ -286,7 +272,7 @@ void Desktop::update(float deltaTime)
             _indicators[i].currentValue += deltaRotation;
 
             glm::quat rotation = glm::angleAxis(_indicators[i].currentValue, _indicators[i].rotationAxis);
-            _indicators[i].modelNode->getTransform().setRotationQuaternion(rotation);
+            _indicators[i].sceneObject->setRotationQuaternion(rotation);
         }
     }
 }

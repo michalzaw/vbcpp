@@ -173,7 +173,7 @@ void BusPreviewLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& bu
 
             busModule.sceneObject->addChild(doorObj);
 
-            RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode, true), doorObj);
+            RenderObject* doorRenderObject = _gMgr->addRenderObject(new RenderObject(doorModel, doorModelNode, false, true), doorObj);
         }
 
         // arm
@@ -208,7 +208,7 @@ void BusPreviewLoader::loadDoors(XMLElement* moduleElement, BusRayCastModule& bu
 
             busModule.sceneObject->addChild(armObj);
 
-            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode, true), armObj);
+            RenderObject* armRenderObject = _gMgr->addRenderObject(new RenderObject(armModel, armModelNode, false, true), armObj);
         }
     }
 }

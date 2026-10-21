@@ -3,6 +3,7 @@
 #include <sstream>
 #include <cstdlib>
 
+#include "FilesHelper.h"
 #include "Logger.h"
 #include "Helpers.hpp"
 #include "Strings.h"
@@ -19,10 +20,13 @@ using namespace tinyxml2;
 #include "../Game/AI/TrafficLightsComponent.h"
 #include "../Game/Directories.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/TransformAnimatorComponent.h"
 
+#include "../Graphics/RenderableSurface.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 
 #include "../Scene/SceneManager.h"
+#include "../Scene/Events/ObjectLoadedEvent.h"
 
 #include "../Scripting/ScriptingManager.h"
 
@@ -100,6 +104,14 @@ void RObjectLoader::loadComponents(XMLElement* objectElement, RObject* object)
 		{
 			loadScriptComponent(componentElement, object, componentIndex);
 		}
+		else if (componentType == "renderableSurface")
+		{
+			loadRenderableSurface(componentElement, object, componentIndex);
+		}
+		else if (componentType == "transformAnimator")
+		{
+			loadTransformAnimatorComponent(componentElement, object, componentIndex);
+		}
 
 		componentElement = componentElement->NextSiblingElement("Component");
 	}
@@ -111,6 +123,7 @@ void RObjectLoader::loadRenderComponent(XMLElement* componentElement, RObject* o
 {
 	object->getComponents()[componentIndex]["model"] = componentElement->Attribute("model");
 	object->getComponents()[componentIndex]["lowPolyModel"] = XmlUtils::getAttributeStringOptional(componentElement, "lowPolyModel");
+	object->getComponents()[componentIndex]["modelNodeName"] = XmlUtils::getAttributeStringOptional(componentElement, "modelNodeName");
 
 	object->getComponents()[componentIndex]["dynamic"] = XmlUtils::getAttributeStringOptional(componentElement, "dynamic");
 	object->getComponents()[componentIndex]["castShadows"] = XmlUtils::getAttributeStringOptional(componentElement, "castShadows", "true");
@@ -159,6 +172,7 @@ void RObjectLoader::loadSoundComponent(tinyxml2::XMLElement* componentElement, R
 {
 	object->getComponents()[componentIndex]["file"] = componentElement->Attribute("file");
 	object->getComponents()[componentIndex]["looping"] = componentElement->Attribute("looping");
+	object->getComponents()[componentIndex]["soundType"] = XmlUtils::getAttributeStringOptional(componentElement, "soundType", soundTypeStrings[EST_AMBIENT]);
 
 	// if set in config file - we set play distance accordingly (otherwise - play distance is 10.0f by default)
 	std::string playDistance = XmlUtils::getAttributeStringOptional(componentElement, "playDistance", "10.0");
@@ -294,6 +308,20 @@ void RObjectLoader::loadScriptComponent(tinyxml2::XMLElement* componentElement, 
 }
 
 
+void RObjectLoader::loadRenderableSurface(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	object->getComponents()[componentIndex]["textureWidth"] = componentElement->Attribute("textureWidth");
+	object->getComponents()[componentIndex]["textureHeight"] = componentElement->Attribute("textureHeight");
+	object->getComponents()[componentIndex]["backgroundColor"] = componentElement->Attribute("backgroundColor");
+}
+
+
+void RObjectLoader::loadTransformAnimatorComponent(tinyxml2::XMLElement* componentElement, RObject* object, int componentIndex)
+{
+	// not contains additional parameters
+}
+
+
 // flag normalSmoothing and loadWithHierarchy only for non animated objects
 RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::string& objectDirPath, bool isAnimated, bool normalSmoothing, bool loadWithHierarchy, RStaticModel* hightPollyModel/* = nullptr*/)
 {
@@ -310,6 +338,44 @@ RStaticModel* RObjectLoader::loadModel(const std::string& modelPath, const std::
 	{
 		return ResourceManager::getInstance().loadModel(modelPath, objectDirPath, normalSmoothing);
 	}
+}
+
+
+void RObjectLoader::loadChildren(XMLElement* parentObjectElement, RObject* object)
+{
+	XMLElement* objectsElement = parentObjectElement->FirstChildElement("Objects");
+	if (objectsElement == nullptr)
+	{
+		return;
+	}
+
+	XMLElement* objectElement = objectsElement->FirstChildElement("Object");
+	while (objectElement != nullptr)
+	{
+		std::string name = objectElement->Attribute("name");
+		std::string position = XmlUtils::getAttributeStringOptional(objectElement, "position");
+		std::string rotation = XmlUtils::getAttributeStringOptional(objectElement, "rotation");
+
+		RObject* childObject = new RObject(object->getPath(), object->getAuthor(), name, object->getComment(), object->getOriginalName());
+
+		if (position != "")
+		{
+			childObject->setPosition(XMLstringToVec3(position.c_str()));
+		}
+		if (rotation != "")
+		{
+			childObject->setRotation(XMLstringToVec3(rotation.c_str()));
+		}
+
+		loadComponents(objectElement, childObject);
+
+		loadChildren(objectElement, childObject);
+
+		object->getChildren().push_back(childObject);
+
+		objectElement = objectElement->NextSiblingElement("Object");
+	}
+
 }
 
 
@@ -355,6 +421,8 @@ RObject* RObjectLoader::loadObject(const std::string& dirPath, const std::string
 
 	loadComponents(objElement, object);
 
+	loadChildren(objElement, object);
+
 
 	return object;
 }
@@ -382,14 +450,37 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			GraphicsManager* graphicsManager = sceneManager->getGraphicsManager();
 
 			const std::string& modelFile = components[i]["model"];
+			const std::string& modelNodeName = components[i]["modelNodeName"];
 			const std::string& modelPath = objectDirPath + modelFile;
 			bool isAnimated = toBool(components[i]["animated"]);
 			bool normalsSmoothing = toBool(components[i]["normalsSmoothing"]);
 			bool loadWithHierarchy = toBool(components[i]["loadWithHierarchy"]);
 
-			model = loadModel(modelPath, objectDirPath, isAnimated, normalsSmoothing, loadWithHierarchy);
+			std::string customTexturePath = FilesHelper::getPathToDirectoryFromFileName(modelFile);
+			std::string texturePath = objectDirPath;
+			if (customTexturePath != "")
+			{
+				texturePath = texturePath + customTexturePath;
+				LOG_DEBUG(LOG_VARIABLE(customTexturePath) + ", " + LOG_VARIABLE(texturePath));
+			}
 
-			RenderObject* renderObject = graphicsManager->addRenderObject(new RenderObject(model), sceneObject);
+			model = loadModel(modelPath, texturePath, isAnimated, normalsSmoothing, loadWithHierarchy);
+
+			RenderObject* tempRenderObject;
+			if (modelNodeName == "")
+			{
+				tempRenderObject = new RenderObject(model);
+			}
+			else
+			{
+				StaticModelNode* modelNode = model->getNodeByName(modelNodeName);
+				tempRenderObject = new RenderObject(model, modelNode, true);
+
+				sceneObject->setPosition(modelNode->transform.getPosition());
+				sceneObject->setRotation(modelNode->transform.getRotation());
+				sceneObject->setScale(modelNode->transform.getScale());
+			}
+			RenderObject* renderObject = graphicsManager->addRenderObject(tempRenderObject, sceneObject);
 			renderObject->setDynamicObject(toBool(components[i]["dynamic"]));
 			renderObject->setCastShadows(toBool(components[i]["castShadows"]));
 
@@ -400,7 +491,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 				bool lowPolyNormalsSmoothing = toBool(components[i]["lowPolyModelNormalsSmoothing"]);
 				bool lowPolyLoadWithHierarchy = toBool(components[i]["lowPolyLoadWithHierarchy"]);
 
-				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, objectDirPath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
+				RStaticModel* lowPolyModel = loadModel(lowPolyModelPath, texturePath, isAnimated, lowPolyNormalsSmoothing, lowPolyLoadWithHierarchy, model);
 				renderObject->setModel(lowPolyModel, 1);
 			}
 		}
@@ -466,6 +557,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 		{
 			std::string soundFile = components[i]["file"];
 			bool looping = toBool(components[i]["looping"]);
+			SoundType soundType = getSoundTypeFromString(components[i]["soundType"]);
 			float playDistance = toFloat(components[i]["playDistance"]);
 			float volume = toFloat(components[i]["volume"]);
 			glm::vec3 soundPosition = XMLstringToVec3(components[i]["position"].c_str());
@@ -473,7 +565,7 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 			std::string soundPath = objectDirPath + soundFile;
 
 			RSound* soundResource = ResourceManager::getInstance().loadSound(soundPath);
-			SoundComponent* sound = new SoundComponent(soundResource, EST_AMBIENT, looping);
+			SoundComponent* sound = new SoundComponent(soundResource, soundType, looping);
 			sceneManager->getSoundManager()->addSoundComponent(sound);
 
 			sound->setPlayDistance(playDistance);
@@ -691,7 +783,33 @@ SceneObject* RObjectLoader::createSceneObjectFromRObject(RObject* objectDefiniti
 
 			sceneObject->addComponent(scriptComponent);
 		}
+		else if (componentType == "renderableSurface")
+		{
+			int textureWidth = toFloat(components[i]["textureWidth"]);
+			int textureHeight = toFloat(components[i]["textureHeight"]);
+			glm::vec4 backgroundColor = XMLstringToVec4(components[i]["backgroundColor"].c_str());
+
+			RenderableSurface* renderableSurface = sceneManager->getGraphicsManager()->addRenderableSurface(textureWidth, textureHeight);
+			renderableSurface->setBackgroundColor(backgroundColor);
+
+			sceneObject->addComponent(renderableSurface);
+		}
+		else if (componentType == "transformAnimator")
+		{
+			TransformAnimatorComponent* transformAnimatorComponent = sceneManager->getGameLogicSystem()->addTransformAnimatorComponent();
+
+			sceneObject->addComponent(transformAnimatorComponent);
+		}
 	}
+
+	std::vector<RObject*>& children = objectDefinition->getChildren();
+	for (int i = 0; i < children.size(); ++i)
+	{
+		SceneObject* child = createSceneObjectFromRObject(children[i], children[i]->getName(), children[i]->getPosition(), children[i]->getRotation(), sceneManager);
+		sceneObject->addChild(child);
+	}
+
+	sceneObject->broadcastEventToChildren<ObjectLoadedEvent>({ sceneObject });
 
 	return sceneObject;
 }

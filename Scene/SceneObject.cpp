@@ -9,9 +9,11 @@
 #include "../Game/BusStartPoint.h"
 #include "../Game/CameraControlComponent.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/TransformAnimatorComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/FoliagePatch.h"
+#include "../Graphics/RenderableSurface.h"
 #include "../Graphics/ShapePolygonComponent.h"
 #include "../Graphics/SkeletalAnimationComponent.h"
 #include "../Graphics/SkeletalAnimationComponent2.h"
@@ -20,6 +22,8 @@
 #include "../Scripting/ScriptingManager.h"
 
 #include "../Utils/GlmUtils.h"
+
+#include <glm/gtx/euler_angles.hpp>
 
 
 SceneObject::SceneObject(const std::string& name, ObjectId id, SceneManager* sceneManager, RObject* objectDefinition/* = nullptr*/, SceneObject* parent/* = nullptr*/)
@@ -153,6 +157,10 @@ SceneObject::~SceneObject()
                 _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(*i));
                 break;
 
+            case CT_RENDERABLE_SURFACE:
+                _sceneManager->getGraphicsManager()->removeRenderableSurface(static_cast<RenderableSurface*>(*i));
+                break;
+
             case CT_SCRIPT:
                 _sceneManager->getScriptingManager()->removeScript(static_cast<ScriptComponent*>(*i));
                 break;
@@ -185,6 +193,10 @@ SceneObject::~SceneObject()
                 _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(*i));
                 break;
 
+            case CT_TRANSFORM_ANIMATOR:
+                _sceneManager->getGameLogicSystem()->removeTransformAnimatorComponent(static_cast<TransformAnimatorComponent*>(*i));
+                break;
+
         }
     }
 }
@@ -213,18 +225,7 @@ void SceneObject::calculateLocalTransformMatrix() const
 {
     glm::mat4 pos = glm::translate(_position);
 
-    glm::mat4 rot;
-
-    if (_rotationMode == RM_EULER_ANGLES)
-    {
-        rot = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        rot *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        rot *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
-    }
-    else
-    {
-        rot = glm::mat4_cast(_rotationQuaternion);
-    }
+    glm::mat4& rot = _rotationMatrix;
 
     glm::mat4 s = glm::scale(_scale);
 
@@ -466,6 +467,10 @@ void SceneObject::removeComponent(Component* component)
                     _sceneManager->getGraphicsManager()->removeFoliagePatch(static_cast<FoliagePatch*>(component));
                     break;
 
+                case CT_RENDERABLE_SURFACE:
+                    _sceneManager->getGraphicsManager()->removeRenderableSurface(static_cast<RenderableSurface*>(component));
+                    break;
+
                 case CT_SCRIPT:
                     _sceneManager->getScriptingManager()->removeScript(static_cast<ScriptComponent*>(component));
                     break;
@@ -498,11 +503,21 @@ void SceneObject::removeComponent(Component* component)
                     _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(component));
                     break;
 
+                case CT_TRANSFORM_ANIMATOR:
+                    _sceneManager->getGameLogicSystem()->removeTransformAnimatorComponent(static_cast<TransformAnimatorComponent*>(component));
+                    break;
+
             }
 
             return;
         }
     }
+}
+
+
+EventDispatcher& SceneObject::getEvents()
+{
+    return _events;
 }
 
 
@@ -612,7 +627,11 @@ void SceneObject::setPosition(float x, float y, float z)
 void SceneObject::setRotation(const glm::vec3& rotation)
 {
     _rotation = rotation;
-    _rotationQuaternion = glm::quat(rotation);
+
+    _rotationMatrix = glm::rotate(_rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    _rotationMatrix *= glm::rotate(_rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    _rotationMatrix *= glm::rotate(_rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    _rotationQuaternion = glm::quat_cast(_rotationMatrix);
 
     _rotationMode = RM_EULER_ANGLES;
 
@@ -629,7 +648,9 @@ void SceneObject::setRotation(float x, float y, float z)
 void SceneObject::setRotationQuaternion(const glm::quat& rotation)
 {
     _rotationQuaternion = rotation;
-    _rotation = glm::eulerAngles(rotation);
+
+    _rotationMatrix = glm::mat4_cast(_rotationQuaternion);
+    glm::extractEulerAngleXYZ(_rotationMatrix, _rotation.x, _rotation.y, _rotation.z);
 
     _rotationMode = RM_QUATERNION;
 
@@ -643,6 +664,9 @@ void SceneObject::setRotationQuaternion(float x, float y, float z, float w)
     _rotationQuaternion.y = y;
     _rotationQuaternion.z = z;
     _rotationQuaternion.w = w;
+
+    _rotationMatrix = glm::mat4_cast(_rotationQuaternion);
+    glm::extractEulerAngleXYZ(_rotationMatrix, _rotation.x, _rotation.y, _rotation.z);
 
     _rotationMode = RM_QUATERNION;
 
@@ -687,6 +711,7 @@ void SceneObject::move(float dx, float dy, float dz)
 void SceneObject::rotate(const glm::vec3& deltaRotation)
 {
     _rotation += deltaRotation;
+    setRotation(_rotation);
 
     _rotationMode = RM_EULER_ANGLES;
 
@@ -697,6 +722,22 @@ void SceneObject::rotate(const glm::vec3& deltaRotation)
 void SceneObject::rotate(float dx, float dy, float dz)
 {
     rotate(glm::vec3(dx, dy, dz));
+}
+
+
+void SceneObject::rotateLocal(const glm::vec3& deltaRotation)
+{
+    glm::quat localRotation = glm::angleAxis(deltaRotation.x, transformLocalVectorToParentSpace(glm::vec3(1.0f, 0.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.y, transformLocalVectorToParentSpace(glm::vec3(0.0f, 1.0f, 0.0f))) *
+                              glm::angleAxis(deltaRotation.z, transformLocalVectorToParentSpace(glm::vec3(0.0f, 0.0f, 1.0f)));
+
+    setRotationQuaternion(localRotation * _rotationQuaternion);
+}
+
+
+void SceneObject::rotateLocal(float dx, float dy, float dz)
+{
+    rotateLocal(glm::vec3(dx, dy, dz));
 }
 
 
@@ -828,5 +869,19 @@ glm::vec3 SceneObject::transformLocalPointToGlobal(const glm::vec3& point)
 glm::vec3 SceneObject::transformLocalVectorToGlobal(const glm::vec3& vec)
 {
     glm::vec4 v = getGlobalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
+    return glm::vec3(v.x, v.y, v.z);
+}
+
+
+glm::vec3 SceneObject::transformLocalPointToParentSpace(const glm::vec3& point)
+{
+    glm::vec4 p = getLocalTransformMatrix() * glm::vec4(point.x, point.y, point.z, 1.0f);
+    return glm::vec3(p.x, p.y, p.z);
+}
+
+
+glm::vec3 SceneObject::transformLocalVectorToParentSpace(const glm::vec3& vec)
+{
+    glm::vec4 v = getLocalNormalMatrix() * glm::vec4(vec.x, vec.y, vec.z, 0.0f);
     return glm::vec3(v.x, v.y, v.z);
 }

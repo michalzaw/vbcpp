@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "BezierCurve.h"
 #include "FoliagePatch.h"
+#include "RenderableSurface.h"
 #include "ShapePolygonComponent.h"
 #include "SkeletalAnimationComponent.h"
 #include "SkeletalAnimationComponent2.h"
@@ -385,6 +386,16 @@ FoliagePatch* GraphicsManager::addFoliagePatch()
 }
 
 
+RenderableSurface* GraphicsManager::addRenderableSurface(int width, int height)
+{
+    RenderableSurface* renderableSurface = new RenderableSurface(width, height);
+
+    _renderableSurfaces.push_back(renderableSurface);
+
+    return renderableSurface;
+}
+
+
 void GraphicsManager::removeRenderObject(RenderObject* object)
 {
     for (std::list<RenderObject*>::iterator i = _renderObjects.begin(); i != _renderObjects.end(); ++i)
@@ -687,6 +698,22 @@ void GraphicsManager::removeFoliagePatch(FoliagePatch* foliagePatch)
 }
 
 
+void GraphicsManager::removeRenderableSurface(RenderableSurface* renderableSurface)
+{
+    for (std::list<RenderableSurface*>::iterator i = _renderableSurfaces.begin(); i != _renderableSurfaces.end(); ++i)
+    {
+        if (*i == renderableSurface)
+        {
+            i = _renderableSurfaces.erase(i);
+
+            delete renderableSurface;
+
+            return;
+        }
+    }
+}
+
+
 void GraphicsManager::setCurrentCamera(CameraStatic* camera)
 {
     _currentCamera = camera;
@@ -877,6 +904,11 @@ void GraphicsManager::update(float deltaTime)
     for (SkeletalAnimationHelperComponent* skeletalAnimationHelper : _skeletalAnimationHelpers)
     {
         skeletalAnimationHelper->update(deltaTime);
+    }
+
+    for (RenderableSurface* renderableSurface : _renderableSurfaces)
+    {
+        renderableSurface->update(deltaTime);
     }
 }
 

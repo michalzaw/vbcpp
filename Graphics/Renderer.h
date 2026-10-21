@@ -324,7 +324,7 @@ class Renderer
         void renderDepth(RenderData* renderData);
         void renderToMirrorTexture(RenderData* renderData);
         void renderScene(RenderData* renderData);
-        void renderGUI(GUIRenderList* renderList);//std::list<GUIObject*>* GUIObjectsList);
+        void renderGUI(GUIRenderList* renderList, Framebuffer* framebuffer, bool flipY);//std::list<GUIObject*>* GUIObjectsList);
 
 		unsigned int pickObject(int x, int y);
 

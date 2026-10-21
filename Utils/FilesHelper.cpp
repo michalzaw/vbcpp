@@ -9,6 +9,8 @@
 #include <dirent.h>
 #endif
 
+#include <filesystem>
+
 
 #include "Logger.h"
 
@@ -208,10 +210,43 @@ bool FilesHelper::isInPathSubdir(std::string filePath, std::string dirPath)
 }
 
 
+std::string FilesHelper::relativePathToFile(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile)
+{
+    std::filesystem::path targetDir = std::filesystem::path(targetFilePath);
+    std::filesystem::path referenceDir = isReferencePathToFile ? std::filesystem::path(referencePath).parent_path() : std::filesystem::path(referencePath);
+
+    std::string relativePath = std::filesystem::relative(targetDir, referenceDir).string();
+    std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
+
+    return relativePath;
+}
+
+
+std::string FilesHelper::relativePathToDir(const std::string& targetFilePath, const std::string& referencePath, bool isReferencePathToFile)
+{
+    std::filesystem::path targetDir = std::filesystem::path(targetFilePath).parent_path();
+    std::filesystem::path referenceDir = isReferencePathToFile ? std::filesystem::path(referencePath).parent_path() : std::filesystem::path(referencePath);
+
+    std::string relativePath = std::filesystem::relative(targetDir, referenceDir).string() + "/";
+    std::replace(relativePath.begin(), relativePath.end(), '\\', '/');
+
+    return relativePath;
+}
+
+
 void FilesHelper::copyFile(const std::string& from, const std::string& to)
 {
 	std::ifstream sourceFile(from, std::ios::binary);
 	std::ofstream destinationFile(to, std::ios::binary);
 
 	destinationFile << sourceFile.rdbuf();
+}
+
+
+void FilesHelper::createEmptyFile(const std::string& path)
+{
+    if (!isFileExists(path))
+    {
+        std::ofstream plik(path);
+    }
 }

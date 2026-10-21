@@ -67,6 +67,7 @@ void Game::initializeEngineSystems()
 	renderer.setFxaaQuality(gameConfig.fxaaQuality);
 	renderer.setBloom(gameConfig.isBloomEnabled);
 	renderer.setIsShadowMappingEnable(gameConfig.isShadowmappingEnable);
+	renderer.setRenderObjectIdsForPicking(true);
 	renderer.init(_window->getWidth(), _window->getHeight());
 	renderer.setDayNightRatio(1.0f);
 	renderer.setAlphaToCoverage(true);
@@ -263,7 +264,7 @@ void Game::run()
 #endif // DRAW_IMGUI
 
 			// Render GUI
-			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList());
+			Renderer::getInstance().renderGUI(_gameScene->getGuiManager()->getGUIRenderList(), OGLDriver::getInstance().getDefaultFramebuffer(), false);
 		}
 		_window->swapBuffers();
 		//_window->updateEvents();
