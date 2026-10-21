@@ -9,6 +9,7 @@
 #include "../Game/BusStartPoint.h"
 #include "../Game/CameraControlComponent.h"
 #include "../Game/GameLogicSystem.h"
+#include "../Game/TransformAnimatorComponent.h"
 
 #include "../Graphics/BezierCurve.h"
 #include "../Graphics/FoliagePatch.h"
@@ -190,6 +191,10 @@ SceneObject::~SceneObject()
 
             case CT_BUS_START_POINT:
                 _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(*i));
+                break;
+
+            case CT_TRANSFORM_ANIMATOR:
+                _sceneManager->getGameLogicSystem()->removeTransformAnimatorComponent(static_cast<TransformAnimatorComponent*>(*i));
                 break;
 
         }
@@ -496,6 +501,10 @@ void SceneObject::removeComponent(Component* component)
 
                 case CT_BUS_START_POINT:
                     _sceneManager->getGameLogicSystem()->removeBusStartPoint(static_cast<BusStartPoint*>(component));
+                    break;
+
+                case CT_TRANSFORM_ANIMATOR:
+                    _sceneManager->getGameLogicSystem()->removeTransformAnimatorComponent(static_cast<TransformAnimatorComponent*>(component));
                     break;
 
             }

@@ -9,6 +9,7 @@
 #include "Events/ObjectClickedEvent.h"
 
 
+// Deprecated - na potrzeby Desktop, obecnie logika klikniecia w obiekt powinna byc definiowana jako subskrybcja na event ObjectClickedEvent w dedykowanym componencie lub w skrypcie Lua
 class ClickableObject : public Component
 {
     VBCPP_COMPONENT(ClickableObject, CT_CLICKABLE_OBJECT)

@@ -24,7 +24,7 @@
 #include <memory>
 #include <sstream>
 
-#define DEVELOPMENT_RESOURCES
+//#define DEVELOPMENT_RESOURCES
 
 typedef std::list<std::unique_ptr<Resource>> resourcePtrList;
 
